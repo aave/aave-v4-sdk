@@ -33,3 +33,33 @@ export const UserSuppliesQuery = graphql(
   [UserSupplyItemFragment],
 );
 export type UserSuppliesRequest = RequestOf<typeof UserSuppliesQuery>;
+
+export const UserBorrowItemFragment = graphql(
+  `fragment UserBorrowItem on UserBorrowItem {
+    __typename
+    amount {
+      ...Erc20Amount
+    }
+    paid {
+      ...Erc20Amount
+    }
+    reserve {
+      ...Reserve
+    }
+  }`,
+  [Erc20AmountFragment, ReserveFragment],
+);
+export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
+
+/**
+ * @internal
+ */
+export const UserBorrowsQuery = graphql(
+  `query UserBorrows($request: UserBorrowsRequest!) {
+    value: userBorrows(request: $request) {
+      ...UserBorrowItem
+    }
+  }`,
+  [UserBorrowItemFragment],
+);
+export type UserBorrowsRequest = RequestOf<typeof UserBorrowsQuery>;
