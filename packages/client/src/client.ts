@@ -391,11 +391,9 @@ export class AaveClient {
     result: TransactionExecutionResult,
   ): ResultAsync<TxHash, TimeoutError | UnexpectedError> => {
     if (isHasProcessedKnownTransactionRequest(result)) {
-      return this.waitForTransaction(
-        result as HasProcessedKnownTransactionRequest,
-      );
+      return this.waitForTransaction(result);
     }
-    return okAsync(result.txHash);
+    return okAsync((result as TransactionExecutionResult).txHash);
   };
 
   /**

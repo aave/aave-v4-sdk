@@ -1,6 +1,7 @@
 import type {
   ERC712Signature,
   ExecutionPlan,
+  HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
   OperationType,
   PermitTypedDataResponse,
@@ -18,7 +19,7 @@ export type TransactionExecutionResult = {
  */
 export function isHasProcessedKnownTransactionRequest(
   result: TransactionExecutionResult,
-): boolean {
+): result is HasProcessedKnownTransactionRequest {
   return result.operations.length > 0;
 }
 
