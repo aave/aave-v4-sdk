@@ -394,16 +394,12 @@ type NativeToken {
 enum OperationType {
   BORROW
   REPAY
-  RESERVE_USED_AS_COLLATERAL_ENABLED
-  RESERVE_USED_AS_COLLATERAL_DISABLED
   SUPPLY
-  USER_EMODE_SET
   WITHDRAW
-  VAULT_DEPLOYED
-  VAULT_DEPOSIT
-  VAULT_FEE_UPDATED
-  VAULT_FEE_WITHDRAWN
-  VAULT_WITHDRAW
+  RESERVE_USED_AS_COLLATERAL_ENABLED
+  SET_USER_USING_AS_COLLATERAL
+  SET_USER_POSITION_MANAGER
+  RENOUNCE_SPOKE_USER_POSITION_MANAGER
   LIQUIDATION
 }
 
@@ -637,9 +633,19 @@ type RepayActivity {
 }
 
 input RepayRequest {
+  """The reserve"""
   reserve: ReserveInput!
+
+  """The amount repaying"""
   amount: ReserveAmountInputWithPermit!
+
+  """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
+
+  """
+  If not supplied, this will use `sender` which is the normal route - you can only use on
+  `onBehalfOf` if you're a position manager for that user
+  """
   onBehalfOf: EvmAddress
 }
 
@@ -800,7 +806,10 @@ type SpokeConfig {
 }
 
 input SpokeInput {
+  """The address of the spoke"""
   address: EvmAddress!
+
+  """The chain id the spoke is deployed to"""
   chainId: ChainId!
 }
 
@@ -1054,7 +1063,7 @@ type TransactionRequest {
   data: BlockchainData!
   value: BigInt!
   chainId: ChainId!
-  operations: [OperationType!]!
+  operations: [OperationType!]
 }
 
 scalar TxHash
@@ -1075,8 +1084,14 @@ input UpdateUserDynamicConfigRequest {
 }
 
 input UpdateUserRiskPremiumRequest {
+  """The spoke"""
   spoke: SpokeInput!
-  user: EvmAddress!
+
+  """The user sending the transaction (normally the user's wallet address)"""
+  sender: EvmAddress!
+
+  """If not supplied, this will use `sender` which is the normal route"""
+  onBehalfOf: EvmAddress
 }
 
 type UserBalance {
