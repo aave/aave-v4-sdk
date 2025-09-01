@@ -1,8 +1,3 @@
-"""
-Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)
-"""
-directive @oneOf on INPUT_OBJECT
-
 type APYSample {
   date: DateTime!
   avgRate: PercentValue!
@@ -51,7 +46,7 @@ input BestBorrowReserveRequest {
   filter: BestBorrowReserveFilter!
 }
 
-input BestRatesRequestQuery {
+input BestRatesRequestQuery @oneOf {
   spokes: [SpokeInput!]
   chainIds: [ChainId!]
 }
@@ -110,7 +105,7 @@ input CancelIntentSwapInput {
 
 union CancelSwapExecutionPlan = TransactionRequest | SwapCancelled
 
-input CancelSwapRequest {
+input CancelSwapRequest @oneOf {
   intent: CancelIntentSwapInput
   transaction: SwapId
 }
@@ -138,7 +133,7 @@ type Chain {
 """A supported blockchain chain ID"""
 scalar ChainId
 
-input ChainTokenInput {
+input ChainTokenInput @oneOf {
   native: ChainId
   erc20: Erc20Input
 }
@@ -214,6 +209,36 @@ type FiatAmountValueVariation {
 
 type FiatAmountWithChange {
   value: FiatAmount!
+}
+
+input ForkTopUpErc20 {
+  """The token address"""
+  currency: EvmAddress!
+
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction
+  """
+  value: BigDecimal!
+}
+
+input ForkTopUpRequest {
+  """The address you want the funds to be topped up against"""
+  user: EvmAddress!
+
+  """The erc20 information"""
+  erc20: ForkTopUpErc20
+
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction
+  """
+  native: BigDecimal
+}
+
+type ForkTopUpResponse {
+  message: String!
+
+  """The tx hash of the newly created transaction"""
+  txHash: String
 }
 
 input HasProcessedKnownTransactionRequest {
@@ -305,7 +330,7 @@ input HubTokenInput {
   token: TokenInput!
 }
 
-input HubsRequest {
+input HubsRequest @oneOf {
   tokens: [ChainTokenInput!]
   chainIds: [ChainId!]
 }
@@ -318,7 +343,7 @@ type InsufficientBalanceError {
   available: DecimalValue!
 }
 
-input LiquidatePositionDebtAmount {
+input LiquidatePositionDebtAmount @oneOf {
   exact: BigDecimal
   max: AlwaysTrue
 }
@@ -496,14 +521,14 @@ type PrepareSwapCancelResult {
   data: CancelSwapTypedData!
 }
 
-input PrepareSwapRequest {
+input PrepareSwapRequest @oneOf {
   market: PrepareMarketOrderSwapInput
   limit: PrepareLimitOrderSwapInput
 }
 
 union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
 
-input PreviewAction {
+input PreviewAction @oneOf {
   supply: SupplyRequest
   borrow: BorrowRequest
   repay: RepayRequest
@@ -580,6 +605,9 @@ type Query {
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
   cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
+
+  """Top up a balance for a user or yourself on the fork"""
+  forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
   _service: _Service!
 }
 
@@ -621,13 +649,16 @@ type Reserve {
   asset: HubAsset!
 }
 
-input ReserveAmountInput {
+input ReserveAmountInput @oneOf {
   native: BigDecimal
   erc20: ReserveErc20AmountInput
 }
 
-input ReserveAmountInputWithPermit {
+input ReserveAmountInputWithPermit @oneOf {
+  """The native amount"""
   native: BigDecimal
+
+  """The erc20 amount input"""
   erc20: ReserveErc20AmountInputWithPermit
 }
 
@@ -636,7 +667,14 @@ input ReserveErc20AmountInput {
 }
 
 input ReserveErc20AmountInputWithPermit {
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
+  """
   value: BigDecimal!
+
+  """
+  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  """
   permitSig: ERC712Signature
 }
 
@@ -650,8 +688,13 @@ type ReserveInfo {
 }
 
 input ReserveInput {
+  """The chain id"""
   chainId: ChainId!
+
+  """The spoke address"""
   spoke: EvmAddress!
+
+  """The reserve id"""
   reserveId: ReserveId!
 }
 
@@ -695,14 +738,14 @@ input ReservesRequest {
   orderBy: ReservesRequestOrderBy! = {name: ASC}
 }
 
-input ReservesRequestOrderBy {
+input ReservesRequestOrderBy @oneOf {
   name: OrderDirection
   balance: OrderDirection
   apy: OrderDirection
   collateralFactor: OrderDirection
 }
 
-input ReservesRequestQuery {
+input ReservesRequestQuery @oneOf {
   spoke: SpokeInput
   token: ChainTokenInput
   hubToken: HubTokenInput
@@ -723,7 +766,7 @@ input SetUserSupplyAsCollateralRequest {
 
 scalar Signature
 
-input SlippageInput {
+input SlippageInput @oneOf {
   custom: BigDecimal
   suggested: BigDecimal
 }
@@ -789,11 +832,23 @@ type SupplyActivity {
 }
 
 input SupplyRequest {
+  """The reserve"""
   reserve: ReserveInput!
+
+  """The amount supplying"""
   amount: ReserveAmountInputWithPermit!
+
+  """If you wish to enable collateral with it meaning you can borrow"""
   enableCollateral: Boolean! = true
+
+  """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-  onBehalfOf: EvmAddress!
+
+  """
+  If not supplied, this will use `sender` which is the normal route - you can only use on
+  `onBehalfOf` if you're a position manager for that user
+  """
+  onBehalfOf: EvmAddress
 }
 
 type SwapActivity {
@@ -921,7 +976,7 @@ type SwapReceipt {
   explorerLink: String!
 }
 
-input SwapRequest {
+input SwapRequest @oneOf {
   intent: SwapByIntentInput
   transaction: SwapWithTransactionInput
 }
@@ -972,7 +1027,7 @@ type TokenInfo {
   decimals: Int!
 }
 
-input TokenInput {
+input TokenInput @oneOf {
   native: AlwaysTrue
   erc20: EvmAddress
 }
@@ -1023,7 +1078,7 @@ input UserBalancesRequest {
   chainIds: [ChainId!]!
 }
 
-input UserBalancesRequestOrderBy {
+input UserBalancesRequestOrderBy @oneOf {
   name: OrderDirection
   supplyApy: OrderDirection
   balance: OrderDirection
@@ -1035,7 +1090,7 @@ type UserBorrowItem {
   reserve: Reserve!
 }
 
-input UserBorrowsQueryRequest {
+input UserBorrowsQueryRequest @oneOf {
   userSpoke: UserSpokeInput
   userPositionId: UserPositionId
 }
@@ -1045,14 +1100,14 @@ input UserBorrowsRequest {
   orderBy: UserBorrowsRequestOrderBy! = {name: ASC}
 }
 
-input UserBorrowsRequestOrderBy {
+input UserBorrowsRequestOrderBy @oneOf {
   name: OrderDirection
   balance: OrderDirection
   apy: OrderDirection
   paid: OrderDirection
 }
 
-input UserHistoryFilter {
+input UserHistoryFilter @oneOf {
   spoke: SpokeInput
   chainIds: [ChainId!]
 }
@@ -1100,7 +1155,7 @@ input UserPositionsRequest {
   chainIds: [ChainId!]!
 }
 
-input UserPositionsRequestOrderBy {
+input UserPositionsRequestOrderBy @oneOf {
   created: OrderDirection
   balance: OrderDirection
   apy: OrderDirection
@@ -1124,7 +1179,7 @@ type UserSummary {
   lowestHealthFactor: BigDecimal
 }
 
-input UserSummaryFilter {
+input UserSummaryFilter @oneOf {
   spoke: SpokeInput
   chainIds: [ChainId!]
 }
@@ -1148,7 +1203,7 @@ input UserSummaryRequest {
   filter: UserSummaryFilter
 }
 
-input UserSuppliesQueryRequest {
+input UserSuppliesQueryRequest @oneOf {
   userSpoke: UserSpokeInput
   userPositionId: UserPositionId
 }
@@ -1158,7 +1213,7 @@ input UserSuppliesRequest {
   orderBy: UserSuppliesRequestOrderBy! = {name: ASC}
 }
 
-input UserSuppliesRequestOrderBy {
+input UserSuppliesRequestOrderBy @oneOf {
   name: OrderDirection
   balance: OrderDirection
   apy: OrderDirection
