@@ -1,7 +1,6 @@
 import type {
   ERC712Signature,
   ExecutionPlan,
-  HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
   OperationType,
   PermitTypedDataResponse,
@@ -11,7 +10,7 @@ import type { SigningError, TransactionError, ValidationError } from './errors';
 
 export type TransactionExecutionResult = {
   txHash: TxHash;
-  operation: OperationType | null;
+  operations: OperationType[];
 };
 
 /**
@@ -19,8 +18,8 @@ export type TransactionExecutionResult = {
  */
 export function isHasProcessedKnownTransactionRequest(
   result: TransactionExecutionResult,
-): result is HasProcessedKnownTransactionRequest {
-  return result.operation !== null;
+): boolean {
+  return result.operations.length > 0;
 }
 
 export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (

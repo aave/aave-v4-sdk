@@ -1,15 +1,15 @@
 /// <reference path="../../../vite-env.d.ts" />
 
-import type { AnyVariables, Reserve } from '@aave/graphql';
+import type { AnyVariables } from '@aave/graphql';
 import { schema } from '@aave/graphql/test-utils';
 import {
-  assertOk,
+  // assertOk,
   type BigDecimal,
   bigDecimal,
   chainId,
   type EvmAddress,
   evmAddress,
-  nonNullable,
+  // nonNullable,
   ResultAsync,
 } from '@aave/types';
 import type { TypedDocumentNode } from '@urql/core';
@@ -27,7 +27,7 @@ import {
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { expect } from 'vitest';
-import { reserve } from './actions';
+// import { reserve } from './actions';
 import { AaveClient } from './client';
 import { local, staging } from './environments';
 import { GraphQLErrorCode, UnexpectedError } from './errors';
@@ -193,19 +193,19 @@ export function fundErc20Address(
   );
 }
 
-export async function fetchReserve(
-  tokenAddress: EvmAddress,
-  user?: EvmAddress,
-): Promise<Reserve> {
-  const result = await reserve(client, {
-    chainId: ETHEREUM_FORK_ID,
-    market: ETHEREUM_MARKET_ADDRESS,
-    underlyingToken: tokenAddress,
-    user: user,
-  }).map(nonNullable);
-  assertOk(result);
-  return result.value;
-}
+// export async function fetchReserve(
+//   tokenAddress: EvmAddress,
+//   user?: EvmAddress,
+// ): Promise<Reserve> {
+//   const result = await reserve(client, {
+//     chainId: ETHEREUM_FORK_ID,
+//     market: ETHEREUM_MARKET_ADDRESS,
+//     underlyingToken: tokenAddress,
+//     user: user,
+//   }).map(nonNullable);
+//   assertOk(result);
+//   return result.value;
+// }
 
 const messages: Record<GraphQLErrorCode, string> = {
   [GraphQLErrorCode.UNAUTHENTICATED]:
