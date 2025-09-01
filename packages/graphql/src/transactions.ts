@@ -1,6 +1,4 @@
-import {
-  ExecutionPlanFragment,
-} from './fragments';
+import { ExecutionPlanFragment } from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
 /**
