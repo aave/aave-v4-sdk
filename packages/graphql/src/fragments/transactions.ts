@@ -5,7 +5,7 @@ import {
   // PaginatedResultInfoFragment,
   // TokenAmountFragment,
 } from './common';
-import { ReserveInfoFragment } from './reserve';
+// import { ReserveInfoFragment } from './reserve';
 
 export const TransactionRequestFragment = graphql(
   `fragment TransactionRequest on TransactionRequest {
