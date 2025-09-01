@@ -129,6 +129,29 @@ export type FiatAmountWithChange = FragmentOf<
   typeof FiatAmountWithChangeFragment
 >;
 
+export const PercentValueWithChangeFragment = graphql(
+  `fragment PercentValueWithChange on PercentValueWithChange {
+    __typename
+    value {
+      ...PercentValue
+    }
+  }`,
+  [PercentValueFragment],
+);
+export type PercentValueWithChange = FragmentOf<
+  typeof PercentValueWithChangeFragment
+>;
+
+export const BigDecimalWithChangeFragment = graphql(
+  `fragment BigDecimalWithChange on BigDecimalWithChange {
+    __typename
+    value
+  }`,
+);
+export type BigDecimalWithChange = FragmentOf<
+  typeof BigDecimalWithChangeFragment
+>;
+
 export const PaginatedResultInfoFragment = graphql(
   `fragment PaginatedResultInfo on PaginatedResultInfo {
     __typename

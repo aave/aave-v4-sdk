@@ -2,6 +2,9 @@ import {
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  type UserPosition,
+  UserPositionsQuery,
+  type UserPositionsRequest,
   type UserSummary,
   UserSummaryQuery,
   type UserSummaryRequest,
@@ -86,4 +89,26 @@ export function userSummary(
   request: UserSummaryRequest,
 ): ResultAsync<UserSummary, UnexpectedError> {
   return client.query(UserSummaryQuery, { request });
+}
+
+/**
+ * Fetches all user positions across specified chains.
+ *
+ * ```ts
+ * const result = await userPositions(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user positions request parameters.
+ * @returns The user's positions across all specified chains.
+ */
+export function userPositions(
+  client: AaveClient,
+  request: UserPositionsRequest,
+): ResultAsync<UserPosition[], UnexpectedError> {
+  return client.query(UserPositionsQuery, { request });
 }

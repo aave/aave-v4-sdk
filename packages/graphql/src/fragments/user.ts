@@ -1,12 +1,14 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql, type RequestOf } from '../graphql';
 import {
+  BigDecimalWithChangeFragment,
   Erc20AmountFragment,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
   PercentValueFragment,
+  PercentValueWithChangeFragment,
 } from './common';
-import { ReserveFragment } from './reserve';
+import { ReserveFragment, SpokeFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
@@ -111,3 +113,76 @@ export const UserSummaryQuery = graphql(
   [UserSummaryFragment],
 );
 export type UserSummaryRequest = RequestOf<typeof UserSummaryQuery>;
+
+export const UserPositionFragment = graphql(
+  `fragment UserPosition on UserPosition {
+    __typename
+    id
+    spoke {
+      ...Spoke
+    }
+    user
+    netApy {
+      ...PercentValue
+    }
+    netCollateral {
+      ...FiatAmountWithChange
+    }
+    netBalance {
+      ...FiatAmountWithChange
+    }
+    totalCollateral {
+      ...FiatAmountWithChange
+    }
+    totalSupplied {
+      ...FiatAmountWithChange
+    }
+    totalDebt {
+      ...FiatAmountWithChange
+    }
+    netSupplyApy {
+      ...PercentValueWithChange
+    }
+    netBorrowApy {
+      ...PercentValueWithChange
+    }
+    healthFactor {
+      ...BigDecimalWithChange
+    }
+    riskPremium {
+      ...PercentValue
+    }
+    betterRiskPremium {
+      ...PercentValue
+    }
+    supplies {
+      ...UserSupplyItem
+    }
+    borrows {
+      ...UserBorrowItem
+    }
+  }`,
+  [
+    SpokeFragment,
+    PercentValueFragment,
+    FiatAmountWithChangeFragment,
+    PercentValueWithChangeFragment,
+    BigDecimalWithChangeFragment,
+    UserSupplyItemFragment,
+    UserBorrowItemFragment,
+  ],
+);
+export type UserPosition = FragmentOf<typeof UserPositionFragment>;
+
+/**
+ * @internal
+ */
+export const UserPositionsQuery = graphql(
+  `query UserPositions($request: UserPositionsRequest!) {
+    value: userPositions(request: $request) {
+      ...UserPosition
+    }
+  }`,
+  [UserPositionFragment],
+);
+export type UserPositionsRequest = RequestOf<typeof UserPositionsQuery>;

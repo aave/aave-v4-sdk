@@ -2,6 +2,9 @@ import {
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  type UserPosition,
+  UserPositionsQuery,
+  type UserPositionsRequest,
   type UserSummary,
   UserSummaryQuery,
   type UserSummaryRequest,
@@ -178,6 +181,56 @@ export function useUserSummary({
 }): SuspendableResult<UserSummary> {
   return useSuspendableQuery({
     document: UserSummaryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserPositionsArgs = UserPositionsRequest;
+
+/**
+ * Fetch all user positions across specified chains.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserPositions({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserPositions(
+  args: UseUserPositionsArgs & Suspendable,
+): SuspenseResult<UserPosition[]>;
+
+/**
+ * Fetch all user positions across specified chains.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserPositions({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
+ * });
+ * ```
+ */
+export function useUserPositions(
+  args: UseUserPositionsArgs,
+): ReadResult<UserPosition[]>;
+
+export function useUserPositions({
+  suspense = false,
+  ...request
+}: UseUserPositionsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserPosition[]> {
+  return useSuspendableQuery({
+    document: UserPositionsQuery,
     variables: {
       request,
     },
