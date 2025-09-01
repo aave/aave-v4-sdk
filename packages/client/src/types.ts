@@ -11,7 +11,7 @@ import type { SigningError, TransactionError, ValidationError } from './errors';
 
 export type TransactionExecutionResult = {
   txHash: TxHash;
-  operations: OperationType[];
+  operations: OperationType[] | null;
 };
 
 /**
@@ -20,7 +20,7 @@ export type TransactionExecutionResult = {
 export function isHasProcessedKnownTransactionRequest(
   result: TransactionExecutionResult,
 ): result is HasProcessedKnownTransactionRequest {
-  return result.operations.length > 0;
+  return result.operations !== null && result.operations.length > 0;
 }
 
 export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (

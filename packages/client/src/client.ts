@@ -393,7 +393,7 @@ export class AaveClient {
     if (isHasProcessedKnownTransactionRequest(result)) {
       return this.waitForTransaction(result);
     }
-    return okAsync((result as TransactionExecutionResult).txHash);
+    return okAsync(result.txHash);
   };
 
   /**

@@ -92,10 +92,20 @@ type BorrowActivity {
 }
 
 input BorrowRequest {
+  """The reserve"""
   reserve: ReserveInput!
+
+  """The amount supplying"""
   amount: ReserveAmountInput!
+
+  """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-  onBehalfOf: EvmAddress!
+
+  """
+  If not supplied, this will use `sender` which is the normal route - you can only use on
+  `onBehalfOf` if you're a position manager for that user
+  """
+  onBehalfOf: EvmAddress
 }
 
 input CancelIntentSwapInput {
@@ -630,7 +640,7 @@ input RepayRequest {
   reserve: ReserveInput!
   amount: ReserveAmountInputWithPermit!
   sender: EvmAddress!
-  onBehalfOf: EvmAddress!
+  onBehalfOf: EvmAddress
 }
 
 type Reserve {
@@ -650,7 +660,10 @@ type Reserve {
 }
 
 input ReserveAmountInput @oneOf {
+  """The native amount"""
   native: BigDecimal
+
+  """The erc20 amount input"""
   erc20: ReserveErc20AmountInput
 }
 
@@ -663,6 +676,9 @@ input ReserveAmountInputWithPermit @oneOf {
 }
 
 input ReserveErc20AmountInput {
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
+  """
   value: BigDecimal!
 }
 
@@ -1237,10 +1253,20 @@ type WithdrawActivity {
 }
 
 input WithdrawRequest {
+  """The reserve"""
   reserve: ReserveInput!
+
+  """The amount withdrawing"""
   amount: ReserveAmountInput!
+
+  """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-  onBehalfOf: EvmAddress!
+
+  """
+  If not supplied, this will use `sender` which is the normal route - you can only use on
+  `onBehalfOf` if you're a position manager for that user
+  """
+  onBehalfOf: EvmAddress
 }
 
 type _Service {
