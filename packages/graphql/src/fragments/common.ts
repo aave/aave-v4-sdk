@@ -103,6 +103,32 @@ export const TokenAmountFragment: FragmentDocumentFor<
   [Erc20AmountFragment, NativeAmountFragment],
 );
 
+export const FiatAmountFragment = graphql(
+  `fragment FiatAmount on FiatAmount {
+    __typename
+    value {
+      ...DecimalValue
+    }
+    name
+    symbol
+  }`,
+  [DecimalValueFragment],
+);
+export type FiatAmount = FragmentOf<typeof FiatAmountFragment>;
+
+export const FiatAmountWithChangeFragment = graphql(
+  `fragment FiatAmountWithChange on FiatAmountWithChange {
+    __typename
+    value {
+      ...FiatAmount
+    }
+  }`,
+  [FiatAmountFragment],
+);
+export type FiatAmountWithChange = FragmentOf<
+  typeof FiatAmountWithChangeFragment
+>;
+
 export const PaginatedResultInfoFragment = graphql(
   `fragment PaginatedResultInfo on PaginatedResultInfo {
     __typename

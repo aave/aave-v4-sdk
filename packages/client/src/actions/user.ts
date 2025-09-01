@@ -2,6 +2,9 @@ import {
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  type UserSummary,
+  UserSummaryQuery,
+  type UserSummaryRequest,
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
@@ -60,4 +63,27 @@ export function userBorrows(
   request: UserBorrowsRequest,
 ): ResultAsync<UserBorrowItem[], UnexpectedError> {
   return client.query(UserBorrowsQuery, { request });
+}
+
+/**
+ * Fetches a user's summary across all positions.
+ *
+ * ```ts
+ * const result = await userSummary(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user summary request parameters.
+ * @returns The user's financial summary.
+ */
+export function userSummary(
+  client: AaveClient,
+  request: UserSummaryRequest,
+): ResultAsync<UserSummary, UnexpectedError> {
+  return client.query(UserSummaryQuery, { request });
 }

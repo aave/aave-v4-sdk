@@ -2,6 +2,9 @@ import {
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  type UserSummary,
+  UserSummaryQuery,
+  type UserSummaryRequest,
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
@@ -123,6 +126,58 @@ export function useUserBorrows({
 }): SuspendableResult<UserBorrowItem[]> {
   return useSuspendableQuery({
     document: UserBorrowsQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserSummaryArgs = UserSummaryRequest;
+
+/**
+ * Fetch a user's financial summary.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserSummary({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserSummary(
+  args: UseUserSummaryArgs & Suspendable,
+): SuspenseResult<UserSummary>;
+
+/**
+ * Fetch a user's financial summary.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserSummary({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
+ * });
+ * ```
+ */
+export function useUserSummary(
+  args: UseUserSummaryArgs,
+): ReadResult<UserSummary>;
+
+export function useUserSummary({
+  suspense = false,
+  ...request
+}: UseUserSummaryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserSummary> {
+  return useSuspendableQuery({
+    document: UserSummaryQuery,
     variables: {
       request,
     },

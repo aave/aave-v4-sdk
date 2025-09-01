@@ -2,9 +2,9 @@ import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
 import { ChainFragment } from './chain';
 import {
-  DecimalValueFragment,
   Erc20AmountFragment,
   Erc20TokenFragment,
+  FiatAmountFragment,
   PercentValueFragment,
   TokenAmountFragment,
 } from './common';
@@ -150,19 +150,6 @@ export const HubAssetUserStateFragment = graphql(
   [TokenAmountFragment],
 );
 export type HubAssetUserState = FragmentOf<typeof HubAssetUserStateFragment>;
-
-export const FiatAmountFragment = graphql(
-  `fragment FiatAmount on FiatAmount {
-    __typename
-    value {
-      ...DecimalValue
-    }
-    name
-    symbol
-  }`,
-  [DecimalValueFragment],
-);
-export type FiatAmount = FragmentOf<typeof FiatAmountFragment>;
 
 export const HubFragment = graphql(
   `fragment Hub on Hub {

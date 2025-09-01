@@ -1,6 +1,11 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql, type RequestOf } from '../graphql';
-import { Erc20AmountFragment } from './common';
+import {
+  Erc20AmountFragment,
+  FiatAmountFragment,
+  FiatAmountWithChangeFragment,
+  PercentValueFragment,
+} from './common';
 import { ReserveFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
@@ -63,3 +68,46 @@ export const UserBorrowsQuery = graphql(
   [UserBorrowItemFragment],
 );
 export type UserBorrowsRequest = RequestOf<typeof UserBorrowsQuery>;
+
+export const UserSummaryFragment = graphql(
+  `fragment UserSummary on UserSummary {
+    __typename
+    netBalance {
+      ...FiatAmountWithChange
+    }
+    totalCollateral {
+      ...FiatAmount
+    }
+    totalSupplied {
+      ...FiatAmount
+    }
+    totalDebt {
+      ...FiatAmount
+    }
+    netApy {
+      ...PercentValue
+    }
+    netFeeEarned {
+      ...FiatAmount
+    }
+    netPnl {
+      ...FiatAmount
+    }
+    lowestHealthFactor
+  }`,
+  [FiatAmountWithChangeFragment, FiatAmountFragment, PercentValueFragment],
+);
+export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
+
+/**
+ * @internal
+ */
+export const UserSummaryQuery = graphql(
+  `query UserSummary($request: UserSummaryRequest!) {
+    value: userSummary(request: $request) {
+      ...UserSummary
+    }
+  }`,
+  [UserSummaryFragment],
+);
+export type UserSummaryRequest = RequestOf<typeof UserSummaryQuery>;
