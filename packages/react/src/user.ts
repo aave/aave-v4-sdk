@@ -3,6 +3,8 @@ import {
   UserBorrowsQuery,
   type UserBorrowsRequest,
   type UserPosition,
+  UserPositionQuery,
+  type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
   type UserSummary,
@@ -231,6 +233,54 @@ export function useUserPositions({
 }): SuspendableResult<UserPosition[]> {
   return useSuspendableQuery({
     document: UserPositionsQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserPositionArgs = UserPositionRequest;
+
+/**
+ * Fetch a specific user position by ID.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserPosition({
+ *   id: userPositionId('0x1234…'),
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserPosition(
+  args: UseUserPositionArgs & Suspendable,
+): SuspenseResult<UserPosition>;
+
+/**
+ * Fetch a specific user position by ID.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserPosition({
+ *   id: userPositionId('0x1234…'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ */
+export function useUserPosition(
+  args: UseUserPositionArgs,
+): ReadResult<UserPosition>;
+
+export function useUserPosition({
+  suspense = false,
+  ...request
+}: UseUserPositionArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserPosition> {
+  return useSuspendableQuery({
+    document: UserPositionQuery,
     variables: {
       request,
     },

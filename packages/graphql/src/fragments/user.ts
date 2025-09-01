@@ -186,3 +186,16 @@ export const UserPositionsQuery = graphql(
   [UserPositionFragment],
 );
 export type UserPositionsRequest = RequestOf<typeof UserPositionsQuery>;
+
+/**
+ * @internal
+ */
+export const UserPositionQuery = graphql(
+  `query UserPosition($request: UserPositionRequest!) {
+    value: userPosition(request: $request) {
+      ...UserPosition
+    }
+  }`,
+  [UserPositionFragment],
+);
+export type UserPositionRequest = RequestOf<typeof UserPositionQuery>;

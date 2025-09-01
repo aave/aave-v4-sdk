@@ -3,6 +3,8 @@ import {
   UserBorrowsQuery,
   type UserBorrowsRequest,
   type UserPosition,
+  UserPositionQuery,
+  type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
   type UserSummary,
@@ -111,4 +113,25 @@ export function userPositions(
   request: UserPositionsRequest,
 ): ResultAsync<UserPosition[], UnexpectedError> {
   return client.query(UserPositionsQuery, { request });
+}
+
+/**
+ * Fetches a specific user position by ID.
+ *
+ * ```ts
+ * const result = await userPosition(client, {
+ *   id: userPositionId('0x1234…'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user position request parameters.
+ * @returns The specific user position.
+ */
+export function userPosition(
+  client: AaveClient,
+  request: UserPositionRequest,
+): ResultAsync<UserPosition, UnexpectedError> {
+  return client.query(UserPositionQuery, { request });
 }
