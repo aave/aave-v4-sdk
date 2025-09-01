@@ -5,7 +5,6 @@ import {
   // liquidate,
   repay,
   supply,
-
   withdraw,
 } from '@aave/client/actions';
 import type {
@@ -14,7 +13,6 @@ import type {
   RepayRequest,
   SupplyRequest,
   // TransactionRequest,
-
   WithdrawRequest,
 } from '@aave/graphql';
 import { useAaveClient } from './context';
@@ -208,7 +206,6 @@ export function useWithdraw(): UseAsyncTask<
   return useAsyncTask((request: WithdrawRequest) => withdraw(client, request));
 }
 
-
 /**
  * A hook that provides a way to enable/disable a specific supplied asset as collateral.
  *
@@ -278,4 +275,3 @@ export function useWithdraw(): UseAsyncTask<
 //     liquidate(client, request),
 //   );
 // }
-

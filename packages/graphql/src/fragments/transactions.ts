@@ -1,8 +1,6 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import {
-  DecimalValueFragment,
-} from './common';
+import { DecimalValueFragment } from './common';
 
 export const TransactionRequestFragment = graphql(
   `fragment TransactionRequest on TransactionRequest {

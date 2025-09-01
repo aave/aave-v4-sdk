@@ -179,7 +179,6 @@ export function withdraw(
  * @param request - The collateral toggle request parameters.
  * @returns The transaction request data to toggle collateral.
  */
-// TODO: Collateral toggle V4 
 // export function collateralToggle(
 //   client: AaveClient,
 //   request: CollateralToggleRequest,
@@ -211,11 +210,9 @@ export function withdraw(
  * @param request - The liquidate request parameters.
  * @returns The transaction request data to liquidate position.
  */
-// TODO: Liquidate V4 
 // export function liquidate(
 //   client: AaveClient,
 //   request: LiquidateRequest,
 // ): ResultAsync<TransactionRequest, UnexpectedError> {
 //   return client.query(LiquidateQuery, { request });
 // }
-
