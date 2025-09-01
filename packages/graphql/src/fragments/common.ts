@@ -6,7 +6,7 @@ export const DecimalValueFragment = graphql(
     __typename
     raw
     decimals
-    value
+    formatted
   }`,
 );
 export type DecimalValue = FragmentOf<typeof DecimalValueFragment>;
