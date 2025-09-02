@@ -11,6 +11,9 @@ import {
   UserPositionsQuery,
   type UserPositionsRequest,
   type UserSummary,
+  type UserSummaryHistoryItem,
+  UserSummaryHistoryQuery,
+  type UserSummaryHistoryRequest,
   UserSummaryQuery,
   type UserSummaryRequest,
   UserSuppliesQuery,
@@ -336,6 +339,56 @@ export function useUserHistory({
 }): SuspendableResult<PaginatedUserHistoryResult> {
   return useSuspendableQuery({
     document: UserHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserSummaryHistoryArgs = UserSummaryHistoryRequest;
+
+/**
+ * Fetch user summary history over time.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserSummaryHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: 'LAST_WEEK',
+ *   filter: { chainIds: [chainId(1)] },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserSummaryHistory(
+  args: UseUserSummaryHistoryArgs & Suspendable,
+): SuspenseResult<UserSummaryHistoryItem[]>;
+
+/**
+ * Fetch user summary history over time.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserSummaryHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: 'LAST_WEEK',
+ *   filter: { chainIds: [chainId(1)] },
+ * });
+ * ```
+ */
+export function useUserSummaryHistory(
+  args: UseUserSummaryHistoryArgs,
+): ReadResult<UserSummaryHistoryItem[]>;
+
+export function useUserSummaryHistory({
+  suspense = false,
+  ...request
+}: UseUserSummaryHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserSummaryHistoryItem[]> {
+  return useSuspendableQuery({
+    document: UserSummaryHistoryQuery,
     variables: {
       request,
     },

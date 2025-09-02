@@ -655,3 +655,39 @@ export const UserHistoryQuery = graphql(
   [PaginatedUserHistoryResultFragment],
 );
 export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
+
+export const UserSummaryHistoryItemFragment = graphql(
+  `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
+    __typename
+    netBalance {
+      ...FiatAmount
+    }
+    borrows {
+      ...FiatAmount
+    }
+    supplies {
+      ...FiatAmount
+    }
+    healthFactor
+    date
+  }`,
+  [FiatAmountFragment],
+);
+export type UserSummaryHistoryItem = FragmentOf<
+  typeof UserSummaryHistoryItemFragment
+>;
+
+/**
+ * @internal
+ */
+export const UserSummaryHistoryQuery = graphql(
+  `query UserSummaryHistory($request: UserSummaryHistoryRequest!) {
+    value: userSummaryHistory(request: $request) {
+      ...UserSummaryHistoryItem
+    }
+  }`,
+  [UserSummaryHistoryItemFragment],
+);
+export type UserSummaryHistoryRequest = RequestOf<
+  typeof UserSummaryHistoryQuery
+>;

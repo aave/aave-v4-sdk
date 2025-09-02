@@ -12,6 +12,9 @@ import {
   UserPositionsQuery,
   type UserPositionsRequest,
   type UserSummary,
+  type UserSummaryHistoryItem,
+  UserSummaryHistoryQuery,
+  type UserSummaryHistoryRequest,
   UserSummaryQuery,
   type UserSummaryRequest,
   UserSuppliesQuery,
@@ -160,4 +163,28 @@ export function userHistory(
   request: UserHistoryRequest,
 ): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
   return client.query(UserHistoryQuery, { request });
+}
+
+/**
+ * Fetches user summary history over time.
+ *
+ * ```ts
+ * const result = await userSummaryHistory(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: 'LAST_WEEK',
+ *   filter: {
+ *     chainIds: [chainId(1)]
+ *   }
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user summary history request parameters.
+ * @returns The user summary history items.
+ */
+export function userSummaryHistory(
+  client: AaveClient,
+  request: UserSummaryHistoryRequest,
+): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
+  return client.query(UserSummaryHistoryQuery, { request });
 }
