@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 
-describe('Aave Market Supply Scenarios', () => {
+describe('Aave V4 Supply Scenarios', () => {
   describe('GIVEN a user and a Reserve', () => {
     describe('WHEN the user supplies tokens', () => {
       describe("THEN the user's supply positions are updated", () => {
