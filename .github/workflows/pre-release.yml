@@ -1,4 +1,8 @@
-name: Continuous Deployment
+permissions:
+  contents: read
+  packages: write
+
+name: Pre-release
 
 on:
   push:
@@ -25,8 +29,11 @@ jobs:
       - name: Setup Repository
         uses: ./.github/actions/setup
 
-      - name: Configure NPM Auth Token
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+      - name: Configure NPM Auth
+        run: |
+          echo "@aave:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
 
       - name: Create Snapshot
         id: create_snapshot
@@ -43,3 +50,5 @@ jobs:
       - name: Publish Snapshot
         if: env.changeset_exists == 'true'
         run: pnpm changeset publish --snapshot --tag canary --no-git-tag
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
