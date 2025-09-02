@@ -24,7 +24,7 @@ describe('Aave V4 Hub Scenarios', () => {
       it.todo('THEN it should return the expected data for assets in a hub');
     });
 
-    describe.skip('WHEN fetching assets in a hub and filtered by the status', () => {
+    describe.skip('WHEN fetching assets filtered in a hub', () => {
       const status = Object.values(['ACTIVE', 'FROZEN', 'PAUSED']);
       it.each(status)(
         'THEN it should return only assets in a hub with a status: %s',
@@ -34,7 +34,7 @@ describe('Aave V4 Hub Scenarios', () => {
       );
     });
 
-    describe.skip('WHEN fetching assets in a hub and sorted by a field', () => {
+    describe.skip('WHEN fetching assets sorted by in a hub', () => {
       const field = Object.values(['NAME', 'BALANCE']);
       it.each(field)(
         'THEN it should return assets sorted by a field: %s',
