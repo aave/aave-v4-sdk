@@ -70,3 +70,20 @@ export enum VaultUserActivityTimeWindow {
   LastYear = 'LAST_YEAR',
   Max = 'MAX',
 }
+
+/**
+ * The status type for hub assets.
+ */
+export enum HubAssetStatusType {
+  Active = 'ACTIVE',
+  Frozen = 'FROZEN',
+  Paused = 'PAUSED',
+}
+
+/**
+ * The order by options for hub assets request.
+ */
+export enum HubAssetsRequestOrderBy {
+  Balance = 'BALANCE',
+  Name = 'NAME',
+}

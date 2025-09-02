@@ -10,7 +10,7 @@ import {
   PercentValueWithChangeFragment,
   TokenAmountFragment,
 } from './common';
-import { ReserveFragment, SpokeFragment } from './reserve';
+import { HubAssetFragment, ReserveFragment, SpokeFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
@@ -729,3 +729,16 @@ export const SupplyApyHistoryQuery = graphql(
   [APYSampleFragment],
 );
 export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
+
+/**
+ * @internal
+ */
+export const HubAssetsQuery = graphql(
+  `query HubAssets($request: HubAssetsRequest!) {
+    value: hubAssets(request: $request) {
+      ...HubAsset
+    }
+  }`,
+  [HubAssetFragment],
+);
+export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;

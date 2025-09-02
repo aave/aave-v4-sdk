@@ -3,10 +3,12 @@ import {
   type APYSample,
   type BorrowAPYHistoryRequest,
   BorrowApyHistoryQuery,
+  type HubAsset,
+  HubAssetsQuery,
+  type HubAssetsRequest,
   type PaginatedUserHistoryResult,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
-  TimeWindow,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
@@ -243,4 +245,28 @@ export function supplyApyHistory(
   request: SupplyAPYHistoryRequest,
 ): ResultAsync<APYSample[], UnexpectedError> {
   return client.query(SupplyApyHistoryQuery, { request });
+}
+
+/**
+ * Fetches hub assets for a specific chain and optional hub/user filtering.
+ *
+ * ```ts
+ * const result = await hubAssets(client, {
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional, defaults to all
+ *   orderBy: HubAssetsRequestOrderBy.Name // optional, defaults to NAME
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub assets request parameters.
+ * @returns The hub assets array.
+ */
+export function hubAssets(
+  client: AaveClient,
+  request: HubAssetsRequest,
+): ResultAsync<HubAsset[], UnexpectedError> {
+  return client.query(HubAssetsQuery, { request });
 }

@@ -2,6 +2,9 @@ import {
   type APYSample,
   type BorrowAPYHistoryRequest,
   BorrowApyHistoryQuery,
+  type HubAsset,
+  HubAssetsQuery,
+  type HubAssetsRequest,
   type PaginatedUserHistoryResult,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
@@ -506,6 +509,58 @@ export function useSupplyApyHistory({
 }): SuspendableResult<APYSample[]> {
   return useSuspendableQuery({
     document: SupplyApyHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseHubAssetsArgs = HubAssetsRequest;
+
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
+ *   orderBy: HubAssetsRequestOrderBy.Name, // optional
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useHubAssets(
+  args: UseHubAssetsArgs & Suspendable,
+): SuspenseResult<HubAsset[]>;
+
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
+ *   orderBy: HubAssetsRequestOrderBy.Name, // optional
+ * });
+ * ```
+ */
+export function useHubAssets(args: UseHubAssetsArgs): ReadResult<HubAsset[]>;
+
+export function useHubAssets({
+  suspense = false,
+  ...request
+}: UseHubAssetsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<HubAsset[]> {
+  return useSuspendableQuery({
+    document: HubAssetsQuery,
     variables: {
       request,
     },
