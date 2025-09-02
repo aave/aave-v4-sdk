@@ -2,27 +2,26 @@ permissions:
   contents: read
   packages: write
 
-name: Continuous Deployment
+name: Pre-release
 
 on:
   push:
-    # branches: [main]
-    branches: [cesare/aave-1667-sdk-fix-build-and-ci-setup]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  # verify:
-  #   name: Verify
-  #   uses: ./.github/workflows/verify.yml
-  #   secrets: inherit
+  verify:
+    name: Verify
+    uses: ./.github/workflows/verify.yml
+    secrets: inherit
 
   publish:
     name: Publish Snapshot
     runs-on: ubuntu-latest
-    # needs: verify
+    needs: verify
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +29,7 @@ jobs:
       - name: Setup Repository
         uses: ./.github/actions/setup
 
-      - name: Configure NPM Auth Token
+      - name: Configure NPM Auth
         run: |
           echo "@aave:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
