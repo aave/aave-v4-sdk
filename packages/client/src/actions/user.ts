@@ -1,6 +1,12 @@
 import type { UnexpectedError } from '@aave/core';
 import {
+  type APYSample,
+  type BorrowAPYHistoryRequest,
+  BorrowApyHistoryQuery,
   type PaginatedUserHistoryResult,
+  type SupplyAPYHistoryRequest,
+  SupplyApyHistoryQuery,
+  TimeWindow,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
@@ -187,4 +193,54 @@ export function userSummaryHistory(
   request: UserSummaryHistoryRequest,
 ): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
   return client.query(UserSummaryHistoryQuery, { request });
+}
+
+/**
+ * Fetches borrow APY history for a specific reserve over time.
+ *
+ * ```ts
+ * const result = await borrowApyHistory(client, {
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId('0x456...'),
+ *   window: TimeWindow.LastWeek
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The borrow APY history request parameters.
+ * @returns The borrow APY history samples.
+ */
+export function borrowApyHistory(
+  client: AaveClient,
+  request: BorrowAPYHistoryRequest,
+): ResultAsync<APYSample[], UnexpectedError> {
+  return client.query(BorrowApyHistoryQuery, { request });
+}
+
+/**
+ * Fetches supply APY history for a specific reserve over time.
+ *
+ * ```ts
+ * const result = await supplyApyHistory(client, {
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId('0x456...'),
+ *   window: TimeWindow.LastWeek
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The supply APY history request parameters.
+ * @returns The supply APY history samples.
+ */
+export function supplyApyHistory(
+  client: AaveClient,
+  request: SupplyAPYHistoryRequest,
+): ResultAsync<APYSample[], UnexpectedError> {
+  return client.query(SupplyApyHistoryQuery, { request });
 }

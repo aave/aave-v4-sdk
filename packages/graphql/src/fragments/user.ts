@@ -691,3 +691,41 @@ export const UserSummaryHistoryQuery = graphql(
 export type UserSummaryHistoryRequest = RequestOf<
   typeof UserSummaryHistoryQuery
 >;
+
+export const APYSampleFragment = graphql(
+  `fragment APYSample on APYSample {
+    __typename
+    date
+    avgRate {
+      ...PercentValue
+    }
+  }`,
+  [PercentValueFragment],
+);
+export type APYSample = FragmentOf<typeof APYSampleFragment>;
+
+/**
+ * @internal
+ */
+export const BorrowApyHistoryQuery = graphql(
+  `query BorrowApyHistory($request: BorrowAPYHistoryRequest!) {
+    value: borrowApyHistory(request: $request) {
+      ...APYSample
+    }
+  }`,
+  [APYSampleFragment],
+);
+export type BorrowAPYHistoryRequest = RequestOf<typeof BorrowApyHistoryQuery>;
+
+/**
+ * @internal
+ */
+export const SupplyApyHistoryQuery = graphql(
+  `query SupplyApyHistory($request: SupplyAPYHistoryRequest!) {
+    value: supplyApyHistory(request: $request) {
+      ...APYSample
+    }
+  }`,
+  [APYSampleFragment],
+);
+export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;

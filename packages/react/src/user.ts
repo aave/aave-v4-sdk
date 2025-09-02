@@ -1,5 +1,10 @@
 import {
+  type APYSample,
+  type BorrowAPYHistoryRequest,
+  BorrowApyHistoryQuery,
   type PaginatedUserHistoryResult,
+  type SupplyAPYHistoryRequest,
+  SupplyApyHistoryQuery,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
@@ -389,6 +394,118 @@ export function useUserSummaryHistory({
 }): SuspendableResult<UserSummaryHistoryItem[]> {
   return useSuspendableQuery({
     document: UserSummaryHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
+
+/**
+ * Fetch borrow APY history for a specific reserve over time.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useBorrowApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId('0x456...'),
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useBorrowApyHistory(
+  args: UseBorrowApyHistoryArgs & Suspendable,
+): SuspenseResult<APYSample[]>;
+
+/**
+ * Fetch borrow APY history for a specific reserve over time.
+ *
+ * ```tsx
+ * const { data, error, loading } = useBorrowApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId('0x456...'),
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useBorrowApyHistory(
+  args: UseBorrowApyHistoryArgs,
+): ReadResult<APYSample[]>;
+
+export function useBorrowApyHistory({
+  suspense = false,
+  ...request
+}: UseBorrowApyHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<APYSample[]> {
+  return useSuspendableQuery({
+    document: BorrowApyHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
+
+/**
+ * Fetch supply APY history for a specific reserve over time.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSupplyApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId('0x456...'),
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSupplyApyHistory(
+  args: UseSupplyApyHistoryArgs & Suspendable,
+): SuspenseResult<APYSample[]>;
+
+/**
+ * Fetch supply APY history for a specific reserve over time.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSupplyApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId('0x456...'),
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useSupplyApyHistory(
+  args: UseSupplyApyHistoryArgs,
+): ReadResult<APYSample[]>;
+
+export function useSupplyApyHistory({
+  suspense = false,
+  ...request
+}: UseSupplyApyHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<APYSample[]> {
+  return useSuspendableQuery({
+    document: SupplyApyHistoryQuery,
     variables: {
       request,
     },
