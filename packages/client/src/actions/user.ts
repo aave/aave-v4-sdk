@@ -1,8 +1,11 @@
 import type { UnexpectedError } from '@aave/core';
 import {
+  type PaginatedUserHistoryResult,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  UserHistoryQuery,
+  type UserHistoryRequest,
   type UserPosition,
   UserPositionQuery,
   type UserPositionRequest,
@@ -134,4 +137,27 @@ export function userPosition(
   request: UserPositionRequest,
 ): ResultAsync<UserPosition, UnexpectedError> {
   return client.query(UserPositionQuery, { request });
+}
+
+/**
+ * Fetches user transaction history with pagination.
+ *
+ * ```ts
+ * const result = await userHistory(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
+ *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
+ *   pageSize: 'FIFTY',
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user history request parameters.
+ * @returns The paginated user transaction history.
+ */
+export function userHistory(
+  client: AaveClient,
+  request: UserHistoryRequest,
+): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
+  return client.query(UserHistoryQuery, { request });
 }

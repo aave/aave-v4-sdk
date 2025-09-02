@@ -1,7 +1,10 @@
 import {
+  type PaginatedUserHistoryResult,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  UserHistoryQuery,
+  type UserHistoryRequest,
   type UserPosition,
   UserPositionQuery,
   type UserPositionRequest,
@@ -281,6 +284,58 @@ export function useUserPosition({
 }): SuspendableResult<UserPosition> {
   return useSuspendableQuery({
     document: UserPositionQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserHistoryArgs = UserHistoryRequest;
+
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
+ *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
+ *   pageSize: 'FIFTY',
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserHistory(
+  args: UseUserHistoryArgs & Suspendable,
+): SuspenseResult<PaginatedUserHistoryResult>;
+
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
+ *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
+ *   pageSize: 'FIFTY',
+ * });
+ * ```
+ */
+export function useUserHistory(
+  args: UseUserHistoryArgs,
+): ReadResult<PaginatedUserHistoryResult>;
+
+export function useUserHistory({
+  suspense = false,
+  ...request
+}: UseUserHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<PaginatedUserHistoryResult> {
+  return useSuspendableQuery({
+    document: UserHistoryQuery,
     variables: {
       request,
     },
