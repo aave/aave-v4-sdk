@@ -1,5 +1,8 @@
 import type { UnexpectedError } from '@aave/core';
 import {
+  type UserBalance,
+  UserBalancesQuery,
+  type UserBalancesRequest,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
@@ -134,4 +137,25 @@ export function userPosition(
   request: UserPositionRequest,
 ): ResultAsync<UserPosition, UnexpectedError> {
   return client.query(UserPositionQuery, { request });
+}
+
+/**
+ * Fetches all user balances across specified chains.
+ *
+ * ```ts
+ * const result = await userBalances(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user balances request parameters.
+ * @returns The user's balances across all specified chains.
+ */
+export function userBalances(
+  client: AaveClient,
+  request: UserBalancesRequest,
+): ResultAsync<UserBalance[], UnexpectedError> {
+  return client.query(UserBalancesQuery, { request });
 }

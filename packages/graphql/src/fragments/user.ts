@@ -1,12 +1,15 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql, type RequestOf } from '../graphql';
+import { graphql } from '../graphql';
 import {
   BigDecimalWithChangeFragment,
+  DecimalValueFragment,
   Erc20AmountFragment,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
   PercentValueFragment,
   PercentValueWithChangeFragment,
+  TokenAmountFragment,
+  TokenInfoFragment,
 } from './common';
 import { ReserveFragment, SpokeFragment } from './reserve';
 
@@ -28,19 +31,6 @@ export const UserSupplyItemFragment = graphql(
 );
 export type UserSupplyItem = FragmentOf<typeof UserSupplyItemFragment>;
 
-/**
- * @internal
- */
-export const UserSuppliesQuery = graphql(
-  `query UserSupplies($request: UserSuppliesRequest!) {
-    value: userSupplies(request: $request) {
-      ...UserSupplyItem
-    }
-  }`,
-  [UserSupplyItemFragment],
-);
-export type UserSuppliesRequest = RequestOf<typeof UserSuppliesQuery>;
-
 export const UserBorrowItemFragment = graphql(
   `fragment UserBorrowItem on UserBorrowItem {
     __typename
@@ -57,19 +47,6 @@ export const UserBorrowItemFragment = graphql(
   [Erc20AmountFragment, ReserveFragment],
 );
 export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
-
-/**
- * @internal
- */
-export const UserBorrowsQuery = graphql(
-  `query UserBorrows($request: UserBorrowsRequest!) {
-    value: userBorrows(request: $request) {
-      ...UserBorrowItem
-    }
-  }`,
-  [UserBorrowItemFragment],
-);
-export type UserBorrowsRequest = RequestOf<typeof UserBorrowsQuery>;
 
 export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
@@ -100,19 +77,6 @@ export const UserSummaryFragment = graphql(
   [FiatAmountWithChangeFragment, FiatAmountFragment, PercentValueFragment],
 );
 export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
-
-/**
- * @internal
- */
-export const UserSummaryQuery = graphql(
-  `query UserSummary($request: UserSummaryRequest!) {
-    value: userSummary(request: $request) {
-      ...UserSummary
-    }
-  }`,
-  [UserSummaryFragment],
-);
-export type UserSummaryRequest = RequestOf<typeof UserSummaryQuery>;
 
 export const UserPositionFragment = graphql(
   `fragment UserPosition on UserPosition {
@@ -174,28 +138,34 @@ export const UserPositionFragment = graphql(
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
 
-/**
- * @internal
- */
-export const UserPositionsQuery = graphql(
-  `query UserPositions($request: UserPositionsRequest!) {
-    value: userPositions(request: $request) {
-      ...UserPosition
+export const UserBalanceFragment = graphql(
+  `fragment UserBalance on UserBalance {
+    __typename
+    info {
+      ...TokenInfo
+    }
+    totalAmount {
+      ...DecimalValue
+    }
+    balances {
+      ...TokenAmount
+    }
+    fiatAmount(currency: USD) {
+      ...FiatAmount
+    }
+    supplyApy(metric: HIGHEST) {
+      ...PercentValue
+    }
+    borrowApy(metric: HIGHEST) {
+      ...PercentValue
     }
   }`,
-  [UserPositionFragment],
+  [
+    TokenInfoFragment,
+    DecimalValueFragment,
+    TokenAmountFragment,
+    FiatAmountFragment,
+    PercentValueFragment,
+  ],
 );
-export type UserPositionsRequest = RequestOf<typeof UserPositionsQuery>;
-
-/**
- * @internal
- */
-export const UserPositionQuery = graphql(
-  `query UserPosition($request: UserPositionRequest!) {
-    value: userPosition(request: $request) {
-      ...UserPosition
-    }
-  }`,
-  [UserPositionFragment],
-);
-export type UserPositionRequest = RequestOf<typeof UserPositionQuery>;
+export type UserBalance = FragmentOf<typeof UserBalanceFragment>;

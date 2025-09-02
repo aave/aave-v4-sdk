@@ -354,16 +354,30 @@ type InsufficientBalanceError {
 }
 
 input LiquidatePositionDebtAmount @oneOf {
+  """Exact amount"""
   exact: BigDecimal
+
+  """The most you can liquidate"""
   max: AlwaysTrue
 }
 
 input LiquidatePositionRequest {
+  """The spoke"""
   spoke: SpokeInput!
+
+  """The collateral reserve id"""
   collateral: ReserveId!
+
+  """The debt reserve id"""
   debt: ReserveId!
+
+  """The amount to liquidate"""
   amount: LiquidatePositionDebtAmount!
+
+  """The person liquidating the position"""
   liquidator: EvmAddress!
+
+  """The user to liquidate"""
   user: EvmAddress!
 }
 
@@ -618,9 +632,14 @@ type Query {
 }
 
 input RenounceSpokeUserPositionManagerRequest {
+  """The spoke"""
   spoke: SpokeInput!
-  managing: EvmAddress!
+
+  """The address to remove as a position manager"""
   manager: EvmAddress!
+
+  """The address to remove `manager` as position manager"""
+  managing: EvmAddress!
 }
 
 type RepayActivity {
@@ -774,16 +793,37 @@ input ReservesRequestQuery @oneOf {
 }
 
 input SetSpokeUserPositionManagerRequest {
+  """The spoke"""
   spoke: SpokeInput!
+
+  """The address to become the position manager"""
   manager: EvmAddress!
+
+  """Approve or remove the manager"""
   approve: Boolean!
+
+  """The user to set the position `manager` for"""
+  user: EvmAddress!
+
+  """The signature"""
+  signature: ERC712Signature
 }
 
 input SetUserSupplyAsCollateralRequest {
+  """The reserve input"""
   reserve: ReserveInput!
-  user: EvmAddress!
+
+  """The user sending the transaction (normally the user's wallet address)"""
+  sender: EvmAddress!
+
+  """
+  If not supplied, this will use `sender` which is the normal route - you can only use on
+  `onBehalfOf` if you're a position manager for that user
+  """
+  onBehalfOf: EvmAddress
+
+  """If you want to enable the collateral or disable"""
   enableCollateral: Boolean!
-  signature: ERC712Signature
 }
 
 scalar Signature
@@ -1079,8 +1119,14 @@ type TypeField {
 }
 
 input UpdateUserDynamicConfigRequest {
+  """The spoke"""
   spoke: SpokeInput!
-  user: EvmAddress!
+
+  """The user sending the transaction (normally the user's wallet address)"""
+  sender: EvmAddress!
+
+  """If not supplied, this will use `sender` which is the normal route"""
+  onBehalfOf: EvmAddress
 }
 
 input UpdateUserRiskPremiumRequest {
