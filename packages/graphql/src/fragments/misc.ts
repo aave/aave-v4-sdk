@@ -8,4 +8,6 @@ export const HasProcessedKnownTransactionQuery = graphql(
     value: hasProcessedKnownTransaction(request: $request)
   }`,
 );
-export type HasProcessedKnownTransactionRequest = RequestOf<typeof HasProcessedKnownTransactionQuery>;
+export type HasProcessedKnownTransactionRequest = RequestOf<
+  typeof HasProcessedKnownTransactionQuery
+>;

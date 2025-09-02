@@ -47,6 +47,15 @@
 		}
 	},
 	"overrides": [
+    {
+      "includes": ["packages/graphql/src/graphql-env.d.ts"],
+      "linter": {
+        "enabled": false
+      },
+      "formatter": {
+        "enabled": false
+      }
+    },
 		{
 			"includes": ["**/*.tsx"],
 			"linter": {
