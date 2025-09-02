@@ -1,4 +1,5 @@
 permissions:
+  contents: read
   packages: write
 
 name: Continuous Deployment
