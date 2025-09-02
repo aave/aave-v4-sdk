@@ -1,26 +1,26 @@
-import type {
-  MarketUserReserveBorrowPosition,
-  MarketUserReserveSupplyPosition,
-  MarketUserState,
-  PaginatedUserTransactionHistoryResult,
-  UserBorrowsRequest,
-  UserMarketStateRequest,
-  UserSuppliesRequest,
-  UserTransactionHistoryRequest,
+import {
+  type UserBorrowItem,
+  UserBorrowsQuery,
+  type UserBorrowsRequest,
+  type UserPosition,
+  UserPositionQuery,
+  type UserPositionRequest,
+  UserPositionsQuery,
+  type UserPositionsRequest,
+  type UserSummary,
+  UserSummaryQuery,
+  type UserSummaryRequest,
+  UserSuppliesQuery,
+  type UserSuppliesRequest,
+  type UserSupplyItem,
 } from '@aave/graphql';
 import {
-  UserBorrowsQuery,
-  UserMarketStateQuery,
-  UserSuppliesQuery,
-  UserTransactionHistoryQuery,
-} from '@aave/graphql';
-import type {
-  ReadResult,
-  Suspendable,
-  SuspendableResult,
-  SuspenseResult,
+  type ReadResult,
+  type Suspendable,
+  type SuspendableResult,
+  type SuspenseResult,
+  useSuspendableQuery,
 } from './helpers';
-import { useSuspendableQuery } from './helpers';
 
 export type UseUserSuppliesArgs = UserSuppliesRequest;
 
@@ -31,38 +31,46 @@ export type UseUserSuppliesArgs = UserSuppliesRequest;
  *
  * ```tsx
  * const { data } = useUserSupplies({
- *   markets: [{ address: evmAddress('0x87870bca…'), chainId: chainId(1) }],
- *   user: evmAddress('0x742d35cc…'),
- *   orderBy: { name: OrderDirection.ASC },
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
  *   suspense: true,
  * });
  * ```
  */
 export function useUserSupplies(
   args: UseUserSuppliesArgs & Suspendable,
-): SuspenseResult<MarketUserReserveSupplyPosition[]>;
+): SuspenseResult<UserSupplyItem[]>;
 
 /**
  * Fetch all user supply positions.
  *
  * ```tsx
  * const { data, error, loading } = useUserSupplies({
- *   markets: [{ address: evmAddress('0x87870bca…'), chainId: chainId(1) }],
- *   user: evmAddress('0x742d35cc…'),
- *   orderBy: { name: OrderDirection.ASC },
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
  * });
  * ```
  */
 export function useUserSupplies(
   args: UseUserSuppliesArgs,
-): ReadResult<MarketUserReserveSupplyPosition[]>;
+): ReadResult<UserSupplyItem[]>;
 
 export function useUserSupplies({
   suspense = false,
   ...request
 }: UseUserSuppliesArgs & {
   suspense?: boolean;
-}): SuspendableResult<MarketUserReserveSupplyPosition[]> {
+}): SuspendableResult<UserSupplyItem[]> {
   return useSuspendableQuery({
     document: UserSuppliesQuery,
     variables: {
@@ -81,38 +89,46 @@ export type UseUserBorrowsArgs = UserBorrowsRequest;
  *
  * ```tsx
  * const { data } = useUserBorrows({
- *   markets: [{ address: evmAddress('0x87870bca…'), chainId: chainId(1) }],
- *   user: evmAddress('0x742d35cc…'),
- *   orderBy: { name: OrderDirection.ASC },
- *   suspense: true
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ *   suspense: true,
  * });
  * ```
  */
 export function useUserBorrows(
   args: UseUserBorrowsArgs & Suspendable,
-): SuspenseResult<MarketUserReserveBorrowPosition[]>;
+): SuspenseResult<UserBorrowItem[]>;
 
 /**
  * Fetch all user borrow positions.
  *
  * ```tsx
  * const { data, error, loading } = useUserBorrows({
- *   markets: [{ address: evmAddress('0x87870bca…'), chainId: chainId(1) }],
- *   user: evmAddress('0x742d35cc…'),
- *   orderBy: { name: OrderDirection.ASC },
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
  * });
  * ```
  */
 export function useUserBorrows(
   args: UseUserBorrowsArgs,
-): ReadResult<MarketUserReserveBorrowPosition[]>;
+): ReadResult<UserBorrowItem[]>;
 
 export function useUserBorrows({
   suspense = false,
   ...request
 }: UseUserBorrowsArgs & {
   suspense?: boolean;
-}): SuspendableResult<MarketUserReserveBorrowPosition[]> {
+}): SuspendableResult<UserBorrowItem[]> {
   return useSuspendableQuery({
     document: UserBorrowsQuery,
     variables: {
@@ -122,49 +138,51 @@ export function useUserBorrows({
   });
 }
 
-export type UseUserStateArgs = UserMarketStateRequest;
+export type UseUserSummaryArgs = UserSummaryRequest;
 
 /**
- * Fetch user account market data across all reserves.
+ * Fetch a user's financial summary.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useUserMarketState({
- *   market: evmAddress('0x1234…'),
- *   user: evmAddress('0x5678…'),
- *   chainId: chainId(1),
+ * const { data } = useUserSummary({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
  *   suspense: true,
  * });
  * ```
  */
-export function useUserMarketState(
-  args: UseUserStateArgs & Suspendable,
-): SuspenseResult<MarketUserState>;
+export function useUserSummary(
+  args: UseUserSummaryArgs & Suspendable,
+): SuspenseResult<UserSummary>;
 
 /**
- * Fetch user account market data across all reserves.
+ * Fetch a user's financial summary.
  *
  * ```tsx
- * const { data, error, loading } = useUserMarketState({
- *   market: evmAddress('0x1234…'),
- *   user: evmAddress('0x5678…'),
- *   chainId: chainId(1),
+ * const { data, error, loading } = useUserSummary({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
  * });
  * ```
  */
-export function useUserMarketState(
-  args: UseUserStateArgs,
-): ReadResult<MarketUserState>;
+export function useUserSummary(
+  args: UseUserSummaryArgs,
+): ReadResult<UserSummary>;
 
-export function useUserMarketState({
+export function useUserSummary({
   suspense = false,
   ...request
-}: UseUserStateArgs & {
+}: UseUserSummaryArgs & {
   suspense?: boolean;
-}): SuspendableResult<MarketUserState> {
+}): SuspendableResult<UserSummary> {
   return useSuspendableQuery({
-    document: UserMarketStateQuery,
+    document: UserSummaryQuery,
     variables: {
       request,
     },
@@ -172,43 +190,100 @@ export function useUserMarketState({
   });
 }
 
-export type UseUserTransactionHistoryArgs = UserTransactionHistoryRequest;
+export type UseUserPositionsArgs = UserPositionsRequest;
 
 /**
- * Fetch user transaction history.
+ * Fetch all user positions across specified chains.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useUserTransactionHistory({
+ * const { data } = useUserPositions({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
  *   suspense: true,
  * });
  * ```
  */
-export function useUserTransactionHistory(
-  args: UseUserTransactionHistoryArgs & Suspendable,
-): SuspenseResult<PaginatedUserTransactionHistoryResult>;
+export function useUserPositions(
+  args: UseUserPositionsArgs & Suspendable,
+): SuspenseResult<UserPosition[]>;
 
 /**
- * Fetch user transaction history.
+ * Fetch all user positions across specified chains.
  *
  * ```tsx
- * const { data, error, loading } = useUserTransactionHistory();
+ * const { data, error, loading } = useUserPositions({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
+ * });
  * ```
  */
-export function useUserTransactionHistory(
-  args: UseUserTransactionHistoryArgs,
-): ReadResult<PaginatedUserTransactionHistoryResult>;
+export function useUserPositions(
+  args: UseUserPositionsArgs,
+): ReadResult<UserPosition[]>;
 
-export function useUserTransactionHistory({
+export function useUserPositions({
   suspense = false,
   ...request
-}: UseUserTransactionHistoryArgs & {
+}: UseUserPositionsArgs & {
   suspense?: boolean;
-}): SuspendableResult<PaginatedUserTransactionHistoryResult> {
+}): SuspendableResult<UserPosition[]> {
   return useSuspendableQuery({
-    document: UserTransactionHistoryQuery,
-    variables: { request },
+    document: UserPositionsQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserPositionArgs = UserPositionRequest;
+
+/**
+ * Fetch a specific user position by ID.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserPosition({
+ *   id: userPositionId('0x1234…'),
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserPosition(
+  args: UseUserPositionArgs & Suspendable,
+): SuspenseResult<UserPosition>;
+
+/**
+ * Fetch a specific user position by ID.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserPosition({
+ *   id: userPositionId('0x1234…'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ */
+export function useUserPosition(
+  args: UseUserPositionArgs,
+): ReadResult<UserPosition>;
+
+export function useUserPosition({
+  suspense = false,
+  ...request
+}: UseUserPositionArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserPosition> {
+  return useSuspendableQuery({
+    document: UserPositionQuery,
+    variables: {
+      request,
+    },
     suspense,
   });
 }

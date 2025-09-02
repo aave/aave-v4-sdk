@@ -1,6 +1,6 @@
 {
   "name": "@aave/graphql",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "GraphQL bindings for the Aave API",
   "repository": {
     "directory": "packages/graphql",
@@ -43,7 +43,7 @@
     "check": "gql.tada check",
     "doctor": "gql.tada doctor",
     "gql:generate:cache": "gql.tada generate turbo",
-    "gql:download:staging": "gql-tada generate schema 'https://api.v3.staging.aave.com/graphql' --output './schema.graphql'",
+    "gql:download:staging": "gql-tada generate schema 'https://api.v4.staging.aave.com/graphql' --output './schema.graphql'",
     "gql:download:local": "gql-tada generate schema 'http://localhost:3011/graphql' --output './schema.graphql'",
     "gql:generate": "gql-tada generate output",
     "gql:turbo": "gql-tada turbo",
