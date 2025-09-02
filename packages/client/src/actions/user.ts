@@ -1,25 +1,35 @@
 import type { UnexpectedError } from '@aave/core';
 import {
-  type MarketUserReserveBorrowPosition,
-  type MarketUserReserveSupplyPosition,
-  type PaginatedUserTransactionHistoryResult,
+  type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  type UserPosition,
+  UserPositionQuery,
+  type UserPositionRequest,
+  UserPositionsQuery,
+  type UserPositionsRequest,
+  type UserSummary,
+  UserSummaryQuery,
+  type UserSummaryRequest,
   UserSuppliesQuery,
   type UserSuppliesRequest,
-  UserTransactionHistoryQuery,
-  type UserTransactionHistoryRequest,
+  type UserSupplyItem,
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 
 /**
- * Fetches all user supply positions across the specified markets.
+ * Fetches all user supply positions across the specified spoke.
  *
  * ```ts
  * const result = await userSupplies(client, {
- *   markets: [{ address: evmAddress('0x87870bca…'), chainId: chainId(1) }],
- *   user: evmAddress('0x742d35cc…'),
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
  * });
  * ```
  *
@@ -30,17 +40,22 @@ import type { AaveClient } from '../AaveClient';
 export function userSupplies(
   client: AaveClient,
   request: UserSuppliesRequest,
-): ResultAsync<MarketUserReserveSupplyPosition[], UnexpectedError> {
+): ResultAsync<UserSupplyItem[], UnexpectedError> {
   return client.query(UserSuppliesQuery, { request });
 }
 
 /**
- * Fetches all user borrow positions.
+ * Fetches all user borrow positions across the specified spoke.
  *
  * ```ts
  * const result = await userBorrows(client, {
- *   markets: [{ address: evmAddress('0x87870bca…'), chainId: chainId(1) }],
- *   user: evmAddress('0x742d35cc…'),
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
  * });
  * ```
  *
@@ -51,28 +66,72 @@ export function userSupplies(
 export function userBorrows(
   client: AaveClient,
   request: UserBorrowsRequest,
-): ResultAsync<MarketUserReserveBorrowPosition[], UnexpectedError> {
+): ResultAsync<UserBorrowItem[], UnexpectedError> {
   return client.query(UserBorrowsQuery, { request });
 }
 
 /**
- * Fetches the user's transaction history for a given market.
+ * Fetches a user's summary across all positions.
  *
  * ```ts
- * const result = await userTransactionHistory(client, {
- *   chainId: chainId(1),
- *   market: evmAddress('0x87870bca…'),
+ * const result = await userSummary(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user summary request parameters.
+ * @returns The user's financial summary.
+ */
+export function userSummary(
+  client: AaveClient,
+  request: UserSummaryRequest,
+): ResultAsync<UserSummary, UnexpectedError> {
+  return client.query(UserSummaryQuery, { request });
+}
+
+/**
+ * Fetches all user positions across specified chains.
+ *
+ * ```ts
+ * const result = await userPositions(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user positions request parameters.
+ * @returns The user's positions across all specified chains.
+ */
+export function userPositions(
+  client: AaveClient,
+  request: UserPositionsRequest,
+): ResultAsync<UserPosition[], UnexpectedError> {
+  return client.query(UserPositionsQuery, { request });
+}
+
+/**
+ * Fetches a specific user position by ID.
+ *
+ * ```ts
+ * const result = await userPosition(client, {
+ *   id: userPositionId('0x1234…'),
  *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
  *
  * @param client - Aave client.
- * @param request - The user transaction history request parameters.
- * @returns The user's paginated transaction history.
+ * @param request - The user position request parameters.
+ * @returns The specific user position.
  */
-export function userTransactionHistory(
+export function userPosition(
   client: AaveClient,
-  request: UserTransactionHistoryRequest,
-): ResultAsync<PaginatedUserTransactionHistoryResult, UnexpectedError> {
-  return client.query(UserTransactionHistoryQuery, { request });
+  request: UserPositionRequest,
+): ResultAsync<UserPosition, UnexpectedError> {
+  return client.query(UserPositionQuery, { request });
 }

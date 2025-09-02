@@ -31,8 +31,8 @@ export const DomainDataFragment = graphql(
 );
 export type DomainData = FragmentOf<typeof DomainDataFragment>;
 
-export const MessageDataFragment = graphql(
-  `fragment MessageData on MessageData {
+export const PermitMessageDataFragment = graphql(
+  `fragment PermitMessageData on PermitMessageData {
     owner
     spender
     value
@@ -40,7 +40,7 @@ export const MessageDataFragment = graphql(
     deadline
   }`,
 );
-export type MessageData = FragmentOf<typeof MessageDataFragment>;
+export type PermitMessageData = FragmentOf<typeof PermitMessageDataFragment>;
 
 export const PermitTypedDataResponseFragment = graphql(
   `fragment PermitTypedDataResponse on PermitTypedDataResponse {
@@ -52,10 +52,10 @@ export const PermitTypedDataResponseFragment = graphql(
       ...DomainData
     }
     message {
-      ...MessageData
+      ...PermitMessageData
     }
   }`,
-  [TypeDefinitionFragment, DomainDataFragment, MessageDataFragment],
+  [TypeDefinitionFragment, DomainDataFragment, PermitMessageDataFragment],
 );
 export type PermitTypedDataResponse = FragmentOf<
   typeof PermitTypedDataResponseFragment

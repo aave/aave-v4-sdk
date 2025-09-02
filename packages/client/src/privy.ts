@@ -80,7 +80,7 @@ function sendTransactionAndWait(
       }
       return okAsync({
         txHash: hash,
-        operation: request.operation,
+        operations: request.operations,
       });
     });
 }

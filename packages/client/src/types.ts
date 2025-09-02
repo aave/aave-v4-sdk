@@ -15,7 +15,7 @@ import type { ResultAsync, TxHash } from '@aave/types';
 
 export type TransactionExecutionResult = {
   txHash: TxHash;
-  operation: OperationType | null;
+  operations: OperationType[] | null;
 };
 
 /**
@@ -24,7 +24,7 @@ export type TransactionExecutionResult = {
 export function isHasProcessedKnownTransactionRequest(
   result: TransactionExecutionResult,
 ): result is HasProcessedKnownTransactionRequest {
-  return result.operation !== null;
+  return result.operations !== null && result.operations.length > 0;
 }
 
 export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (

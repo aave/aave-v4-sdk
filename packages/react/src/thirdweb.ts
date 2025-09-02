@@ -151,7 +151,7 @@ export function useSendTransaction(
           : okAsync(txHash(receipt.transactionHash)),
       )
       .map((hash) => ({
-        operation: request.operation,
+        operations: request.operations,
         txHash: hash,
       }))
       .andThen(client.waitForSupportedTransaction);
