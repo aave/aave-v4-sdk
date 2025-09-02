@@ -26,7 +26,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Configure NPM Auth Token
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Create Snapshot
         id: create_snapshot
