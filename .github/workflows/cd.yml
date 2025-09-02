@@ -1,3 +1,6 @@
+permissions:
+  packages: write
+
 name: Continuous Deployment
 
 on:
