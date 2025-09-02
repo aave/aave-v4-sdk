@@ -1,3 +1,4 @@
+import type { UnexpectedError } from '@aave/core';
 import {
   type UserBorrowItem,
   UserBorrowsQuery,
@@ -15,8 +16,7 @@ import {
   type UserSupplyItem,
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
-import type { AaveClient } from '../client';
-import type { UnexpectedError } from '../errors';
+import type { AaveClient } from '../AaveClient';
 
 /**
  * Fetches all user supply positions across the specified spoke.

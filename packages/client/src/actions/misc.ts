@@ -1,10 +1,10 @@
+import type { UnexpectedError } from '@aave/core';
 import {
   HasProcessedKnownTransactionQuery,
   type HasProcessedKnownTransactionRequest,
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
-import type { AaveClient } from '../client';
-import type { UnexpectedError } from '../errors';
+import type { AaveClient } from '../AaveClient';
 
 /**
  * Check if a transaction has been processed by the Aave API.
