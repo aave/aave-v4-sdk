@@ -356,7 +356,7 @@ export type UseUserSummaryHistoryArgs = UserSummaryHistoryRequest;
  * ```tsx
  * const { data } = useUserSummaryHistory({
  *   user: evmAddress('0x742d35cc…'),
- *   window: 'LAST_WEEK',
+ *   window: TimeWindow.LastWeek,
  *   filter: { chainIds: [chainId(1)] },
  *   suspense: true,
  * });
@@ -372,7 +372,7 @@ export function useUserSummaryHistory(
  * ```tsx
  * const { data, error, loading } = useUserSummaryHistory({
  *   user: evmAddress('0x742d35cc…'),
- *   window: 'LAST_WEEK',
+ *   window: TimeWindow.LastWeek,
  *   filter: { chainIds: [chainId(1)] },
  * });
  * ```

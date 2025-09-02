@@ -171,7 +171,7 @@ export function userHistory(
  * ```ts
  * const result = await userSummaryHistory(client, {
  *   user: evmAddress('0x742d35cc…'),
- *   window: 'LAST_WEEK',
+ *   window: TimeWindow.LastWeek,
  *   filter: {
  *     chainIds: [chainId(1)]
  *   }
