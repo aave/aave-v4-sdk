@@ -2,22 +2,23 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main]
+    # branches: [main]
+    branches: [cesare/aave-1667-sdk-fix-build-and-ci-setup]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Verify
-    uses: ./.github/workflows/verify.yml
-    secrets: inherit
+  # verify:
+  #   name: Verify
+  #   uses: ./.github/workflows/verify.yml
+  #   secrets: inherit
 
   publish:
     name: Publish Snapshot
     runs-on: ubuntu-latest
-    needs: verify
+    # needs: verify
 
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +26,8 @@ jobs:
       - name: Setup Repository
         uses: ./.github/actions/setup
 
-      - name: Configure NPM Auth Token
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+      # - name: Configure NPM Auth Token
+      #   run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Create Snapshot
         id: create_snapshot
@@ -43,3 +44,5 @@ jobs:
       - name: Publish Snapshot
         if: env.changeset_exists == 'true'
         run: pnpm changeset publish --snapshot --tag canary --no-git-tag
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
