@@ -1,8 +1,8 @@
 import { describe, it } from 'vitest';
 
 describe('Aave V4 History Scenario', () => {
-  describe('GIVEN a user with prior history of transactions', () => {
-    describe('WHEN fetching the user history by activity type', () => {
+  describe('Given a user with prior history of transactions', () => {
+    describe('When fetching the user history by activity type', () => {
       const activityType = Object.values([
         'BORROW',
         'SUPPLY',
@@ -12,16 +12,16 @@ describe('Aave V4 History Scenario', () => {
         'SWAP',
       ]);
       it.each(activityType)(
-        'THEN it should be possible so filter them by %s activity',
+        'Then it should be possible so filter them by %s activity',
         (_activityType) => {
           // TODO: Implement test
         },
       );
     });
 
-    describe('WHEN fetching filtered user history', () => {
-      it.todo('THEN it should be possible to filter them by chainIds');
-      it.todo('THEN it should be possible to filter them by spoke');
+    describe('When fetching filtered user history', () => {
+      it.todo('Then it should be possible to filter them by chainIds');
+      it.todo('Then it should be possible to filter them by spoke');
     });
   });
 });
