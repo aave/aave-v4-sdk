@@ -1,7 +1,8 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql, type RequestOf } from '../graphql';
+import { graphql } from '../graphql';
 import {
   BigDecimalWithChangeFragment,
+  DecimalValueFragment,
   Erc20AmountFragment,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
@@ -9,8 +10,10 @@ import {
   PercentValueFragment,
   PercentValueWithChangeFragment,
   TokenAmountFragment,
+  TokenInfoFragment,
 } from './common';
-import { HubAssetFragment, ReserveFragment, SpokeFragment } from './reserve';
+
+import { ReserveFragment, SpokeFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
@@ -30,19 +33,6 @@ export const UserSupplyItemFragment = graphql(
 );
 export type UserSupplyItem = FragmentOf<typeof UserSupplyItemFragment>;
 
-/**
- * @internal
- */
-export const UserSuppliesQuery = graphql(
-  `query UserSupplies($request: UserSuppliesRequest!) {
-    value: userSupplies(request: $request) {
-      ...UserSupplyItem
-    }
-  }`,
-  [UserSupplyItemFragment],
-);
-export type UserSuppliesRequest = RequestOf<typeof UserSuppliesQuery>;
-
 export const UserBorrowItemFragment = graphql(
   `fragment UserBorrowItem on UserBorrowItem {
     __typename
@@ -59,19 +49,6 @@ export const UserBorrowItemFragment = graphql(
   [Erc20AmountFragment, ReserveFragment],
 );
 export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
-
-/**
- * @internal
- */
-export const UserBorrowsQuery = graphql(
-  `query UserBorrows($request: UserBorrowsRequest!) {
-    value: userBorrows(request: $request) {
-      ...UserBorrowItem
-    }
-  }`,
-  [UserBorrowItemFragment],
-);
-export type UserBorrowsRequest = RequestOf<typeof UserBorrowsQuery>;
 
 export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
@@ -102,19 +79,6 @@ export const UserSummaryFragment = graphql(
   [FiatAmountWithChangeFragment, FiatAmountFragment, PercentValueFragment],
 );
 export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
-
-/**
- * @internal
- */
-export const UserSummaryQuery = graphql(
-  `query UserSummary($request: UserSummaryRequest!) {
-    value: userSummary(request: $request) {
-      ...UserSummary
-    }
-  }`,
-  [UserSummaryFragment],
-);
-export type UserSummaryRequest = RequestOf<typeof UserSummaryQuery>;
 
 export const UserPositionFragment = graphql(
   `fragment UserPosition on UserPosition {
@@ -176,31 +140,37 @@ export const UserPositionFragment = graphql(
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
 
-/**
- * @internal
- */
-export const UserPositionsQuery = graphql(
-  `query UserPositions($request: UserPositionsRequest!) {
-    value: userPositions(request: $request) {
-      ...UserPosition
+export const UserBalanceFragment = graphql(
+  `fragment UserBalance on UserBalance {
+    __typename
+    info {
+      ...TokenInfo
+    }
+    totalAmount {
+      ...DecimalValue
+    }
+    balances {
+      ...TokenAmount
+    }
+    fiatAmount(currency: USD) {
+      ...FiatAmount
+    }
+    supplyApy(metric: HIGHEST) {
+      ...PercentValue
+    }
+    borrowApy(metric: HIGHEST) {
+      ...PercentValue
     }
   }`,
-  [UserPositionFragment],
+  [
+    TokenInfoFragment,
+    DecimalValueFragment,
+    TokenAmountFragment,
+    FiatAmountFragment,
+    PercentValueFragment,
+  ],
 );
-export type UserPositionsRequest = RequestOf<typeof UserPositionsQuery>;
-
-/**
- * @internal
- */
-export const UserPositionQuery = graphql(
-  `query UserPosition($request: UserPositionRequest!) {
-    value: userPosition(request: $request) {
-      ...UserPosition
-    }
-  }`,
-  [UserPositionFragment],
-);
-export type UserPositionRequest = RequestOf<typeof UserPositionQuery>;
+export type UserBalance = FragmentOf<typeof UserBalanceFragment>;
 
 // Activity Fragments
 export const BorrowActivityFragment = graphql(
@@ -213,56 +183,13 @@ export const BorrowActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type BorrowActivity = FragmentOf<typeof BorrowActivityFragment>;
 
@@ -276,56 +203,13 @@ export const SupplyActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type SupplyActivity = FragmentOf<typeof SupplyActivityFragment>;
 
@@ -339,56 +223,13 @@ export const WithdrawActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type WithdrawActivity = FragmentOf<typeof WithdrawActivityFragment>;
 
@@ -402,56 +243,13 @@ export const RepayActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type RepayActivity = FragmentOf<typeof RepayActivityFragment>;
 
@@ -465,96 +263,10 @@ export const LiquidatedActivityFragment = graphql(
       ...Spoke
     }
     collateralReserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     debtReserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     collateralAmount {
       ...Erc20Amount
@@ -564,7 +276,7 @@ export const LiquidatedActivityFragment = graphql(
     }
     liquidator
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
 
@@ -643,19 +355,6 @@ export type PaginatedUserHistoryResult = FragmentOf<
   typeof PaginatedUserHistoryResultFragment
 >;
 
-/**
- * @internal
- */
-export const UserHistoryQuery = graphql(
-  `query UserHistory($request: UserHistoryRequest!) {
-    value: userHistory(request: $request) {
-      ...PaginatedUserHistoryResult
-    }
-  }`,
-  [PaginatedUserHistoryResultFragment],
-);
-export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
-
 export const UserSummaryHistoryItemFragment = graphql(
   `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
     __typename
@@ -677,21 +376,6 @@ export type UserSummaryHistoryItem = FragmentOf<
   typeof UserSummaryHistoryItemFragment
 >;
 
-/**
- * @internal
- */
-export const UserSummaryHistoryQuery = graphql(
-  `query UserSummaryHistory($request: UserSummaryHistoryRequest!) {
-    value: userSummaryHistory(request: $request) {
-      ...UserSummaryHistoryItem
-    }
-  }`,
-  [UserSummaryHistoryItemFragment],
-);
-export type UserSummaryHistoryRequest = RequestOf<
-  typeof UserSummaryHistoryQuery
->;
-
 export const APYSampleFragment = graphql(
   `fragment APYSample on APYSample {
     __typename
@@ -703,42 +387,3 @@ export const APYSampleFragment = graphql(
   [PercentValueFragment],
 );
 export type APYSample = FragmentOf<typeof APYSampleFragment>;
-
-/**
- * @internal
- */
-export const BorrowApyHistoryQuery = graphql(
-  `query BorrowApyHistory($request: BorrowAPYHistoryRequest!) {
-    value: borrowApyHistory(request: $request) {
-      ...APYSample
-    }
-  }`,
-  [APYSampleFragment],
-);
-export type BorrowAPYHistoryRequest = RequestOf<typeof BorrowApyHistoryQuery>;
-
-/**
- * @internal
- */
-export const SupplyApyHistoryQuery = graphql(
-  `query SupplyApyHistory($request: SupplyAPYHistoryRequest!) {
-    value: supplyApyHistory(request: $request) {
-      ...APYSample
-    }
-  }`,
-  [APYSampleFragment],
-);
-export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
-
-/**
- * @internal
- */
-export const HubAssetsQuery = graphql(
-  `query HubAssets($request: HubAssetsRequest!) {
-    value: hubAssets(request: $request) {
-      ...HubAsset
-    }
-  }`,
-  [HubAssetFragment],
-);
-export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;
