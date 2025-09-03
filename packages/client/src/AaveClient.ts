@@ -1,6 +1,11 @@
-import { delay, GqlClient, TimeoutError, UnexpectedError } from '@aave/core';
-import type { HasProcessedKnownTransactionRequest } from '@aave/graphql';
-import { invariant, okAsync, ResultAsync, type TxHash } from '@aave/types';
+import {
+  delay,
+  GqlClient,
+  TimeoutError,
+  UnexpectedError,
+} from '@aave/core-next';
+import type { HasProcessedKnownTransactionRequest } from '@aave/graphql-next';
+import { invariant, okAsync, ResultAsync, type TxHash } from '@aave/types-next';
 import { hasProcessedKnownTransaction } from './actions';
 import { type ClientConfig, configureContext } from './config';
 import {

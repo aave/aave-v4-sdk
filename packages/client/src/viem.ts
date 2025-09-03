@@ -1,10 +1,14 @@
-import { SigningError, TransactionError, ValidationError } from '@aave/core';
+import {
+  SigningError,
+  TransactionError,
+  ValidationError,
+} from '@aave/core-next';
 import type {
   ExecutionPlan,
   InsufficientBalanceError,
   PermitTypedDataResponse,
   TransactionRequest,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import {
   type ChainId,
   chainId,
@@ -15,7 +19,7 @@ import {
   signatureFrom,
   type TxHash,
   txHash,
-} from '@aave/types';
+} from '@aave/types-next';
 import {
   type Chain,
   defineChain,

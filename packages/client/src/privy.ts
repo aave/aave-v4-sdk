@@ -2,13 +2,13 @@ import {
   SigningError,
   type TransactionError,
   ValidationError,
-} from '@aave/core';
+} from '@aave/core-next';
 import type {
   ExecutionPlan,
   InsufficientBalanceError,
   PermitTypedDataResponse,
   TransactionRequest,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import {
   errAsync,
   okAsync,
@@ -16,7 +16,7 @@ import {
   signatureFrom,
   type TxHash,
   txHash,
-} from '@aave/types';
+} from '@aave/types-next';
 import type { PrivyClient } from '@privy-io/server-auth';
 import { createPublicClient, http } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';

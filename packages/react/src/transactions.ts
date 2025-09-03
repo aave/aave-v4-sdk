@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/client';
+import type { UnexpectedError } from '@aave/client-next';
 import {
   borrow,
   // collateralToggle,
@@ -6,7 +6,7 @@ import {
   repay,
   supply,
   withdraw,
-} from '@aave/client/actions';
+} from '@aave/client-next/actions';
 import type {
   BorrowRequest,
   ExecutionPlan,
@@ -14,7 +14,7 @@ import type {
   SupplyRequest,
   // TransactionRequest,
   WithdrawRequest,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import { useAaveClient } from './context';
 import { type UseAsyncTask, useAsyncTask } from './helpers';
 

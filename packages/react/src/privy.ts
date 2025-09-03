@@ -3,20 +3,23 @@ import {
   type TimeoutError,
   type TransactionError,
   UnexpectedError,
-} from '@aave/client';
-import { permitTypedData } from '@aave/client/actions';
-import { sendTransactionAndWait, supportedChains } from '@aave/client/viem';
+} from '@aave/client-next';
+import { permitTypedData } from '@aave/client-next/actions';
+import {
+  sendTransactionAndWait,
+  supportedChains,
+} from '@aave/client-next/viem';
 import type {
   ERC712Signature,
   PermitTypedDataRequest,
   TransactionRequest,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import {
   invariant,
   ResultAsync,
   signatureFrom,
   type TxHash,
-} from '@aave/types';
+} from '@aave/types-next';
 import { useSignTypedData, useWallets } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import { useAaveClient } from './context';

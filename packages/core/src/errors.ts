@@ -6,7 +6,7 @@ import {
   ResultAwareError,
   type TxHash,
   type TypedSelectionSet,
-} from '@aave/types';
+} from '@aave/types-next';
 import type { CombinedError } from '@urql/core';
 
 /**

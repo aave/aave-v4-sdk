@@ -1,4 +1,4 @@
-import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types';
+import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types-next';
 import { PrivyClient } from '@privy-io/server-auth';
 import { describe, expect, it } from 'vitest';
 import { permitTypedData } from './actions';

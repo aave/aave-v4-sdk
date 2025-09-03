@@ -30,7 +30,7 @@ import {
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import {
   type ReadResult,
   type Suspendable,

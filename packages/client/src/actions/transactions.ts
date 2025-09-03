@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core';
+import type { UnexpectedError } from '@aave/core-next';
 import {
   BorrowQuery,
   type BorrowRequest,
@@ -10,8 +10,8 @@ import {
   // type TransactionRequest,
   WithdrawQuery,
   type WithdrawRequest,
-} from '@aave/graphql';
-import type { ResultAsync } from '@aave/types';
+} from '@aave/graphql-next';
+import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 
 /**
