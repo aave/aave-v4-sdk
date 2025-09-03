@@ -1,14 +1,28 @@
 import type { UnexpectedError } from '@aave/core';
 import {
+  type APYSample,
+  type BorrowAPYHistoryRequest,
+  BorrowApyHistoryQuery,
+  type HubAsset,
+  HubAssetsQuery,
+  type HubAssetsRequest,
+  type PaginatedUserHistoryResult,
+  type SupplyAPYHistoryRequest,
+  SupplyApyHistoryQuery,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  UserHistoryQuery,
+  type UserHistoryRequest,
   type UserPosition,
   UserPositionQuery,
   type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
   type UserSummary,
+  type UserSummaryHistoryItem,
+  UserSummaryHistoryQuery,
+  type UserSummaryHistoryRequest,
   UserSummaryQuery,
   type UserSummaryRequest,
   UserSuppliesQuery,
@@ -134,4 +148,125 @@ export function userPosition(
   request: UserPositionRequest,
 ): ResultAsync<UserPosition, UnexpectedError> {
   return client.query(UserPositionQuery, { request });
+}
+
+/**
+ * Fetches user transaction history with pagination.
+ *
+ * ```ts
+ * const result = await userHistory(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
+ *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
+ *   pageSize: 'FIFTY',
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user history request parameters.
+ * @returns The paginated user transaction history.
+ */
+export function userHistory(
+  client: AaveClient,
+  request: UserHistoryRequest,
+): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
+  return client.query(UserHistoryQuery, { request });
+}
+
+/**
+ * Fetches user summary history over time.
+ *
+ * ```ts
+ * const result = await userSummaryHistory(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: TimeWindow.LastWeek,
+ *   filter: {
+ *     chainIds: [chainId(1)]
+ *   }
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user summary history request parameters.
+ * @returns The user summary history items.
+ */
+export function userSummaryHistory(
+  client: AaveClient,
+  request: UserSummaryHistoryRequest,
+): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
+  return client.query(UserSummaryHistoryQuery, { request });
+}
+
+/**
+ * Fetches borrow APY history for a specific reserve over time.
+ *
+ * ```ts
+ * const result = await borrowApyHistory(client, {
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: '0x456...',
+ *   window: TimeWindow.LastWeek
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The borrow APY history request parameters.
+ * @returns The borrow APY history samples.
+ */
+export function borrowApyHistory(
+  client: AaveClient,
+  request: BorrowAPYHistoryRequest,
+): ResultAsync<APYSample[], UnexpectedError> {
+  return client.query(BorrowApyHistoryQuery, { request });
+}
+
+/**
+ * Fetches supply APY history for a specific reserve over time.
+ *
+ * ```ts
+ * const result = await supplyApyHistory(client, {
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: '0x456...',
+ *   window: TimeWindow.LastWeek
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The supply APY history request parameters.
+ * @returns The supply APY history samples.
+ */
+export function supplyApyHistory(
+  client: AaveClient,
+  request: SupplyAPYHistoryRequest,
+): ResultAsync<APYSample[], UnexpectedError> {
+  return client.query(SupplyApyHistoryQuery, { request });
+}
+
+/**
+ * Fetches hub assets for a specific chain and optional hub/user filtering.
+ *
+ * ```ts
+ * const result = await hubAssets(client, {
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional, defaults to all
+ *   orderBy: HubAssetsRequestOrderBy.Name // optional, defaults to NAME
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub assets request parameters.
+ * @returns The hub assets array.
+ */
+export function hubAssets(
+  client: AaveClient,
+  request: HubAssetsRequest,
+): ResultAsync<HubAsset[], UnexpectedError> {
+  return client.query(HubAssetsQuery, { request });
 }

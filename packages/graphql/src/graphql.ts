@@ -21,6 +21,8 @@ import {
 } from 'gql.tada';
 import type {
   ChainsFilter,
+  HubAssetStatusType,
+  HubAssetsRequestOrderBy,
   OperationType,
   OrderDirection,
   PageSize,
@@ -47,11 +49,14 @@ export const graphql = initGraphQLTada<{
     DateTime: DateTime;
     EvmAddress: EvmAddress;
     Float: number;
+    HubAssetStatusType: HubAssetStatusType;
+    HubAssetsRequestOrderBy: HubAssetsRequestOrderBy;
     ID: ID;
     Int: number;
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
+    ReserveId: ID;
     Signature: Signature;
     String: string;
     TxHash: TxHash;
