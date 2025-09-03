@@ -183,56 +183,13 @@ export const BorrowActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type BorrowActivity = FragmentOf<typeof BorrowActivityFragment>;
 
@@ -246,56 +203,13 @@ export const SupplyActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type SupplyActivity = FragmentOf<typeof SupplyActivityFragment>;
 
@@ -309,56 +223,13 @@ export const WithdrawActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type WithdrawActivity = FragmentOf<typeof WithdrawActivityFragment>;
 
@@ -372,56 +243,13 @@ export const RepayActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type RepayActivity = FragmentOf<typeof RepayActivityFragment>;
 
@@ -435,96 +263,10 @@ export const LiquidatedActivityFragment = graphql(
       ...Spoke
     }
     collateralReserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     debtReserve {
-      id
-      spoke {
-        ...Spoke
-      }
-      asset {
-        assetId
-        underlying {
-          info {
-            name
-            symbol
-            icon
-            decimals
-          }
-          contract
-          chain {
-            name
-            icon
-            chainId
-            explorerUrl
-            isTestnet
-            nativeWrappedToken
-            nativeInfo {
-              name
-              symbol
-              icon
-              decimals
-            }
-          }
-        }
-      }
-      chain {
-        name
-        icon
-        chainId
-        explorerUrl
-        isTestnet
-        nativeWrappedToken
-        nativeInfo {
-          name
-          symbol
-          icon
-          decimals
-        }
-      }
+      ...Reserve
     }
     collateralAmount {
       ...Erc20Amount
@@ -534,7 +276,7 @@ export const LiquidatedActivityFragment = graphql(
     }
     liquidator
   }`,
-  [SpokeFragment, Erc20AmountFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
 export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
 
