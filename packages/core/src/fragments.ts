@@ -1,4 +1,4 @@
-import { invariant } from '@aave/types';
+import { invariant } from '@aave/types-next';
 import type { AnyVariables, TypedDocumentNode } from '@urql/core';
 import {
   type FragmentDefinitionNode,

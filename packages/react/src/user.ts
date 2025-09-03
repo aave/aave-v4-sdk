@@ -1,19 +1,36 @@
 import {
+  type APYSample,
+  type BorrowAPYHistoryRequest,
+  BorrowApyHistoryQuery,
+  type HubAsset,
+  HubAssetsQuery,
+  type HubAssetsRequest,
+  type PaginatedUserHistoryResult,
+  type SupplyAPYHistoryRequest,
+  SupplyApyHistoryQuery,
+  type UserBalance,
+  UserBalancesQuery,
+  type UserBalancesRequest,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  UserHistoryQuery,
+  type UserHistoryRequest,
   type UserPosition,
   UserPositionQuery,
   type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
   type UserSummary,
+  type UserSummaryHistoryItem,
+  UserSummaryHistoryQuery,
+  type UserSummaryHistoryRequest,
   UserSummaryQuery,
   type UserSummaryRequest,
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import {
   type ReadResult,
   type Suspendable,
@@ -249,7 +266,7 @@ export type UseUserPositionArgs = UserPositionRequest;
  *
  * ```tsx
  * const { data } = useUserPosition({
- *   id: userPositionId('0x1234…'),
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
  *   user: evmAddress('0x742d35cc…'),
  *   suspense: true,
  * });
@@ -264,7 +281,7 @@ export function useUserPosition(
  *
  * ```tsx
  * const { data, error, loading } = useUserPosition({
- *   id: userPositionId('0x1234…'),
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
  *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
@@ -281,6 +298,320 @@ export function useUserPosition({
 }): SuspendableResult<UserPosition> {
   return useSuspendableQuery({
     document: UserPositionQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserBalancesArgs = UserBalancesRequest;
+
+/**
+ * Fetch all user balances across specified chains.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserBalances({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserBalances(
+  args: UseUserBalancesArgs & Suspendable,
+): SuspenseResult<UserBalance[]>;
+
+/**
+ * Fetch all user balances across specified chains.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserBalances({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ * });
+ * ```
+ */
+export function useUserBalances(
+  args: UseUserBalancesArgs,
+): ReadResult<UserBalance[]>;
+
+export function useUserBalances({
+  suspense = false,
+  ...request
+}: UseUserBalancesArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserBalance[]> {
+  return useSuspendableQuery({
+    document: UserBalancesQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserHistoryArgs = UserHistoryRequest;
+
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
+ *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
+ *   pageSize: 'FIFTY',
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserHistory(
+  args: UseUserHistoryArgs & Suspendable,
+): SuspenseResult<PaginatedUserHistoryResult>;
+
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
+ *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
+ *   pageSize: 'FIFTY',
+ * });
+ * ```
+ */
+export function useUserHistory(
+  args: UseUserHistoryArgs,
+): ReadResult<PaginatedUserHistoryResult>;
+
+export function useUserHistory({
+  suspense = false,
+  ...request
+}: UseUserHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<PaginatedUserHistoryResult> {
+  return useSuspendableQuery({
+    document: UserHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserSummaryHistoryArgs = UserSummaryHistoryRequest;
+
+/**
+ * Fetch user summary history over time.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserSummaryHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: TimeWindow.LastWeek,
+ *   filter: { chainIds: [chainId(1)] },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserSummaryHistory(
+  args: UseUserSummaryHistoryArgs & Suspendable,
+): SuspenseResult<UserSummaryHistoryItem[]>;
+
+/**
+ * Fetch user summary history over time.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserSummaryHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: TimeWindow.LastWeek,
+ *   filter: { chainIds: [chainId(1)] },
+ * });
+ * ```
+ */
+export function useUserSummaryHistory(
+  args: UseUserSummaryHistoryArgs,
+): ReadResult<UserSummaryHistoryItem[]>;
+
+export function useUserSummaryHistory({
+  suspense = false,
+  ...request
+}: UseUserSummaryHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserSummaryHistoryItem[]> {
+  return useSuspendableQuery({
+    document: UserSummaryHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
+
+/**
+ * Fetch borrow APY history for a specific reserve over time.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useBorrowApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useBorrowApyHistory(
+  args: UseBorrowApyHistoryArgs & Suspendable,
+): SuspenseResult<APYSample[]>;
+
+/**
+ * Fetch borrow APY history for a specific reserve over time.
+ *
+ * ```tsx
+ * const { data, error, loading } = useBorrowApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useBorrowApyHistory(
+  args: UseBorrowApyHistoryArgs,
+): ReadResult<APYSample[]>;
+
+export function useBorrowApyHistory({
+  suspense = false,
+  ...request
+}: UseBorrowApyHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<APYSample[]> {
+  return useSuspendableQuery({
+    document: BorrowApyHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
+
+/**
+ * Fetch supply APY history for a specific reserve over time.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSupplyApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSupplyApyHistory(
+  args: UseSupplyApyHistoryArgs & Suspendable,
+): SuspenseResult<APYSample[]>;
+
+/**
+ * Fetch supply APY history for a specific reserve over time.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSupplyApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useSupplyApyHistory(
+  args: UseSupplyApyHistoryArgs,
+): ReadResult<APYSample[]>;
+
+export function useSupplyApyHistory({
+  suspense = false,
+  ...request
+}: UseSupplyApyHistoryArgs & {
+  suspense?: boolean;
+}): SuspendableResult<APYSample[]> {
+  return useSuspendableQuery({
+    document: SupplyApyHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseHubAssetsArgs = HubAssetsRequest;
+
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
+ *   orderBy: HubAssetsRequestOrderBy.Name, // optional
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useHubAssets(
+  args: UseHubAssetsArgs & Suspendable,
+): SuspenseResult<HubAsset[]>;
+
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
+ *   orderBy: HubAssetsRequestOrderBy.Name, // optional
+ * });
+ * ```
+ */
+export function useHubAssets(args: UseHubAssetsArgs): ReadResult<HubAsset[]>;
+
+export function useHubAssets({
+  suspense = false,
+  ...request
+}: UseHubAssetsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<HubAsset[]> {
+  return useSuspendableQuery({
+    document: HubAssetsQuery,
     variables: {
       request,
     },

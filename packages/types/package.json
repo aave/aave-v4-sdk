@@ -1,5 +1,5 @@
 {
-  "name": "@aave/types",
+  "name": "@aave/types-next",
   "version": "0.1.1",
   "description": "Core types for the Aave SDK",
   "repository": {
@@ -44,7 +44,6 @@
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted",
-    "registry": "https://npm.pkg.github.com"
+    "access": "restricted"
   }
 }

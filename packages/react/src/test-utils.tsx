@@ -1,5 +1,5 @@
-import { AaveClient } from '@aave/client';
-import { environment } from '@aave/client/test-utils';
+import { AaveClient } from '@aave/client-next';
+import { environment } from '@aave/client-next/test-utils';
 import { type RenderHookOptions, renderHook } from '@testing-library/react';
 // biome-ignore lint/correctness/noUnusedImports: needed for types
 import React, { Component, type ReactNode, Suspense } from 'react';

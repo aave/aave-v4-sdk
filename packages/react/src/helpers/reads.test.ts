@@ -1,5 +1,5 @@
-import { UnexpectedError } from '@aave/client';
-import { HealthQuery } from '@aave/graphql';
+import { UnexpectedError } from '@aave/client-next';
+import { HealthQuery } from '@aave/graphql-next';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {

@@ -1,7 +1,7 @@
 /// <reference path="../../../vite-env.d.ts" />
 
-import { GraphQLErrorCode, UnexpectedError } from '@aave/core';
-import { schema } from '@aave/graphql/test-utils';
+import { GraphQLErrorCode, UnexpectedError } from '@aave/core-next';
+import { schema } from '@aave/graphql-next/test-utils';
 import {
   type AnyVariables,
   type BigDecimal,
@@ -10,7 +10,7 @@ import {
   type EvmAddress,
   evmAddress,
   ResultAsync,
-} from '@aave/types';
+} from '@aave/types-next';
 import type { TypedDocumentNode } from '@urql/core';
 import { validate } from 'graphql';
 import type { ValidationRule } from 'graphql/validation/ValidationContext';
@@ -59,7 +59,7 @@ const ETHEREUM_FORK_RPC_URL = import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC;
 const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env.ETHEREUM_TENDERLY_ADMIN_RPC;
 
 // Re-export for convenience
-export { bigDecimal } from '@aave/types';
+export { bigDecimal } from '@aave/types-next';
 
 export const ethereumForkChain: Chain = defineChain({
   id: ETHEREUM_FORK_ID,

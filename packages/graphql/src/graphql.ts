@@ -9,11 +9,13 @@ import type {
   DateTime,
   EvmAddress,
   ID,
+  ReserveId,
   Signature,
   TxHash,
   TypedSelectionSet,
+  UserPositionId,
   Void,
-} from '@aave/types';
+} from '@aave/types-next';
 import {
   type DocumentDecoration,
   initGraphQLTada,
@@ -21,6 +23,8 @@ import {
 } from 'gql.tada';
 import type {
   ChainsFilter,
+  HubAssetStatusType,
+  HubAssetsRequestOrderBy,
   OperationType,
   OrderDirection,
   PageSize,
@@ -37,6 +41,7 @@ export const graphql = initGraphQLTada<{
   introspection: introspection;
   scalars: {
     AlwaysTrue: true;
+    AssetId: ID;
     BigDecimal: BigDecimal;
     BigInt: BigIntString;
     BlockchainData: BlockchainData;
@@ -47,14 +52,20 @@ export const graphql = initGraphQLTada<{
     DateTime: DateTime;
     EvmAddress: EvmAddress;
     Float: number;
+    HubAssetStatusType: HubAssetStatusType;
+    HubAssetsRequestOrderBy: HubAssetsRequestOrderBy;
     ID: ID;
     Int: number;
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
+    ReserveId: ReserveId;
     Signature: Signature;
     String: string;
+    SwapId: ID;
+    SwapRequestId: ID;
     TxHash: TxHash;
+    UserPositionId: UserPositionId;
     Void: Void;
     TimeWindow: TimeWindow;
     VaultUserHistoryAction: VaultUserHistoryAction;

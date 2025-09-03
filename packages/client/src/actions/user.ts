@@ -1,21 +1,39 @@
-import type { UnexpectedError } from '@aave/core';
+import type { UnexpectedError } from '@aave/core-next';
 import {
+  type APYSample,
+  type BorrowAPYHistoryRequest,
+  BorrowApyHistoryQuery,
+  type HubAsset,
+  HubAssetsQuery,
+  type HubAssetsRequest,
+  type PaginatedUserHistoryResult,
+  type SupplyAPYHistoryRequest,
+  SupplyApyHistoryQuery,
+  type UserBalance,
+  UserBalancesQuery,
+  type UserBalancesRequest,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
+  UserHistoryQuery,
+  type UserHistoryRequest,
   type UserPosition,
   UserPositionQuery,
   type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
   type UserSummary,
+  type UserSummaryHistoryItem,
+  UserSummaryHistoryQuery,
+  type UserSummaryHistoryRequest,
   UserSummaryQuery,
   type UserSummaryRequest,
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql';
-import type { ResultAsync } from '@aave/types';
+} from '@aave/graphql-next';
+import type { ResultAsync } from '@aave/types-next';
+
 import type { AaveClient } from '../AaveClient';
 
 /**
@@ -120,7 +138,7 @@ export function userPositions(
  *
  * ```ts
  * const result = await userPosition(client, {
- *   id: userPositionId('0x1234…'),
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
  *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
@@ -134,4 +152,146 @@ export function userPosition(
   request: UserPositionRequest,
 ): ResultAsync<UserPosition, UnexpectedError> {
   return client.query(UserPositionQuery, { request });
+}
+
+/**
+ * Fetches all user balances across specified chains.
+ *
+ * ```ts
+ * const result = await userBalances(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user balances request parameters.
+ * @returns The user's balances across all specified chains.
+ **/
+export function userBalances(
+  client: AaveClient,
+  request: UserBalancesRequest,
+): ResultAsync<UserBalance[], UnexpectedError> {
+  return client.query(UserBalancesQuery, { request });
+}
+
+/**
+ * Fetches user transaction history with pagination.
+ *
+ * ```ts
+ * const result = await userHistory(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
+ *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
+ *   pageSize: 'FIFTY',
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user history request parameters.
+ * @returns The paginated user transaction history.
+ */
+export function userHistory(
+  client: AaveClient,
+  request: UserHistoryRequest,
+): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
+  return client.query(UserHistoryQuery, { request });
+}
+
+/**
+ * Fetches user summary history over time.
+ *
+ * ```ts
+ * const result = await userSummaryHistory(client, {
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: TimeWindow.LastWeek,
+ *   filter: {
+ *     chainIds: [chainId(1)]
+ *   }
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user summary history request parameters.
+ * @returns The user summary history items.
+ */
+export function userSummaryHistory(
+  client: AaveClient,
+  request: UserSummaryHistoryRequest,
+): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
+  return client.query(UserSummaryHistoryQuery, { request });
+}
+
+/**
+ * Fetches borrow APY history for a specific reserve over time.
+ *
+ * ```ts
+ * const result = await borrowApyHistory(client, {
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The borrow APY history request parameters.
+ * @returns The borrow APY history samples.
+ */
+export function borrowApyHistory(
+  client: AaveClient,
+  request: BorrowAPYHistoryRequest,
+): ResultAsync<APYSample[], UnexpectedError> {
+  return client.query(BorrowApyHistoryQuery, { request });
+}
+
+/**
+ * Fetches supply APY history for a specific reserve over time.
+ *
+ * ```ts
+ * const result = await supplyApyHistory(client, {
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The supply APY history request parameters.
+ * @returns The supply APY history samples.
+ */
+export function supplyApyHistory(
+  client: AaveClient,
+  request: SupplyAPYHistoryRequest,
+): ResultAsync<APYSample[], UnexpectedError> {
+  return client.query(SupplyApyHistoryQuery, { request });
+}
+
+/**
+ * Fetches hub assets for a specific chain and optional hub/user filtering.
+ *
+ * ```ts
+ * const result = await hubAssets(client, {
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional, defaults to all
+ *   orderBy: HubAssetsRequestOrderBy.Name // optional, defaults to NAME
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub assets request parameters.
+ * @returns The hub assets array.
+ */
+export function hubAssets(
+  client: AaveClient,
+  request: HubAssetsRequest,
+): ResultAsync<HubAsset[], UnexpectedError> {
+  return client.query(HubAssetsQuery, { request });
 }

@@ -1,4 +1,4 @@
-import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types';
+import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types-next';
 import { AaveV3BaseSepolia } from '@bgd-labs/aave-address-book';
 import { createThirdwebClient } from 'thirdweb';
 import { describe, expect, it } from 'vitest';

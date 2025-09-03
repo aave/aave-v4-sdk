@@ -1,13 +1,18 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql, type RequestOf } from '../graphql';
+import { graphql } from '../graphql';
 import {
   BigDecimalWithChangeFragment,
+  DecimalValueFragment,
   Erc20AmountFragment,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
+  PaginatedResultInfoFragment,
   PercentValueFragment,
   PercentValueWithChangeFragment,
+  TokenAmountFragment,
+  TokenInfoFragment,
 } from './common';
+
 import { ReserveFragment, SpokeFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
@@ -28,19 +33,6 @@ export const UserSupplyItemFragment = graphql(
 );
 export type UserSupplyItem = FragmentOf<typeof UserSupplyItemFragment>;
 
-/**
- * @internal
- */
-export const UserSuppliesQuery = graphql(
-  `query UserSupplies($request: UserSuppliesRequest!) {
-    value: userSupplies(request: $request) {
-      ...UserSupplyItem
-    }
-  }`,
-  [UserSupplyItemFragment],
-);
-export type UserSuppliesRequest = RequestOf<typeof UserSuppliesQuery>;
-
 export const UserBorrowItemFragment = graphql(
   `fragment UserBorrowItem on UserBorrowItem {
     __typename
@@ -57,19 +49,6 @@ export const UserBorrowItemFragment = graphql(
   [Erc20AmountFragment, ReserveFragment],
 );
 export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
-
-/**
- * @internal
- */
-export const UserBorrowsQuery = graphql(
-  `query UserBorrows($request: UserBorrowsRequest!) {
-    value: userBorrows(request: $request) {
-      ...UserBorrowItem
-    }
-  }`,
-  [UserBorrowItemFragment],
-);
-export type UserBorrowsRequest = RequestOf<typeof UserBorrowsQuery>;
 
 export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
@@ -100,19 +79,6 @@ export const UserSummaryFragment = graphql(
   [FiatAmountWithChangeFragment, FiatAmountFragment, PercentValueFragment],
 );
 export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
-
-/**
- * @internal
- */
-export const UserSummaryQuery = graphql(
-  `query UserSummary($request: UserSummaryRequest!) {
-    value: userSummary(request: $request) {
-      ...UserSummary
-    }
-  }`,
-  [UserSummaryFragment],
-);
-export type UserSummaryRequest = RequestOf<typeof UserSummaryQuery>;
 
 export const UserPositionFragment = graphql(
   `fragment UserPosition on UserPosition {
@@ -174,28 +140,250 @@ export const UserPositionFragment = graphql(
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
 
-/**
- * @internal
- */
-export const UserPositionsQuery = graphql(
-  `query UserPositions($request: UserPositionsRequest!) {
-    value: userPositions(request: $request) {
-      ...UserPosition
+export const UserBalanceFragment = graphql(
+  `fragment UserBalance on UserBalance {
+    __typename
+    info {
+      ...TokenInfo
+    }
+    totalAmount {
+      ...DecimalValue
+    }
+    balances {
+      ...TokenAmount
+    }
+    fiatAmount(currency: USD) {
+      ...FiatAmount
+    }
+    supplyApy(metric: HIGHEST) {
+      ...PercentValue
+    }
+    borrowApy(metric: HIGHEST) {
+      ...PercentValue
     }
   }`,
-  [UserPositionFragment],
+  [
+    TokenInfoFragment,
+    DecimalValueFragment,
+    TokenAmountFragment,
+    FiatAmountFragment,
+    PercentValueFragment,
+  ],
 );
-export type UserPositionsRequest = RequestOf<typeof UserPositionsQuery>;
+export type UserBalance = FragmentOf<typeof UserBalanceFragment>;
 
-/**
- * @internal
- */
-export const UserPositionQuery = graphql(
-  `query UserPosition($request: UserPositionRequest!) {
-    value: userPosition(request: $request) {
-      ...UserPosition
+// Activity Fragments
+export const BorrowActivityFragment = graphql(
+  `fragment BorrowActivity on BorrowActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...Reserve
+    }
+    amount {
+      ...Erc20Amount
     }
   }`,
-  [UserPositionFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
 );
-export type UserPositionRequest = RequestOf<typeof UserPositionQuery>;
+export type BorrowActivity = FragmentOf<typeof BorrowActivityFragment>;
+
+export const SupplyActivityFragment = graphql(
+  `fragment SupplyActivity on SupplyActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...Reserve
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+);
+export type SupplyActivity = FragmentOf<typeof SupplyActivityFragment>;
+
+export const WithdrawActivityFragment = graphql(
+  `fragment WithdrawActivity on WithdrawActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...Reserve
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+);
+export type WithdrawActivity = FragmentOf<typeof WithdrawActivityFragment>;
+
+export const RepayActivityFragment = graphql(
+  `fragment RepayActivity on RepayActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...Reserve
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+);
+export type RepayActivity = FragmentOf<typeof RepayActivityFragment>;
+
+export const LiquidatedActivityFragment = graphql(
+  `fragment LiquidatedActivity on LiquidatedActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    collateralReserve {
+      ...Reserve
+    }
+    debtReserve {
+      ...Reserve
+    }
+    collateralAmount {
+      ...Erc20Amount
+    }
+    debtAmount {
+      ...Erc20Amount
+    }
+    liquidator
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+);
+export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
+
+export const SwapActivityFragment = graphql(
+  `fragment SwapActivity on SwapActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    sellAmount {
+      ...TokenAmount
+    }
+    buyAmount {
+      ...TokenAmount
+    }
+    executedSellAmount {
+      ...TokenAmount
+    }
+    executedBuyAmount {
+      ...TokenAmount
+    }
+    createdAt
+    fulfilledAt
+    explorerLink
+  }`,
+  [TokenAmountFragment],
+);
+export type SwapActivity = FragmentOf<typeof SwapActivityFragment>;
+
+export const UserHistoryItemFragment = graphql(
+  `fragment UserHistoryItem on UserHistoryItem {
+    __typename
+    ... on BorrowActivity {
+      ...BorrowActivity
+    }
+    ... on SupplyActivity {
+      ...SupplyActivity
+    }
+    ... on WithdrawActivity {
+      ...WithdrawActivity
+    }
+    ... on RepayActivity {
+      ...RepayActivity
+    }
+    ... on LiquidatedActivity {
+      ...LiquidatedActivity
+    }
+    ... on SwapActivity {
+      ...SwapActivity
+    }
+  }`,
+  [
+    BorrowActivityFragment,
+    SupplyActivityFragment,
+    WithdrawActivityFragment,
+    RepayActivityFragment,
+    LiquidatedActivityFragment,
+    SwapActivityFragment,
+  ],
+);
+export type UserHistoryItem = FragmentOf<typeof UserHistoryItemFragment>;
+
+export const PaginatedUserHistoryResultFragment = graphql(
+  `fragment PaginatedUserHistoryResult on PaginatedUserHistoryResult {
+    __typename
+    items {
+      ...UserHistoryItem
+    }
+    pageInfo {
+      ...PaginatedResultInfo
+    }
+  }`,
+  [UserHistoryItemFragment, PaginatedResultInfoFragment],
+);
+export type PaginatedUserHistoryResult = FragmentOf<
+  typeof PaginatedUserHistoryResultFragment
+>;
+
+export const UserSummaryHistoryItemFragment = graphql(
+  `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
+    __typename
+    netBalance {
+      ...FiatAmount
+    }
+    borrows {
+      ...FiatAmount
+    }
+    supplies {
+      ...FiatAmount
+    }
+    healthFactor
+    date
+  }`,
+  [FiatAmountFragment],
+);
+export type UserSummaryHistoryItem = FragmentOf<
+  typeof UserSummaryHistoryItemFragment
+>;
+
+export const APYSampleFragment = graphql(
+  `fragment APYSample on APYSample {
+    __typename
+    date
+    avgRate {
+      ...PercentValue
+    }
+  }`,
+  [PercentValueFragment],
+);
+export type APYSample = FragmentOf<typeof APYSampleFragment>;
