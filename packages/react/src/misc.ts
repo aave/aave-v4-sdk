@@ -11,7 +11,7 @@ export type UseAaveChainsArgs = {
   filter?: ChainsFilter;
 };
 /**
- * Fetch supported blockchain chains.
+ * Fetches the list of supported chains.
  *
  * This signature supports React Suspense:
  *
@@ -27,7 +27,7 @@ export function useAaveChains(
 ): SuspenseResult<Chain[]>;
 
 /**
- * Fetch supported blockchain chains.
+ * Fetches the list of supported chains.
  *
  * ```tsx
  * const { data, error, loading } = useAaveChains({

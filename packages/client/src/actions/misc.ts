@@ -10,7 +10,7 @@ import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 
 /**
- * Fetch supported blockchain chains.
+ * Fetches the list of supported chains.
  *
  * @param client - Aave client.
  * @param filter - The chains filter options.
