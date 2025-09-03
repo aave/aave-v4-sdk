@@ -6,11 +6,13 @@ import {
   Erc20AmountFragment,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
+  PaginatedResultInfoFragment,
   PercentValueFragment,
   PercentValueWithChangeFragment,
   TokenAmountFragment,
   TokenInfoFragment,
 } from './common';
+
 import { ReserveFragment, SpokeFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
@@ -169,3 +171,477 @@ export const UserBalanceFragment = graphql(
   ],
 );
 export type UserBalance = FragmentOf<typeof UserBalanceFragment>;
+
+// Activity Fragments
+export const BorrowActivityFragment = graphql(
+  `fragment BorrowActivity on BorrowActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      id
+      spoke {
+        ...Spoke
+      }
+      asset {
+        assetId
+        underlying {
+          info {
+            name
+            symbol
+            icon
+            decimals
+          }
+          contract
+          chain {
+            name
+            icon
+            chainId
+            explorerUrl
+            isTestnet
+            nativeWrappedToken
+            nativeInfo {
+              name
+              symbol
+              icon
+              decimals
+            }
+          }
+        }
+      }
+      chain {
+        name
+        icon
+        chainId
+        explorerUrl
+        isTestnet
+        nativeWrappedToken
+        nativeInfo {
+          name
+          symbol
+          icon
+          decimals
+        }
+      }
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment],
+);
+export type BorrowActivity = FragmentOf<typeof BorrowActivityFragment>;
+
+export const SupplyActivityFragment = graphql(
+  `fragment SupplyActivity on SupplyActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      id
+      spoke {
+        ...Spoke
+      }
+      asset {
+        assetId
+        underlying {
+          info {
+            name
+            symbol
+            icon
+            decimals
+          }
+          contract
+          chain {
+            name
+            icon
+            chainId
+            explorerUrl
+            isTestnet
+            nativeWrappedToken
+            nativeInfo {
+              name
+              symbol
+              icon
+              decimals
+            }
+          }
+        }
+      }
+      chain {
+        name
+        icon
+        chainId
+        explorerUrl
+        isTestnet
+        nativeWrappedToken
+        nativeInfo {
+          name
+          symbol
+          icon
+          decimals
+        }
+      }
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment],
+);
+export type SupplyActivity = FragmentOf<typeof SupplyActivityFragment>;
+
+export const WithdrawActivityFragment = graphql(
+  `fragment WithdrawActivity on WithdrawActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      id
+      spoke {
+        ...Spoke
+      }
+      asset {
+        assetId
+        underlying {
+          info {
+            name
+            symbol
+            icon
+            decimals
+          }
+          contract
+          chain {
+            name
+            icon
+            chainId
+            explorerUrl
+            isTestnet
+            nativeWrappedToken
+            nativeInfo {
+              name
+              symbol
+              icon
+              decimals
+            }
+          }
+        }
+      }
+      chain {
+        name
+        icon
+        chainId
+        explorerUrl
+        isTestnet
+        nativeWrappedToken
+        nativeInfo {
+          name
+          symbol
+          icon
+          decimals
+        }
+      }
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment],
+);
+export type WithdrawActivity = FragmentOf<typeof WithdrawActivityFragment>;
+
+export const RepayActivityFragment = graphql(
+  `fragment RepayActivity on RepayActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      id
+      spoke {
+        ...Spoke
+      }
+      asset {
+        assetId
+        underlying {
+          info {
+            name
+            symbol
+            icon
+            decimals
+          }
+          contract
+          chain {
+            name
+            icon
+            chainId
+            explorerUrl
+            isTestnet
+            nativeWrappedToken
+            nativeInfo {
+              name
+              symbol
+              icon
+              decimals
+            }
+          }
+        }
+      }
+      chain {
+        name
+        icon
+        chainId
+        explorerUrl
+        isTestnet
+        nativeWrappedToken
+        nativeInfo {
+          name
+          symbol
+          icon
+          decimals
+        }
+      }
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment],
+);
+export type RepayActivity = FragmentOf<typeof RepayActivityFragment>;
+
+export const LiquidatedActivityFragment = graphql(
+  `fragment LiquidatedActivity on LiquidatedActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    collateralReserve {
+      id
+      spoke {
+        ...Spoke
+      }
+      asset {
+        assetId
+        underlying {
+          info {
+            name
+            symbol
+            icon
+            decimals
+          }
+          contract
+          chain {
+            name
+            icon
+            chainId
+            explorerUrl
+            isTestnet
+            nativeWrappedToken
+            nativeInfo {
+              name
+              symbol
+              icon
+              decimals
+            }
+          }
+        }
+      }
+      chain {
+        name
+        icon
+        chainId
+        explorerUrl
+        isTestnet
+        nativeWrappedToken
+        nativeInfo {
+          name
+          symbol
+          icon
+          decimals
+        }
+      }
+    }
+    debtReserve {
+      id
+      spoke {
+        ...Spoke
+      }
+      asset {
+        assetId
+        underlying {
+          info {
+            name
+            symbol
+            icon
+            decimals
+          }
+          contract
+          chain {
+            name
+            icon
+            chainId
+            explorerUrl
+            isTestnet
+            nativeWrappedToken
+            nativeInfo {
+              name
+              symbol
+              icon
+              decimals
+            }
+          }
+        }
+      }
+      chain {
+        name
+        icon
+        chainId
+        explorerUrl
+        isTestnet
+        nativeWrappedToken
+        nativeInfo {
+          name
+          symbol
+          icon
+          decimals
+        }
+      }
+    }
+    collateralAmount {
+      ...Erc20Amount
+    }
+    debtAmount {
+      ...Erc20Amount
+    }
+    liquidator
+  }`,
+  [SpokeFragment, Erc20AmountFragment],
+);
+export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
+
+export const SwapActivityFragment = graphql(
+  `fragment SwapActivity on SwapActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    sellAmount {
+      ...TokenAmount
+    }
+    buyAmount {
+      ...TokenAmount
+    }
+    executedSellAmount {
+      ...TokenAmount
+    }
+    executedBuyAmount {
+      ...TokenAmount
+    }
+    createdAt
+    fulfilledAt
+    explorerLink
+  }`,
+  [TokenAmountFragment],
+);
+export type SwapActivity = FragmentOf<typeof SwapActivityFragment>;
+
+export const UserHistoryItemFragment = graphql(
+  `fragment UserHistoryItem on UserHistoryItem {
+    __typename
+    ... on BorrowActivity {
+      ...BorrowActivity
+    }
+    ... on SupplyActivity {
+      ...SupplyActivity
+    }
+    ... on WithdrawActivity {
+      ...WithdrawActivity
+    }
+    ... on RepayActivity {
+      ...RepayActivity
+    }
+    ... on LiquidatedActivity {
+      ...LiquidatedActivity
+    }
+    ... on SwapActivity {
+      ...SwapActivity
+    }
+  }`,
+  [
+    BorrowActivityFragment,
+    SupplyActivityFragment,
+    WithdrawActivityFragment,
+    RepayActivityFragment,
+    LiquidatedActivityFragment,
+    SwapActivityFragment,
+  ],
+);
+export type UserHistoryItem = FragmentOf<typeof UserHistoryItemFragment>;
+
+export const PaginatedUserHistoryResultFragment = graphql(
+  `fragment PaginatedUserHistoryResult on PaginatedUserHistoryResult {
+    __typename
+    items {
+      ...UserHistoryItem
+    }
+    pageInfo {
+      ...PaginatedResultInfo
+    }
+  }`,
+  [UserHistoryItemFragment, PaginatedResultInfoFragment],
+);
+export type PaginatedUserHistoryResult = FragmentOf<
+  typeof PaginatedUserHistoryResultFragment
+>;
+
+export const UserSummaryHistoryItemFragment = graphql(
+  `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
+    __typename
+    netBalance {
+      ...FiatAmount
+    }
+    borrows {
+      ...FiatAmount
+    }
+    supplies {
+      ...FiatAmount
+    }
+    healthFactor
+    date
+  }`,
+  [FiatAmountFragment],
+);
+export type UserSummaryHistoryItem = FragmentOf<
+  typeof UserSummaryHistoryItemFragment
+>;
+
+export const APYSampleFragment = graphql(
+  `fragment APYSample on APYSample {
+    __typename
+    date
+    avgRate {
+      ...PercentValue
+    }
+  }`,
+  [PercentValueFragment],
+);
+export type APYSample = FragmentOf<typeof APYSampleFragment>;
