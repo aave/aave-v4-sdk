@@ -87,3 +87,11 @@ export enum HubAssetsRequestOrderBy {
   Balance = 'BALANCE',
   Name = 'NAME',
 }
+
+/**
+ * The filter options for best borrow reserve request.
+ */
+export enum BestBorrowReserveFilter {
+  LowestRate = 'LOWEST_RATE',
+  LowestAverageRate = 'LOWEST_AVERAGE_RATE',
+}

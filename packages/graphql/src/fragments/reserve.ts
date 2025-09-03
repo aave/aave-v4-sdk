@@ -1,5 +1,6 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql } from '../graphql';
+import { graphql, type RequestOf } from '../graphql';
+
 import { ChainFragment } from './chain';
 import {
   Erc20AmountFragment,
@@ -254,3 +255,13 @@ export const ReserveFragment = graphql(
   ],
 );
 export type Reserve = FragmentOf<typeof ReserveFragment>;
+
+export const BestBorrowReserveQuery = graphql(
+  `query BestBorrowReserve($request: BestBorrowReserveRequest!) {
+    value: bestBorrowReserve(request: $request) {
+      ...Reserve
+    }
+  }`,
+  [ReserveFragment],
+);
+export type BestBorrowReserveRequest = RequestOf<typeof BestBorrowReserveQuery>;
