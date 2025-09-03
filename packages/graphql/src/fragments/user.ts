@@ -12,12 +12,8 @@ import {
   TokenAmountFragment,
   TokenInfoFragment,
 } from './common';
-import {
-  HubAssetFragment,
-  ReserveFragment,
-  ReserveInfoFragment,
-  SpokeFragment,
-} from './reserve';
+import { HubAssetFragment } from './hubs';
+import { ReserveFragment, ReserveInfoFragment, SpokeFragment } from './reserve';
 import { TransactionRequestFragment } from './transactions';
 
 export const UserSupplyItemFragment = graphql(

@@ -1,5 +1,6 @@
 export * from './chain';
 export * from './common';
+export * from './hubs';
 export * from './reserve';
 export * from './transactions';
 export * from './user';
