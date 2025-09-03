@@ -1,4 +1,4 @@
-import { errAsync, okAsync } from '@aave/types';
+import { errAsync, okAsync } from '@aave/types-next';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {

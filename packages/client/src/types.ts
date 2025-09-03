@@ -2,7 +2,7 @@ import type {
   SigningError,
   TransactionError,
   ValidationError,
-} from '@aave/core';
+} from '@aave/core-next';
 import type {
   ERC712Signature,
   ExecutionPlan,
@@ -10,8 +10,8 @@ import type {
   InsufficientBalanceError,
   OperationType,
   PermitTypedDataResponse,
-} from '@aave/graphql';
-import type { ResultAsync, TxHash } from '@aave/types';
+} from '@aave/graphql-next';
+import type { ResultAsync, TxHash } from '@aave/types-next';
 
 export type TransactionExecutionResult = {
   txHash: TxHash;

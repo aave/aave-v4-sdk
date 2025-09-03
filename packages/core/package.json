@@ -1,5 +1,5 @@
 {
-  "name": "@aave/core",
+  "name": "@aave/core-next",
   "version": "0.0.0",
   "description": "The shared core across Aave SDKs.",
   "repository": {
@@ -28,7 +28,7 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/types": "workspace:*",
+    "@aave/types-next": "workspace:*",
     "@urql/core": "^5.2.0",
     "graphql": "^16.11.0"
   },
@@ -36,5 +36,8 @@
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "restricted"
+  }
 }

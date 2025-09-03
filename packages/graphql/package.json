@@ -1,5 +1,5 @@
 {
-  "name": "@aave/graphql",
+  "name": "@aave/graphql-next",
   "version": "0.6.1",
   "description": "GraphQL bindings for the Aave API",
   "repository": {
@@ -50,7 +50,7 @@
     "prebuild": "pnpm run gql:turbo"
   },
   "dependencies": {
-    "@aave/types": "workspace:*",
+    "@aave/types-next": "workspace:*",
     "gql.tada": "^1.8.13",
     "graphql": "^16.11.0",
     "type-fest": "^4.41.0"
@@ -59,5 +59,8 @@
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "restricted"
+  }
 }

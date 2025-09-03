@@ -15,7 +15,7 @@ import type {
   TypedSelectionSet,
   UserPositionId,
   Void,
-} from '@aave/types';
+} from '@aave/types-next';
 import {
   type DocumentDecoration,
   initGraphQLTada,

@@ -1,5 +1,5 @@
 {
-  "name": "@aave/react",
+  "name": "@aave/react-next",
   "version": "0.6.1",
   "description": "The official React bindings for the Aave Protocol",
   "repository": {
@@ -57,9 +57,10 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/client": "workspace:*",
-    "@aave/graphql": "workspace:*",
-    "@aave/types": "workspace:*",
+    "@aave/client-next": "workspace:*",
+    "@aave/core-next": "workspace:*",
+    "@aave/graphql-next": "workspace:*",
+    "@aave/types-next": "workspace:*",
     "urql": "^4.2.2"
   },
   "devDependencies": {
@@ -99,5 +100,8 @@
       "optional": true
     }
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "restricted"
+  }
 }

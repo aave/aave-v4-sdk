@@ -1,4 +1,4 @@
-import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types';
+import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types-next';
 import { PrivyClient } from '@privy-io/server-auth';
 import { describe, expect, it } from 'vitest';
 import { permitTypedData } from './actions';
@@ -30,7 +30,7 @@ describe('Given a PrivyClient instance', () => {
         currency: ETHEREUM_USDC_ADDRESS,
         amount: bigDecimal('1'),
         chainId: chainId(1),
-        spender: evmAddress('0x0000000000000000000000000000000000000000'),,
+        spender: evmAddress('0x0000000000000000000000000000000000000000'),
         owner: evmAddress('0x0000000000000000000000000000000000000000'),
       }).andThen(
         signERC20PermitWith(privy, import.meta.env.PRIVY_TEST_WALLET_ID),

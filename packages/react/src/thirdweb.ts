@@ -3,13 +3,13 @@ import {
   type TimeoutError,
   TransactionError,
   UnexpectedError,
-} from '@aave/client';
-import { permitTypedData } from '@aave/client/actions';
+} from '@aave/client-next';
+import { permitTypedData } from '@aave/client-next/actions';
 import type {
   ERC712Signature,
   PermitTypedDataRequest,
   TransactionRequest,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import {
   invariant,
   okAsync,
@@ -17,7 +17,7 @@ import {
   signatureFrom,
   type TxHash,
   txHash,
-} from '@aave/types';
+} from '@aave/types-next';
 import { defineChain, type ThirdwebClient } from 'thirdweb';
 import {
   useActiveAccount,

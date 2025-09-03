@@ -1,10 +1,10 @@
-import type { UnexpectedError } from '@aave/core';
+import type { UnexpectedError } from '@aave/core-next';
 import {
   PermitTypedDataQuery,
   type PermitTypedDataRequest,
   type PermitTypedDataResponse,
-} from '@aave/graphql';
-import type { ResultAsync } from '@aave/types';
+} from '@aave/graphql-next';
+import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 
 /**
@@ -12,12 +12,11 @@ import type { AaveClient } from '../AaveClient';
  *
  * ```ts
  * const result = await permitTypedData(client, {
- *   market: evmAddress('0x87870bca...'),
- *   underlyingToken: evmAddress('0xa0b86a33...'),
- *   amount: '1.5',
+ *   spender: evmAddress('0x87870bca…'),
+ *   currency: evmAddress('0xa0b86a33…'),
+ *   amount: bigDecimal('1.5'),
  *   chainId: chainId(1),
- *   spender: evmAddress('0x123...'),
- *   owner: evmAddress('0x456...'),
+ *   owner: evmAddress('0x4567…'),
  * });
  *
  * if (result.isOk()) {

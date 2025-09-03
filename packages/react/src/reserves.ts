@@ -6,7 +6,7 @@ import {
   type Reserve,
   ReservesQuery,
   type ReservesRequest,
-} from '@aave/graphql';
+} from '@aave/graphql-next';
 import {
   type ReadResult,
   type Suspendable,

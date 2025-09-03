@@ -1,4 +1,4 @@
-import { invariant } from '@aave/types';
+import { invariant } from '@aave/types-next';
 import type { AnyVariables, OperationResult } from '@urql/core';
 import type { StandardData } from './types';
 

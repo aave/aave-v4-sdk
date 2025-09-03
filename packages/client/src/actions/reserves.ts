@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core';
+import type { UnexpectedError } from '@aave/core-next';
 import {
   BestBorrowReserveQuery,
   type BestBorrowReserveRequest,
@@ -7,8 +7,8 @@ import {
   type Reserve,
   ReservesQuery,
   type ReservesRequest,
-} from '@aave/graphql';
-import type { ResultAsync } from '@aave/types';
+} from '@aave/graphql-next';
+import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 
 /**
