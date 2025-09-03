@@ -70,6 +70,7 @@ type BigDecimalVariation {
 
 type BigDecimalWithChange {
   value: BigDecimal!
+  change(window: TimeWindow! = LAST_DAY): PercentValue!
 }
 
 scalar BigInt
@@ -184,11 +185,13 @@ input ERC712Signature {
 }
 
 type Erc20Amount {
-  token: Erc20Token!
-  value: DecimalValue!
+  """The chain id"""
+  chainId: ChainId!
   fiatAmount(currency: Currency! = USD): FiatAmount!
   fiatRate(currency: Currency! = USD): DecimalValue!
   isWrappedNative: Boolean!
+  value: DecimalValue!
+  token: Erc20Token!
 }
 
 input Erc20Input {
@@ -197,9 +200,9 @@ input Erc20Input {
 }
 
 type Erc20Token {
-  info: TokenInfo!
   contract: EvmAddress!
   chain: Chain!
+  info: TokenInfo!
 }
 
 scalar EvmAddress
@@ -207,7 +210,7 @@ scalar EvmAddress
 union ExecutionPlan = TransactionRequest | ApprovalRequired | InsufficientBalanceError
 
 type FiatAmount {
-  value: DecimalValue!
+  value: BigDecimal!
   name: String!
   symbol: String!
 }
@@ -218,7 +221,8 @@ type FiatAmountValueVariation {
 }
 
 type FiatAmountWithChange {
-  value: FiatAmount!
+  amount: FiatAmount!
+  change(window: TimeWindow! = LAST_DAY): PercentValue!
 }
 
 input ForkTopUpErc20 {
@@ -253,7 +257,7 @@ type ForkTopUpResponse {
 
 input HasProcessedKnownTransactionRequest {
   """
-  The operation type this is given to you on the TransactionRequest::operation
+  The operation types this is given to you on the TransactionRequest::operations
   """
   operations: [OperationType!]!
 
@@ -406,15 +410,14 @@ type NativeToken {
 }
 
 enum OperationType {
-  BORROW
-  REPAY
-  SUPPLY
-  WITHDRAW
-  RESERVE_USED_AS_COLLATERAL_ENABLED
-  SET_USER_USING_AS_COLLATERAL
-  SET_USER_POSITION_MANAGER
+  SPOKE_BORROW
+  SPOKE_REPAY
+  SPOKE_SUPPLY
+  SPOKE_WITHDRAW
+  SPOKE_UPDATE_USER_RISK_PREMIUM
+  SPOKE_SET_USER_USING_AS_COLLATERAL
+  SPOKE_SET_USER_POSITION_MANAGER
   RENOUNCE_SPOKE_USER_POSITION_MANAGER
-  LIQUIDATION
 }
 
 enum OrderDirection {
@@ -477,7 +480,8 @@ type PercentValueVariation {
 }
 
 type PercentValueWithChange {
-  value: PercentValue!
+  amount: PercentValue!
+  change(window: TimeWindow! = LAST_DAY): PercentValue!
 }
 
 type PermitMessageData {
@@ -606,7 +610,7 @@ type Query {
   userSummary(request: UserSummaryRequest!): UserSummary!
   userSummaryHistory(request: UserSummaryHistoryRequest!): [UserSummaryHistoryItem!]!
   userPositions(request: UserPositionsRequest!): [UserPosition!]!
-  userPosition(request: UserPositionRequest!): UserPosition!
+  userPosition(request: UserPositionRequest!): UserPosition
   userSupplies(request: UserSuppliesRequest!): [UserSupplyItem!]!
 
   """
@@ -1086,9 +1090,16 @@ union Token = NativeToken | Erc20Token
 union TokenAmount = NativeAmount | Erc20Amount
 
 type TokenInfo {
+  """The token name"""
   name: String!
+
+  """The token symbol"""
   symbol: String!
+
+  """The token icon"""
   icon: String!
+
+  """The token decimals"""
   decimals: Int!
 }
 
@@ -1162,9 +1173,14 @@ input UserBalancesRequestOrderBy @oneOf {
 }
 
 type UserBorrowItem {
+  """The amount borrowed"""
   amount: Erc20Amount!
-  paid: Erc20Amount!
+
+  """The reserve borrowed from"""
   reserve: Reserve!
+
+  """The amount paid back of the borrow so far"""
+  paid: Erc20Amount!
 }
 
 input UserBorrowsQueryRequest @oneOf {
@@ -1193,7 +1209,6 @@ union UserHistoryItem = BorrowActivity | SupplyActivity | WithdrawActivity | Rep
 
 input UserHistoryRequest {
   user: EvmAddress!
-  chainId: ChainId!
   activityTypes: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY]
   filter: UserHistoryFilter
   pageSize: PageSize! = FIFTY
@@ -1201,34 +1216,51 @@ input UserHistoryRequest {
 }
 
 type UserPosition {
-  id: UserPositionId!
-  spoke: Spoke!
+  """The user holding this position"""
   user: EvmAddress!
+
+  """The supplies within a position"""
+  supplies: [UserSupplyItem!]!
+
+  """The borrows within a position"""
+  borrows: [UserBorrowItem!]!
+
+  """The user position ID"""
+  id: UserPositionId!
+  totalSupplied(currency: Currency! = USD): FiatAmountWithChange!
+
+  """
+  Total collateral which is the full some of the assets supplied which are enabled as collateral
+  """
+  totalCollateral(currency: Currency! = USD): FiatAmountWithChange!
+
+  """Total debt which is the total amount borrowed"""
+  totalDebt(currency: Currency! = USD): FiatAmountWithChange!
+
+  """The net balance which is `total_supplied` - `borrows`"""
+  netBalance(currency: Currency! = USD): FiatAmountWithChange!
+
+  """The net collateral which is `totalCollateral` - `totalDebt`"""
+  netCollateral(currency: Currency! = USD): FiatAmountWithChange!
   netApy: PercentValue!
-  netCollateral: FiatAmountWithChange!
-  netBalance: FiatAmountWithChange!
-  totalCollateral: FiatAmountWithChange!
-  totalSupplied: FiatAmountWithChange!
-  totalDebt: FiatAmountWithChange!
   netSupplyApy: PercentValueWithChange!
   netBorrowApy: PercentValueWithChange!
   healthFactor: BigDecimalWithChange
   riskPremium: PercentValue!
   betterRiskPremium: PercentValue
-  supplies: [UserSupplyItem!]!
-  borrows: [UserBorrowItem!]!
+  netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentValue!
+  spoke: Spoke!
 }
 
 scalar UserPositionId
 
 input UserPositionRequest {
   id: UserPositionId!
-  user: EvmAddress!
 }
 
 input UserPositionsRequest {
   user: EvmAddress!
-  orderBy: UserPositionsRequestOrderBy!
+  orderBy: UserPositionsRequestOrderBy! = {created: ASC}
   chainIds: [ChainId!]!
 }
 
@@ -1298,10 +1330,17 @@ input UserSuppliesRequestOrderBy @oneOf {
 }
 
 type UserSupplyItem {
+  """The amount supplied"""
   amount: Erc20Amount!
-  earned: Erc20Amount!
-  isCollateral: Boolean!
+
+  """The reserve supplied to"""
   reserve: Reserve!
+
+  """The amount earned since supplying"""
+  earned: Erc20Amount!
+
+  """If this supply is used as collateral"""
+  isCollateral: Boolean!
 }
 
 type WithdrawActivity {

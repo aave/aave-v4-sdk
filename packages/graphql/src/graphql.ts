@@ -22,15 +22,20 @@ import {
   type TadaDocumentNode,
 } from 'gql.tada';
 import type {
+  ActivityType,
+  ApyMetric,
+  BestBorrowReserveFilter,
+  BestSupplyReserveFilter,
   ChainsFilter,
+  Currency,
   HubAssetStatusType,
   HubAssetsRequestOrderBy,
   OperationType,
   OrderDirection,
   PageSize,
+  ReservesFilterRequest,
+  SwapKind,
   TimeWindow,
-  VaultUserActivityTimeWindow,
-  VaultUserHistoryAction,
 } from './enums';
 import type { introspection } from './graphql-env';
 
@@ -40,14 +45,19 @@ export const graphql = initGraphQLTada<{
   disableMasking: true;
   introspection: introspection;
   scalars: {
+    ActivityType: ActivityType;
     AlwaysTrue: true;
+    ApyMetric: ApyMetric;
     AssetId: ID;
+    BestBorrowReserveFilter: BestBorrowReserveFilter;
+    BestSupplyReserveFilter: BestSupplyReserveFilter;
     BigDecimal: BigDecimal;
     BigInt: BigIntString;
     BlockchainData: BlockchainData;
     Boolean: boolean;
     ChainsFilter: ChainsFilter;
     ChainId: ChainId;
+    Currency: Currency;
     Cursor: Cursor;
     DateTime: DateTime;
     EvmAddress: EvmAddress;
@@ -60,16 +70,16 @@ export const graphql = initGraphQLTada<{
     OrderDirection: OrderDirection;
     PageSize: PageSize;
     ReserveId: ReserveId;
+    ReservesFilterRequest: ReservesFilterRequest;
     Signature: Signature;
     String: string;
     SwapId: ID;
+    SwapKind: SwapKind;
     SwapRequestId: ID;
+    TimeWindow: TimeWindow;
     TxHash: TxHash;
     UserPositionId: UserPositionId;
     Void: Void;
-    TimeWindow: TimeWindow;
-    VaultUserHistoryAction: VaultUserHistoryAction;
-    VaultUserActivityTimeWindow: VaultUserActivityTimeWindow;
   };
 }>();
 
