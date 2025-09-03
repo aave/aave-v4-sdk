@@ -5,6 +5,8 @@ import {
   BestSupplyReserveQuery,
   type BestSupplyReserveRequest,
   type Reserve,
+  ReservesQuery,
+  type ReservesRequest,
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
@@ -53,4 +55,31 @@ export function bestSupplyReserve(
   request: BestSupplyReserveRequest,
 ): ResultAsync<Reserve, UnexpectedError> {
   return client.query(BestSupplyReserveQuery, { request });
+}
+
+/**
+ * Fetches reserves based on specified criteria.
+ *
+ * ```ts
+ * const result = await reserves(client, {
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   filter: ReservesFilterRequest.All,
+ *   orderBy: { name: 'ASC' }
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The reserves request parameters.
+ * @returns Array of reserves matching the criteria.
+ */
+export function reserves(
+  client: AaveClient,
+  request: ReservesRequest,
+): ResultAsync<Reserve[], UnexpectedError> {
+  return client.query(ReservesQuery, { request });
 }

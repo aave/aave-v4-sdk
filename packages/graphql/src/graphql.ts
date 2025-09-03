@@ -30,6 +30,7 @@ import type {
   OperationType,
   OrderDirection,
   PageSize,
+  ReservesFilterRequest,
   TimeWindow,
   VaultUserActivityTimeWindow,
   VaultUserHistoryAction,
@@ -64,6 +65,7 @@ export const graphql = initGraphQLTada<{
     OrderDirection: OrderDirection;
     PageSize: PageSize;
     ReserveId: ReserveId;
+    ReservesFilterRequest: ReservesFilterRequest;
     Signature: Signature;
     String: string;
     SwapId: ID;

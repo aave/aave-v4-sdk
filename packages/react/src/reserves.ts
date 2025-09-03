@@ -4,6 +4,8 @@ import {
   BestSupplyReserveQuery,
   type BestSupplyReserveRequest,
   type Reserve,
+  ReservesQuery,
+  type ReservesRequest,
 } from '@aave/graphql';
 import {
   type ReadResult,
@@ -110,6 +112,64 @@ export function useBestSupplyReserve({
 }): SuspendableResult<Reserve> {
   return useSuspendableQuery({
     document: BestSupplyReserveQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseReservesArgs = ReservesRequest;
+
+/**
+ * Fetch reserves based on specified criteria.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   filter: ReservesFilterRequest.All,
+ *   orderBy: { name: 'ASC' },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useReserves(
+  args: UseReservesArgs & Suspendable,
+): SuspenseResult<Reserve[]>;
+
+/**
+ * Fetch reserves based on specified criteria.
+ *
+ * ```tsx
+ * const { data, error, loading } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   filter: ReservesFilterRequest.All,
+ *   orderBy: { name: 'ASC' },
+ * });
+ * ```
+ */
+export function useReserves(args: UseReservesArgs): ReadResult<Reserve[]>;
+
+export function useReserves({
+  suspense = false,
+  ...request
+}: UseReservesArgs & {
+  suspense?: boolean;
+}): SuspendableResult<Reserve[]> {
+  return useSuspendableQuery({
+    document: ReservesQuery,
     variables: {
       request,
     },

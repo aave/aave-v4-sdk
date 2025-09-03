@@ -103,3 +103,12 @@ export enum BestSupplyReserveFilter {
   HighestYield = 'HIGHEST_YIELD',
   HighestAverageYield = 'HIGHEST_AVERAGE_YIELD',
 }
+
+/**
+ * The filter options for reserves request.
+ */
+export enum ReservesFilterRequest {
+  Supply = 'SUPPLY',
+  Borrow = 'BORROW',
+  All = 'ALL',
+}
