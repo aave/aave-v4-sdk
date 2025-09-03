@@ -263,7 +263,7 @@ export type UseUserPositionArgs = UserPositionRequest;
  *
  * ```tsx
  * const { data } = useUserPosition({
- *   id: userPositionId('0x1234…'),
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
  *   user: evmAddress('0x742d35cc…'),
  *   suspense: true,
  * });
@@ -278,7 +278,7 @@ export function useUserPosition(
  *
  * ```tsx
  * const { data, error, loading } = useUserPosition({
- *   id: userPositionId('0x1234…'),
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
  *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
@@ -417,7 +417,7 @@ export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: '0x456...',
+ *   reserve: reserveId(1),
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  * });
@@ -436,7 +436,7 @@ export function useBorrowApyHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: '0x456...',
+ *   reserve: reserveId(1),
  *   window: TimeWindow.LastWeek,
  * });
  * ```
@@ -473,7 +473,7 @@ export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: '0x456...',
+ *   reserve: reserveId(1),
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  * });
@@ -492,7 +492,7 @@ export function useSupplyApyHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: '0x456...',
+ *   reserve: reserveId(1),
  *   window: TimeWindow.LastWeek,
  * });
  * ```
