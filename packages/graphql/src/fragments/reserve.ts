@@ -171,7 +171,6 @@ export const ReservesQuery = graphql(
   [ReserveFragment],
 );
 export type ReservesRequest = RequestOf<typeof ReservesQuery>;
-
 export const ReserveInfoFragment = graphql(
   `fragment ReserveInfo on ReserveInfo {
     __typename

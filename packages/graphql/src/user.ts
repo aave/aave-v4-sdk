@@ -114,5 +114,3 @@ export const UserHistoryQuery = graphql(
   [PaginatedUserHistoryResultFragment],
 );
 export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
-
-
