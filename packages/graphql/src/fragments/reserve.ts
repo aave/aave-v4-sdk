@@ -254,3 +254,21 @@ export const ReserveFragment = graphql(
   ],
 );
 export type Reserve = FragmentOf<typeof ReserveFragment>;
+
+export const ReserveInfoFragment = graphql(
+  `fragment ReserveInfo on ReserveInfo {
+    __typename
+    id
+    spoke {
+      ...Spoke
+    }
+    asset {
+      ...HubAsset
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [SpokeFragment, HubAssetFragment, ChainFragment],
+);
+export type ReserveInfo = FragmentOf<typeof ReserveInfoFragment>;
