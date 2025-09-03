@@ -17,7 +17,7 @@ export type UseAaveChainsArgs = {
  *
  * ```tsx
  * const { data } = useAaveChains({
- *   filter: 'ALL',
+ *   filter: ChainsFilter.ALL,
  *   suspense: true,
  * });
  * ```
@@ -31,7 +31,7 @@ export function useAaveChains(
  *
  * ```tsx
  * const { data, error, loading } = useAaveChains({
- *   filter: 'MAINNET_ONLY',
+ *   filter: ChainsFilter.ALL,
  * });
  * ```
  */

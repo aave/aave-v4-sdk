@@ -12,8 +12,12 @@ import type { AaveClient } from '../AaveClient';
 /**
  * Fetches the list of supported chains.
  *
+ * ```ts
+ * const chains = await chains(client, { filter: ChainsFilter.ALL });
+ * ```
+ *
  * @param client - Aave client.
- * @param filter - The chains filter options.
+ * @param filter - The filter for chains.
  * @returns Array of supported chains.
  */
 export function chains(
