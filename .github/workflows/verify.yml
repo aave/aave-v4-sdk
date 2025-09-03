@@ -64,6 +64,3 @@ jobs:
         if: ${{ inputs.run-acceptance }}
         shell: bash
         run: pnpm spec
-
-      
-
