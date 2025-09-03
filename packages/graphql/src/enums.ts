@@ -95,3 +95,11 @@ export enum BestBorrowReserveFilter {
   LowestRate = 'LOWEST_RATE',
   LowestAverageRate = 'LOWEST_AVERAGE_RATE',
 }
+
+/**
+ * The filter options for best supply reserve request.
+ */
+export enum BestSupplyReserveFilter {
+  HighestYield = 'HIGHEST_YIELD',
+  HighestAverageYield = 'HIGHEST_AVERAGE_YIELD',
+}

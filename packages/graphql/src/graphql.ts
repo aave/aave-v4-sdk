@@ -23,6 +23,7 @@ import {
 } from 'gql.tada';
 import type {
   BestBorrowReserveFilter,
+  BestSupplyReserveFilter,
   ChainsFilter,
   HubAssetStatusType,
   HubAssetsRequestOrderBy,
@@ -44,6 +45,7 @@ export const graphql = initGraphQLTada<{
     AlwaysTrue: true;
     AssetId: ID;
     BestBorrowReserveFilter: BestBorrowReserveFilter;
+    BestSupplyReserveFilter: BestSupplyReserveFilter;
     BigDecimal: BigDecimal;
     BigInt: BigIntString;
     BlockchainData: BlockchainData;

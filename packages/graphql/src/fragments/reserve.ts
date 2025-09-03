@@ -265,3 +265,13 @@ export const BestBorrowReserveQuery = graphql(
   [ReserveFragment],
 );
 export type BestBorrowReserveRequest = RequestOf<typeof BestBorrowReserveQuery>;
+
+export const BestSupplyReserveQuery = graphql(
+  `query BestSupplyReserve($request: BestSupplyReserveRequest!) {
+    value: bestSupplyReserve(request: $request) {
+      ...Reserve
+    }
+  }`,
+  [ReserveFragment],
+);
+export type BestSupplyReserveRequest = RequestOf<typeof BestSupplyReserveQuery>;
