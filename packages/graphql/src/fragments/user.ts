@@ -13,7 +13,7 @@ import {
   TokenInfoFragment,
 } from './common';
 
-import { ReserveFragment, SpokeFragment } from './reserve';
+import { ReserveFragment, ReserveInfoFragment, SpokeFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
@@ -91,19 +91,19 @@ export const UserPositionFragment = graphql(
     netApy {
       ...PercentValue
     }
-    netCollateral {
+    netCollateral(currency: USD) {
       ...FiatAmountWithChange
     }
-    netBalance {
+    netBalance(currency: USD) {
       ...FiatAmountWithChange
     }
-    totalCollateral {
+    totalCollateral(currency: USD) {
       ...FiatAmountWithChange
     }
-    totalSupplied {
+    totalSupplied(currency: USD) {
       ...FiatAmountWithChange
     }
-    totalDebt {
+    totalDebt(currency: USD) {
       ...FiatAmountWithChange
     }
     netSupplyApy {
@@ -127,6 +127,9 @@ export const UserPositionFragment = graphql(
     borrows {
       ...UserBorrowItem
     }
+    netBalancePercentChange(window: LAST_DAY){
+      ...PercentValue
+    }
   }`,
   [
     SpokeFragment,
@@ -136,6 +139,7 @@ export const UserPositionFragment = graphql(
     BigDecimalWithChangeFragment,
     UserSupplyItemFragment,
     UserBorrowItemFragment,
+    PercentValueFragment,
   ],
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
@@ -183,13 +187,13 @@ export const BorrowActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      ...Reserve
+      ...ReserveInfo
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
 );
 export type BorrowActivity = FragmentOf<typeof BorrowActivityFragment>;
 
@@ -203,13 +207,13 @@ export const SupplyActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      ...Reserve
+      ...ReserveInfo
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
 );
 export type SupplyActivity = FragmentOf<typeof SupplyActivityFragment>;
 
@@ -223,13 +227,13 @@ export const WithdrawActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      ...Reserve
+      ...ReserveInfo
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
 );
 export type WithdrawActivity = FragmentOf<typeof WithdrawActivityFragment>;
 
@@ -243,13 +247,13 @@ export const RepayActivityFragment = graphql(
       ...Spoke
     }
     reserve {
-      ...Reserve
+      ...ReserveInfo
     }
     amount {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
 );
 export type RepayActivity = FragmentOf<typeof RepayActivityFragment>;
 
@@ -263,10 +267,10 @@ export const LiquidatedActivityFragment = graphql(
       ...Spoke
     }
     collateralReserve {
-      ...Reserve
+      ...ReserveInfo
     }
     debtReserve {
-      ...Reserve
+      ...ReserveInfo
     }
     collateralAmount {
       ...Erc20Amount
@@ -276,7 +280,7 @@ export const LiquidatedActivityFragment = graphql(
     }
     liquidator
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
 );
 export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
 

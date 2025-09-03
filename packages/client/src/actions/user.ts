@@ -145,12 +145,12 @@ export function userPositions(
  *
  * @param client - Aave client.
  * @param request - The user position request parameters.
- * @returns The specific user position.
+ * @returns The specific user position or null if not found.
  */
 export function userPosition(
   client: AaveClient,
   request: UserPositionRequest,
-): ResultAsync<UserPosition, UnexpectedError> {
+): ResultAsync<UserPosition | null, UnexpectedError> {
   return client.query(UserPositionQuery, { request });
 }
 

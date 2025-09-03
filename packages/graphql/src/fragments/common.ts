@@ -22,6 +22,17 @@ export const PercentValueFragment = graphql(
 );
 export type PercentValue = FragmentOf<typeof PercentValueFragment>;
 
+export const FiatAmountFragment = graphql(
+  `fragment FiatAmount on FiatAmount {
+    __typename
+    value
+    name
+    symbol
+  }`,
+  [DecimalValueFragment],
+);
+export type FiatAmount = FragmentOf<typeof FiatAmountFragment>;
+
 export const TokenInfoFragment = graphql(
   `fragment TokenInfo on TokenInfo {
     __typename
@@ -65,9 +76,15 @@ export const Erc20AmountFragment = graphql(
     value {
       ...DecimalValue
     }
+    fiatAmount(currency: USD){
+      ...FiatAmount
+    }
+    fiatRate(currency: USD){
+      ...DecimalValue
+    }
     isWrappedNative
   }`,
-  [Erc20TokenFragment, DecimalValueFragment],
+  [Erc20TokenFragment, DecimalValueFragment, FiatAmountFragment],
 );
 export type Erc20Amount = FragmentOf<typeof Erc20AmountFragment>;
 
@@ -103,27 +120,17 @@ export const TokenAmountFragment: FragmentDocumentFor<
   [Erc20AmountFragment, NativeAmountFragment],
 );
 
-export const FiatAmountFragment = graphql(
-  `fragment FiatAmount on FiatAmount {
-    __typename
-    value {
-      ...DecimalValue
-    }
-    name
-    symbol
-  }`,
-  [DecimalValueFragment],
-);
-export type FiatAmount = FragmentOf<typeof FiatAmountFragment>;
-
 export const FiatAmountWithChangeFragment = graphql(
   `fragment FiatAmountWithChange on FiatAmountWithChange {
     __typename
-    value {
+    amount {
       ...FiatAmount
     }
+    change(window: LAST_DAY){
+      ...PercentValue
+    }
   }`,
-  [FiatAmountFragment],
+  [FiatAmountFragment, PercentValueFragment],
 );
 export type FiatAmountWithChange = FragmentOf<
   typeof FiatAmountWithChangeFragment
@@ -132,7 +139,10 @@ export type FiatAmountWithChange = FragmentOf<
 export const PercentValueWithChangeFragment = graphql(
   `fragment PercentValueWithChange on PercentValueWithChange {
     __typename
-    value {
+    amount {
+      ...PercentValue
+    }
+    change(window: LAST_DAY){
       ...PercentValue
     }
   }`,
@@ -146,7 +156,11 @@ export const BigDecimalWithChangeFragment = graphql(
   `fragment BigDecimalWithChange on BigDecimalWithChange {
     __typename
     value
+    change(window: LAST_DAY){
+      ...PercentValue
+    }
   }`,
+  [PercentValueFragment],
 );
 export type BigDecimalWithChange = FragmentOf<
   typeof BigDecimalWithChangeFragment
