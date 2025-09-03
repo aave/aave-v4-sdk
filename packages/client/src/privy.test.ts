@@ -11,7 +11,6 @@ const privy = new PrivyClient(
 );
 
 describe('Given a PrivyClient instance', () => {
-  // TODO: Add a test for privy
   describe('When using it to send Aave v3 transactions', () => {
     it.todo(
       'Then it should work as expected (within current testability constraints)',
