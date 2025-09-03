@@ -1,4 +1,17 @@
-import { graphql, type RequestOf } from '../graphql';
+import { ChainFragment } from './fragments';
+import { graphql, type RequestOf } from './graphql';
+
+/**
+ * @internal
+ */
+export const ChainsQuery = graphql(
+  `query Chains($filter: ChainsFilter!) {
+    value: chains(filter: $filter) {
+      ...Chain
+    }
+  }`,
+  [ChainFragment],
+);
 
 /**
  * @internal
