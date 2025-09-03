@@ -206,7 +206,7 @@ export function userSummaryHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: reserveId('0x456...'),
+ *   reserve: '0x456...',
  *   window: TimeWindow.LastWeek
  * });
  * ```
@@ -231,7 +231,7 @@ export function borrowApyHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: reserveId('0x456...'),
+ *   reserve: '0x456...',
  *   window: TimeWindow.LastWeek
  * });
  * ```

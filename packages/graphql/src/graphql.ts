@@ -56,6 +56,7 @@ export const graphql = initGraphQLTada<{
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
+    ReserveId: ID;
     Signature: Signature;
     String: string;
     TxHash: TxHash;

@@ -417,7 +417,7 @@ export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: reserveId('0x456...'),
+ *   reserve: '0x456...',
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  * });
@@ -436,7 +436,7 @@ export function useBorrowApyHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: reserveId('0x456...'),
+ *   reserve: '0x456...',
  *   window: TimeWindow.LastWeek,
  * });
  * ```
@@ -473,7 +473,7 @@ export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: reserveId('0x456...'),
+ *   reserve: '0x456...',
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  * });
@@ -492,7 +492,7 @@ export function useSupplyApyHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: reserveId('0x456...'),
+ *   reserve: '0x456...',
  *   window: TimeWindow.LastWeek,
  * });
  * ```
