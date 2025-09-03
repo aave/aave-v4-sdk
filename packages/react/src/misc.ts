@@ -7,7 +7,7 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseChainsArgs = {
+export type UseAaveChainsArgs = {
   filter?: ChainsFilter;
 };
 /**
@@ -22,25 +22,25 @@ export type UseChainsArgs = {
  * });
  * ```
  */
-export function useChains(
-  args: UseChainsArgs & Suspendable,
+export function useAaveChains(
+  args: UseAaveChainsArgs & Suspendable,
 ): SuspenseResult<Chain[]>;
 
 /**
  * Fetch supported blockchain chains.
  *
  * ```tsx
- * const { data, error, loading } = useChains({
+ * const { data, error, loading } = useAaveChains({
  *   filter: 'MAINNET_ONLY',
  * });
  * ```
  */
-export function useChains(args: UseChainsArgs): ReadResult<Chain[]>;
+export function useAaveChains(args: UseAaveChainsArgs): ReadResult<Chain[]>;
 
-export function useChains({
+export function useAaveChains({
   suspense = false,
   filter = ChainsFilter.ALL,
-}: UseChainsArgs & {
+}: UseAaveChainsArgs & {
   suspense?: boolean;
 }): SuspendableResult<Chain[]> {
   return useSuspendableQuery({
