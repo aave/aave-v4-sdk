@@ -1,5 +1,5 @@
 {
-  "name": "@aave/client",
+  "name": "@aave/client-next",
   "version": "0.6.1",
   "description": "The official JavaScript client for the Aave API",
   "repository": {
@@ -71,9 +71,9 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/graphql": "workspace:*",
-    "@aave/core": "workspace:*",
-    "@aave/types": "workspace:*",
+    "@aave/graphql-next": "workspace:*",
+    "@aave/core-next": "workspace:*",
+    "@aave/types-next": "workspace:*",
     "@urql/core": "^5.2.0",
     "graphql": "^16.11.0"
   },
@@ -108,7 +108,6 @@
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted",
-    "registry": "https://npm.pkg.github.com"
+    "access": "restricted"
   }
 }
