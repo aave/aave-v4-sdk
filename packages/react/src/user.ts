@@ -360,6 +360,7 @@ export type UseUserHistoryArgs = UserHistoryRequest;
  *
  * This signature supports React Suspense:
  *
+ * ```tsx
  * const { data } = useUserHistory({
  *   user: evmAddress('0x742d35cc…'),
  *   chainId: chainId(1),
@@ -369,7 +370,6 @@ export type UseUserHistoryArgs = UserHistoryRequest;
  * });
  * ```
  */
-
 export function useUserHistory(
   args: UseUserHistoryArgs & Suspendable,
 ): SuspenseResult<PaginatedUserHistoryResult>;

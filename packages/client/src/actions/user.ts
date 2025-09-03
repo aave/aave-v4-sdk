@@ -32,8 +32,8 @@ import {
   type UserSuppliesRequest,
   type UserSupplyItem,
 } from '@aave/graphql';
-
 import type { ResultAsync } from '@aave/types';
+
 import type { AaveClient } from '../AaveClient';
 
 /**
@@ -142,6 +142,7 @@ export function userPositions(
  *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
+ *
  * @param client - Aave client.
  * @param request - The user position request parameters.
  * @returns The specific user position.
@@ -190,7 +191,6 @@ export function userBalances(
  * @param request - The user history request parameters.
  * @returns The paginated user transaction history.
  */
-
 export function userHistory(
   client: AaveClient,
   request: UserHistoryRequest,
