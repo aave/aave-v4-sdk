@@ -301,7 +301,7 @@ export function useUserPosition({
   ...request
 }: UseUserPositionArgs & {
   suspense?: boolean;
-}): SuspendableResult<UserPosition> {
+}): SuspendableResult<UserPosition | null> {
   return useSuspendableQuery({
     document: UserPositionQuery,
     variables: {

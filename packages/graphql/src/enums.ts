@@ -23,25 +23,21 @@ export enum TimeWindow {
   LastMonth = 'LAST_MONTH',
   LastSixMonths = 'LAST_SIX_MONTHS',
   LastYear = 'LAST_YEAR',
+  All = 'ALL',
 }
 
 /**
  * The operation type for transactions, used for tracking transaction processing.
  */
 export enum OperationType {
-  Borrow = 'BORROW',
-  Repay = 'REPAY',
-  ReserveUsedAsCollateralEnabled = 'RESERVE_USED_AS_COLLATERAL_ENABLED',
-  ReserveUsedAsCollateralDisabled = 'RESERVE_USED_AS_COLLATERAL_DISABLED',
-  Supply = 'SUPPLY',
-  UserEmodeSet = 'USER_EMODE_SET',
-  Withdraw = 'WITHDRAW',
-  VaultDeployed = 'VAULT_DEPLOYED',
-  VaultDeposit = 'VAULT_DEPOSIT',
-  VaultFeeUpdated = 'VAULT_FEE_UPDATED',
-  VaultFeeWithdrawn = 'VAULT_FEE_WITHDRAWN',
-  VaultWithdraw = 'VAULT_WITHDRAW',
-  Liquidation = 'LIQUIDATION',
+  SpokeBorrow = 'SPOKE_BORROW',
+  SpokeRepay = 'SPOKE_REPAY',
+  SpokeSupply = 'SPOKE_SUPPLY',
+  SpokeWithdraw = 'SPOKE_WITHDRAW',
+  SpokeUpdateUserRiskPremium = 'SPOKE_UPDATE_USER_RISK_PREMIUM',
+  SpokeSetUserUsingAsCollateral = 'SPOKE_SET_USER_USING_AS_COLLATERAL',
+  SpokeSetUserPositionManager = 'SPOKE_SET_USER_POSITION_MANAGER',
+  RenounceSpokeUserPositionManager = 'RENOUNCE_SPOKE_USER_POSITION_MANAGER',
 }
 
 /**
@@ -51,24 +47,6 @@ export enum ChainsFilter {
   TESTNET_ONLY = 'TESTNET_ONLY',
   MAINNET_ONLY = 'MAINNET_ONLY',
   ALL = 'ALL',
-}
-
-/**
- * The action type for vault user history.
- */
-export enum VaultUserHistoryAction {
-  Deposit = 'DEPOSIT',
-  Withdraw = 'WITHDRAW',
-}
-
-/**
- * The time window for the vault user activity.
- */
-export enum VaultUserActivityTimeWindow {
-  LastWeek = 'LAST_WEEK',
-  LastMonth = 'LAST_MONTH',
-  LastYear = 'LAST_YEAR',
-  Max = 'MAX',
 }
 
 /**
@@ -89,7 +67,27 @@ export enum HubAssetsRequestOrderBy {
 }
 
 /**
- * The filter options for best borrow reserve request.
+ * The activity type for user history.
+ */
+export enum ActivityType {
+  Borrow = 'BORROW',
+  Supply = 'SUPPLY',
+  Withdraw = 'WITHDRAW',
+  Repay = 'REPAY',
+  Liquidated = 'LIQUIDATED',
+  Swap = 'SWAP',
+}
+
+/**
+ * The APY metric for comparing rates.
+ */
+export enum ApyMetric {
+  Highest = 'HIGHEST',
+  Lowest = 'LOWEST',
+}
+
+/**
+ * The filter for best borrow reserve selection.
  */
 export enum BestBorrowReserveFilter {
   LowestRate = 'LOWEST_RATE',
@@ -97,7 +95,7 @@ export enum BestBorrowReserveFilter {
 }
 
 /**
- * The filter options for best supply reserve request.
+ * The filter for best supply reserve selection.
  */
 export enum BestSupplyReserveFilter {
   HighestYield = 'HIGHEST_YIELD',
@@ -105,10 +103,25 @@ export enum BestSupplyReserveFilter {
 }
 
 /**
- * The filter options for reserves request.
+ * The currency for fiat amounts.
+ */
+export enum Currency {
+  Usd = 'USD',
+}
+
+/**
+ * The filter for reserves request.
  */
 export enum ReservesFilterRequest {
   Supply = 'SUPPLY',
   Borrow = 'BORROW',
   All = 'ALL',
+}
+
+/**
+ * The swap kind for swapping tokens.
+ */
+export enum SwapKind {
+  Buy = 'BUY',
+  Sell = 'SELL',
 }

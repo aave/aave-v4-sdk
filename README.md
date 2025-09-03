@@ -4,12 +4,9 @@ The official SDK for Aave V3 👻.
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Installation](#installation)
 - [Development Workflow](#development-workflow)
 - [Contributing](#contributing)
 - [License](#license)
-
-## Installation
 
 ## Development Workflow
 
