@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "@aave/client-next": "workspace:*",
+    "@aave/core-next": "workspace:*",
     "@aave/graphql-next": "workspace:*",
     "@aave/types-next": "workspace:*",
     "urql": "^4.2.2"

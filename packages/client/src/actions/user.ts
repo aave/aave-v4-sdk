@@ -7,8 +7,11 @@ import {
   HubAssetsQuery,
   type HubAssetsRequest,
   type PaginatedUserHistoryResult,
+  SetUserSupplyAsCollateralQuery,
+  type SetUserSupplyAsCollateralRequest,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
+  type TransactionRequest,
   type UserBalance,
   UserBalancesQuery,
   type UserBalancesRequest,
@@ -294,4 +297,30 @@ export function hubAssets(
   request: HubAssetsRequest,
 ): ResultAsync<HubAsset[], UnexpectedError> {
   return client.query(HubAssetsQuery, { request });
+}
+
+/**
+ * Sets whether a user's supply should be used as collateral.
+ *
+ * ```ts
+ * const result = await setUserSupplyAsCollateral(client, {
+ *   reserve: {
+ *     chainId: chainId(1),
+ *     spoke: evmAddress('0x123...'),
+ *     reserveId: reserveId(1)
+ *   },
+ *   sender: evmAddress('0x456...'),
+ *   enableCollateral: true
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The set user supply as collateral request parameters.
+ * @returns The transaction request to set collateral status.
+ */
+export function setUserSupplyAsCollateral(
+  client: AaveClient,
+  request: SetUserSupplyAsCollateralRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(SetUserSupplyAsCollateralQuery, { request });
 }

@@ -31,8 +31,8 @@ export function chains(
  * Check if a transaction has been processed by the Aave API.
  *
  * @param client - Aave client.
- * @param request - The transaction request to check.
- * @returns Whether the transaction has been processed.
+ * @param request - The request containing transaction hash and operations to check.
+ * @returns True if the transaction has been processed, false otherwise.
  */
 export function hasProcessedKnownTransaction(
   client: AaveClient,

@@ -135,6 +135,9 @@ importers:
       '@aave/client-next':
         specifier: workspace:*
         version: link:../client
+      '@aave/core-next':
+        specifier: workspace:*
+        version: link:../core
       '@aave/graphql-next':
         specifier: workspace:*
         version: link:../graphql

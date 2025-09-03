@@ -1,6 +1,4 @@
 import {
-  APYSampleFragment,
-  HubAssetFragment,
   PaginatedUserHistoryResultFragment,
   UserBalanceFragment,
   UserBorrowItemFragment,
@@ -117,41 +115,4 @@ export const UserHistoryQuery = graphql(
 );
 export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
 
-/**
- * @internal
- */
-export const BorrowApyHistoryQuery = graphql(
-  `query BorrowApyHistory($request: BorrowAPYHistoryRequest!) {
-    value: borrowApyHistory(request: $request) {
-      ...APYSample
-    }
-  }`,
-  [APYSampleFragment],
-);
-export type BorrowAPYHistoryRequest = RequestOf<typeof BorrowApyHistoryQuery>;
 
-/**
- * @internal
- */
-export const SupplyApyHistoryQuery = graphql(
-  `query SupplyApyHistory($request: SupplyAPYHistoryRequest!) {
-    value: supplyApyHistory(request: $request) {
-      ...APYSample
-    }
-  }`,
-  [APYSampleFragment],
-);
-export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
-
-/**
- * @internal
- */
-export const HubAssetsQuery = graphql(
-  `query HubAssets($request: HubAssetsRequest!) {
-    value: hubAssets(request: $request) {
-      ...HubAsset
-    }
-  }`,
-  [HubAssetFragment],
-);
-export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;
