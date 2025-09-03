@@ -138,7 +138,7 @@ export function userPositions(
  *
  * ```ts
  * const result = await userPosition(client, {
- *   id: userPositionId('0x1234…'),
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
  *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
@@ -231,7 +231,7 @@ export function userSummaryHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: '0x456...',
+ *   reserve: reserveId(1),
  *   window: TimeWindow.LastWeek
  * });
  * ```
@@ -256,7 +256,7 @@ export function borrowApyHistory(
  *     address: evmAddress('0x123...'),
  *     chainId: chainId(1)
  *   },
- *   reserve: '0x456...',
+ *   reserve: reserveId(1),
  *   window: TimeWindow.LastWeek
  * });
  * ```

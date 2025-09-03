@@ -9,9 +9,11 @@ import type {
   DateTime,
   EvmAddress,
   ID,
+  ReserveId,
   Signature,
   TxHash,
   TypedSelectionSet,
+  UserPositionId,
   Void,
 } from '@aave/types';
 import {
@@ -39,6 +41,7 @@ export const graphql = initGraphQLTada<{
   introspection: introspection;
   scalars: {
     AlwaysTrue: true;
+    AssetId: ID;
     BigDecimal: BigDecimal;
     BigInt: BigIntString;
     BlockchainData: BlockchainData;
@@ -56,10 +59,13 @@ export const graphql = initGraphQLTada<{
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
-    ReserveId: ID;
+    ReserveId: ReserveId;
     Signature: Signature;
     String: string;
+    SwapId: ID;
+    SwapRequestId: ID;
     TxHash: TxHash;
+    UserPositionId: UserPositionId;
     Void: Void;
     TimeWindow: TimeWindow;
     VaultUserHistoryAction: VaultUserHistoryAction;
