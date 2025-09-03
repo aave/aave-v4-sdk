@@ -11,6 +11,7 @@ import {
   TokenAmountFragment,
 } from './common';
 import { HubAssetFragment, ReserveFragment, SpokeFragment } from './reserve';
+import { TransactionRequestFragment } from './transactions';
 
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
@@ -742,3 +743,18 @@ export const HubAssetsQuery = graphql(
   [HubAssetFragment],
 );
 export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;
+
+/**
+ * @internal
+ */
+export const SetUserSupplyAsCollateralQuery = graphql(
+  `mutation SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
+    value: setUserSupplyAsCollateral(request: $request) {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type SetUserSupplyAsCollateralRequest = RequestOf<
+  typeof SetUserSupplyAsCollateralQuery
+>;

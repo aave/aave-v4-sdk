@@ -1,3 +1,5 @@
+import { setUserSupplyAsCollateral } from '@aave/client';
+import type { UnexpectedError } from '@aave/core';
 import {
   type APYSample,
   type BorrowAPYHistoryRequest,
@@ -6,8 +8,10 @@ import {
   HubAssetsQuery,
   type HubAssetsRequest,
   type PaginatedUserHistoryResult,
+  type SetUserSupplyAsCollateralRequest,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
+  type TransactionRequest,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
@@ -28,6 +32,7 @@ import {
   type UserSuppliesRequest,
   type UserSupplyItem,
 } from '@aave/graphql';
+import { useAaveClient } from './context';
 import {
   type ReadResult,
   type Suspendable,
@@ -35,6 +40,7 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from './helpers';
+import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
 export type UseUserSuppliesArgs = UserSuppliesRequest;
 
@@ -566,4 +572,35 @@ export function useHubAssets({
     },
     suspense,
   });
+}
+
+/**
+ * Hook for setting whether a user's supply should be used as collateral.
+ *
+ * ```tsx
+ * const [execute, { called, loading, data, error }] = useSetUserSupplyAsCollateral();
+ *
+ * const handleToggleCollateral = async () => {
+ *   const result = await execute({
+ *     reserve: {
+ *       chainId: chainId(1),
+ *       spoke: evmAddress('0x123...'),
+ *       reserveId: reserveId(1)
+ *     },
+ *     sender: evmAddress('0x456...'),
+ *     enableCollateral: true,
+ *   });
+ * };
+ * ```
+ */
+export function useSetUserSupplyAsCollateral(): UseAsyncTask<
+  SetUserSupplyAsCollateralRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
+    setUserSupplyAsCollateral(client, request),
+  );
 }
