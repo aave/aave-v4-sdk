@@ -24,3 +24,12 @@ export const HasProcessedKnownTransactionQuery = graphql(
 export type HasProcessedKnownTransactionRequest = RequestOf<
   typeof HasProcessedKnownTransactionQuery
 >;
+
+/**
+ * @internal
+ */
+export const HealthQuery = graphql(
+  `query Health {
+    value: health
+  }`,
+);
