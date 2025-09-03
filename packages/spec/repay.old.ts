@@ -1,39 +1,33 @@
 import { describe, it } from 'vitest';
 
-describe('Given an Aave Market', () => {
-  describe('And a user with a borrow position', () => {
-    describe('When the user repays their loan', () => {
-      it('Then it should be reflected in the user borrow positions', async () => {
-        // TODO: Implement test
+describe('Aave V4 Repay Scenario', () => {
+  describe('GIVEN a user with a borrow position', () => {
+    describe('WHEN the user repays their loan', () => {
+      it.todo('THEN it should be reflected in the user positions');
+    });
+
+    describe('WHEN the user repays a partial amount of their loan', () => {
+      it.todo('THEN it should be reflected in the user positions');
+    });
+
+    describe('WHEN the reserve allows repaying in native tokens', () => {
+      describe('AND the user repays their loan in native tokens', () => {
+        it.todo('THEN it should be reflected in the user positions');
       });
     });
 
-    describe('When the user repays a partial amount of their loan', () => {
-      it('Then it should be reflected in the user borrow positions', async () => {
-        // TODO: Implement test
-      });
-    });
-
-    describe('And the reserve allows repaying in native tokens', () => {
-      describe('When the user repays their loan in native tokens', () => {
-        it('Then it should be reflected in the user borrow positions', async () => {
-          // TODO: Implement test
-        });
-      });
+    describe('WHEN the user repays a loan with a permit signature', () => {
+      it.todo(
+        'THEN it should allow to repay their own loan without needing for an ERC20 Approval transaction',
+      );
     });
   });
 
-  describe('And an open borrow position', () => {
-    describe('When a user repays a full loan amount in behalf of another address', () => {
-      it('Then it should be reflected in the borrow positions of the other address', async () => {
-        // TODO: Implement test
-      });
-    });
-
-    describe('When a user repays a loan with a permit signature', () => {
-      it('Then it should allow to repay their own loan without needing for an ERC20 Approval transaction', async () => {
-        // TODO: Implement test
-      });
+  describe('GIVEN an open borrow position', () => {
+    describe('WHEN a user repays a full loan amount in behalf of another address', () => {
+      it.todo(
+        'THEN it should be reflected in the positions from the other address',
+      );
     });
 
     describe('When a user repays a loan in behalf of another address with a permit signature', () => {
