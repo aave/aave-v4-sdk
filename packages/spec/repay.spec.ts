@@ -30,10 +30,10 @@ describe('Aave V4 Repay Scenario', () => {
       );
     });
 
-    describe('When a user repays a loan in behalf of another address with a permit signature', () => {
-      it(`Then it should be reflected in the other user's borrow positions`, async () => {
-        // TODO: Implement test
-      });
+    describe('WHEN a user repays a loan in behalf of another address with a permit signature', () => {
+      it.todo(
+        `THEN it should be reflected in the other user's borrow positions`,
+      );
     });
   });
 });
