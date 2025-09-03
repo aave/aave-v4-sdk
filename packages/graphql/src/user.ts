@@ -1,8 +1,12 @@
 import {
+  APYSampleFragment,
+  HubAssetFragment,
+  PaginatedUserHistoryResultFragment,
   UserBalanceFragment,
   UserBorrowItemFragment,
   UserPositionFragment,
   UserSummaryFragment,
+  UserSummaryHistoryItemFragment,
   UserSupplyItemFragment,
 } from './fragments';
 import { graphql, type RequestOf } from './graphql';
@@ -84,3 +88,70 @@ export const UserBalancesQuery = graphql(
   [UserBalanceFragment],
 );
 export type UserBalancesRequest = RequestOf<typeof UserBalancesQuery>;
+
+/**
+ * @internal
+ */
+export const UserSummaryHistoryQuery = graphql(
+  `query UserSummaryHistory($request: UserSummaryHistoryRequest!) {
+    value: userSummaryHistory(request: $request) {
+      ...UserSummaryHistoryItem
+    }
+  }`,
+  [UserSummaryHistoryItemFragment],
+);
+export type UserSummaryHistoryRequest = RequestOf<
+  typeof UserSummaryHistoryQuery
+>;
+
+/**
+ * @internal
+ */
+export const UserHistoryQuery = graphql(
+  `query UserHistory($request: UserHistoryRequest!) {
+    value: userHistory(request: $request) {
+      ...PaginatedUserHistoryResult
+    }
+  }`,
+  [PaginatedUserHistoryResultFragment],
+);
+export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
+
+/**
+ * @internal
+ */
+export const BorrowApyHistoryQuery = graphql(
+  `query BorrowApyHistory($request: BorrowAPYHistoryRequest!) {
+    value: borrowApyHistory(request: $request) {
+      ...APYSample
+    }
+  }`,
+  [APYSampleFragment],
+);
+export type BorrowAPYHistoryRequest = RequestOf<typeof BorrowApyHistoryQuery>;
+
+/**
+ * @internal
+ */
+export const SupplyApyHistoryQuery = graphql(
+  `query SupplyApyHistory($request: SupplyAPYHistoryRequest!) {
+    value: supplyApyHistory(request: $request) {
+      ...APYSample
+    }
+  }`,
+  [APYSampleFragment],
+);
+export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
+
+/**
+ * @internal
+ */
+export const HubAssetsQuery = graphql(
+  `query HubAssets($request: HubAssetsRequest!) {
+    value: hubAssets(request: $request) {
+      ...HubAsset
+    }
+  }`,
+  [HubAssetFragment],
+);
+export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;
