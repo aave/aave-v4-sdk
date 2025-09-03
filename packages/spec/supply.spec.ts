@@ -36,4 +36,15 @@ describe('Aave V4 Supply Scenarios', () => {
       });
     });
   });
+
+  describe('GIVEN a user with a more than one supply position', () => {
+    describe('WHEN fetching supply positions ordered by', () => {
+      it.todo('THEN it should return the supply positions ordered by amount');
+      it.todo('THEN it should return the supply positions ordered by earned');
+      it.todo(
+        'THEN it should return the supply positions ordered by isCollateral',
+      );
+      it.todo('THEN it should return the supply positions ordered by reserve');
+    });
+  });
 });
