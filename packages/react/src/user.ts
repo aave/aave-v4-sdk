@@ -8,6 +8,9 @@ import {
   type PaginatedUserHistoryResult,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
+  type UserBalance,
+  UserBalancesQuery,
+  type UserBalancesRequest,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
@@ -295,6 +298,54 @@ export function useUserPosition({
 }): SuspendableResult<UserPosition> {
   return useSuspendableQuery({
     document: UserPositionQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserBalancesArgs = UserBalancesRequest;
+
+/**
+ * Fetch all user balances across specified chains.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserBalances({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserBalances(
+  args: UseUserBalancesArgs & Suspendable,
+): SuspenseResult<UserBalance[]>;
+
+/**
+ * Fetch all user balances across specified chains.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserBalances({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ * });
+ * ```
+ */
+export function useUserBalances(
+  args: UseUserBalancesArgs,
+): ReadResult<UserBalance[]>;
+
+export function useUserBalances({
+  suspense = false,
+  ...request
+}: UseUserBalancesArgs & {
+  suspense?: boolean;
+}): SuspendableResult<UserBalance[]> {
+  return useSuspendableQuery({
+    document: UserBalancesQuery,
     variables: {
       request,
     },
