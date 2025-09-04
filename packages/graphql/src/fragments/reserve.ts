@@ -1,5 +1,5 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql, type RequestOf } from '../graphql';
+import { graphql } from '../graphql';
 
 import { ChainFragment } from './chain';
 import {
@@ -256,35 +256,6 @@ export const ReserveFragment = graphql(
 );
 export type Reserve = FragmentOf<typeof ReserveFragment>;
 
-export const BestBorrowReserveQuery = graphql(
-  `query BestBorrowReserve($request: BestBorrowReserveRequest!, $currency: Currency!) {
-    value: bestBorrowReserve(request: $request) {
-      ...Reserve
-    }
-  }`,
-  [ReserveFragment],
-);
-export type BestBorrowReserveRequest = RequestOf<typeof BestBorrowReserveQuery>;
-
-export const BestSupplyReserveQuery = graphql(
-  `query BestSupplyReserve($request: BestSupplyReserveRequest!, $currency: Currency!) {
-    value: bestSupplyReserve(request: $request) {
-      ...Reserve
-    }
-  }`,
-  [ReserveFragment],
-);
-export type BestSupplyReserveRequest = RequestOf<typeof BestSupplyReserveQuery>;
-
-export const ReservesQuery = graphql(
-  `query Reserves($request: ReservesRequest!, $currency: Currency!) {
-    value: reserves(request: $request) {
-      ...Reserve
-    }
-  }`,
-  [ReserveFragment],
-);
-export type ReservesRequest = RequestOf<typeof ReservesQuery>;
 export const ReserveInfoFragment = graphql(
   `fragment ReserveInfo on ReserveInfo {
     __typename
