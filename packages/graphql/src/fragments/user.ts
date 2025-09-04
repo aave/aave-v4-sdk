@@ -1,5 +1,5 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql, type RequestOf } from '../graphql';
+import { graphql } from '../graphql';
 import {
   BigDecimalWithChangeFragment,
   DecimalValueFragment,
@@ -12,13 +12,7 @@ import {
   TokenAmountFragment,
   TokenInfoFragment,
 } from './common';
-import {
-  HubAssetFragment,
-  ReserveFragment,
-  ReserveInfoFragment,
-  SpokeFragment,
-} from './reserve';
-import { TransactionRequestFragment } from './transactions';
+import { ReserveFragment, ReserveInfoFragment, SpokeFragment } from './reserve';
 
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
@@ -396,57 +390,3 @@ export const APYSampleFragment = graphql(
   [PercentValueFragment],
 );
 export type APYSample = FragmentOf<typeof APYSampleFragment>;
-
-/**
- * @internal
- */
-export const BorrowApyHistoryQuery = graphql(
-  `query BorrowApyHistory($request: BorrowAPYHistoryRequest!) {
-    value: borrowApyHistory(request: $request) {
-      ...APYSample
-    }
-  }`,
-  [APYSampleFragment],
-);
-export type BorrowAPYHistoryRequest = RequestOf<typeof BorrowApyHistoryQuery>;
-
-/**
- * @internal
- */
-export const SupplyApyHistoryQuery = graphql(
-  `query SupplyApyHistory($request: SupplyAPYHistoryRequest!) {
-    value: supplyApyHistory(request: $request) {
-      ...APYSample
-    }
-  }`,
-  [APYSampleFragment],
-);
-export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
-
-/**
- * @internal
- */
-export const HubAssetsQuery = graphql(
-  `query HubAssets($request: HubAssetsRequest!) {
-    value: hubAssets(request: $request) {
-      ...HubAsset
-    }
-  }`,
-  [HubAssetFragment],
-);
-export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;
-
-/**
- * @internal
- */
-export const SetUserSupplyAsCollateralQuery = graphql(
-  `mutation SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
-    value: setUserSupplyAsCollateral(request: $request) {
-      ...TransactionRequest
-    }
-  }`,
-  [TransactionRequestFragment],
-);
-export type SetUserSupplyAsCollateralRequest = RequestOf<
-  typeof SetUserSupplyAsCollateralQuery
->;

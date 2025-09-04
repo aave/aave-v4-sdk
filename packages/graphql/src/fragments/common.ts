@@ -76,10 +76,10 @@ export const Erc20AmountFragment = graphql(
     value {
       ...DecimalValue
     }
-    fiatAmount(currency: USD){
+    fiatAmount(currency: $currency){
       ...FiatAmount
     }
-    fiatRate(currency: USD){
+    fiatRate(currency: $currency){
       ...DecimalValue
     }
     isWrappedNative

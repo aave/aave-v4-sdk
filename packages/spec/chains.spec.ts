@@ -1,4 +1,4 @@
-import { ChainsFilter } from '@aave/graphql';
+import { ChainsFilter } from '@aave/client-next';
 import { describe, it } from 'vitest';
 
 describe('Aave V4 Chains Scenario', () => {
