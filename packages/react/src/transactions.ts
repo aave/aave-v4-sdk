@@ -4,6 +4,7 @@ import {
   // collateralToggle,
   // liquidate,
   liquidatePosition,
+  preview,
   repay,
   setSpokeUserPositionManager,
   supply,
@@ -21,17 +22,8 @@ import type {
   TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
-import { PreviewQuery } from '@aave/graphql-next';
 import { useAaveClient } from './context';
-import {
-  type ReadResult,
-  type Suspendable,
-  type SuspendableResult,
-  type SuspenseResult,
-  type UseAsyncTask,
-  useAsyncTask,
-  useSuspendableQuery,
-} from './helpers';
+import { type UseAsyncTask, useAsyncTask } from './helpers';
 
 /**
  * A hook that provides a way to supply assets to an Aave market.
@@ -301,23 +293,41 @@ export function useWithdraw(): UseAsyncTask<
  * const loading = liquidating.loading || sending.loading;
  * const error = liquidating.error || sending.error;
  *
- * const onLiquidate = async () => {
- *   const result = await liquidatePosition({
- *     spoke: {
- *       address: evmAddress('0x87870bca…'),
- *       chainId: chainId(1),
- *     },
- *     collateral: reserveId(1),
- *     debt: reserveId(2),
- *     amount: amount,
- *     liquidator: liquidator,
- *     borrower: borrower,
- *   }).then(sendTransaction);
+ * // …
  *
- *   if (result.isOk()) {
- *     // update local UI
- *   }
- * };
+ * const result = await liquidatePosition({
+ *   spoke: {
+ *     address: evmAddress('0x87870bca…'),
+ *     chainId: chainId(1),
+ *   },
+ *   collateral: reserveId(1),
+ *   debt: reserveId(2),
+ *   amount: amount,
+ *   liquidator: liquidator,
+ *   borrower: borrower,
+ * })
+ *   .andThen((plan) => {
+ *     switch (plan.__typename) {
+ *       case 'TransactionRequest':
+ *         return sendTransaction(plan);
+ *
+ *       case 'ApprovalRequired':
+ *         return sendTransaction(plan.approval)
+ *           .andThen(() => sendTransaction(plan.originalTransaction));
+ *
+ *       case 'InsufficientBalanceError':
+ *         return errAsync(
+ *           new Error(`Insufficient balance: ${plan.required.value} required.`)
+ *         );
+ *     }
+ *   });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
  * ```
  */
 export function useLiquidatePosition(): UseAsyncTask<
@@ -335,6 +345,17 @@ export function useLiquidatePosition(): UseAsyncTask<
 /**
  * A hook that provides a way to set or remove a position manager for a user on a specific spoke.
  *
+ * **Position managers** can perform transactions on behalf of other users, including:
+ * - Supply assets using `onBehalfOf`
+ * - Borrow assets using `onBehalfOf`
+ * - Withdraw assets using `onBehalfOf`
+ * - Enable/disable collateral using `onBehalfOf`
+ *
+ * The `signature` parameter is an **ERC712 signature** that must be signed by the **user**
+ * (the account granting permissions) to authorize the position manager. The signature contains:
+ * - `value`: The actual cryptographic signature
+ * - `deadline`: Unix timestamp when the authorization expires
+ *
  * ```ts
  * const [setSpokeUserPositionManager, setting] = useSetSpokeUserPositionManager();
  * const [sendTransaction, sending] = useSendTransaction(wallet);
@@ -348,11 +369,12 @@ export function useLiquidatePosition(): UseAsyncTask<
  *       address: evmAddress('0x87870bca…'),
  *       chainId: chainId(1),
  *     },
- *     manager: evmAddress('0x9abc…'),
- *     approve: true,
- *     user: evmAddress('0xdef0…'),
+ *     manager: evmAddress('0x9abc…'), // Address that will become the position manager
+ *     approve: true, // true to approve, false to remove the manager
+ *     user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
  *     signature: {
- *       // ERC712 signature data
+ *       value: '0x1234...', // ERC712 signature signed by the user
+ *       deadline: 1735689600, // Unix timestamp when signature expires
  *     },
  *   }).then(sendTransaction);
  *
@@ -374,44 +396,18 @@ export function useSetSpokeUserPositionManager(): UseAsyncTask<
   );
 }
 
-export type UsePreviewArgs = PreviewRequest;
-
-/**
- * Preview the impact of a potential action on a user's position.
- *
- * This signature supports React Suspense:
- *
- * ```tsx
- * const { data } = usePreview({
- *   action: {
- *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
- *       amount: {
- *         erc20: {
- *           currency: evmAddress('0x5678…'),
- *           value: '1000',
- *         },
- *       },
- *       supplier: evmAddress('0x9abc…'),
- *     },
- *   },
- *   suspense: true,
- * });
- * ```
- */
-export function usePreview(
-  args: UsePreviewArgs & Suspendable,
-): SuspenseResult<PreviewUserPositionResult>;
-
 /**
  * Preview the impact of a potential action on a user's position.
  *
  * ```tsx
- * const { data, error, loading } = usePreview({
+ * const [getPreview, previewing] = usePreview();
+ *
+ * const loading = previewing.loading;
+ * const error = previewing.error;
+ *
+ * // …
+ *
+ * const result = await getPreview({
  *   action: {
  *     supply: {
  *       spoke: {
@@ -429,23 +425,21 @@ export function usePreview(
  *     },
  *   },
  * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Preview result:', result.value);
  * ```
  */
-export function usePreview(
-  args: UsePreviewArgs,
-): ReadResult<PreviewUserPositionResult>;
+export function usePreview(): UseAsyncTask<
+  PreviewRequest,
+  PreviewUserPositionResult,
+  UnexpectedError
+> {
+  const client = useAaveClient();
 
-export function usePreview({
-  suspense = false,
-  ...request
-}: UsePreviewArgs & {
-  suspense?: boolean;
-}): SuspendableResult<PreviewUserPositionResult> {
-  return useSuspendableQuery({
-    document: PreviewQuery,
-    variables: {
-      request,
-    },
-    suspense,
-  });
+  return useAsyncTask((request: PreviewRequest) => preview(client, request));
 }

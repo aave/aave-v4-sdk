@@ -209,6 +209,13 @@ type Erc20Token {
   contract: EvmAddress!
   chain: Chain!
   info: TokenInfo!
+
+  """
+  The protocol only deals with ERC20 this allows you to understand if
+  the token is a wrapped native token to allow you to maybe change `WETH` > `ETH`
+  on the display screen, or whatever you decide makes sense
+  """
+  isWrappedNativeToken: Boolean!
 }
 
 scalar EvmAddress
@@ -347,7 +354,7 @@ input HubRequest {
 input HubTokenInput {
   chainId: ChainId!
   hub: EvmAddress!
-  token: TokenInput!
+  token: EvmAddress!
 }
 
 input HubsRequest @oneOf {
@@ -698,6 +705,7 @@ type Reserve {
   settings: ReserveSettings!
   status: ReserveStatus!
   canBorrow: Boolean!
+  canSupply: Boolean!
   canUseAsCollateral: Boolean!
   userState: ReserveUserState
   asset: HubAsset!
@@ -795,7 +803,7 @@ enum ReservesFilterRequest {
 input ReservesRequest {
   query: ReservesRequestQuery!
   user: EvmAddress
-  filter: ReservesFilterRequest!
+  filter: ReservesFilterRequest! = ALL
   orderBy: ReservesRequestOrderBy! = {name: ASC}
 }
 
@@ -808,7 +816,7 @@ input ReservesRequestOrderBy @oneOf {
 
 input ReservesRequestQuery @oneOf {
   spoke: SpokeInput
-  token: ChainTokenInput
+  token: Erc20Input
   hubToken: HubTokenInput
 }
 
@@ -896,9 +904,9 @@ type SpokeUserPositionManger {
   enabledAt: DateTime!
 }
 
-input SpokesRequest {
-  hub: HubInput!
-  chainIds: [ChainId!]!
+input SpokesRequest @oneOf {
+  hub: HubInput
+  chainIds: [ChainId!]
 }
 
 input SupplyAPYHistoryRequest {
@@ -1178,7 +1186,7 @@ type UserBalance {
   totalAmount: DecimalValue!
 
   """The total fiat amount summed across all balances"""
-  fiatAmount: FiatAmount!
+  fiatAmount(currency: Currency! = USD): FiatAmount!
 
   """The supply APY dependent on what you pass in for the `metric`"""
   supplyApy(metric: ApyMetric! = HIGHEST): PercentValue!

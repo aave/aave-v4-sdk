@@ -303,17 +303,29 @@ export function liquidatePosition(
 /**
  * Sets or removes a position manager for a user on a specific spoke.
  *
+ * **Position managers** can perform transactions on behalf of other users, including:
+ * - Supply assets using `onBehalfOf`
+ * - Borrow assets using `onBehalfOf`
+ * - Withdraw assets using `onBehalfOf`
+ * - Enable/disable collateral using `onBehalfOf`
+ *
+ * The `signature` parameter is an **ERC712 signature** that must be signed by the **user**
+ * (the account granting permissions) to authorize the position manager. The signature contains:
+ * - `value`: The actual cryptographic signature
+ * - `deadline`: Unix timestamp when the authorization expires
+ *
  * ```ts
  * const result = await setSpokeUserPositionManager(client, {
  *   spoke: {
  *     address: evmAddress('0x87870bca…'),
  *     chainId: chainId(1),
  *   },
- *   manager: evmAddress('0x9abc…'),
- *   approve: true,
- *   user: evmAddress('0xdef0…'),
+ *   manager: evmAddress('0x9abc…'), // Address that will become the position manager
+ *   approve: true, // true to approve, false to remove the manager
+ *   user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
  *   signature: {
- *     // ERC712 signature data
+ *     value: '0x1234...', // ERC712 signature signed by the user
+ *     deadline: 1735689600, // Unix timestamp when signature expires
  *   },
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
