@@ -1,13 +1,16 @@
 import type { UnexpectedError } from '@aave/core-next';
+import type { SwapExecutionPlan } from '@aave/graphql-next';
 import {
   PrepareSwapQuery,
   type PrepareSwapRequest,
   type PrepareSwapResult,
   SwappableTokensQuery,
   type SwappableTokensRequest,
+  SwapQuery,
   type SwapQuote,
   SwapQuoteQuery,
   type SwapQuoteRequest,
+  type SwapRequest,
   type Token,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
@@ -83,4 +86,30 @@ export function prepareSwap(
   request: PrepareSwapRequest,
 ): ResultAsync<PrepareSwapResult, UnexpectedError> {
   return client.query(PrepareSwapQuery, { request });
+}
+
+/**
+ * Executes a swap for the specified request parameters.
+ *
+ * ```ts
+ * const result = await swap(client, {
+ *   intent: {
+ *     id: swapRequestId('123...'),
+ *     signature: {
+ *       value: signature('0x456...'),
+ *       deadline: 1234567890,
+ *     },
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The swap request parameters.
+ * @returns The swap execution plan containing transaction details or receipt.
+ */
+export function swap(
+  client: AaveClient,
+  request: SwapRequest,
+): ResultAsync<SwapExecutionPlan, UnexpectedError> {
+  return client.query(SwapQuery, { request });
 }

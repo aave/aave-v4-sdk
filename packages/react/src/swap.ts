@@ -1,10 +1,12 @@
-import { prepareSwap, swapQuote } from '@aave/client-next';
+import { prepareSwap, swap, swapQuote } from '@aave/client-next';
 import type { UnexpectedError } from '@aave/core-next';
 import type {
   PrepareSwapRequest,
   PrepareSwapResult,
+  SwapExecutionPlan,
   SwapQuote,
   SwapQuoteRequest,
+  SwapRequest,
 } from '@aave/graphql-next';
 import {
   SwappableTokensQuery,
@@ -143,7 +145,6 @@ export function useSwappableTokens({
  *   console.error(result.error);
  *   return;
  * }
- *
  * ```
  */
 export function usePrepareSwap(): UseAsyncTask<
@@ -156,4 +157,57 @@ export function usePrepareSwap(): UseAsyncTask<
   return useAsyncTask((request: PrepareSwapRequest) =>
     prepareSwap(client, request),
   );
+}
+
+/**
+ * Executes a swap for the specified request parameters.
+ *
+ * ```tsx
+ * const [execute, executing] = useSwap();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = executing.loading && sending.loading;
+ * const error = executing.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   intent: {
+ *     id: swapRequestId('123...'),
+ *     signature: {
+ *       value: signature('0x456...'),
+ *       deadline: 1234567890,
+ *     },
+ *   },
+ * }).andThen((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'SwapTransactionRequest':
+ *       return sendTransaction(plan.transaction);
+ *
+ *     case 'SwapApprovalRequired':
+ *       return sendTransaction(plan.approval)
+ *         .andThen(() => sendTransaction(plan.originalTransaction.transaction));
+ *
+ *     case 'InsufficientBalanceError':
+ *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
+ *
+ *     case 'SwapReceipt':
+ *       return plan;
+ *   }
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ * ```
+ */
+export function useSwap(): UseAsyncTask<
+  SwapRequest,
+  SwapExecutionPlan,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SwapRequest) => swap(client, request));
 }

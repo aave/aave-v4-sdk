@@ -1,6 +1,7 @@
 import { TokenFragment } from './fragments/common';
 import {
   PrepareSwapResultFragment,
+  SwapExecutionPlanFragment,
   SwapQuoteFragment,
 } from './fragments/swaps';
 import { graphql, type RequestOf } from './graphql';
@@ -43,3 +44,16 @@ export const PrepareSwapQuery = graphql(
   [PrepareSwapResultFragment],
 );
 export type PrepareSwapRequest = RequestOf<typeof PrepareSwapQuery>;
+
+/**
+ * @internal
+ */
+export const SwapQuery = graphql(
+  `query Swap($request: SwapRequest!) {
+    value: swap(request: $request) {
+      ...SwapExecutionPlan
+    }
+  }`,
+  [SwapExecutionPlanFragment],
+);
+export type SwapRequest = RequestOf<typeof SwapQuery>;
