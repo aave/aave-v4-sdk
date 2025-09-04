@@ -106,7 +106,6 @@ export const ReserveFragment = graphql(
     spoke {
       ...Spoke
     }
-    assetId
     borrowCap
     supplyCap
     chain {
