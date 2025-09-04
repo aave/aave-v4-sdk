@@ -11,6 +11,7 @@ import {
   type SetUserSupplyAsCollateralRequest,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
+  type TimeWindow,
   type TransactionRequest,
   type UserBalance,
   UserBalancesQuery,
@@ -36,7 +37,6 @@ import {
   type UserSupplyItem,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
-
 import type { AaveClient } from '../AaveClient';
 import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '../options';
 
@@ -96,6 +96,15 @@ export function userBorrows(
   return client.query(UserBorrowsQuery, { request, ...options });
 }
 
+export type UserSummaryQueryOptions = {
+  /**
+   * The time window for historical data changes.
+   *
+   * @defaultValue {@link TimeWindow.LastDay}
+   */
+  timeWindow: TimeWindow;
+};
+
 /**
  * Fetches a user's summary across all positions.
  *
@@ -110,13 +119,18 @@ export function userBorrows(
  *
  * @param client - Aave client.
  * @param request - The user summary request parameters.
+ * @param options - The query options.
  * @returns The user's financial summary.
  */
 export function userSummary(
   client: AaveClient,
   request: UserSummaryRequest,
+  options: UserSummaryQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummary, UnexpectedError> {
-  return client.query(UserSummaryQuery, { request });
+  return client.query(UserSummaryQuery, {
+    request,
+    timeWindow: options.timeWindow,
+  });
 }
 
 /**

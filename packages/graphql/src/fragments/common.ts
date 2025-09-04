@@ -141,7 +141,7 @@ export const FiatAmountWithChangeFragment = graphql(
     amount {
       ...FiatAmount
     }
-    change(window: LAST_DAY){
+    change(window: $timeWindow){
       ...PercentValue
     }
   }`,
@@ -157,7 +157,7 @@ export const PercentValueWithChangeFragment = graphql(
     amount {
       ...PercentValue
     }
-    change(window: LAST_DAY){
+    change(window: $timeWindow){
       ...PercentValue
     }
   }`,
@@ -171,7 +171,7 @@ export const BigDecimalWithChangeFragment = graphql(
   `fragment BigDecimalWithChange on BigDecimalWithChange {
     __typename
     value
-    change(window: LAST_DAY){
+    change(window: $timeWindow){
       ...PercentValue
     }
   }`,
