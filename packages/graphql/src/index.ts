@@ -4,5 +4,6 @@ export * from './fragments';
 export * from './graphql';
 export * from './misc';
 export * from './permits';
+export * from './swaps';
 export * from './transactions';
 export * from './user';
