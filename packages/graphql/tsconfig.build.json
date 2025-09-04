@@ -5,6 +5,6 @@
     "outDir": "dist",
     "declarationMap": true
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["src/**/*.ts", "schema.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
