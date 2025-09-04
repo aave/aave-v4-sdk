@@ -112,14 +112,14 @@ export function useSwappableTokens({
  * Prepares swap for the specified trade parameters.
  *
  * ```tsx
- * const [prepare, preparing] = usePrepareSwap();
+ * const [prepareSwap, preparing] = usePrepareSwap();
  *
  * const loading = preparing.loading;
  * const error = preparing.error;
  *
  * // …
  *
- * const result = await prepare({
+ * const result = await prepareSwap({
  *   market: {
  *     chainId: chainId(1),
  *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
@@ -131,13 +131,24 @@ export function useSwappableTokens({
  * }).andThen((swapResult) => {
  *   switch (swapResult.__typename) {
  *     case 'SwapByIntent':
- *       // TODO: define how to handle SwapByIntent
+ *       return signSwapByIntentWith(wallet, swapResult.data)
+ *         .andThen((signedData) => swap({ intent: { id: swapResult.id, signature: signedData } }))
+ *         .andThen((plan) => {
+ *           // …
+ *         });
  *     case 'SwapByIntentWithApprovalRequired':
- *       // TODO: define how to handle SwapByIntentWithApprovalRequired
+ *       return sendTransaction(swapResult.approval)
+ *         .andThen(() => signSwapByIntentWith(wallet, swapResult.data))
+ *         .andThen((signedData) => swap({ intent: { id: swapResult.id, signature: signedData } }))
+ *         .andThen((plan) => {
+ *           // …
+ *         });
  *     case 'SwapByTransaction':
- *       // TODO: define how to handle SwapByTransaction
- *     default:
- *       return errAsync(new Error('Unexpected swap result type'));
+ *       // NOTE: needed to add permit if needed
+ *       return swap({ transaction: { id: swapResult.id } })
+ *         .andThen((plan) => {
+ *           // …
+ *       });
  *   }
  * });
  *
@@ -182,17 +193,22 @@ export function usePrepareSwap(): UseAsyncTask<
  * }).andThen((plan) => {
  *   switch (plan.__typename) {
  *     case 'SwapTransactionRequest':
- *       return sendTransaction(plan.transaction);
+ *       console.log('Swap ID:', plan.orderReceipt.id);
+ *       return sendTransaction(plan.transaction)
+ *         .andTee(() => return plan.orderReceipt)
  *
  *     case 'SwapApprovalRequired':
+ *       console.log('Swap ID:', plan.originalTransaction.orderReceipt.id);
  *       return sendTransaction(plan.approval)
- *         .andThen(() => sendTransaction(plan.originalTransaction.transaction));
+ *         .andThen(() => sendTransaction(plan.originalTransaction.transaction))
+ *         .andTee(() => return plan.originalTransaction.orderReceipt)
  *
  *     case 'InsufficientBalanceError':
  *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
  *
  *     case 'SwapReceipt':
- *       return plan;
+ *       console.log('Swap ID:', plan.id);
+ *       return plan.orderReceipt;
  *   }
  * });
  *
