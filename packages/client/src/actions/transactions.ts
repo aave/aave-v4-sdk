@@ -3,6 +3,8 @@ import {
   BorrowQuery,
   type BorrowRequest,
   type ExecutionPlan,
+  LiquidatePositionQuery,
+  type LiquidatePositionRequest,
   RepayQuery,
   type RepayRequest,
   SupplyQuery,
@@ -216,3 +218,43 @@ export function withdraw(
 // ): ResultAsync<TransactionRequest, UnexpectedError> {
 //   return client.query(LiquidateQuery, { request });
 // }
+
+/**
+ * Creates a transaction to liquidate a user's position.
+ *
+ * ```ts
+ * const result = await liquidatePosition(client, {
+ *   spoke: {
+ *     address: evmAddress('0x87870bca…'),
+ *     chainId: chainId(1),
+ *   },
+ *   collateral: reserveId(1),
+ *   debt: reserveId(2),
+ *   amount: {
+ *     erc20: {
+ *       currency: evmAddress('0x5678…'),
+ *       value: '1000',
+ *     },
+ *   },
+ *   liquidator: evmAddress('0x9abc…'),
+ *   borrower: evmAddress('0xdef0…'),
+ * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *
+ * if (result.isErr()) {
+ *   // Handle error, e.g. signing error, etc.
+ *   return;
+ * }
+ *
+ * // result.value: TxHash
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The liquidate position request parameters.
+ * @returns The transaction data, approval requirements, or insufficient balance error.
+ */
+export function liquidatePosition(
+  client: AaveClient,
+  request: LiquidatePositionRequest,
+): ResultAsync<ExecutionPlan, UnexpectedError> {
+  return client.query(LiquidatePositionQuery, { request });
+}

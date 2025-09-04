@@ -56,6 +56,19 @@ export type WithdrawRequest = RequestOf<typeof WithdrawQuery>;
 /**
  * @internal
  */
+export const LiquidatePositionQuery = graphql(
+  `query LiquidatePosition($request: LiquidatePositionRequest!) {
+    value: liquidatePosition(request: $request) {
+      ...ExecutionPlan
+    }
+  }`,
+  [ExecutionPlanFragment],
+);
+export type LiquidatePositionRequest = RequestOf<typeof LiquidatePositionQuery>;
+
+/**
+ * @internal
+ */
 export const SetUserSupplyAsCollateralQuery = graphql(
   `mutation SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
     value: setUserSupplyAsCollateral(request: $request) {

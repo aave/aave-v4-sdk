@@ -3,6 +3,7 @@ import {
   borrow,
   // collateralToggle,
   // liquidate,
+  liquidatePosition,
   repay,
   supply,
   withdraw,
@@ -10,6 +11,7 @@ import {
 import type {
   BorrowRequest,
   ExecutionPlan,
+  LiquidatePositionRequest,
   RepayRequest,
   SupplyRequest,
   // TransactionRequest,
@@ -275,3 +277,44 @@ export function useWithdraw(): UseAsyncTask<
 //     liquidate(client, request),
 //   );
 // }
+
+/**
+ * A hook that provides a way to liquidate a user's position.
+ *
+ * ```ts
+ * const [liquidatePosition, liquidating] = useLiquidatePosition();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = liquidating.loading || sending.loading;
+ * const error = liquidating.error || sending.error;
+ *
+ * const onLiquidate = async () => {
+ *   const result = await liquidatePosition({
+ *     spoke: {
+ *       address: evmAddress('0x87870bca…'),
+ *       chainId: chainId(1),
+ *     },
+ *     collateral: reserveId(1),
+ *     debt: reserveId(2),
+ *     amount: amount,
+ *     liquidator: liquidator,
+ *     borrower: borrower,
+ *   }).then(sendTransaction);
+ *
+ *   if (result.isOk()) {
+ *     // update local UI
+ *   }
+ * };
+ * ```
+ */
+export function useLiquidatePosition(): UseAsyncTask<
+  LiquidatePositionRequest,
+  ExecutionPlan,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: LiquidatePositionRequest) =>
+    liquidatePosition(client, request),
+  );
+}
