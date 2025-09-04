@@ -126,7 +126,7 @@ export const UserPositionFragment = graphql(
     borrows {
       ...UserBorrowItem
     }
-    netBalancePercentChange(window: LAST_DAY){
+    netBalancePercentChange(window: $timeWindow){
       ...PercentValue
     }
   }`,

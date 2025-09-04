@@ -3,6 +3,7 @@ import {
   type QueryOptions,
   setUserSupplyAsCollateral,
   type UnexpectedError,
+  type UserSummaryQueryOptions,
 } from '@aave/client-next';
 import {
   type APYSample,
@@ -169,7 +170,7 @@ export function useUserBorrows({
   });
 }
 
-export type UseUserSummaryArgs = UserSummaryRequest;
+export type UseUserSummaryArgs = UserSummaryRequest & UserSummaryQueryOptions;
 
 /**
  * Fetch a user's financial summary.
@@ -208,6 +209,7 @@ export function useUserSummary(
 
 export function useUserSummary({
   suspense = false,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: UseUserSummaryArgs & {
   suspense?: boolean;
@@ -216,6 +218,7 @@ export function useUserSummary({
     document: UserSummaryQuery,
     variables: {
       request,
+      timeWindow,
     },
     suspense,
   });
@@ -259,6 +262,7 @@ export function useUserPositions(
 export function useUserPositions({
   suspense = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: UseUserPositionsArgs & {
   suspense?: boolean;
@@ -268,6 +272,7 @@ export function useUserPositions({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
   });
@@ -309,6 +314,7 @@ export function useUserPosition(
 export function useUserPosition({
   suspense = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: UseUserPositionArgs & {
   suspense?: boolean;
@@ -318,6 +324,7 @@ export function useUserPosition({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
   });
