@@ -5,6 +5,7 @@ import {
   // liquidate,
   liquidatePosition,
   repay,
+  setSpokeUserPositionManager,
   supply,
   withdraw,
 } from '@aave/client-next/actions';
@@ -15,8 +16,9 @@ import type {
   PreviewRequest,
   PreviewUserPositionResult,
   RepayRequest,
+  SetSpokeUserPositionManagerRequest,
   SupplyRequest,
-  // TransactionRequest,
+  TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
 import { PreviewQuery } from '@aave/graphql-next';
@@ -327,6 +329,48 @@ export function useLiquidatePosition(): UseAsyncTask<
 
   return useAsyncTask((request: LiquidatePositionRequest) =>
     liquidatePosition(client, request),
+  );
+}
+
+/**
+ * A hook that provides a way to set or remove a position manager for a user on a specific spoke.
+ *
+ * ```ts
+ * const [setSpokeUserPositionManager, setting] = useSetSpokeUserPositionManager();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = setting.loading || sending.loading;
+ * const error = setting.error || sending.error;
+ *
+ * const onSetPositionManager = async () => {
+ *   const result = await setSpokeUserPositionManager({
+ *     spoke: {
+ *       address: evmAddress('0x87870bca…'),
+ *       chainId: chainId(1),
+ *     },
+ *     manager: evmAddress('0x9abc…'),
+ *     approve: true,
+ *     user: evmAddress('0xdef0…'),
+ *     signature: {
+ *       // ERC712 signature data
+ *     },
+ *   }).then(sendTransaction);
+ *
+ *   if (result.isOk()) {
+ *     // update local UI
+ *   }
+ * };
+ * ```
+ */
+export function useSetSpokeUserPositionManager(): UseAsyncTask<
+  SetSpokeUserPositionManagerRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SetSpokeUserPositionManagerRequest) =>
+    setSpokeUserPositionManager(client, request),
   );
 }
 

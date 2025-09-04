@@ -10,9 +10,11 @@ import {
   type PreviewUserPositionResult,
   RepayQuery,
   type RepayRequest,
+  SetSpokeUserPositionManagerQuery,
+  type SetSpokeUserPositionManagerRequest,
   SupplyQuery,
   type SupplyRequest,
-  // type TransactionRequest,
+  type TransactionRequest,
   WithdrawQuery,
   type WithdrawRequest,
 } from '@aave/graphql-next';
@@ -260,6 +262,42 @@ export function liquidatePosition(
   request: LiquidatePositionRequest,
 ): ResultAsync<ExecutionPlan, UnexpectedError> {
   return client.query(LiquidatePositionQuery, { request });
+}
+
+/**
+ * Sets or removes a position manager for a user on a specific spoke.
+ *
+ * ```ts
+ * const result = await setSpokeUserPositionManager(client, {
+ *   spoke: {
+ *     address: evmAddress('0x87870bca…'),
+ *     chainId: chainId(1),
+ *   },
+ *   manager: evmAddress('0x9abc…'),
+ *   approve: true,
+ *   user: evmAddress('0xdef0…'),
+ *   signature: {
+ *     // ERC712 signature data
+ *   },
+ * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *
+ * if (result.isErr()) {
+ *   // Handle error, e.g. signing error, etc.
+ *   return;
+ * }
+ *
+ * // result.value: TxHash
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The spoke set for the position manager request parameters.
+ * @returns The transaction request data to set position manager.
+ */
+export function setSpokeUserPositionManager(
+  client: AaveClient,
+  request: SetSpokeUserPositionManagerRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(SetSpokeUserPositionManagerQuery, { request });
 }
 
 /**

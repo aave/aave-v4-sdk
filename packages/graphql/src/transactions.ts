@@ -75,8 +75,23 @@ export type LiquidatePositionRequest = RequestOf<typeof LiquidatePositionQuery>;
 /**
  * @internal
  */
+export const SetSpokeUserPositionManagerQuery = graphql(
+  `query SetSpokeUserPositionManager($request: SetSpokeUserPositionManagerRequest!) {
+    value: setSpokeUserPositionManager(request: $request) {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type SetSpokeUserPositionManagerRequest = RequestOf<
+  typeof SetSpokeUserPositionManagerQuery
+>;
+
+/**
+ * @internal
+ */
 export const SetUserSupplyAsCollateralQuery = graphql(
-  `mutation SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
+  `query SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
     value: setUserSupplyAsCollateral(request: $request) {
       ...TransactionRequest
     }
