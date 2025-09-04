@@ -1,6 +1,11 @@
-import { swapQuote } from '@aave/client-next';
+import { prepareSwap, swapQuote } from '@aave/client-next';
 import type { UnexpectedError } from '@aave/core-next';
-import type { SwapQuote, SwapQuoteRequest } from '@aave/graphql-next';
+import type {
+  PrepareSwapRequest,
+  PrepareSwapResult,
+  SwapQuote,
+  SwapQuoteRequest,
+} from '@aave/graphql-next';
 import {
   SwappableTokensQuery,
   type SwappableTokensRequest,
@@ -99,4 +104,56 @@ export function useSwappableTokens({
     },
     suspense,
   });
+}
+
+/**
+ * Prepares swap for the specified trade parameters.
+ *
+ * ```tsx
+ * const [prepare, preparing] = usePrepareSwap();
+ *
+ * const loading = preparing.loading;
+ * const error = preparing.error;
+ *
+ * // …
+ *
+ * const result = await prepare({
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
+ *     sell: { erc20: evmAddress('0x6B175474E...') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.SELL,
+ *     user: evmAddress('0x742d35cc...'),
+ *   },
+ * }).andThen((swapResult) => {
+ *   switch (swapResult.__typename) {
+ *     case 'SwapByIntent':
+ *       // TODO: define how to handle SwapByIntent
+ *     case 'SwapByIntentWithApprovalRequired':
+ *       // TODO: define how to handle SwapByIntentWithApprovalRequired
+ *     case 'SwapByTransaction':
+ *       // TODO: define how to handle SwapByTransaction
+ *     default:
+ *       return errAsync(new Error('Unexpected swap result type'));
+ *   }
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * ```
+ */
+export function usePrepareSwap(): UseAsyncTask<
+  PrepareSwapRequest,
+  PrepareSwapResult,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: PrepareSwapRequest) =>
+    prepareSwap(client, request),
+  );
 }

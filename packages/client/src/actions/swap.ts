@@ -1,5 +1,8 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
+  PrepareSwapQuery,
+  type PrepareSwapRequest,
+  type PrepareSwapResult,
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type SwapQuote,
@@ -53,4 +56,31 @@ export function swappableTokens(
   request: SwappableTokensRequest,
 ): ResultAsync<Token[], UnexpectedError> {
   return client.query(SwappableTokensQuery, { request });
+}
+
+/**
+ * Prepares a swap for the specified trade parameters.
+ *
+ * ```ts
+ * const result = await prepareSwap(client, {
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
+ *     sell: { erc20: evmAddress('0x6B175474E...') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.SELL,
+ *     user: evmAddress('0x742d35cc...'),
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The prepare swap request parameters.
+ * @returns The prepared swap result containing details of the swap.
+ */
+export function prepareSwap(
+  client: AaveClient,
+  request: PrepareSwapRequest,
+): ResultAsync<PrepareSwapResult, UnexpectedError> {
+  return client.query(PrepareSwapQuery, { request });
 }
