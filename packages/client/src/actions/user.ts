@@ -38,6 +38,7 @@ import {
 import type { ResultAsync } from '@aave/types-next';
 
 import type { AaveClient } from '../AaveClient';
+import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '../options';
 
 /**
  * Fetches all user supply positions across the specified spoke.
@@ -56,13 +57,15 @@ import type { AaveClient } from '../AaveClient';
  *
  * @param client - Aave client.
  * @param request - The user supplies request parameters.
+ * @param options - The query options.
  * @returns The user's supply positions.
  */
 export function userSupplies(
   client: AaveClient,
   request: UserSuppliesRequest,
+  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSupplyItem[], UnexpectedError> {
-  return client.query(UserSuppliesQuery, { request });
+  return client.query(UserSuppliesQuery, { request, ...options });
 }
 
 /**
@@ -82,13 +85,15 @@ export function userSupplies(
  *
  * @param client - Aave client.
  * @param request - The user borrows request parameters.
+ * @param options - The query options.
  * @returns The user's borrow positions.
  */
 export function userBorrows(
   client: AaveClient,
   request: UserBorrowsRequest,
+  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBorrowItem[], UnexpectedError> {
-  return client.query(UserBorrowsQuery, { request });
+  return client.query(UserBorrowsQuery, { request, ...options });
 }
 
 /**
@@ -127,13 +132,15 @@ export function userSummary(
  *
  * @param client - Aave client.
  * @param request - The user positions request parameters.
+ * @param options - The query options.
  * @returns The user's positions across all specified chains.
  */
 export function userPositions(
   client: AaveClient,
   request: UserPositionsRequest,
+  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition[], UnexpectedError> {
-  return client.query(UserPositionsQuery, { request });
+  return client.query(UserPositionsQuery, { request, ...options });
 }
 
 /**
@@ -148,13 +155,15 @@ export function userPositions(
  *
  * @param client - Aave client.
  * @param request - The user position request parameters.
+ * @param options - The query options.
  * @returns The specific user position or null if not found.
  */
 export function userPosition(
   client: AaveClient,
   request: UserPositionRequest,
+  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition | null, UnexpectedError> {
-  return client.query(UserPositionQuery, { request });
+  return client.query(UserPositionQuery, { request, ...options });
 }
 
 /**
@@ -169,13 +178,15 @@ export function userPosition(
  *
  * @param client - Aave client.
  * @param request - The user balances request parameters.
+ * @param options - The query options.
  * @returns The user's balances across all specified chains.
  **/
 export function userBalances(
   client: AaveClient,
   request: UserBalancesRequest,
+  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBalance[], UnexpectedError> {
-  return client.query(UserBalancesQuery, { request });
+  return client.query(UserBalancesQuery, { request, ...options });
 }
 
 /**
@@ -192,13 +203,15 @@ export function userBalances(
  *
  * @param client - Aave client.
  * @param request - The user history request parameters.
+ * @param options - The query options.
  * @returns The paginated user transaction history.
  */
 export function userHistory(
   client: AaveClient,
   request: UserHistoryRequest,
+  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
-  return client.query(UserHistoryQuery, { request });
+  return client.query(UserHistoryQuery, { request, ...options });
 }
 
 /**
@@ -290,13 +303,15 @@ export function supplyApyHistory(
  *
  * @param client - Aave client.
  * @param request - The hub assets request parameters.
+ * @param options - The query options.
  * @returns The hub assets array.
  */
 export function hubAssets(
   client: AaveClient,
   request: HubAssetsRequest,
+  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubAsset[], UnexpectedError> {
-  return client.query(HubAssetsQuery, { request });
+  return client.query(HubAssetsQuery, { request, ...options });
 }
 
 /**

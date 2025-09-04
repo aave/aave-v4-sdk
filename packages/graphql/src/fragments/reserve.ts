@@ -257,7 +257,7 @@ export const ReserveFragment = graphql(
 export type Reserve = FragmentOf<typeof ReserveFragment>;
 
 export const BestBorrowReserveQuery = graphql(
-  `query BestBorrowReserve($request: BestBorrowReserveRequest!) {
+  `query BestBorrowReserve($request: BestBorrowReserveRequest!, $currency: Currency!) {
     value: bestBorrowReserve(request: $request) {
       ...Reserve
     }
@@ -267,7 +267,7 @@ export const BestBorrowReserveQuery = graphql(
 export type BestBorrowReserveRequest = RequestOf<typeof BestBorrowReserveQuery>;
 
 export const BestSupplyReserveQuery = graphql(
-  `query BestSupplyReserve($request: BestSupplyReserveRequest!) {
+  `query BestSupplyReserve($request: BestSupplyReserveRequest!, $currency: Currency!) {
     value: bestSupplyReserve(request: $request) {
       ...Reserve
     }
@@ -277,7 +277,7 @@ export const BestSupplyReserveQuery = graphql(
 export type BestSupplyReserveRequest = RequestOf<typeof BestSupplyReserveQuery>;
 
 export const ReservesQuery = graphql(
-  `query Reserves($request: ReservesRequest!) {
+  `query Reserves($request: ReservesRequest!, $currency: Currency!) {
     value: reserves(request: $request) {
       ...Reserve
     }

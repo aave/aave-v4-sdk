@@ -427,7 +427,7 @@ export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
  * @internal
  */
 export const HubAssetsQuery = graphql(
-  `query HubAssets($request: HubAssetsRequest!) {
+  `query HubAssets($request: HubAssetsRequest!, $currency: Currency!) {
     value: hubAssets(request: $request) {
       ...HubAsset
     }
