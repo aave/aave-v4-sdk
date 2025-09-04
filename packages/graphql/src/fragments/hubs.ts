@@ -1,5 +1,5 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql, type RequestOf } from '../graphql';
+import { graphql } from '../graphql';
 import { ChainFragment } from './chain';
 
 import {
