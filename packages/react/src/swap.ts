@@ -1,7 +1,10 @@
 import {
+  SwappableTokensQuery,
+  type SwappableTokensRequest,
   type SwapQuote,
   SwapQuoteQuery,
   type SwapQuoteRequest,
+  type Token,
 } from '@aave/graphql-next';
 import {
   type ReadResult,
@@ -56,6 +59,52 @@ export function useSwapQuote({
 }): SuspendableResult<SwapQuote> {
   return useSuspendableQuery({
     document: SwapQuoteQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseSwappableTokensArgs = SwappableTokensRequest;
+
+/**
+ * Fetch the list of tokens available for swapping on a specific chain.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSwappableTokens({
+ *   query: { chainId: chainId(1) },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSwappableTokens(
+  args: UseSwappableTokensArgs & Suspendable,
+): SuspenseResult<Token[]>;
+
+/**
+ * Fetch the list of tokens available for swapping on a specific chain.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSwappableTokens({
+ *   query: { chainId: chainId(1) },
+ * });
+ * ```
+ */
+export function useSwappableTokens(
+  args: UseSwappableTokensArgs,
+): ReadResult<Token[]>;
+
+export function useSwappableTokens({
+  suspense = false,
+  ...request
+}: UseSwappableTokensArgs & {
+  suspense?: boolean;
+}): SuspendableResult<Token[]> {
+  return useSuspendableQuery({
+    document: SwappableTokensQuery,
     variables: {
       request,
     },

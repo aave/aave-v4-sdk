@@ -120,6 +120,21 @@ export const TokenAmountFragment: FragmentDocumentFor<
   [Erc20AmountFragment, NativeAmountFragment],
 );
 
+export type Token = NativeToken | Erc20Token;
+
+export const TokenFragment: FragmentDocumentFor<Token, 'Token'> = graphql(
+  `fragment Token on Token {
+    __typename
+    ... on Erc20Token {
+      ...Erc20Token
+    }
+    ... on NativeToken {
+      ...NativeToken
+    }
+  }`,
+  [Erc20TokenFragment, NativeTokenFragment],
+);
+
 export const FiatAmountWithChangeFragment = graphql(
   `fragment FiatAmountWithChange on FiatAmountWithChange {
     __typename
