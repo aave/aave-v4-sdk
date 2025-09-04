@@ -5,6 +5,9 @@ import {
   type ExecutionPlan,
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
+  PreviewQuery,
+  type PreviewRequest,
+  type PreviewUserPositionResult,
   RepayQuery,
   type RepayRequest,
   SupplyQuery,
@@ -257,4 +260,39 @@ export function liquidatePosition(
   request: LiquidatePositionRequest,
 ): ResultAsync<ExecutionPlan, UnexpectedError> {
   return client.query(LiquidatePositionQuery, { request });
+}
+
+/**
+ * Previews the impact of a potential action on a user's position.
+ *
+ * ```ts
+ * const result = await preview(client, {
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The preview request parameters containing the action to preview.
+ * @returns The preview result showing position changes.
+ */
+export function preview(
+  client: AaveClient,
+  request: PreviewRequest,
+): ResultAsync<PreviewUserPositionResult, UnexpectedError> {
+  return client.query(PreviewQuery, { request });
 }

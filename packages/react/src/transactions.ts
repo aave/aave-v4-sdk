@@ -12,13 +12,24 @@ import type {
   BorrowRequest,
   ExecutionPlan,
   LiquidatePositionRequest,
+  PreviewRequest,
+  PreviewUserPositionResult,
   RepayRequest,
   SupplyRequest,
   // TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
+import { PreviewQuery } from '@aave/graphql-next';
 import { useAaveClient } from './context';
-import { type UseAsyncTask, useAsyncTask } from './helpers';
+import {
+  type ReadResult,
+  type Suspendable,
+  type SuspendableResult,
+  type SuspenseResult,
+  type UseAsyncTask,
+  useAsyncTask,
+  useSuspendableQuery,
+} from './helpers';
 
 /**
  * A hook that provides a way to supply assets to an Aave market.
@@ -317,4 +328,80 @@ export function useLiquidatePosition(): UseAsyncTask<
   return useAsyncTask((request: LiquidatePositionRequest) =>
     liquidatePosition(client, request),
   );
+}
+
+export type UsePreviewArgs = PreviewRequest;
+
+/**
+ * Preview the impact of a potential action on a user's position.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = usePreview({
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function usePreview(
+  args: UsePreviewArgs & Suspendable,
+): SuspenseResult<PreviewUserPositionResult>;
+
+/**
+ * Preview the impact of a potential action on a user's position.
+ *
+ * ```tsx
+ * const { data, error, loading } = usePreview({
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ * });
+ * ```
+ */
+export function usePreview(
+  args: UsePreviewArgs,
+): ReadResult<PreviewUserPositionResult>;
+
+export function usePreview({
+  suspense = false,
+  ...request
+}: UsePreviewArgs & {
+  suspense?: boolean;
+}): SuspendableResult<PreviewUserPositionResult> {
+  return useSuspendableQuery({
+    document: PreviewQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
 }
