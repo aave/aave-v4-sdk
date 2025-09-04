@@ -1,9 +1,7 @@
 /// <reference path="../../../vite-env.d.ts" />
 
 import { GraphQLErrorCode, UnexpectedError } from '@aave/core-next';
-import { schema } from '@aave/graphql-next/test-utils';
 import {
-  type AnyVariables,
   type BigDecimal,
   bigDecimal,
   chainId,
@@ -11,9 +9,6 @@ import {
   evmAddress,
   ResultAsync,
 } from '@aave/types-next';
-import type { TypedDocumentNode } from '@urql/core';
-import { validate } from 'graphql';
-import type { ValidationRule } from 'graphql/validation/ValidationContext';
 import {
   type Chain,
   createPublicClient,
@@ -25,7 +20,6 @@ import {
   type WalletClient,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { expect } from 'vitest';
 import { AaveClient } from './AaveClient';
 import { local, staging } from './environments';
 
@@ -57,9 +51,6 @@ export const ETHEREUM_MARKET_ETH_CORRELATED_EMODE_CATEGORY = 1;
 const ETHEREUM_FORK_RPC_URL = import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC;
 
 const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env.ETHEREUM_TENDERLY_ADMIN_RPC;
-
-// Re-export for convenience
-export { bigDecimal } from '@aave/types-next';
 
 export const ethereumForkChain: Chain = defineChain({
   id: ETHEREUM_FORK_ID,
@@ -204,16 +195,6 @@ export function createGraphQLErrorObject(code: GraphQLErrorCode) {
       code: code,
     },
   };
-}
-
-export function assertTypedDocumentSatisfies<
-  TResult,
-  TVariables extends AnyVariables,
->(
-  document: TypedDocumentNode<TResult, TVariables>,
-  rules: ReadonlyArray<ValidationRule>,
-) {
-  expect(validate(schema, document, rules)).toEqual([]);
 }
 
 export function wait(ms: number) {
