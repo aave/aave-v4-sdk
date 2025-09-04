@@ -39,7 +39,7 @@ export type UserBorrowsRequest = RequestOf<typeof UserBorrowsQuery>;
  * @internal
  */
 export const UserSummaryQuery = graphql(
-  `query UserSummary($request: UserSummaryRequest!) {
+  `query UserSummary($request: UserSummaryRequest!, $timeWindow: TimeWindow!) {
     value: userSummary(request: $request) {
       ...UserSummary
     }
@@ -52,7 +52,7 @@ export type UserSummaryRequest = RequestOf<typeof UserSummaryQuery>;
  * @internal
  */
 export const UserPositionsQuery = graphql(
-  `query UserPositions($request: UserPositionsRequest!, $currency: Currency!) {
+  `query UserPositions($request: UserPositionsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userPositions(request: $request) {
       ...UserPosition
     }
@@ -65,7 +65,7 @@ export type UserPositionsRequest = RequestOf<typeof UserPositionsQuery>;
  * @internal
  */
 export const UserPositionQuery = graphql(
-  `query UserPosition($request: UserPositionRequest!, $currency: Currency!) {
+  `query UserPosition($request: UserPositionRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userPosition(request: $request) {
       ...UserPosition
     }
