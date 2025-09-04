@@ -1,64 +1,44 @@
-import {
-  type SwapQuote,
-  SwapQuoteQuery,
-  type SwapQuoteRequest,
-} from '@aave/graphql-next';
-import {
-  type ReadResult,
-  type Suspendable,
-  type SuspendableResult,
-  type SuspenseResult,
-  useSuspendableQuery,
-} from './helpers';
-
-export type UseSwapQuoteArgs = SwapQuoteRequest;
+import { swapQuote } from '@aave/client-next';
+import type { UnexpectedError } from '@aave/core-next';
+import type { SwapQuote, SwapQuoteRequest } from '@aave/graphql-next';
+import { useAaveClient } from './context';
+import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
 /**
- * Fetch a swap quote for the specified trade parameters.
- *
- * This signature supports React Suspense:
+ * Fetches a swap quote for the specified trade parameters.
  *
  * ```tsx
- * const { data } = useSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
- *   suspense: true,
- * });
- * ```
- */
-export function useSwapQuote(
-  args: UseSwapQuoteArgs & Suspendable,
-): SuspenseResult<SwapQuote>;
-
-/**
- * Fetch a swap quote for the specified trade parameters.
+ * const [getQuote, gettingQuote] = useSwapQuote();
  *
- * ```tsx
- * const { data, error, loading } = useSwapQuote({
+ * const loading = gettingQuote.loading;
+ * const error = gettingQuote.error;
+ *
+ * // …
+ *
+ * const result = await getQuote({
  *   chainId: chainId(1),
  *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
  *   sell: { erc20: evmAddress('0x6B175474E...') },
  *   amount: bigDecimal('1000'),
  *   kind: SwapKind.SELL,
  * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Swap quote:', result.value);
  * ```
  */
-export function useSwapQuote(args: UseSwapQuoteArgs): ReadResult<SwapQuote>;
+export function useSwapQuote(): UseAsyncTask<
+  SwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError
+> {
+  const client = useAaveClient();
 
-export function useSwapQuote({
-  suspense = false,
-  ...request
-}: UseSwapQuoteArgs & {
-  suspense?: boolean;
-}): SuspendableResult<SwapQuote> {
-  return useSuspendableQuery({
-    document: SwapQuoteQuery,
-    variables: {
-      request,
-    },
-    suspense,
-  });
+  return useAsyncTask((request: SwapQuoteRequest) =>
+    swapQuote(client, request),
+  );
 }
