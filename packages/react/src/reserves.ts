@@ -1,3 +1,4 @@
+import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '@aave/client-next';
 import {
   BestBorrowReserveQuery,
   type BestBorrowReserveRequest,
@@ -15,7 +16,7 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseBestBorrowReserveArgs = BestBorrowReserveRequest;
+export type UseBestBorrowReserveArgs = BestBorrowReserveRequest & QueryOptions;
 
 /**
  * Find the best borrow reserve based on specified criteria.
@@ -54,6 +55,7 @@ export function useBestBorrowReserve(
 
 export function useBestBorrowReserve({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseBestBorrowReserveArgs & {
   suspense?: boolean;
@@ -62,12 +64,13 @@ export function useBestBorrowReserve({
     document: BestBorrowReserveQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseBestSupplyReserveArgs = BestSupplyReserveRequest;
+export type UseBestSupplyReserveArgs = BestSupplyReserveRequest & QueryOptions;
 
 /**
  * Find the best supply reserve based on specified criteria.
@@ -106,6 +109,7 @@ export function useBestSupplyReserve(
 
 export function useBestSupplyReserve({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseBestSupplyReserveArgs & {
   suspense?: boolean;
@@ -114,12 +118,13 @@ export function useBestSupplyReserve({
     document: BestSupplyReserveQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseReservesArgs = ReservesRequest;
+export type UseReservesArgs = ReservesRequest & QueryOptions;
 
 /**
  * Fetch reserves based on specified criteria.
@@ -164,6 +169,7 @@ export function useReserves(args: UseReservesArgs): ReadResult<Reserve[]>;
 
 export function useReserves({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseReservesArgs & {
   suspense?: boolean;
@@ -172,6 +178,7 @@ export function useReserves({
     document: ReservesQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });

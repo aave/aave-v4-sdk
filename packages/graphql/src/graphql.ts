@@ -88,9 +88,11 @@ export const graphql = initGraphQLTada<{
  */
 export type RequestOf<Document> = Document extends DocumentDecoration<
   unknown,
-  { request: infer Request }
+  infer Variables
 >
-  ? Request
+  ? Variables extends { request: infer Request }
+    ? Request
+    : never
   : never;
 
 /**
