@@ -1,0 +1,7 @@
+# Ignore generated files
+exclude: dist/**
+exclude: node_modules/**
+
+# Prioritize main app logic
+include: AGENTS.md
+priority: high
