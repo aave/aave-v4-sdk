@@ -1,4 +1,4 @@
-import { ExecutionPlanFragment } from './fragments';
+import { ExecutionPlanFragment, TransactionRequestFragment } from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
 /**
@@ -52,3 +52,18 @@ export const WithdrawQuery = graphql(
   [ExecutionPlanFragment],
 );
 export type WithdrawRequest = RequestOf<typeof WithdrawQuery>;
+
+/**
+ * @internal
+ */
+export const SetUserSupplyAsCollateralQuery = graphql(
+  `mutation SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
+    value: setUserSupplyAsCollateral(request: $request) {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type SetUserSupplyAsCollateralRequest = RequestOf<
+  typeof SetUserSupplyAsCollateralQuery
+>;

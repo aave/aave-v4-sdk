@@ -1,5 +1,9 @@
-import { setUserSupplyAsCollateral } from '@aave/client-next';
-import type { UnexpectedError } from '@aave/core-next';
+import {
+  DEFAULT_QUERY_OPTIONS,
+  type QueryOptions,
+  setUserSupplyAsCollateral,
+  type UnexpectedError,
+} from '@aave/client-next';
 import {
   type APYSample,
   type BorrowAPYHistoryRequest,
@@ -45,7 +49,7 @@ import {
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
-export type UseUserSuppliesArgs = UserSuppliesRequest;
+export type UseUserSuppliesArgs = UserSuppliesRequest & QueryOptions;
 
 /**
  * Fetch all user supply positions.
@@ -90,6 +94,7 @@ export function useUserSupplies(
 
 export function useUserSupplies({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserSuppliesArgs & {
   suspense?: boolean;
@@ -98,12 +103,13 @@ export function useUserSupplies({
     document: UserSuppliesQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseUserBorrowsArgs = UserBorrowsRequest;
+export type UseUserBorrowsArgs = UserBorrowsRequest & QueryOptions;
 
 /**
  * Fetch all user borrow positions.
@@ -148,6 +154,7 @@ export function useUserBorrows(
 
 export function useUserBorrows({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserBorrowsArgs & {
   suspense?: boolean;
@@ -156,6 +163,7 @@ export function useUserBorrows({
     document: UserBorrowsQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
@@ -213,7 +221,7 @@ export function useUserSummary({
   });
 }
 
-export type UseUserPositionsArgs = UserPositionsRequest;
+export type UseUserPositionsArgs = UserPositionsRequest & QueryOptions;
 
 /**
  * Fetch all user positions across specified chains.
@@ -250,6 +258,7 @@ export function useUserPositions(
 
 export function useUserPositions({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserPositionsArgs & {
   suspense?: boolean;
@@ -258,12 +267,13 @@ export function useUserPositions({
     document: UserPositionsQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseUserPositionArgs = UserPositionRequest;
+export type UseUserPositionArgs = UserPositionRequest & QueryOptions;
 
 /**
  * Fetch a specific user position by ID.
@@ -298,6 +308,7 @@ export function useUserPosition(
 
 export function useUserPosition({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserPositionArgs & {
   suspense?: boolean;
@@ -306,12 +317,13 @@ export function useUserPosition({
     document: UserPositionQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseUserBalancesArgs = UserBalancesRequest;
+export type UseUserBalancesArgs = UserBalancesRequest & QueryOptions;
 
 /**
  * Fetch all user balances across specified chains.
@@ -346,6 +358,7 @@ export function useUserBalances(
 
 export function useUserBalances({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserBalancesArgs & {
   suspense?: boolean;
@@ -354,12 +367,13 @@ export function useUserBalances({
     document: UserBalancesQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseUserHistoryArgs = UserHistoryRequest;
+export type UseUserHistoryArgs = UserHistoryRequest & QueryOptions;
 
 /**
  * Fetch user transaction history with pagination.
@@ -398,6 +412,7 @@ export function useUserHistory(
 
 export function useUserHistory({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserHistoryArgs & {
   suspense?: boolean;
@@ -406,6 +421,7 @@ export function useUserHistory({
     document: UserHistoryQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
@@ -573,7 +589,7 @@ export function useSupplyApyHistory({
   });
 }
 
-export type UseHubAssetsArgs = HubAssetsRequest;
+export type UseHubAssetsArgs = HubAssetsRequest & QueryOptions;
 
 /**
  * Fetch hub assets for a specific chain and optional hub/user filtering.
@@ -612,6 +628,7 @@ export function useHubAssets(args: UseHubAssetsArgs): ReadResult<HubAsset[]>;
 
 export function useHubAssets({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseHubAssetsArgs & {
   suspense?: boolean;
@@ -620,6 +637,7 @@ export function useHubAssets({
     document: HubAssetsQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });

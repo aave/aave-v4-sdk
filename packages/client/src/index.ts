@@ -3,6 +3,7 @@ export * from '@aave/graphql-next';
 export * from '@aave/types-next';
 export * from './AaveClient';
 export * from './actions';
-export type * from './config';
+export type { ClientConfig } from './config';
 export * from './environments';
+export * from './options';
 export type * from './types';
