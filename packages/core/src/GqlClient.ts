@@ -330,6 +330,9 @@ export class GqlClient {
   }
 
   protected exchanges(): Exchange[] {
+    if (this.context.cache) {
+      return [this.context.cache, fetchExchange];
+    }
     return [fetchExchange];
   }
 

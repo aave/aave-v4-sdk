@@ -1,6 +1,7 @@
 import type { UnexpectedError } from '@aave/core-next';
 import type { SwapExecutionPlan } from '@aave/graphql-next';
 import {
+  type Currency,
   PrepareSwapQuery,
   type PrepareSwapRequest,
   type PrepareSwapResult,
@@ -16,6 +17,16 @@ import {
 import type { ResultAsync } from '@aave/types-next';
 
 import type { AaveClient } from '../AaveClient';
+import { DEFAULT_QUERY_OPTIONS } from '../options';
+
+export type SwapQueryOptions = {
+  /**
+   * The currency for fiat amounts.
+   *
+   * @defaultValue {@link Currency.Usd}
+   */
+  currency: Currency;
+};
 
 /**
  * Fetches a swap quote for the specified trade parameters.
@@ -37,8 +48,9 @@ import type { AaveClient } from '../AaveClient';
 export function swapQuote(
   client: AaveClient,
   request: SwapQuoteRequest,
+  options: SwapQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<SwapQuote, UnexpectedError> {
-  return client.query(SwapQuoteQuery, { request });
+  return client.query(SwapQuoteQuery, { request, ...options });
 }
 
 /**
@@ -108,8 +120,9 @@ export function swappableTokens(
 export function prepareSwap(
   client: AaveClient,
   request: PrepareSwapRequest,
+  options: SwapQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PrepareSwapResult, UnexpectedError> {
-  return client.query(PrepareSwapQuery, { request });
+  return client.query(PrepareSwapQuery, { request, ...options });
 }
 
 /**

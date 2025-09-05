@@ -19,6 +19,11 @@
     "./test-utils": {
       "import": "./dist/test-utils.js",
       "require": "./dist/test-utils.cjs"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.js",
+      "require": "./dist/schema.cjs"
     }
   },
   "typesVersions": {
@@ -31,6 +36,9 @@
       ],
       "test-utils": [
         "./dist/test-utils.d.ts"
+      ],
+      "schema": [
+        "./dist/schema.d.ts"
       ]
     }
   },
@@ -43,9 +51,9 @@
     "check": "gql.tada check",
     "doctor": "gql.tada doctor",
     "gql:generate:cache": "gql.tada generate turbo",
-    "gql:download:staging": "gql-tada generate schema 'https://api.v4.staging.aave.com/graphql' --output './schema.graphql'",
-    "gql:download:local": "gql-tada generate schema 'http://localhost:3011/graphql' --output './schema.graphql'",
-    "gql:generate": "gql-tada generate output",
+    "gql:download:local": "./scripts/fetch-schema.ts http://localhost:3011/graphql ./src/schema.json && gql-tada generate schema 'http://localhost:3011/graphql' --output './schema.graphql'",
+    "gql:download:staging": "./scripts/fetch-schema.ts https://api.v4.staging.aave.com/graphql ./src/schema.json && gql-tada generate schema 'https://api.v4.staging.aave.com/graphql' --output './schema.graphql'",
+    "gql:generate:introspection": "gql-tada generate output",
     "gql:turbo": "gql-tada turbo",
     "prebuild": "pnpm run gql:turbo"
   },
@@ -56,7 +64,9 @@
     "type-fest": "^4.41.0"
   },
   "devDependencies": {
+    "@urql/introspection": "^1.2.1",
     "tsup": "^8.5.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   },
   "license": "MIT",

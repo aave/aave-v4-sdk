@@ -10,7 +10,7 @@ import { graphql, type RequestOf } from './graphql';
  * @internal
  */
 export const SwapQuoteQuery = graphql(
-  `query SwapQuote($request: SwapQuoteRequest!) {
+  `query SwapQuote($request: SwapQuoteRequest!, $currency: Currency!) {
     value: swapQuote(request: $request) {
       ...SwapQuote
     }
@@ -36,7 +36,7 @@ export type SwappableTokensRequest = RequestOf<typeof SwappableTokensQuery>;
  * @internal
  */
 export const PrepareSwapQuery = graphql(
-  `query PrepareSwap($request: PrepareSwapRequest!) {
+  `query PrepareSwap($request: PrepareSwapRequest!, $currency: Currency!) {
     value: prepareSwap(request: $request) {
       ...PrepareSwapResult
     }

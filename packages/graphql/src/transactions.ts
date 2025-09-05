@@ -57,7 +57,7 @@ export type WithdrawRequest = RequestOf<typeof WithdrawQuery>;
  * @internal
  */
 export const SetUserSupplyAsCollateralQuery = graphql(
-  `mutation SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
+  `query SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
     value: setUserSupplyAsCollateral(request: $request) {
       ...TransactionRequest
     }

@@ -4,32 +4,7 @@ import { graphql } from '../graphql';
 import { ChainFragment } from './chain';
 import { Erc20AmountFragment, PercentValueFragment } from './common';
 import { HubAssetFragment } from './hubs';
-
-export const SpokeConfigFragment = graphql(
-  `fragment SpokeConfig on SpokeConfig {
-    __typename
-    canSetPositionManager
-    active
-  }`,
-);
-export type SpokeConfig = FragmentOf<typeof SpokeConfigFragment>;
-
-export const SpokeFragment = graphql(
-  `fragment Spoke on Spoke {
-    __typename
-    name
-    address
-    chain {
-      ...Chain
-    }
-    config {
-      ...SpokeConfig
-    }
-  }`,
-  [ChainFragment, SpokeConfigFragment],
-);
-
-export type Spoke = FragmentOf<typeof SpokeFragment>;
+import { SpokeFragment } from './spoke';
 
 export const ReserveSettingsFragment = graphql(
   `fragment ReserveSettings on ReserveSettings {
@@ -106,7 +81,6 @@ export const ReserveFragment = graphql(
     spoke {
       ...Spoke
     }
-    assetId
     borrowCap
     supplyCap
     chain {

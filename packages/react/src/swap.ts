@@ -1,4 +1,10 @@
-import { prepareSwap, swap, swapQuote } from '@aave/client-next';
+import {
+  DEFAULT_QUERY_OPTIONS,
+  prepareSwap,
+  type SwapQueryOptions,
+  swap,
+  swapQuote,
+} from '@aave/client-next';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
   PrepareSwapRequest,
@@ -24,6 +30,8 @@ import {
   useSuspendableQuery,
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
+
+export type UseSwapQuoteArgs = SwapQueryOptions;
 
 /**
  * Fetches a swap quote for the specified trade parameters.
@@ -52,15 +60,13 @@ import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
  * console.log('Swap quote:', result.value);
  * ```
  */
-export function useSwapQuote(): UseAsyncTask<
-  SwapQuoteRequest,
-  SwapQuote,
-  UnexpectedError
-> {
+export function useSwapQuote(
+  options: UseSwapQuoteArgs = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<SwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask((request: SwapQuoteRequest) =>
-    swapQuote(client, request),
+    swapQuote(client, request, options),
   );
 }
 
