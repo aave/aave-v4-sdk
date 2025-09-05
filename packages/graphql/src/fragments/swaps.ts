@@ -2,7 +2,11 @@ import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 import { DomainDataFragment } from '../permits';
 import { PercentValueFragment, TokenAmountFragment } from './common';
-import { TransactionRequestFragment } from './transactions';
+import {
+  type InsufficientBalanceError,
+  InsufficientBalanceErrorFragment,
+  TransactionRequestFragment,
+} from './transactions';
 
 export const SwapQuoteCostsFragment = graphql(
   `fragment SwapQuoteCosts on SwapQuoteCosts {
@@ -254,3 +258,76 @@ export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
       SwapFulfilledFragment,
     ],
   );
+export const SwapReceiptFragment = graphql(
+  `fragment SwapReceipt on SwapReceipt {
+    __typename
+    id
+    explorerLink
+  }`,
+);
+export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
+
+export const SwapTransactionRequestFragment = graphql(
+  `fragment SwapTransactionRequest on SwapTransactionRequest {
+    __typename
+    transaction {
+      ...TransactionRequest
+    }
+    orderReceipt {
+      ...SwapReceipt
+    }
+  }`,
+  [TransactionRequestFragment, SwapReceiptFragment],
+);
+export type SwapTransactionRequest = FragmentOf<
+  typeof SwapTransactionRequestFragment
+>;
+
+export const SwapApprovalRequiredFragment = graphql(
+  `fragment SwapApprovalRequired on SwapApprovalRequired {
+    __typename
+    approval {
+      ...TransactionRequest
+    }
+    originalTransaction {
+      ...SwapTransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment, SwapTransactionRequestFragment],
+);
+export type SwapApprovalRequired = FragmentOf<
+  typeof SwapApprovalRequiredFragment
+>;
+
+export type SwapExecutionPlan =
+  | SwapTransactionRequest
+  | SwapApprovalRequired
+  | InsufficientBalanceError
+  | SwapReceipt;
+
+export const SwapExecutionPlanFragment: FragmentDocumentFor<
+  SwapExecutionPlan,
+  'SwapExecutionPlan'
+> = graphql(
+  `fragment SwapExecutionPlan on SwapExecutionPlan {
+    __typename
+    ... on SwapTransactionRequest {
+      ...SwapTransactionRequest
+    }
+    ... on SwapApprovalRequired {
+      ...SwapApprovalRequired
+    }
+    ... on InsufficientBalanceError {
+      ...InsufficientBalanceError
+    }
+    ... on SwapReceipt {
+      ...SwapReceipt
+    }
+  }`,
+  [
+    SwapTransactionRequestFragment,
+    SwapApprovalRequiredFragment,
+    InsufficientBalanceErrorFragment,
+    SwapReceiptFragment,
+  ],
+);

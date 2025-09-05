@@ -191,3 +191,51 @@ export const PaginatedResultInfoFragment = graphql(
 export type PaginatedResultInfo = FragmentOf<
   typeof PaginatedResultInfoFragment
 >;
+
+export const BigDecimalVariationFragment = graphql(
+  `fragment BigDecimalVariation on BigDecimalVariation {
+    __typename
+    current {
+      ...PercentValue
+    }
+    after {
+      ...PercentValue
+    }
+  }`,
+  [PercentValueFragment],
+);
+export type BigDecimalVariation = FragmentOf<
+  typeof BigDecimalVariationFragment
+>;
+
+export const PercentValueVariationFragment = graphql(
+  `fragment PercentValueVariation on PercentValueVariation {
+    __typename
+    current {
+      ...PercentValue
+    }
+    after {
+      ...PercentValue
+    }
+  }`,
+  [PercentValueFragment],
+);
+export type PercentValueVariation = FragmentOf<
+  typeof PercentValueVariationFragment
+>;
+
+export const FiatAmountValueVariationFragment = graphql(
+  `fragment FiatAmountValueVariation on FiatAmountValueVariation {
+    __typename
+    current {
+      ...FiatAmount
+    }
+    after {
+      ...FiatAmount
+    }
+  }`,
+  [FiatAmountFragment],
+);
+export type FiatAmountValueVariation = FragmentOf<
+  typeof FiatAmountValueVariationFragment
+>;
