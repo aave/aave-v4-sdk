@@ -1,6 +1,7 @@
 import {
+  type Spoke,
   SpokesQuery,
-  SpokesRequest,
+  type SpokesRequest,
 } from '@aave/graphql-next';
 import {
   type ReadResult,
@@ -9,7 +10,6 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from './helpers';
-import { Spoke } from '@aave/graphql-next';
 
 export type UseSpokesArgs = SpokesRequest;
 

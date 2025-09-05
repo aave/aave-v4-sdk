@@ -5,7 +5,7 @@ export * from './hub';
 export * from './misc';
 export * from './permits';
 export * from './reserve';
+export * from './spoke';
 export * from './swaps';
 export * from './transactions';
 export * from './user';
-export * from './spoke';

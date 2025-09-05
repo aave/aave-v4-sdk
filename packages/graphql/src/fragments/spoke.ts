@@ -1,5 +1,5 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql } from "../graphql";
+import { graphql } from '../graphql';
 import { ChainFragment } from './chain';
 
 export const SpokeConfigFragment = graphql(

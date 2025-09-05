@@ -1,11 +1,11 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
+  type Spoke,
   SpokesQuery,
-  SpokesRequest,
+  type SpokesRequest,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
-import { Spoke } from '@aave/graphql-next';
 
 /**
  * Fetches spokes based on specified criteria.
@@ -28,5 +28,3 @@ export function spokes(
 ): ResultAsync<Spoke[], UnexpectedError> {
   return client.query(SpokesQuery, { request });
 }
-
-
