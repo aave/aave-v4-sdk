@@ -67,3 +67,18 @@ export const SetUserSupplyAsCollateralQuery = graphql(
 export type SetUserSupplyAsCollateralRequest = RequestOf<
   typeof SetUserSupplyAsCollateralQuery
 >;
+
+/**
+ * @internal
+ */
+export const UpdateUserRiskPremiumQuery = graphql(
+  `query UpdateUserRiskPremium($request: UpdateUserRiskPremiumRequest!) {
+    value: updateUserRiskPremium(request: $request) {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type UpdateUserRiskPremiumRequest = RequestOf<
+  typeof UpdateUserRiskPremiumQuery
+>;

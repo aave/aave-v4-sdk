@@ -5,6 +5,7 @@ import {
   // liquidate,
   repay,
   supply,
+  updateUserRiskPremium,
   withdraw,
 } from '@aave/client-next/actions';
 import type {
@@ -12,6 +13,8 @@ import type {
   ExecutionPlan,
   RepayRequest,
   SupplyRequest,
+  TransactionRequest,
+  UpdateUserRiskPremiumRequest,
   // TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
@@ -204,6 +207,42 @@ export function useWithdraw(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask((request: WithdrawRequest) => withdraw(client, request));
+}
+
+/**
+ * A hook that provides a way to update the user risk premium for a spoke.
+ *
+ * ```ts
+ * const [updateUserRiskPremium, updating] = useUpdateUserRiskPremium();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = updating.loading && sending.loading;
+ * const error = updating.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await updateUserRiskPremium({ ... })
+ *   .andThen(sendTransaction);
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
+ * ```
+ */
+
+export function useUpdateUserRiskPremium(): UseAsyncTask<
+  UpdateUserRiskPremiumRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
+    updateUserRiskPremium(client, request),
+  );
 }
 
 /**
