@@ -123,7 +123,7 @@ export type SwapByIntentHandler = (
 ) => ResultAsync<ERC712Signature, SigningError | UnexpectedError>;
 
 /**
- * Executes the complete swap workflow combining preparation and execution.
+ * Orchestrate the swap execution plan.
  *
  * ```tsx
  * const [sendTransaction, sending] = useSendTransaction(wallet);
