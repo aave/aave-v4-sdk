@@ -1,14 +1,15 @@
 import type { UnexpectedError } from '@aave/client-next';
 import {
   borrow,
-  // collateralToggle,
-  // liquidate,
   liquidatePosition,
   preview,
+  renounceSpokeUserPositionManager,
   repay,
   setSpokeUserPositionManager,
+  setUserSupplyAsCollateral,
   supply,
   updateUserDynamicConfig,
+  updateUserRiskPremium,
   withdraw,
 } from '@aave/client-next/actions';
 import type {
@@ -17,12 +18,14 @@ import type {
   LiquidatePositionRequest,
   PreviewRequest,
   PreviewUserPositionResult,
+  RenounceSpokeUserPositionManagerRequest,
   RepayRequest,
   SetSpokeUserPositionManagerRequest,
+  SetUserSupplyAsCollateralRequest,
   SupplyRequest,
   TransactionRequest,
   UpdateUserDynamicConfigRequest,
-  // TransactionRequest,
+  UpdateUserRiskPremiumRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
 import { useAaveClient } from './context';
@@ -217,6 +220,78 @@ export function useWithdraw(): UseAsyncTask<
 }
 
 /**
+ * A hook that provides a way to renounce a position manager of a user for a specific spoke.
+ *
+ * ```ts
+ * const [renounceSpokeUserPositionManager, renouncing] = useRenounceSpokeUserPositionManager();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = renouncing.loading && sending.loading;
+ * const error = renouncing.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await renounceSpokeUserPositionManager({ ... })
+ *   .andThen(sendTransaction);
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
+ * ```
+ */
+
+export function useRenounceSpokeUserPositionManager(): UseAsyncTask<
+  RenounceSpokeUserPositionManagerRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: RenounceSpokeUserPositionManagerRequest) =>
+    renounceSpokeUserPositionManager(client, request),
+  );
+}
+
+/**
+ * A hook that provides a way to update the user risk premium for a spoke.
+ *
+ * ```ts
+ * const [updateUserRiskPremium, updating] = useUpdateUserRiskPremium();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = updating.loading && sending.loading;
+ * const error = updating.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await updateUserRiskPremium({ ... })
+ *   .andThen(sendTransaction);
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
+ * ```
+ */
+
+export function useUpdateUserRiskPremium(): UseAsyncTask<
+  UpdateUserRiskPremiumRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
+    updateUserRiskPremium(client, request),
+  );
+}
+
+/**
  * A hook that provides a way to update the user dynamic configuration for a spoke.
  *
  * ```ts
@@ -253,74 +328,35 @@ export function useUpdateUserDynamicConfig(): UseAsyncTask<
 }
 
 /**
- * A hook that provides a way to enable/disable a specific supplied asset as collateral.
+ * Hook for setting whether a user's supply should be used as collateral.
  *
- * ```ts
- * const [toggle, toggling] = useCollateralToggle();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
+ * ```tsx
+ * const [execute, { called, loading, data, error }] = useSetUserSupplyAsCollateral();
  *
- * const loading = toggling.loading && sending.loading;
- * const error = toggling.error || sending.error;
- *
- * // …
- *
- * const result = await toggle({ ... })
- *   .andThen(sendTransaction);
- *
- * if (result.isErr()) {
- *   console.error(result.error);
- *   return;
- * }
- *
- * console.log('Transaction sent with hash:', result.value);
+ * const handleToggleCollateral = async () => {
+ *   const result = await execute({
+ *     reserve: {
+ *       chainId: chainId(1),
+ *       spoke: evmAddress('0x123...'),
+ *       reserveId: reserveId(1)
+ *     },
+ *     sender: evmAddress('0x456...'),
+ *     enableCollateral: true,
+ *   });
+ * };
  * ```
  */
-// export function useCollateralToggle(): UseAsyncTask<
-//   CollateralToggleRequest,
-//   TransactionRequest,
-//   UnexpectedError
-// > {
-//   const client = useAaveClient();
+export function useSetUserSupplyAsCollateral(): UseAsyncTask<
+  SetUserSupplyAsCollateralRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
 
-//   return useAsyncTask((request: CollateralToggleRequest) =>
-//     collateralToggle(client, request),
-//   );
-// }
-
-// /**
-//  * A hook that provides a way to liquidate a non-healthy position with Health Factor below 1.
-//  *
-//  * ```ts
-//  * const [liquidate, liquidating] = useLiquidate();
-//  * const [sendTransaction, sending] = useSendTransaction(wallet);
-//  *
-//  * const loading = liquidating.loading && sending.loading;
-//  * const error = liquidating.error || sending.error;
-//  *
-//  * // …
-//  *
-//  * const result = await liquidate({ ... })
-//  *   .andThen(sendTransaction);
-//  *
-//  * if (result.isErr()) {
-//  *   console.error(result.error);
-//  *   return;
-//  * }
-//  *
-//  * console.log('Transaction sent with hash:', result.value);
-//  * ```
-//  */
-// export function useLiquidate(): UseAsyncTask<
-//   LiquidateRequest,
-//   TransactionRequest,
-//   UnexpectedError
-// > {
-//   const client = useAaveClient();
-
-//   return useAsyncTask((request: LiquidateRequest) =>
-//     liquidate(client, request),
-//   );
-// }
+  return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
+    setUserSupplyAsCollateral(client, request),
+  );
+}
 
 /**
  * A hook that provides a way to liquidate a user's position.

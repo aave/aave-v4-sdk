@@ -102,6 +102,36 @@ export type SetUserSupplyAsCollateralRequest = RequestOf<
   typeof SetUserSupplyAsCollateralQuery
 >;
 
+/**
+ * @internal
+ */
+export const RenounceSpokeUserPositionManagerQuery = graphql(
+  `query RenounceSpokeUserPositionManager($request: RenounceSpokeUserPositionManagerRequest!) {
+    value: renounceSpokeUserPositionManager(request: $request) {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type RenounceSpokeUserPositionManagerRequest = RequestOf<
+  typeof RenounceSpokeUserPositionManagerQuery
+>;
+
+/**
+ * @internal
+ */
+export const UpdateUserRiskPremiumQuery = graphql(
+  `query UpdateUserRiskPremium($request: UpdateUserRiskPremiumRequest!) {
+    value: updateUserRiskPremium(request: $request) {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type UpdateUserRiskPremiumRequest = RequestOf<
+  typeof UpdateUserRiskPremiumQuery
+>;
+
 export const PreviewUserPositionResultFragment = graphql(
   `fragment PreviewUserPositionResult on PreviewUserPositionResult {
     __typename
@@ -146,6 +176,7 @@ export const PreviewQuery = graphql(
   [PreviewUserPositionResultFragment],
 );
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
+
 /**
  * @internal
  */
@@ -157,7 +188,6 @@ export const UpdateUserDynamicConfigQuery = graphql(
   }`,
   [TransactionRequestFragment],
 );
-
 export type UpdateUserDynamicConfigRequest = RequestOf<
   typeof UpdateUserDynamicConfigQuery
 >;

@@ -8,6 +8,8 @@ import {
   PreviewQuery,
   type PreviewRequest,
   type PreviewUserPositionResult,
+  RenounceSpokeUserPositionManagerQuery,
+  type RenounceSpokeUserPositionManagerRequest,
   RepayQuery,
   type RepayRequest,
   SetSpokeUserPositionManagerQuery,
@@ -17,7 +19,8 @@ import {
   type TransactionRequest,
   UpdateUserDynamicConfigQuery,
   type UpdateUserDynamicConfigRequest,
-  // type TransactionRequest,
+  UpdateUserRiskPremiumQuery,
+  type UpdateUserRiskPremiumRequest,
   WithdrawQuery,
   type WithdrawRequest,
 } from '@aave/graphql-next';
@@ -203,6 +206,39 @@ export function withdraw(
 }
 
 /**
+ * Creates a transaction to renounce a position manager of a user in a specific spoke.
+ *
+ * ```ts
+ * const result = await renounceSpokeUserPositionManager(client, {
+ *   manager: evmAddress('0x9abc…'),
+ *   managing: evmAddress('0xdef0…'),
+ *   spoke: {
+ *     chainId: chainId(1),
+ *     address: evmAddress('0x878…'),
+ *   }
+ * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *
+ * if (result.isErr()) {
+ *   // Handle error
+ *   return;
+ * }
+ *
+ * // result.value: TxHash
+ * ```
+ *
+ *
+ * @param client - Aave client.
+ * @param request - The renounce spoke user position manager request parameters.
+ * @returns The transaction data.
+ */
+export function renounceSpokeUserPositionManager(
+  client: AaveClient,
+  request: RenounceSpokeUserPositionManagerRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(RenounceSpokeUserPositionManagerQuery, { request });
+}
+
+/**
  * Creates a transaction to update user dynamic config for a specific spoke.
  *
  * ```ts
@@ -233,6 +269,38 @@ export function updateUserDynamicConfig(
   request: UpdateUserDynamicConfigRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
   return client.query(UpdateUserDynamicConfigQuery, { request });
+}
+
+/**
+ * Creates a transaction to update user risk premium for a specific spoke.
+ *
+ * ```ts
+ * const result = await updateUserRiskPremium(client, {
+ *   sender: evmAddress('0x9abc…'),
+ *   spoke: {
+ *     chainId: chainId(1),
+ *     address: evmAddress('0x878…'),
+ *   }
+ * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *
+ * if (result.isErr()) {
+ *   // Handle error
+ *   return;
+ * }
+ *
+ * // result.value: TxHash
+ * ```
+ *
+ *
+ * @param client - Aave client.
+ * @param request - The update user risk premium request parameters.
+ * @returns The transaction data.
+ */
+export function updateUserRiskPremium(
+  client: AaveClient,
+  request: UpdateUserRiskPremiumRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(UpdateUserRiskPremiumQuery, { request });
 }
 
 /**
