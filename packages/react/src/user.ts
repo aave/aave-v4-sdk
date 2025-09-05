@@ -1,8 +1,5 @@
-import {
-  DEFAULT_QUERY_OPTIONS,
-  type QueryOptions,
-  type UserSummaryQueryOptions,
-} from '@aave/client-next';
+import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '@aave/client-next';
+import type { UserSummaryQueryOptions } from '@aave/client-next/actions';
 import {
   type APYSample,
   type BorrowAPYHistoryRequest,
