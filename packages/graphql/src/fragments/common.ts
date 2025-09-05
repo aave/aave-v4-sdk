@@ -29,7 +29,6 @@ export const FiatAmountFragment = graphql(
     name
     symbol
   }`,
-  [DecimalValueFragment],
 );
 export type FiatAmount = FragmentOf<typeof FiatAmountFragment>;
 
