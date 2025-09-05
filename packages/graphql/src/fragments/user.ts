@@ -12,7 +12,8 @@ import {
   TokenAmountFragment,
   TokenInfoFragment,
 } from './common';
-import { ReserveFragment, ReserveInfoFragment, SpokeFragment } from './reserve';
+import { ReserveFragment, ReserveInfoFragment } from './reserve';
+import { SpokeFragment } from './spoke';
 
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
