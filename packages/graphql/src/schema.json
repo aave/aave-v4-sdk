@@ -634,6 +634,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "isWrappedNativeToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -3128,6 +3139,17 @@
             "args": []
           },
           {
+            "name": "canSupply",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "canUseAsCollateral",
             "type": {
               "kind": "NON_NULL",
@@ -4792,7 +4814,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "supplyApy",
