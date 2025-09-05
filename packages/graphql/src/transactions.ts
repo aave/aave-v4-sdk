@@ -105,6 +105,21 @@ export type SetUserSupplyAsCollateralRequest = RequestOf<
 /**
  * @internal
  */
+export const RenounceSpokeUserPositionManagerQuery = graphql(
+  `query RenounceSpokeUserPositionManager($request: RenounceSpokeUserPositionManagerRequest!) {
+    value: renounceSpokeUserPositionManager(request: $request) {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type RenounceSpokeUserPositionManagerRequest = RequestOf<
+  typeof RenounceSpokeUserPositionManagerQuery
+>;
+
+/**
+ * @internal
+ */
 export const UpdateUserRiskPremiumQuery = graphql(
   `query UpdateUserRiskPremium($request: UpdateUserRiskPremiumRequest!) {
     value: updateUserRiskPremium(request: $request) {
