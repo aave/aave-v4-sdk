@@ -1,10 +1,10 @@
+import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
 import {
-  DEFAULT_QUERY_OPTIONS,
   prepareSwap,
   type SwapQueryOptions,
   swap,
   swapQuote,
-} from '@aave/client-next';
+} from '@aave/client-next/actions';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
   PendingSwapsRequest,
