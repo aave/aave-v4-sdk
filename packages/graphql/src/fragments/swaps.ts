@@ -126,6 +126,15 @@ export const SwapByTransactionFragment = graphql(
 );
 export type SwapByTransaction = FragmentOf<typeof SwapByTransactionFragment>;
 
+export const SwapReceiptFragment = graphql(
+  `fragment SwapReceipt on SwapReceipt {
+    __typename
+    id
+    explorerLink
+  }`,
+);
+export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
+
 export type PrepareSwapResult =
   | SwapByIntent
   | SwapByIntentWithApprovalRequired
@@ -153,15 +162,6 @@ export const PrepareSwapResultFragment: FragmentDocumentFor<
     SwapByTransactionFragment,
   ],
 );
-
-export const SwapReceiptFragment = graphql(
-  `fragment SwapReceipt on SwapReceipt {
-    __typename
-    id
-    explorerLink
-  }`,
-);
-export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
 
 export const SwapTransactionRequestFragment = graphql(
   `fragment SwapTransactionRequest on SwapTransactionRequest {

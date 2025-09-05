@@ -2,6 +2,8 @@ import type { UnexpectedError } from '@aave/core-next';
 import type { SwapExecutionPlan } from '@aave/graphql-next';
 import {
   type Currency,
+  PendingSwapsQuery,
+  type PendingSwapsRequest,
   PrepareSwapQuery,
   type PrepareSwapRequest,
   type PrepareSwapResult,
@@ -11,9 +13,11 @@ import {
   type SwapQuote,
   SwapQuoteQuery,
   type SwapQuoteRequest,
+  type SwapReceipt,
   type SwapRequest,
   type Token,
 } from '@aave/graphql-next';
+
 import type { ResultAsync } from '@aave/types-next';
 
 import type { AaveClient } from '../AaveClient';
@@ -123,6 +127,26 @@ export function prepareSwap(
   options: SwapQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PrepareSwapResult, UnexpectedError> {
   return client.query(PrepareSwapQuery, { request, ...options });
+}
+
+/**
+ * Fetches pending swaps for a specific user.
+ *
+ * ```ts
+ * const result = await pendingSwaps(client, {
+ *   user: evmAddress('0x742d35cc...'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The pending swaps request parameters.
+ * @returns The list of pending swap receipts for the user.
+ */
+export function pendingSwaps(
+  client: AaveClient,
+  request: PendingSwapsRequest,
+): ResultAsync<SwapReceipt[], UnexpectedError> {
+  return client.query(PendingSwapsQuery, { request });
 }
 
 /**
