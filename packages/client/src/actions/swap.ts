@@ -74,6 +74,30 @@ export function swappableTokens(
  *     kind: SwapKind.SELL,
  *     user: evmAddress('0x742d35cc...'),
  *   },
+ * }).andThen(plan => {
+ *   switch (plan.__typename) {
+ *     case 'SwapByIntent':
+ *       return signSwapByIntentWith(plan.data)
+ *         .andThen((signature) => swap({ intent: { id: plan.id, signature } }))
+ *         .andThen((plan) => {
+ *           // …
+ *         });
+ *       );
+ *     case 'SwapByIntentWithApprovalRequired':
+ *       return sendTransaction(plan.approval)
+ *         .andThen(signSwapByIntentWith(plan.data))
+ *         .andThen((signature) => swap({ intent: { id: plan.id, signature } }))
+ *         .andThen((plan) => {
+ *         // …
+ *         });
+ *       );
+ *     case 'SwapByTransaction':
+ *       return swap({ transaction: { id: plan.id } })
+ *         .andThen((plan) => {
+ *           // …
+ *         });
+ *       );
+ *   }
  * });
  * ```
  *
@@ -100,7 +124,31 @@ export function prepareSwap(
  *       deadline: 1234567890,
  *     },
  *   },
+ * }).andThen((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'SwapTransactionRequest':
+ *       return sendTransaction(plan.transaction)
+ *         .map(() => plan.orderReceipt);
+ *
+ *     case 'SwapApprovalRequired':
+ *       return sendTransaction(plan.approval)
+ *         .andThen(() => sendTransaction(plan.originalTransaction))
+ *         .map(() => plan.originalTransaction.orderReceipt);
+ *
+ *     case 'SwapReceipt':
+ *       return okAsync(plan.orderReceipt);
+ *
+ *     case 'InsufficientBalanceError':
+ *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
+ *   }
  * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Order receipt:', result.value);
  * ```
  *
  * @param client - Aave client.
