@@ -1,6 +1,7 @@
 import type { UnexpectedError } from '@aave/client-next';
 import {
   borrow,
+  renounceSpokeUserPositionManager,
   // collateralToggle,
   // liquidate,
   repay,
@@ -10,8 +11,10 @@ import {
 import type {
   BorrowRequest,
   ExecutionPlan,
+  RenounceSpokeUserPositionManagerRequest,
   RepayRequest,
   SupplyRequest,
+  TransactionRequest,
   // TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
@@ -204,6 +207,42 @@ export function useWithdraw(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask((request: WithdrawRequest) => withdraw(client, request));
+}
+
+/**
+ * A hook that provides a way to renounce a position manager of a user for a specific spoke.
+ *
+ * ```ts
+ * const [renounceSpokeUserPositionManager, renouncing] = useRenounceSpokeUserPositionManager();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = renouncing.loading && sending.loading;
+ * const error = renouncing.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await renounceSpokeUserPositionManager({ ... })
+ *   .andThen(sendTransaction);
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
+ * ```
+ */
+
+export function useRenounceSpokeUserPositionManager(): UseAsyncTask<
+  RenounceSpokeUserPositionManagerRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: RenounceSpokeUserPositionManagerRequest) =>
+    renounceSpokeUserPositionManager(client, request),
+  );
 }
 
 /**

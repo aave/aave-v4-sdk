@@ -3,10 +3,13 @@ import {
   BorrowQuery,
   type BorrowRequest,
   type ExecutionPlan,
+  RenounceSpokeUserPositionManagerQuery,
+  type RenounceSpokeUserPositionManagerRequest,
   RepayQuery,
   type RepayRequest,
   SupplyQuery,
   type SupplyRequest,
+  type TransactionRequest,
   // type TransactionRequest,
   WithdrawQuery,
   type WithdrawRequest,
@@ -190,6 +193,39 @@ export function withdraw(
   request: WithdrawRequest,
 ): ResultAsync<ExecutionPlan, UnexpectedError> {
   return client.query(WithdrawQuery, { request });
+}
+
+/**
+ * Creates a transaction to renounce a position manager of a user in a specific spoke.
+ *
+ * ```ts
+ * const result = await renounceSpokeUserPositionManager(client, {
+ *   manager: evmAddress('0x9abc…'),
+ *   managing: evmAddress('0xdef0…'),
+ *   spoke: {
+ *     chainId: chainId(1),
+ *     address: evmAddress('0x878…'),
+ *   }
+ * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *
+ * if (result.isErr()) {
+ *   // Handle error
+ *   return;
+ * }
+ *
+ * // result.value: TxHash
+ * ```
+ *
+ *
+ * @param client - Aave client.
+ * @param request - The renounce spoke user position manager request parameters.
+ * @returns The transaction data.
+ */
+export function renounceSpokeUserPositionManager(
+  client: AaveClient,
+  request: RenounceSpokeUserPositionManagerRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(RenounceSpokeUserPositionManagerQuery, { request });
 }
 
 /**
