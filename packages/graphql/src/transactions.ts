@@ -67,3 +67,19 @@ export const SetUserSupplyAsCollateralQuery = graphql(
 export type SetUserSupplyAsCollateralRequest = RequestOf<
   typeof SetUserSupplyAsCollateralQuery
 >;
+
+/**
+ * @internal
+ */
+export const UpdateUserDynamicConfigQuery = graphql(
+  `query UpdateUserDynamicConfig($request: UpdateUserDynamicConfigRequest!) {
+    value: updateUserDynamicConfig(request: $request) {
+      ...TransactionRequest
+      }
+  }`,
+  [TransactionRequestFragment],
+);
+
+export type UpdateUserDynamicConfigRequest = RequestOf<
+  typeof UpdateUserDynamicConfigQuery
+>;

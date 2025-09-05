@@ -5,6 +5,7 @@ import {
   // liquidate,
   repay,
   supply,
+  updateUserDynamicConfig,
   withdraw,
 } from '@aave/client-next/actions';
 import type {
@@ -12,6 +13,8 @@ import type {
   ExecutionPlan,
   RepayRequest,
   SupplyRequest,
+  TransactionRequest,
+  UpdateUserDynamicConfigRequest,
   // TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
@@ -204,6 +207,42 @@ export function useWithdraw(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask((request: WithdrawRequest) => withdraw(client, request));
+}
+
+/**
+ * A hook that provides a way to update the user dynamic configuration for a spoke.
+ *
+ * ```ts
+ * const [updateUserDynamicConfig, updating] = useUpdateUserDynamicConfig();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = updating.loading && sending.loading;
+ * const error = updating.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await updateUserDynamicConfig({ ... })
+ *   .andThen(sendTransaction);
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
+ * ```
+ */
+
+export function useUpdateUserDynamicConfig(): UseAsyncTask<
+  UpdateUserDynamicConfigRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: UpdateUserDynamicConfigRequest) =>
+    updateUserDynamicConfig(client, request),
+  );
 }
 
 /**
