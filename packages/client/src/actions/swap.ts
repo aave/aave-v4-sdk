@@ -9,6 +9,9 @@ import {
   type SwapQuote,
   SwapQuoteQuery,
   type SwapQuoteRequest,
+  type SwapStatus,
+  SwapStatusQuery,
+  type SwapStatusRequest,
   type Token,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
@@ -96,4 +99,24 @@ export function prepareSwap(
   options: SwapQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PrepareSwapResult, UnexpectedError> {
   return client.query(PrepareSwapQuery, { request, ...options });
+}
+
+/**
+ * Fetches the status of a specific swap.
+ *
+ * ```ts
+ * const result = await swapStatus(client, {
+ *   id: swapId('swap_123'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The swap status request parameters.
+ * @returns The current status of the swap.
+ */
+export function swapStatus(
+  client: AaveClient,
+  request: SwapStatusRequest,
+): ResultAsync<SwapStatus, UnexpectedError> {
+  return client.query(SwapStatusQuery, { request });
 }

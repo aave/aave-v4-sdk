@@ -149,3 +149,108 @@ export const PrepareSwapResultFragment: FragmentDocumentFor<
     SwapByTransactionFragment,
   ],
 );
+
+export const SwapOpenFragment = graphql(
+  `fragment SwapOpen on SwapOpen {
+    __typename
+    swapId
+    createAt
+    deadline
+    explorerLink
+    sellAmount {
+      ...TokenAmount
+    }
+    buyAmount {
+      ...TokenAmount
+    }
+  }`,
+  [TokenAmountFragment],
+);
+export type SwapOpen = FragmentOf<typeof SwapOpenFragment>;
+
+export const SwapPendingSignatureFragment = graphql(
+  `fragment SwapPendingSignature on SwapPendingSignature {
+    __typename
+    createdAt
+    deadline
+    explorerLink
+    signer
+  }`,
+);
+export type SwapPendingSignature = FragmentOf<
+  typeof SwapPendingSignatureFragment
+>;
+
+export const SwapCancelledFragment = graphql(
+  `fragment SwapCancelled on SwapCancelled {
+    __typename
+    createdAt
+    cancelledAt
+    explorerLink
+  }`,
+);
+export type SwapCancelled = FragmentOf<typeof SwapCancelledFragment>;
+
+export const SwapExpiredFragment = graphql(
+  `fragment SwapExpired on SwapExpired {
+    __typename
+    createdAt
+    expiredAt
+    explorerLink
+  }`,
+);
+export type SwapExpired = FragmentOf<typeof SwapExpiredFragment>;
+
+export const SwapFulfilledFragment = graphql(
+  `fragment SwapFulfilled on SwapFulfilled {
+    __typename
+    txHash
+    sellAmount {
+      ...TokenAmount
+    }
+    buyAmount {
+      ...TokenAmount
+    }
+    executedSellAmount {
+      ...TokenAmount
+    }
+  }`,
+  [TokenAmountFragment],
+);
+export type SwapFulfilled = FragmentOf<typeof SwapFulfilledFragment>;
+
+export type SwapStatus =
+  | SwapOpen
+  | SwapPendingSignature
+  | SwapCancelled
+  | SwapExpired
+  | SwapFulfilled;
+
+export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
+  graphql(
+    `fragment SwapStatus on SwapStatus {
+    __typename
+    ... on SwapOpen {
+      ...SwapOpen
+    }
+    ... on SwapPendingSignature {
+      ...SwapPendingSignature
+    }
+    ... on SwapCancelled {
+      ...SwapCancelled
+    }
+    ... on SwapExpired {
+      ...SwapExpired
+    }
+    ... on SwapFulfilled {
+      ...SwapFulfilled
+    }
+  }`,
+    [
+      SwapOpenFragment,
+      SwapPendingSignatureFragment,
+      SwapCancelledFragment,
+      SwapExpiredFragment,
+      SwapFulfilledFragment,
+    ],
+  );

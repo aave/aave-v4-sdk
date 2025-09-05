@@ -10,10 +10,13 @@ import type {
   PrepareSwapResult,
   SwapQuote,
   SwapQuoteRequest,
+  SwapStatus,
+  SwapStatusRequest,
 } from '@aave/graphql-next';
 import {
   SwappableTokensQuery,
   type SwappableTokensRequest,
+  SwapStatusQuery,
   type Token,
 } from '@aave/graphql-next';
 import { useAaveClient } from './context';
@@ -161,4 +164,48 @@ export function usePrepareSwap(): UseAsyncTask<
   return useAsyncTask((request: PrepareSwapRequest) =>
     prepareSwap(client, request),
   );
+}
+
+export type UseSwapStatusArgs = SwapStatusRequest;
+
+/**
+ * Fetch the status of a specific swap.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSwapStatus({
+ *   id: swapId('swap_123'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: UseSwapStatusArgs & Suspendable,
+): SuspenseResult<SwapStatus>;
+
+/**
+ * Fetch the status of a specific swap.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSwapStatus({
+ *   id: swapId('swap_123'),
+ * });
+ * ```
+ */
+export function useSwapStatus(args: UseSwapStatusArgs): ReadResult<SwapStatus>;
+
+export function useSwapStatus({
+  suspense = false,
+  ...request
+}: UseSwapStatusArgs & {
+  suspense?: boolean;
+}): SuspendableResult<SwapStatus> {
+  return useSuspendableQuery({
+    document: SwapStatusQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
 }
