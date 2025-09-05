@@ -1,21 +1,31 @@
 import type { UnexpectedError } from '@aave/client-next';
 import {
   borrow,
+  liquidatePosition,
+  preview,
   renounceSpokeUserPositionManager,
-  // collateralToggle,
-  // liquidate,
   repay,
+  setSpokeUserPositionManager,
+  setUserSupplyAsCollateral,
   supply,
+  updateUserDynamicConfig,
+  updateUserRiskPremium,
   withdraw,
 } from '@aave/client-next/actions';
 import type {
   BorrowRequest,
   ExecutionPlan,
+  LiquidatePositionRequest,
+  PreviewRequest,
+  PreviewUserPositionResult,
   RenounceSpokeUserPositionManagerRequest,
   RepayRequest,
+  SetSpokeUserPositionManagerRequest,
+  SetUserSupplyAsCollateralRequest,
   SupplyRequest,
   TransactionRequest,
-  // TransactionRequest,
+  UpdateUserDynamicConfigRequest,
+  UpdateUserRiskPremiumRequest,
   WithdrawRequest,
 } from '@aave/graphql-next';
 import { useAaveClient } from './context';
@@ -246,18 +256,18 @@ export function useRenounceSpokeUserPositionManager(): UseAsyncTask<
 }
 
 /**
- * A hook that provides a way to enable/disable a specific supplied asset as collateral.
+ * A hook that provides a way to update the user risk premium for a spoke.
  *
  * ```ts
- * const [toggle, toggling] = useCollateralToggle();
+ * const [updateUserRiskPremium, updating] = useUpdateUserRiskPremium();
  * const [sendTransaction, sending] = useSendTransaction(wallet);
  *
- * const loading = toggling.loading && sending.loading;
- * const error = toggling.error || sending.error;
+ * const loading = updating.loading && sending.loading;
+ * const error = updating.error || sending.error;
  *
  * // …
  *
- * const result = await toggle({ ... })
+ * const result = await updateUserRiskPremium({ ... })
  *   .andThen(sendTransaction);
  *
  * if (result.isErr()) {
@@ -268,49 +278,243 @@ export function useRenounceSpokeUserPositionManager(): UseAsyncTask<
  * console.log('Transaction sent with hash:', result.value);
  * ```
  */
-// export function useCollateralToggle(): UseAsyncTask<
-//   CollateralToggleRequest,
-//   TransactionRequest,
-//   UnexpectedError
-// > {
-//   const client = useAaveClient();
 
-//   return useAsyncTask((request: CollateralToggleRequest) =>
-//     collateralToggle(client, request),
-//   );
-// }
+export function useUpdateUserRiskPremium(): UseAsyncTask<
+  UpdateUserRiskPremiumRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
 
-// /**
-//  * A hook that provides a way to liquidate a non-healthy position with Health Factor below 1.
-//  *
-//  * ```ts
-//  * const [liquidate, liquidating] = useLiquidate();
-//  * const [sendTransaction, sending] = useSendTransaction(wallet);
-//  *
-//  * const loading = liquidating.loading && sending.loading;
-//  * const error = liquidating.error || sending.error;
-//  *
-//  * // …
-//  *
-//  * const result = await liquidate({ ... })
-//  *   .andThen(sendTransaction);
-//  *
-//  * if (result.isErr()) {
-//  *   console.error(result.error);
-//  *   return;
-//  * }
-//  *
-//  * console.log('Transaction sent with hash:', result.value);
-//  * ```
-//  */
-// export function useLiquidate(): UseAsyncTask<
-//   LiquidateRequest,
-//   TransactionRequest,
-//   UnexpectedError
-// > {
-//   const client = useAaveClient();
+  return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
+    updateUserRiskPremium(client, request),
+  );
+}
 
-//   return useAsyncTask((request: LiquidateRequest) =>
-//     liquidate(client, request),
-//   );
-// }
+/**
+ * A hook that provides a way to update the user dynamic configuration for a spoke.
+ *
+ * ```ts
+ * const [updateUserDynamicConfig, updating] = useUpdateUserDynamicConfig();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = updating.loading && sending.loading;
+ * const error = updating.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await updateUserDynamicConfig({ ... })
+ *   .andThen(sendTransaction);
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
+ * ```
+ */
+
+export function useUpdateUserDynamicConfig(): UseAsyncTask<
+  UpdateUserDynamicConfigRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: UpdateUserDynamicConfigRequest) =>
+    updateUserDynamicConfig(client, request),
+  );
+}
+
+/**
+ * Hook for setting whether a user's supply should be used as collateral.
+ *
+ * ```tsx
+ * const [execute, { called, loading, data, error }] = useSetUserSupplyAsCollateral();
+ *
+ * const handleToggleCollateral = async () => {
+ *   const result = await execute({
+ *     reserve: {
+ *       chainId: chainId(1),
+ *       spoke: evmAddress('0x123...'),
+ *       reserveId: reserveId(1)
+ *     },
+ *     sender: evmAddress('0x456...'),
+ *     enableCollateral: true,
+ *   });
+ * };
+ * ```
+ */
+export function useSetUserSupplyAsCollateral(): UseAsyncTask<
+  SetUserSupplyAsCollateralRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
+    setUserSupplyAsCollateral(client, request),
+  );
+}
+
+/**
+ * A hook that provides a way to liquidate a user's position.
+ *
+ * ```ts
+ * const [liquidatePosition, liquidating] = useLiquidatePosition();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = liquidating.loading || sending.loading;
+ * const error = liquidating.error || sending.error;
+ *
+ * // …
+ *
+ * const result = await liquidatePosition({
+ *   spoke: {
+ *     address: evmAddress('0x87870bca…'),
+ *     chainId: chainId(1),
+ *   },
+ *   collateral: reserveId(1),
+ *   debt: reserveId(2),
+ *   amount: amount,
+ *   liquidator: liquidator,
+ *   borrower: borrower,
+ * })
+ *   .andThen((plan) => {
+ *     switch (plan.__typename) {
+ *       case 'TransactionRequest':
+ *         return sendTransaction(plan);
+ *
+ *       case 'ApprovalRequired':
+ *         return sendTransaction(plan.approval)
+ *           .andThen(() => sendTransaction(plan.originalTransaction));
+ *
+ *       case 'InsufficientBalanceError':
+ *         return errAsync(
+ *           new Error(`Insufficient balance: ${plan.required.value} required.`)
+ *         );
+ *     }
+ *   });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
+ * ```
+ */
+export function useLiquidatePosition(): UseAsyncTask<
+  LiquidatePositionRequest,
+  ExecutionPlan,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: LiquidatePositionRequest) =>
+    liquidatePosition(client, request),
+  );
+}
+
+/**
+ * A hook that provides a way to set or remove a position manager for a user on a specific spoke.
+ *
+ * **Position managers** can perform transactions on behalf of other users, including:
+ * - Supply assets using `onBehalfOf`
+ * - Borrow assets using `onBehalfOf`
+ * - Withdraw assets using `onBehalfOf`
+ * - Enable/disable collateral using `onBehalfOf`
+ *
+ * The `signature` parameter is an **ERC712 signature** that must be signed by the **user**
+ * (the account granting permissions) to authorize the position manager. The signature contains:
+ * - `value`: The actual cryptographic signature
+ * - `deadline`: Unix timestamp when the authorization expires
+ *
+ * ```ts
+ * const [setSpokeUserPositionManager, setting] = useSetSpokeUserPositionManager();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ *
+ * const loading = setting.loading || sending.loading;
+ * const error = setting.error || sending.error;
+ *
+ * const onSetPositionManager = async () => {
+ *   const result = await setSpokeUserPositionManager({
+ *     spoke: {
+ *       address: evmAddress('0x87870bca…'),
+ *       chainId: chainId(1),
+ *     },
+ *     manager: evmAddress('0x9abc…'), // Address that will become the position manager
+ *     approve: true, // true to approve, false to remove the manager
+ *     user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
+ *     signature: {
+ *       value: '0x1234...', // ERC712 signature signed by the user
+ *       deadline: 1735689600, // Unix timestamp when signature expires
+ *     },
+ *   }).then(sendTransaction);
+ *
+ *   if (result.isOk()) {
+ *     // update local UI
+ *   }
+ * };
+ * ```
+ */
+export function useSetSpokeUserPositionManager(): UseAsyncTask<
+  SetSpokeUserPositionManagerRequest,
+  TransactionRequest,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SetSpokeUserPositionManagerRequest) =>
+    setSpokeUserPositionManager(client, request),
+  );
+}
+
+/**
+ * Preview the impact of a potential action on a user's position.
+ *
+ * ```tsx
+ * const [getPreview, previewing] = usePreview();
+ *
+ * const loading = previewing.loading;
+ * const error = previewing.error;
+ *
+ * // …
+ *
+ * const result = await getPreview({
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Preview result:', result.value);
+ * ```
+ */
+export function usePreview(): UseAsyncTask<
+  PreviewRequest,
+  PreviewUserPositionResult,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: PreviewRequest) => preview(client, request));
+}
