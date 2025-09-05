@@ -1,23 +1,26 @@
 import type { UnexpectedError } from '@aave/core-next';
-import type { SwapRequest } from '@aave/graphql-next';
+import type {
+  Currency,
+  PrepareSwapRequest,
+  PrepareSwapResult,
+  SwapExecutionPlan,
+  SwappableTokensRequest,
+  SwapQuote,
+  SwapQuoteRequest,
+  SwapRequest,
+  SwapStatus,
+  SwapStatusRequest,
+  Token,
+} from '@aave/graphql-next';
 import {
-  type Currency,
   PrepareSwapQuery,
-  type PrepareSwapRequest,
-  type PrepareSwapResult,
-  type SwapExecutionPlan,
   SwappableTokensQuery,
-  type SwappableTokensRequest,
   SwapQuery,
-  type SwapQuote,
   SwapQuoteQuery,
-  type SwapQuoteRequest,
-  type SwapStatus,
   SwapStatusQuery,
-  type SwapStatusRequest,
-  type Token,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
+
 import type { AaveClient } from '../AaveClient';
 import { DEFAULT_QUERY_OPTIONS } from '../options';
 
