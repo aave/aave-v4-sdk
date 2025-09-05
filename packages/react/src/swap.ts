@@ -1,18 +1,20 @@
 import { prepareSwap, swap, swapQuote } from '@aave/client-next';
-import type { UnexpectedError } from '@aave/core-next';
+import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
   PrepareSwapRequest,
-  PrepareSwapResult,
   SwapExecutionPlan,
   SwapQuote,
   SwapQuoteRequest,
-  SwapRequest,
 } from '@aave/graphql-next';
 import {
+  type ERC712Signature,
+  type SwapByIntent,
+  type SwapByIntentWithApprovalRequired,
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type Token,
 } from '@aave/graphql-next';
+import type { ResultAsync } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type ReadResult,
@@ -108,18 +110,31 @@ export function useSwappableTokens({
   });
 }
 
+export type SwapIntent = SwapByIntent | SwapByIntentWithApprovalRequired;
+
+export type SwapByIntentHandler = (
+  intent: SwapIntent,
+) => ResultAsync<ERC712Signature, SigningError | UnexpectedError>;
+
 /**
- * Prepares swap for the specified trade parameters.
+ * Executes the complete swap workflow combining preparation and execution.
  *
  * ```tsx
- * const [prepareSwap, preparing] = usePrepareSwap();
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ * const [signSwapByIntentWith, signing] = useSignSwapByIntentWith(wallet);
  *
- * const loading = preparing.loading;
- * const error = preparing.error;
+ * const [swap, swapping] = useSwapTokens((intent) => {
+ *   switch (intent.__typename) {
+ *     case 'SwapByIntent':
+ *       return signSwapByIntentWith(intent.data);
  *
- * // …
+ *     case 'SwapByIntentWithApprovalRequired':
+ *       return sendTransaction(intent.approval)
+ *         .andThen(() => signSwapByIntentWith(intent.data));
+ *   }
+ * });
  *
- * const result = await prepareSwap({
+ * const result = await swap({
  *   market: {
  *     chainId: chainId(1),
  *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
@@ -128,102 +143,51 @@ export function useSwappableTokens({
  *     kind: SwapKind.SELL,
  *     user: evmAddress('0x742d35cc...'),
  *   },
- * }).andThen((swapResult) => {
- *   switch (swapResult.__typename) {
- *     case 'SwapByIntent':
- *       return signSwapByIntentWith(wallet, swapResult.data)
- *         .andThen((signedData) => swap({ intent: { id: swapResult.id, signature: signedData } }))
- *         .andThen((plan) => {
- *           // …
- *         });
- *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(swapResult.approval)
- *         .andThen(() => signSwapByIntentWith(wallet, swapResult.data))
- *         .andThen((signedData) => swap({ intent: { id: swapResult.id, signature: signedData } }))
- *         .andThen((plan) => {
- *           // …
- *         });
- *     case 'SwapByTransaction':
- *       // NOTE: needed to add permit if needed
- *       return swap({ transaction: { id: swapResult.id } })
- *         .andThen((plan) => {
- *           // …
- *       });
+ * }).andThen((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'InsufficientBalanceError':
+ *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
+ *
+ *     case 'SwapTransactionRequest':
+ *       return sendTransaction(plan.transaction)
+ *         .map(() => plan.orderReceipt);
+ *
+ *     case 'SwapApprovalRequired':
+ *       return sendTransaction(plan.approval)
+ *         .andThen(() => sendTransaction(plan.originalTransaction.transaction))
+ *         .map(() => plan.originalTransaction.orderReceipt);
+ *
+ *     case 'SwapReceipt':
+ *       return okAsync(plan.orderReceipt);
  *   }
  * });
- *
- * if (result.isErr()) {
- *   console.error(result.error);
- *   return;
- * }
  * ```
  */
-export function usePrepareSwap(): UseAsyncTask<
+export function useSwapTokens(
+  handler: SwapByIntentHandler,
+): UseAsyncTask<
   PrepareSwapRequest,
-  PrepareSwapResult,
-  UnexpectedError
+  SwapExecutionPlan,
+  SigningError | UnexpectedError
 > {
   const client = useAaveClient();
 
   return useAsyncTask((request: PrepareSwapRequest) =>
-    prepareSwap(client, request),
+    prepareSwap(client, request).andThen((prepareResult) => {
+      switch (prepareResult.__typename) {
+        case 'SwapByIntent':
+          return handler(prepareResult).andThen((signature) =>
+            swap(client, { intent: { id: prepareResult.id, signature } }),
+          );
+
+        case 'SwapByIntentWithApprovalRequired':
+          return handler(prepareResult).andThen((signature) =>
+            swap(client, { intent: { id: prepareResult.id, signature } }),
+          );
+
+        case 'SwapByTransaction':
+          return swap(client, { transaction: { id: prepareResult.id } });
+      }
+    }),
   );
-}
-
-/**
- * Executes a swap for the specified request parameters.
- *
- * ```tsx
- * const [execute, executing] = useSwap();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = executing.loading && sending.loading;
- * const error = executing.error || sending.error;
- *
- * // …
- *
- * const result = await execute({
- *   intent: {
- *     id: swapRequestId('123...'),
- *     signature: {
- *       value: signature('0x456...'),
- *       deadline: 1234567890,
- *     },
- *   },
- * }).andThen((plan) => {
- *   switch (plan.__typename) {
- *     case 'SwapTransactionRequest':
- *       console.log('Swap ID:', plan.orderReceipt.id);
- *       return sendTransaction(plan.transaction)
- *         .andTee(() => return plan.orderReceipt)
- *
- *     case 'SwapApprovalRequired':
- *       console.log('Swap ID:', plan.originalTransaction.orderReceipt.id);
- *       return sendTransaction(plan.approval)
- *         .andThen(() => sendTransaction(plan.originalTransaction.transaction))
- *         .andTee(() => return plan.originalTransaction.orderReceipt)
- *
- *     case 'InsufficientBalanceError':
- *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
- *
- *     case 'SwapReceipt':
- *       console.log('Swap ID:', plan.id);
- *       return plan.orderReceipt;
- *   }
- * });
- *
- * if (result.isErr()) {
- *   console.error(result.error);
- *   return;
- * }
- * ```
- */
-export function useSwap(): UseAsyncTask<
-  SwapRequest,
-  SwapExecutionPlan,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask((request: SwapRequest) => swap(client, request));
 }
