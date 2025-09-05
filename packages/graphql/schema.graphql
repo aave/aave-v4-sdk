@@ -144,11 +144,6 @@ type Chain {
 """A supported blockchain chain ID"""
 scalar ChainId
 
-input ChainTokenInput @oneOf {
-  native: ChainId
-  erc20: Erc20Input
-}
-
 enum ChainsFilter {
   TESTNET_ONLY
   MAINNET_ONLY
@@ -201,7 +196,10 @@ type Erc20Amount {
 }
 
 input Erc20Input {
+  """The token address"""
   address: EvmAddress!
+
+  """The token chain id"""
   chainId: ChainId!
 }
 
@@ -279,66 +277,89 @@ input HasProcessedKnownTransactionRequest {
 }
 
 type Hub {
+  """The hub name"""
   name: String!
+
+  """The hub address"""
   address: EvmAddress!
+
+  """The chain the hub is deployed on"""
   chain: Chain!
-  totalSupplied: FiatAmount!
-  totalSupplyCap: FiatAmount!
-  supplyUtilizationRate: PercentValue!
-  totalBorrowed: FiatAmount!
-  totalBorrowCap: FiatAmount!
-  borrowUtilizationRate: PercentValue!
+
+  """The hub summary"""
+  summary(currency: Currency! = USD): HubSummary!
 }
 
 type HubAsset {
+  """The asset id"""
   assetId: AssetId!
+
+  """The hub"""
   hub: Hub!
+
+  """The underlying token"""
   underlying: Erc20Token!
+
+  """The hub asset summary"""
   summary: HubAssetSummary!
+
+  """The hub asset settings"""
   settings: HubAssetSettings!
+
+  """The best supply reserve for this hub asset"""
   bestSupplyReserve: Reserve
+
+  """The best borrow reserve for this hub asset"""
   bestBorrowReserve: Reserve
   userState: HubAssetUserState
 }
 
 type HubAssetSettings {
+  """The fee receiver"""
   feeReceiver: EvmAddress!
-  liquidityFee: PercentValue!
-  irStrategy: EvmAddress!
-  reinvestmentStrategy: EvmAddress!
-}
 
-enum HubAssetStatusType {
-  ACTIVE
-  FROZEN
-  PAUSED
+  """The liquidity fee"""
+  liquidityFee: PercentValue!
+
+  """The ir strategy"""
+  irStrategy: EvmAddress!
+
+  """The reinvestment strategy"""
+  reinvestmentStrategy: EvmAddress
 }
 
 type HubAssetSummary {
+  """The supplied amount"""
   supplied: BigDecimal!
+
+  """The borrowed amount"""
   borrowed: BigDecimal!
+
+  """The available liquidity"""
   availableLiquidity: BigDecimal!
+
+  """The supply APY"""
   supplyApy: PercentValue!
+
+  """The borrow APY"""
   borrowApy: PercentValue!
+
+  """The net APY"""
   netApy: PercentValue!
+
+  """The utilization rate"""
   utilizationRate: PercentValue!
 }
 
 type HubAssetUserState {
+  """The hub asset balance"""
   balance: TokenAmount!
 }
 
 input HubAssetsRequest {
-  hub: EvmAddress
+  hub: EvmAddress!
   user: EvmAddress
-  include: [HubAssetStatusType!]! = [ACTIVE, FROZEN, PAUSED]
-  orderBy: HubAssetsRequestOrderBy! = NAME
   chainId: ChainId!
-}
-
-enum HubAssetsRequestOrderBy {
-  BALANCE
-  NAME
 }
 
 input HubInput {
@@ -354,6 +375,28 @@ input HubRequest {
   chainId: ChainId!
 }
 
+type HubSummary {
+  """
+  The total spoke reserves aggregated borrowed using this hub, showed in fiat as each asset has a different value
+  """
+  totalBorrowed: FiatAmount!
+
+  """
+  The total spoke reserves aggregated borrow caps using this hub, showed in fiat as each asset has a different value
+  """
+  totalBorrowCap: FiatAmount!
+
+  """
+  The total spoke reserves aggregated supplied using this hub, showed in fiat as each asset has a different value
+  """
+  totalSupplied: FiatAmount!
+
+  """
+  The total spoke reserves aggregated supply caps using this hub, showed in fiat as each asset has a different value
+  """
+  totalSupplyCap: FiatAmount!
+}
+
 input HubTokenInput {
   chainId: ChainId!
   hub: EvmAddress!
@@ -361,7 +404,10 @@ input HubTokenInput {
 }
 
 input HubsRequest @oneOf {
-  tokens: [ChainTokenInput!]
+  """Get back all the hubs which have one of the underlying tokens supplied"""
+  tokens: [Erc20Input!]
+
+  """Get back all the hubs based on the chain ids passed in"""
   chainIds: [ChainId!]
 }
 
@@ -602,7 +648,7 @@ type Query {
   """Generate EIP-712 typed data for EIP-2612 permit signature"""
   permitTypedData(request: PermitRequest!): PermitTypedDataResponse!
 
-  """Lists all the hubs"""
+  """Fetch a list of hubs depending on your search criteria"""
   hubs(request: HubsRequest!): [Hub!]!
   hub(request: HubRequest!): Hub
   hubAssets(request: HubAssetsRequest!): [HubAsset!]!

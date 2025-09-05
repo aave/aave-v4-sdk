@@ -9,6 +9,26 @@ import {
   TokenAmountFragment,
 } from './common';
 
+export const HubSummaryFragment = graphql(
+  `fragment HubSummary on HubSummary {
+    __typename
+    totalBorrowed {
+      ...FiatAmount
+    }
+    totalBorrowCap {
+      ...FiatAmount
+    }
+    totalSupplied {
+      ...FiatAmount
+    }
+    totalSupplyCap {
+      ...FiatAmount
+    }
+  }`,
+  [FiatAmountFragment],
+);
+export type HubSummary = FragmentOf<typeof HubSummaryFragment>;
+
 export const HubAssetSummaryFragment = graphql(
   `fragment HubAssetSummary on HubAssetSummary {
       __typename
@@ -65,26 +85,11 @@ export const HubFragment = graphql(
       chain {
         ...Chain
       }
-      totalSupplied {
-        ...FiatAmount
-      }
-      totalSupplyCap {
-        ...FiatAmount
-      }
-      supplyUtilizationRate {
-        ...PercentValue
-      }
-      totalBorrowed {
-        ...FiatAmount
-      }
-      totalBorrowCap {
-        ...FiatAmount
-      }
-      borrowUtilizationRate {
-        ...PercentValue
+      summary(currency: USD) {
+        ...HubSummary
       }
     }`,
-  [ChainFragment, FiatAmountFragment, PercentValueFragment],
+  [ChainFragment, HubSummaryFragment],
 );
 export type Hub = FragmentOf<typeof HubFragment>;
 
