@@ -1,5 +1,8 @@
 import {
+  type PaginatedSpokePositionManagerResult,
   type Spoke,
+  SpokePositionManagersQuery,
+  type SpokePositionManagersRequest,
   SpokesQuery,
   type SpokesRequest,
 } from '@aave/graphql-next';
@@ -49,6 +52,59 @@ export function useSpokes({
 }): SuspendableResult<Spoke[]> {
   return useSuspendableQuery({
     document: SpokesQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
+}
+
+export type UseSpokePositionManagersArgs = SpokePositionManagersRequest;
+
+/**
+ * Fetches all the positions manager for a specific spoke.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSpokePositionManagers({
+ *     spoke: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0x878...'),
+ *     },
+ *     suspense: true,
+ * });
+ * ```
+ */
+export function useSpokePositionManagers(
+  args: UseSpokePositionManagersArgs & Suspendable,
+): SuspenseResult<PaginatedSpokePositionManagerResult>;
+
+/**
+ * Fetches all the positions manager for a specific spoke.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSpokePositionManagers({
+ *     spoke: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0x878...'),
+ *     },
+ *   },
+ * });
+ * ```
+ */
+export function useSpokePositionManagers(
+  args: UseSpokePositionManagersArgs,
+): ReadResult<PaginatedSpokePositionManagerResult>;
+
+export function useSpokePositionManagers({
+  suspense = false,
+  ...request
+}: UseSpokePositionManagersArgs & {
+  suspense?: boolean;
+}): SuspendableResult<PaginatedSpokePositionManagerResult> {
+  return useSuspendableQuery({
+    document: SpokePositionManagersQuery,
     variables: {
       request,
     },
