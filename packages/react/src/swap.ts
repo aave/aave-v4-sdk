@@ -6,12 +6,15 @@ import {
 } from '@aave/client-next';
 import type { UnexpectedError } from '@aave/core-next';
 import type {
+  PendingSwapsRequest,
   PrepareSwapRequest,
   PrepareSwapResult,
   SwapQuote,
   SwapQuoteRequest,
+  SwapReceipt,
 } from '@aave/graphql-next';
 import {
+  PendingSwapsQuery,
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type Token,
@@ -63,6 +66,52 @@ export function useSwapQuote(
   return useAsyncTask((request: SwapQuoteRequest) =>
     swapQuote(client, request, options),
   );
+}
+
+export type UsePendingSwapsArgs = PendingSwapsRequest;
+
+/**
+ * Fetch pending swaps for a specific user.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = usePendingSwaps({
+ *   user: evmAddress('0x742d35cc...'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function usePendingSwaps(
+  args: UsePendingSwapsArgs & Suspendable,
+): SuspenseResult<SwapReceipt[]>;
+
+/**
+ * Fetch pending swaps for a specific user.
+ *
+ * ```tsx
+ * const { data, error, loading } = usePendingSwaps({
+ *   user: evmAddress('0x742d35cc...'),
+ * });
+ * ```
+ */
+export function usePendingSwaps(
+  args: UsePendingSwapsArgs,
+): ReadResult<SwapReceipt[]>;
+
+export function usePendingSwaps({
+  suspense = false,
+  ...request
+}: UsePendingSwapsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<SwapReceipt[]> {
+  return useSuspendableQuery({
+    document: PendingSwapsQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
 }
 
 export type UseSwappableTokensArgs = SwappableTokensRequest;
