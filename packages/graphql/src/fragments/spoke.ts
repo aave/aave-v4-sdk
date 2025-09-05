@@ -57,3 +57,33 @@ export const PaginatedSpokePositionManagerResultFragment = graphql(
 export type PaginatedSpokePositionManagerResult = FragmentOf<
   typeof PaginatedSpokePositionManagerResultFragment
 >;
+
+export const SpokeUserPositionManagerFragment = graphql(
+  `fragment SpokeUserPositionManager on SpokeUserPositionManger {
+    __typename
+    address
+    enabledAt
+    name
+  }`,
+);
+
+export type SpokeUserPositionManager = FragmentOf<
+  typeof SpokeUserPositionManagerFragment
+>;
+
+export const PaginatedSpokeUserPositionManagerResultFragment = graphql(
+  `fragment PaginatedSpokeUserPositionManagerResult on PaginatedSpokeUserPositionManagerResult {
+    __typename
+    items {
+      ...SpokeUserPositionManager
+    }
+    pageInfo {
+      ...PaginatedResultInfo
+    }
+  }`,
+  [SpokeUserPositionManagerFragment, PaginatedResultInfoFragment],
+);
+
+export type PaginatedSpokeUserPositionManagerResult = FragmentOf<
+  typeof PaginatedSpokeUserPositionManagerResultFragment
+>;
