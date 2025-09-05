@@ -5,3 +5,4 @@ export * from './reserve';
 export * from './swaps';
 export * from './transactions';
 export * from './user';
+export * from './spoke';

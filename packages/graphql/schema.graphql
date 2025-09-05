@@ -164,8 +164,15 @@ scalar Cursor
 scalar DateTime
 
 type DecimalValue {
+  """
+  The raw value before any formatting (should be used if you want to do any math)
+  """
   raw: BigInt!
+
+  """The decimals"""
   decimals: Int!
+
+  """The formatted value which is {raw} / 1e{decimals}"""
   formatted: BigDecimal!
 }
 
@@ -185,12 +192,11 @@ input ERC712Signature {
 }
 
 type Erc20Amount {
-  """The chain id"""
-  chainId: ChainId!
+  """The value"""
+  value: DecimalValue!
   fiatAmount(currency: Currency! = USD): FiatAmount!
   fiatRate(currency: Currency! = USD): DecimalValue!
   isWrappedNative: Boolean!
-  value: DecimalValue!
   token: Erc20Token!
 }
 
@@ -203,6 +209,13 @@ type Erc20Token {
   contract: EvmAddress!
   chain: Chain!
   info: TokenInfo!
+
+  """
+  The protocol only deals with ERC20 this allows you to understand if
+  the token is a wrapped native token to allow you to maybe change `WETH` > `ETH`
+  on the display screen, or whatever you decide makes sense
+  """
+  isWrappedNativeToken: Boolean!
 }
 
 scalar EvmAddress
@@ -329,7 +342,10 @@ enum HubAssetsRequestOrderBy {
 }
 
 input HubInput {
+  """The hub address"""
   address: EvmAddress!
+
+  """The hub chain id"""
   chainId: ChainId!
 }
 
@@ -341,7 +357,7 @@ input HubRequest {
 input HubTokenInput {
   chainId: ChainId!
   hub: EvmAddress!
-  token: TokenInput!
+  token: EvmAddress!
 }
 
 input HubsRequest @oneOf {
@@ -398,9 +414,16 @@ type LiquidatedActivity {
 }
 
 type NativeAmount {
+  """The native token"""
   token: NativeToken!
+
+  """The value"""
   value: DecimalValue!
+
+  """The fiat amount"""
   fiatAmount(currency: Currency! = USD): FiatAmount!
+
+  """The fiat rate"""
   fiatRate(currency: Currency! = USD): DecimalValue!
 }
 
@@ -604,6 +627,11 @@ type Query {
 
   """Lists all spokes"""
   spokes(request: SpokesRequest!): [Spoke!]!
+
+  """
+  Get the user balances for the protocol
+  This will only return balances > 0 and assets that can be used on the protocol
+  """
   userBalances(request: UserBalancesRequest!): [UserBalance!]!
   userBorrows(request: UserBorrowsRequest!): [UserBorrowItem!]!
   userHistory(request: UserHistoryRequest!): PaginatedUserHistoryResult!
@@ -632,7 +660,6 @@ type Query {
 
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
-  _service: _Service!
 }
 
 input RenounceSpokeUserPositionManagerRequest {
@@ -674,8 +701,6 @@ input RepayRequest {
 
 type Reserve {
   id: ReserveId!
-  spoke: Spoke!
-  assetId: AssetId!
   borrowCap: BigDecimal!
   supplyCap: BigDecimal!
   chain: Chain!
@@ -683,9 +708,11 @@ type Reserve {
   settings: ReserveSettings!
   status: ReserveStatus!
   canBorrow: Boolean!
+  canSupply: Boolean!
   canUseAsCollateral: Boolean!
   userState: ReserveUserState
   asset: HubAsset!
+  spoke: Spoke!
 }
 
 input ReserveAmountInput @oneOf {
@@ -779,7 +806,7 @@ enum ReservesFilterRequest {
 input ReservesRequest {
   query: ReservesRequestQuery!
   user: EvmAddress
-  filter: ReservesFilterRequest!
+  filter: ReservesFilterRequest! = ALL
   orderBy: ReservesRequestOrderBy! = {name: ASC}
 }
 
@@ -792,7 +819,7 @@ input ReservesRequestOrderBy @oneOf {
 
 input ReservesRequestQuery @oneOf {
   spoke: SpokeInput
-  token: ChainTokenInput
+  token: Erc20Input
   hubToken: HubTokenInput
 }
 
@@ -838,14 +865,24 @@ input SlippageInput @oneOf {
 }
 
 type Spoke {
+  """The spoke name (offchain)"""
   name: String!
+
+  """The spoke address"""
   address: EvmAddress!
+
+  """The spoke chain"""
   chain: Chain!
+
+  """The spoke config"""
   config: SpokeConfig!
 }
 
 type SpokeConfig {
+  """Has the spoke got the position manager enabled"""
   canSetPositionManager: Boolean!
+
+  """Is the spoke active"""
   active: Boolean!
 }
 
@@ -880,9 +917,18 @@ type SpokeUserPositionManger {
   enabledAt: DateTime!
 }
 
-input SpokesRequest {
-  hub: HubInput!
-  chainIds: [ChainId!]!
+input SpokesRequest @oneOf {
+  """
+  The hub address and chain id
+  Get all the spokes which hubs are linked to a spoke reserve
+  """
+  hub: HubInput
+
+  """
+  The chain ids
+  Get all the spokes which are on the list of chain ids
+  """
+  chainIds: [ChainId!]
 }
 
 input SupplyAPYHistoryRequest {
@@ -1152,11 +1198,22 @@ input UpdateUserRiskPremiumRequest {
 }
 
 type UserBalance {
+  """The token info"""
   info: TokenInfo!
-  totalAmount: DecimalValue!
+
+  """The balances across chains it will be 1 item per chain"""
   balances: [TokenAmount!]!
+
+  """The total amount summed across all balances"""
+  totalAmount: DecimalValue!
+
+  """The total fiat amount summed across all balances"""
   fiatAmount(currency: Currency! = USD): FiatAmount!
+
+  """The supply APY dependent on what you pass in for the `metric`"""
   supplyApy(metric: ApyMetric! = HIGHEST): PercentValue!
+
+  """The borrow APY dependent on what you pass in for the `metric`"""
   borrowApy(metric: ApyMetric! = HIGHEST): PercentValue!
 }
 
@@ -1357,7 +1414,7 @@ input WithdrawRequest {
   reserve: ReserveInput!
 
   """The amount withdrawing"""
-  amount: ReserveAmountInput!
+  amount: WithdrawReserveAmountInput!
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
@@ -1369,6 +1426,18 @@ input WithdrawRequest {
   onBehalfOf: EvmAddress
 }
 
-type _Service {
-  sdl: String
+input WithdrawReserveAmountInput @oneOf {
+  """The native amount"""
+  native: BigDecimal
+
+  """The erc20 amount input"""
+  erc20: WithdrawReserveErc20AmountInput
+}
+
+input WithdrawReserveErc20AmountInput @oneOf {
+  """Exact amount to withdraw, remember interest is generated on each block"""
+  exact: BigDecimal
+
+  """Withdraw all the position completely"""
+  max: AlwaysTrue
 }
