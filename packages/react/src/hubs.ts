@@ -1,3 +1,5 @@
+import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
+import type { HubQueryOptions } from '@aave/client-next/actions';
 import {
   type Hub,
   HubQuery,
@@ -13,7 +15,7 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseHubArgs = HubRequest;
+export type UseHubArgs = HubRequest & HubQueryOptions;
 
 /**
  * Fetch a specific hub by address and chain ID.
@@ -48,6 +50,7 @@ export function useHub(args: UseHubArgs): ReadResult<Hub | null>;
 
 export function useHub({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseHubArgs & {
   suspense?: boolean;
@@ -56,12 +59,13 @@ export function useHub({
     document: HubQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseHubsArgs = HubsRequest;
+export type UseHubsArgs = HubsRequest & HubQueryOptions;
 
 /**
  * Fetch multiple hubs based on specified criteria.
@@ -90,6 +94,7 @@ export function useHubs(args: UseHubsArgs): ReadResult<Hub[]>;
 
 export function useHubs({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseHubsArgs & {
   suspense?: boolean;
@@ -98,6 +103,7 @@ export function useHubs({
     document: HubsQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });

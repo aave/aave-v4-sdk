@@ -1,5 +1,6 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
+  type Currency,
   type Hub,
   HubQuery,
   type HubRequest,
@@ -9,6 +10,16 @@ import {
 import type { ResultAsync } from '@aave/types-next';
 
 import type { AaveClient } from '../AaveClient';
+import { DEFAULT_QUERY_OPTIONS } from '../options';
+
+export type HubQueryOptions = {
+  /**
+   * The currency for fiat amounts.
+   *
+   * @defaultValue {@link Currency.Usd}
+   */
+  currency: Currency;
+};
 
 /**
  * Fetches a specific hub by address and chain ID.
@@ -22,13 +33,15 @@ import type { AaveClient } from '../AaveClient';
  *
  * @param client - Aave client.
  * @param request - The hub request parameters.
+ * @param options - The query options (currency only).
  * @returns The hub data, or null if not found.
  */
 export function hub(
   client: AaveClient,
   request: HubRequest,
+  options: HubQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Hub | null, UnexpectedError> {
-  return client.query(HubQuery, { request });
+  return client.query(HubQuery, { request, ...options });
 }
 
 /**
@@ -42,11 +55,13 @@ export function hub(
  *
  * @param client - Aave client.
  * @param request - The hubs request parameters (either tokens or chainIds).
+ * @param options - The query options (currency only).
  * @returns Array of hub data.
  */
 export function hubs(
   client: AaveClient,
   request: HubsRequest,
+  options: HubQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Hub[], UnexpectedError> {
-  return client.query(HubsQuery, { request });
+  return client.query(HubsQuery, { request, ...options });
 }

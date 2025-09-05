@@ -85,7 +85,7 @@ export const HubFragment = graphql(
       chain {
         ...Chain
       }
-      summary(currency: USD) {
+      summary(currency: $currency) {
         ...HubSummary
       }
     }`,

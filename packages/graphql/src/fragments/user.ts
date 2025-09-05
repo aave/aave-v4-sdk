@@ -91,19 +91,19 @@ export const UserPositionFragment = graphql(
     netApy {
       ...PercentValue
     }
-    netCollateral(currency: USD) {
+    netCollateral(currency: $currency) {
       ...FiatAmountWithChange
     }
-    netBalance(currency: USD) {
+    netBalance(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalCollateral(currency: USD) {
+    totalCollateral(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalSupplied(currency: USD) {
+    totalSupplied(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalDebt(currency: USD) {
+    totalDebt(currency: $currency) {
       ...FiatAmountWithChange
     }
     netSupplyApy {
