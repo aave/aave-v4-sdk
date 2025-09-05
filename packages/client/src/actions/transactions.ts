@@ -23,7 +23,7 @@ import type { AaveClient } from '../AaveClient';
  *   amount: {
  *     erc20: {
  *       currency: evmAddress('0x5678…'),
- *       value: '1000',
+ *       value: bigDecimal('1000'),
  *     },
  *   },
  *   borrower: evmAddress('0x9abc…'),
@@ -58,7 +58,7 @@ export function borrow(
  *   amount: {
  *     erc20: {
  *       currency: evmAddress('0x5678…'),
- *       value: '1000',
+ *       value: bigDecimal('1000'),
  *     },
  *   },
  *   supplier: evmAddress('0x9abc…'),
@@ -94,7 +94,7 @@ export function supply(
  *     erc20: {
  *       currency: evmAddress('0x5678…'),
  *       value: {
- *         exact: '500',
+ *         exact: bigDecimal('500'),
  *       },
  *     },
  *   },
@@ -122,19 +122,21 @@ export function repay(
 }
 
 /**
- * Creates a transaction to withdraw from a market.
+ * Creates a transaction to withdraw from a reserve.
  *
  * ```ts
  * const result = await withdraw(client, {
- *   market: market.address,
+ *   reserve: {
+ *     chainId: chainId(1),
+ *     spoke: evmAddress('0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2'),
+ *     reserveId: reserveId('0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e'),
+ *   },
  *   amount: {
  *     erc20: {
- *       currency: evmAddress('0x5678…'),
- *       value: { exact: '750' },
+ *       exact: bigDecimal('750.5'),
  *     },
  *   },
- *   supplier: evmAddress('0x9abc…'),
- *   chainId: market.chain.chainId,
+ *   sender: evmAddress('0x9abc…'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -143,6 +145,40 @@ export function repay(
  * }
  *
  * // result.value: TxHash
+ * ```
+ *
+ * **Withdraw specific amount:**
+ * ```ts
+ * amount: {
+ *   erc20: {
+ *     exact: bigDecimal('100.5'), // Exact amount to withdraw
+ *   }
+ * }
+ * ```
+ *
+ * **Withdraw all available:**
+ * ```ts
+ * amount: {
+ *   erc20: {
+ *     max: true, // Withdraw the full position
+ *   }
+ * }
+ * ```
+ *
+ * **Withdraw native token:**
+ * ```ts
+ * amount: {
+ *   native: bigDecimal('0.5'), // For ETH on Ethereum
+ * }
+ * ```
+ *
+ * **On behalf of another user (position manager only):**
+ * ```ts
+ * {
+ *   // ... other fields
+ *   sender: evmAddress('0xManager…'),
+ *   onBehalfOf: evmAddress('0xUser…'),
+ * }
  * ```
  *
  * @param client - Aave client.

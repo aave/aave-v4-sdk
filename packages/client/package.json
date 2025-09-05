@@ -71,10 +71,11 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/graphql-next": "workspace:*",
     "@aave/core-next": "workspace:*",
+    "@aave/graphql-next": "workspace:*",
     "@aave/types-next": "workspace:*",
     "@urql/core": "^5.2.0",
+    "@urql/exchange-graphcache": "^8.1.0",
     "graphql": "^16.11.0"
   },
   "devDependencies": {
