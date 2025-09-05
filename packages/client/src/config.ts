@@ -1,6 +1,7 @@
 import type { Context } from '@aave/core-next';
 import type { TypedDocumentNode } from '@urql/core';
 import type { EnvironmentConfig } from '../../core/src/types';
+import { cache } from './cache';
 import { production } from './environments';
 
 /**
@@ -43,7 +44,7 @@ export function configureContext(from: ClientConfig): Context {
   return {
     environment: from.environment ?? production,
     headers: from.headers,
-    cache: from.cache ?? false,
+    cache: from.cache ? cache : null,
     debug: from.debug ?? false,
     fragments: from.fragments ?? [],
   };

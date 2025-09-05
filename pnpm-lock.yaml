@@ -63,6 +63,9 @@ importers:
       '@urql/core':
         specifier: ^5.2.0
         version: 5.2.0(graphql@16.11.0)
+      '@urql/exchange-graphcache':
+        specifier: ^8.1.0
+        version: 8.1.0(@urql/core@5.2.0(graphql@16.11.0))(graphql@16.11.0)
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
@@ -1737,6 +1740,11 @@ packages:
 
   '@urql/core@5.2.0':
     resolution: {integrity: sha512-/n0ieD0mvvDnVAXEQgX/7qJiVcvYvNkOHeBvkwtylfjydar123caCXcl58PXFY11oU1oquJocVXHxLAbtv4x1A==}
+
+  '@urql/exchange-graphcache@8.1.0':
+    resolution: {integrity: sha512-KxdDFcGAWhYOkpCz/NLNHb8SaWSxE2G1iv+jlFty2f/ZlCkD+FjtzwQuieGl7fk1MVR8DG1zLmxGNlwfCNksfQ==}
+    peerDependencies:
+      '@urql/core': ^6.0.0
 
   '@urql/introspection@1.2.1':
     resolution: {integrity: sha512-U9FTSISz69EEK3bHWDsqux9JqOeiLzr3eDFBQ5DmHuTLaBsd5mjPdtLRzzzmb9nW1Ygd6IR8YcuM7zeNqQ5lCQ==}
@@ -6832,6 +6840,14 @@ snapshots:
   '@urql/core@5.2.0(graphql@16.11.0)':
     dependencies:
       '@0no-co/graphql.web': 1.1.2(graphql@16.11.0)
+      wonka: 6.3.5
+    transitivePeerDependencies:
+      - graphql
+
+  '@urql/exchange-graphcache@8.1.0(@urql/core@5.2.0(graphql@16.11.0))(graphql@16.11.0)':
+    dependencies:
+      '@0no-co/graphql.web': 1.1.2(graphql@16.11.0)
+      '@urql/core': 5.2.0(graphql@16.11.0)
       wonka: 6.3.5
     transitivePeerDependencies:
       - graphql

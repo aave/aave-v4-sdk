@@ -5,7 +5,7 @@ The official TypeScript library for interacting with Aave Protocol.
 ---
 
 
-The `@aave/client` package contains the core functionality to query markets, execute transactions, and manage user positions across Aave lending markets and vaults. It provides a type-safe interface with built-in error handling and result types.
+The `@aave/client` package contains the core functionality to query markets, execute transactions, and manage user positions across Aave lending markets. It provides a type-safe interface with built-in error handling and result types.
 
 
 ## Usage

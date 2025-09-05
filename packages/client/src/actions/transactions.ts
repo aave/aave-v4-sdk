@@ -15,6 +15,9 @@ import {
   SupplyQuery,
   type SupplyRequest,
   type TransactionRequest,
+  UpdateUserDynamicConfigQuery,
+  type UpdateUserDynamicConfigRequest,
+  // type TransactionRequest,
   WithdrawQuery,
   type WithdrawRequest,
 } from '@aave/graphql-next';
@@ -197,6 +200,39 @@ export function withdraw(
   request: WithdrawRequest,
 ): ResultAsync<ExecutionPlan, UnexpectedError> {
   return client.query(WithdrawQuery, { request });
+}
+
+/**
+ * Creates a transaction to update user dynamic config for a specific spoke.
+ *
+ * ```ts
+ * const result = await updateUserDynamicConfig(client, {
+ *   sender: evmAddress('0x9abc…'),
+ *   spoke: {
+ *     chainId: chainId(1),
+ *     address: evmAddress('0x878…'),
+ *   }
+ * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *
+ * if (result.isErr()) {
+ *   // Handle error
+ *   return;
+ * }
+ *
+ * // result.value: TxHash
+ * ```
+ *
+ *
+ * @param client - Aave client.
+ * @param request - The update user dynamic config request parameters.
+ * @returns The transaction data.
+ */
+
+export function updateUserDynamicConfig(
+  client: AaveClient,
+  request: UpdateUserDynamicConfigRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(UpdateUserDynamicConfigQuery, { request });
 }
 
 /**

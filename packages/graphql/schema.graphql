@@ -342,7 +342,10 @@ enum HubAssetsRequestOrderBy {
 }
 
 input HubInput {
+  """The hub address"""
   address: EvmAddress!
+
+  """The hub chain id"""
   chainId: ChainId!
 }
 
@@ -862,14 +865,24 @@ input SlippageInput @oneOf {
 }
 
 type Spoke {
+  """The spoke name (offchain)"""
   name: String!
+
+  """The spoke address"""
   address: EvmAddress!
+
+  """The spoke chain"""
   chain: Chain!
+
+  """The spoke config"""
   config: SpokeConfig!
 }
 
 type SpokeConfig {
+  """Has the spoke got the position manager enabled"""
   canSetPositionManager: Boolean!
+
+  """Is the spoke active"""
   active: Boolean!
 }
 
@@ -905,7 +918,16 @@ type SpokeUserPositionManger {
 }
 
 input SpokesRequest @oneOf {
+  """
+  The hub address and chain id
+  Get all the spokes which hubs are linked to a spoke reserve
+  """
   hub: HubInput
+
+  """
+  The chain ids
+  Get all the spokes which are on the list of chain ids
+  """
   chainIds: [ChainId!]
 }
 

@@ -146,3 +146,18 @@ export const PreviewQuery = graphql(
   [PreviewUserPositionResultFragment],
 );
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
+/**
+ * @internal
+ */
+export const UpdateUserDynamicConfigQuery = graphql(
+  `query UpdateUserDynamicConfig($request: UpdateUserDynamicConfigRequest!) {
+    value: updateUserDynamicConfig(request: $request) {
+      ...TransactionRequest
+      }
+  }`,
+  [TransactionRequestFragment],
+);
+
+export type UpdateUserDynamicConfigRequest = RequestOf<
+  typeof UpdateUserDynamicConfigQuery
+>;
