@@ -1,4 +1,7 @@
-import { SpokeFragment } from './fragments/spoke';
+import {
+  PaginatedSpokePositionManagerResultFragment,
+  SpokeFragment,
+} from './fragments/spoke';
 import { graphql, type RequestOf } from './graphql';
 
 /**
@@ -13,3 +16,18 @@ export const SpokesQuery = graphql(
   [SpokeFragment],
 );
 export type SpokesRequest = RequestOf<typeof SpokesQuery>;
+
+/**
+ * @internal
+ */
+export const SpokePositionManagersQuery = graphql(
+  `query SpokePositionManagers($request: SpokePositionManagersRequest!) {
+    value: spokePositionManagers(request: $request) {
+      ...PaginatedSpokePositionManagerResult
+    }
+  }`,
+  [PaginatedSpokePositionManagerResultFragment],
+);
+export type SpokePositionManagersRequest = RequestOf<
+  typeof SpokePositionManagersQuery
+>;
