@@ -7,6 +7,9 @@ import {
   type RepayRequest,
   SupplyQuery,
   type SupplyRequest,
+  type TransactionRequest,
+  UpdateUserDynamicConfigQuery,
+  type UpdateUserDynamicConfigRequest,
   // type TransactionRequest,
   WithdrawQuery,
   type WithdrawRequest,
@@ -190,6 +193,13 @@ export function withdraw(
   request: WithdrawRequest,
 ): ResultAsync<ExecutionPlan, UnexpectedError> {
   return client.query(WithdrawQuery, { request });
+}
+
+export function updateUserDynamicConfig(
+  client: AaveClient,
+  request: UpdateUserDynamicConfigRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(UpdateUserDynamicConfigQuery, { request });
 }
 
 /**
