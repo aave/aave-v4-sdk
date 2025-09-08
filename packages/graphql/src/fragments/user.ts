@@ -88,6 +88,12 @@ export const UserPositionFragment = graphql(
       ...Spoke
     }
     user
+    supplies {
+      ...UserSupplyItem
+    }
+    borrows {
+      ...UserBorrowItem
+    }
     netApy {
       ...PercentValue
     }
@@ -121,12 +127,6 @@ export const UserPositionFragment = graphql(
     betterRiskPremium {
       ...PercentValue
     }
-    supplies {
-      ...UserSupplyItem
-    }
-    borrows {
-      ...UserBorrowItem
-    }
     netBalancePercentChange(window: $timeWindow){
       ...PercentValue
     }
@@ -139,7 +139,6 @@ export const UserPositionFragment = graphql(
     BigDecimalWithChangeFragment,
     UserSupplyItemFragment,
     UserBorrowItemFragment,
-    PercentValueFragment,
   ],
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;

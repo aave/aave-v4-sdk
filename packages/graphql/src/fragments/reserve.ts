@@ -1,8 +1,10 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
-
-import { ChainFragment } from './chain';
-import { Erc20AmountFragment, PercentValueFragment } from './common';
+import {
+  ChainFragment,
+  Erc20AmountFragment,
+  PercentValueFragment,
+} from './common';
 import { HubAssetFragment } from './hubs';
 import { SpokeFragment } from './spoke';
 
@@ -96,6 +98,7 @@ export const ReserveFragment = graphql(
       ...ReserveStatus
     }
     canBorrow
+    canSupply
     canUseAsCollateral
     userState {
       ...ReserveUserState
