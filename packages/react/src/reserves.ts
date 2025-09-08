@@ -1,4 +1,7 @@
-import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '@aave/client-next';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+} from '@aave/client-next';
 import {
   BestBorrowReserveQuery,
   type BestBorrowReserveRequest,
@@ -8,6 +11,7 @@ import {
   ReservesQuery,
   type ReservesRequest,
 } from '@aave/graphql-next';
+import type { Prettify } from '@aave/types-next';
 import {
   type ReadResult,
   type Suspendable,
@@ -16,7 +20,9 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseBestBorrowReserveArgs = BestBorrowReserveRequest & QueryOptions;
+export type UseBestBorrowReserveArgs = Prettify<
+  BestBorrowReserveRequest & CurrencyQueryOptions
+>;
 
 /**
  * Find the best borrow reserve based on specified criteria.
@@ -70,7 +76,9 @@ export function useBestBorrowReserve({
   });
 }
 
-export type UseBestSupplyReserveArgs = BestSupplyReserveRequest & QueryOptions;
+export type UseBestSupplyReserveArgs = Prettify<
+  BestSupplyReserveRequest & CurrencyQueryOptions
+>;
 
 /**
  * Find the best supply reserve based on specified criteria.
@@ -124,7 +132,7 @@ export function useBestSupplyReserve({
   });
 }
 
-export type UseReservesArgs = ReservesRequest & QueryOptions;
+export type UseReservesArgs = Prettify<ReservesRequest & CurrencyQueryOptions>;
 
 /**
  * Fetch reserves based on specified criteria.

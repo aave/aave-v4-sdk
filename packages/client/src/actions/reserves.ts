@@ -10,7 +10,7 @@ import {
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
-import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '../options';
+import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
  * Fetches the best borrow reserve based on specified criteria.
@@ -32,7 +32,7 @@ import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '../options';
 export function bestBorrowReserve(
   client: AaveClient,
   request: BestBorrowReserveRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve, UnexpectedError> {
   return client.query(BestBorrowReserveQuery, { request, ...options });
 }
@@ -57,7 +57,7 @@ export function bestBorrowReserve(
 export function bestSupplyReserve(
   client: AaveClient,
   request: BestSupplyReserveRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve, UnexpectedError> {
   return client.query(BestSupplyReserveQuery, { request, ...options });
 }
@@ -86,7 +86,7 @@ export function bestSupplyReserve(
 export function reserves(
   client: AaveClient,
   request: ReservesRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve[], UnexpectedError> {
   return client.query(ReservesQuery, { request, ...options });
 }

@@ -1,21 +1,24 @@
 import { Currency, TimeWindow } from '@aave/graphql-next';
 
-export type QueryOptions = {
+export type CurrencyQueryOptions = {
   /**
    * The currency for fiat amounts.
    *
    * @defaultValue {@link Currency.Usd}
    */
-  currency: Currency;
+  currency?: Currency;
+};
+
+export type TimeWindowQueryOptions = {
   /**
    * The time window for historical data changes.
    *
    * @defaultValue {@link TimeWindow.LastDay}
    */
-  timeWindow: TimeWindow;
+  timeWindow?: TimeWindow;
 };
 
-export const DEFAULT_QUERY_OPTIONS: QueryOptions = {
+export const DEFAULT_QUERY_OPTIONS = {
   currency: Currency.Usd,
   timeWindow: TimeWindow.LastDay,
-};
+} as const;
