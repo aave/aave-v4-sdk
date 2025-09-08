@@ -49,7 +49,7 @@ export const Erc20TokenFragment = graphql(
     info {
       ...TokenInfo
     }
-    contract
+    address
   }`,
   [TokenInfoFragment],
 );

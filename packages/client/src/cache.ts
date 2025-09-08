@@ -40,7 +40,7 @@ export const cache = /*#__PURE__*/ cacheExchange({
     RepayActivity: (data: RepayActivity) => data.id,
 
     // Entities with address field as key
-    Erc20Token: (data: Erc20Token) => data.contract,
+    Erc20Token: (data: Erc20Token) => data.address,
     Hub: (data: Hub) => data.address,
     Spoke: (data: Spoke) => data.address,
 

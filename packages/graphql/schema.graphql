@@ -204,7 +204,7 @@ input Erc20Input {
 }
 
 type Erc20Token {
-  contract: EvmAddress!
+  address: EvmAddress!
   chain: Chain!
   info: TokenInfo!
 
@@ -353,7 +353,7 @@ type HubAssetSummary {
 
 type HubAssetUserState {
   """The hub asset balance"""
-  balance: TokenAmount!
+  balance: Erc20Amount!
 }
 
 input HubAssetsRequest {
@@ -1276,11 +1276,11 @@ input UserBalancesRequestOrderBy @oneOf {
 }
 
 type UserBorrowItem {
-  """The amount borrowed"""
-  amount: Erc20Amount!
-
   """The reserve borrowed from"""
   reserve: Reserve!
+
+  """The amount borrowed"""
+  amount: Erc20Amount!
 
   """The amount paid back of the borrow so far"""
   paid: Erc20Amount!
@@ -1433,11 +1433,11 @@ input UserSuppliesRequestOrderBy @oneOf {
 }
 
 type UserSupplyItem {
-  """The amount supplied"""
-  amount: Erc20Amount!
-
   """The reserve supplied to"""
   reserve: Reserve!
+
+  """The amount supplied"""
+  amount: Erc20Amount!
 
   """The amount earned since supplying"""
   earned: Erc20Amount!
