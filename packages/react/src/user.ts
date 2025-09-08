@@ -33,6 +33,7 @@ import {
   type UserSuppliesRequest,
   type UserSupplyItem,
 } from '@aave/graphql-next';
+import type { Prettify } from '@aave/types-next';
 import {
   type ReadResult,
   type Suspendable,
@@ -161,7 +162,9 @@ export function useUserBorrows({
   });
 }
 
-export type UseUserSummaryArgs = UserSummaryRequest & UserSummaryQueryOptions;
+export type UseUserSummaryArgs = Prettify<
+  UserSummaryRequest & Partial<UserSummaryQueryOptions>
+>;
 
 /**
  * Fetch a user's financial summary.

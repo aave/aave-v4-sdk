@@ -7,6 +7,7 @@ import {
   HubsQuery,
   type HubsRequest,
 } from '@aave/graphql-next';
+import type { Prettify } from '@aave/types-next';
 import {
   type ReadResult,
   type Suspendable,
@@ -15,7 +16,7 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseHubArgs = HubRequest & HubQueryOptions;
+export type UseHubArgs = Prettify<HubRequest & Partial<HubQueryOptions>>;
 
 /**
  * Fetch a specific hub by address and chain ID.
@@ -65,7 +66,7 @@ export function useHub({
   });
 }
 
-export type UseHubsArgs = HubsRequest & HubQueryOptions;
+export type UseHubsArgs = Prettify<HubsRequest & Partial<HubQueryOptions>>;
 
 /**
  * Fetch multiple hubs based on specified criteria.
