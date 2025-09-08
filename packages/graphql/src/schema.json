@@ -601,7 +601,7 @@
         "name": "Erc20Token",
         "fields": [
           {
-            "name": "contract",
+            "name": "address",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -1109,8 +1109,8 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "TokenAmount",
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
                 "ofType": null
               }
             },
@@ -4884,24 +4884,24 @@
         "name": "UserBorrowItem",
         "fields": [
           {
-            "name": "amount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "reserve",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Reserve",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
                 "ofType": null
               }
             },
@@ -5399,24 +5399,24 @@
         "name": "UserSupplyItem",
         "fields": [
           {
-            "name": "amount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "reserve",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Reserve",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
                 "ofType": null
               }
             },
