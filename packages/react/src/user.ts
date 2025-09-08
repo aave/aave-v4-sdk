@@ -1,5 +1,9 @@
-import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '@aave/client-next';
-import type { UserSummaryQueryOptions } from '@aave/client-next/actions';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
+} from '@aave/client-next';
+import type { UserPositionQueryOptions } from '@aave/client-next/actions';
 import {
   type APYSample,
   type BorrowAPYHistoryRequest,
@@ -42,7 +46,9 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseUserSuppliesArgs = UserSuppliesRequest & QueryOptions;
+export type UseUserSuppliesArgs = Prettify<
+  UserSuppliesRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch all user supply positions.
@@ -102,7 +108,9 @@ export function useUserSupplies({
   });
 }
 
-export type UseUserBorrowsArgs = UserBorrowsRequest & QueryOptions;
+export type UseUserBorrowsArgs = Prettify<
+  UserBorrowsRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch all user borrow positions.
@@ -163,7 +171,7 @@ export function useUserBorrows({
 }
 
 export type UseUserSummaryArgs = Prettify<
-  UserSummaryRequest & Partial<UserSummaryQueryOptions>
+  UserSummaryRequest & TimeWindowQueryOptions
 >;
 
 /**
@@ -218,7 +226,9 @@ export function useUserSummary({
   });
 }
 
-export type UseUserPositionsArgs = UserPositionsRequest & QueryOptions;
+export type UseUserPositionsArgs = Prettify<
+  UserPositionsRequest & UserPositionQueryOptions
+>;
 
 /**
  * Fetch all user positions across specified chains.
@@ -272,7 +282,9 @@ export function useUserPositions({
   });
 }
 
-export type UseUserPositionArgs = UserPositionRequest & QueryOptions;
+export type UseUserPositionArgs = Prettify<
+  UserPositionRequest & UserPositionQueryOptions
+>;
 
 /**
  * Fetch a specific user position by ID.
@@ -324,7 +336,9 @@ export function useUserPosition({
   });
 }
 
-export type UseUserBalancesArgs = UserBalancesRequest & QueryOptions;
+export type UseUserBalancesArgs = Prettify<
+  UserBalancesRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch all user balances across specified chains.
@@ -374,7 +388,9 @@ export function useUserBalances({
   });
 }
 
-export type UseUserHistoryArgs = UserHistoryRequest & QueryOptions;
+export type UseUserHistoryArgs = Prettify<
+  UserHistoryRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch user transaction history with pagination.
@@ -590,7 +606,9 @@ export function useSupplyApyHistory({
   });
 }
 
-export type UseHubAssetsArgs = HubAssetsRequest & QueryOptions;
+export type UseHubAssetsArgs = Prettify<
+  HubAssetsRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch hub assets for a specific chain and optional hub/user filtering.

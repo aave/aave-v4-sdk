@@ -1,5 +1,7 @@
-import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
-import type { HubQueryOptions } from '@aave/client-next/actions';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+} from '@aave/client-next';
 import {
   type Hub,
   HubQuery,
@@ -16,7 +18,7 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseHubArgs = Prettify<HubRequest & Partial<HubQueryOptions>>;
+export type UseHubArgs = Prettify<HubRequest & CurrencyQueryOptions>;
 
 /**
  * Fetch a specific hub by address and chain ID.
@@ -66,7 +68,7 @@ export function useHub({
   });
 }
 
-export type UseHubsArgs = Prettify<HubsRequest & Partial<HubQueryOptions>>;
+export type UseHubsArgs = Prettify<HubsRequest & CurrencyQueryOptions>;
 
 /**
  * Fetch multiple hubs based on specified criteria.

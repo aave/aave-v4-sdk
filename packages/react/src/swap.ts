@@ -1,10 +1,8 @@
-import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
 import {
-  prepareSwap,
-  type SwapQueryOptions,
-  swap,
-  swapQuote,
-} from '@aave/client-next/actions';
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+} from '@aave/client-next';
+import { prepareSwap, swap, swapQuote } from '@aave/client-next/actions';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
   PendingSwapsRequest,
@@ -23,7 +21,7 @@ import {
   type SwappableTokensRequest,
   type Token,
 } from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+import type { Prettify, ResultAsync } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type ReadResult,
@@ -33,8 +31,6 @@ import {
   useSuspendableQuery,
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
-
-export type UseSwapQuoteArgs = SwapQueryOptions;
 
 /**
  * Fetches a swap quote for the specified trade parameters.
@@ -64,7 +60,7 @@ export type UseSwapQuoteArgs = SwapQueryOptions;
  * ```
  */
 export function useSwapQuote(
-  options: UseSwapQuoteArgs = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<SwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
@@ -165,6 +161,10 @@ export function useSwappableTokens({
   });
 }
 
+export type UseSwapTokensRequest = Prettify<
+  PrepareSwapRequest & CurrencyQueryOptions
+>;
+
 export type SwapIntent = SwapByIntent | SwapByIntentWithApprovalRequired;
 
 export type SwapByIntentHandler = (
@@ -227,22 +227,26 @@ export function useSwapTokens(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: PrepareSwapRequest) =>
-    prepareSwap(client, request).andThen((prepareResult) => {
-      switch (prepareResult.__typename) {
-        case 'SwapByIntent':
-          return handler(prepareResult).andThen((signature) =>
-            swap(client, { intent: { id: prepareResult.id, signature } }),
-          );
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseSwapTokensRequest) =>
+      prepareSwap(client, request, { currency }).andThen((prepareResult) => {
+        switch (prepareResult.__typename) {
+          case 'SwapByIntent':
+            return handler(prepareResult).andThen((signature) =>
+              swap(client, { intent: { id: prepareResult.id, signature } }),
+            );
 
-        case 'SwapByIntentWithApprovalRequired':
-          return handler(prepareResult).andThen((signature) =>
-            swap(client, { intent: { id: prepareResult.id, signature } }),
-          );
+          case 'SwapByIntentWithApprovalRequired':
+            return handler(prepareResult).andThen((signature) =>
+              swap(client, { intent: { id: prepareResult.id, signature } }),
+            );
 
-        case 'SwapByTransaction':
-          return swap(client, { transaction: { id: prepareResult.id } });
-      }
-    }),
+          case 'SwapByTransaction':
+            return swap(client, { transaction: { id: prepareResult.id } });
+        }
+      }),
   );
 }
