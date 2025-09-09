@@ -1,11 +1,11 @@
+import { useSendTransaction } from '@aave/react/viem';
 import {
   bigDecimal,
   errAsync,
   evmAddress,
   type Reserve,
   useSupply,
-} from '@aave/react';
-import { useSendTransaction } from '@aave/react/viem';
+} from '@aave/react-next';
 import { useState } from 'react';
 import type { WalletClient } from 'viem';
 
@@ -17,8 +17,21 @@ interface SupplyFormProps {
 export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
   const [status, setStatus] = useState<string>('');
 
-  const [supply, supplying] = useSupply();
   const [sendTransaction, sending] = useSendTransaction(walletClient);
+  const [supply, supplying] = useSupply((plan) => {
+    switch (plan.__typename) {
+      case 'TransactionRequest':
+        setStatus('Sending transaction...');
+        return sendTransaction(plan);
+
+      case 'ApprovalRequired':
+        setStatus('Approval required. Sending approval transaction...');
+        return sendTransaction(plan.approval).andThen(() => {
+          setStatus('Approval sent. Now sending supply transaction...');
+          return sendTransaction(plan.originalTransaction);
+        });
+    }
+  });
 
   const loading = supplying.loading || sending.loading;
   const error = supplying.error || sending.error;
@@ -33,43 +46,25 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
     }
 
     const result = await supply({
-      chainId: reserve.market.chain.chainId,
-      market: reserve.market.address,
+      reserve: {
+        reserveId: reserve.id,
+        chainId: reserve.chain.chainId,
+        spoke: reserve.spoke.address,
+      },
       amount: {
         erc20: {
-          currency: reserve.underlyingToken.address,
           value: bigDecimal(amount),
         },
       },
       sender: evmAddress(walletClient.account!.address),
-    }).andThen((plan) => {
-      switch (plan.__typename) {
-        case 'TransactionRequest':
-          setStatus('Sending transaction...');
-          return sendTransaction(plan);
-
-        case 'ApprovalRequired':
-          setStatus('Approval required. Sending approval transaction...');
-
-          return sendTransaction(plan.approval).andThen(() => {
-            setStatus('Approval sent. Now sending supply transaction...');
-
-            return sendTransaction(plan.originalTransaction);
-          });
-
-        case 'InsufficientBalanceError':
-          setStatus(
-            `Insufficient balance: ${plan.available.value} ${reserve.underlyingToken.symbol}`,
-          );
-          return errAsync(
-            new Error(`Insufficient balance: ${plan.required.value}`),
-          );
-      }
     });
 
-    console.log(reserve);
-
-    if (result.isOk()) {
+    if (result.isErr()) {
+      setStatus(
+        result.error.message,
+        // `Insufficient balance: ${result.error.available.formatted} ${reserve.asset.underlying.info.symbol}`,
+      );
+    } else {
       setStatus('Supply successful!');
     }
   };
