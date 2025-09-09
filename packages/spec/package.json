@@ -12,6 +12,6 @@
   },
   "devDependencies": {
     "typescript": "^5.9.2",
-    "viem": "^2.31.6"
+    "viem": "^2.37.5"
   }
 }
