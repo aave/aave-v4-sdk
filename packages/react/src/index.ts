@@ -2,6 +2,16 @@ export * from '@aave/client-next';
 
 export * from './AaveProvider';
 export { useAaveClient } from './context';
+export type {
+  AsyncTaskError,
+  AsyncTaskIdle,
+  AsyncTaskLoading,
+  AsyncTaskState,
+  AsyncTaskSuccess,
+  SendTransactionError,
+  UseAsyncTask,
+  UseSendTransactionResult,
+} from './helpers';
 export * from './hubs';
 export * from './misc';
 export * from './permits';

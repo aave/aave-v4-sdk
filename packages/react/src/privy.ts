@@ -1,9 +1,4 @@
-import {
-  SigningError,
-  type TimeoutError,
-  type TransactionError,
-  UnexpectedError,
-} from '@aave/client-next';
+import { SigningError, UnexpectedError } from '@aave/client-next';
 import { permitTypedData } from '@aave/client-next/actions';
 import {
   sendTransactionAndWait,
@@ -14,22 +9,15 @@ import type {
   PermitTypedDataRequest,
   TransactionRequest,
 } from '@aave/graphql-next';
-import {
-  invariant,
-  ResultAsync,
-  signatureFrom,
-  type TxHash,
-} from '@aave/types-next';
+import { invariant, ResultAsync, signatureFrom } from '@aave/types-next';
 import { useSignTypedData, useWallets } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import { useAaveClient } from './context';
-import { type UseAsyncTask, useAsyncTask } from './helpers';
-
-export type SendTransactionError =
-  | SigningError
-  | TimeoutError
-  | TransactionError
-  | UnexpectedError;
+import {
+  type UseAsyncTask,
+  type UseSendTransactionResult,
+  useAsyncTask,
+} from './helpers';
 
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
@@ -45,14 +33,10 @@ export type SendTransactionError =
  * ```ts
  * const account = useAccount(); // wagmi hook
  *
- * const [toggle, { loading, error, data }] = useEModeToggle();
+ * const [execute, { loading, error, data }] = useSimpleTransactionHook();
  *
  * const run = async () => {
- *   const result = await toggle({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     user: evmAddress(account.address!),
- *   })
+ *   const result = await execute(args)
  *     .andThen(sendTransaction);
  *
  *   if (result.isErr()) {
@@ -69,20 +53,10 @@ export type SendTransactionError =
  * ```ts
  * const account = useAccount(); // wagmi hook
  *
- * const [supply, { loading, error, data }] = useSupply();
+ * const [execute, { loading, error, data }] = useComplexTransactionHook();
  *
  * const run = async () => {
- *   const result = await supply({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     amount: {
- *       erc20: {
- *         currency: evmAddress('0x5678…'),
- *         value: '42.42',
- *       }
- *     },
- *     supplier: evmAddress(account.address!),
- *   })
+ *   const result = await execute(args)
  *     .andThen((plan) => {
  *       switch (plan.__typename) {
  *         case 'TransactionRequest':
@@ -107,11 +81,7 @@ export type SendTransactionError =
  * }
  * ```
  */
-export function useSendTransaction(): UseAsyncTask<
-  TransactionRequest,
-  TxHash,
-  SendTransactionError
-> {
+export function useSendTransaction(): UseSendTransactionResult {
   const client = useAaveClient();
   const { wallets } = useWallets();
 
