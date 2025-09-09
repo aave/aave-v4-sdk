@@ -20,76 +20,25 @@ import {
   type TxHash,
   txHash,
 } from '@aave/types-next';
-import {
-  type Chain,
+import type {
+  Chain,
   defineChain,
-  type Hash,
-  type TypedData,
-  type TypedDataDomain,
-  type WalletClient,
+  Hash,
+  TypedData,
+  TypedDataDomain,
+  WalletClient,
 } from 'viem';
 import {
   sendTransaction as sendEip1559Transaction,
   signTypedData,
   waitForTransactionReceipt,
 } from 'viem/actions';
-// chains.ts
-import {
-  arbitrum,
-  avalanche,
-  base,
-  baseSepolia,
-  bsc,
-  celo,
-  gnosis,
-  linea,
-  mainnet,
-  metis,
-  optimism,
-  polygon,
-  scroll,
-  zksync,
-} from 'viem/chains';
+import { mainnet } from 'viem/chains';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
   TransactionExecutionResult,
 } from './types';
-
-// Other chains
-const sonic: Chain = defineChain({
-  id: 146,
-  name: 'Sonic',
-  nativeCurrency: { name: 'Sonic', symbol: 'S', decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ['https://sonicscan.org'], // Replace with actual RPC URL if needed
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'SonicScan',
-      url: 'https://sonicscan.org',
-    },
-  },
-});
-
-const soneium: Chain = defineChain({
-  id: 1868,
-  name: 'Soneium',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ['https://soneium.blockscout.com'], // Replace with actual RPC URL if needed
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Blockscout',
-      url: 'https://soneium.blockscout.com',
-    },
-  },
-});
 
 /**
  * @internal
@@ -99,21 +48,6 @@ export const supportedChains: Record<
   ReturnType<typeof defineChain>
 > = {
   [chainId(mainnet.id)]: mainnet,
-  [chainId(arbitrum.id)]: arbitrum,
-  [chainId(avalanche.id)]: avalanche,
-  [chainId(base.id)]: base,
-  [chainId(baseSepolia.id)]: baseSepolia,
-  [chainId(bsc.id)]: bsc,
-  [chainId(celo.id)]: celo,
-  [chainId(gnosis.id)]: gnosis,
-  [chainId(linea.id)]: linea,
-  [chainId(metis.id)]: metis,
-  [chainId(optimism.id)]: optimism,
-  [chainId(polygon.id)]: polygon,
-  [chainId(scroll.id)]: scroll,
-  [chainId(zksync.id)]: zksync,
-  [chainId(sonic.id)]: sonic,
-  [chainId(soneium.id)]: soneium,
 };
 
 async function sendTransaction(
