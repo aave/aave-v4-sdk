@@ -137,6 +137,9 @@ importers:
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
+      wonka:
+        specifier: ^6.3.5
+        version: 6.3.5
     devDependencies:
       tsup:
         specifier: ^8.5.0

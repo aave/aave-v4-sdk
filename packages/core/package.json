@@ -19,18 +19,25 @@
   },
   "typesVersions": {
     "*": {
-      "import": ["./dist/index.d.ts"],
-      "require": ["./dist/index.d.cts"]
+      "import": [
+        "./dist/index.d.ts"
+      ],
+      "require": [
+        "./dist/index.d.cts"
+      ]
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup"
   },
   "dependencies": {
     "@aave/types-next": "workspace:*",
     "@urql/core": "^5.2.0",
-    "graphql": "^16.11.0"
+    "graphql": "^16.11.0",
+    "wonka": "^6.3.5"
   },
   "devDependencies": {
     "tsup": "^8.5.0",
