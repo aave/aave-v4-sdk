@@ -237,23 +237,30 @@ To handle a simple transaction hook, follow the steps below.
 First, instantiate the specific transaction hook and the `useSendTransaction` hook.
 
 ```tsx
-const [prepare, preparing] = useSimpleTransaction();
-const [sendTransaction, sending] = useSendTransaction(/* … */);
+const [sendTransaction] = useSendTransaction(wallet);
+const [execute, { loading, error }] = useSimpleTransaction(
+  request => sendTransaction(request),
+);
 ```
+
+You can bail out of the operation by calling the `cancel(message)` function.
+
+```ts
+const [execute, { loading, error }] = useSimpleTransaction((request, { cancel }) => {
+  if (window.confirm('Are you sure you want to continue?') === false) {
+    return cancel('User cancelled the operation');
+  }
+  return sendTransaction(request);
+});
+```
+
 
 #### Execute the Transaction <!-- omit in toc -->
 
-Next, execute the transaction in your callback by chaining the prepare and send operations.
+Next, execute the transaction in your callback.
 
 ```ts
-const result = await prepare(/* args */).andThen(sendTransaction);
-```
-
-Optionally, combine the state objects to drive your UI components.
-
-```ts
-const loading = preparing.loading && sending.loading;
-const error = preparing.error || sending.error;
+const result = await execute({ ... });
 ```
 
 #### Handle the Result <!-- omit in toc -->
@@ -266,26 +273,30 @@ Finally, handle the result of the operation.
 ```ts
 if (result.isErr()) {
   switch (result.error.name) {
+    case "CancelError":
+      // The user cancelled the operation
+      return;
+
     case "SigningError":
-      // Most likely the user rejected the transaction
-      console.error(`Failed to sign the transaction: ${error.message}`);
+      console.error(`Failed to sign the transaction: ${result.error.message}`);
       break;
 
     case "TimeoutError":
-      console.error(`Transaction timed out: ${error.message}`);
+      console.error(`Transaction timed out: ${result.error.message}`);
       break;
 
     case "TransactionError":
-      console.error(`Transaction failed: ${error.message}`);
+      console.error(`Transaction failed: ${result.error.message}`);
       break;
 
     case "UnexpectedError":
-      console.error(error.message);
+      console.error(result.error.message);
       break;
   }
-} else {
-  console.log("Transaction sent with hash:", result.value);
+  return;
 }
+
+console.log("Transaction sent with hash:", result.value);
 ```
 
 **Declarative Fashion**
@@ -293,9 +304,6 @@ if (result.isErr()) {
 ```tsx
 function MyComponent() {
   // …
-
-  const loading = preparing.loading || sending.loading;
-  const error = preparing.error || sending.error;
 
   return (
     <div>
@@ -318,48 +326,43 @@ To handle a complex transaction hook, follow the steps below.
 First, instantiate the transaction hook and the `useSendTransaction` hook.
 
 ```tsx
-const [prepare, preparing] = useComplexTransaction();
-const [sendTransaction, sending] = useSendTransaction(/* … */);
-```
-
-Optionally, combine the state objects to drive your UI components.
-
-```ts
-const loading = preparing.loading && sending.loading;
-const error = preparing.error || sending.error;
-```
-
-#### Process the Execution Plan <!-- omit in toc -->
-
-Next, handle the execution plan in your transaction flow. Some operations may require token approval before executing the main transaction.
-
-```ts
-import { errAsync } from "@aave/react-next";
-
-// …
-
-const result = await prepare(/* args */).andThen((plan) => {
+const [sendTransaction] = useSendTransaction(wallet);
+const [execute, { loading, error }] = useComplexTransaction((plan, { cancel }) => {
   switch (plan.__typename) {
-    case "TransactionRequest":
+    case 'TransactionRequest':
       return sendTransaction(plan);
 
-    case "ApprovalRequired":
-      return sendTransaction(plan.approval).andThen(() =>
-        sendTransaction(plan.originalTransaction)
-      );
-
-    case "InsufficientBalanceError":
-      return errAsync(
-        new Error(`Insufficient balance: ${plan.required.value} required.`)
-      );
+    case 'ApprovalRequired':
+      return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
   }
 });
-
-// …
 ```
 
-> [!NOTE]
-> If you wish to ask the user for confirmation before sending the transaction, you can do so by integrating your app's confirmation UI at this point.
+You can bail out of the operation by calling the `cancel(message)` function.
+
+```ts
+const [execute, { loading, error }] = useComplexTransaction((plan, { cancel }) => {
+  if (window.confirm('Are you sure you want to continue?') === false) {
+    return cancel('User cancelled the operation');
+  }
+
+  switch (plan.__typename) {
+    case 'TransactionRequest':
+      return sendTransaction(plan);
+
+    case 'ApprovalRequired':
+      return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+  }
+});
+```
+
+#### Execute the Execution Plan <!-- omit in toc -->
+
+Next, execute the transaction in your callback.
+
+```ts
+const result = await execute({ ... });
+```
 
 #### Handle the Result <!-- omit in toc -->
 
@@ -371,26 +374,35 @@ Finally, handle the result of the operation.
 ```ts
 if (result.isErr()) {
   switch (result.error.name) {
+    case "CancelError":
+      // The user cancelled the operation
+      return;
+
     case "SigningError":
       // Most likely the user rejected the transaction
-      console.error(`Failed to sign the transaction: ${error.message}`);
+      console.error(`Failed to sign the transaction: ${result.error.message}`);
       break;
 
     case "TimeoutError":
-      console.error(`Transaction timed out: ${error.message}`);
+      console.error(`Transaction timed out: ${result.error.message}`);
       break;
 
     case "TransactionError":
-      console.error(`Transaction failed: ${error.message}`);
+      console.error(`Transaction failed: ${result.error.message}`);
+      break;
+
+    case "ValidationError":
+      console.error(`Insufficient balance: ${result.error.cause.required.value} required.`);
       break;
 
     case "UnexpectedError":
-      console.error(error.message);
+      console.error(result.error.message);
       break;
   }
-} else {
-  console.log("Transaction sent with hash:", result.value);
+  return;
 }
+
+console.log("Transaction sent with hash:", result.value);
 ```
 
 **Declarative Fashion**
@@ -398,9 +410,6 @@ if (result.isErr()) {
 ```tsx
 function MyComponent() {
   // …
-
-  const loading = preparing.loading || sending.loading;
-  const error = preparing.error || sending.error;
 
   return (
     <div>
