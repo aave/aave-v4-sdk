@@ -22,63 +22,10 @@ import {
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
  *
- * First, use the `useSendTransaction` hook from `@aave/react/privy` entry point.
+ * Import the `useSendTransaction` hook from `@aave/react/privy` entry point.
  *
  * ```ts
  * const [sendTransaction, { loading, error, data }] = useSendTransaction();
- * ```
- *
- * Then, use it to send a {@link TransactionRequest} as shown below.
- *
- * ```ts
- * const account = useAccount(); // wagmi hook
- *
- * const [execute, { loading, error, data }] = useSimpleTransactionHook();
- *
- * const run = async () => {
- *   const result = await execute(args)
- *     .andThen(sendTransaction);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Transaction sent with hash:', result.value);
- * };
- * ```
- *
- * Or use it to handle an {@link ExecutionPlan} that may require multiple transactions as shown below.
- *
- * ```ts
- * const account = useAccount(); // wagmi hook
- *
- * const [execute, { loading, error, data }] = useComplexTransactionHook();
- *
- * const run = async () => {
- *   const result = await execute(args)
- *     .andThen((plan) => {
- *       switch (plan.__typename) {
- *         case 'TransactionRequest':
- *           return sendTransaction(plan);
- *
- *         case 'ApprovalRequired':
- *           return sendTransaction(plan.approval).andThen(() =>
- *             sendTransaction(plan.originalTransaction),
- *           );
- *
- *         case 'InsufficientBalanceError':
- *           return errAsync(new Error(`Insufficient balance: ${error.cause.required.value} required.`));
- *        }
- *      });
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Transaction sent with hash:', result.value);
- * }
  * ```
  */
 export function useSendTransaction(): UseSendTransactionResult {
