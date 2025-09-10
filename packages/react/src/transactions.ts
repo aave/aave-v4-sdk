@@ -37,6 +37,7 @@ import {
   type ComplexTransactionHandler,
   cancel,
   type SendTransactionError,
+  type SimpleTransactionHandler,
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
@@ -457,27 +458,68 @@ export function useWithdrawAction(): UseAsyncTask<
  * A hook that provides a way to renounce a position manager of a user for a specific spoke.
  *
  * ```ts
- * const [renounceSpokeUserPositionManager, renouncing] = useRenounceSpokeUserPositionManager();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = renouncing.loading && sending.loading;
- * const error = renouncing.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [renounceSpokeUserPositionManager, { loading, error }] = useRenounceSpokeUserPositionManager(sendTransaction);
  *
  * // …
  *
- * const result = await renounceSpokeUserPositionManager({ ... })
- *   .andThen(sendTransaction);
+ * const result = await renounceSpokeUserPositionManager({ ... });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
  */
 
-export function useRenounceSpokeUserPositionManager(): UseAsyncTask<
+export function useRenounceSpokeUserPositionManager(
+  handler: SimpleTransactionHandler,
+): UseAsyncTask<
+  RenounceSpokeUserPositionManagerRequest,
+  TxHash,
+  SendTransactionError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: RenounceSpokeUserPositionManagerRequest) =>
+    renounceSpokeUserPositionManager(client, request).andThen((transaction) =>
+      handler(transaction, { cancel }),
+    ),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link renounceSpokeUserPositionManager} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useRenounceSpokeUserPositionManager} for a higher-level API that handles transactions.
+ */
+export function useRenounceSpokeUserPositionManagerAction(): UseAsyncTask<
   RenounceSpokeUserPositionManagerRequest,
   TransactionRequest,
   UnexpectedError
@@ -493,27 +535,66 @@ export function useRenounceSpokeUserPositionManager(): UseAsyncTask<
  * A hook that provides a way to update the user risk premium for a spoke.
  *
  * ```ts
- * const [updateUserRiskPremium, updating] = useUpdateUserRiskPremium();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = updating.loading && sending.loading;
- * const error = updating.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [updateUserRiskPremium, { loading, error }] = useUpdateUserRiskPremium((transaction, { cancel }) => {
+ *   return sendTransaction(transaction);
+ * });
  *
  * // …
  *
- * const result = await updateUserRiskPremium({ ... })
- *   .andThen(sendTransaction);
+ * const result = await updateUserRiskPremium({ ... });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
  */
 
-export function useUpdateUserRiskPremium(): UseAsyncTask<
+export function useUpdateUserRiskPremium(
+  handler: SimpleTransactionHandler,
+): UseAsyncTask<UpdateUserRiskPremiumRequest, TxHash, SendTransactionError> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
+    updateUserRiskPremium(client, request).andThen((transaction) =>
+      handler(transaction, { cancel }),
+    ),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link updateUserRiskPremium} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useUpdateUserRiskPremium} for a higher-level API that handles transactions.
+ */
+export function useUpdateUserRiskPremiumAction(): UseAsyncTask<
   UpdateUserRiskPremiumRequest,
   TransactionRequest,
   UnexpectedError
@@ -529,27 +610,66 @@ export function useUpdateUserRiskPremium(): UseAsyncTask<
  * A hook that provides a way to update the user dynamic configuration for a spoke.
  *
  * ```ts
- * const [updateUserDynamicConfig, updating] = useUpdateUserDynamicConfig();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = updating.loading && sending.loading;
- * const error = updating.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [updateUserDynamicConfig, { loading, error }] = useUpdateUserDynamicConfig((transaction, { cancel }) => {
+ *   return sendTransaction(transaction);
+ * });
  *
  * // …
  *
- * const result = await updateUserDynamicConfig({ ... })
- *   .andThen(sendTransaction);
+ * const result = await updateUserDynamicConfig({ ... });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
  */
 
-export function useUpdateUserDynamicConfig(): UseAsyncTask<
+export function useUpdateUserDynamicConfig(
+  handler: SimpleTransactionHandler,
+): UseAsyncTask<UpdateUserDynamicConfigRequest, TxHash, SendTransactionError> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: UpdateUserDynamicConfigRequest) =>
+    updateUserDynamicConfig(client, request).andThen((transaction) =>
+      handler(transaction, { cancel }),
+    ),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link updateUserDynamicConfig} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useUpdateUserDynamicConfig} for a higher-level API that handles transactions.
+ */
+export function useUpdateUserDynamicConfigAction(): UseAsyncTask<
   UpdateUserDynamicConfigRequest,
   TransactionRequest,
   UnexpectedError
@@ -564,23 +684,76 @@ export function useUpdateUserDynamicConfig(): UseAsyncTask<
 /**
  * Hook for setting whether a user's supply should be used as collateral.
  *
- * ```tsx
- * const [execute, { called, loading, data, error }] = useSetUserSupplyAsCollateral();
+ * ```ts
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [setUserSupplyAsCollateral, { loading, error }] = useSetUserSupplyAsCollateral((transaction, { cancel }) => {
+ *   return sendTransaction(transaction);
+ * });
  *
- * const handleToggleCollateral = async () => {
- *   const result = await execute({
- *     reserve: {
- *       chainId: chainId(1),
- *       spoke: evmAddress('0x123...'),
- *       reserveId: reserveId(1)
- *     },
- *     sender: evmAddress('0x456...'),
- *     enableCollateral: true,
- *   });
- * };
+ * const result = await setUserSupplyAsCollateral({
+ *   reserve: {
+ *     chainId: chainId(1),
+ *     spoke: evmAddress('0x123...'),
+ *     reserveId: reserveId(1)
+ *   },
+ *   sender: evmAddress('0x456...'),
+ *   enableCollateral: true,
+ * });
+ *
+ * if (result.isErr()) {
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
  */
-export function useSetUserSupplyAsCollateral(): UseAsyncTask<
+export function useSetUserSupplyAsCollateral(
+  handler: SimpleTransactionHandler,
+): UseAsyncTask<
+  SetUserSupplyAsCollateralRequest,
+  TxHash,
+  SendTransactionError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
+    setUserSupplyAsCollateral(client, request).andThen((transaction) =>
+      handler(transaction, { cancel }),
+    ),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link setUserSupplyAsCollateral} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useSetUserSupplyAsCollateral} for a higher-level API that handles transactions.
+ */
+export function useSetUserSupplyAsCollateralAction(): UseAsyncTask<
   SetUserSupplyAsCollateralRequest,
   TransactionRequest,
   UnexpectedError
@@ -722,34 +895,79 @@ export function useLiquidatePositionAction(): UseAsyncTask<
  * - `deadline`: Unix timestamp when the authorization expires
  *
  * ```ts
- * const [setSpokeUserPositionManager, setting] = useSetSpokeUserPositionManager();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [setSpokeUserPositionManager, { loading, error }] = useSetSpokeUserPositionManager((transaction, { cancel }) => {
+ *   return sendTransaction(transaction);
+ * });
  *
- * const loading = setting.loading || sending.loading;
- * const error = setting.error || sending.error;
+ * const result = await setSpokeUserPositionManager({
+ *   spoke: {
+ *     address: evmAddress('0x87870bca…'),
+ *     chainId: chainId(1),
+ *   },
+ *   manager: evmAddress('0x9abc…'), // Address that will become the position manager
+ *   approve: true, // true to approve, false to remove the manager
+ *   user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
+ *   signature: {
+ *     value: '0x1234...', // ERC712 signature signed by the user
+ *     deadline: 1735689600, // Unix timestamp when signature expires
+ *   },
+ * });
  *
- * const onSetPositionManager = async () => {
- *   const result = await setSpokeUserPositionManager({
- *     spoke: {
- *       address: evmAddress('0x87870bca…'),
- *       chainId: chainId(1),
- *     },
- *     manager: evmAddress('0x9abc…'), // Address that will become the position manager
- *     approve: true, // true to approve, false to remove the manager
- *     user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
- *     signature: {
- *       value: '0x1234...', // ERC712 signature signed by the user
- *       deadline: 1735689600, // Unix timestamp when signature expires
- *     },
- *   }).then(sendTransaction);
+ * if (result.isErr()) {
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
  *
- *   if (result.isOk()) {
- *     // update local UI
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
  *   }
- * };
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
  */
-export function useSetSpokeUserPositionManager(): UseAsyncTask<
+export function useSetSpokeUserPositionManager(
+  handler: SimpleTransactionHandler,
+): UseAsyncTask<
+  SetSpokeUserPositionManagerRequest,
+  TxHash,
+  SendTransactionError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SetSpokeUserPositionManagerRequest) =>
+    setSpokeUserPositionManager(client, request).andThen((transaction) =>
+      handler(transaction, { cancel }),
+    ),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link setSpokeUserPositionManager} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useSetSpokeUserPositionManager} for a higher-level API that handles transactions.
+ */
+export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
   SetSpokeUserPositionManagerRequest,
   TransactionRequest,
   UnexpectedError
