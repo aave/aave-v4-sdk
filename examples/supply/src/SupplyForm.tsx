@@ -1,7 +1,6 @@
 import { useSendTransaction } from '@aave/react/viem';
 import {
   bigDecimal,
-  errAsync,
   evmAddress,
   type Reserve,
   useSupply,
@@ -17,24 +16,24 @@ interface SupplyFormProps {
 export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
   const [status, setStatus] = useState<string>('');
 
-  const [sendTransaction, sending] = useSendTransaction(walletClient);
-  const [supply, supplying] = useSupply((plan) => {
+  const [sendTransaction] = useSendTransaction(walletClient);
+  const [supply, { loading, error }] = useSupply((plan) => {
     switch (plan.__typename) {
       case 'TransactionRequest':
         setStatus('Sending transaction...');
+
         return sendTransaction(plan);
 
       case 'ApprovalRequired':
         setStatus('Approval required. Sending approval transaction...');
+
         return sendTransaction(plan.approval).andThen(() => {
           setStatus('Approval sent. Now sending supply transaction...');
+
           return sendTransaction(plan.originalTransaction);
         });
     }
   });
-
-  const loading = supplying.loading || sending.loading;
-  const error = supplying.error || sending.error;
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,12 +58,7 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
       sender: evmAddress(walletClient.account!.address),
     });
 
-    if (result.isErr()) {
-      setStatus(
-        result.error.message,
-        // `Insufficient balance: ${result.error.available.formatted} ${reserve.asset.underlying.info.symbol}`,
-      );
-    } else {
+    if (result.isOk()) {
       setStatus('Supply successful!');
     }
   };

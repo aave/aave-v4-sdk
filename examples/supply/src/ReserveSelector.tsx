@@ -8,16 +8,11 @@ import {
 import { useEffect } from 'react';
 
 interface ReserveSelectorProps {
-  children?: React.ReactNode;
   spoke: Spoke;
   onChange: (reserve: Reserve) => void;
 }
 
-export function ReserveSelector({
-  children,
-  onChange,
-  spoke,
-}: ReserveSelectorProps) {
+export function ReserveSelector({ onChange, spoke }: ReserveSelectorProps) {
   const { data: reserves, loading } = useReserves({
     query: {
       spoke: {
@@ -59,7 +54,11 @@ export function ReserveSelector({
           </option>
         ))}
       </select>
-      {children}
+      <small style={{ color: '#666' }}>
+        {reserves?.length === 1
+          ? 'Only one reserve found'
+          : 'Select the reserve you want to supply to'}
+      </small>
     </label>
   );
 }

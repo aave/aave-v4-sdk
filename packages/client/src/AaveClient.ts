@@ -5,7 +5,14 @@ import {
   UnexpectedError,
 } from '@aave/core-next';
 import type { HasProcessedKnownTransactionRequest } from '@aave/graphql-next';
-import { invariant, okAsync, ResultAsync, type TxHash } from '@aave/types-next';
+import {
+  type AnyVariables,
+  invariant,
+  okAsync,
+  ResultAsync,
+  type TxHash,
+} from '@aave/types-next';
+import type { TypedDocumentNode } from '@urql/core';
 import { hasProcessedKnownTransaction } from './actions';
 import { type ClientConfig, configureContext } from './config';
 import {
@@ -69,6 +76,18 @@ export class AaveClient extends GqlClient {
       },
     );
   };
+
+  /**
+   * @internal
+   */
+  refreshQueryWhere<TVariables extends AnyVariables>(
+    document: TypedDocumentNode<unknown, TVariables>,
+    predicate: (variables: TVariables) => boolean,
+  ): void {
+    this.refreshWhere(
+      (op) => op.query === document && predicate(op.variables as TVariables),
+    );
+  }
 
   protected async pollTransactionStatus(
     request: HasProcessedKnownTransactionRequest,

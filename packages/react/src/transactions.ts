@@ -13,22 +13,23 @@ import {
   withdraw,
 } from '@aave/client-next/actions';
 import { ValidationError } from '@aave/core-next';
-import type {
-  BorrowRequest,
-  ExecutionPlan,
-  InsufficientBalanceError,
-  LiquidatePositionRequest,
-  PreviewRequest,
-  PreviewUserPositionResult,
-  RenounceSpokeUserPositionManagerRequest,
-  RepayRequest,
-  SetSpokeUserPositionManagerRequest,
-  SetUserSupplyAsCollateralRequest,
-  SupplyRequest,
-  TransactionRequest,
-  UpdateUserDynamicConfigRequest,
-  UpdateUserRiskPremiumRequest,
-  WithdrawRequest,
+import {
+  type BorrowRequest,
+  type ExecutionPlan,
+  HubsQuery,
+  type InsufficientBalanceError,
+  type LiquidatePositionRequest,
+  type PreviewRequest,
+  type PreviewUserPositionResult,
+  type RenounceSpokeUserPositionManagerRequest,
+  type RepayRequest,
+  type SetSpokeUserPositionManagerRequest,
+  type SetUserSupplyAsCollateralRequest,
+  type SupplyRequest,
+  type TransactionRequest,
+  type UpdateUserDynamicConfigRequest,
+  type UpdateUserRiskPremiumRequest,
+  type WithdrawRequest,
 } from '@aave/graphql-next';
 import { errAsync, type TxHash } from '@aave/types-next';
 import { useAaveClient } from './context';
@@ -113,7 +114,16 @@ export function useSupply(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(() => console.log('TODO: refetch relevant queries')),
+      .andTee(() => {
+        client.refreshQueryWhere(
+          HubsQuery,
+          (variables) =>
+            'chainIds' in variables.request &&
+            variables.request.chainIds.some(
+              (chainId) => chainId === request.reserve.chainId,
+            ),
+        );
+      }),
   );
 }
 

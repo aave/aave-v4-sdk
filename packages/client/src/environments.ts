@@ -17,7 +17,7 @@ export const staging: EnvironmentConfig = {
   name: 'staging',
   backend: 'https://api.v4.staging.aave.com/graphql',
   indexingTimeout: 60_000,
-  pollingInterval: 100,
+  pollingInterval: 500,
 };
 
 /**
