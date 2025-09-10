@@ -45,7 +45,7 @@ export class GqlClient {
   protected constructor(protected readonly context: Context) {
     this.resolver = FragmentResolver.from(context.fragments);
     this.logger = Logger.named(
-      this.constructor.name,
+      context.displayName,
       context.debug ? LogLevel.DEBUG : LogLevel.SILENT,
     );
 
