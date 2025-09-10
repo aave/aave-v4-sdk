@@ -1,10 +1,10 @@
 import {
+  CancelError,
   SigningError,
   TransactionError,
   ValidationError,
 } from '@aave/core-next';
 import type {
-  ExecutionPlan,
   InsufficientBalanceError,
   PermitTypedDataResponse,
   TransactionRequest,
@@ -20,13 +20,15 @@ import {
   type TxHash,
   txHash,
 } from '@aave/types-next';
-import type {
-  Chain,
-  defineChain,
-  Hash,
-  TypedData,
-  TypedDataDomain,
-  WalletClient,
+import {
+  type Chain,
+  type defineChain,
+  type Hash,
+  TransactionExecutionError,
+  type TypedData,
+  type TypedDataDomain,
+  UserRejectedRequestError,
+  type WalletClient,
 } from 'viem';
 import {
   sendTransaction as sendEip1559Transaction,
@@ -83,13 +85,27 @@ export function transactionError(
 export function sendTransactionAndWait(
   walletClient: WalletClient,
   request: TransactionRequest,
-): ResultAsync<TransactionExecutionResult, SigningError | TransactionError> {
+): ResultAsync<
+  TransactionExecutionResult,
+  CancelError | SigningError | TransactionError
+> {
   // TODO: verify it's on the correct chain, ask to switch if possible
   // TODO: verify if wallet account is correct, switch if possible
 
   return ResultAsync.fromPromise(
     sendTransaction(walletClient, request),
-    (err) => SigningError.from(err),
+    (err) => {
+      if (err instanceof TransactionExecutionError) {
+        const rejected = err.walk(
+          (err) => err instanceof UserRejectedRequestError,
+        );
+
+        if (rejected) {
+          return CancelError.from(rejected);
+        }
+      }
+      return SigningError.from(err);
+    },
   )
     .map(async (hash) =>
       waitForTransactionReceipt(walletClient, {
@@ -113,17 +129,12 @@ export function sendTransactionAndWait(
 }
 
 /**
- * Sends transactions using the provided wallet client.
+ * Creates a transaction handler that sends transactions using the provided wallet client.
  *
- * Handles {@link TransactionRequest} by signing and sending, {@link ApprovalRequired} by sending both approval and original transactions, and returns validation errors for {@link InsufficientBalanceError}.
+ * The handler handles {@link TransactionRequest} by signing and sending, {@link ApprovalRequired} by sending both approval and original transactions, and returns validation errors for {@link InsufficientBalanceError}.
  */
 export function sendWith(walletClient: WalletClient): ExecutionPlanHandler {
-  return (
-    result: ExecutionPlan,
-  ): ResultAsync<
-    TransactionExecutionResult,
-    SigningError | TransactionError | ValidationError<InsufficientBalanceError>
-  > => {
+  return (result) => {
     switch (result.__typename) {
       case 'TransactionRequest':
         return sendTransactionAndWait(walletClient, result);
