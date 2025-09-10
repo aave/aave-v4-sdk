@@ -4,7 +4,6 @@ import {
   ValidationError,
 } from '@aave/core-next';
 import type {
-  ExecutionPlan,
   InsufficientBalanceError,
   PermitTypedDataResponse,
   TransactionRequest,
@@ -85,17 +84,12 @@ function sendTransactionAndWait(
 }
 
 /**
- * Sends transactions using the provided Thirdweb client and account.
+ * Creates a transaction handler that sends transactions using the provided Thirdweb client and account.
  *
- * Handles {@link TransactionRequest} by signing and sending, {@link ApprovalRequired} by sending both approval and original transactions, and returns validation errors for {@link InsufficientBalanceError}.
+ * The handler handles {@link TransactionRequest} by signing and sending, {@link ApprovalRequired} by sending both approval and original transactions, and returns validation errors for {@link InsufficientBalanceError}.
  */
 export function sendWith(client: ThirdwebClient): ExecutionPlanHandler {
-  return (
-    result: ExecutionPlan,
-  ): ResultAsync<
-    TransactionExecutionResult,
-    SigningError | TransactionError | ValidationError<InsufficientBalanceError>
-  > => {
+  return (result) => {
     switch (result.__typename) {
       case 'TransactionRequest':
         return sendTransactionAndWait(client, result);

@@ -1,6 +1,5 @@
 import {
   SigningError,
-  type TimeoutError,
   TransactionError,
   UnexpectedError,
 } from '@aave/client-next';
@@ -15,7 +14,6 @@ import {
   okAsync,
   ResultAsync,
   signatureFrom,
-  type TxHash,
   txHash,
 } from '@aave/types-next';
 import { defineChain, type ThirdwebClient } from 'thirdweb';
@@ -26,12 +24,7 @@ import {
 } from 'thirdweb/react';
 import { useAaveClient } from './context';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
-
-export type SendTransactionError =
-  | SigningError
-  | TimeoutError
-  | TransactionError
-  | UnexpectedError;
+import type { UseSendTransactionResult } from './helpers/writes';
 
 /**
  * A hook that provides a way to send Aave transactions using a Thirdweb wallet.
@@ -53,14 +46,10 @@ export type SendTransactionError =
  * ```ts
  * const account = useActiveAccount(); // thirdweb hook
  *
- * const [toggle, { loading, error, data }] = useEModeToggle();
+ * const [execute, { loading, error, data }] = useSimpleTransactionHook();
  *
  * const run = async () => {
- *   const result = await toggle({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     user: evmAddress(account!.address),
- *   })
+ *   const result = await execute(args)
  *     .andThen(sendTransaction);
  *
  *   if (result.isErr()) {
@@ -77,20 +66,10 @@ export type SendTransactionError =
  * ```ts
  * const account = useActiveAccount(); // thirdweb hook
  *
- * const [supply, { loading, error, data }] = useSupply();
+ * const [execute, { loading, error, data }] = useComplexTransactionHook();
  *
  * const run = async () => {
- *   const result = await supply({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     amount: {
- *       erc20: {
- *         currency: evmAddress('0x5678…'),
- *         value: '42.42',
- *       }
- *     },
- *     supplier: evmAddress(account!.address),
- *   })
+ *   const result = await execute(args)
  *     .andThen((plan) => {
  *       switch (plan.__typename) {
  *         case 'TransactionRequest':
@@ -117,7 +96,7 @@ export type SendTransactionError =
  */
 export function useSendTransaction(
   thirdwebClient: ThirdwebClient,
-): UseAsyncTask<TransactionRequest, TxHash, SendTransactionError> {
+): UseSendTransactionResult {
   const client = useAaveClient();
   const switchChain = useSwitchActiveWalletChain();
   const { mutateAsync: sendAndConfirmTx } = useSendAndConfirmTransaction();

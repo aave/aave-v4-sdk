@@ -1,4 +1,4 @@
-import { AaveProvider } from '@aave/react';
+import { AaveProvider } from '@aave/react-next';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App';

@@ -12,63 +12,129 @@ import {
   updateUserRiskPremium,
   withdraw,
 } from '@aave/client-next/actions';
-import type {
-  BorrowRequest,
-  ExecutionPlan,
-  LiquidatePositionRequest,
-  PreviewRequest,
-  PreviewUserPositionResult,
-  RenounceSpokeUserPositionManagerRequest,
-  RepayRequest,
-  SetSpokeUserPositionManagerRequest,
-  SetUserSupplyAsCollateralRequest,
-  SupplyRequest,
-  TransactionRequest,
-  UpdateUserDynamicConfigRequest,
-  UpdateUserRiskPremiumRequest,
-  WithdrawRequest,
+import { ValidationError } from '@aave/core-next';
+import {
+  type BorrowRequest,
+  type ExecutionPlan,
+  HubsQuery,
+  type InsufficientBalanceError,
+  type LiquidatePositionRequest,
+  type PreviewRequest,
+  type PreviewUserPositionResult,
+  type RenounceSpokeUserPositionManagerRequest,
+  type RepayRequest,
+  type SetSpokeUserPositionManagerRequest,
+  type SetUserSupplyAsCollateralRequest,
+  type SupplyRequest,
+  type TransactionRequest,
+  type UpdateUserDynamicConfigRequest,
+  type UpdateUserRiskPremiumRequest,
+  type WithdrawRequest,
 } from '@aave/graphql-next';
+import { errAsync, type TxHash } from '@aave/types-next';
 import { useAaveClient } from './context';
-import { type UseAsyncTask, useAsyncTask } from './helpers';
+import {
+  type ComplexTransactionHandler,
+  cancel,
+  type SendTransactionError,
+  type UseAsyncTask,
+  useAsyncTask,
+} from './helpers';
 
 /**
- * A hook that provides a way to supply assets to an Aave market.
+ * A hook that provides a way to supply assets to an Aave reserve.
  *
  * ```ts
- * const [supply, supplying] = useSupply();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = supplying.loading && sending.loading;
- * const error = supplying.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [supply, { loading, error }] = useSupply((plan, { cancel }) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan);
+ *     case 'ApprovalRequired':
+ *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *   }
+ * });
  *
  * // …
  *
- * const result = await supply({ ... })
- *   .andThen((plan) => {
- *     switch (plan.__typename) {
- *       case 'TransactionRequest':
- *         return sendTransaction(plan);
- *
- *       case 'ApprovalRequired':
- *         return sendTransaction(plan.approval)
- *           .andThen(() => sendTransaction(plan.originalTransaction));
- *
- *       case 'InsufficientBalanceError':
- *         return errAsync(
- *           new Error(`Insufficient balance: ${plan.required.value} required.`)
- *         );
- *     }
- *   });
+ * const result = await supply({ ... });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'ValidationError':
+ *       console.error(`Insufficient balance: ${result.error.cause.required.value} required.`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transactions.
  */
-export function useSupply(): UseAsyncTask<
+export function useSupply(
+  handler: ComplexTransactionHandler,
+): UseAsyncTask<
+  SupplyRequest,
+  TxHash,
+  SendTransactionError | ValidationError<InsufficientBalanceError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: SupplyRequest) =>
+    supply(client, request)
+      .andThen((plan) => {
+        switch (plan.__typename) {
+          case 'TransactionRequest':
+          case 'ApprovalRequired':
+            return handler(plan, { cancel });
+
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(plan));
+        }
+      })
+      .andTee(() => {
+        client.refreshQueryWhere(
+          HubsQuery,
+          (variables) =>
+            'chainIds' in variables.request &&
+            variables.request.chainIds.some(
+              (chainId) => chainId === request.reserve.chainId,
+            ),
+        );
+      }),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link supply} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useSupply} for a higher-level API that updates the relevant read hooks.
+ */
+export function useSupplyAction(): UseAsyncTask<
   SupplyRequest,
   ExecutionPlan,
   UnexpectedError
@@ -79,7 +145,7 @@ export function useSupply(): UseAsyncTask<
 }
 
 /**
- * A hook that provides a way to borrow assets from an Aave market.
+ * A hook that provides a way to borrow assets from an Aave reserve.
  *
  * ```ts
  * const [borrow, borrowing] = useBorrow();
@@ -126,7 +192,7 @@ export function useBorrow(): UseAsyncTask<
 }
 
 /**
- * A hook that provides a way to repay borrowed assets to an Aave market.
+ * A hook that provides a way to repay borrowed assets to an Aave reserve.
  *
  * ```ts
  * const [repay, repaying] = useRepay();
@@ -173,7 +239,7 @@ export function useRepay(): UseAsyncTask<
 }
 
 /**
- * A hook that provides a way to withdraw supplied assets from an Aave market.
+ * A hook that provides a way to withdraw supplied assets from an Aave reserve.
  *
  * ```ts
  * const [withdraw, withdrawing] = useWithdraw();

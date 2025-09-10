@@ -8,11 +8,11 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@aave/react": "latest",
+    "@aave/react-next": "workspace:*",
     "@tanstack/react-query": "^5.83.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "viem": "^2.31.6",
+    "viem": "^2.37.5",
     "wagmi": "^2.15.6"
   },
   "devDependencies": {

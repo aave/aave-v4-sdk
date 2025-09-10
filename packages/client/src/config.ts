@@ -42,6 +42,7 @@ export type ClientConfig = {
  */
 export function configureContext(from: ClientConfig): Context {
   return {
+    displayName: 'AaveClient',
     environment: from.environment ?? production,
     headers: from.headers,
     cache: from.cache ? cache : null,
