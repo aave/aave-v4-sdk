@@ -8,7 +8,10 @@ export type {
   AsyncTaskLoading,
   AsyncTaskState,
   AsyncTaskSuccess,
+  ComplexTransactionHandler,
   SendTransactionError,
+  SimpleTransactionHandler,
+  TransactionHandlerOptions,
   UseAsyncTask,
   UseSendTransactionResult,
 } from './helpers';
