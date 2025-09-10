@@ -148,40 +148,96 @@ export function useSupplyAction(): UseAsyncTask<
  * A hook that provides a way to borrow assets from an Aave reserve.
  *
  * ```ts
- * const [borrow, borrowing] = useBorrow();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = borrowing.loading && sending.loading;
- * const error = borrowing.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [borrow, { loading, error }] = useBorrow((plan, { cancel }) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan);
+ *     case 'ApprovalRequired':
+ *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *   }
+ * });
  *
  * // …
  *
- * const result = await borrow({ ... })
- *   .andThen((plan) => {
- *     switch (plan.__typename) {
- *       case 'TransactionRequest':
- *         return sendTransaction(plan);
- *
- *       case 'ApprovalRequired':
- *         return sendTransaction(plan.approval)
- *           .andThen(() => sendTransaction(plan.originalTransaction));
- *
- *       case 'InsufficientBalanceError':
- *         return errAsync(
- *           new Error(`Insufficient balance: ${plan.required.value} required.`)
- *         );
- *     }
- *   });
+ * const result = await borrow({ ... });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'ValidationError':
+ *       console.error(`Insufficient balance: ${result.error.cause.required.value} required.`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transactions.
  */
-export function useBorrow(): UseAsyncTask<
+export function useBorrow(
+  handler: ComplexTransactionHandler,
+): UseAsyncTask<
+  BorrowRequest,
+  TxHash,
+  SendTransactionError | ValidationError<InsufficientBalanceError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: BorrowRequest) =>
+    borrow(client, request)
+      .andThen((plan) => {
+        switch (plan.__typename) {
+          case 'TransactionRequest':
+          case 'ApprovalRequired':
+            return handler(plan, { cancel });
+
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(plan));
+        }
+      })
+      .andTee(() => {
+        client.refreshQueryWhere(
+          HubsQuery,
+          (variables) =>
+            'chainIds' in variables.request &&
+            variables.request.chainIds.some(
+              (chainId) => chainId === request.reserve.chainId,
+            ),
+        );
+      }),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link borrow} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useBorrow} for a higher-level API that updates the relevant read hooks.
+ */
+export function useBorrowAction(): UseAsyncTask<
   BorrowRequest,
   ExecutionPlan,
   UnexpectedError
@@ -195,40 +251,96 @@ export function useBorrow(): UseAsyncTask<
  * A hook that provides a way to repay borrowed assets to an Aave reserve.
  *
  * ```ts
- * const [repay, repaying] = useRepay();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = repaying.loading && sending.loading;
- * const error = repaying.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [repay, { loading, error }] = useRepay((plan, { cancel }) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan);
+ *     case 'ApprovalRequired':
+ *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *   }
+ * });
  *
  * // …
  *
- * const result = await repay({ ... })
- *   .andThen((plan) => {
- *     switch (plan.__typename) {
- *       case 'TransactionRequest':
- *         return sendTransaction(plan);
- *
- *       case 'ApprovalRequired':
- *         return sendTransaction(plan.approval)
- *           .andThen(() => sendTransaction(plan.originalTransaction));
- *
- *       case 'InsufficientBalanceError':
- *         return errAsync(
- *           new Error(`Insufficient balance: ${plan.required.value} required.`)
- *         );
- *     }
- *   });
+ * const result = await repay({ ... });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'ValidationError':
+ *       console.error(`Insufficient balance: ${result.error.cause.required.value} required.`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transactions.
  */
-export function useRepay(): UseAsyncTask<
+export function useRepay(
+  handler: ComplexTransactionHandler,
+): UseAsyncTask<
+  RepayRequest,
+  TxHash,
+  SendTransactionError | ValidationError<InsufficientBalanceError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: RepayRequest) =>
+    repay(client, request)
+      .andThen((plan) => {
+        switch (plan.__typename) {
+          case 'TransactionRequest':
+          case 'ApprovalRequired':
+            return handler(plan, { cancel });
+
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(plan));
+        }
+      })
+      .andTee(() => {
+        client.refreshQueryWhere(
+          HubsQuery,
+          (variables) =>
+            'chainIds' in variables.request &&
+            variables.request.chainIds.some(
+              (chainId) => chainId === request.reserve.chainId,
+            ),
+        );
+      }),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link repay} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useRepay} for a higher-level API that updates the relevant read hooks.
+ */
+export function useRepayAction(): UseAsyncTask<
   RepayRequest,
   ExecutionPlan,
   UnexpectedError
@@ -242,40 +354,96 @@ export function useRepay(): UseAsyncTask<
  * A hook that provides a way to withdraw supplied assets from an Aave reserve.
  *
  * ```ts
- * const [withdraw, withdrawing] = useWithdraw();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = withdrawing.loading && sending.loading;
- * const error = withdrawing.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [withdraw, { loading, error }] = useWithdraw((plan, { cancel }) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan);
+ *     case 'ApprovalRequired':
+ *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *   }
+ * });
  *
  * // …
  *
- * const result = await withdraw({ ... })
- *   .andThen((plan) => {
- *     switch (plan.__typename) {
- *       case 'TransactionRequest':
- *         return sendTransaction(plan);
- *
- *       case 'ApprovalRequired':
- *         return sendTransaction(plan.approval)
- *           .andThen(() => sendTransaction(plan.originalTransaction));
- *
- *       case 'InsufficientBalanceError':
- *         return errAsync(
- *           new Error(`Insufficient balance: ${plan.required.value} required.`)
- *         );
- *     }
- *   });
+ * const result = await withdraw({ ... });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'ValidationError':
+ *       console.error(`Insufficient balance: ${result.error.cause.required.value} required.`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transactions.
  */
-export function useWithdraw(): UseAsyncTask<
+export function useWithdraw(
+  handler: ComplexTransactionHandler,
+): UseAsyncTask<
+  WithdrawRequest,
+  TxHash,
+  SendTransactionError | ValidationError<InsufficientBalanceError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: WithdrawRequest) =>
+    withdraw(client, request)
+      .andThen((plan) => {
+        switch (plan.__typename) {
+          case 'TransactionRequest':
+          case 'ApprovalRequired':
+            return handler(plan, { cancel });
+
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(plan));
+        }
+      })
+      .andTee(() => {
+        client.refreshQueryWhere(
+          HubsQuery,
+          (variables) =>
+            'chainIds' in variables.request &&
+            variables.request.chainIds.some(
+              (chainId) => chainId === request.reserve.chainId,
+            ),
+        );
+      }),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link withdraw} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useWithdraw} for a higher-level API that updates the relevant read hooks.
+ */
+export function useWithdrawAction(): UseAsyncTask<
   WithdrawRequest,
   ExecutionPlan,
   UnexpectedError
@@ -428,11 +596,15 @@ export function useSetUserSupplyAsCollateral(): UseAsyncTask<
  * A hook that provides a way to liquidate a user's position.
  *
  * ```ts
- * const [liquidatePosition, liquidating] = useLiquidatePosition();
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- *
- * const loading = liquidating.loading || sending.loading;
- * const error = liquidating.error || sending.error;
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [liquidatePosition, { loading, error }] = useLiquidatePosition((plan, { cancel }) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan);
+ *     case 'ApprovalRequired':
+ *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *   }
+ * });
  *
  * // …
  *
@@ -446,32 +618,84 @@ export function useSetUserSupplyAsCollateral(): UseAsyncTask<
  *   amount: amount,
  *   liquidator: liquidator,
  *   borrower: borrower,
- * })
- *   .andThen((plan) => {
- *     switch (plan.__typename) {
- *       case 'TransactionRequest':
- *         return sendTransaction(plan);
- *
- *       case 'ApprovalRequired':
- *         return sendTransaction(plan.approval)
- *           .andThen(() => sendTransaction(plan.originalTransaction));
- *
- *       case 'InsufficientBalanceError':
- *         return errAsync(
- *           new Error(`Insufficient balance: ${plan.required.value} required.`)
- *         );
- *     }
- *   });
+ * });
  *
  * if (result.isErr()) {
- *   console.error(result.error);
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'ValidationError':
+ *       console.error(`Insufficient balance: ${result.error.cause.required.value} required.`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
  *   return;
  * }
  *
  * console.log('Transaction sent with hash:', result.value);
  * ```
+ *
+ * @param handler - The handler that will be used to handle the transactions.
  */
-export function useLiquidatePosition(): UseAsyncTask<
+export function useLiquidatePosition(
+  handler: ComplexTransactionHandler,
+): UseAsyncTask<
+  LiquidatePositionRequest,
+  TxHash,
+  SendTransactionError | ValidationError<InsufficientBalanceError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: LiquidatePositionRequest) =>
+    liquidatePosition(client, request)
+      .andThen((plan) => {
+        switch (plan.__typename) {
+          case 'TransactionRequest':
+          case 'ApprovalRequired':
+            return handler(plan, { cancel });
+
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(plan));
+        }
+      })
+      .andTee(() => {
+        client.refreshQueryWhere(
+          HubsQuery,
+          (variables) =>
+            'chainIds' in variables.request &&
+            variables.request.chainIds.some(
+              (chainId) => chainId === request.spoke.chainId,
+            ),
+        );
+      }),
+  );
+}
+
+/**
+ * Low-level hook to execute a {@link liquidatePosition} action directly.
+ *
+ * @remarks
+ * This hook **does not** update any read/cache state or trigger follow-up effects.
+ * Prefer {@link useLiquidatePosition} for a higher-level API that updates the relevant read hooks.
+ */
+export function useLiquidatePositionAction(): UseAsyncTask<
   LiquidatePositionRequest,
   ExecutionPlan,
   UnexpectedError
