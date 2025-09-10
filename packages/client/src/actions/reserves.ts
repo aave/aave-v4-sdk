@@ -27,13 +27,13 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
  * @param client - Aave client.
  * @param request - The best borrow reserve request parameters.
  * @param options - The query options.
- * @returns The best reserve for borrowing.
+ * @returns The best reserve for borrowing, or null if none found.
  */
 export function bestBorrowReserve(
   client: AaveClient,
   request: BestBorrowReserveRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<Reserve, UnexpectedError> {
+): ResultAsync<Reserve | null, UnexpectedError> {
   return client.query(BestBorrowReserveQuery, { request, ...options });
 }
 
@@ -52,13 +52,13 @@ export function bestBorrowReserve(
  * @param client - Aave client.
  * @param request - The best supply reserve request parameters.
  * @param options - The query options.
- * @returns The best reserve for supplying.
+ * @returns The best reserve for supplying, or null if none found.
  */
 export function bestSupplyReserve(
   client: AaveClient,
   request: BestSupplyReserveRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<Reserve, UnexpectedError> {
+): ResultAsync<Reserve | null, UnexpectedError> {
   return client.query(BestSupplyReserveQuery, { request, ...options });
 }
 

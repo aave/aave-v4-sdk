@@ -14,6 +14,14 @@ enum ActivityType {
 
 scalar AlwaysTrue
 
+input AmountInput @oneOf {
+  """Exact amount"""
+  exact: BigDecimal
+
+  """Max amount"""
+  max: AlwaysTrue
+}
+
 type ApprovalRequired {
   """The transaction requires an approval first"""
   approval: TransactionRequest!
@@ -37,8 +45,8 @@ enum ApyMetric {
 scalar AssetId
 
 enum BestBorrowReserveFilter {
-  LOWEST_RATE
-  LOWEST_AVERAGE_RATE
+  LOWEST_APY
+  LOWEST_AVERAGE_APY
 }
 
 input BestBorrowReserveRequest {
@@ -52,13 +60,13 @@ input BestRatesRequestQuery @oneOf {
 }
 
 enum BestSupplyReserveFilter {
-  HIGHEST_YIELD
-  HIGHEST_AVERAGE_YIELD
+  HIGHEST_APY
+  HIGHEST_AVERAGE_APY
 }
 
 input BestSupplyReserveRequest {
   query: BestRatesRequestQuery!
-  filter: BestSupplyReserveFilter!
+  filter: BestSupplyReserveFilter! = HIGHEST_APY
 }
 
 scalar BigDecimal
@@ -666,8 +674,8 @@ type Query {
   updateUserRiskPremium(request: UpdateUserRiskPremiumRequest!): TransactionRequest!
   updateUserDynamicConfig(request: UpdateUserDynamicConfigRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPositionResult!
-  bestSupplyReserve(request: BestSupplyReserveRequest!): Reserve!
-  bestBorrowReserve(request: BestBorrowReserveRequest!): Reserve!
+  bestSupplyReserve(request: BestSupplyReserveRequest!): Reserve
+  bestBorrowReserve(request: BestBorrowReserveRequest!): Reserve
   borrowApyHistory(request: BorrowAPYHistoryRequest!): [APYSample!]!
   supplyApyHistory(request: SupplyAPYHistoryRequest!): [APYSample!]!
 
@@ -728,12 +736,32 @@ type RepayActivity {
   amount: Erc20Amount!
 }
 
+input RepayAmountInputWithPermit @oneOf {
+  """The native amount"""
+  native: AmountInput
+
+  """The erc20 amount input"""
+  erc20: RepayErc20AmountInputWithPermit
+}
+
+input RepayErc20AmountInputWithPermit {
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
+  """
+  value: AmountInput!
+
+  """
+  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  """
+  permitSig: ERC712Signature
+}
+
 input RepayRequest {
   """The reserve"""
   reserve: ReserveInput!
 
   """The amount repaying"""
-  amount: ReserveAmountInputWithPermit!
+  amount: RepayAmountInputWithPermit!
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
@@ -801,8 +829,8 @@ scalar ReserveId
 type ReserveInfo {
   id: ReserveId!
   spoke: Spoke!
-  asset: HubAsset!
   chain: Chain!
+  asset: HubAsset!
 }
 
 input ReserveInput {
@@ -1312,8 +1340,8 @@ union UserHistoryItem = BorrowActivity | SupplyActivity | WithdrawActivity | Rep
 
 input UserHistoryRequest {
   user: EvmAddress!
-  activityTypes: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY]
-  filter: UserHistoryFilter
+  activityTypes: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, SWAP, LIQUIDATED]
+  filter: UserHistoryFilter!
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -1337,7 +1365,7 @@ type UserPosition {
   """
   totalCollateral(currency: Currency! = USD): FiatAmountWithChange!
 
-  """Total debt which is the total amount borrowed"""
+  """Total debt which is the total amount borrowed plus the accrued premium"""
   totalDebt(currency: Currency! = USD): FiatAmountWithChange!
 
   """The net balance which is `total_supplied` - `borrows`"""
@@ -1349,16 +1377,17 @@ type UserPosition {
   netSupplyApy: PercentValueWithChange!
   netBorrowApy: PercentValueWithChange!
   healthFactor: BigDecimalWithChange
-  riskPremium: PercentValue!
   betterRiskPremium: PercentValue
+  riskPremium: PercentValue!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentValue!
   spoke: Spoke!
 }
 
 scalar UserPositionId
 
-input UserPositionRequest {
-  id: UserPositionId!
+input UserPositionRequest @oneOf {
+  userSpoke: UserSpokeInput
+  id: UserPositionId
 }
 
 input UserPositionsRequest {
@@ -1381,13 +1410,29 @@ input UserSpokeInput {
 }
 
 type UserSummary {
-  netBalance: FiatAmountWithChange!
-  totalCollateral: FiatAmount!
-  totalSupplied: FiatAmount!
-  totalDebt: FiatAmount!
+  totalPositions: Int!
+
+  """Net balance = supply - debt"""
+  netBalance(currency: Currency! = USD): FiatAmountWithChange!
+
+  """Total supply where is_collateral is true"""
+  totalCollateral(currency: Currency! = USD): FiatAmount!
+
+  """Total supplied across all positions"""
+  totalSupplied(currency: Currency! = USD): FiatAmount!
+
+  """Total debt across all positions"""
+  totalDebt(currency: Currency! = USD): FiatAmount!
+
+  """
+  Net APY = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
+  """
   netApy: PercentValue!
+
+  """Interest earned (net fee earned)"""
   netFeeEarned: FiatAmount!
-  netPnl: FiatAmount!
+
+  """Lowest health factor across all positions"""
   lowestHealthFactor: BigDecimal
 }
 
@@ -1436,7 +1481,7 @@ type UserSupplyItem {
   """The reserve supplied to"""
   reserve: Reserve!
 
-  """The amount supplied"""
+  """The amount of supplied shares"""
   amount: Erc20Amount!
 
   """The amount earned since supplying"""
@@ -1447,7 +1492,7 @@ type UserSupplyItem {
 }
 
 type WithdrawActivity {
-  id: String!
+  id: ID!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
@@ -1474,16 +1519,8 @@ input WithdrawRequest {
 
 input WithdrawReserveAmountInput @oneOf {
   """The native amount"""
-  native: BigDecimal
+  native: AmountInput
 
   """The erc20 amount input"""
-  erc20: WithdrawReserveErc20AmountInput
-}
-
-input WithdrawReserveErc20AmountInput @oneOf {
-  """Exact amount to withdraw, remember interest is generated on each block"""
-  exact: BigDecimal
-
-  """Withdraw all the position completely"""
-  max: AlwaysTrue
+  erc20: AmountInput
 }

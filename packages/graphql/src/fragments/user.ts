@@ -53,6 +53,7 @@ export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
 export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
     __typename
+    totalPositions
     netBalance {
       ...FiatAmountWithChange
     }
@@ -69,9 +70,6 @@ export const UserSummaryFragment = graphql(
       ...PercentValue
     }
     netFeeEarned {
-      ...FiatAmount
-    }
-    netPnl {
       ...FiatAmount
     }
     lowestHealthFactor
