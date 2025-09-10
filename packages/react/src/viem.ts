@@ -32,9 +32,7 @@ import {
  * Then, use it to send a {@link TransactionRequest} as shown below.
  *
  * ```ts
- * const account = useAccount(); // wagmi hook
- *
- * const [execute, { loading, error, data }] = useSimpleTransactionHook();
+ * const [execute] = useSimpleTransactionHook();
  *
  * const run = async () => {
  *   const result = await execute(args)
@@ -52,9 +50,7 @@ import {
  * Or use it to handle an {@link ExecutionPlan} that may require multiple transactions as shown below.
  *
  * ```ts
- * const account = useAccount(); // wagmi hook
- *
- * const [execute, { loading, error, data }] = useComplexTransactionHook();
+ * const [execute] = useComplexTransactionHook();
  *
  * const run = async () => {
  *   const result = await execute(args)
