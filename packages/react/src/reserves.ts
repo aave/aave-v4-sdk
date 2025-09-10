@@ -41,7 +41,7 @@ export type UseBestBorrowReserveArgs = Prettify<
  */
 export function useBestBorrowReserve(
   args: UseBestBorrowReserveArgs & Suspendable,
-): SuspenseResult<Reserve>;
+): SuspenseResult<Reserve | null>;
 
 /**
  * Find the best borrow reserve based on specified criteria.
@@ -57,7 +57,7 @@ export function useBestBorrowReserve(
  */
 export function useBestBorrowReserve(
   args: UseBestBorrowReserveArgs,
-): ReadResult<Reserve>;
+): ReadResult<Reserve | null>;
 
 export function useBestBorrowReserve({
   suspense = false,
@@ -65,7 +65,7 @@ export function useBestBorrowReserve({
   ...request
 }: UseBestBorrowReserveArgs & {
   suspense?: boolean;
-}): SuspendableResult<Reserve> {
+}): SuspendableResult<Reserve | null> {
   return useSuspendableQuery({
     document: BestBorrowReserveQuery,
     variables: {
@@ -97,7 +97,7 @@ export type UseBestSupplyReserveArgs = Prettify<
  */
 export function useBestSupplyReserve(
   args: UseBestSupplyReserveArgs & Suspendable,
-): SuspenseResult<Reserve>;
+): SuspenseResult<Reserve | null>;
 
 /**
  * Find the best supply reserve based on specified criteria.
@@ -113,7 +113,7 @@ export function useBestSupplyReserve(
  */
 export function useBestSupplyReserve(
   args: UseBestSupplyReserveArgs,
-): ReadResult<Reserve>;
+): ReadResult<Reserve | null>;
 
 export function useBestSupplyReserve({
   suspense = false,
@@ -121,7 +121,7 @@ export function useBestSupplyReserve({
   ...request
 }: UseBestSupplyReserveArgs & {
   suspense?: boolean;
-}): SuspendableResult<Reserve> {
+}): SuspendableResult<Reserve | null> {
   return useSuspendableQuery({
     document: BestSupplyReserveQuery,
     variables: {

@@ -90,16 +90,16 @@ export enum ApyMetric {
  * The filter for best borrow reserve selection.
  */
 export enum BestBorrowReserveFilter {
-  LowestRate = 'LOWEST_RATE',
-  LowestAverageRate = 'LOWEST_AVERAGE_RATE',
+  LowestApy = 'LOWEST_APY',
+  LowestAverageApy = 'LOWEST_AVERAGE_APY',
 }
 
 /**
  * The filter for best supply reserve selection.
  */
 export enum BestSupplyReserveFilter {
-  HighestYield = 'HIGHEST_YIELD',
-  HighestAverageYield = 'HIGHEST_AVERAGE_YIELD',
+  HighestApy = 'HIGHEST_APY',
+  HighestAverageApy = 'HIGHEST_AVERAGE_APY',
 }
 
 /**

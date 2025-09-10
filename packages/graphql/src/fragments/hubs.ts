@@ -2,10 +2,8 @@ import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
 import {
   ChainFragment,
-  Erc20AmountFragment,
   Erc20TokenFragment,
   FiatAmountFragment,
-  PercentValueFragment,
 } from './common';
 
 export const HubSummaryFragment = graphql(
@@ -28,54 +26,6 @@ export const HubSummaryFragment = graphql(
 );
 export type HubSummary = FragmentOf<typeof HubSummaryFragment>;
 
-export const HubAssetSummaryFragment = graphql(
-  `fragment HubAssetSummary on HubAssetSummary {
-      __typename
-      supplied
-      borrowed
-      availableLiquidity
-      supplyApy {
-        ...PercentValue
-      }
-      borrowApy {
-        ...PercentValue
-      }
-      netApy {
-        ...PercentValue
-      }
-      utilizationRate {
-        ...PercentValue
-      }
-    }`,
-  [PercentValueFragment],
-);
-export type HubAssetSummary = FragmentOf<typeof HubAssetSummaryFragment>;
-
-export const HubAssetSettingsFragment = graphql(
-  `fragment HubAssetSettings on HubAssetSettings {
-      __typename
-      feeReceiver
-      liquidityFee {
-        ...PercentValue
-      }
-      irStrategy
-      reinvestmentStrategy
-    }`,
-  [PercentValueFragment],
-);
-export type HubAssetSettings = FragmentOf<typeof HubAssetSettingsFragment>;
-
-export const HubAssetUserStateFragment = graphql(
-  `fragment HubAssetUserState on HubAssetUserState {
-      __typename
-      balance {
-        ...Erc20Amount
-      }
-    }`,
-  [Erc20AmountFragment],
-);
-export type HubAssetUserState = FragmentOf<typeof HubAssetUserStateFragment>;
-
 export const HubFragment = graphql(
   `fragment Hub on Hub {
       __typename
@@ -92,8 +42,8 @@ export const HubFragment = graphql(
 );
 export type Hub = FragmentOf<typeof HubFragment>;
 
-export const HubAssetFragment = graphql(
-  `fragment HubAsset on HubAsset {
+export const HubAssetInfoFragment = graphql(
+  `fragment HubAssetInfo on HubAsset {
       __typename
       assetId
       hub {
@@ -102,22 +52,7 @@ export const HubAssetFragment = graphql(
       underlying {
         ...Erc20Token
       }
-      summary {
-        ...HubAssetSummary
-      }
-      settings {
-        ...HubAssetSettings
-      }
-      userState {
-        ...HubAssetUserState
-      }
     }`,
-  [
-    HubFragment,
-    Erc20TokenFragment,
-    HubAssetSummaryFragment,
-    HubAssetSettingsFragment,
-    HubAssetUserStateFragment,
-  ],
+  [HubFragment, Erc20TokenFragment],
 );
-export type HubAsset = FragmentOf<typeof HubAssetFragment>;
+export type HubAssetInfo = FragmentOf<typeof HubAssetInfoFragment>;
