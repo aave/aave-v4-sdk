@@ -20,7 +20,7 @@ import {
 /**
  * A hook that provides a way to send Aave transactions using an ethers Signer instance.
  *
- * First, get the `Signer` instance from your ethers provider, then pass it to this hook to create a function that can be used to send transactions.
+ * Retrieve the `Signer` instance from your ethers provider, then pass it to this hook to create a function that can be used to send transactions.
  *
  * ```ts
  * const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -29,55 +29,6 @@ import {
  * // …
  *
  * const [sendTransaction, { loading, error, data }] = useSendTransaction(signer);
- * ```
- *
- * Then, use it to send a {@link TransactionRequest} as shown below.
- *
- * ```ts
- * const [execute, { loading, error, data }] = useSimpleTransactionHook();
- *
- * const run = async () => {
- *   const result = await execute(args)
- *     .andThen(sendTransaction);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Transaction sent with hash:', result.value);
- * };
- * ```
- *
- * Or use it to handle an {@link ExecutionPlan} that may require multiple transactions as shown below.
- *
- * ```ts
- * const [execute, { loading, error, data }] = useComplexTransactionHook();
- *
- * const run = async () => {
- *   const result = await execute(args)
- *     .andThen((plan) => {
- *       switch (plan.__typename) {
- *         case 'TransactionRequest':
- *           return sendTransaction(plan);
- *
- *         case 'ApprovalRequired':
- *           return sendTransaction(plan.approval).andThen(() =>
- *             sendTransaction(plan.originalTransaction),
- *           );
- *
- *         case 'InsufficientBalanceError':
- *           return errAsync(new Error(`Insufficient balance: ${error.cause.required.value} required.`));
- *        }
- *      });
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Transaction sent with hash:', result.value);
- * }
  * ```
  *
  * @param signer - The ethers Signer to use for sending transactions.
