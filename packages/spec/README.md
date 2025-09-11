@@ -1,3 +1,3 @@
 # `@aave/spec`
 
-End-to-end specs for Aave v3 protocol, API, and SDK.
+End-to-end specs for Aave v4 protocol, API, and SDK.

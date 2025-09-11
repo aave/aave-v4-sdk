@@ -56,28 +56,10 @@ export class AaveClient extends GqlClient {
   };
 
   /**
-   * Waits for a swap to reach a final outcome (cancelled, expired, or fulfilled).
+   * Given the swap receipt of an Aave protocol swap, wait for the swap to reach a final outcome.
+   * This is useful to know if the swap was successful, cancelled, or expired.
    *
-   * ```ts
-   * const result = await client.waitForSwapOutcome(receipt);
-   *
-   * if (result.isErr()) {
-   *   console.error(result.error);
-   *   return;
-   * }
-   *
-   * switch (result.value.__typename) {
-   *   case 'SwapCancelled':
-   *     console.log('Swap was cancelled');
-   *     break;
-   *   case 'SwapExpired':
-   *     console.log('Swap expired');
-   *     break;
-   *   case 'SwapFulfilled':
-   *     console.log('Swap fulfilled:', result.value.txHash);
-   *     break;
-   * }
-   * ```
+   * Returns a {@link TimeoutError} if the swap does not reach a final outcome within the expected timeout period.
    *
    * @param receipt - The swap receipt to wait for.
    * @returns The swap outcome or a TimeoutError
@@ -98,7 +80,7 @@ export class AaveClient extends GqlClient {
 
   /**
    * Given the transaction hash of an Aave protocol transaction, wait for the transaction to be
-   * processed by the Aave v3 API.
+   * processed by the Aave v4 API.
    *
    * Returns a {@link TimeoutError} if the transaction is not processed within the expected timeout period.
    *

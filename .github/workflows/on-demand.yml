@@ -1,4 +1,4 @@
-name: Run Aave V3 Spec
+name: Run Aave V4 Spec
 
 on:
   repository_dispatch:
