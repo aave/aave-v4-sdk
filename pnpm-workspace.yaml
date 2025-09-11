@@ -1,2 +1,4 @@
 packages:
   - 'packages/*'
+  - 'examples/hubs'
+  - 'examples/supply'

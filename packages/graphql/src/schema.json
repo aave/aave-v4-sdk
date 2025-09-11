@@ -601,7 +601,7 @@
         "name": "Erc20Token",
         "fields": [
           {
-            "name": "contract",
+            "name": "address",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -845,76 +845,27 @@
             "args": []
           },
           {
-            "name": "totalSupplied",
+            "name": "summary",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "HubSummary",
                 "ofType": null
               }
             },
-            "args": []
-          },
-          {
-            "name": "totalSupplyCap",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
               }
-            },
-            "args": []
-          },
-          {
-            "name": "supplyUtilizationRate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValue",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "totalBorrowed",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "totalBorrowCap",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "borrowUtilizationRate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValue",
-                "ofType": null
-              }
-            },
-            "args": []
+            ]
           }
         ],
         "interfaces": []
@@ -1053,11 +1004,8 @@
           {
             "name": "reinvestmentStrategy",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           }
@@ -1161,8 +1109,63 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "TokenAmount",
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HubSummary",
+        "fields": [
+          {
+            "name": "totalBorrowed",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalBorrowCap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalSupplied",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalSupplyCap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
                 "ofType": null
               }
             },
@@ -2381,12 +2384,9 @@
           {
             "name": "bestSupplyReserve",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Reserve",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Reserve",
+              "ofType": null
             },
             "args": [
               {
@@ -2404,12 +2404,9 @@
           {
             "name": "bestBorrowReserve",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Reserve",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Reserve",
+              "ofType": null
             },
             "args": [
               {
@@ -3224,24 +3221,24 @@
             "args": []
           },
           {
-            "name": "asset",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "HubAsset",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "chain",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "asset",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "HubAsset",
                 "ofType": null
               }
             },
@@ -4881,24 +4878,24 @@
         "name": "UserBorrowItem",
         "fields": [
           {
-            "name": "amount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "reserve",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Reserve",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
                 "ofType": null
               }
             },
@@ -5172,6 +5169,15 @@
             "args": []
           },
           {
+            "name": "betterRiskPremium",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentValue",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "riskPremium",
             "type": {
               "kind": "NON_NULL",
@@ -5180,15 +5186,6 @@
                 "name": "PercentValue",
                 "ofType": null
               }
-            },
-            "args": []
-          },
-          {
-            "name": "betterRiskPremium",
-            "type": {
-              "kind": "OBJECT",
-              "name": "PercentValue",
-              "ofType": null
             },
             "args": []
           },
@@ -5235,6 +5232,17 @@
         "name": "UserSummary",
         "fields": [
           {
+            "name": "totalPositions",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "netBalance",
             "type": {
               "kind": "NON_NULL",
@@ -5244,7 +5252,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "totalCollateral",
@@ -5256,7 +5275,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "totalSupplied",
@@ -5268,7 +5298,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "totalDebt",
@@ -5280,7 +5321,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "netApy",
@@ -5296,18 +5348,6 @@
           },
           {
             "name": "netFeeEarned",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "netPnl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5396,24 +5436,24 @@
         "name": "UserSupplyItem",
         "fields": [
           {
-            "name": "amount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "reserve",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Reserve",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
                 "ofType": null
               }
             },

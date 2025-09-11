@@ -104,3 +104,10 @@ export class ValidationError<
     return new ValidationError(error);
   }
 }
+
+/**
+ * Error indicating the desire to cancel an operation.
+ */
+export class CancelError extends ResultAwareError {
+  name = 'CancelError' as const;
+}

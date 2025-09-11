@@ -1,10 +1,15 @@
 import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+} from '@aave/client-next';
+import {
   type Hub,
   HubQuery,
   type HubRequest,
   HubsQuery,
   type HubsRequest,
 } from '@aave/graphql-next';
+import type { Prettify } from '@aave/types-next';
 import {
   type ReadResult,
   type Suspendable,
@@ -13,7 +18,7 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseHubArgs = HubRequest;
+export type UseHubArgs = Prettify<HubRequest & CurrencyQueryOptions>;
 
 /**
  * Fetch a specific hub by address and chain ID.
@@ -48,6 +53,7 @@ export function useHub(args: UseHubArgs): ReadResult<Hub | null>;
 
 export function useHub({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseHubArgs & {
   suspense?: boolean;
@@ -56,12 +62,13 @@ export function useHub({
     document: HubQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });
 }
 
-export type UseHubsArgs = HubsRequest;
+export type UseHubsArgs = Prettify<HubsRequest & CurrencyQueryOptions>;
 
 /**
  * Fetch multiple hubs based on specified criteria.
@@ -90,6 +97,7 @@ export function useHubs(args: UseHubsArgs): ReadResult<Hub[]>;
 
 export function useHubs({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseHubsArgs & {
   suspense?: boolean;
@@ -98,6 +106,7 @@ export function useHubs({
     document: HubsQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });

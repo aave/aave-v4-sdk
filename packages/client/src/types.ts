@@ -1,4 +1,5 @@
 import type {
+  CancelError,
   SigningError,
   TransactionError,
   ValidationError,
@@ -27,12 +28,15 @@ export function isHasProcessedKnownTransactionRequest(
   return result.operations !== null && result.operations.length > 0;
 }
 
+export type SendWithError =
+  | CancelError
+  | SigningError
+  | TransactionError
+  | ValidationError<InsufficientBalanceError>;
+
 export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
   result: T,
-) => ResultAsync<
-  TransactionExecutionResult,
-  SigningError | TransactionError | ValidationError<InsufficientBalanceError>
->;
+) => ResultAsync<TransactionExecutionResult, SendWithError>;
 
 export type PermitHandler = (
   result: PermitTypedDataResponse,

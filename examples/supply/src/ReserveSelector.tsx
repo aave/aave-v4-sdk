@@ -1,21 +1,38 @@
-import type { Reserve } from '@aave/react';
+import {
+  type Reserve,
+  type ReserveId,
+  ReservesFilterRequest,
+  type Spoke,
+  useReserves,
+} from '@aave/react-next';
+import { useEffect } from 'react';
 
 interface ReserveSelectorProps {
-  children?: React.ReactNode;
-  reserves: Reserve[];
+  spoke: Spoke;
   onChange: (reserve: Reserve) => void;
 }
 
-export function ReserveSelector({
-  children,
-  reserves,
-  onChange,
-}: ReserveSelectorProps) {
+export function ReserveSelector({ onChange, spoke }: ReserveSelectorProps) {
+  const { data: reserves, loading } = useReserves({
+    query: {
+      spoke: {
+        chainId: spoke.chain.chainId,
+        address: spoke.address,
+      },
+    },
+    filter: ReservesFilterRequest.Supply,
+  });
+
+  useEffect(() => {
+    if (reserves?.length === 1) {
+      onChange(reserves[0]);
+    }
+  }, [reserves, onChange]);
+
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedReserve = reserves.find(
-      (reserve) => reserve.underlyingToken.address === event.target.value,
+    const selectedReserve = reserves?.find(
+      (reserve) => reserve.id === (event.target.value as unknown as ReserveId),
     );
-    console.log(selectedReserve);
     if (selectedReserve) {
       onChange(selectedReserve);
     }
@@ -24,18 +41,24 @@ export function ReserveSelector({
   return (
     <label style={{ marginBottom: '5px' }}>
       <strong style={{ display: 'block' }}>Reserve:</strong>
-      <select onChange={handleChange} style={{ padding: '8px', width: '100%' }}>
-        {reserves.map((reserve) => (
-          <option
-            key={reserve.underlyingToken.address}
-            value={reserve.underlyingToken.address}
-          >
-            {reserve.underlyingToken.symbol} - APY:{' '}
-            {reserve.supplyInfo.apy.formatted}%
+      <select
+        onChange={handleChange}
+        disabled={loading || reserves?.length === 1}
+        style={{ padding: '8px', width: '100%' }}
+      >
+        <option value=''>Select a reserve</option>
+        {reserves?.map((reserve) => (
+          <option key={reserve.id} value={reserve.id}>
+            {reserve.asset.underlying.info.name} - APY:{' '}
+            {reserve.summary.supplyApy.formatted}%
           </option>
         ))}
       </select>
-      {children}
+      <small style={{ color: '#666' }}>
+        {reserves?.length === 1
+          ? 'Only one reserve found'
+          : 'Select the reserve you want to supply to'}
+      </small>
     </label>
   );
 }

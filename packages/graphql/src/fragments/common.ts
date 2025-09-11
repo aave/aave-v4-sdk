@@ -29,7 +29,6 @@ export const FiatAmountFragment = graphql(
     name
     symbol
   }`,
-  [DecimalValueFragment],
 );
 export type FiatAmount = FragmentOf<typeof FiatAmountFragment>;
 
@@ -44,15 +43,36 @@ export const TokenInfoFragment = graphql(
 );
 export type TokenInfo = FragmentOf<typeof TokenInfoFragment>;
 
+export const ChainFragment = graphql(
+  `fragment Chain on Chain {
+    __typename
+    name
+    icon
+    chainId
+    explorerUrl
+    isTestnet
+    nativeWrappedToken
+    nativeInfo {
+      ...TokenInfo
+    }
+  }`,
+  [TokenInfoFragment],
+);
+export type Chain = FragmentOf<typeof ChainFragment>;
+
 export const Erc20TokenFragment = graphql(
   `fragment Erc20Token on Erc20Token {
     __typename
     info {
       ...TokenInfo
     }
-    contract
+    address
+    chain {
+      ...Chain
+    }
+    isWrappedNativeToken
   }`,
-  [TokenInfoFragment],
+  [TokenInfoFragment, ChainFragment],
 );
 export type Erc20Token = FragmentOf<typeof Erc20TokenFragment>;
 
@@ -62,8 +82,11 @@ export const NativeTokenFragment = graphql(
     info {
       ...TokenInfo
     }
+    chain {
+      ...Chain
+    }
   }`,
-  [TokenInfoFragment],
+  [TokenInfoFragment, ChainFragment],
 );
 export type NativeToken = FragmentOf<typeof NativeTokenFragment>;
 

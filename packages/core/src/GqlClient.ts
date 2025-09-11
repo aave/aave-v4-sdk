@@ -9,24 +9,34 @@ import {
   createClient,
   type Exchange,
   fetchExchange,
+  makeOperation,
+  type Operation,
   type OperationResult,
   type OperationResultSource,
   type TypedDocumentNode,
   type Client as UrqlClient,
 } from '@urql/core';
+import { pipe, tap } from 'wonka';
 import { BatchQueryBuilder } from './batch';
 import type { Context } from './context';
 import { UnexpectedError } from './errors';
 import { FragmentResolver } from './fragments';
 import { Logger, LogLevel } from './logger';
 import type { StandardData } from './types';
-import { takeValue } from './utils';
+import {
+  extractOperationName,
+  isActiveQueryOperation,
+  isTeardownOperation,
+  takeValue,
+} from './utils';
 
 export class GqlClient {
   /**
    * @internal
    */
   public readonly urql: UrqlClient;
+
+  private readonly activeQueries = new Map<number, Operation>();
 
   private readonly logger: Logger;
 
@@ -35,7 +45,7 @@ export class GqlClient {
   protected constructor(protected readonly context: Context) {
     this.resolver = FragmentResolver.from(context.fragments);
     this.logger = Logger.named(
-      this.constructor.name,
+      context.displayName,
       context.debug ? LogLevel.DEBUG : LogLevel.SILENT,
     );
 
@@ -329,19 +339,82 @@ export class GqlClient {
       .andThen(() => combined);
   }
 
-  protected exchanges(): Exchange[] {
-    if (this.context.cache) {
-      return [this.context.cache, fetchExchange];
+  protected refreshAll(): void {
+    const ops = Array.from(this.activeQueries.values());
+    this.logger.debug(`Refreshing ${ops.length} active queries`);
+    for (const op of ops) {
+      this.urql.reexecuteOperation(
+        makeOperation(op.kind, op, {
+          ...op.context,
+          requestPolicy: 'network-only',
+        }),
+      );
     }
-    return [fetchExchange];
   }
 
-  protected resultFrom<TData, TVariables extends AnyVariables>(
+  protected refreshByDocument(document: TypedDocumentNode): void {
+    this.refreshWhere((op) => op.query === document);
+  }
+
+  protected refreshWhere(predicate: (op: Operation) => boolean): void {
+    const ops = Array.from(this.activeQueries.values()).filter(predicate);
+    this.logger.debug(`Refreshing ${ops.length} matching queries`);
+    for (const op of ops) {
+      this.urql.reexecuteOperation(
+        makeOperation(op.kind, op, {
+          ...op.context,
+          requestPolicy: 'network-only',
+        }),
+      );
+    }
+  }
+
+  private exchanges(): Exchange[] {
+    const exchanges: Exchange[] = [this.activeQueryRegistry()];
+
+    if (this.context.cache) {
+      exchanges.push(this.context.cache);
+    }
+
+    exchanges.push(fetchExchange);
+    return exchanges;
+  }
+
+  private registerQuery(op: Operation): void {
+    this.activeQueries.set(op.key, op);
+    this.logger.debug(
+      `Registered query: ${extractOperationName(op)} (key: ${op.key})`,
+    );
+  }
+
+  private unregisterQuery(key: number): void {
+    const op = this.activeQueries.get(key);
+    if (op) {
+      this.activeQueries.delete(key);
+      this.logger.debug(
+        `Unregistered query: ${extractOperationName(op)} (key: ${key})`,
+      );
+    }
+  }
+
+  private activeQueryRegistry(): Exchange {
+    return ({ forward }) =>
+      (ops$) =>
+        pipe(
+          ops$,
+          tap((op: Operation) => {
+            if (isActiveQueryOperation(op)) this.registerQuery(op);
+            else if (isTeardownOperation(op)) this.unregisterQuery(op.key);
+          }),
+          forward,
+        );
+  }
+
+  private resultFrom<TData, TVariables extends AnyVariables>(
     source: OperationResultSource<OperationResult<TData, TVariables>>,
   ): ResultAsync<OperationResult<TData, TVariables>, UnexpectedError> {
     return ResultAsync.fromPromise(source.toPromise(), (err: unknown) => {
       this.logger.error(err);
-      console.log(err);
       return UnexpectedError.from(err);
     }).andThen((result) => {
       if (result.error?.networkError) {

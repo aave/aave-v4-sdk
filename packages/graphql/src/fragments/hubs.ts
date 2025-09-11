@@ -1,61 +1,30 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
-import { ChainFragment } from './chain';
-
 import {
+  ChainFragment,
   Erc20TokenFragment,
   FiatAmountFragment,
-  PercentValueFragment,
-  TokenAmountFragment,
 } from './common';
 
-export const HubAssetSummaryFragment = graphql(
-  `fragment HubAssetSummary on HubAssetSummary {
-      __typename
-      supplied
-      borrowed
-      availableLiquidity
-      supplyApy {
-        ...PercentValue
-      }
-      borrowApy {
-        ...PercentValue
-      }
-      netApy {
-        ...PercentValue
-      }
-      utilizationRate {
-        ...PercentValue
-      }
-    }`,
-  [PercentValueFragment],
+export const HubSummaryFragment = graphql(
+  `fragment HubSummary on HubSummary {
+    __typename
+    totalBorrowed {
+      ...FiatAmount
+    }
+    totalBorrowCap {
+      ...FiatAmount
+    }
+    totalSupplied {
+      ...FiatAmount
+    }
+    totalSupplyCap {
+      ...FiatAmount
+    }
+  }`,
+  [FiatAmountFragment],
 );
-export type HubAssetSummary = FragmentOf<typeof HubAssetSummaryFragment>;
-
-export const HubAssetSettingsFragment = graphql(
-  `fragment HubAssetSettings on HubAssetSettings {
-      __typename
-      feeReceiver
-      liquidityFee {
-        ...PercentValue
-      }
-      irStrategy
-      reinvestmentStrategy
-    }`,
-  [PercentValueFragment],
-);
-export type HubAssetSettings = FragmentOf<typeof HubAssetSettingsFragment>;
-
-export const HubAssetUserStateFragment = graphql(
-  `fragment HubAssetUserState on HubAssetUserState {
-      __typename
-      balance {
-        ...TokenAmount
-      }
-    }`,
-  [TokenAmountFragment],
-);
-export type HubAssetUserState = FragmentOf<typeof HubAssetUserStateFragment>;
+export type HubSummary = FragmentOf<typeof HubSummaryFragment>;
 
 export const HubFragment = graphql(
   `fragment Hub on Hub {
@@ -65,31 +34,16 @@ export const HubFragment = graphql(
       chain {
         ...Chain
       }
-      totalSupplied {
-        ...FiatAmount
-      }
-      totalSupplyCap {
-        ...FiatAmount
-      }
-      supplyUtilizationRate {
-        ...PercentValue
-      }
-      totalBorrowed {
-        ...FiatAmount
-      }
-      totalBorrowCap {
-        ...FiatAmount
-      }
-      borrowUtilizationRate {
-        ...PercentValue
+      summary(currency: $currency) {
+        ...HubSummary
       }
     }`,
-  [ChainFragment, FiatAmountFragment, PercentValueFragment],
+  [ChainFragment, HubSummaryFragment],
 );
 export type Hub = FragmentOf<typeof HubFragment>;
 
-export const HubAssetFragment = graphql(
-  `fragment HubAsset on HubAsset {
+export const HubAssetInfoFragment = graphql(
+  `fragment HubAssetInfo on HubAsset {
       __typename
       assetId
       hub {
@@ -98,22 +52,7 @@ export const HubAssetFragment = graphql(
       underlying {
         ...Erc20Token
       }
-      summary {
-        ...HubAssetSummary
-      }
-      settings {
-        ...HubAssetSettings
-      }
-      userState {
-        ...HubAssetUserState
-      }
     }`,
-  [
-    HubFragment,
-    Erc20TokenFragment,
-    HubAssetSummaryFragment,
-    HubAssetSettingsFragment,
-    HubAssetUserStateFragment,
-  ],
+  [HubFragment, Erc20TokenFragment],
 );
-export type HubAsset = FragmentOf<typeof HubAssetFragment>;
+export type HubAssetInfo = FragmentOf<typeof HubAssetInfoFragment>;

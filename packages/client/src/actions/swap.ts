@@ -2,7 +2,7 @@ import type { UnexpectedError } from '@aave/core-next';
 import type {
   CancelSwapExecutionPlan,
   CancelSwapRequest,
-  Currency,
+  PendingSwapsRequest,
   PrepareSwapCancelRequest,
   PrepareSwapCancelResult,
   PrepareSwapRequest,
@@ -11,30 +11,24 @@ import type {
   SwappableTokensRequest,
   SwapQuote,
   SwapQuoteRequest,
+  SwapReceipt,
   SwapRequest,
   Token,
 } from '@aave/graphql-next';
 import {
   CancelSwapQuery,
+  PendingSwapsQuery,
   PrepareSwapCancelQuery,
   PrepareSwapQuery,
   SwappableTokensQuery,
   SwapQuery,
   SwapQuoteQuery,
 } from '@aave/graphql-next';
+
 import type { ResultAsync } from '@aave/types-next';
 
 import type { AaveClient } from '../AaveClient';
-import { DEFAULT_QUERY_OPTIONS } from '../options';
-
-export type SwapQueryOptions = {
-  /**
-   * The currency for fiat amounts.
-   *
-   * @defaultValue {@link Currency.Usd}
-   */
-  currency: Currency;
-};
+import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
  * Fetches a swap quote for the specified trade parameters.
@@ -56,7 +50,7 @@ export type SwapQueryOptions = {
 export function swapQuote(
   client: AaveClient,
   request: SwapQuoteRequest,
-  options: SwapQueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<SwapQuote, UnexpectedError> {
   return client.query(SwapQuoteQuery, { request, ...options });
 }
@@ -128,9 +122,29 @@ export function swappableTokens(
 export function prepareSwap(
   client: AaveClient,
   request: PrepareSwapRequest,
-  options: SwapQueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PrepareSwapResult, UnexpectedError> {
   return client.query(PrepareSwapQuery, { request, ...options });
+}
+
+/**
+ * Fetches pending swaps for a specific user.
+ *
+ * ```ts
+ * const result = await pendingSwaps(client, {
+ *   user: evmAddress('0x742d35cc...'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The pending swaps request parameters.
+ * @returns The list of pending swap receipts for the user.
+ */
+export function pendingSwaps(
+  client: AaveClient,
+  request: PendingSwapsRequest,
+): ResultAsync<SwapReceipt[], UnexpectedError> {
+  return client.query(PendingSwapsQuery, { request });
 }
 
 /**
