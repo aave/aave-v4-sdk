@@ -18,10 +18,34 @@ import type {
   WithdrawActivity,
 } from '@aave/graphql-next';
 import introspectedSchema from '@aave/graphql-next/schema';
-import { cacheExchange } from '@urql/exchange-graphcache';
+import {
+  cacheExchange,
+  type Resolver,
+  type Scalar,
+} from '@urql/exchange-graphcache';
 
-export const cache = /*#__PURE__*/ cacheExchange({
+const transformToBigInt: Resolver = (parent, _args, _cache, info) => {
+  return BigInt(parent[info.fieldName] as string) as unknown as Scalar;
+};
+
+export const exchange = cacheExchange({
   schema: introspectedSchema,
+  resolvers: {
+    PercentValue: {
+      raw: transformToBigInt,
+    },
+    DecimalValue: {
+      raw: transformToBigInt,
+    },
+    TransactionRequest: {
+      value: transformToBigInt,
+    },
+    // Intentionally omitted to keep it as BigIntString
+    // PermitMessageData: {
+    //   value: transformToBigInt,
+    //   nonce: transformToBigInt,
+    // },
+  },
   keys: {
     // Entities with id field as key
     Reserve: (data: Reserve) => data.id.toString(),

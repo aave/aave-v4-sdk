@@ -1,7 +1,7 @@
 import type { Context } from '@aave/core-next';
 import type { TypedDocumentNode } from '@urql/core';
 import type { EnvironmentConfig } from '../../core/src/types';
-import { cache } from './cache';
+import { exchange } from './cache';
 import { production } from './environments';
 
 /**
@@ -20,7 +20,7 @@ export type ClientConfig = {
   /**
    * Whether to enable caching.
    *
-   * @defaultValue `false`
+   * @defaultValue `true`
    */
   cache?: boolean;
   /**
@@ -40,13 +40,19 @@ export type ClientConfig = {
 /**
  * @internal
  */
-export function configureContext(from: ClientConfig): Context {
+export function configureContext({
+  environment = production,
+  headers,
+  cache = true,
+  debug = false,
+  fragments = [],
+}: ClientConfig): Context {
   return {
     displayName: 'AaveClient',
-    environment: from.environment ?? production,
-    headers: from.headers,
-    cache: from.cache ? cache : null,
-    debug: from.debug ?? false,
-    fragments: from.fragments ?? [],
+    environment,
+    headers,
+    cache: cache ? exchange : null,
+    debug,
+    fragments,
   };
 }

@@ -1,5 +1,4 @@
 import {
-  type BigIntString,
   type BlockchainData,
   type ChainId,
   type EvmAddress,
@@ -49,7 +48,7 @@ export type UnsignedTransactionRequest = {
   to: EvmAddress;
   from: EvmAddress;
   data: BlockchainData;
-  value: BigIntString;
+  value: bigint;
   chainId: ChainId;
 };
 

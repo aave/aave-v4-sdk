@@ -51,6 +51,7 @@ export class GqlClient {
 
     this.urql = createClient({
       url: context.environment.backend,
+      requestPolicy: context.cache ? 'cache-and-network' : 'network-only',
       fetchOptions: {
         credentials: 'omit',
         headers: context.headers,
