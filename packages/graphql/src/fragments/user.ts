@@ -53,6 +53,7 @@ export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
 export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
     __typename
+    totalPositions
     netBalance {
       ...FiatAmountWithChange
     }
@@ -71,9 +72,6 @@ export const UserSummaryFragment = graphql(
     netFeeEarned {
       ...FiatAmount
     }
-    netPnl {
-      ...FiatAmount
-    }
     lowestHealthFactor
   }`,
   [FiatAmountWithChangeFragment, FiatAmountFragment, PercentValueFragment],
@@ -88,22 +86,28 @@ export const UserPositionFragment = graphql(
       ...Spoke
     }
     user
+    supplies {
+      ...UserSupplyItem
+    }
+    borrows {
+      ...UserBorrowItem
+    }
     netApy {
       ...PercentValue
     }
-    netCollateral(currency: USD) {
+    netCollateral(currency: $currency) {
       ...FiatAmountWithChange
     }
-    netBalance(currency: USD) {
+    netBalance(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalCollateral(currency: USD) {
+    totalCollateral(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalSupplied(currency: USD) {
+    totalSupplied(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalDebt(currency: USD) {
+    totalDebt(currency: $currency) {
       ...FiatAmountWithChange
     }
     netSupplyApy {
@@ -121,12 +125,6 @@ export const UserPositionFragment = graphql(
     betterRiskPremium {
       ...PercentValue
     }
-    supplies {
-      ...UserSupplyItem
-    }
-    borrows {
-      ...UserBorrowItem
-    }
     netBalancePercentChange(window: $timeWindow){
       ...PercentValue
     }
@@ -139,7 +137,6 @@ export const UserPositionFragment = graphql(
     BigDecimalWithChangeFragment,
     UserSupplyItemFragment,
     UserBorrowItemFragment,
-    PercentValueFragment,
   ],
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;

@@ -4,7 +4,7 @@ describe('Aave V4 Supply Scenarios', () => {
   describe('Given a user and a Reserve', () => {
     describe('When the user supplies tokens', () => {
       describe("Then the user's supply positions are updated", () => {
-        it.todo('AND the supplied tokens are set as collateral by default');
+        it.todo('And the supplied tokens are set as collateral by default');
       });
     });
 
@@ -24,14 +24,14 @@ describe('Aave V4 Supply Scenarios', () => {
 
     describe('When the user supplies tokens on behalf of another address using a permit signature', () => {
       describe('Then the supply succeeds without requiring ERC20 approval', () => {
-        it.todo(`AND the other user's supply positions are updated`);
+        it.todo(`And the other user's supply positions are updated`);
       });
     });
 
     describe('When the Reserve allows supplying native tokens', () => {
-      describe('AND the user supplies native tokens', () => {
+      describe('And the user supplies native tokens', () => {
         describe(`Then the use's supply positions are updated`, () => {
-          it.todo(`AND should appear in the user's supply positions`);
+          it.todo(`And should appear in the user's supply positions`);
         });
       });
     });

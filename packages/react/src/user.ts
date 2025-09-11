@@ -1,10 +1,9 @@
 import {
+  type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
-  type QueryOptions,
-  setUserSupplyAsCollateral,
-  type UnexpectedError,
-  type UserSummaryQueryOptions,
+  type TimeWindowQueryOptions,
 } from '@aave/client-next';
+import type { UserPositionQueryOptions } from '@aave/client-next/actions';
 import {
   type APYSample,
   type BorrowAPYHistoryRequest,
@@ -13,10 +12,8 @@ import {
   HubAssetsQuery,
   type HubAssetsRequest,
   type PaginatedUserHistoryResult,
-  type SetUserSupplyAsCollateralRequest,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
-  type TransactionRequest,
   type UserBalance,
   UserBalancesQuery,
   type UserBalancesRequest,
@@ -40,7 +37,7 @@ import {
   type UserSuppliesRequest,
   type UserSupplyItem,
 } from '@aave/graphql-next';
-import { useAaveClient } from './context';
+import type { Prettify } from '@aave/types-next';
 import {
   type ReadResult,
   type Suspendable,
@@ -48,9 +45,10 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from './helpers';
-import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
-export type UseUserSuppliesArgs = UserSuppliesRequest & QueryOptions;
+export type UseUserSuppliesArgs = Prettify<
+  UserSuppliesRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch all user supply positions.
@@ -110,7 +108,9 @@ export function useUserSupplies({
   });
 }
 
-export type UseUserBorrowsArgs = UserBorrowsRequest & QueryOptions;
+export type UseUserBorrowsArgs = Prettify<
+  UserBorrowsRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch all user borrow positions.
@@ -170,7 +170,9 @@ export function useUserBorrows({
   });
 }
 
-export type UseUserSummaryArgs = UserSummaryRequest & UserSummaryQueryOptions;
+export type UseUserSummaryArgs = Prettify<
+  UserSummaryRequest & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch a user's financial summary.
@@ -224,7 +226,9 @@ export function useUserSummary({
   });
 }
 
-export type UseUserPositionsArgs = UserPositionsRequest & QueryOptions;
+export type UseUserPositionsArgs = Prettify<
+  UserPositionsRequest & UserPositionQueryOptions
+>;
 
 /**
  * Fetch all user positions across specified chains.
@@ -278,7 +282,9 @@ export function useUserPositions({
   });
 }
 
-export type UseUserPositionArgs = UserPositionRequest & QueryOptions;
+export type UseUserPositionArgs = Prettify<
+  UserPositionRequest & UserPositionQueryOptions
+>;
 
 /**
  * Fetch a specific user position by ID.
@@ -330,7 +336,9 @@ export function useUserPosition({
   });
 }
 
-export type UseUserBalancesArgs = UserBalancesRequest & QueryOptions;
+export type UseUserBalancesArgs = Prettify<
+  UserBalancesRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch all user balances across specified chains.
@@ -380,7 +388,9 @@ export function useUserBalances({
   });
 }
 
-export type UseUserHistoryArgs = UserHistoryRequest & QueryOptions;
+export type UseUserHistoryArgs = Prettify<
+  UserHistoryRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch user transaction history with pagination.
@@ -596,7 +606,9 @@ export function useSupplyApyHistory({
   });
 }
 
-export type UseHubAssetsArgs = HubAssetsRequest & QueryOptions;
+export type UseHubAssetsArgs = Prettify<
+  HubAssetsRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch hub assets for a specific chain and optional hub/user filtering.
@@ -648,35 +660,4 @@ export function useHubAssets({
     },
     suspense,
   });
-}
-
-/**
- * Hook for setting whether a user's supply should be used as collateral.
- *
- * ```tsx
- * const [execute, { called, loading, data, error }] = useSetUserSupplyAsCollateral();
- *
- * const handleToggleCollateral = async () => {
- *   const result = await execute({
- *     reserve: {
- *       chainId: chainId(1),
- *       spoke: evmAddress('0x123...'),
- *       reserveId: reserveId(1)
- *     },
- *     sender: evmAddress('0x456...'),
- *     enableCollateral: true,
- *   });
- * };
- * ```
- */
-export function useSetUserSupplyAsCollateral(): UseAsyncTask<
-  SetUserSupplyAsCollateralRequest,
-  TransactionRequest,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
-    setUserSupplyAsCollateral(client, request),
-  );
 }

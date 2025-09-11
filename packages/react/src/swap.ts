@@ -1,21 +1,22 @@
 import {
+  type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
-  prepareSwap,
-  type SwapQueryOptions,
-  swap,
-  swapQuote,
 } from '@aave/client-next';
+import { prepareSwap, swap, swapQuote } from '@aave/client-next/actions';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
+  PendingSwapsRequest,
   PrepareSwapRequest,
   SwapExecutionPlan,
   SwapQuote,
   SwapQuoteRequest,
+  SwapReceipt,
   SwapStatus,
   SwapStatusRequest,
 } from '@aave/graphql-next';
 import {
   type ERC712Signature,
+  PendingSwapsQuery,
   type SwapByIntent,
   type SwapByIntentWithApprovalRequired,
   SwappableTokensQuery,
@@ -23,7 +24,7 @@ import {
   SwapStatusQuery,
   type Token,
 } from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+import type { Prettify, ResultAsync } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type ReadResult,
@@ -33,8 +34,6 @@ import {
   useSuspendableQuery,
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
-
-export type UseSwapQuoteArgs = SwapQueryOptions;
 
 /**
  * Fetches a swap quote for the specified trade parameters.
@@ -64,13 +63,59 @@ export type UseSwapQuoteArgs = SwapQueryOptions;
  * ```
  */
 export function useSwapQuote(
-  options: UseSwapQuoteArgs = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<SwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask((request: SwapQuoteRequest) =>
     swapQuote(client, request, options),
   );
+}
+
+export type UsePendingSwapsArgs = PendingSwapsRequest;
+
+/**
+ * Fetch pending swaps for a specific user.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = usePendingSwaps({
+ *   user: evmAddress('0x742d35cc...'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function usePendingSwaps(
+  args: UsePendingSwapsArgs & Suspendable,
+): SuspenseResult<SwapReceipt[]>;
+
+/**
+ * Fetch pending swaps for a specific user.
+ *
+ * ```tsx
+ * const { data, error, loading } = usePendingSwaps({
+ *   user: evmAddress('0x742d35cc...'),
+ * });
+ * ```
+ */
+export function usePendingSwaps(
+  args: UsePendingSwapsArgs,
+): ReadResult<SwapReceipt[]>;
+
+export function usePendingSwaps({
+  suspense = false,
+  ...request
+}: UsePendingSwapsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<SwapReceipt[]> {
+  return useSuspendableQuery({
+    document: PendingSwapsQuery,
+    variables: {
+      request,
+    },
+    suspense,
+  });
 }
 
 export type UseSwappableTokensArgs = SwappableTokensRequest;
@@ -118,6 +163,10 @@ export function useSwappableTokens({
     suspense,
   });
 }
+
+export type UseSwapTokensRequest = Prettify<
+  PrepareSwapRequest & CurrencyQueryOptions
+>;
 
 export type SwapIntent = SwapByIntent | SwapByIntentWithApprovalRequired;
 
@@ -181,23 +230,27 @@ export function useSwapTokens(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: PrepareSwapRequest) =>
-    prepareSwap(client, request).andThen((prepareResult) => {
-      switch (prepareResult.__typename) {
-        case 'SwapByIntent':
-          return handler(prepareResult).andThen((signature) =>
-            swap(client, { intent: { id: prepareResult.id, signature } }),
-          );
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseSwapTokensRequest) =>
+      prepareSwap(client, request, { currency }).andThen((prepareResult) => {
+        switch (prepareResult.__typename) {
+          case 'SwapByIntent':
+            return handler(prepareResult).andThen((signature) =>
+              swap(client, { intent: { id: prepareResult.id, signature } }),
+            );
 
-        case 'SwapByIntentWithApprovalRequired':
-          return handler(prepareResult).andThen((signature) =>
-            swap(client, { intent: { id: prepareResult.id, signature } }),
-          );
+          case 'SwapByIntentWithApprovalRequired':
+            return handler(prepareResult).andThen((signature) =>
+              swap(client, { intent: { id: prepareResult.id, signature } }),
+            );
 
-        case 'SwapByTransaction':
-          return swap(client, { transaction: { id: prepareResult.id } });
-      }
-    }),
+          case 'SwapByTransaction':
+            return swap(client, { transaction: { id: prepareResult.id } });
+        }
+      }),
   );
 }
 

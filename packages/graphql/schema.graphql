@@ -14,6 +14,14 @@ enum ActivityType {
 
 scalar AlwaysTrue
 
+input AmountInput @oneOf {
+  """Exact amount"""
+  exact: BigDecimal
+
+  """Max amount"""
+  max: AlwaysTrue
+}
+
 type ApprovalRequired {
   """The transaction requires an approval first"""
   approval: TransactionRequest!
@@ -37,8 +45,8 @@ enum ApyMetric {
 scalar AssetId
 
 enum BestBorrowReserveFilter {
-  LOWEST_RATE
-  LOWEST_AVERAGE_RATE
+  LOWEST_APY
+  LOWEST_AVERAGE_APY
 }
 
 input BestBorrowReserveRequest {
@@ -52,13 +60,13 @@ input BestRatesRequestQuery @oneOf {
 }
 
 enum BestSupplyReserveFilter {
-  HIGHEST_YIELD
-  HIGHEST_AVERAGE_YIELD
+  HIGHEST_APY
+  HIGHEST_AVERAGE_APY
 }
 
 input BestSupplyReserveRequest {
   query: BestRatesRequestQuery!
-  filter: BestSupplyReserveFilter!
+  filter: BestSupplyReserveFilter! = HIGHEST_APY
 }
 
 scalar BigDecimal
@@ -144,11 +152,6 @@ type Chain {
 """A supported blockchain chain ID"""
 scalar ChainId
 
-input ChainTokenInput @oneOf {
-  native: ChainId
-  erc20: Erc20Input
-}
-
 enum ChainsFilter {
   TESTNET_ONLY
   MAINNET_ONLY
@@ -201,12 +204,15 @@ type Erc20Amount {
 }
 
 input Erc20Input {
+  """The token address"""
   address: EvmAddress!
+
+  """The token chain id"""
   chainId: ChainId!
 }
 
 type Erc20Token {
-  contract: EvmAddress!
+  address: EvmAddress!
   chain: Chain!
   info: TokenInfo!
 
@@ -279,66 +285,89 @@ input HasProcessedKnownTransactionRequest {
 }
 
 type Hub {
+  """The hub name"""
   name: String!
+
+  """The hub address"""
   address: EvmAddress!
+
+  """The chain the hub is deployed on"""
   chain: Chain!
-  totalSupplied: FiatAmount!
-  totalSupplyCap: FiatAmount!
-  supplyUtilizationRate: PercentValue!
-  totalBorrowed: FiatAmount!
-  totalBorrowCap: FiatAmount!
-  borrowUtilizationRate: PercentValue!
+
+  """The hub summary"""
+  summary(currency: Currency! = USD): HubSummary!
 }
 
 type HubAsset {
+  """The asset id"""
   assetId: AssetId!
+
+  """The hub"""
   hub: Hub!
+
+  """The underlying token"""
   underlying: Erc20Token!
+
+  """The hub asset summary"""
   summary: HubAssetSummary!
+
+  """The hub asset settings"""
   settings: HubAssetSettings!
+
+  """The best supply reserve for this hub asset"""
   bestSupplyReserve: Reserve
+
+  """The best borrow reserve for this hub asset"""
   bestBorrowReserve: Reserve
   userState: HubAssetUserState
 }
 
 type HubAssetSettings {
+  """The fee receiver"""
   feeReceiver: EvmAddress!
-  liquidityFee: PercentValue!
-  irStrategy: EvmAddress!
-  reinvestmentStrategy: EvmAddress!
-}
 
-enum HubAssetStatusType {
-  ACTIVE
-  FROZEN
-  PAUSED
+  """The liquidity fee"""
+  liquidityFee: PercentValue!
+
+  """The ir strategy"""
+  irStrategy: EvmAddress!
+
+  """The reinvestment strategy"""
+  reinvestmentStrategy: EvmAddress
 }
 
 type HubAssetSummary {
+  """The supplied amount"""
   supplied: BigDecimal!
+
+  """The borrowed amount"""
   borrowed: BigDecimal!
+
+  """The available liquidity"""
   availableLiquidity: BigDecimal!
+
+  """The supply APY"""
   supplyApy: PercentValue!
+
+  """The borrow APY"""
   borrowApy: PercentValue!
+
+  """The net APY"""
   netApy: PercentValue!
+
+  """The utilization rate"""
   utilizationRate: PercentValue!
 }
 
 type HubAssetUserState {
-  balance: TokenAmount!
+  """The hub asset balance"""
+  balance: Erc20Amount!
 }
 
 input HubAssetsRequest {
-  hub: EvmAddress
+  hub: EvmAddress!
   user: EvmAddress
-  include: [HubAssetStatusType!]! = [ACTIVE, FROZEN, PAUSED]
-  orderBy: HubAssetsRequestOrderBy! = NAME
   chainId: ChainId!
-}
-
-enum HubAssetsRequestOrderBy {
-  BALANCE
-  NAME
 }
 
 input HubInput {
@@ -354,6 +383,28 @@ input HubRequest {
   chainId: ChainId!
 }
 
+type HubSummary {
+  """
+  The total spoke reserves aggregated borrowed using this hub, showed in fiat as each asset has a different value
+  """
+  totalBorrowed: FiatAmount!
+
+  """
+  The total spoke reserves aggregated borrow caps using this hub, showed in fiat as each asset has a different value
+  """
+  totalBorrowCap: FiatAmount!
+
+  """
+  The total spoke reserves aggregated supplied using this hub, showed in fiat as each asset has a different value
+  """
+  totalSupplied: FiatAmount!
+
+  """
+  The total spoke reserves aggregated supply caps using this hub, showed in fiat as each asset has a different value
+  """
+  totalSupplyCap: FiatAmount!
+}
+
 input HubTokenInput {
   chainId: ChainId!
   hub: EvmAddress!
@@ -361,7 +412,10 @@ input HubTokenInput {
 }
 
 input HubsRequest @oneOf {
-  tokens: [ChainTokenInput!]
+  """Get back all the hubs which have one of the underlying tokens supplied"""
+  tokens: [Erc20Input!]
+
+  """Get back all the hubs based on the chain ids passed in"""
   chainIds: [ChainId!]
 }
 
@@ -602,7 +656,7 @@ type Query {
   """Generate EIP-712 typed data for EIP-2612 permit signature"""
   permitTypedData(request: PermitRequest!): PermitTypedDataResponse!
 
-  """Lists all the hubs"""
+  """Fetch a list of hubs depending on your search criteria"""
   hubs(request: HubsRequest!): [Hub!]!
   hub(request: HubRequest!): Hub
   hubAssets(request: HubAssetsRequest!): [HubAsset!]!
@@ -620,8 +674,8 @@ type Query {
   updateUserRiskPremium(request: UpdateUserRiskPremiumRequest!): TransactionRequest!
   updateUserDynamicConfig(request: UpdateUserDynamicConfigRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPositionResult!
-  bestSupplyReserve(request: BestSupplyReserveRequest!): Reserve!
-  bestBorrowReserve(request: BestBorrowReserveRequest!): Reserve!
+  bestSupplyReserve(request: BestSupplyReserveRequest!): Reserve
+  bestBorrowReserve(request: BestBorrowReserveRequest!): Reserve
   borrowApyHistory(request: BorrowAPYHistoryRequest!): [APYSample!]!
   supplyApyHistory(request: SupplyAPYHistoryRequest!): [APYSample!]!
 
@@ -682,12 +736,32 @@ type RepayActivity {
   amount: Erc20Amount!
 }
 
+input RepayAmountInputWithPermit @oneOf {
+  """The native amount"""
+  native: AmountInput
+
+  """The erc20 amount input"""
+  erc20: RepayErc20AmountInputWithPermit
+}
+
+input RepayErc20AmountInputWithPermit {
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
+  """
+  value: AmountInput!
+
+  """
+  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  """
+  permitSig: ERC712Signature
+}
+
 input RepayRequest {
   """The reserve"""
   reserve: ReserveInput!
 
   """The amount repaying"""
-  amount: ReserveAmountInputWithPermit!
+  amount: RepayAmountInputWithPermit!
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
@@ -755,8 +829,8 @@ scalar ReserveId
 type ReserveInfo {
   id: ReserveId!
   spoke: Spoke!
-  asset: HubAsset!
   chain: Chain!
+  asset: HubAsset!
 }
 
 input ReserveInput {
@@ -1230,11 +1304,11 @@ input UserBalancesRequestOrderBy @oneOf {
 }
 
 type UserBorrowItem {
-  """The amount borrowed"""
-  amount: Erc20Amount!
-
   """The reserve borrowed from"""
   reserve: Reserve!
+
+  """The amount borrowed"""
+  amount: Erc20Amount!
 
   """The amount paid back of the borrow so far"""
   paid: Erc20Amount!
@@ -1266,8 +1340,8 @@ union UserHistoryItem = BorrowActivity | SupplyActivity | WithdrawActivity | Rep
 
 input UserHistoryRequest {
   user: EvmAddress!
-  activityTypes: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY]
-  filter: UserHistoryFilter
+  activityTypes: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, SWAP, LIQUIDATED]
+  filter: UserHistoryFilter!
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -1291,7 +1365,7 @@ type UserPosition {
   """
   totalCollateral(currency: Currency! = USD): FiatAmountWithChange!
 
-  """Total debt which is the total amount borrowed"""
+  """Total debt which is the total amount borrowed plus the accrued premium"""
   totalDebt(currency: Currency! = USD): FiatAmountWithChange!
 
   """The net balance which is `total_supplied` - `borrows`"""
@@ -1303,16 +1377,17 @@ type UserPosition {
   netSupplyApy: PercentValueWithChange!
   netBorrowApy: PercentValueWithChange!
   healthFactor: BigDecimalWithChange
-  riskPremium: PercentValue!
   betterRiskPremium: PercentValue
+  riskPremium: PercentValue!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentValue!
   spoke: Spoke!
 }
 
 scalar UserPositionId
 
-input UserPositionRequest {
-  id: UserPositionId!
+input UserPositionRequest @oneOf {
+  userSpoke: UserSpokeInput
+  id: UserPositionId
 }
 
 input UserPositionsRequest {
@@ -1335,13 +1410,29 @@ input UserSpokeInput {
 }
 
 type UserSummary {
-  netBalance: FiatAmountWithChange!
-  totalCollateral: FiatAmount!
-  totalSupplied: FiatAmount!
-  totalDebt: FiatAmount!
+  totalPositions: Int!
+
+  """Net balance = supply - debt"""
+  netBalance(currency: Currency! = USD): FiatAmountWithChange!
+
+  """Total supply where is_collateral is true"""
+  totalCollateral(currency: Currency! = USD): FiatAmount!
+
+  """Total supplied across all positions"""
+  totalSupplied(currency: Currency! = USD): FiatAmount!
+
+  """Total debt across all positions"""
+  totalDebt(currency: Currency! = USD): FiatAmount!
+
+  """
+  Net APY = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
+  """
   netApy: PercentValue!
+
+  """Interest earned (net fee earned)"""
   netFeeEarned: FiatAmount!
-  netPnl: FiatAmount!
+
+  """Lowest health factor across all positions"""
   lowestHealthFactor: BigDecimal
 }
 
@@ -1387,11 +1478,11 @@ input UserSuppliesRequestOrderBy @oneOf {
 }
 
 type UserSupplyItem {
-  """The amount supplied"""
-  amount: Erc20Amount!
-
   """The reserve supplied to"""
   reserve: Reserve!
+
+  """The amount of supplied shares"""
+  amount: Erc20Amount!
 
   """The amount earned since supplying"""
   earned: Erc20Amount!
@@ -1401,7 +1492,7 @@ type UserSupplyItem {
 }
 
 type WithdrawActivity {
-  id: String!
+  id: ID!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
@@ -1428,16 +1519,8 @@ input WithdrawRequest {
 
 input WithdrawReserveAmountInput @oneOf {
   """The native amount"""
-  native: BigDecimal
+  native: AmountInput
 
   """The erc20 amount input"""
-  erc20: WithdrawReserveErc20AmountInput
-}
-
-input WithdrawReserveErc20AmountInput @oneOf {
-  """Exact amount to withdraw, remember interest is generated on each block"""
-  exact: BigDecimal
-
-  """Withdraw all the position completely"""
-  max: AlwaysTrue
+  erc20: AmountInput
 }

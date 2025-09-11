@@ -1,7 +1,6 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
-import { ChainFragment } from './chain';
-import { PaginatedResultInfoFragment } from './common';
+import { ChainFragment, PaginatedResultInfoFragment } from './common';
 
 export const SpokeConfigFragment = graphql(
   `fragment SpokeConfig on SpokeConfig {

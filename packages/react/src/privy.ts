@@ -1,9 +1,4 @@
-import {
-  SigningError,
-  type TimeoutError,
-  type TransactionError,
-  UnexpectedError,
-} from '@aave/client-next';
+import { SigningError, UnexpectedError } from '@aave/client-next';
 import { permitTypedData } from '@aave/client-next/actions';
 import {
   sendTransactionAndWait,
@@ -14,104 +9,26 @@ import type {
   PermitTypedDataRequest,
   TransactionRequest,
 } from '@aave/graphql-next';
-import {
-  invariant,
-  ResultAsync,
-  signatureFrom,
-  type TxHash,
-} from '@aave/types-next';
+import { invariant, ResultAsync, signatureFrom } from '@aave/types-next';
 import { useSignTypedData, useWallets } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import { useAaveClient } from './context';
-import { type UseAsyncTask, useAsyncTask } from './helpers';
-
-export type SendTransactionError =
-  | SigningError
-  | TimeoutError
-  | TransactionError
-  | UnexpectedError;
+import {
+  type UseAsyncTask,
+  type UseSendTransactionResult,
+  useAsyncTask,
+} from './helpers';
 
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
  *
- * First, use the `useSendTransaction` hook from `@aave/react/privy` entry point.
+ * Import the `useSendTransaction` hook from `@aave/react/privy` entry point.
  *
  * ```ts
  * const [sendTransaction, { loading, error, data }] = useSendTransaction();
  * ```
- *
- * Then, use it to send a {@link TransactionRequest} as shown below.
- *
- * ```ts
- * const account = useAccount(); // wagmi hook
- *
- * const [toggle, { loading, error, data }] = useEModeToggle();
- *
- * const run = async () => {
- *   const result = await toggle({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     user: evmAddress(account.address!),
- *   })
- *     .andThen(sendTransaction);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Transaction sent with hash:', result.value);
- * };
- * ```
- *
- * Or use it to handle an {@link ExecutionPlan} that may require multiple transactions as shown below.
- *
- * ```ts
- * const account = useAccount(); // wagmi hook
- *
- * const [supply, { loading, error, data }] = useSupply();
- *
- * const run = async () => {
- *   const result = await supply({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     amount: {
- *       erc20: {
- *         currency: evmAddress('0x5678…'),
- *         value: '42.42',
- *       }
- *     },
- *     supplier: evmAddress(account.address!),
- *   })
- *     .andThen((plan) => {
- *       switch (plan.__typename) {
- *         case 'TransactionRequest':
- *           return sendTransaction(plan);
- *
- *         case 'ApprovalRequired':
- *           return sendTransaction(plan.approval).andThen(() =>
- *             sendTransaction(plan.originalTransaction),
- *           );
- *
- *         case 'InsufficientBalanceError':
- *           return errAsync(new Error(`Insufficient balance: ${error.cause.required.value} required.`));
- *        }
- *      });
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Transaction sent with hash:', result.value);
- * }
- * ```
  */
-export function useSendTransaction(): UseAsyncTask<
-  TransactionRequest,
-  TxHash,
-  SendTransactionError
-> {
+export function useSendTransaction(): UseSendTransactionResult {
   const client = useAaveClient();
   const { wallets } = useWallets();
 

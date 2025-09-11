@@ -40,8 +40,6 @@ export class Logger {
     (['trace', 'debug', 'info', 'warn', 'error'] as const).forEach(
       (methodName, index) => {
         if (index >= this.level) {
-          this[methodName] = () => {};
-        } else {
           this[methodName] = (...args) =>
             console[methodName === 'debug' ? 'log' : methodName](
               `[${this.name}]`,

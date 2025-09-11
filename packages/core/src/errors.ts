@@ -1,5 +1,4 @@
 import {
-  type BigIntString,
   type BlockchainData,
   type ChainId,
   type EvmAddress,
@@ -49,7 +48,7 @@ export type UnsignedTransactionRequest = {
   to: EvmAddress;
   from: EvmAddress;
   data: BlockchainData;
-  value: BigIntString;
+  value: bigint;
   chainId: ChainId;
 };
 
@@ -103,4 +102,11 @@ export class ValidationError<
   ): ValidationError<TGqlNode> {
     return new ValidationError(error);
   }
+}
+
+/**
+ * Error indicating the desire to cancel an operation.
+ */
+export class CancelError extends ResultAwareError {
+  name = 'CancelError' as const;
 }

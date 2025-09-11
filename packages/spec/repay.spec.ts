@@ -11,7 +11,7 @@ describe('Aave V4 Repay Scenario', () => {
     });
 
     describe('When the reserve allows repaying in native tokens', () => {
-      describe('AND the user repays their loan in native tokens', () => {
+      describe('And the user repays their loan in native tokens', () => {
         it.todo('Then it should be reflected in the user positions');
       });
     });

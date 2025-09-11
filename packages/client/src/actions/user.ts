@@ -7,12 +7,8 @@ import {
   HubAssetsQuery,
   type HubAssetsRequest,
   type PaginatedUserHistoryResult,
-  SetUserSupplyAsCollateralQuery,
-  type SetUserSupplyAsCollateralRequest,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
-  type TimeWindow,
-  type TransactionRequest,
   type UserBalance,
   UserBalancesQuery,
   type UserBalancesRequest,
@@ -38,7 +34,11 @@ import {
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
-import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '../options';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
+} from '../options';
 
 /**
  * Fetches all user supply positions across the specified spoke.
@@ -63,7 +63,7 @@ import { DEFAULT_QUERY_OPTIONS, type QueryOptions } from '../options';
 export function userSupplies(
   client: AaveClient,
   request: UserSuppliesRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSupplyItem[], UnexpectedError> {
   return client.query(UserSuppliesQuery, { request, ...options });
 }
@@ -91,19 +91,10 @@ export function userSupplies(
 export function userBorrows(
   client: AaveClient,
   request: UserBorrowsRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBorrowItem[], UnexpectedError> {
   return client.query(UserBorrowsQuery, { request, ...options });
 }
-
-export type UserSummaryQueryOptions = {
-  /**
-   * The time window for historical data changes.
-   *
-   * @defaultValue {@link TimeWindow.LastDay}
-   */
-  timeWindow: TimeWindow;
-};
 
 /**
  * Fetches a user's summary across all positions.
@@ -125,13 +116,16 @@ export type UserSummaryQueryOptions = {
 export function userSummary(
   client: AaveClient,
   request: UserSummaryRequest,
-  options: UserSummaryQueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<TimeWindowQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummary, UnexpectedError> {
   return client.query(UserSummaryQuery, {
     request,
     timeWindow: options.timeWindow,
   });
 }
+
+export type UserPositionQueryOptions = CurrencyQueryOptions &
+  TimeWindowQueryOptions;
 
 /**
  * Fetches all user positions across specified chains.
@@ -152,7 +146,7 @@ export function userSummary(
 export function userPositions(
   client: AaveClient,
   request: UserPositionsRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<UserPositionQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition[], UnexpectedError> {
   return client.query(UserPositionsQuery, { request, ...options });
 }
@@ -175,7 +169,7 @@ export function userPositions(
 export function userPosition(
   client: AaveClient,
   request: UserPositionRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<UserPositionQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition | null, UnexpectedError> {
   return client.query(UserPositionQuery, { request, ...options });
 }
@@ -198,7 +192,7 @@ export function userPosition(
 export function userBalances(
   client: AaveClient,
   request: UserBalancesRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBalance[], UnexpectedError> {
   return client.query(UserBalancesQuery, { request, ...options });
 }
@@ -223,7 +217,7 @@ export function userBalances(
 export function userHistory(
   client: AaveClient,
   request: UserHistoryRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
   return client.query(UserHistoryQuery, { request, ...options });
 }
@@ -323,33 +317,7 @@ export function supplyApyHistory(
 export function hubAssets(
   client: AaveClient,
   request: HubAssetsRequest,
-  options: QueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubAsset[], UnexpectedError> {
   return client.query(HubAssetsQuery, { request, ...options });
-}
-
-/**
- * Sets whether a user's supply should be used as collateral.
- *
- * ```ts
- * const result = await setUserSupplyAsCollateral(client, {
- *   reserve: {
- *     chainId: chainId(1),
- *     spoke: evmAddress('0x123...'),
- *     reserveId: reserveId(1)
- *   },
- *   sender: evmAddress('0x456...'),
- *   enableCollateral: true
- * });
- * ```
- *
- * @param client - Aave client.
- * @param request - The set user supply as collateral request parameters.
- * @returns The transaction request to set collateral status.
- */
-export function setUserSupplyAsCollateral(
-  client: AaveClient,
-  request: SetUserSupplyAsCollateralRequest,
-): ResultAsync<TransactionRequest, UnexpectedError> {
-  return client.query(SetUserSupplyAsCollateralQuery, { request });
 }

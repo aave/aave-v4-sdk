@@ -3,6 +3,7 @@ import {
   PrepareSwapResultFragment,
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
+  SwapReceiptFragment,
   SwapStatusFragment,
 } from './fragments/swaps';
 import { graphql, type RequestOf } from './graphql';
@@ -58,6 +59,19 @@ export const SwapStatusQuery = graphql(
   [SwapStatusFragment],
 );
 export type SwapStatusRequest = RequestOf<typeof SwapStatusQuery>;
+
+/**
+ * @internal
+ */
+export const PendingSwapsQuery = graphql(
+  `query PendingSwaps($request: PendingSwapsRequest!) {
+    value: pendingSwaps(request: $request) {
+      ...SwapReceipt
+    }
+  }`,
+  [SwapReceiptFragment],
+);
+export type PendingSwapsRequest = RequestOf<typeof PendingSwapsQuery>;
 
 /**
  * @internal

@@ -1,4 +1,4 @@
-import { AaveProvider } from '@aave/react';
+import { AaveProvider } from '@aave/react-next';
 import { client } from './client';
 
 export function App() {
