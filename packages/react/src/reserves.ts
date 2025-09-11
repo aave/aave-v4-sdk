@@ -1,7 +1,9 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type UnexpectedError,
 } from '@aave/client-next';
+import { reserves } from '@aave/client-next/actions';
 import {
   BestBorrowReserveQuery,
   type BestBorrowReserveRequest,
@@ -12,11 +14,14 @@ import {
   type ReservesRequest,
 } from '@aave/graphql-next';
 import type { Prettify } from '@aave/types-next';
+import { useAaveClient } from './context';
 import {
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
+  type UseAsyncTask,
+  useAsyncTask,
   useSuspendableQuery,
 } from './helpers';
 
@@ -190,4 +195,44 @@ export function useReserves({
     },
     suspense,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link reserves} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on the reserves.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useReservesAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x1234…'),
+ *       chainId: chainId(1)
+ *     }
+ *   }
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // Reserve[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useReservesAction(): UseAsyncTask<
+  ReservesRequest,
+  Reserve[],
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: ReservesRequest) => reserves(client, request));
 }
