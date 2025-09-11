@@ -8,12 +8,10 @@ import {
 import type {
   ApprovalRequired,
   ERC712Signature,
-  PrepareSwapResult,
   SwapApprovalRequired,
   SwapByIntent,
   SwapByIntentWithApprovalRequired,
   SwapByTransaction,
-  SwapExecutionPlan,
   SwapReceipt,
   SwapTransactionRequest,
   TransactionRequest,
