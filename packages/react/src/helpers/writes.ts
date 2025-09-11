@@ -5,7 +5,19 @@ import {
   type TransactionError,
   type UnexpectedError,
 } from '@aave/core-next';
-import type { ApprovalRequired, TransactionRequest } from '@aave/graphql-next';
+import type {
+  ApprovalRequired,
+  ERC712Signature,
+  PrepareSwapResult,
+  SwapApprovalRequired,
+  SwapByIntent,
+  SwapByIntentWithApprovalRequired,
+  SwapByTransaction,
+  SwapExecutionPlan,
+  SwapReceipt,
+  SwapTransactionRequest,
+  TransactionRequest,
+} from '@aave/graphql-next';
 import type { ResultAsync, TxHash } from '@aave/types-next';
 import type { UseAsyncTask } from './tasks';
 
@@ -48,3 +60,20 @@ export type SimpleTransactionHandler = (
   result: TransactionRequest,
   options: TransactionHandlerOptions,
 ) => ResultAsync<TxHash, SendTransactionError>;
+
+export type SwapIntent =
+  | SwapByIntent
+  | SwapByTransaction
+  | SwapByIntentWithApprovalRequired
+  | SwapTransactionRequest
+  | SwapApprovalRequired;
+
+/**
+ * A handler for swap transactions.
+ */
+export type SwapHandler = (
+  intent: SwapIntent,
+) => ResultAsync<
+  ERC712Signature | SwapReceipt,
+  SendTransactionError | UnexpectedError
+>;
