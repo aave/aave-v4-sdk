@@ -1,14 +1,14 @@
 import {
-  cancelSwap,
-  DEFAULT_QUERY_OPTIONS,
-  prepareSwap,
-  prepareSwapCancel,
-  type SwapQueryOptions,
-  swap,
-  swapQuote,
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
 } from '@aave/client-next';
+import {
+  cancelSwap,
+  prepareSwap,
+  prepareSwapCancel,
+  swap,
+  swapQuote,
+} from '@aave/client-next/actions';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
   CancelSwapExecutionPlan,
