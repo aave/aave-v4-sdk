@@ -1,12 +1,17 @@
 import {
+  cancelSwap,
   DEFAULT_QUERY_OPTIONS,
   prepareSwap,
+  prepareSwapCancel,
   type SwapQueryOptions,
   swap,
   swapQuote,
 } from '@aave/client-next';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
+  CancelSwapExecutionPlan,
+  PrepareSwapCancelRequest,
+  PrepareSwapCancelResult,
   PrepareSwapRequest,
   SwapExecutionPlan,
   SwapQuote,
@@ -21,6 +26,7 @@ import {
   type Token,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
+
 import { useAaveClient } from './context';
 import {
   type ReadResult,
@@ -195,5 +201,52 @@ export function useSwapTokens(
           return swap(client, { transaction: { id: prepareResult.id } });
       }
     }),
+  );
+}
+
+export type CancelSwapByIntentHandler = (
+  data: PrepareSwapCancelResult,
+) => ResultAsync<ERC712Signature, SigningError | UnexpectedError>;
+
+/**
+ * Executes the complete swap cancellation workflow combining preparation and execution.
+ *
+ * ```tsx
+ * const [sendTransaction, sending] = useSendTransaction(wallet);
+ * const [signSwapByIntentWith, signing] = useSignSwapByIntentWith(wallet);
+ *
+ * const [cancelSwap, cancelling] = useCancelSwap((prepareResult) =>
+ *   signSwapByIntentWith(prepareResult.data)
+ * );
+ *
+ * const result = await cancelSwap({
+ *   id: swapId('123...'),
+ * }).andThen((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan)
+ *         .map(() => ({ success: true }));
+ *
+ *     case 'SwapCancelled':
+ *       return okAsync(plan);
+ *   }
+ * });
+ * ```
+ */
+export function useCancelSwap(
+  handler: CancelSwapByIntentHandler,
+): UseAsyncTask<
+  PrepareSwapCancelRequest,
+  CancelSwapExecutionPlan,
+  SigningError | UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: PrepareSwapCancelRequest) =>
+    prepareSwapCancel(client, request).andThen((prepareResult) =>
+      handler(prepareResult).andThen((signature) =>
+        cancelSwap(client, { intent: { id: request.id, signature } }),
+      ),
+    ),
   );
 }

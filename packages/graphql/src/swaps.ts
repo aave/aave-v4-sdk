@@ -1,5 +1,7 @@
 import { TokenFragment } from './fragments/common';
 import {
+  CancelSwapExecutionPlanFragment,
+  PrepareSwapCancelResultFragment,
   PrepareSwapResultFragment,
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
@@ -57,3 +59,29 @@ export const SwapQuery = graphql(
   [SwapExecutionPlanFragment],
 );
 export type SwapRequest = RequestOf<typeof SwapQuery>;
+
+/**
+ * @internal
+ */
+export const PrepareSwapCancelQuery = graphql(
+  `query PrepareSwapCancel($request: PrepareSwapCancelRequest!) {
+    value: prepareSwapCancel(request: $request) {
+      ...PrepareSwapCancelResult
+    }
+  }`,
+  [PrepareSwapCancelResultFragment],
+);
+export type PrepareSwapCancelRequest = RequestOf<typeof PrepareSwapCancelQuery>;
+
+/**
+ * @internal
+ */
+export const CancelSwapQuery = graphql(
+  `query CancelSwap($request: CancelSwapRequest!) {
+    value: cancelSwap(request: $request) {
+      ...CancelSwapExecutionPlan
+    }
+  }`,
+  [CancelSwapExecutionPlanFragment],
+);
+export type CancelSwapRequest = RequestOf<typeof CancelSwapQuery>;

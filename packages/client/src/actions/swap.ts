@@ -1,18 +1,26 @@
 import type { UnexpectedError } from '@aave/core-next';
-import type { SwapExecutionPlan } from '@aave/graphql-next';
+import type {
+  CancelSwapExecutionPlan,
+  CancelSwapRequest,
+  Currency,
+  PrepareSwapCancelRequest,
+  PrepareSwapCancelResult,
+  PrepareSwapRequest,
+  PrepareSwapResult,
+  SwapExecutionPlan,
+  SwappableTokensRequest,
+  SwapQuote,
+  SwapQuoteRequest,
+  SwapRequest,
+  Token,
+} from '@aave/graphql-next';
 import {
-  type Currency,
+  CancelSwapQuery,
+  PrepareSwapCancelQuery,
   PrepareSwapQuery,
-  type PrepareSwapRequest,
-  type PrepareSwapResult,
   SwappableTokensQuery,
-  type SwappableTokensRequest,
   SwapQuery,
-  type SwapQuote,
   SwapQuoteQuery,
-  type SwapQuoteRequest,
-  type SwapRequest,
-  type Token,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 
@@ -173,4 +181,59 @@ export function swap(
   request: SwapRequest,
 ): ResultAsync<SwapExecutionPlan, UnexpectedError> {
   return client.query(SwapQuery, { request });
+}
+
+/**
+ * Prepares a swap cancellation for the specified swap ID.
+ *
+ * ```ts
+ * const result = await prepareSwapCancel(client, {
+ *   id: swapId('123...'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The prepare swap cancel request parameters.
+ * @returns The prepared swap cancel result containing typed data for signing.
+ */
+export function prepareSwapCancel(
+  client: AaveClient,
+  request: PrepareSwapCancelRequest,
+): ResultAsync<PrepareSwapCancelResult, UnexpectedError> {
+  return client.query(PrepareSwapCancelQuery, { request });
+}
+
+/**
+ * Executes a swap cancellation for the specified request parameters.
+ *
+ * ```ts
+ * const result = await cancelSwap(client, {
+ *   intent: {
+ *     id: swapId('123...'),
+ *     signature: {
+ *       value: signature('0x456...'),
+ *       deadline: 1234567890,
+ *     },
+ *   },
+ * }).andThen((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan)
+ *         .map(() => ({ success: true }));
+ *
+ *     case 'SwapCancelled':
+ *       return okAsync(plan);
+ *   }
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The cancel swap request parameters.
+ * @returns The cancel swap execution plan containing transaction details or cancellation receipt.
+ */
+export function cancelSwap(
+  client: AaveClient,
+  request: CancelSwapRequest,
+): ResultAsync<CancelSwapExecutionPlan, UnexpectedError> {
+  return client.query(CancelSwapQuery, { request });
 }
