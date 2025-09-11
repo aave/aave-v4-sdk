@@ -11,8 +11,6 @@ import type {
   SwapQuote,
   SwapQuoteRequest,
   SwapReceipt,
-  SwapStatus,
-  SwapStatusRequest,
 } from '@aave/graphql-next';
 import {
   type ERC712Signature,
@@ -21,7 +19,6 @@ import {
   type SwapByIntentWithApprovalRequired,
   SwappableTokensQuery,
   type SwappableTokensRequest,
-  SwapStatusQuery,
   type Token,
 } from '@aave/graphql-next';
 import type { Prettify, ResultAsync } from '@aave/types-next';
@@ -33,6 +30,7 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from './helpers';
+
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
 /**
@@ -252,48 +250,4 @@ export function useSwapTokens(
         }
       }),
   );
-}
-
-export type UseSwapStatusArgs = SwapStatusRequest;
-
-/**
- * Fetch the status of a specific swap.
- *
- * This signature supports React Suspense:
- *
- * ```tsx
- * const { data } = useSwapStatus({
- *   id: swapId('swap_123'),
- *   suspense: true,
- * });
- * ```
- */
-export function useSwapStatus(
-  args: UseSwapStatusArgs & Suspendable,
-): SuspenseResult<SwapStatus>;
-
-/**
- * Fetch the status of a specific swap.
- *
- * ```tsx
- * const { data, error, loading } = useSwapStatus({
- *   id: swapId('swap_123'),
- * });
- * ```
- */
-export function useSwapStatus(args: UseSwapStatusArgs): ReadResult<SwapStatus>;
-
-export function useSwapStatus({
-  suspense = false,
-  ...request
-}: UseSwapStatusArgs & {
-  suspense?: boolean;
-}): SuspendableResult<SwapStatus> {
-  return useSuspendableQuery({
-    document: SwapStatusQuery,
-    variables: {
-      request,
-    },
-    suspense,
-  });
 }
