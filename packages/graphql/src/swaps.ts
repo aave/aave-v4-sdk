@@ -51,7 +51,7 @@ export type PrepareSwapRequest = RequestOf<typeof PrepareSwapQuery>;
  * @internal
  */
 export const SwapStatusQuery = graphql(
-  `query SwapStatus($request: SwapStatusRequest!) {
+  `query SwapStatus($request: SwapStatusRequest!, $currency: Currency!) {
     value: swapStatus(request: $request) {
       ...SwapStatus
     }

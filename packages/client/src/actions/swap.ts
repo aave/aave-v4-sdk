@@ -21,7 +21,6 @@ import {
   type SwapReceipt,
   SwapStatusQuery,
 } from '@aave/graphql-next';
-
 import type { ResultAsync } from '@aave/types-next';
 
 import type { AaveClient } from '../AaveClient';
@@ -140,8 +139,9 @@ export function prepareSwap(
 export function swapStatus(
   client: AaveClient,
   request: SwapStatusRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<SwapStatus, UnexpectedError> {
-  return client.query(SwapStatusQuery, { request });
+  return client.query(SwapStatusQuery, { request, ...options });
 }
 
 /**
