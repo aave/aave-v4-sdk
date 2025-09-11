@@ -2,7 +2,6 @@ import type {
   AnySelectionSet,
   AnyVariables,
   BigDecimal,
-  BigIntString,
   BlockchainData,
   ChainId,
   Cursor,
@@ -52,7 +51,7 @@ export const graphql = initGraphQLTada<{
     BestBorrowReserveFilter: BestBorrowReserveFilter;
     BestSupplyReserveFilter: BestSupplyReserveFilter;
     BigDecimal: BigDecimal;
-    BigInt: BigIntString;
+    BigInt: bigint;
     BlockchainData: BlockchainData;
     Boolean: boolean;
     ChainsFilter: ChainsFilter;
