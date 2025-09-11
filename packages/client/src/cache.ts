@@ -40,10 +40,11 @@ export const exchange = cacheExchange({
     TransactionRequest: {
       value: transformToBigInt,
     },
-    PermitMessageData: {
-      value: transformToBigInt,
-      nonce: transformToBigInt,
-    },
+    // Intentionally omitted to keep it as BigIntString
+    // PermitMessageData: {
+    //   value: transformToBigInt,
+    //   nonce: transformToBigInt,
+    // },
   },
   keys: {
     // Entities with id field as key
