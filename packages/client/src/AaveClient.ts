@@ -10,6 +10,8 @@ import type {
   SwapExpired,
   SwapFulfilled,
   SwapReceipt,
+  SwapRequest,
+  SwapStatusRequest,
 } from '@aave/graphql-next';
 import {
   type AnyVariables,
@@ -56,21 +58,21 @@ export class AaveClient extends GqlClient {
   };
 
   /**
-   * Given the swap receipt of an Aave protocol swap, wait for the swap to reach a final outcome.
+   * Given the swap status request of an Aave protocol swap, wait for the swap to reach a final outcome.
    * This is useful to know if the swap was successful, cancelled, or expired.
    *
    * Returns a {@link TimeoutError} if the swap does not reach a final outcome within the expected timeout period.
    *
-   * @param receipt - The swap receipt to wait for.
+   * @param request - The swap status request to wait for.
    * @returns The swap outcome or a TimeoutError
    */
   readonly waitForSwapOutcome = (
-    receipt: SwapReceipt,
+    request: SwapStatusRequest,
   ): ResultAsync<
     SwapCancelled | SwapExpired | SwapFulfilled,
     TimeoutError | UnexpectedError
   > => {
-    return ResultAsync.fromPromise(this.pollSwapStatus(receipt), (err) => {
+    return ResultAsync.fromPromise(this.pollSwapStatus(request), (err) => {
       if (err instanceof TimeoutError || err instanceof UnexpectedError) {
         return err;
       }
@@ -143,12 +145,12 @@ export class AaveClient extends GqlClient {
   }
 
   protected async pollSwapStatus(
-    receipt: SwapReceipt,
+    request: SwapStatusRequest,
   ): Promise<SwapCancelled | SwapExpired | SwapFulfilled> {
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < this.context.environment.indexingTimeout) {
-      const status = await swapStatus(this, { id: receipt.id }).match(
+      const status = await swapStatus(this, { id: request.id }).match(
         (ok) => ok,
         (err) => {
           throw err;
@@ -167,7 +169,7 @@ export class AaveClient extends GqlClient {
       }
     }
     throw TimeoutError.from(
-      `Timeout waiting for swap ${receipt.id} to reach final outcome.`,
+      `Timeout waiting for swap ${request.id} to reach final outcome.`,
     );
   }
 }
