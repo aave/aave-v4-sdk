@@ -5,7 +5,6 @@ import {
   PercentValueFragment,
 } from './common';
 import { HubFragment } from './hubs';
-import { ReserveFragment } from './reserve';
 
 export const HubAssetSummaryFragment = graphql(
   `fragment HubAssetSummary on HubAssetSummary {
@@ -71,12 +70,6 @@ export const HubAssetFragment = graphql(
       settings {
         ...HubAssetSettings
       }
-      bestSupplyReserve {
-        ...Reserve
-      }
-      bestBorrowReserve {
-        ...Reserve
-      }
       userState {
         ...HubAssetUserState
       }
@@ -86,7 +79,6 @@ export const HubAssetFragment = graphql(
     Erc20TokenFragment,
     HubAssetSummaryFragment,
     HubAssetSettingsFragment,
-    ReserveFragment,
     HubAssetUserStateFragment,
   ],
 );

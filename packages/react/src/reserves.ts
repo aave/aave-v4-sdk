@@ -3,7 +3,7 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type UnexpectedError,
 } from '@aave/client-next';
-import { reserves } from '@aave/client-next/actions';
+import { bestSupplyReserve, reserves } from '@aave/client-next/actions';
 import {
   BestBorrowReserveQuery,
   type BestBorrowReserveRequest,
@@ -235,4 +235,47 @@ export function useReservesAction(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask((request: ReservesRequest) => reserves(client, request));
+}
+
+/**
+ * Low-level hook to execute a {@link bestSupplyReserve} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on the best supply reserve.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useBestSupplyReserveAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x1234…'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   filter: BestSupplyReserveFilter.HighestYield
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // Reserve | null
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useBestSupplyReserveAction(): UseAsyncTask<
+  BestSupplyReserveRequest,
+  Reserve | null,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: BestSupplyReserveRequest) =>
+    bestSupplyReserve(client, request),
+  );
 }
