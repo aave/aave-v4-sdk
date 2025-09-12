@@ -9,8 +9,6 @@ import type {
   SwapCancelled,
   SwapExpired,
   SwapFulfilled,
-  SwapReceipt,
-  SwapRequest,
   SwapStatusRequest,
 } from '@aave/graphql-next';
 import {
