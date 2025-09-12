@@ -58,20 +58,3 @@ export type SimpleTransactionHandler = (
   result: TransactionRequest,
   options: TransactionHandlerOptions,
 ) => ResultAsync<TxHash, SendTransactionError>;
-
-export type SwapIntent =
-  | SwapByIntent
-  | SwapByTransaction
-  | SwapByIntentWithApprovalRequired
-  | SwapTransactionRequest
-  | SwapApprovalRequired;
-
-/**
- * A handler for swap transactions.
- */
-export type SwapHandler = (
-  intent: SwapIntent,
-) => ResultAsync<
-  ERC712Signature | SwapReceipt,
-  SendTransactionError | UnexpectedError
->;
