@@ -934,24 +934,6 @@
             "args": []
           },
           {
-            "name": "bestSupplyReserve",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Reserve",
-              "ofType": null
-            },
-            "args": []
-          },
-          {
-            "name": "bestBorrowReserve",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Reserve",
-              "ofType": null
-            },
-            "args": []
-          },
-          {
             "name": "userState",
             "type": {
               "kind": "OBJECT",
