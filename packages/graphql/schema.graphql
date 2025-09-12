@@ -130,13 +130,15 @@ input CancelSwapRequest @oneOf {
 }
 
 type CancelSwapTypeDefinition {
-  eip712Domain: [TypeField!]!
+  EIP712Domain: [TypeField!]!
+  OrderCancellations: [TypeField!]!
 }
 
 type CancelSwapTypedData {
   types: CancelSwapTypeDefinition!
   primaryType: String!
   domain: DomainData!
+  message: JSON!
 }
 
 type Chain {
@@ -427,6 +429,9 @@ type InsufficientBalanceError {
   available: DecimalValue!
 }
 
+"""A scalar that can represent any JSON value."""
+scalar JSON
+
 input LiquidatePositionDebtAmount @oneOf {
   """Exact amount"""
   exact: BigDecimal
@@ -495,6 +500,8 @@ enum OperationType {
   SPOKE_SET_USER_USING_AS_COLLATERAL
   SPOKE_SET_USER_POSITION_MANAGER
   RENOUNCE_SPOKE_USER_POSITION_MANAGER
+  COW_NATIVE_TOKEN_SWAP
+  COW_SMART_CONTRACT_WALLET_SWAP
 }
 
 enum OrderDirection {
@@ -528,10 +535,6 @@ type PaginatedSpokeUserPositionManagerResult {
 type PaginatedUserHistoryResult {
   items: [UserHistoryItem!]!
   pageInfo: PaginatedResultInfo!
-}
-
-input PendingSwapsRequest {
-  user: EvmAddress!
 }
 
 type PercentValue {
@@ -602,6 +605,10 @@ input PrepareLimitOrderSwapInput {
   sellAmount: BigDecimal!
   buyAmount: BigDecimal!
   user: EvmAddress!
+  receiver: EvmAddress
+  isSuggestedSlippage: Boolean!
+  networkCosts: BigDecimal!
+  partnerFeeAmount: BigDecimal!
   slippage: SlippageInput!
 }
 
@@ -612,6 +619,7 @@ input PrepareMarketOrderSwapInput {
   amount: BigDecimal!
   kind: SwapKind!
   user: EvmAddress!
+  receiver: EvmAddress
 }
 
 input PrepareSwapCancelRequest {
@@ -627,7 +635,7 @@ input PrepareSwapRequest @oneOf {
   limit: PrepareLimitOrderSwapInput
 }
 
-union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
+union PrepareSwapResult = SwapByIntent | SwapByIntentWithQuote | SwapByIntentWithApprovalRequired | SwapByIntentWithQuoteAndApprovalRequired | SwapByTransaction | SwapByTransactionWithQuote | InsufficientBalanceError
 
 input PreviewAction @oneOf {
   supply: SupplyRequest
@@ -707,7 +715,7 @@ type Query {
   prepareSwap(request: PrepareSwapRequest!): PrepareSwapResult!
   swap(request: SwapRequest!): SwapExecutionPlan!
   swapStatus(request: SwapStatusRequest!): SwapStatus!
-  pendingSwaps(request: PendingSwapsRequest!): [SwapReceipt!]!
+  userSwaps(request: UserSwapsRequest!): [SwapReceipt!]!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
   cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
@@ -1060,26 +1068,48 @@ type SwapApprovalRequired {
 
 type SwapByIntent {
   id: SwapRequestId!
-  quote: SwapQuote!
   data: SwapByIntentTypedData!
 }
 
 input SwapByIntentInput {
   id: SwapRequestId!
   signature: ERC712Signature!
+  isSmartContractWallet: Boolean!
 }
 
 type SwapByIntentTypeDefinition {
-  eip712Domain: [TypeField!]!
+  EIP712Domain: [TypeField!]!
+  Order: [TypeField!]!
 }
 
 type SwapByIntentTypedData {
   types: SwapByIntentTypeDefinition!
   primaryType: String!
   domain: DomainData!
+  message: JSON!
 }
 
 type SwapByIntentWithApprovalRequired {
+  id: SwapRequestId!
+  approval: TransactionRequest!
+  data: SwapByIntentTypedData!
+}
+
+type SwapByIntentWithApprovalTransaction {
+  """The transaction requires an approval first"""
+  approval: TransactionRequest!
+
+  """The swap ip"""
+  id: SwapRequestId!
+}
+
+type SwapByIntentWithQuote {
+  id: SwapRequestId!
+  quote: SwapQuote!
+  data: SwapByIntentTypedData!
+}
+
+type SwapByIntentWithQuoteAndApprovalRequired {
   id: SwapRequestId!
   approval: TransactionRequest!
   quote: SwapQuote!
@@ -1088,16 +1118,20 @@ type SwapByIntentWithApprovalRequired {
 
 type SwapByTransaction {
   id: SwapRequestId!
+}
+
+type SwapByTransactionWithQuote {
+  id: SwapRequestId!
   quote: SwapQuote!
 }
 
 type SwapCancelled {
   createdAt: DateTime!
-  cancelledAt: DateTime!
+  cancelledAt: DateTime
   explorerLink: String!
 }
 
-union SwapExecutionPlan = SwapTransactionRequest | SwapApprovalRequired | InsufficientBalanceError | SwapReceipt
+union SwapExecutionPlan = TransactionRequest | SwapTransactionRequest | SwapApprovalRequired | InsufficientBalanceError | SwapByIntentWithApprovalTransaction | SwapReceipt
 
 type SwapExpired {
   createdAt: DateTime!
@@ -1114,6 +1148,7 @@ type SwapFulfilled {
   createdAt: DateTime!
   fulfilledAt: DateTime!
   explorerLink: String!
+  nativeSwapRefundHash: String
 }
 
 scalar SwapId
@@ -1136,7 +1171,6 @@ type SwapPendingSignature {
   createdAt: DateTime!
   deadline: DateTime!
   explorerLink: String!
-  signer: EvmAddress!
 }
 
 type SwapQuote {
@@ -1157,11 +1191,14 @@ input SwapQuoteRequest {
   buy: TokenInput!
   sell: TokenInput!
   amount: BigDecimal!
-  kind: SwapKind!
+  kind: SwapKind
+  from: EvmAddress!
+  receiver: EvmAddress
 }
 
 type SwapReceipt {
   id: SwapId!
+  createdAt: DateTime!
   explorerLink: String!
 }
 
@@ -1173,6 +1210,14 @@ input SwapRequest @oneOf {
 scalar SwapRequestId
 
 union SwapStatus = SwapOpen | SwapPendingSignature | SwapCancelled | SwapExpired | SwapFulfilled
+
+enum SwapStatusFilter {
+  CANCELLED
+  EXPIRED
+  FULFILLED
+  OPEN
+  PENDING_SIGNATURE
+}
 
 input SwapStatusRequest {
   id: SwapId!
@@ -1489,6 +1534,12 @@ type UserSupplyItem {
 
   """If this supply is used as collateral"""
   isCollateral: Boolean!
+}
+
+input UserSwapsRequest {
+  chainId: ChainId!
+  user: EvmAddress!
+  filterBy: [SwapStatusFilter!]
 }
 
 type WithdrawActivity {
