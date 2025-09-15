@@ -1,8 +1,11 @@
-import type { UnexpectedError } from '@aave/core-next';
+import { delay, TimeoutError, UnexpectedError } from '@aave/core-next';
 import type {
   PrepareSwapRequest,
   PrepareSwapResult,
+  SwapCancelled,
   SwapExecutionPlan,
+  SwapExpired,
+  SwapFulfilled,
   SwappableTokensRequest,
   SwapQuote,
   SwapQuoteRequest,
@@ -21,7 +24,7 @@ import {
   type SwapReceipt,
   SwapStatusQuery,
 } from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+import { ResultAsync } from '@aave/types-next';
 
 import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
@@ -142,6 +145,81 @@ export function swapStatus(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<SwapStatus, UnexpectedError> {
   return client.query(SwapStatusQuery, { request, ...options });
+}
+
+export type SwapOutcome = SwapCancelled | SwapExpired | SwapFulfilled;
+
+/**
+ * Waits for a swap to reach a final outcome (cancelled, expired, or fulfilled).
+ *
+ * ```ts
+ * const result = waitForSwapOutcome(client)(swapReceipt);
+ *
+ * if (result.isOk()) {
+ *   const outcome = result.value;
+ *   switch (outcome.__typename) {
+ *     case 'SwapFulfilled':
+ *       console.log('Swap completed successfully:', outcome.txHash);
+ *       break;
+ *     case 'SwapCancelled':
+ *       console.log('Swap was cancelled:', outcome.cancelledAt);
+ *       break;
+ *     case 'SwapExpired':
+ *       console.log('Swap expired:', outcome.expiredAt);
+ *       break;
+ *   }
+ * }
+ * ```
+ *
+ * @param client - Aave client configured with polling settings.
+ * @returns A function that takes a SwapReceipt and returns a ResultAsync with the final outcome.
+ */
+export function waitForSwapOutcome(
+  client: AaveClient,
+): (
+  receipt: SwapReceipt,
+) => ResultAsync<SwapOutcome, TimeoutError | UnexpectedError> {
+  return (receipt: SwapReceipt) => {
+    const pollForSwapOutcome = async (
+      request: SwapStatusRequest,
+    ): Promise<SwapOutcome> => {
+      const startedAt = Date.now();
+
+      while (Date.now() - startedAt < 60_000) {
+        const status = await swapStatus(client, request).match(
+          (ok) => ok,
+          (err) => {
+            throw err;
+          },
+        );
+
+        switch (status.__typename) {
+          case 'SwapCancelled':
+          case 'SwapExpired':
+          case 'SwapFulfilled':
+            return status;
+
+          default:
+            await delay(500);
+            continue;
+        }
+      }
+
+      throw TimeoutError.from(
+        `Timeout waiting for swap ${request.id} to reach final outcome.`,
+      );
+    };
+
+    return ResultAsync.fromPromise(
+      pollForSwapOutcome({ id: receipt.id }),
+      (error) => {
+        if (error instanceof TimeoutError || error instanceof UnexpectedError) {
+          return error;
+        }
+        return UnexpectedError.from(error);
+      },
+    );
+  };
 }
 
 /**
