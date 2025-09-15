@@ -69,16 +69,21 @@ export function borrow(
  *
  * ```ts
  * const result = await supply(client, {
- *   market: market.address,
+ *   reserve: {
+ *     reserveId: "1234567890",
+ *     spoke: evmAddress('0x8787…'),
+ *     chainId: chainId(1),
+ *   },
  *   amount: {
  *     erc20: {
  *       currency: evmAddress('0x5678…'),
  *       value: bigDecimal('1000'),
  *     },
  *   },
- *   supplier: evmAddress('0x9abc…'),
- *   chainId: market.chain.chainId,
- * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *   enableCollateral: true, // Optional, defaults to true
+ *   sender: evmAddress('0x9abc…'),
+ *   // onBehalfOf: evmAddress('0xdef0…'), // Optional, if supplying on behalf of another user
+ * });
  *
  * if (result.isErr()) {
  *   // Handle error, e.g. insufficient balance, signing error, etc.
