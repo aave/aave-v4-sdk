@@ -5,6 +5,7 @@ export default defineConfig(() => ({
   entry: [
     'src/index.ts',
     'src/actions/index.ts',
+    'src/utils/index.ts',
     'src/ethers.ts',
     'src/privy.ts',
     'src/thirdweb.ts',
