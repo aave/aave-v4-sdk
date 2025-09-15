@@ -10,7 +10,7 @@ const thirdwebClient = createThirdwebClient({
 });
 
 describe('Given a ThirdwebClient instance', () => {
-  describe('When using it to send Aave v3 transactions', () => {
+  describe('When using it to send Aave v4 transactions', () => {
     it.todo('Then it should work as expected', async () => {
       // const result = await action(...).andThen(sendWith(thirdwebClient));
       // assertOk(result);

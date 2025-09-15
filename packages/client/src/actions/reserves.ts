@@ -1,9 +1,5 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
-  BestBorrowReserveQuery,
-  type BestBorrowReserveRequest,
-  BestSupplyReserveQuery,
-  type BestSupplyReserveRequest,
   type Reserve,
   ReservesQuery,
   type ReservesRequest,
@@ -11,56 +7,6 @@ import {
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
-
-/**
- * Fetches the best borrow reserve based on specified criteria.
- *
- * ```ts
- * const result = await bestBorrowReserve(client, {
- *   query: {
- *     chainIds: [chainId(1), chainId(137)]
- *   },
- *   filter: BestBorrowReserveFilter.LowestRate
- * });
- * ```
- *
- * @param client - Aave client.
- * @param request - The best borrow reserve request parameters.
- * @param options - The query options.
- * @returns The best reserve for borrowing, or null if none found.
- */
-export function bestBorrowReserve(
-  client: AaveClient,
-  request: BestBorrowReserveRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<Reserve | null, UnexpectedError> {
-  return client.query(BestBorrowReserveQuery, { request, ...options });
-}
-
-/**
- * Fetches the best supply reserve based on specified criteria.
- *
- * ```ts
- * const result = await bestSupplyReserve(client, {
- *   query: {
- *     chainIds: [chainId(1), chainId(137)]
- *   },
- *   filter: BestSupplyReserveFilter.HighestYield
- * });
- * ```
- *
- * @param client - Aave client.
- * @param request - The best supply reserve request parameters.
- * @param options - The query options.
- * @returns The best reserve for supplying, or null if none found.
- */
-export function bestSupplyReserve(
-  client: AaveClient,
-  request: BestSupplyReserveRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<Reserve | null, UnexpectedError> {
-  return client.query(BestSupplyReserveQuery, { request, ...options });
-}
 
 /**
  * Fetches reserves based on specified criteria.

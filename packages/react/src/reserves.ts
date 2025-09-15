@@ -3,12 +3,12 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type UnexpectedError,
 } from '@aave/client-next';
-import { bestSupplyReserve, reserves } from '@aave/client-next/actions';
+import { reserves } from '@aave/client-next/actions';
 import {
-  BestBorrowReserveQuery,
-  type BestBorrowReserveRequest,
-  BestSupplyReserveQuery,
-  type BestSupplyReserveRequest,
+  pickHighestSupplyApyReserve,
+  pickLowestBorrowApyReserve,
+} from '@aave/client-next/utils';
+import {
   type Reserve,
   ReservesQuery,
   type ReservesRequest,
@@ -17,6 +17,7 @@ import type { Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type ReadResult,
+  type Selector,
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
@@ -26,11 +27,13 @@ import {
 } from './helpers';
 
 export type UseBestBorrowReserveArgs = Prettify<
-  BestBorrowReserveRequest & CurrencyQueryOptions
+  Pick<ReservesRequest, 'query'> & CurrencyQueryOptions
 >;
 
 /**
  * Find the best borrow reserve based on specified criteria.
+ *
+ * * @deprecated Use {@link useReserves} with {@link pickHighestSupplyApyReserve} instead.
  *
  * This signature supports React Suspense:
  *
@@ -50,6 +53,8 @@ export function useBestBorrowReserve(
 
 /**
  * Find the best borrow reserve based on specified criteria.
+ *
+ * @deprecated Use {@link useReserves} with {@link pickLowestBorrowApyReserve} instead.
  *
  * ```tsx
  * const { data, error, loading } = useBestBorrowReserve({
@@ -72,21 +77,24 @@ export function useBestBorrowReserve({
   suspense?: boolean;
 }): SuspendableResult<Reserve | null> {
   return useSuspendableQuery({
-    document: BestBorrowReserveQuery,
+    document: ReservesQuery,
     variables: {
       request,
       currency,
     },
     suspense,
+    selector: pickLowestBorrowApyReserve,
   });
 }
 
 export type UseBestSupplyReserveArgs = Prettify<
-  BestSupplyReserveRequest & CurrencyQueryOptions
+  Pick<ReservesRequest, 'query'> & CurrencyQueryOptions
 >;
 
 /**
  * Find the best supply reserve based on specified criteria.
+ *
+ * @deprecated Use {@link useReserves} with {@link pickHighestSupplyApyReserve} instead.
  *
  * This signature supports React Suspense:
  *
@@ -106,6 +114,8 @@ export function useBestSupplyReserve(
 
 /**
  * Find the best supply reserve based on specified criteria.
+ *
+ * @deprecated Use {@link useReserves} with {@link pickHighestSupplyApyReserve} instead.
  *
  * ```tsx
  * const { data, error, loading } = useBestSupplyReserve({
@@ -128,16 +138,30 @@ export function useBestSupplyReserve({
   suspense?: boolean;
 }): SuspendableResult<Reserve | null> {
   return useSuspendableQuery({
-    document: BestSupplyReserveQuery,
+    document: ReservesQuery,
     variables: {
       request,
       currency,
     },
     suspense,
+    selector: pickHighestSupplyApyReserve,
   });
 }
 
-export type UseReservesArgs = Prettify<ReservesRequest & CurrencyQueryOptions>;
+export type UseReservesArgs<T = Reserve[]> = Prettify<
+  ReservesRequest &
+    CurrencyQueryOptions & {
+      /**
+       * A function that maps the full list of reserves
+       * into a derived or narrowed value.
+       *
+       * Example: pick a single reserve based on a criteria.
+       *
+       * @experimental This is experimental and may be subject to breaking changes.
+       */
+      selector?: Selector<Reserve[], T>;
+    }
+>;
 
 /**
  * Fetch reserves based on specified criteria.
@@ -157,10 +181,38 @@ export type UseReservesArgs = Prettify<ReservesRequest & CurrencyQueryOptions>;
  *   suspense: true,
  * });
  * ```
+ *
+ * **Reserves with Highest Supply APY**
+ * ```tsx
+ * const { data } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   suspense: true,
+ *   selector: pickHighestSupplyApyReserve,
+ * });
+ * ```
+ *
+ * **Reserves with Lowest Borrow APY**
+ * ```tsx
+ * const { data } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   suspense: true,
+ *   selector: pickLowestBorrowApyReserve,
+ * });
+ * ```
  */
-export function useReserves(
-  args: UseReservesArgs & Suspendable,
-): SuspenseResult<Reserve[]>;
+export function useReserves<T = Reserve[]>(
+  args: UseReservesArgs<T> & Suspendable,
+): SuspenseResult<T>;
 
 /**
  * Fetch reserves based on specified criteria.
@@ -177,16 +229,45 @@ export function useReserves(
  *   orderBy: { name: 'ASC' },
  * });
  * ```
+ *
+ * **Reserves with Highest Supply APY**
+ * ```tsx
+ * const { data } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   selector: pickHighestSupplyApyReserve,
+ * });
+ * ```
+ *
+ * **Reserves with Lowest Borrow APY**
+ * ```tsx
+ * const { data } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   selector: pickLowestBorrowApyReserve,
+ * });
+ * ```
  */
-export function useReserves(args: UseReservesArgs): ReadResult<Reserve[]>;
+export function useReserves<T = Reserve[]>(
+  args: UseReservesArgs<T>,
+): ReadResult<T>;
 
-export function useReserves({
+export function useReserves<T = Reserve[]>({
   suspense = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  selector,
   ...request
-}: UseReservesArgs & {
+}: UseReservesArgs<T> & {
   suspense?: boolean;
-}): SuspendableResult<Reserve[]> {
+}): SuspendableResult<T> {
   return useSuspendableQuery({
     document: ReservesQuery,
     variables: {
@@ -194,6 +275,7 @@ export function useReserves({
       currency,
     },
     suspense,
+    selector,
   });
 }
 
@@ -226,19 +308,53 @@ export function useReserves({
  *   console.error(result.error);
  * }
  * ```
+ *
+ * **Reserves with Highest Supply APY**
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useReservesAction();
+ *
+ * // …
+ *
+ * const result = await execute(…).map(pickHighestSupplyApyReserve);
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // Reserve | null
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ *
+ * **Reserves with Highest Supply APY**
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useReservesAction();
+ *
+ * // …
+ *
+ * const result = await execute(…).map(pickHighestSupplyApyReserve);
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // Reserve | null
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
  */
-export function useReservesAction(): UseAsyncTask<
-  ReservesRequest,
-  Reserve[],
-  UnexpectedError
-> {
+export function useReservesAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<ReservesRequest, Reserve[], UnexpectedError> {
   const client = useAaveClient();
 
-  return useAsyncTask((request: ReservesRequest) => reserves(client, request));
+  return useAsyncTask((request: ReservesRequest) =>
+    reserves(client, request, options),
+  );
 }
+
+export type BestSupplyReserveRequest = Pick<ReservesRequest, 'query'>;
 
 /**
  * Low-level hook to execute a {@link bestSupplyReserve} action directly.
+ *
+ * @deprecated Use {@link useReservesAction} with {@link pickHighestSupplyApyReserve} instead.
  *
  * @experimental This hook is experimental and may be subject to breaking changes.
  * @remarks
@@ -268,14 +384,12 @@ export function useReservesAction(): UseAsyncTask<
  * }
  * ```
  */
-export function useBestSupplyReserveAction(): UseAsyncTask<
-  BestSupplyReserveRequest,
-  Reserve | null,
-  UnexpectedError
-> {
+export function useBestSupplyReserveAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<BestSupplyReserveRequest, Reserve | null, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask((request: BestSupplyReserveRequest) =>
-    bestSupplyReserve(client, request),
+    reserves(client, request, options).map(pickHighestSupplyApyReserve),
   );
 }
