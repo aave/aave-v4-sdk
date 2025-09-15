@@ -276,6 +276,9 @@ importers:
       '@aave/client-next':
         specifier: workspace:*
         version: link:../client
+      '@aave/types-next':
+        specifier: workspace:*
+        version: link:../types
     devDependencies:
       typescript:
         specifier: ^5.9.2
