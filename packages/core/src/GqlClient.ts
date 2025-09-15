@@ -13,6 +13,7 @@ import {
   type Operation,
   type OperationResult,
   type OperationResultSource,
+  type RequestPolicy,
   type TypedDocumentNode,
   type Client as UrqlClient,
 } from '@urql/core';
@@ -70,9 +71,25 @@ export class GqlClient {
   public query<TValue, TVariables extends AnyVariables>(
     document: TypedDocumentNode<StandardData<TValue>, TVariables>,
     variables: TVariables,
+  ): ResultAsync<TValue, UnexpectedError>;
+  /**
+   * @internal
+   */
+  public query<TValue, TVariables extends AnyVariables>(
+    document: TypedDocumentNode<StandardData<TValue>, TVariables>,
+    variables: TVariables,
+    requestPolicy: RequestPolicy,
+  ): ResultAsync<TValue, UnexpectedError>;
+
+  public query<TValue, TVariables extends AnyVariables>(
+    document: TypedDocumentNode<StandardData<TValue>, TVariables>,
+    variables: TVariables,
+    requestPolicy?: RequestPolicy,
   ): ResultAsync<TValue, UnexpectedError> {
     const query = this.resolver.replaceFrom(document);
-    return this.resultFrom(this.urql.query(query, variables)).map(takeValue);
+    return this.resultFrom(
+      this.urql.query(query, variables, { requestPolicy }),
+    ).map(takeValue);
   }
 
   /**
@@ -340,25 +357,20 @@ export class GqlClient {
       .andThen(() => combined);
   }
 
-  protected refreshAll(): void {
-    const ops = Array.from(this.activeQueries.values());
-    this.logger.debug(`Refreshing ${ops.length} active queries`);
-    for (const op of ops) {
-      this.urql.reexecuteOperation(
-        makeOperation(op.kind, op, {
-          ...op.context,
-          requestPolicy: 'network-only',
-        }),
-      );
-    }
-  }
+  protected async refreshWhere(
+    predicate: (op: Operation) => boolean | Promise<boolean>,
+  ): Promise<void> {
+    const allOps = Array.from(this.activeQueries.values());
+    const predicateResults = await Promise.all(
+      allOps.map(async (op) => ({
+        op,
+        matches: await predicate(op),
+      })),
+    );
 
-  protected refreshByDocument(document: TypedDocumentNode): void {
-    this.refreshWhere((op) => op.query === document);
-  }
-
-  protected refreshWhere(predicate: (op: Operation) => boolean): void {
-    const ops = Array.from(this.activeQueries.values()).filter(predicate);
+    const ops = predicateResults
+      .filter(({ matches }) => matches)
+      .map(({ op }) => op);
     this.logger.debug(`Refreshing ${ops.length} matching queries`);
     for (const op of ops) {
       this.urql.reexecuteOperation(

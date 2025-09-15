@@ -1,11 +1,6 @@
 import type { Err, Ok, Result } from 'neverthrow';
-import type { UnknownRecord } from 'type-fest';
 import { InvariantError } from './invariant';
-
-function isObject(value: unknown): value is UnknownRecord {
-  const type = typeof value;
-  return value != null && (type === 'object' || type === 'function');
-}
+import { isObject } from './typeguards';
 
 export function assertError(error: unknown): asserts error is Error {
   // why not `error instanceof Error`? see https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/1099
