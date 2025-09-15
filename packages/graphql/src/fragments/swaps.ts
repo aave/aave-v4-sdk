@@ -1,7 +1,11 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import { DomainDataFragment } from '../permits';
-import { PercentValueFragment, TokenAmountFragment } from './common';
+import { DomainDataFragment, TypeFieldFragment } from '../permits';
+import {
+  PaginatedResultInfoFragment,
+  PercentValueFragment,
+  TokenAmountFragment,
+} from './common';
 import {
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
@@ -26,6 +30,7 @@ export type SwapQuoteCosts = FragmentOf<typeof SwapQuoteCostsFragment>;
 export const SwapQuoteFragment = graphql(
   `fragment SwapQuote on SwapQuote {
     __typename
+    quoteId
     suggestedSlippage {
       ...PercentValue
     }
@@ -49,11 +54,14 @@ export type SwapQuote = FragmentOf<typeof SwapQuoteFragment>;
 export const SwapByIntentTypeDefinitionFragment = graphql(
   `fragment SwapByIntentTypeDefinition on SwapByIntentTypeDefinition {
     __typename
-    eip712Domain {
-      name
-      type
+    EIP712Domain {
+      ...TypeField
+    }
+    Order {
+      ...TypeField
     }
   }`,
+  [TypeFieldFragment],
 );
 export type SwapByIntentTypeDefinition = FragmentOf<
   typeof SwapByIntentTypeDefinitionFragment
@@ -61,7 +69,6 @@ export type SwapByIntentTypeDefinition = FragmentOf<
 
 export const SwapByIntentTypedDataFragment = graphql(
   `fragment SwapByIntentTypedData on SwapByIntentTypedData {
-    __typename
     types {
       ...SwapByIntentTypeDefinition
     }
@@ -69,6 +76,7 @@ export const SwapByIntentTypedDataFragment = graphql(
     domain {
       ...DomainData
     }
+    message
   }`,
   [SwapByIntentTypeDefinitionFragment, DomainDataFragment],
 );
@@ -79,7 +87,6 @@ export type SwapByIntentTypedData = FragmentOf<
 export const SwapByIntentFragment = graphql(
   `fragment SwapByIntent on SwapByIntent {
     __typename
-    id
     quote {
       ...SwapQuote
     }
@@ -94,7 +101,6 @@ export type SwapByIntent = FragmentOf<typeof SwapByIntentFragment>;
 export const SwapByIntentWithApprovalRequiredFragment = graphql(
   `fragment SwapByIntentWithApprovalRequired on SwapByIntentWithApprovalRequired {
     __typename
-    id
     approval {
       ...TransactionRequest
     }
@@ -118,7 +124,6 @@ export type SwapByIntentWithApprovalRequired = FragmentOf<
 export const SwapByTransactionFragment = graphql(
   `fragment SwapByTransaction on SwapByTransaction {
     __typename
-    id
     quote {
       ...SwapQuote
     }
@@ -132,6 +137,7 @@ export const SwapReceiptFragment = graphql(
     __typename
     id
     explorerLink
+    createdAt
   }`,
 );
 export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
@@ -139,7 +145,8 @@ export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
 export type PrepareSwapResult =
   | SwapByIntent
   | SwapByIntentWithApprovalRequired
-  | SwapByTransaction;
+  | SwapByTransaction
+  | InsufficientBalanceError;
 
 export const PrepareSwapResultFragment: FragmentDocumentFor<
   PrepareSwapResult,
@@ -156,11 +163,15 @@ export const PrepareSwapResultFragment: FragmentDocumentFor<
     ... on SwapByTransaction {
       ...SwapByTransaction
     }
+    ... on InsufficientBalanceError {
+      ...InsufficientBalanceError
+    }
   }`,
   [
     SwapByIntentFragment,
     SwapByIntentWithApprovalRequiredFragment,
     SwapByTransactionFragment,
+    InsufficientBalanceErrorFragment,
   ],
 );
 
@@ -273,7 +284,6 @@ export const SwapPendingSignatureFragment = graphql(
     createdAt
     deadline
     explorerLink
-    signer
   }`,
 );
 export type SwapPendingSignature = FragmentOf<
@@ -299,6 +309,7 @@ export const SwapFulfilledFragment = graphql(
     createdAt
     fulfilledAt
     explorerLink
+    refundTxHash
   }`,
   [TokenAmountFragment],
 );
@@ -343,11 +354,14 @@ export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
 export const CancelSwapTypeDefinitionFragment = graphql(
   `fragment CancelSwapTypeDefinition on CancelSwapTypeDefinition {
     __typename
-    eip712Domain {
-      name
-      type
+    OrderCancellations {
+      ...TypeField
+    }
+    EIP712Domain {
+      ...TypeField
     }
   }`,
+  [TypeFieldFragment],
 );
 export type CancelSwapTypeDefinition = FragmentOf<
   typeof CancelSwapTypeDefinitionFragment
@@ -363,6 +377,7 @@ export const CancelSwapTypedDataFragment = graphql(
     domain {
       ...DomainData
     }
+    message
   }`,
   [CancelSwapTypeDefinitionFragment, DomainDataFragment],
 );
@@ -400,3 +415,19 @@ export const CancelSwapExecutionPlanFragment: FragmentDocumentFor<
   }`,
   [TransactionRequestFragment, SwapCancelledFragment],
 );
+
+export const PaginatedUserSwapsResultFragment = graphql(
+  `fragment PaginatedUserSwapsResult on PaginatedUserSwapsResult {
+    __typename
+    items {
+      ...SwapStatus
+    }
+    pageInfo {
+      ...PaginatedResultInfo
+    }
+  }`,
+  [SwapStatusFragment, PaginatedResultInfoFragment],
+);
+export type PaginatedUserSwapsResult = FragmentOf<
+  typeof PaginatedUserSwapsResultFragment
+>;

@@ -1,11 +1,11 @@
-import { TokenFragment } from './fragments/common';
+import { FiatAmountFragment, TokenFragment } from './fragments/common';
 import {
   CancelSwapExecutionPlanFragment,
+  PaginatedUserSwapsResultFragment,
   PrepareSwapCancelResultFragment,
   PrepareSwapResultFragment,
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
-  SwapReceiptFragment,
 } from './fragments/swaps';
 import { graphql, type RequestOf } from './graphql';
 
@@ -51,19 +51,6 @@ export type PrepareSwapRequest = RequestOf<typeof PrepareSwapQuery>;
 /**
  * @internal
  */
-export const PendingSwapsQuery = graphql(
-  `query PendingSwaps($request: PendingSwapsRequest!) {
-    value: pendingSwaps(request: $request) {
-      ...SwapReceipt
-    }
-  }`,
-  [SwapReceiptFragment],
-);
-export type PendingSwapsRequest = RequestOf<typeof PendingSwapsQuery>;
-
-/**
- * @internal
- */
 export const SwapQuery = graphql(
   `query Swap($request: SwapRequest!) {
     value: swap(request: $request) {
@@ -99,3 +86,29 @@ export const CancelSwapQuery = graphql(
   [CancelSwapExecutionPlanFragment],
 );
 export type CancelSwapRequest = RequestOf<typeof CancelSwapQuery>;
+
+/**
+ * @internal
+ */
+export const UserSwapsQuery = graphql(
+  `query UserSwaps($request: UserSwapsRequest!, $currency: Currency!) {
+    value: userSwaps(request: $request) {
+      ...PaginatedUserSwapsResult
+    }
+  }`,
+  [PaginatedUserSwapsResultFragment],
+);
+export type UserSwapsRequest = RequestOf<typeof UserSwapsQuery>;
+
+/**
+ * @internal
+ */
+export const ExchangeRateQuery = graphql(
+  `query ExchangeRate($request: ExchangeRateRequest!) {
+    value: exchangeRate(request: $request) {
+      ...FiatAmount
+    }
+  }`,
+  [FiatAmountFragment],
+);
+export type ExchangeRateRequest = RequestOf<typeof ExchangeRateQuery>;

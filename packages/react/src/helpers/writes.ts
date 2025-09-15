@@ -5,17 +5,7 @@ import {
   type TransactionError,
   type UnexpectedError,
 } from '@aave/core-next';
-import type {
-  ApprovalRequired,
-  ERC712Signature,
-  SwapApprovalRequired,
-  SwapByIntent,
-  SwapByIntentWithApprovalRequired,
-  SwapByTransaction,
-  SwapReceipt,
-  SwapTransactionRequest,
-  TransactionRequest,
-} from '@aave/graphql-next';
+import type { ApprovalRequired, TransactionRequest } from '@aave/graphql-next';
 import type { ResultAsync, TxHash } from '@aave/types-next';
 import type { UseAsyncTask } from './tasks';
 

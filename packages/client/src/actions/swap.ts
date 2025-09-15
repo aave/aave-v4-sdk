@@ -2,7 +2,9 @@ import type { UnexpectedError } from '@aave/core-next';
 import type {
   CancelSwapExecutionPlan,
   CancelSwapRequest,
-  PendingSwapsRequest,
+  ExchangeRateRequest,
+  FiatAmount,
+  PaginatedUserSwapsResult,
   PrepareSwapCancelRequest,
   PrepareSwapCancelResult,
   PrepareSwapRequest,
@@ -11,18 +13,19 @@ import type {
   SwappableTokensRequest,
   SwapQuote,
   SwapQuoteRequest,
-  SwapReceipt,
   SwapRequest,
   Token,
+  UserSwapsRequest,
 } from '@aave/graphql-next';
 import {
   CancelSwapQuery,
-  PendingSwapsQuery,
+  ExchangeRateQuery,
   PrepareSwapCancelQuery,
   PrepareSwapQuery,
   SwappableTokensQuery,
   SwapQuery,
   SwapQuoteQuery,
+  UserSwapsQuery,
 } from '@aave/graphql-next';
 
 import type { ResultAsync } from '@aave/types-next';
@@ -92,25 +95,30 @@ export function swappableTokens(
  *   switch (plan.__typename) {
  *     case 'SwapByIntent':
  *       return signSwapByIntentWith(plan.data)
- *         .andThen((signature) => swap({ intent: { id: plan.id, signature } }))
+ *         .andThen((signature) => swap({ intent: { quoteId: quote.quoteId, signature } }))
  *         .andThen((plan) => {
  *           // …
  *         });
  *       );
+ *
  *     case 'SwapByIntentWithApprovalRequired':
  *       return sendTransaction(plan.approval)
  *         .andThen(signSwapByIntentWith(plan.data))
- *         .andThen((signature) => swap({ intent: { id: plan.id, signature } }))
+ *         .andThen((signature) => swap({ intent: { quoteId: quote.quoteId, signature } }))
  *         .andThen((plan) => {
  *         // …
  *         });
  *       );
+ *
  *     case 'SwapByTransaction':
- *       return swap({ transaction: { id: plan.id } })
+ *       return swap({ transaction: { quoteId: quote.quoteId } })
  *         .andThen((plan) => {
  *           // …
  *         });
  *       );
+ *
+ *     case 'InsufficientBalanceError':
+ *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
  *   }
  * });
  * ```
@@ -128,32 +136,12 @@ export function prepareSwap(
 }
 
 /**
- * Fetches pending swaps for a specific user.
- *
- * ```ts
- * const result = await pendingSwaps(client, {
- *   user: evmAddress('0x742d35cc...'),
- * });
- * ```
- *
- * @param client - Aave client.
- * @param request - The pending swaps request parameters.
- * @returns The list of pending swap receipts for the user.
- */
-export function pendingSwaps(
-  client: AaveClient,
-  request: PendingSwapsRequest,
-): ResultAsync<SwapReceipt[], UnexpectedError> {
-  return client.query(PendingSwapsQuery, { request });
-}
-
-/**
  * Executes a swap for the specified request parameters.
  *
  * ```ts
  * const result = await swap(client, {
  *   intent: {
- *     id: swapRequestId('123...'),
+ *     id: swapQuoteId('123...'),
  *     signature: {
  *       value: signature('0x456...'),
  *       deadline: 1234567890,
@@ -250,4 +238,48 @@ export function cancelSwap(
   request: CancelSwapRequest,
 ): ResultAsync<CancelSwapExecutionPlan, UnexpectedError> {
   return client.query(CancelSwapQuery, { request });
+}
+
+/**
+ * Fetches the user's swap history for a specific chain.
+ *
+ * ```ts
+ * const result = await userSwaps(client, {
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x742d35cc...'),
+ *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user swaps request parameters.
+ * @returns The paginated list of user swaps with their status information.
+ */
+export function userSwaps(
+  client: AaveClient,
+  request: UserSwapsRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PaginatedUserSwapsResult, UnexpectedError> {
+  return client.query(UserSwapsQuery, { request, ...options });
+}
+
+/**
+ * Fetches the exchange rate between tokens and fiat currencies.
+ *
+ * ```ts
+ * const result = await exchangeRate(client, {
+ *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
+ *   to: Currency.USD,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The exchange rate request parameters.
+ * @returns The exchange rate information as a fiat amount.
+ */
+export function exchangeRate(
+  client: AaveClient,
+  request: ExchangeRateRequest,
+): ResultAsync<FiatAmount, UnexpectedError> {
+  return client.query(ExchangeRateQuery, { request });
 }

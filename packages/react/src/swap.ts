@@ -6,16 +6,18 @@ import {
 } from '@aave/client-next';
 import {
   cancelSwap,
+  exchangeRate,
   prepareSwap,
   prepareSwapCancel,
   swap,
   swapQuote,
-  swapStatus,
 } from '@aave/client-next/actions';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
+  ExchangeRateRequest,
+  FiatAmount,
   InsufficientBalanceError,
-  PendingSwapsRequest,
+  PaginatedUserSwapsResult,
   PrepareSwapCancelRequest,
   PrepareSwapCancelResult,
   PrepareSwapRequest,
@@ -28,14 +30,15 @@ import type {
   SwapQuoteRequest,
   SwapReceipt,
   SwapTransactionRequest,
+  UserSwapsRequest,
 } from '@aave/graphql-next';
 import {
   type ERC712Signature,
-  PendingSwapsQuery,
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type Token,
   type TransactionRequest,
+  UserSwapsQuery,
 } from '@aave/graphql-next';
 import {
   invariant,
@@ -92,50 +95,40 @@ export function useSwapQuote(
   );
 }
 
-export type UsePendingSwapsArgs = PendingSwapsRequest;
-
 /**
- * Fetch pending swaps for a specific user.
- *
- * This signature supports React Suspense:
+ * Fetches the exchange rate between tokens and fiat currencies.
  *
  * ```tsx
- * const { data } = usePendingSwaps({
- *   user: evmAddress('0x742d35cc...'),
- *   suspense: true,
- * });
- * ```
- */
-export function usePendingSwaps(
-  args: UsePendingSwapsArgs & Suspendable,
-): SuspenseResult<SwapReceipt[]>;
-
-/**
- * Fetch pending swaps for a specific user.
+ * const [getExchangeRate, gettingRate] = useExchangeRate();
  *
- * ```tsx
- * const { data, error, loading } = usePendingSwaps({
- *   user: evmAddress('0x742d35cc...'),
+ * const loading = gettingRate.loading;
+ * const error = gettingRate.error;
+ *
+ * // …
+ *
+ * const result = await getExchangeRate({
+ *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
+ *   to: Currency.USD,
  * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Exchange rate:', result.value);
  * ```
  */
-export function usePendingSwaps(
-  args: UsePendingSwapsArgs,
-): ReadResult<SwapReceipt[]>;
+export function useExchangeRate(): UseAsyncTask<
+  ExchangeRateRequest,
+  FiatAmount,
+  UnexpectedError
+> {
+  const client = useAaveClient();
 
-export function usePendingSwaps({
-  suspense = false,
-  ...request
-}: UsePendingSwapsArgs & {
-  suspense?: boolean;
-}): SuspendableResult<SwapReceipt[]> {
-  return useSuspendableQuery({
-    document: PendingSwapsQuery,
-    variables: {
-      request,
-    },
-    suspense,
-  });
+  return useAsyncTask((request: ExchangeRateRequest) =>
+    exchangeRate(client, request),
+  );
 }
 
 export type UseSwappableTokensArgs = SwappableTokensRequest;
@@ -179,6 +172,60 @@ export function useSwappableTokens({
     document: SwappableTokensQuery,
     variables: {
       request,
+    },
+    suspense,
+  });
+}
+
+export type UseUserSwapsArgs = Prettify<
+  UserSwapsRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch the user's swap history for a specific chain.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserSwaps({
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x742d35cc...'),
+ *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserSwaps(
+  args: UseUserSwapsArgs & Suspendable,
+): SuspenseResult<PaginatedUserSwapsResult>;
+
+/**
+ * Fetch the user's swap history for a specific chain.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserSwaps({
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x742d35cc...'),
+ *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ * });
+ * ```
+ */
+export function useUserSwaps(
+  args: UseUserSwapsArgs,
+): ReadResult<PaginatedUserSwapsResult>;
+
+export function useUserSwaps({
+  suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: UseUserSwapsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<PaginatedUserSwapsResult> {
+  return useSuspendableQuery({
+    document: UserSwapsQuery,
+    variables: {
+      request,
+      currency,
     },
     suspense,
   });
@@ -294,7 +341,7 @@ export function useSwapTokens(
         switch (preparePlan.__typename) {
           case 'SwapByTransaction':
             return swap(client, {
-              transaction: { id: preparePlan.id },
+              transaction: { quoteId: preparePlan.quote.quoteId },
             }).andThen(executeSwap);
 
           case 'SwapByIntent':
@@ -303,11 +350,13 @@ export function useSwapTokens(
               invariant(isERC712Signature(signature), 'Invalid signature');
               return swap(client, {
                 intent: {
-                  id: preparePlan.id,
+                  quoteId: preparePlan.quote.quoteId,
                   signature,
                 },
               }).andThen(executeSwap);
             });
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(preparePlan));
         }
       }),
   );
