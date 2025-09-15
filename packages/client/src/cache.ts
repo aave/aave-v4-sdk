@@ -5,6 +5,7 @@ import type {
   Hub,
   HubAsset,
   LiquidatedActivity,
+  NativeToken,
   RepayActivity,
   Reserve,
   ReserveInfo,
@@ -47,11 +48,19 @@ export const exchange = cacheExchange({
     // },
   },
   keys: {
+    // Entitied with composite key
+    Hub: (data: Hub) => `Hub:${data.address}/chain:${data.chain.chainId}`,
+    HubAsset: (data: HubAsset) =>
+      `HubAsset:${data.assetId}/hub:${data.hub.address}/chain:${data.hub.chain.chainId}`,
+    Reserve: (data: Reserve) =>
+      `Reserve:${data.id}/spoke:${data.spoke.address}/chain:${data.chain.chainId}`,
+    ReserveInfo: (data: ReserveInfo) =>
+      `ReserveInfo:${data.id}/spoke:${data.spoke.address}/chain:${data.chain.chainId}`,
+    Spoke: (data: Spoke) => `Spoke:${data.address}/chain:${data.chain.chainId}`,
+
     // Entities with id field as key
-    Reserve: (data: Reserve) => data.id.toString(),
     BorrowActivity: (data: BorrowActivity) => data.id,
     LiquidatedActivity: (data: LiquidatedActivity) => data.id,
-    ReserveInfo: (data: ReserveInfo) => data.id.toString(),
     SupplyActivity: (data: SupplyActivity) => data.id,
     SwapActivity: (data: SwapActivity) => data.id,
     SwapByIntent: (data: SwapByIntent) => data.id,
@@ -65,12 +74,10 @@ export const exchange = cacheExchange({
 
     // Entities with address field as key
     Erc20Token: (data: Erc20Token) => data.address,
-    Hub: (data: Hub) => data.address,
-    Spoke: (data: Spoke) => data.address,
 
     // Entities with other fields as key
-    HubAsset: (data: HubAsset) => data.assetId,
     Chain: (data: Chain) => data.chainId.toString(),
+    NativeToken: (data: NativeToken) => data.chain.chainId.toString(),
 
     // Entities without keys will be embedded directly on the parent entity
     PaginatedResultInfo: () => null,
@@ -103,7 +110,6 @@ export const exchange = cacheExchange({
     HubSummary: () => null,
     InsufficientBalanceError: () => null,
     NativeAmount: () => null,
-    NativeToken: () => null,
     PercentValue: () => null,
     PercentValueVariation: () => null,
     PercentValueWithChange: () => null,
