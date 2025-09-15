@@ -4,6 +4,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig(() => ({
   entry: [
     'src/index.ts',
+    'src/utils.ts',
     'src/ethers.ts',
     'src/privy.ts',
     'src/thirdweb.ts',
