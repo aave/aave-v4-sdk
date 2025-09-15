@@ -1,16 +1,11 @@
 import { type StandardData, UnexpectedError } from '@aave/client-next';
-import { type AnyVariables, invariant } from '@aave/types-next';
+import { type AnyVariables, identity, invariant } from '@aave/types-next';
 import { useMemo } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
-import {
-  ReadResult,
-  type SuspendableResult,
-  type SuspenseResult,
-} from './results';
+import { ReadResult, type SuspendableResult } from './results';
 
-/**
- * @internal
- */
+export type Selector<T, V> = (data: T) => V;
+
 export type Suspendable = { suspense: true };
 
 /**
@@ -18,43 +13,33 @@ export type Suspendable = { suspense: true };
  */
 export type UseSuspendableQueryArgs<
   Value,
+  Output,
   Variables extends AnyVariables,
   Suspense extends boolean = boolean,
 > = {
   document: TypedDocumentNode<StandardData<Value>, Variables>;
   variables: Variables;
   suspense: Suspense;
+  selector?: Selector<Value, Output>;
 };
 
 /**
  * @internal
  */
-export function useSuspendableQuery<Value, Variables extends AnyVariables>({
+export function useSuspendableQuery<
+  Value,
+  Output,
+  Variables extends AnyVariables,
+>({
   document,
   variables,
   suspense,
-}: UseSuspendableQueryArgs<Value, Variables, false>): ReadResult<Value>;
-/**
- * @internal
- */
-export function useSuspendableQuery<Value, Variables extends AnyVariables>({
-  document,
-  variables,
-  suspense,
-}: UseSuspendableQueryArgs<Value, Variables, true>): SuspenseResult<Value>;
-/**
- * @internal
- */
-export function useSuspendableQuery<Value, Variables extends AnyVariables>({
-  document,
-  variables,
-  suspense,
-}: UseSuspendableQueryArgs<Value, Variables>): SuspendableResult<Value>;
-export function useSuspendableQuery<Value, Variables extends AnyVariables>({
-  document,
-  variables,
-  suspense,
-}: UseSuspendableQueryArgs<Value, Variables>): SuspendableResult<Value> {
+  selector = identity as Selector<Value, Output>,
+}: UseSuspendableQueryArgs<
+  Value,
+  Output,
+  Variables
+>): SuspendableResult<Output> {
   const [{ data, fetching, error }] = useQuery({
     query: document,
     variables,
@@ -76,5 +61,5 @@ export function useSuspendableQuery<Value, Variables extends AnyVariables>({
 
   invariant(data, 'No data returned');
 
-  return ReadResult.Success(data.value);
+  return ReadResult.Success(selector(data.value));
 }
