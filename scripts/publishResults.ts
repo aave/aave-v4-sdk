@@ -67,9 +67,9 @@ const main = async (): Promise<void> => {
   const message = createMessageTestResults(
     testResultsJson.numPassedTests,
     testResultsJson.numFailedTests,
-    'Aave SDK V3 - E2E Tests',
+    'Aave SDK V4 - E2E Tests',
   );
-  await sendMessage(message.message, message.status, 'Aave SDK V3 - E2E Tests');
+  await sendMessage(message.message, message.status, 'Aave SDK V4 - E2E Tests');
 };
 
 main();
