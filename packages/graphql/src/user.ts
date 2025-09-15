@@ -85,6 +85,10 @@ export const UserBalancesQuery = graphql(
   }`,
   [UserBalanceFragment],
 );
+export type UserBalancesRequestFilter = ReturnType<
+  typeof graphql.scalar<'UserBalancesRequestFilter'>
+>;
+
 export type UserBalancesRequest = RequestOf<typeof UserBalancesQuery>;
 
 /**
