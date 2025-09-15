@@ -1589,6 +1589,43 @@
       },
       {
         "kind": "OBJECT",
+        "name": "PaginatedUserSwapsResult",
+        "fields": [
+          {
+            "name": "items",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "UNION",
+                    "name": "SwapStatus",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedResultInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "PercentValue",
         "fields": [
           {
@@ -1856,23 +1893,11 @@
           },
           {
             "kind": "OBJECT",
-            "name": "SwapByIntentWithQuote"
-          },
-          {
-            "kind": "OBJECT",
             "name": "SwapByIntentWithApprovalRequired"
           },
           {
             "kind": "OBJECT",
-            "name": "SwapByIntentWithQuoteAndApprovalRequired"
-          },
-          {
-            "kind": "OBJECT",
             "name": "SwapByTransaction"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "SwapByTransactionWithQuote"
           },
           {
             "kind": "OBJECT",
@@ -2883,15 +2908,9 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "SwapReceipt",
-                    "ofType": null
-                  }
-                }
+                "kind": "OBJECT",
+                "name": "PaginatedUserSwapsResult",
+                "ofType": null
               }
             },
             "args": [
@@ -3874,12 +3893,13 @@
         "name": "SwapByIntent",
         "fields": [
           {
-            "name": "id",
+            "name": "quote",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+                "kind": "OBJECT",
+                "name": "SwapQuote",
+                "ofType": null
               }
             },
             "args": []
@@ -4000,89 +4020,6 @@
         "name": "SwapByIntentWithApprovalRequired",
         "fields": [
           {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "approval",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "data",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapByIntentTypedData",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SwapByIntentWithApprovalTransaction",
-        "fields": [
-          {
-            "name": "approval",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SwapByIntentWithQuote",
-        "fields": [
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
             "name": "quote",
             "type": {
               "kind": "NON_NULL",
@@ -4095,54 +4032,12 @@
             "args": []
           },
           {
-            "name": "data",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapByIntentTypedData",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SwapByIntentWithQuoteAndApprovalRequired",
-        "fields": [
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
             "name": "approval",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "quote",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapQuote",
                 "ofType": null
               }
             },
@@ -4167,35 +4062,6 @@
         "kind": "OBJECT",
         "name": "SwapByTransaction",
         "fields": [
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SwapByTransactionWithQuote",
-        "fields": [
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
           {
             "name": "quote",
             "type": {
@@ -4254,10 +4120,6 @@
         "possibleTypes": [
           {
             "kind": "OBJECT",
-            "name": "TransactionRequest"
-          },
-          {
-            "kind": "OBJECT",
             "name": "SwapTransactionRequest"
           },
           {
@@ -4267,10 +4129,6 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientBalanceError"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "SwapByIntentWithApprovalTransaction"
           },
           {
             "kind": "OBJECT",
@@ -4415,7 +4273,7 @@
             "args": []
           },
           {
-            "name": "nativeSwapRefundHash",
+            "name": "refundTxHash",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -4544,6 +4402,17 @@
         "kind": "OBJECT",
         "name": "SwapQuote",
         "fields": [
+          {
+            "name": "quoteId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "suggestedSlippage",
             "type": {
