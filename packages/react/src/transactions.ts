@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/client-next';
+import type { AaveClient, UnexpectedError } from '@aave/client-next';
 import {
   borrow,
   liquidatePosition,
@@ -46,6 +46,63 @@ import {
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
+
+function refreshQueriesForReserveChange(
+  client: AaveClient,
+  request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
+) {
+  return async () =>
+    Promise.all([
+      // update user positions
+      await client.refreshQueryWhere(
+        UserPositionsQuery,
+        (variables) =>
+          'chainIds' in variables.request &&
+          variables.request.user === request.sender &&
+          variables.request.chainIds.some(
+            (chainId) => chainId === request.reserve.chainId,
+          ),
+      ),
+      await client.refreshQueryWhere(
+        UserPositionQuery,
+        (_, data) =>
+          data?.spoke.chain.chainId === request.reserve.chainId &&
+          data?.spoke.address === request.reserve.spoke &&
+          data.user === request.sender,
+      ),
+
+      // update reserves
+      await client.refreshQueryWhere(ReservesQuery, (_, data) =>
+        data.some((reserve) => reserve.id === request.reserve.reserveId),
+      ),
+
+      // update spokes
+      await client.refreshQueryWhere(SpokesQuery, (_, data) =>
+        data.some(
+          (spoke) =>
+            spoke.chain.chainId === request.reserve.chainId &&
+            spoke.address === request.reserve.spoke,
+        ),
+      ),
+
+      // update user balances
+      await client.refreshQueryWhere(
+        UserBalancesQuery,
+        // update any user balances for the given user
+        (variables) => variables.request.user === request.sender,
+      ),
+
+      // update hubs
+      await client.refreshQueryWhere(
+        HubsQuery,
+        (variables) =>
+          'chainIds' in variables.request &&
+          variables.request.chainIds.some(
+            (chainId) => chainId === request.reserve.chainId,
+          ),
+      ),
+    ]);
+}
 
 /**
  * A hook that provides a way to supply assets to an Aave reserve.
@@ -120,58 +177,7 @@ export function useSupply(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () =>
-        Promise.all([
-          // update user positions
-          await client.refreshQueryWhere(
-            UserPositionsQuery,
-            (variables) =>
-              'chainIds' in variables.request &&
-              variables.request.user === request.sender &&
-              variables.request.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
-              ),
-          ),
-          await client.refreshQueryWhere(
-            UserPositionQuery,
-            (_, data) =>
-              data?.spoke.chain.chainId === request.reserve.chainId &&
-              data?.spoke.address === request.reserve.spoke &&
-              data.user === request.sender,
-          ),
-
-          // update reserves
-          await client.refreshQueryWhere(ReservesQuery, (_, data) =>
-            data.some((reserve) => reserve.id === request.reserve.reserveId),
-          ),
-
-          // update spokes
-          await client.refreshQueryWhere(SpokesQuery, (_, data) =>
-            data.some(
-              (spoke) =>
-                spoke.chain.chainId === request.reserve.chainId &&
-                spoke.address === request.reserve.spoke,
-            ),
-          ),
-
-          // update user balances
-          await client.refreshQueryWhere(
-            UserBalancesQuery,
-            // update any user balances for the given user
-            (variables) => variables.request.user === request.sender,
-          ),
-
-          // update hubs
-          await client.refreshQueryWhere(
-            HubsQuery,
-            (variables) =>
-              'chainIds' in variables.request &&
-              variables.request.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
-              ),
-          ),
-        ]),
-      ),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
@@ -265,16 +271,7 @@ export function useBorrow(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () => {
-        await client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.reserve.chainId,
-            ),
-        );
-      }),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
@@ -368,16 +365,7 @@ export function useRepay(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () => {
-        await client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.reserve.chainId,
-            ),
-        );
-      }),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
@@ -471,16 +459,7 @@ export function useWithdraw(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () => {
-        await client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.reserve.chainId,
-            ),
-        );
-      }),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
