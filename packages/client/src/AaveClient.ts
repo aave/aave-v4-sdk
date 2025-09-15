@@ -1,5 +1,6 @@
 import {
   delay,
+  type EnvironmentConfig,
   GqlClient,
   type StandardData,
   TimeoutError,
@@ -37,6 +38,10 @@ export class AaveClient extends GqlClient {
   static create(options?: ClientConfig): AaveClient {
     return new AaveClient(configureContext(options ?? {}));
   }
+
+  readonly getEnvironment = (): EnvironmentConfig => {
+    return this.context.environment;
+  };
 
   /**
    * @internal

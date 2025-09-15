@@ -199,7 +199,7 @@ export function waitForSwapOutcome(
     ): Promise<SwapOutcome> => {
       const startedAt = Date.now();
 
-      while (Date.now() - startedAt < 60_000) {
+      while (Date.now() - startedAt < client.getEnvironment().indexingTimeout) {
         const status = await swapStatus(client, request).match(
           (ok) => ok,
           (err) => {
@@ -214,7 +214,7 @@ export function waitForSwapOutcome(
             return status;
 
           default:
-            await delay(500);
+            await delay(client.getEnvironment().pollingInterval);
             continue;
         }
       }
