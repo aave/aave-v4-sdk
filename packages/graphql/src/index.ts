@@ -2,6 +2,7 @@ export * from './enums';
 export * from './fragments';
 export * from './graphql';
 export * from './hub';
+export * from './inputs';
 export * from './misc';
 export * from './permits';
 export * from './reserve';

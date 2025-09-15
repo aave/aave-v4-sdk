@@ -57,6 +57,7 @@ input BestBorrowReserveRequest {
 input BestRatesRequestQuery @oneOf {
   spokes: [SpokeInput!]
   chainIds: [ChainId!]
+  tokenInput: ChainTokenInput
 }
 
 enum BestSupplyReserveFilter {
@@ -152,6 +153,11 @@ type Chain {
 """A supported blockchain chain ID"""
 scalar ChainId
 
+input ChainTokenInput @oneOf {
+  native: ChainId
+  erc20: Erc20Input
+}
+
 enum ChainsFilter {
   TESTNET_ONLY
   MAINNET_ONLY
@@ -160,6 +166,8 @@ enum ChainsFilter {
 
 enum Currency {
   USD
+  GBP
+  EUR
 }
 
 scalar Cursor
@@ -313,12 +321,6 @@ type HubAsset {
 
   """The hub asset settings"""
   settings: HubAssetSettings!
-
-  """The best supply reserve for this hub asset"""
-  bestSupplyReserve: Reserve
-
-  """The best borrow reserve for this hub asset"""
-  bestBorrowReserve: Reserve
   userState: HubAssetUserState
 }
 
@@ -684,7 +686,7 @@ type Query {
 
   """
   Get the user balances for the protocol
-  This will only return balances > 0 and assets that can be used on the protocol
+  This will only return assets that can be used on the protocol
   """
   userBalances(request: UserBalancesRequest!): [UserBalance!]!
   userBorrows(request: UserBorrowsRequest!): [UserBorrowItem!]!
@@ -1292,14 +1294,32 @@ type UserBalance {
 }
 
 input UserBalancesRequest {
+  """The user to get the balance for"""
   user: EvmAddress!
-  orderBy: UserBalancesRequestOrderBy! = {name: ASC}
-  chainIds: [ChainId!]!
+
+  """The order by clause - defaults to the highest USD value"""
+  orderBy: UserBalancesRequestOrderBy! = {balance: DESC}
+
+  """The user balance filter"""
+  filter: UserBalancesRequestFilter!
+
+  """If you want to include 0 balances in the return list"""
+  includeZeroBalances: Boolean! = false
+}
+
+input UserBalancesRequestFilter @oneOf {
+  """List of chains"""
+  chainIds: [ChainId!]
+
+  """The balances for the underlyings attached to a hub"""
+  hub: HubInput
 }
 
 input UserBalancesRequestOrderBy @oneOf {
+  """The name of the token"""
   name: OrderDirection
-  supplyApy: OrderDirection
+
+  """The balance of the token"""
   balance: OrderDirection
 }
 

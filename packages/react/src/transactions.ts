@@ -23,12 +23,17 @@ import {
   type PreviewUserPositionResult,
   type RenounceSpokeUserPositionManagerRequest,
   type RepayRequest,
+  ReservesQuery,
   type SetSpokeUserPositionManagerRequest,
   type SetUserSupplyAsCollateralRequest,
+  SpokesQuery,
   type SupplyRequest,
   type TransactionRequest,
   type UpdateUserDynamicConfigRequest,
   type UpdateUserRiskPremiumRequest,
+  UserBalancesQuery,
+  UserPositionQuery,
+  UserPositionsQuery,
   type WithdrawRequest,
 } from '@aave/graphql-next';
 import { errAsync, type TxHash } from '@aave/types-next';
@@ -115,16 +120,58 @@ export function useSupply(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(() => {
-        client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.reserve.chainId,
+      .andTee(async () =>
+        Promise.all([
+          // update user positions
+          await client.refreshQueryWhere(
+            UserPositionsQuery,
+            (variables) =>
+              'chainIds' in variables.request &&
+              variables.request.user === request.sender &&
+              variables.request.chainIds.some(
+                (chainId) => chainId === request.reserve.chainId,
+              ),
+          ),
+          await client.refreshQueryWhere(
+            UserPositionQuery,
+            (_, data) =>
+              data?.spoke.chain.chainId === request.reserve.chainId &&
+              data?.spoke.address === request.reserve.spoke &&
+              data.user === request.sender,
+          ),
+
+          // update reserves
+          await client.refreshQueryWhere(ReservesQuery, (_, data) =>
+            data.some((reserve) => reserve.id === request.reserve.reserveId),
+          ),
+
+          // update spokes
+          await client.refreshQueryWhere(SpokesQuery, (_, data) =>
+            data.some(
+              (spoke) =>
+                spoke.chain.chainId === request.reserve.chainId &&
+                spoke.address === request.reserve.spoke,
             ),
-        );
-      }),
+          ),
+
+          // update user balances
+          await client.refreshQueryWhere(
+            UserBalancesQuery,
+            // update any user balances for the given user
+            (variables) => variables.request.user === request.sender,
+          ),
+
+          // update hubs
+          await client.refreshQueryWhere(
+            HubsQuery,
+            (variables) =>
+              'chainIds' in variables.request &&
+              variables.request.chainIds.some(
+                (chainId) => chainId === request.reserve.chainId,
+              ),
+          ),
+        ]),
+      ),
   );
 }
 
@@ -218,8 +265,8 @@ export function useBorrow(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(() => {
-        client.refreshQueryWhere(
+      .andTee(async () => {
+        await client.refreshQueryWhere(
           HubsQuery,
           (variables) =>
             'chainIds' in variables.request &&
@@ -321,8 +368,8 @@ export function useRepay(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(() => {
-        client.refreshQueryWhere(
+      .andTee(async () => {
+        await client.refreshQueryWhere(
           HubsQuery,
           (variables) =>
             'chainIds' in variables.request &&
@@ -424,8 +471,8 @@ export function useWithdraw(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(() => {
-        client.refreshQueryWhere(
+      .andTee(async () => {
+        await client.refreshQueryWhere(
           HubsQuery,
           (variables) =>
             'chainIds' in variables.request &&
@@ -848,8 +895,8 @@ export function useLiquidatePosition(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(() => {
-        client.refreshQueryWhere(
+      .andTee(async () => {
+        await client.refreshQueryWhere(
           HubsQuery,
           (variables) =>
             'chainIds' in variables.request &&

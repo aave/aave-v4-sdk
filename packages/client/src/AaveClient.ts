@@ -1,6 +1,7 @@
 import {
   delay,
   GqlClient,
+  type StandardData,
   TimeoutError,
   UnexpectedError,
 } from '@aave/core-next';
@@ -80,13 +81,29 @@ export class AaveClient extends GqlClient {
   /**
    * @internal
    */
-  refreshQueryWhere<TVariables extends AnyVariables>(
-    document: TypedDocumentNode<unknown, TVariables>,
-    predicate: (variables: TVariables) => boolean,
-  ): void {
-    this.refreshWhere(
-      (op) => op.query === document && predicate(op.variables as TVariables),
-    );
+  async refreshQueryWhere<TValue, TVariables extends AnyVariables>(
+    document: TypedDocumentNode<StandardData<TValue>, TVariables>,
+    predicate: (
+      variables: TVariables,
+      data: TValue,
+    ) => boolean | Promise<boolean>,
+  ): Promise<void> {
+    await this.refreshWhere(async (op) => {
+      if (op.query === document) {
+        const result = await this.query(
+          document,
+          op.variables as TVariables,
+          'cache-only',
+        );
+
+        if (result.isErr()) {
+          return false;
+        }
+
+        return predicate(op.variables as TVariables, result.value as TValue);
+      }
+      return false;
+    });
   }
 
   protected async pollTransactionStatus(

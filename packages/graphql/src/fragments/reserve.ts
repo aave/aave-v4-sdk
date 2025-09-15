@@ -1,11 +1,11 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
+import { HubAssetFragment } from './assets';
 import {
   ChainFragment,
   Erc20AmountFragment,
   PercentValueFragment,
 } from './common';
-import { HubAssetInfoFragment } from './hubs';
 import { SpokeFragment } from './spoke';
 
 export const ReserveSettingsFragment = graphql(
@@ -104,7 +104,7 @@ export const ReserveFragment = graphql(
       ...ReserveUserState
     }
     asset {
-      ...HubAssetInfo
+      ...HubAsset
     }
   }`,
   [
@@ -114,7 +114,7 @@ export const ReserveFragment = graphql(
     ReserveSettingsFragment,
     ReserveStatusFragment,
     ReserveUserStateFragment,
-    HubAssetInfoFragment,
+    HubAssetFragment,
   ],
 );
 export type Reserve = FragmentOf<typeof ReserveFragment>;
@@ -127,12 +127,12 @@ export const ReserveInfoFragment = graphql(
       ...Spoke
     }
     asset {
-      ...HubAssetInfo
+      ...HubAsset
     }
     chain {
       ...Chain
     }
   }`,
-  [SpokeFragment, HubAssetInfoFragment, ChainFragment],
+  [SpokeFragment, HubAssetFragment, ChainFragment],
 );
 export type ReserveInfo = FragmentOf<typeof ReserveInfoFragment>;

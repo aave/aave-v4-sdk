@@ -107,6 +107,8 @@ export enum BestSupplyReserveFilter {
  */
 export enum Currency {
   Usd = 'USD',
+  Eur = 'EUR',
+  Gbp = 'GBP',
 }
 
 /**

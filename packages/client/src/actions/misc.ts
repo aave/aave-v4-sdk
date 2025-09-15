@@ -38,5 +38,9 @@ export function hasProcessedKnownTransaction(
   client: AaveClient,
   request: HasProcessedKnownTransactionRequest,
 ): ResultAsync<boolean, UnexpectedError> {
-  return client.query(HasProcessedKnownTransactionQuery, { request });
+  return client.query(
+    HasProcessedKnownTransactionQuery,
+    { request },
+    'network-only',
+  );
 }
