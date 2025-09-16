@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/client-next';
+import type { AaveClient, UnexpectedError } from '@aave/client-next';
 import {
   borrow,
   liquidatePosition,
@@ -16,8 +16,11 @@ import { ValidationError } from '@aave/core-next';
 import {
   type BorrowRequest,
   type ExecutionPlan,
+  HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
+  isChainIdsVariant,
+  isSpokeInputVariant,
   type LiquidatePositionRequest,
   type PreviewRequest,
   type PreviewUserPositionResult,
@@ -26,6 +29,7 @@ import {
   ReservesQuery,
   type SetSpokeUserPositionManagerRequest,
   type SetUserSupplyAsCollateralRequest,
+  SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
   type TransactionRequest,
@@ -34,6 +38,7 @@ import {
   UserBalancesQuery,
   UserPositionQuery,
   UserPositionsQuery,
+  UserSummaryQuery,
   type WithdrawRequest,
 } from '@aave/graphql-next';
 import { errAsync, type TxHash } from '@aave/types-next';
@@ -46,6 +51,76 @@ import {
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
+
+function refreshQueriesForReserveChange(
+  client: AaveClient,
+  request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
+) {
+  return async () =>
+    Promise.all([
+      // update user positions
+      await client.refreshQueryWhere(
+        UserPositionsQuery,
+        (variables) =>
+          variables.request.user === request.sender &&
+          variables.request.chainIds.some(
+            (chainId) => chainId === request.reserve.chainId,
+          ),
+      ),
+      await client.refreshQueryWhere(
+        UserPositionQuery,
+        (_, data) =>
+          data?.spoke.chain.chainId === request.reserve.chainId &&
+          data?.spoke.address === request.reserve.spoke &&
+          data.user === request.sender,
+      ),
+
+      // update user summary
+      await client.refreshQueryWhere(UserSummaryQuery, (variables) =>
+        variables.request.user === request.sender &&
+        isSpokeInputVariant(variables.request.filter)
+          ? variables.request.filter.spoke.chainId ===
+              request.reserve.chainId &&
+            variables.request.filter.spoke.address === request.reserve.spoke
+          : isChainIdsVariant(variables.request.filter)
+            ? variables.request.filter.chainIds.some(
+                (chainId) => chainId === request.reserve.chainId,
+              )
+            : false,
+      ),
+
+      // update reserves
+      await client.refreshQueryWhere(ReservesQuery, (_, data) =>
+        data.some((reserve) => reserve.id === request.reserve.reserveId),
+      ),
+
+      // update spokes
+      await client.refreshQueryWhere(SpokesQuery, (_, data) =>
+        data.some(
+          (spoke) =>
+            spoke.chain.chainId === request.reserve.chainId &&
+            spoke.address === request.reserve.spoke,
+        ),
+      ),
+
+      // update user balances
+      await client.refreshQueryWhere(
+        UserBalancesQuery,
+        // update any user balances for the given user
+        (variables) => variables.request.user === request.sender,
+      ),
+
+      // update hubs
+      await client.refreshQueryWhere(
+        HubsQuery,
+        (variables) =>
+          isChainIdsVariant(variables.request) &&
+          variables.request.chainIds.some(
+            (chainId) => chainId === request.reserve.chainId,
+          ),
+      ),
+    ]);
+}
 
 /**
  * A hook that provides a way to supply assets to an Aave reserve.
@@ -120,58 +195,7 @@ export function useSupply(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () =>
-        Promise.all([
-          // update user positions
-          await client.refreshQueryWhere(
-            UserPositionsQuery,
-            (variables) =>
-              'chainIds' in variables.request &&
-              variables.request.user === request.sender &&
-              variables.request.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
-              ),
-          ),
-          await client.refreshQueryWhere(
-            UserPositionQuery,
-            (_, data) =>
-              data?.spoke.chain.chainId === request.reserve.chainId &&
-              data?.spoke.address === request.reserve.spoke &&
-              data.user === request.sender,
-          ),
-
-          // update reserves
-          await client.refreshQueryWhere(ReservesQuery, (_, data) =>
-            data.some((reserve) => reserve.id === request.reserve.reserveId),
-          ),
-
-          // update spokes
-          await client.refreshQueryWhere(SpokesQuery, (_, data) =>
-            data.some(
-              (spoke) =>
-                spoke.chain.chainId === request.reserve.chainId &&
-                spoke.address === request.reserve.spoke,
-            ),
-          ),
-
-          // update user balances
-          await client.refreshQueryWhere(
-            UserBalancesQuery,
-            // update any user balances for the given user
-            (variables) => variables.request.user === request.sender,
-          ),
-
-          // update hubs
-          await client.refreshQueryWhere(
-            HubsQuery,
-            (variables) =>
-              'chainIds' in variables.request &&
-              variables.request.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
-              ),
-          ),
-        ]),
-      ),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
@@ -265,16 +289,7 @@ export function useBorrow(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () => {
-        await client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.reserve.chainId,
-            ),
-        );
-      }),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
@@ -368,16 +383,7 @@ export function useRepay(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () => {
-        await client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.reserve.chainId,
-            ),
-        );
-      }),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
@@ -471,16 +477,7 @@ export function useWithdraw(
             return errAsync(ValidationError.fromGqlNode(plan));
         }
       })
-      .andTee(async () => {
-        await client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.reserve.chainId,
-            ),
-        );
-      }),
+      .andTee(refreshQueriesForReserveChange(client, request)),
   );
 }
 
@@ -553,9 +550,16 @@ export function useRenounceSpokeUserPositionManager(
   const client = useAaveClient();
 
   return useAsyncTask((request: RenounceSpokeUserPositionManagerRequest) =>
-    renounceSpokeUserPositionManager(client, request).andThen((transaction) =>
-      handler(transaction, { cancel }),
-    ),
+    renounceSpokeUserPositionManager(client, request)
+      .andThen((transaction) => handler(transaction, { cancel }))
+      .andTee(() =>
+        client.refreshQueryWhere(
+          SpokePositionManagersQuery,
+          (variables) =>
+            variables.request.spoke.chainId === request.spoke.chainId &&
+            variables.request.spoke.address === request.spoke.address,
+        ),
+      ),
   );
 }
 
@@ -628,9 +632,27 @@ export function useUpdateUserRiskPremium(
   const client = useAaveClient();
 
   return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
-    updateUserRiskPremium(client, request).andThen((transaction) =>
-      handler(transaction, { cancel }),
-    ),
+    updateUserRiskPremium(client, request)
+      .andThen((transaction) => handler(transaction, { cancel }))
+      .andTee(async () =>
+        Promise.all([
+          client.refreshQueryWhere(
+            UserPositionsQuery,
+            (variables) =>
+              variables.request.user === request.sender &&
+              variables.request.chainIds.some(
+                (chainId) => chainId === request.spoke.chainId,
+              ),
+          ),
+          client.refreshQueryWhere(
+            UserPositionQuery,
+            (_, data) =>
+              data?.spoke.chain.chainId === request.spoke.chainId &&
+              data?.spoke.address === request.spoke.address &&
+              data.user === request.sender,
+          ),
+        ]),
+      ),
   );
 }
 
@@ -702,6 +724,7 @@ export function useUpdateUserDynamicConfig(
 ): UseAsyncTask<UpdateUserDynamicConfigRequest, TxHash, SendTransactionError> {
   const client = useAaveClient();
 
+  // TODO update relevant active queries once the location of dynamic config is clarified
   return useAsyncTask((request: UpdateUserDynamicConfigRequest) =>
     updateUserDynamicConfig(client, request).andThen((transaction) =>
       handler(transaction, { cancel }),
@@ -787,9 +810,71 @@ export function useSetUserSupplyAsCollateral(
   const client = useAaveClient();
 
   return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
-    setUserSupplyAsCollateral(client, request).andThen((transaction) =>
-      handler(transaction, { cancel }),
-    ),
+    setUserSupplyAsCollateral(client, request)
+      .andThen((transaction) => handler(transaction, { cancel }))
+      .andTee(() =>
+        Promise.all([
+          // update user positions
+          client.refreshQueryWhere(
+            UserPositionsQuery,
+            (variables) =>
+              variables.request.user === request.sender &&
+              variables.request.chainIds.some(
+                (chainId) => chainId === request.reserve.chainId,
+              ),
+          ),
+          client.refreshQueryWhere(
+            UserPositionQuery,
+            (_, data) =>
+              data?.spoke.chain.chainId === request.reserve.chainId &&
+              data?.spoke.address === request.reserve.spoke &&
+              data.user === request.sender,
+          ),
+
+          // update user summary
+          client.refreshQueryWhere(UserSummaryQuery, (variables) =>
+            variables.request.user === request.sender &&
+            isSpokeInputVariant(variables.request.filter)
+              ? variables.request.filter.spoke.chainId ===
+                  request.reserve.chainId &&
+                variables.request.filter.spoke.address === request.reserve.spoke
+              : isChainIdsVariant(variables.request.filter)
+                ? variables.request.filter.chainIds.some(
+                    (chainId) => chainId === request.reserve.chainId,
+                  )
+                : false,
+          ),
+
+          // update reserves
+          client.refreshQueryWhere(ReservesQuery, (_, data) =>
+            data.some((reserve) => reserve.id === request.reserve.reserveId),
+          ),
+
+          // update spokes
+          client.refreshQueryWhere(SpokesQuery, (_, data) =>
+            data.some(
+              (spoke) =>
+                spoke.chain.chainId === request.reserve.chainId &&
+                spoke.address === request.reserve.spoke,
+            ),
+          ),
+
+          // update hubs
+          client.refreshQueryWhere(
+            HubsQuery,
+            (variables) =>
+              isChainIdsVariant(variables.request) &&
+              variables.request.chainIds.some(
+                (chainId) => chainId === request.reserve.chainId,
+              ),
+          ),
+          client.refreshQueryWhere(
+            HubQuery,
+            (variables) =>
+              variables.request.chainId === request.reserve.chainId,
+          ),
+        ]),
+      ),
   );
 }
 
@@ -884,27 +969,17 @@ export function useLiquidatePosition(
   const client = useAaveClient();
 
   return useAsyncTask((request: LiquidatePositionRequest) =>
-    liquidatePosition(client, request)
-      .andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-          case 'ApprovalRequired':
-            return handler(plan, { cancel });
+    // TODO: update the relevant read queries
+    liquidatePosition(client, request).andThen((plan) => {
+      switch (plan.__typename) {
+        case 'TransactionRequest':
+        case 'ApprovalRequired':
+          return handler(plan, { cancel });
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      })
-      .andTee(async () => {
-        await client.refreshQueryWhere(
-          HubsQuery,
-          (variables) =>
-            'chainIds' in variables.request &&
-            variables.request.chainIds.some(
-              (chainId) => chainId === request.spoke.chainId,
-            ),
-        );
-      }),
+        case 'InsufficientBalanceError':
+          return errAsync(ValidationError.fromGqlNode(plan));
+      }
+    }),
   );
 }
 
@@ -1001,9 +1076,16 @@ export function useSetSpokeUserPositionManager(
   const client = useAaveClient();
 
   return useAsyncTask((request: SetSpokeUserPositionManagerRequest) =>
-    setSpokeUserPositionManager(client, request).andThen((transaction) =>
-      handler(transaction, { cancel }),
-    ),
+    setSpokeUserPositionManager(client, request)
+      .andThen((transaction) => handler(transaction, { cancel }))
+      .andTee(() =>
+        client.refreshQueryWhere(
+          SpokePositionManagersQuery,
+          (variables) =>
+            variables.request.spoke.chainId === request.spoke.chainId &&
+            variables.request.spoke.address === request.spoke.address,
+        ),
+      ),
   );
 }
 

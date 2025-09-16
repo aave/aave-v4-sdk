@@ -20,6 +20,10 @@
       "import": "./dist/actions/index.js",
       "require": "./dist/actions/index.cjs"
     },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs"
+    },
     "./ethers": {
       "import": "./dist/ethers.js",
       "require": "./dist/ethers.cjs"
@@ -45,6 +49,9 @@
     "*": {
       "actions": [
         "./dist/actions/index.d.ts"
+      ],
+      "utils": [
+        "./dist/utils/index.d.ts"
       ],
       "ethers": [
         "./dist/ethers.d.ts"
