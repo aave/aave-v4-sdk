@@ -190,20 +190,6 @@ export type PercentValueWithChange = FragmentOf<
   typeof PercentValueWithChangeFragment
 >;
 
-export const BigDecimalWithChangeFragment = graphql(
-  `fragment BigDecimalWithChange on BigDecimalWithChange {
-    __typename
-    value
-    change(window: $timeWindow){
-      ...PercentValue
-    }
-  }`,
-  [PercentValueFragment],
-);
-export type BigDecimalWithChange = FragmentOf<
-  typeof BigDecimalWithChangeFragment
->;
-
 export const PaginatedResultInfoFragment = graphql(
   `fragment PaginatedResultInfo on PaginatedResultInfo {
     __typename
@@ -213,22 +199,6 @@ export const PaginatedResultInfoFragment = graphql(
 );
 export type PaginatedResultInfo = FragmentOf<
   typeof PaginatedResultInfoFragment
->;
-
-export const BigDecimalVariationFragment = graphql(
-  `fragment BigDecimalVariation on BigDecimalVariation {
-    __typename
-    current {
-      ...PercentValue
-    }
-    after {
-      ...PercentValue
-    }
-  }`,
-  [PercentValueFragment],
-);
-export type BigDecimalVariation = FragmentOf<
-  typeof BigDecimalVariationFragment
 >;
 
 export const PercentValueVariationFragment = graphql(
@@ -261,4 +231,27 @@ export const FiatAmountValueVariationFragment = graphql(
 );
 export type FiatAmountValueVariation = FragmentOf<
   typeof FiatAmountValueVariationFragment
+>;
+
+export const HealthFactorChangeFragment = graphql(
+  `fragment HealthFactorChange on HealthFactorChange {
+    __typename
+    value
+    change(window: $timeWindow) {
+      ...PercentValue
+    }
+  }`,
+  [PercentValueFragment],
+);
+export type HealthFactorChange = FragmentOf<typeof HealthFactorChangeFragment>;
+
+export const HealthFactorVariationFragment = graphql(
+  `fragment HealthFactorVariation on HealthFactorVariation {
+    __typename
+    current
+    after
+  }`,
+);
+export type HealthFactorVariation = FragmentOf<
+  typeof HealthFactorVariationFragment
 >;

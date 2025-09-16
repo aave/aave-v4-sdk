@@ -23,7 +23,7 @@ import {
   isSpokeInputVariant,
   type LiquidatePositionRequest,
   type PreviewRequest,
-  type PreviewUserPositionResult,
+  type PreviewUserPosition,
   type RenounceSpokeUserPositionManagerRequest,
   type RepayRequest,
   ReservesQuery,
@@ -61,10 +61,12 @@ function refreshQueriesForReserveChange(
       // update user positions
       await client.refreshQueryWhere(
         UserPositionsQuery,
-        (variables) =>
+        (variables, data) =>
           variables.request.user === request.sender &&
-          variables.request.chainIds.some(
-            (chainId) => chainId === request.reserve.chainId,
+          data.some(
+            (position) =>
+              position.spoke.chain.chainId === request.reserve.chainId &&
+              position.spoke.address === request.reserve.spoke,
           ),
       ),
       await client.refreshQueryWhere(
@@ -638,10 +640,12 @@ export function useUpdateUserRiskPremium(
         Promise.all([
           client.refreshQueryWhere(
             UserPositionsQuery,
-            (variables) =>
+            (variables, data) =>
               variables.request.user === request.sender &&
-              variables.request.chainIds.some(
-                (chainId) => chainId === request.spoke.chainId,
+              data.some(
+                (position) =>
+                  position.spoke.chain.chainId === request.spoke.chainId &&
+                  position.spoke.address === request.spoke.address,
               ),
           ),
           client.refreshQueryWhere(
@@ -817,10 +821,12 @@ export function useSetUserSupplyAsCollateral(
           // update user positions
           client.refreshQueryWhere(
             UserPositionsQuery,
-            (variables) =>
+            (variables, data) =>
               variables.request.user === request.sender &&
-              variables.request.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
+              data.some(
+                (position) =>
+                  position.spoke.chain.chainId === request.reserve.chainId &&
+                  position.spoke.address === request.reserve.spoke,
               ),
           ),
           client.refreshQueryWhere(
@@ -860,13 +866,14 @@ export function useSetUserSupplyAsCollateral(
           ),
 
           // update hubs
-          client.refreshQueryWhere(
-            HubsQuery,
-            (variables) =>
-              isChainIdsVariant(variables.request) &&
-              variables.request.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
-              ),
+          client.refreshQueryWhere(HubsQuery, (variables) =>
+            isChainIdsVariant(variables.request)
+              ? variables.request.chainIds.some(
+                  (chainId) => chainId === request.reserve.chainId,
+                )
+              : variables.request.tokens.some(
+                  (token) => token.chainId === request.reserve.chainId,
+                ),
           ),
           client.refreshQueryWhere(
             HubQuery,
@@ -1148,7 +1155,7 @@ export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
  */
 export function usePreview(): UseAsyncTask<
   PreviewRequest,
-  PreviewUserPositionResult,
+  PreviewUserPosition,
   UnexpectedError
 > {
   const client = useAaveClient();

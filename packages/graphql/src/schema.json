@@ -105,78 +105,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "BigDecimalVariation",
-        "fields": [
-          {
-            "name": "current",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValue",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "after",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValue",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "BigDecimalWithChange",
-        "fields": [
-          {
-            "name": "value",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "change",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValue",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "window",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
         "name": "BorrowActivity",
         "fields": [
           {
@@ -826,6 +754,67 @@
           },
           {
             "name": "txHash",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HealthFactorChange",
+        "fields": [
+          {
+            "name": "value",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "change",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentValue",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "window",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HealthFactorVariation",
+        "fields": [
+          {
+            "name": "current",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "after",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -1889,47 +1878,61 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PreviewUserPositionResult",
+        "name": "PreviewUserPosition",
         "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "healthFactor",
             "type": {
               "kind": "OBJECT",
-              "name": "BigDecimalVariation",
+              "name": "HealthFactorVariation",
               "ofType": null
-            },
-            "args": []
-          },
-          {
-            "name": "positionAPY",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValueVariation",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "netAPY",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValueVariation",
-                "ofType": null
-              }
             },
             "args": []
           },
           {
             "name": "riskPremium",
             "type": {
-              "kind": "OBJECT",
-              "name": "PercentValueVariation",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentValueVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "positionApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentValueVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "netApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentValueVariation",
+                "ofType": null
+              }
             },
             "args": []
           },
@@ -1946,7 +1949,7 @@
             "args": []
           },
           {
-            "name": "netDebt",
+            "name": "netBalance",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -2439,49 +2442,9 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PreviewUserPositionResult",
+                "name": "PreviewUserPosition",
                 "ofType": null
               }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "bestSupplyReserve",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Reserve",
-              "ofType": null
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "bestBorrowReserve",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Reserve",
-              "ofType": null
             },
             "args": [
               {
@@ -3577,17 +3540,6 @@
         "kind": "OBJECT",
         "name": "SpokeConfig",
         "fields": [
-          {
-            "name": "canSetPositionManager",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
           {
             "name": "active",
             "type": {
@@ -5243,9 +5195,12 @@
           {
             "name": "healthFactor",
             "type": {
-              "kind": "OBJECT",
-              "name": "BigDecimalWithChange",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "HealthFactorChange",
+                "ofType": null
+              }
             },
             "args": []
           },

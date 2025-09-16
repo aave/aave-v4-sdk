@@ -5,7 +5,6 @@ import { ChainFragment, PaginatedResultInfoFragment } from './common';
 export const SpokeConfigFragment = graphql(
   `fragment SpokeConfig on SpokeConfig {
     __typename
-    canSetPositionManager
     active
   }`,
 );

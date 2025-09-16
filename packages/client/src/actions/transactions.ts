@@ -7,7 +7,7 @@ import {
   type LiquidatePositionRequest,
   PreviewQuery,
   type PreviewRequest,
-  type PreviewUserPositionResult,
+  type PreviewUserPosition,
   RenounceSpokeUserPositionManagerQuery,
   type RenounceSpokeUserPositionManagerRequest,
   RepayQuery,
@@ -490,7 +490,7 @@ export function setSpokeUserPositionManager(
 export function preview(
   client: AaveClient,
   request: PreviewRequest,
-): ResultAsync<PreviewUserPositionResult, UnexpectedError> {
+): ResultAsync<PreviewUserPosition, UnexpectedError> {
   return client.query(PreviewQuery, { request });
 }
 

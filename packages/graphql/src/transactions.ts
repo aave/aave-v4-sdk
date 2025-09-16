@@ -1,8 +1,8 @@
 import type { FragmentOf } from 'gql.tada';
 import { ExecutionPlanFragment, TransactionRequestFragment } from './fragments';
 import {
-  BigDecimalVariationFragment,
   FiatAmountValueVariationFragment,
+  HealthFactorVariationFragment,
   PercentValueVariationFragment,
 } from './fragments/common';
 import { graphql, type RequestOf } from './graphql';
@@ -132,16 +132,17 @@ export type UpdateUserRiskPremiumRequest = RequestOf<
   typeof UpdateUserRiskPremiumQuery
 >;
 
-export const PreviewUserPositionResultFragment = graphql(
-  `fragment PreviewUserPositionResult on PreviewUserPositionResult {
+export const PreviewUserPositionFragment = graphql(
+  `fragment PreviewUserPosition on PreviewUserPosition {
     __typename
+    id
     healthFactor {
-      ...BigDecimalVariation
+      ...HealthFactorVariation
     }
-    positionAPY {
+    positionApy {
       ...PercentValueVariation
     }
-    netAPY {
+    netApy {
       ...PercentValueVariation
     }
     riskPremium {
@@ -150,18 +151,18 @@ export const PreviewUserPositionResultFragment = graphql(
     netCollateral {
       ...FiatAmountValueVariation
     }
-    netDebt {
+    netBalance {
       ...FiatAmountValueVariation
     }
   }`,
   [
-    BigDecimalVariationFragment,
+    HealthFactorVariationFragment,
     PercentValueVariationFragment,
     FiatAmountValueVariationFragment,
   ],
 );
-export type PreviewUserPositionResult = FragmentOf<
-  typeof PreviewUserPositionResultFragment
+export type PreviewUserPosition = FragmentOf<
+  typeof PreviewUserPositionFragment
 >;
 
 /**
@@ -170,10 +171,10 @@ export type PreviewUserPositionResult = FragmentOf<
 export const PreviewQuery = graphql(
   `query Preview($request: PreviewRequest!) {
     value: preview(request: $request) {
-      ...PreviewUserPositionResult
+      ...PreviewUserPosition
     }
   }`,
-  [PreviewUserPositionResultFragment],
+  [PreviewUserPositionFragment],
 );
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
