@@ -199,7 +199,10 @@ export function waitForSwapOutcome(
     ): Promise<SwapOutcome> => {
       const startedAt = Date.now();
 
-      while (Date.now() - startedAt < client.getEnvironment().indexingTimeout) {
+      while (
+        Date.now() - startedAt <
+        client.context.environment.indexingTimeout
+      ) {
         const status = await swapStatus(client, request).match(
           (ok) => ok,
           (err) => {
@@ -214,7 +217,7 @@ export function waitForSwapOutcome(
             return status;
 
           default:
-            await delay(client.getEnvironment().pollingInterval);
+            await delay(client.context.environment.pollingInterval);
             continue;
         }
       }
@@ -242,7 +245,7 @@ export function waitForSwapOutcome(
  * ```ts
  * const result = await swap(client, {
  *   intent: {
- *     id: swapQuoteId('123...'),
+ *     quoteId: swapQuoteId('123...'),
  *     signature: {
  *       value: signature('0x456...'),
  *       deadline: 1234567890,
