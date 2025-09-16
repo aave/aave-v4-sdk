@@ -36,10 +36,12 @@ describe('Aave V4 Supply Scenarios', () => {
         it('And the supplied tokens are set as collateral by default', async () => {
           const listReserves = await reserves(client, {
             query: {
-              token: {
-                chainId: chainId(1),
-                address: ETHEREUM_USDC_ADDRESS,
-              },
+              tokens: [
+                {
+                  chainId: chainId(1),
+                  address: ETHEREUM_USDC_ADDRESS,
+                },
+              ],
             },
           });
           assertOk(listReserves);
@@ -79,14 +81,14 @@ describe('Aave V4 Supply Scenarios', () => {
             );
           assertOk(result);
 
-          expect(result.value.length > 0, 'No supply positions found');
+          invariant(result.value.length > 0, 'No supply positions found');
           expect(
-            result.value[0]?.isCollateral === true,
-            'Supply position not set as collateral',
+            result.value[0]!.isCollateral === true,
+            'Supply position should be set as collateral',
           );
-          expect(
-            result.value[0]?.amount.value.formatted === bigDecimal('10'),
-            'Supply amount not correct',
+          expect(Number(result.value[0]!.amount.value.formatted)).toBeCloseTo(
+            Number(amountToSupply),
+            4,
           );
         });
       });
