@@ -24,6 +24,9 @@ jobs:
     name: Publish Snapshot
     runs-on: ubuntu-latest
     needs: verify
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -46,3 +49,5 @@ jobs:
       - name: Publish Snapshot
         if: env.changeset_exists == 'true'
         run: pnpm changeset publish --snapshot --tag latest --no-git-tag
+        env:
+          NPM_CONFIG_PROVENANCE: false #PROVENANCE IS NOT SUPPORTED FOR SNAPSHOT PUBLISHES
