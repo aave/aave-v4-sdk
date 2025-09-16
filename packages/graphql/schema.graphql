@@ -131,13 +131,15 @@ input CancelSwapRequest @oneOf {
 }
 
 type CancelSwapTypeDefinition {
-  eip712Domain: [TypeField!]!
+  EIP712Domain: [TypeField!]!
+  OrderCancellations: [TypeField!]!
 }
 
 type CancelSwapTypedData {
   types: CancelSwapTypeDefinition!
   primaryType: String!
   domain: DomainData!
+  message: JSON!
 }
 
 type Chain {
@@ -233,6 +235,25 @@ type Erc20Token {
 }
 
 scalar EvmAddress
+
+input ExchangeRateRequest {
+  """The from criteria"""
+  from: ExchangeRateRequestFrom!
+
+  """The currency to get the result in"""
+  to: Currency!
+}
+
+input ExchangeRateRequestFrom @oneOf {
+  """The currency"""
+  fiat: Currency
+
+  """The erc20 token"""
+  erc20: Erc20Input
+
+  """The native token"""
+  native: ChainId
+}
 
 union ExecutionPlan = TransactionRequest | ApprovalRequired | InsufficientBalanceError
 
@@ -429,6 +450,9 @@ type InsufficientBalanceError {
   available: DecimalValue!
 }
 
+"""A scalar that can represent any JSON value."""
+scalar JSON
+
 input LiquidatePositionDebtAmount @oneOf {
   """Exact amount"""
   exact: BigDecimal
@@ -532,8 +556,9 @@ type PaginatedUserHistoryResult {
   pageInfo: PaginatedResultInfo!
 }
 
-input PendingSwapsRequest {
-  user: EvmAddress!
+type PaginatedUserSwapsResult {
+  items: [SwapStatus!]!
+  pageInfo: PaginatedResultInfo!
 }
 
 type PercentValue {
@@ -598,13 +623,11 @@ type PermitTypedDataResponse {
 }
 
 input PrepareLimitOrderSwapInput {
-  chainId: ChainId!
-  buy: TokenInput!
-  sell: TokenInput!
-  sellAmount: BigDecimal!
-  buyAmount: BigDecimal!
-  user: EvmAddress!
-  slippage: SlippageInput!
+  quoteId: SwapQuoteId!
+  newSellAmount: BigDecimal
+  newBuyAmount: BigDecimal
+  newSlippage: BigDecimal
+  newReceiver: EvmAddress
 }
 
 input PrepareMarketOrderSwapInput {
@@ -614,6 +637,7 @@ input PrepareMarketOrderSwapInput {
   amount: BigDecimal!
   kind: SwapKind!
   user: EvmAddress!
+  receiver: EvmAddress
 }
 
 input PrepareSwapCancelRequest {
@@ -629,7 +653,7 @@ input PrepareSwapRequest @oneOf {
   limit: PrepareLimitOrderSwapInput
 }
 
-union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
+union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
 
 input PreviewAction @oneOf {
   supply: SupplyRequest
@@ -657,6 +681,9 @@ type Query {
 
   """Generate EIP-712 typed data for EIP-2612 permit signature"""
   permitTypedData(request: PermitRequest!): PermitTypedDataResponse!
+
+  """Get the exchange rate of tokens > currency or currency > currency"""
+  exchangeRate(request: ExchangeRateRequest!): FiatAmount!
 
   """Fetch a list of hubs depending on your search criteria"""
   hubs(request: HubsRequest!): [Hub!]!
@@ -709,7 +736,7 @@ type Query {
   prepareSwap(request: PrepareSwapRequest!): PrepareSwapResult!
   swap(request: SwapRequest!): SwapExecutionPlan!
   swapStatus(request: SwapStatusRequest!): SwapStatus!
-  pendingSwaps(request: PendingSwapsRequest!): [SwapReceipt!]!
+  userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
   cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
@@ -935,11 +962,6 @@ input SetUserSupplyAsCollateralRequest {
 
 scalar Signature
 
-input SlippageInput @oneOf {
-  custom: BigDecimal
-  suggested: BigDecimal
-}
-
 type Spoke {
   """The spoke name (offchain)"""
   name: String!
@@ -1061,41 +1083,45 @@ type SwapApprovalRequired {
 }
 
 type SwapByIntent {
-  id: SwapRequestId!
   quote: SwapQuote!
   data: SwapByIntentTypedData!
 }
 
 input SwapByIntentInput {
-  id: SwapRequestId!
+  quoteId: SwapQuoteId!
   signature: ERC712Signature!
+
+  """
+  Whether the swap order creator is a smart contract wallet. If not provided, it will be inferred following the ERC-1271 standard.
+  """
+  isSenderSmartContractWallet: Boolean
 }
 
 type SwapByIntentTypeDefinition {
-  eip712Domain: [TypeField!]!
+  EIP712Domain: [TypeField!]!
+  Order: [TypeField!]!
 }
 
 type SwapByIntentTypedData {
   types: SwapByIntentTypeDefinition!
   primaryType: String!
   domain: DomainData!
+  message: JSON!
 }
 
 type SwapByIntentWithApprovalRequired {
-  id: SwapRequestId!
-  approval: TransactionRequest!
   quote: SwapQuote!
+  approval: TransactionRequest!
   data: SwapByIntentTypedData!
 }
 
 type SwapByTransaction {
-  id: SwapRequestId!
   quote: SwapQuote!
 }
 
 type SwapCancelled {
   createdAt: DateTime!
-  cancelledAt: DateTime!
+  cancelledAt: DateTime
   explorerLink: String!
 }
 
@@ -1116,6 +1142,7 @@ type SwapFulfilled {
   createdAt: DateTime!
   fulfilledAt: DateTime!
   explorerLink: String!
+  refundTxHash: TxHash
 }
 
 scalar SwapId
@@ -1138,10 +1165,10 @@ type SwapPendingSignature {
   createdAt: DateTime!
   deadline: DateTime!
   explorerLink: String!
-  signer: EvmAddress!
 }
 
 type SwapQuote {
+  quoteId: SwapQuoteId!
   suggestedSlippage: PercentValue!
   sellAmount: TokenAmount!
   buyAmount: TokenAmount!
@@ -1154,16 +1181,21 @@ type SwapQuoteCosts {
   partnerFeeAmount: TokenAmount!
 }
 
+scalar SwapQuoteId
+
 input SwapQuoteRequest {
   chainId: ChainId!
   buy: TokenInput!
   sell: TokenInput!
   amount: BigDecimal!
-  kind: SwapKind!
+  kind: SwapKind
+  from: EvmAddress!
+  receiver: EvmAddress
 }
 
 type SwapReceipt {
   id: SwapId!
+  createdAt: DateTime!
   explorerLink: String!
 }
 
@@ -1172,9 +1204,15 @@ input SwapRequest @oneOf {
   transaction: SwapWithTransactionInput
 }
 
-scalar SwapRequestId
-
 union SwapStatus = SwapOpen | SwapPendingSignature | SwapCancelled | SwapExpired | SwapFulfilled
+
+enum SwapStatusFilter {
+  CANCELLED
+  EXPIRED
+  FULFILLED
+  OPEN
+  PENDING_SIGNATURE
+}
 
 input SwapStatusRequest {
   id: SwapId!
@@ -1186,7 +1224,7 @@ type SwapTransactionRequest {
 }
 
 input SwapWithTransactionInput {
-  id: SwapRequestId!
+  quoteId: SwapQuoteId!
   permitSig: ERC712Signature
 }
 
@@ -1509,6 +1547,14 @@ type UserSupplyItem {
 
   """If this supply is used as collateral"""
   isCollateral: Boolean!
+}
+
+input UserSwapsRequest {
+  chainId: ChainId!
+  user: EvmAddress!
+  filterBy: [SwapStatusFilter!]
+  pageSize: PageSize! = FIFTY
+  cursor: Cursor
 }
 
 type WithdrawActivity {

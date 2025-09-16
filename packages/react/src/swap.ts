@@ -1,30 +1,57 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  errAsync,
+  ValidationError,
 } from '@aave/client-next';
-import { prepareSwap, swap, swapQuote } from '@aave/client-next/actions';
+import {
+  cancelSwap,
+  exchangeRate,
+  prepareSwap,
+  prepareSwapCancel,
+  swap,
+  swapQuote,
+  swapStatus,
+} from '@aave/client-next/actions';
 import type { SigningError, UnexpectedError } from '@aave/core-next';
 import type {
-  PendingSwapsRequest,
+  ExchangeRateRequest,
+  FiatAmount,
+  InsufficientBalanceError,
+  PaginatedUserSwapsResult,
+  PrepareSwapCancelRequest,
+  PrepareSwapCancelResult,
   PrepareSwapRequest,
+  SwapApprovalRequired,
+  SwapByIntent,
+  SwapByIntentWithApprovalRequired,
+  SwapCancelled,
   SwapExecutionPlan,
   SwapQuote,
   SwapQuoteRequest,
   SwapReceipt,
+  SwapTransactionRequest,
+  UserSwapsRequest,
 } from '@aave/graphql-next';
 import {
   type ERC712Signature,
-  PendingSwapsQuery,
-  type SwapByIntent,
-  type SwapByIntentWithApprovalRequired,
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type Token,
+  type TransactionRequest,
+  UserSwapsQuery,
 } from '@aave/graphql-next';
-import type { Prettify, ResultAsync } from '@aave/types-next';
+import {
+  invariant,
+  okAsync,
+  type Prettify,
+  type ResultAsync,
+  ResultAwareError,
+} from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type ReadResult,
+  type SendTransactionError,
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
@@ -70,50 +97,40 @@ export function useSwapQuote(
   );
 }
 
-export type UsePendingSwapsArgs = PendingSwapsRequest;
-
 /**
- * Fetch pending swaps for a specific user.
- *
- * This signature supports React Suspense:
+ * Fetches the exchange rate between tokens and fiat currencies.
  *
  * ```tsx
- * const { data } = usePendingSwaps({
- *   user: evmAddress('0x742d35cc...'),
- *   suspense: true,
- * });
- * ```
- */
-export function usePendingSwaps(
-  args: UsePendingSwapsArgs & Suspendable,
-): SuspenseResult<SwapReceipt[]>;
-
-/**
- * Fetch pending swaps for a specific user.
+ * const [getExchangeRate, gettingRate] = useExchangeRate();
  *
- * ```tsx
- * const { data, error, loading } = usePendingSwaps({
- *   user: evmAddress('0x742d35cc...'),
+ * const loading = gettingRate.loading;
+ * const error = gettingRate.error;
+ *
+ * // …
+ *
+ * const result = await getExchangeRate({
+ *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
+ *   to: Currency.USD,
  * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * console.log('Exchange rate:', result.value);
  * ```
  */
-export function usePendingSwaps(
-  args: UsePendingSwapsArgs,
-): ReadResult<SwapReceipt[]>;
+export function useExchangeRate(): UseAsyncTask<
+  ExchangeRateRequest,
+  FiatAmount,
+  UnexpectedError
+> {
+  const client = useAaveClient();
 
-export function usePendingSwaps({
-  suspense = false,
-  ...request
-}: UsePendingSwapsArgs & {
-  suspense?: boolean;
-}): SuspendableResult<SwapReceipt[]> {
-  return useSuspendableQuery({
-    document: PendingSwapsQuery,
-    variables: {
-      request,
-    },
-    suspense,
-  });
+  return useAsyncTask((request: ExchangeRateRequest) =>
+    exchangeRate(client, request),
+  );
 }
 
 export type UseSwappableTokensArgs = SwappableTokensRequest;
@@ -162,15 +179,85 @@ export function useSwappableTokens({
   });
 }
 
+export type UseUserSwapsArgs = Prettify<
+  UserSwapsRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch the user's swap history for a specific chain.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserSwaps({
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x742d35cc...'),
+ *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserSwaps(
+  args: UseUserSwapsArgs & Suspendable,
+): SuspenseResult<PaginatedUserSwapsResult>;
+
+/**
+ * Fetch the user's swap history for a specific chain.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserSwaps({
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x742d35cc...'),
+ *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ * });
+ * ```
+ */
+export function useUserSwaps(
+  args: UseUserSwapsArgs,
+): ReadResult<PaginatedUserSwapsResult>;
+
+export function useUserSwaps({
+  suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: UseUserSwapsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<PaginatedUserSwapsResult> {
+  return useSuspendableQuery({
+    document: UserSwapsQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+  });
+}
+
 export type UseSwapTokensRequest = Prettify<
   PrepareSwapRequest & CurrencyQueryOptions
 >;
 
-export type SwapIntent = SwapByIntent | SwapByIntentWithApprovalRequired;
+export type SwapIntent =
+  | SwapByIntent
+  | SwapByIntentWithApprovalRequired
+  | SwapTransactionRequest
+  | SwapApprovalRequired;
 
-export type SwapByIntentHandler = (
+export type SwapHandler = (
   intent: SwapIntent,
-) => ResultAsync<ERC712Signature, SigningError | UnexpectedError>;
+) => ResultAsync<
+  ERC712Signature | SwapReceipt,
+  SendTransactionError | UnexpectedError
+>;
+
+function isERC712Signature(signature: unknown): signature is ERC712Signature {
+  return (
+    typeof signature === 'object' &&
+    signature !== null &&
+    'deadline' in signature &&
+    'value' in signature
+  );
+}
 
 /**
  * Orchestrate the swap execution plan.
@@ -179,14 +266,21 @@ export type SwapByIntentHandler = (
  * const [sendTransaction, sending] = useSendTransaction(wallet);
  * const [signSwapByIntentWith, signing] = useSignSwapByIntentWith(wallet);
  *
- * const [swap, swapping] = useSwapTokens((intent) => {
- *   switch (intent.__typename) {
+ * const [swap, swapping] = useSwapTokens((plan) => {
+ *   switch (plan.__typename) {
  *     case 'SwapByIntent':
- *       return signSwapByIntentWith(intent.data);
+ *       return signSwapByIntentWith(plan.data);
  *
  *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(intent.approval)
- *         .andThen(() => signSwapByIntentWith(intent.data));
+ *       return sendTransaction(plan.approval)
+ *         .andThen(() => signSwapByIntentWith(plan.data));
+ *
+ *     case 'SwapTransactionRequest':
+ *       return sendTransaction(plan.transaction);
+ *
+ *     case 'SwapApprovalRequired':
+ *       return sendTransaction(plan.approval)
+ *         .andThen(() => sendTransaction(plan.originalTransaction.transaction));
  *   }
  * });
  *
@@ -199,55 +293,165 @@ export type SwapByIntentHandler = (
  *     kind: SwapKind.SELL,
  *     user: evmAddress('0x742d35cc...'),
  *   },
- * }).andThen((plan) => {
- *   switch (plan.__typename) {
- *     case 'InsufficientBalanceError':
- *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
- *
- *     case 'SwapTransactionRequest':
- *       return sendTransaction(plan.transaction)
- *         .map(() => plan.orderReceipt);
- *
- *     case 'SwapApprovalRequired':
- *       return sendTransaction(plan.approval)
- *         .andThen(() => sendTransaction(plan.originalTransaction.transaction))
- *         .map(() => plan.originalTransaction.orderReceipt);
- *
- *     case 'SwapReceipt':
- *       return okAsync(plan.orderReceipt);
- *   }
  * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
  * ```
  */
 export function useSwapTokens(
-  handler: SwapByIntentHandler,
+  handler: SwapHandler,
 ): UseAsyncTask<
   PrepareSwapRequest,
-  SwapExecutionPlan,
-  SigningError | UnexpectedError
+  SwapReceipt,
+  SendTransactionError | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
+
+  function executeSwap(
+    plan: SwapExecutionPlan,
+  ): ResultAsync<
+    SwapReceipt,
+    SendTransactionError | ValidationError<InsufficientBalanceError>
+  > {
+    switch (plan.__typename) {
+      case 'SwapTransactionRequest':
+        return handler(plan).andThen(() => {
+          return okAsync(plan.orderReceipt);
+        });
+      case 'SwapApprovalRequired':
+        return handler(plan).andThen(() => {
+          return okAsync(plan.originalTransaction.orderReceipt);
+        });
+      case 'InsufficientBalanceError':
+        return errAsync(ValidationError.fromGqlNode(plan));
+      case 'SwapReceipt':
+        return okAsync(plan);
+    }
+  }
 
   return useAsyncTask(
     ({
       currency = DEFAULT_QUERY_OPTIONS.currency,
       ...request
     }: UseSwapTokensRequest) =>
-      prepareSwap(client, request, { currency }).andThen((prepareResult) => {
-        switch (prepareResult.__typename) {
-          case 'SwapByIntent':
-            return handler(prepareResult).andThen((signature) =>
-              swap(client, { intent: { id: prepareResult.id, signature } }),
-            );
-
-          case 'SwapByIntentWithApprovalRequired':
-            return handler(prepareResult).andThen((signature) =>
-              swap(client, { intent: { id: prepareResult.id, signature } }),
-            );
-
+      prepareSwap(client, request, { currency }).andThen((preparePlan) => {
+        switch (preparePlan.__typename) {
           case 'SwapByTransaction':
-            return swap(client, { transaction: { id: prepareResult.id } });
+            return swap(client, {
+              transaction: { quoteId: preparePlan.quote.quoteId },
+            }).andThen(executeSwap);
+
+          case 'SwapByIntent':
+          case 'SwapByIntentWithApprovalRequired':
+            return handler(preparePlan).andThen((signature) => {
+              invariant(isERC712Signature(signature), 'Invalid signature');
+              return swap(client, {
+                intent: {
+                  quoteId: preparePlan.quote.quoteId,
+                  signature,
+                },
+              }).andThen(executeSwap);
+            });
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(preparePlan));
         }
       }),
+  );
+}
+
+export type CancelSwapHandler = (
+  data: PrepareSwapCancelResult | TransactionRequest,
+) => ResultAsync<ERC712Signature, SigningError | UnexpectedError>;
+
+class CancelSwapError extends ResultAwareError {
+  name = 'CancelSwapError' as const;
+}
+
+/**
+ * Executes the complete swap cancellation workflow combining preparation and execution.
+ *
+ * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [signSwapCancelWith] = useSignSwapCancelWith(wallet);
+ *
+ *  const [cancelSwap, {loading, error}] = useCancelSwap((plan: PrepareSwapCancelResult | TransactionRequest) => {
+ *     switch (plan.__typename) {
+ *         case 'TransactionRequest':
+ *             return sendTransaction(plan);
+ *
+ *         case 'PrepareSwapCancelResult':
+ *             return signSwapCancelWith(plan.data);
+ *     }
+ * });
+ *
+ * const result = await cancelSwap({
+ *   id: swapId('123...'),
+ * });
+ *
+ * if (result.isErr()) {
+ *     console.error(result.error);
+ *     return;
+ * }
+ *
+ * // result.value: SwapCancelled
+ * console.log('Swap cancelled:', result.value);
+ * ```
+ */
+export function useCancelSwap(
+  handler: CancelSwapHandler,
+): UseAsyncTask<
+  PrepareSwapCancelRequest,
+  SwapCancelled,
+  SigningError | UnexpectedError | CancelSwapError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request) =>
+    swapStatus(client, { id: request.id }).andThen((status) => {
+      switch (status.__typename) {
+        case 'SwapOpen':
+        case 'SwapPendingSignature':
+          return prepareSwapCancel(client, request)
+            .andThen(handler)
+            .andThen((signature) => {
+              invariant(isERC712Signature(signature), 'Invalid signature');
+
+              return cancelSwap(client, {
+                intent: { id: request.id, signature },
+              });
+            })
+            .andThen((plan) => {
+              if (plan.__typename === 'TransactionRequest') {
+                return (
+                  handler(plan)
+                    // TODO: verify that if fails cause too early, we need to waitForSwapOutcome(client)({ id: request.id })
+                    .andThen(() => swapStatus(client, { id: request.id }))
+                    .andThen((status) => {
+                      if (status.__typename === 'SwapCancelled') {
+                        return okAsync(status);
+                      }
+                      return errAsync(
+                        new CancelSwapError('Swap is not cancelled'),
+                      );
+                    })
+                );
+              }
+              return okAsync(plan);
+            });
+
+        case 'SwapCancelled':
+          return okAsync(status);
+
+        default:
+          return errAsync(
+            new CancelSwapError('Swap cannot be cancelled at this stage'),
+          );
+      }
+    }),
   );
 }

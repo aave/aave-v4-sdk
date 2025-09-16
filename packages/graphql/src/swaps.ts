@@ -1,9 +1,11 @@
-import { TokenFragment } from './fragments/common';
+import { FiatAmountFragment, TokenFragment } from './fragments/common';
 import {
+  CancelSwapExecutionPlanFragment,
+  PaginatedUserSwapsResultFragment,
+  PrepareSwapCancelResultFragment,
   PrepareSwapResultFragment,
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
-  SwapReceiptFragment,
   SwapStatusFragment,
 } from './fragments/swaps';
 import { graphql, type RequestOf } from './graphql';
@@ -63,19 +65,6 @@ export type SwapStatusRequest = RequestOf<typeof SwapStatusQuery>;
 /**
  * @internal
  */
-export const PendingSwapsQuery = graphql(
-  `query PendingSwaps($request: PendingSwapsRequest!) {
-    value: pendingSwaps(request: $request) {
-      ...SwapReceipt
-    }
-  }`,
-  [SwapReceiptFragment],
-);
-export type PendingSwapsRequest = RequestOf<typeof PendingSwapsQuery>;
-
-/**
- * @internal
- */
 export const SwapQuery = graphql(
   `query Swap($request: SwapRequest!) {
     value: swap(request: $request) {
@@ -85,3 +74,55 @@ export const SwapQuery = graphql(
   [SwapExecutionPlanFragment],
 );
 export type SwapRequest = RequestOf<typeof SwapQuery>;
+
+/**
+ * @internal
+ */
+export const PrepareSwapCancelQuery = graphql(
+  `query PrepareSwapCancel($request: PrepareSwapCancelRequest!) {
+    value: prepareSwapCancel(request: $request) {
+      ...PrepareSwapCancelResult
+    }
+  }`,
+  [PrepareSwapCancelResultFragment],
+);
+export type PrepareSwapCancelRequest = RequestOf<typeof PrepareSwapCancelQuery>;
+
+/**
+ * @internal
+ */
+export const CancelSwapQuery = graphql(
+  `query CancelSwap($request: CancelSwapRequest!) {
+    value: cancelSwap(request: $request) {
+      ...CancelSwapExecutionPlan
+    }
+  }`,
+  [CancelSwapExecutionPlanFragment],
+);
+export type CancelSwapRequest = RequestOf<typeof CancelSwapQuery>;
+
+/**
+ * @internal
+ */
+export const UserSwapsQuery = graphql(
+  `query UserSwaps($request: UserSwapsRequest!, $currency: Currency!) {
+    value: userSwaps(request: $request) {
+      ...PaginatedUserSwapsResult
+    }
+  }`,
+  [PaginatedUserSwapsResultFragment],
+);
+export type UserSwapsRequest = RequestOf<typeof UserSwapsQuery>;
+
+/**
+ * @internal
+ */
+export const ExchangeRateQuery = graphql(
+  `query ExchangeRate($request: ExchangeRateRequest!) {
+    value: exchangeRate(request: $request) {
+      ...FiatAmount
+    }
+  }`,
+  [FiatAmountFragment],
+);
+export type ExchangeRateRequest = RequestOf<typeof ExchangeRateQuery>;

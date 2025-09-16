@@ -157,7 +157,6 @@ export function userPositions(
  * ```ts
  * const result = await userPosition(client, {
  *   id: userPositionId('dGVzdEJhc2U2NA=='),
- *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
  *
@@ -180,7 +179,9 @@ export function userPosition(
  * ```ts
  * const result = await userBalances(client, {
  *   user: evmAddress('0x742d35cc…'),
- *   chainIds: [chainId(1), chainId(137)],
+ *   filter: {
+ *     chainIds: [chainId(1), chainId(137)],
+ *   },
  * });
  * ```
  *
@@ -203,7 +204,9 @@ export function userBalances(
  * ```ts
  * const result = await userHistory(client, {
  *   user: evmAddress('0x742d35cc…'),
- *   chainId: chainId(1),
+ *   filter: {
+ *     chainIds: [chainId(1)],
+ *   },
  *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
  *   pageSize: 'FIFTY',
  * });
@@ -304,8 +307,6 @@ export function supplyApyHistory(
  *   chainId: chainId(1),
  *   hub: evmAddress('0x123...'), // optional
  *   user: evmAddress('0x456...'), // optional
- *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional, defaults to all
- *   orderBy: HubAssetsRequestOrderBy.Name // optional, defaults to NAME
  * });
  * ```
  *

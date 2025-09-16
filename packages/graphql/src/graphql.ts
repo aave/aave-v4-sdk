@@ -8,8 +8,11 @@ import type {
   DateTime,
   EvmAddress,
   ID,
+  JSONString,
   ReserveId,
   Signature,
+  SwapId,
+  SwapQuoteId,
   TxHash,
   TypedSelectionSet,
   UserPositionId,
@@ -34,6 +37,7 @@ import type {
   PageSize,
   ReservesFilterRequest,
   SwapKind,
+  SwapStatusFilter,
   TimeWindow,
 } from './enums';
 import type { introspection } from './graphql-env';
@@ -72,10 +76,12 @@ export const graphql = initGraphQLTada<{
     ReservesFilterRequest: ReservesFilterRequest;
     Signature: Signature;
     String: string;
-    SwapId: ID;
+    SwapId: SwapId;
     SwapKind: SwapKind;
-    SwapRequestId: ID;
+    SwapQuoteId: SwapQuoteId;
+    SwapStatusFilter: SwapStatusFilter;
     TimeWindow: TimeWindow;
+    message: JSONString;
     TxHash: TxHash;
     UserPositionId: UserPositionId;
     Void: Void;

@@ -18,9 +18,7 @@ import type { AaveClient } from '../AaveClient';
  *
  * ```ts
  * const result = await spokes(client, {
- *   query: {
  *     chainIds: [chainId(1), chainId(137)]
- *   },
  * });
  * ```
  *

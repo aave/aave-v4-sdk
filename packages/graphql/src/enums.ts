@@ -127,3 +127,14 @@ export enum SwapKind {
   Buy = 'BUY',
   Sell = 'SELL',
 }
+
+/**
+ * The filter for swap status.
+ */
+export enum SwapStatusFilter {
+  Cancelled = 'CANCELLED',
+  Expired = 'EXPIRED',
+  Fulfilled = 'FULFILLED',
+  Open = 'OPEN',
+  PendingSignature = 'PENDING_SIGNATURE',
+}
