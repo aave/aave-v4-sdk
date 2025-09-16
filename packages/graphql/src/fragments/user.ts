@@ -1,11 +1,11 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
 import {
-  BigDecimalWithChangeFragment,
   DecimalValueFragment,
   Erc20AmountFragment,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
+  HealthFactorChangeFragment,
   PaginatedResultInfoFragment,
   PercentValueFragment,
   PercentValueWithChangeFragment,
@@ -117,7 +117,7 @@ export const UserPositionFragment = graphql(
       ...PercentValueWithChange
     }
     healthFactor {
-      ...BigDecimalWithChange
+      ...HealthFactorChange
     }
     riskPremium {
       ...PercentValue
@@ -134,7 +134,7 @@ export const UserPositionFragment = graphql(
     PercentValueFragment,
     FiatAmountWithChangeFragment,
     PercentValueWithChangeFragment,
-    BigDecimalWithChangeFragment,
+    HealthFactorChangeFragment,
     UserSupplyItemFragment,
     UserBorrowItemFragment,
   ],

@@ -44,43 +44,7 @@ enum ApyMetric {
 
 scalar AssetId
 
-enum BestBorrowReserveFilter {
-  LOWEST_APY
-  LOWEST_AVERAGE_APY
-}
-
-input BestBorrowReserveRequest {
-  query: BestRatesRequestQuery!
-  filter: BestBorrowReserveFilter!
-}
-
-input BestRatesRequestQuery @oneOf {
-  spokes: [SpokeInput!]
-  chainIds: [ChainId!]
-  tokenInput: ChainTokenInput
-}
-
-enum BestSupplyReserveFilter {
-  HIGHEST_APY
-  HIGHEST_AVERAGE_APY
-}
-
-input BestSupplyReserveRequest {
-  query: BestRatesRequestQuery!
-  filter: BestSupplyReserveFilter! = HIGHEST_APY
-}
-
 scalar BigDecimal
-
-type BigDecimalVariation {
-  current: PercentValue!
-  after: PercentValue!
-}
-
-type BigDecimalWithChange {
-  value: BigDecimal!
-  change(window: TimeWindow! = LAST_DAY): PercentValue!
-}
 
 scalar BigInt
 
@@ -154,11 +118,6 @@ type Chain {
 
 """A supported blockchain chain ID"""
 scalar ChainId
-
-input ChainTokenInput @oneOf {
-  native: ChainId
-  erc20: Erc20Input
-}
 
 enum ChainsFilter {
   TESTNET_ONLY
@@ -311,6 +270,16 @@ input HasProcessedKnownTransactionRequest {
 
   """The tx hash"""
   txHash: TxHash!
+}
+
+type HealthFactorChange {
+  value: BigDecimal
+  change(window: TimeWindow! = LAST_DAY): PercentValue!
+}
+
+type HealthFactorVariation {
+  current: BigDecimal
+  after: BigDecimal
 }
 
 type Hub {
@@ -666,13 +635,14 @@ input PreviewRequest {
   action: PreviewAction!
 }
 
-type PreviewUserPositionResult {
-  healthFactor: BigDecimalVariation
-  positionAPY: PercentValueVariation!
-  netAPY: PercentValueVariation!
-  riskPremium: PercentValueVariation
+type PreviewUserPosition {
+  id: UserPositionId!
+  healthFactor: HealthFactorVariation
+  riskPremium: PercentValueVariation!
+  positionApy: PercentValueVariation!
+  netApy: PercentValueVariation!
   netCollateral: FiatAmountValueVariation!
-  netDebt: FiatAmountValueVariation!
+  netBalance: FiatAmountValueVariation!
 }
 
 type Query {
@@ -702,9 +672,7 @@ type Query {
   liquidatePosition(request: LiquidatePositionRequest!): ExecutionPlan!
   updateUserRiskPremium(request: UpdateUserRiskPremiumRequest!): TransactionRequest!
   updateUserDynamicConfig(request: UpdateUserDynamicConfigRequest!): TransactionRequest!
-  preview(request: PreviewRequest!): PreviewUserPositionResult!
-  bestSupplyReserve(request: BestSupplyReserveRequest!): Reserve
-  bestBorrowReserve(request: BestBorrowReserveRequest!): Reserve
+  preview(request: PreviewRequest!): PreviewUserPosition!
   borrowApyHistory(request: BorrowAPYHistoryRequest!): [APYSample!]!
   supplyApyHistory(request: SupplyAPYHistoryRequest!): [APYSample!]!
 
@@ -907,9 +875,18 @@ enum ReservesFilterRequest {
 }
 
 input ReservesRequest {
+  """The reserve's request query"""
   query: ReservesRequestQuery!
+
+  """
+  The user who is doing the query (this injects user state into some of the return objects)
+  """
   user: EvmAddress
+
+  """The reserve's filter"""
   filter: ReservesFilterRequest! = ALL
+
+  """The reserve's order by"""
   orderBy: ReservesRequestOrderBy! = {name: ASC}
 }
 
@@ -921,9 +898,23 @@ input ReservesRequestOrderBy @oneOf {
 }
 
 input ReservesRequestQuery @oneOf {
+  """Get all the reserves for a spoke"""
   spoke: SpokeInput
-  token: Erc20Input
+
+  """Get all the reserves with underlying tokens"""
+  tokens: [Erc20Input!]
+
+  """Get all the reserves on a hub for an underlying"""
   hubToken: HubTokenInput
+
+  """Get all the reserves on a list of chains"""
+  chainIds: [ChainId!]
+
+  """Get all the reserves for a spoke for an underlying"""
+  spokeToken: SpokeTokenInput
+
+  """Get all tokens on a hub"""
+  hub: HubInput
 }
 
 input SetSpokeUserPositionManagerRequest {
@@ -977,9 +968,6 @@ type Spoke {
 }
 
 type SpokeConfig {
-  """Has the spoke got the position manager enabled"""
-  canSetPositionManager: Boolean!
-
   """Is the spoke active"""
   active: Boolean!
 }
@@ -1001,6 +989,17 @@ input SpokePositionManagersRequest {
 type SpokePositionManger {
   name: String
   address: EvmAddress!
+}
+
+input SpokeTokenInput {
+  """The spoke address"""
+  spoke: EvmAddress!
+
+  """The token"""
+  token: EvmAddress!
+
+  """The chain id"""
+  chainId: ChainId!
 }
 
 input SpokeUserPositionManagersRequest {
@@ -1264,7 +1263,10 @@ type TokenInfo {
 }
 
 input TokenInput @oneOf {
+  """Native token"""
   native: AlwaysTrue
+
+  """The erc20 address"""
   erc20: EvmAddress
 }
 
@@ -1351,6 +1353,9 @@ input UserBalancesRequestFilter @oneOf {
 
   """The balances for the underlyings attached to a hub"""
   hub: HubInput
+
+  """The balances for the underlying attached to a spoke"""
+  spoke: SpokeInput
 }
 
 input UserBalancesRequestOrderBy @oneOf {
@@ -1434,7 +1439,7 @@ type UserPosition {
   netApy: PercentValue!
   netSupplyApy: PercentValueWithChange!
   netBorrowApy: PercentValueWithChange!
-  healthFactor: BigDecimalWithChange
+  healthFactor: HealthFactorChange!
   betterRiskPremium: PercentValue
   riskPremium: PercentValue!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentValue!
@@ -1449,9 +1454,19 @@ input UserPositionRequest @oneOf {
 }
 
 input UserPositionsRequest {
+  """The user to get the positions for"""
   user: EvmAddress!
+
+  """The filter for the user position"""
+  filter: UserPositionsRequestFilter!
+
+  """The ordering for the positions"""
   orderBy: UserPositionsRequestOrderBy! = {created: ASC}
-  chainIds: [ChainId!]!
+}
+
+input UserPositionsRequestFilter @oneOf {
+  tokens: [Erc20Input!]
+  chainIds: [ChainId!]
 }
 
 input UserPositionsRequestOrderBy @oneOf {
