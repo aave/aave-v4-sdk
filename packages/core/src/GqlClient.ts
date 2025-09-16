@@ -43,7 +43,12 @@ export class GqlClient {
 
   private readonly resolver: FragmentResolver;
 
-  protected constructor(protected readonly context: Context) {
+  protected constructor(
+    /**
+     * @internal
+     */
+    public readonly context: Context,
+  ) {
     this.resolver = FragmentResolver.from(context.fragments);
     this.logger = Logger.named(
       context.displayName,

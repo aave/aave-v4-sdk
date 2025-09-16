@@ -1,5 +1,6 @@
 import type { Tagged } from 'type-fest';
 import { invariant } from './helpers';
+import { isValidHexString } from './hex';
 
 /**
  * An identifier.
@@ -41,4 +42,22 @@ export function userPositionId(value: string): UserPositionId {
     `UserPositionId must be valid base64: ${value}`,
   );
   return value as UserPositionId;
+}
+
+/**
+ * A swap identifier.
+ */
+export type SwapId = Tagged<string, 'SwapId'>;
+export function swapId(value: string): SwapId {
+  invariant(isValidHexString(value), `Invalid SwapId: ${value}`);
+  return value as SwapId;
+}
+
+/**
+ * A swap quote identifier.
+ */
+export type SwapQuoteId = Tagged<string, 'SwapQuoteId'>;
+export function swapQuoteId(value: string): SwapQuoteId {
+  invariant(isValidHexString(value), `Invalid SwapQuoteId: ${value}`);
+  return value as SwapQuoteId;
 }

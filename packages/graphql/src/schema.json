@@ -270,7 +270,25 @@
         "name": "CancelSwapTypeDefinition",
         "fields": [
           {
-            "name": "eip712Domain",
+            "name": "EIP712Domain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "TypeField",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "OrderCancellations",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -325,6 +343,17 @@
                 "kind": "OBJECT",
                 "name": "DomainData",
                 "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "message",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -1542,6 +1571,43 @@
       },
       {
         "kind": "OBJECT",
+        "name": "PaginatedUserSwapsResult",
+        "fields": [
+          {
+            "name": "items",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "UNION",
+                    "name": "SwapStatus",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedResultInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "PercentValue",
         "fields": [
           {
@@ -1814,6 +1880,10 @@
           {
             "kind": "OBJECT",
             "name": "SwapByTransaction"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
           }
         ]
       },
@@ -1941,6 +2011,29 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PermitTypedDataResponse",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "exchangeRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
                 "ofType": null
               }
             },
@@ -2816,19 +2909,13 @@
             ]
           },
           {
-            "name": "pendingSwaps",
+            "name": "userSwaps",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "SwapReceipt",
-                    "ofType": null
-                  }
-                }
+                "kind": "OBJECT",
+                "name": "PaginatedUserSwapsResult",
+                "ofType": null
               }
             },
             "args": [
@@ -3811,17 +3898,6 @@
         "name": "SwapByIntent",
         "fields": [
           {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
             "name": "quote",
             "type": {
               "kind": "NON_NULL",
@@ -3853,7 +3929,25 @@
         "name": "SwapByIntentTypeDefinition",
         "fields": [
           {
-            "name": "eip712Domain",
+            "name": "EIP712Domain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "TypeField",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "Order",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3911,6 +4005,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "message",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -3920,12 +4025,13 @@
         "name": "SwapByIntentWithApprovalRequired",
         "fields": [
           {
-            "name": "id",
+            "name": "quote",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+                "kind": "OBJECT",
+                "name": "SwapQuote",
+                "ofType": null
               }
             },
             "args": []
@@ -3937,18 +4043,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "quote",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapQuote",
                 "ofType": null
               }
             },
@@ -3973,17 +4067,6 @@
         "kind": "OBJECT",
         "name": "SwapByTransaction",
         "fields": [
-          {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
           {
             "name": "quote",
             "type": {
@@ -4017,11 +4100,8 @@
           {
             "name": "cancelledAt",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           },
@@ -4196,6 +4276,14 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "refundTxHash",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -4311,17 +4399,6 @@
               }
             },
             "args": []
-          },
-          {
-            "name": "signer",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
           }
         ],
         "interfaces": []
@@ -4330,6 +4407,17 @@
         "kind": "OBJECT",
         "name": "SwapQuote",
         "fields": [
+          {
+            "name": "quoteId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "suggestedSlippage",
             "type": {
@@ -4430,6 +4518,17 @@
         "fields": [
           {
             "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "createdAt",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
