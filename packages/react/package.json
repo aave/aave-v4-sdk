@@ -16,6 +16,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./utils": {
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs"
+    },
     "./ethers": {
       "import": "./dist/ethers.js",
       "require": "./dist/ethers.cjs"
@@ -35,6 +39,9 @@
   },
   "typesVersions": {
     "*": {
+      "utils": [
+        "./dist/utils.d.ts"
+      ],
       "ethers": [
         "./dist/ethers.d.ts"
       ],
