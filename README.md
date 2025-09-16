@@ -1,6 +1,6 @@
 # Aave SDK <!-- omit in toc -->
 
-The official SDK for Aave V3 👻.
+The official SDK for Aave V4 👻.
 
 ## Table of Contents <!-- omit in toc -->
 

@@ -11,7 +11,7 @@ const privy = new PrivyClient(
 );
 
 describe('Given a PrivyClient instance', () => {
-  describe('When using it to send Aave v3 transactions', () => {
+  describe('When using it to send Aave v4 transactions', () => {
     it.todo(
       'Then it should work as expected (within current testability constraints)',
       async () => {

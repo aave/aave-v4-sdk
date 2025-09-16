@@ -52,7 +52,7 @@ export class AaveClient extends GqlClient {
 
   /**
    * Given the transaction hash of an Aave protocol transaction, wait for the transaction to be
-   * processed by the Aave v3 API.
+   * processed by the Aave v4 API.
    *
    * Returns a {@link TimeoutError} if the transaction is not processed within the expected timeout period.
    *
