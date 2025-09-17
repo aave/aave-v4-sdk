@@ -461,18 +461,17 @@ export function setSpokeUserPositionManager(
  * const result = await preview(client, {
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
+ *       reserve: {
+ *         spoke: evmAddress('0x87870bca…'),
+ *         reserveId: reserveId(1),
  *         chainId: chainId(1),
  *       },
- *       reserve: reserveId(1),
  *       amount: {
  *         erc20: {
- *           currency: evmAddress('0x5678…'),
  *           value: '1000',
  *         },
  *       },
- *       supplier: evmAddress('0x9abc…'),
+ *       sender: evmAddress('0x9abc…'),
  *     },
  *   },
  * });
