@@ -20,7 +20,7 @@ export const dateTime = tag<DateTime>;
 /**
  * A JSON value.
  */
-export type JSONString = Tagged<string, 'JSONString'>;
+export type JSONData = Tagged<Record<string, unknown>, 'JSONData'>;
 
 /**
  * Beautify the  readout of all of the members of that intersection.

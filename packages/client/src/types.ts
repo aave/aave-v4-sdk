@@ -5,12 +5,14 @@ import type {
   ValidationError,
 } from '@aave/core-next';
 import type {
+  CancelSwapTypedData,
   ERC712Signature,
   ExecutionPlan,
   HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
   OperationType,
   PermitTypedDataResponse,
+  SwapByIntentTypedData,
 } from '@aave/graphql-next';
 import type { ResultAsync, TxHash } from '@aave/types-next';
 
@@ -40,4 +42,12 @@ export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
 
 export type PermitHandler = (
   result: PermitTypedDataResponse,
+) => ResultAsync<ERC712Signature, SigningError>;
+
+export type SwapByIntentHandler = (
+  result: SwapByIntentTypedData,
+) => ResultAsync<ERC712Signature, SigningError>;
+
+export type SwapCancelHandler = (
+  result: CancelSwapTypedData,
 ) => ResultAsync<ERC712Signature, SigningError>;

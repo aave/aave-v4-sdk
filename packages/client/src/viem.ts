@@ -5,8 +5,10 @@ import {
   ValidationError,
 } from '@aave/core-next';
 import type {
+  CancelSwapTypedData,
   InsufficientBalanceError,
   PermitTypedDataResponse,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import {
@@ -39,6 +41,8 @@ import { mainnet } from 'viem/chains';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
+  SwapByIntentHandler,
+  SwapCancelHandler,
   TransactionExecutionResult,
 } from './types';
 
@@ -169,6 +173,56 @@ export function signERC20PermitWith(walletClient: WalletClient): PermitHandler {
       (err) => SigningError.from(err),
     ).map((hex) => ({
       deadline: result.message.deadline,
+      value: signatureFrom(hex),
+    }));
+  };
+}
+
+/**
+ * Signs a swap by intent using the provided wallet client.
+ */
+export function signSwapByIntentWith(
+  walletClient: WalletClient,
+): SwapByIntentHandler {
+  return (result: SwapByIntentTypedData) => {
+    invariant(walletClient.account, 'Wallet account is required');
+
+    return ResultAsync.fromPromise(
+      signTypedData(walletClient, {
+        account: walletClient.account,
+        domain: result.domain as TypedDataDomain,
+        types: result.types as TypedData,
+        primaryType: result.primaryType,
+        message: result.message,
+      }),
+      (err) => SigningError.from(err),
+    ).map((hex) => ({
+      deadline: result.message.deadline as number,
+      value: signatureFrom(hex),
+    }));
+  };
+}
+
+/**
+ * Signs a swap cancellation using the provided wallet client.
+ */
+export function signSwapCancelWith(
+  walletClient: WalletClient,
+): SwapCancelHandler {
+  return (result: CancelSwapTypedData) => {
+    invariant(walletClient.account, 'Wallet account is required');
+
+    return ResultAsync.fromPromise(
+      signTypedData(walletClient, {
+        account: walletClient.account,
+        domain: result.domain as TypedDataDomain,
+        types: result.types as TypedData,
+        primaryType: result.primaryType,
+        message: result.message,
+      }),
+      (err) => SigningError.from(err),
+    ).map((hex) => ({
+      deadline: result.message.deadline as number,
       value: signatureFrom(hex),
     }));
   };
