@@ -7,7 +7,7 @@ import type { UnexpectedError } from '@aave/client-next';
  * - Rely on the `loading` value to determine if the `data` or `error` can be evaluated.
  * - If `error` is `undefined`, then `data` value will be available.
  */
-export type ReadResult<T, E = never> =
+export type ReadResult<T, E extends UnexpectedError = UnexpectedError> =
   | {
       data: undefined;
       error: undefined;
@@ -28,17 +28,24 @@ export type ReadResult<T, E = never> =
  * @internal
  */
 export const ReadResult = {
-  Initial: <T, E = never>(): ReadResult<T, E> => ({
+  Initial: <T, E extends UnexpectedError = UnexpectedError>(): ReadResult<
+    T,
+    E
+  > => ({
     data: undefined,
     error: undefined,
     loading: true,
   }),
-  Success: <T, E = never>(data: T): ReadResult<T, E> => ({
+  Success: <T, E extends UnexpectedError = UnexpectedError>(
+    data: T,
+  ): ReadResult<T, E> => ({
     data,
     error: undefined,
     loading: false,
   }),
-  Failure: <T, E = never>(error: E): ReadResult<T, E> => ({
+  Failure: <T, E extends UnexpectedError = UnexpectedError>(
+    error: E,
+  ): ReadResult<T, E> => ({
     data: undefined,
     error,
     loading: false,
