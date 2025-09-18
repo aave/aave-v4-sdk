@@ -4,6 +4,9 @@ import {
 } from '@aave/client-next';
 import {
   type Hub,
+  type HubAsset,
+  HubAssetsQuery,
+  type HubAssetsRequest,
   HubQuery,
   type HubRequest,
   HubsQuery,
@@ -104,6 +107,62 @@ export function useHubs({
 }): SuspendableResult<Hub[]> {
   return useSuspendableQuery({
     document: HubsQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+  });
+}
+
+export type UseHubAssetsArgs = Prettify<
+  HubAssetsRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
+ *   orderBy: HubAssetsRequestOrderBy.Name, // optional
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useHubAssets(
+  args: UseHubAssetsArgs & Suspendable,
+): SuspenseResult<HubAsset[]>;
+
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
+ *   orderBy: HubAssetsRequestOrderBy.Name, // optional
+ * });
+ * ```
+ */
+export function useHubAssets(args: UseHubAssetsArgs): ReadResult<HubAsset[]>;
+
+export function useHubAssets({
+  suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: UseHubAssetsArgs & {
+  suspense?: boolean;
+}): SuspendableResult<HubAsset[]> {
+  return useSuspendableQuery({
+    document: HubAssetsQuery,
     variables: {
       request,
       currency,
