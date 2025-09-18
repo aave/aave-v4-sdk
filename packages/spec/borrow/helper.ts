@@ -12,7 +12,7 @@ import {
 } from '@aave/types-next';
 import type { WalletClient } from 'viem';
 
-function supplyToReserve(
+export function supplyToReserve(
   client: AaveClient,
   request: SupplyRequest,
   user: WalletClient,
@@ -22,7 +22,7 @@ function supplyToReserve(
     .andThen(client.waitForTransaction);
 }
 
-function findReserveToSupply(
+export function findReserveToSupply(
   client: AaveClient,
   token: EvmAddress,
 ): ResultAsync<Reserve, Error> {
