@@ -1,3 +1,4 @@
+import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
 import { borrow, userBorrows } from '@aave/client-next/actions';
 import {
   client,
@@ -7,7 +8,6 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
-import { assertOk, bigDecimal, evmAddress } from '@aave/types-next';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve } from './helper';
 

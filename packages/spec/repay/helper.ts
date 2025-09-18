@@ -1,12 +1,12 @@
 import type { AaveClient, Reserve } from '@aave/client-next';
-import { borrow } from '@aave/client-next/actions';
-import { sendWith } from '@aave/client-next/viem';
 import {
   bigDecimal,
   type EvmAddress,
   evmAddress,
   type ResultAsync,
-} from '@aave/types-next';
+} from '@aave/client-next';
+import { borrow } from '@aave/client-next/actions';
+import { sendWith } from '@aave/client-next/viem';
 import type { WalletClient } from 'viem';
 import { findReserveToSupply, supplyToReserve } from '../borrow/helper';
 

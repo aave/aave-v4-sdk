@@ -1,6 +1,4 @@
 import type { AaveClient, Reserve, SupplyRequest } from '@aave/client-next';
-import { reserves, supply } from '@aave/client-next/actions';
-import { sendWith } from '@aave/client-next/viem';
 import {
   bigDecimal,
   chainId,
@@ -9,7 +7,9 @@ import {
   invariant,
   type ResultAsync,
   type TxHash,
-} from '@aave/types-next';
+} from '@aave/client-next';
+import { reserves, supply } from '@aave/client-next/actions';
+import { sendWith } from '@aave/client-next/viem';
 import type { WalletClient } from 'viem';
 
 export function supplyToReserve(
