@@ -26,8 +26,6 @@ import {
 import type {
   ActivityType,
   ApyMetric,
-  BestBorrowReserveFilter,
-  BestSupplyReserveFilter,
   ChainsFilter,
   Currency,
   HubAssetStatusType,
@@ -35,7 +33,7 @@ import type {
   OperationType,
   OrderDirection,
   PageSize,
-  ReservesFilterRequest,
+  ReservesRequestFilter,
   SwapKind,
   SwapStatusFilter,
   TimeWindow,
@@ -52,8 +50,6 @@ export const graphql = initGraphQLTada<{
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
     AssetId: ID;
-    BestBorrowReserveFilter: BestBorrowReserveFilter;
-    BestSupplyReserveFilter: BestSupplyReserveFilter;
     BigDecimal: BigDecimal;
     BigInt: bigint;
     BlockchainData: BlockchainData;
@@ -73,7 +69,7 @@ export const graphql = initGraphQLTada<{
     OrderDirection: OrderDirection;
     PageSize: PageSize;
     ReserveId: ReserveId;
-    ReservesFilterRequest: ReservesFilterRequest;
+    ReservesFilterRequest: ReservesRequestFilter;
     Signature: Signature;
     String: string;
     SwapId: SwapId;

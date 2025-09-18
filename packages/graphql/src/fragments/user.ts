@@ -86,12 +86,6 @@ export const UserPositionFragment = graphql(
       ...Spoke
     }
     user
-    supplies {
-      ...UserSupplyItem
-    }
-    borrows {
-      ...UserBorrowItem
-    }
     netApy {
       ...PercentValue
     }
@@ -135,8 +129,6 @@ export const UserPositionFragment = graphql(
     FiatAmountWithChangeFragment,
     PercentValueWithChangeFragment,
     HealthFactorChangeFragment,
-    UserSupplyItemFragment,
-    UserBorrowItemFragment,
   ],
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
