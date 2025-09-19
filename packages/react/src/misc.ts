@@ -76,7 +76,7 @@ export function useAaveChains({
  *
  * const result = await getExchangeRate({
  *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
- *   to: Currency.USD,
+ *   to: Currency.Usd,
  * });
  *
  * if (result.isErr()) {
@@ -114,7 +114,7 @@ export type UseLiveExchangeRateArgs = ExchangeRateRequest;
  *       address: evmAddress('0xA0b86a33E6...')
  *     }
  *   },
- *   to: Currency.USD,
+ *   to: Currency.Usd,
  *   suspense: true,
  * });
  * ```
@@ -134,7 +134,7 @@ export function useLiveExchangeRate(
  *       address: evmAddress('0xA0b86a33E6...')
  *     }
  *   },
- *   to: Currency.USD,
+ *   to: Currency.Usd,
  * });
  *
  * <Component value={somewhere} fxRate={data} />

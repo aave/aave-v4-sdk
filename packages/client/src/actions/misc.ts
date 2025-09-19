@@ -54,7 +54,7 @@ export function hasProcessedKnownTransaction(
  * ```ts
  * const result = await exchangeRate(client, {
  *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
- *   to: Currency.USD,
+ *   to: Currency.Usd,
  * });
  * ```
  *
