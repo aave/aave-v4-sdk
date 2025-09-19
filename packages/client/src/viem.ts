@@ -2,6 +2,7 @@ import {
   CancelError,
   SigningError,
   TransactionError,
+  UnexpectedError,
   ValidationError,
 } from '@aave/core-next';
 import type {
@@ -23,7 +24,6 @@ import {
 import {
   type Chain,
   type defineChain,
-  type Hash,
   TransactionExecutionError,
   type TypedData,
   type TypedDataDomain,
@@ -39,7 +39,7 @@ import { mainnet } from 'viem/chains';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
-  TransactionExecutionResult,
+  TransactionResult,
 } from './types';
 
 /**
@@ -52,17 +52,37 @@ export const supportedChains: Record<
   [chainId(mainnet.id)]: mainnet,
 };
 
-async function sendTransaction(
+/**
+ * @internal
+ */
+export function sendTransaction(
   walletClient: WalletClient,
   request: TransactionRequest,
-): Promise<Hash> {
-  return sendEip1559Transaction(walletClient, {
-    account: request.from,
-    data: request.data,
-    to: request.to,
-    value: BigInt(request.value),
-    chain: walletClient.chain,
-  });
+): ResultAsync<TxHash, CancelError | SigningError> {
+  // TODO: verify it's on the correct chain, ask to switch if possible
+  // TODO: verify if wallet account is correct, switch if possible
+
+  return ResultAsync.fromPromise(
+    sendEip1559Transaction(walletClient, {
+      account: request.from,
+      data: request.data,
+      to: request.to,
+      value: BigInt(request.value),
+      chain: walletClient.chain,
+    }),
+    (err) => {
+      if (err instanceof TransactionExecutionError) {
+        const rejected = err.walk(
+          (err) => err instanceof UserRejectedRequestError,
+        );
+
+        if (rejected) {
+          return CancelError.from(rejected);
+        }
+      }
+      return SigningError.from(err);
+    },
+  ).map(txHash);
 }
 
 /**
@@ -82,50 +102,52 @@ export function transactionError(
 /**
  * @internal
  */
-export function sendTransactionAndWait(
+export function waitForTransactionResult(
+  walletClient: WalletClient,
+  request: TransactionRequest,
+  initialTxHash: TxHash,
+): ResultAsync<
+  TransactionResult,
+  CancelError | TransactionError | UnexpectedError
+> {
+  return ResultAsync.fromPromise(
+    waitForTransactionReceipt(walletClient, {
+      hash: initialTxHash,
+      pollingInterval: 100,
+      retryCount: 20,
+      retryDelay: 50,
+    }),
+    (err) => UnexpectedError.from(err),
+  ).andThen((receipt) => {
+    const hash = txHash(receipt.transactionHash);
+
+    switch (receipt.status) {
+      case 'reverted':
+        if (initialTxHash !== hash) {
+          return errAsync(CancelError.from(`Transaction replaced by ${hash}`));
+        }
+        return errAsync(transactionError(walletClient.chain, hash, request));
+      case 'success':
+        return okAsync({
+          // viem's waitForTransactionReceipt supports transaction replacement
+          // so it's important to use the transaction hash from the receipt
+          txHash: hash,
+          operations: request.operations,
+        });
+    }
+  });
+}
+
+function sendTransactionAndWait(
   walletClient: WalletClient,
   request: TransactionRequest,
 ): ResultAsync<
-  TransactionExecutionResult,
-  CancelError | SigningError | TransactionError
+  TransactionResult,
+  CancelError | SigningError | TransactionError | UnexpectedError
 > {
-  // TODO: verify it's on the correct chain, ask to switch if possible
-  // TODO: verify if wallet account is correct, switch if possible
-
-  return ResultAsync.fromPromise(
-    sendTransaction(walletClient, request),
-    (err) => {
-      if (err instanceof TransactionExecutionError) {
-        const rejected = err.walk(
-          (err) => err instanceof UserRejectedRequestError,
-        );
-
-        if (rejected) {
-          return CancelError.from(rejected);
-        }
-      }
-      return SigningError.from(err);
-    },
-  )
-    .map(async (hash) =>
-      waitForTransactionReceipt(walletClient, {
-        hash,
-        pollingInterval: 100,
-        retryCount: 20,
-        retryDelay: 50,
-      }),
-    )
-    .andThen((receipt) => {
-      const hash = txHash(receipt.transactionHash);
-
-      if (receipt.status === 'reverted') {
-        return errAsync(transactionError(walletClient.chain, hash, request));
-      }
-      return okAsync({
-        txHash: hash,
-        operations: request.operations,
-      });
-    });
+  return sendTransaction(walletClient, request).andThen((hash) =>
+    waitForTransactionResult(walletClient, request, hash),
+  );
 }
 
 /**

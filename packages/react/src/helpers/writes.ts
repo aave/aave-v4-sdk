@@ -1,3 +1,4 @@
+import type { TransactionResult } from '@aave/client-next';
 import {
   CancelError,
   type SigningError,
@@ -6,45 +7,56 @@ import {
   type UnexpectedError,
 } from '@aave/core-next';
 import type { ApprovalRequired, TransactionRequest } from '@aave/graphql-next';
-import type { ResultAsync, TxHash } from '@aave/types-next';
+import type { ResultAsync } from '@aave/types-next';
 import type { UseAsyncTask } from './tasks';
 
-export type SendTransactionError =
-  | CancelError
-  | SigningError
-  | TimeoutError
-  | TransactionError
-  | UnexpectedError;
-
-export type UseSendTransactionResult = UseAsyncTask<
-  TransactionRequest,
-  TxHash,
-  SendTransactionError
->;
+/**
+ * The errors that could occur in the early stage of sending a transaction.
+ */
+export type SendTransactionError = CancelError | SigningError | UnexpectedError;
 
 /**
  * @internal
  */
-export function cancel(message: string): ResultAsync<unknown, CancelError> {
+export function cancel(message: string): ResultAsync<never, CancelError> {
   return CancelError.from(message).asResultAsync();
 }
 
 export type TransactionHandlerOptions = {
-  cancel: (message: string) => ResultAsync<unknown, CancelError>;
+  cancel: (message: string) => ResultAsync<never, CancelError>;
 };
 
 /**
- * A handler for complex transactions that can require approval beforehand.
+ * The errors that could occur in the late stages of a transaction.
  */
-export type ComplexTransactionHandler = (
-  result: TransactionRequest | ApprovalRequired,
-  options: TransactionHandlerOptions,
-) => ResultAsync<TxHash, SendTransactionError>;
+export type PendingTransactionError =
+  | CancelError
+  | TimeoutError
+  | TransactionError
+  | UnexpectedError;
+
+export class PendingTransaction {
+  constructor(
+    /**
+     * @internal Do NOT use this method. It's used internally by the SDK and may be subject to breaking changes.
+     */
+    public readonly wait: () => ResultAsync<
+      TransactionResult,
+      PendingTransactionError
+    >,
+  ) {}
+}
+
+export type UseSendTransactionResult = UseAsyncTask<
+  TransactionRequest,
+  PendingTransaction,
+  SendTransactionError
+>;
 
 /**
- * A handler for simple transactions that do not require approval.
+ * The handler for sending Aave transactions.
  */
-export type SimpleTransactionHandler = (
-  result: TransactionRequest,
+export type TransactionHandler = (
+  result: TransactionRequest | ApprovalRequired,
   options: TransactionHandlerOptions,
-) => ResultAsync<TxHash, SendTransactionError>;
+) => ResultAsync<PendingTransaction, SendTransactionError>;

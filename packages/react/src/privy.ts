@@ -1,8 +1,9 @@
 import { SigningError, UnexpectedError } from '@aave/client-next';
 import { permitTypedData } from '@aave/client-next/actions';
 import {
-  sendTransactionAndWait,
+  sendTransaction,
   supportedChains,
+  waitForTransactionResult,
 } from '@aave/client-next/viem';
 import type {
   ERC712Signature,
@@ -14,6 +15,7 @@ import { useSignTypedData, useWallets } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import { useAaveClient } from './context';
 import {
+  PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
@@ -29,7 +31,6 @@ import {
  * ```
  */
 export function useSendTransaction(): UseSendTransactionResult {
-  const client = useAaveClient();
   const { wallets } = useWallets();
 
   return useAsyncTask((request: TransactionRequest) => {
@@ -45,16 +46,21 @@ export function useSendTransaction(): UseSendTransactionResult {
       (error) => UnexpectedError.from(error),
     )
       .map(() => wallet.getEthereumProvider())
-      .andThen((provider) => {
-        const walletClient = createWalletClient({
+      .map((provider) =>
+        createWalletClient({
           account: request.from,
           chain: supportedChains[request.chainId],
           transport: custom(provider),
-        });
-
-        return sendTransactionAndWait(walletClient, request);
-      })
-      .andThen(client.waitForSupportedTransaction);
+        }),
+      )
+      .andThen((walletClient) =>
+        sendTransaction(walletClient, request).map(
+          (hash) =>
+            new PendingTransaction(() =>
+              waitForTransactionResult(walletClient, request, hash),
+            ),
+        ),
+      );
   });
 }
 

@@ -2,6 +2,7 @@ import type {
   CancelError,
   SigningError,
   TransactionError,
+  UnexpectedError,
   ValidationError,
 } from '@aave/core-next';
 import type {
@@ -14,7 +15,10 @@ import type {
 } from '@aave/graphql-next';
 import type { ResultAsync, TxHash } from '@aave/types-next';
 
-export type TransactionExecutionResult = {
+/**
+ * @internal
+ */
+export type TransactionResult = {
   txHash: TxHash;
   operations: OperationType[] | null;
 };
@@ -23,7 +27,7 @@ export type TransactionExecutionResult = {
  * @internal
  */
 export function isHasProcessedKnownTransactionRequest(
-  result: TransactionExecutionResult,
+  result: TransactionResult,
 ): result is HasProcessedKnownTransactionRequest {
   return result.operations !== null && result.operations.length > 0;
 }
@@ -32,11 +36,12 @@ export type SendWithError =
   | CancelError
   | SigningError
   | TransactionError
-  | ValidationError<InsufficientBalanceError>;
+  | ValidationError<InsufficientBalanceError>
+  | UnexpectedError;
 
 export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
   result: T,
-) => ResultAsync<TransactionExecutionResult, SendWithError>;
+) => ResultAsync<TransactionResult, SendWithError>;
 
 export type PermitHandler = (
   result: PermitTypedDataResponse,
