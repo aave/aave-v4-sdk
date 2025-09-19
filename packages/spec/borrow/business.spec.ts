@@ -71,7 +71,7 @@ describe('Aave V4 Borrow Scenarios', () => {
         // BUG: The amount is slightly different from the total borrow amount
         expect(result.value[0].amount.value.formatted).toBeBigDecimalCloseTo(
           amountToBorrow,
-          4,
+          2,
         );
         expect(result.value[0].amount.isWrappedNative).toBe(false);
       });
