@@ -8,7 +8,7 @@ import type {
   DateTime,
   EvmAddress,
   ID,
-  JSONData,
+  JSONString,
   ReserveId,
   Signature,
   SwapId,
@@ -77,7 +77,7 @@ export const graphql = initGraphQLTada<{
     SwapQuoteId: SwapQuoteId;
     SwapStatusFilter: SwapStatusFilter;
     TimeWindow: TimeWindow;
-    JSON: JSONData;
+    JSON: JSONString;
     TxHash: TxHash;
     UserPositionId: UserPositionId;
     Void: Void;

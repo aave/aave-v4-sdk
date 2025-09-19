@@ -193,11 +193,11 @@ export function signSwapByIntentWith(
         domain: result.domain as TypedDataDomain,
         types: result.types as TypedData,
         primaryType: result.primaryType,
-        message: result.message,
+        message: JSON.parse(result.message),
       }),
       (err) => SigningError.from(err),
     ).map((hex) => ({
-      deadline: result.message.deadline as number,
+      deadline: JSON.parse(result.message).deadline,
       value: signatureFrom(hex),
     }));
   };
@@ -218,11 +218,11 @@ export function signSwapCancelWith(
         domain: result.domain as TypedDataDomain,
         types: result.types as TypedData,
         primaryType: result.primaryType,
-        message: result.message,
+        message: JSON.parse(result.message),
       }),
       (err) => SigningError.from(err),
     ).map((hex) => ({
-      deadline: result.message.deadline as number,
+      deadline: JSON.parse(result.message).deadline,
       value: signatureFrom(hex),
     }));
   };
