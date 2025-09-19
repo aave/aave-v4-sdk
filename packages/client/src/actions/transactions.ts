@@ -71,18 +71,20 @@ export function borrow(
  *
  * ```ts
  * const result = await supply(client, {
+ *   reserve: {
+ *     reserveId: "1234567890",
+ *     spoke: evmAddress('0x8787…'),
+ *     chainId: chainId(1),
+ *   },
  *   amount: {
  *     erc20: {
  *       value: bigDecimal('1000'),
  *     },
  *   },
+ *   enableCollateral: true, // Optional, defaults to true
  *   sender: evmAddress('0x9abc…'),
- *   reserve: {
- *     spoke: evmAddress('0x87870bca…'),
- *     reserveId: reserveId(1),
- *     chainId: chainId(1),
- *   },
- * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *   // onBehalfOf: evmAddress('0xdef0…'), // Optional, if supplying on behalf of another user
+ * });
  *
  * if (result.isErr()) {
  *   // Handle error, e.g. insufficient balance, signing error, etc.
