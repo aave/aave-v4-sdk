@@ -93,8 +93,6 @@ export const exchange = cacheExchange({
     // Value objects and result types
     ApprovalRequired: () => null,
     APYSample: () => null,
-    BigDecimalVariation: () => null,
-    BigDecimalWithChange: () => null,
     CancelSwapTypedData: () => null,
     CancelSwapTypeDefinition: () => null,
     DecimalValue: () => null,

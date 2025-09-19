@@ -25,7 +25,7 @@ export const staging: EnvironmentConfig = {
  */
 export const local: EnvironmentConfig = {
   name: 'local',
-  backend: 'http://localhost:3011/graphql',
+  backend: 'http://localhost:3007/graphql',
   indexingTimeout: 60_000,
   pollingInterval: 1000,
 };
