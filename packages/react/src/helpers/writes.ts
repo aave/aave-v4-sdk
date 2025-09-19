@@ -8,6 +8,7 @@ import {
 } from '@aave/core-next';
 import type { ApprovalRequired, TransactionRequest } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
+import { invariant } from '@aave/types-next';
 import type { UseAsyncTask } from './tasks';
 
 /**
@@ -15,15 +16,18 @@ import type { UseAsyncTask } from './tasks';
  */
 export type SendTransactionError = CancelError | SigningError | UnexpectedError;
 
+export type CancelOperation = (
+  message: string,
+) => ResultAsync<never, CancelError>;
+
 /**
  * @internal
  */
-export function cancel(message: string): ResultAsync<never, CancelError> {
-  return CancelError.from(message).asResultAsync();
-}
+export const cancel: CancelOperation = (message: string) =>
+  CancelError.from(message).asResultAsync();
 
 export type TransactionHandlerOptions = {
-  cancel: (message: string) => ResultAsync<never, CancelError>;
+  cancel: CancelOperation;
 };
 
 /**
@@ -38,13 +42,24 @@ export type PendingTransactionError =
 export class PendingTransaction {
   constructor(
     /**
-     * @internal Do NOT use this method. It's used internally by the SDK and may be subject to breaking changes.
+     * @internal Do NOT rely on this method. It's used internally by the SDK and may be subject to breaking changes.
      */
     public readonly wait: () => ResultAsync<
       TransactionResult,
       PendingTransactionError
     >,
   ) {}
+
+  /**
+   * @internal
+   */
+  static ensure<T>(value: T): PendingTransaction & T {
+    invariant(
+      value instanceof PendingTransaction,
+      'Expected PendingTransaction',
+    );
+    return value as PendingTransaction & T;
+  }
 }
 
 export type UseSendTransactionResult = UseAsyncTask<
