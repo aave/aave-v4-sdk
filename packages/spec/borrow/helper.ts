@@ -5,6 +5,7 @@ import {
   type EvmAddress,
   evmAddress,
   invariant,
+  ReservesRequestFilter,
   type ResultAsync,
   type TxHash,
 } from '@aave/client-next';
@@ -35,6 +36,7 @@ export function findReserveToSupply(
         },
       ],
     },
+    filter: ReservesRequestFilter.Supply,
   }).map((listReserves) => {
     invariant(
       listReserves.length > 0,
