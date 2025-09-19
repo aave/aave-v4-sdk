@@ -14,7 +14,7 @@ export const ReserveSettingsFragment = graphql(
     collateralFactor {
       ...PercentValue
     }
-    liquidationBonus {
+    maxLiquidationBonus {
       ...PercentValue
     }
     collateralRisk {
