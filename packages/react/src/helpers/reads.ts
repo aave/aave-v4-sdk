@@ -1,7 +1,7 @@
 import { type StandardData, UnexpectedError } from '@aave/client-next';
 import { type AnyVariables, identity, invariant } from '@aave/types-next';
-import { useMemo } from 'react';
-import { type TypedDocumentNode, useQuery } from 'urql';
+import { useEffect, useMemo } from 'react';
+import { type RequestPolicy, type TypedDocumentNode, useQuery } from 'urql';
 import { ReadResult, type SuspendableResult } from './results';
 
 export type Selector<T, V> = (data: T) => V;
@@ -21,6 +21,8 @@ export type UseSuspendableQueryArgs<
   variables: Variables;
   suspense: Suspense;
   selector?: Selector<Value, Output>;
+  pollInterval?: number;
+  requestPolicy?: RequestPolicy;
 };
 
 /**
@@ -35,16 +37,42 @@ export function useSuspendableQuery<
   variables,
   suspense,
   selector = identity as Selector<Value, Output>,
+  pollInterval,
+  requestPolicy,
 }: UseSuspendableQueryArgs<
   Value,
   Output,
   Variables
 >): SuspendableResult<Output> {
-  const [{ data, fetching, error }] = useQuery({
+  const [result, executeQuery] = useQuery({
     query: document,
     variables,
-    context: useMemo(() => ({ suspense }), [suspense]),
+    context: useMemo(
+      () => ({
+        suspense,
+        ...(requestPolicy && { requestPolicy }),
+      }),
+      [suspense, requestPolicy],
+    ),
   });
+
+  useEffect(() => {
+    if (!pollInterval || pollInterval <= 0) return undefined;
+
+    if (!result.fetching) {
+      const timerId = setTimeout(() => {
+        executeQuery({
+          requestPolicy: requestPolicy || 'cache-and-network',
+        });
+      }, pollInterval);
+
+      return () => clearTimeout(timerId);
+    }
+
+    return undefined;
+  }, [result.fetching, executeQuery, pollInterval, requestPolicy]);
+
+  const { data, fetching, error } = result;
 
   if (fetching) {
     return ReadResult.Initial();

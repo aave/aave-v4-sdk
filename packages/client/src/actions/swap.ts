@@ -2,8 +2,6 @@ import { delay, TimeoutError, UnexpectedError } from '@aave/core-next';
 import type {
   CancelSwapExecutionPlan,
   CancelSwapRequest,
-  ExchangeRateRequest,
-  FiatAmount,
   PaginatedUserSwapsResult,
   PrepareSwapCancelRequest,
   PrepareSwapCancelResult,
@@ -25,7 +23,6 @@ import type {
 } from '@aave/graphql-next';
 import {
   CancelSwapQuery,
-  ExchangeRateQuery,
   PrepareSwapCancelQuery,
   PrepareSwapQuery,
   SwappableTokensQuery,
@@ -365,25 +362,4 @@ export function userSwaps(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedUserSwapsResult, UnexpectedError> {
   return client.query(UserSwapsQuery, { request, ...options });
-}
-
-/**
- * Fetches the exchange rate between tokens and fiat currencies.
- *
- * ```ts
- * const result = await exchangeRate(client, {
- *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
- *   to: Currency.USD,
- * });
- * ```
- *
- * @param client - Aave client.
- * @param request - The exchange rate request parameters.
- * @returns The exchange rate information as a fiat amount.
- */
-export function exchangeRate(
-  client: AaveClient,
-  request: ExchangeRateRequest,
-): ResultAsync<FiatAmount, UnexpectedError> {
-  return client.query(ExchangeRateQuery, { request });
 }

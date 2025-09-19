@@ -1,4 +1,4 @@
-import { FiatAmountFragment, TokenFragment } from './fragments/common';
+import { TokenFragment } from './fragments/common';
 import {
   CancelSwapExecutionPlanFragment,
   PaginatedUserSwapsResultFragment,
@@ -113,16 +113,3 @@ export const UserSwapsQuery = graphql(
   [PaginatedUserSwapsResultFragment],
 );
 export type UserSwapsRequest = RequestOf<typeof UserSwapsQuery>;
-
-/**
- * @internal
- */
-export const ExchangeRateQuery = graphql(
-  `query ExchangeRate($request: ExchangeRateRequest!) {
-    value: exchangeRate(request: $request) {
-      ...FiatAmount
-    }
-  }`,
-  [FiatAmountFragment],
-);
-export type ExchangeRateRequest = RequestOf<typeof ExchangeRateQuery>;
