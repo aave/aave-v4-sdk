@@ -137,10 +137,12 @@ export function fundNativeAddress(
 }
 
 export function fundErc20Address(
-  tokenAddress: EvmAddress,
   address: EvmAddress,
-  amount: BigDecimal,
-  decimals = 18,
+  token: {
+    address: EvmAddress;
+    amount: BigDecimal;
+    decimals?: number;
+  },
 ): ResultAsync<string, UnexpectedError> {
   const publicClient = createPublicClient({
     chain: {
@@ -156,14 +158,14 @@ export function fundErc20Address(
   });
 
   // Convert amount to the smallest unit (e.g., wei for 18 decimals)
-  const amountInSmallestUnit = parseUnits(amount, decimals);
+  const amountInSmallestUnit = parseUnits(token.amount, token.decimals ?? 18);
   const amountHex = `0x${amountInSmallestUnit.toString(16)}`;
 
   return ResultAsync.fromPromise(
     publicClient
       .request<TSetErc20BalanceRpc>({
         method: 'tenderly_setErc20Balance',
-        params: [tokenAddress, address, amountHex],
+        params: [token.address, address, amountHex],
       })
       .then(async (res) => {
         await wait(500); // Temporal fix to avoid tenderly issues with the balance not being set

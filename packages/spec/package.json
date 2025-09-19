@@ -8,7 +8,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aave/client-next": "workspace:*"
+    "@aave/client-next": "workspace:*",
+    "type-fest": "^4.41.0"
+
   },
   "devDependencies": {
     "typescript": "^5.9.2",
