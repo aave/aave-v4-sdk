@@ -6,7 +6,6 @@ import {
   signSwapTypedDataWith,
 } from '@aave/client-next/viem';
 import type {
-  CancelSwapTypedData,
   ERC712Signature,
   PermitTypedDataRequest,
   SwapByIntentTypedData,
