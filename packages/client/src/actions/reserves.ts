@@ -24,7 +24,7 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
  *       chainId: chainId(1)
  *     }
  *   },
- *   filter: ReservesFilterRequest.All,
+ *   filter: ReservesRequestFilter.All,
  *   orderBy: { name: 'ASC' }
  * });
  * ```

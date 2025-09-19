@@ -50,6 +50,7 @@ import {
 } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
+  type PendingTransactionError,
   type ReadResult,
   type SendTransactionError,
   type Suspendable,
@@ -247,7 +248,7 @@ export type SwapHandler = (
   intent: SwapIntent,
 ) => ResultAsync<
   ERC712Signature | SwapReceipt,
-  SendTransactionError | UnexpectedError
+  SendTransactionError | PendingTransactionError
 >;
 
 function isERC712Signature(signature: unknown): signature is ERC712Signature {
@@ -308,7 +309,9 @@ export function useSwapTokens(
 ): UseAsyncTask<
   PrepareSwapRequest,
   SwapReceipt,
-  SendTransactionError | ValidationError<InsufficientBalanceError>
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
@@ -316,7 +319,9 @@ export function useSwapTokens(
     plan: SwapExecutionPlan,
   ): ResultAsync<
     SwapReceipt,
-    SendTransactionError | ValidationError<InsufficientBalanceError>
+    | SendTransactionError
+    | PendingTransactionError
+    | ValidationError<InsufficientBalanceError>
   > {
     switch (plan.__typename) {
       case 'SwapTransactionRequest':

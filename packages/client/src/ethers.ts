@@ -1,6 +1,7 @@
 import {
   SigningError,
   TransactionError,
+  UnexpectedError,
   ValidationError,
 } from '@aave/core-next';
 import type {
@@ -20,48 +21,64 @@ import type { Signer, TransactionResponse } from 'ethers';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
-  TransactionExecutionResult,
+  TransactionResult,
 } from './types';
 
-async function sendTransaction(
+/**
+ * @internal
+ */
+export function sendTransaction(
   signer: Signer,
   request: TransactionRequest,
-): Promise<TransactionResponse> {
-  return signer.sendTransaction({
-    to: request.to,
-    data: request.data,
-    value: request.value,
-    from: request.from,
-  });
+): ResultAsync<TransactionResponse, SigningError> {
+  return ResultAsync.fromPromise(
+    signer.sendTransaction({
+      to: request.to,
+      data: request.data,
+      value: request.value,
+      from: request.from,
+    }),
+    (err) => SigningError.from(err),
+  );
 }
 
 /**
  * @internal
  */
-export function sendTransactionAndWait(
+export function waitForTransactionResult(
+  request: TransactionRequest,
+  response: TransactionResponse,
+): ResultAsync<TransactionResult, TransactionError | UnexpectedError> {
+  return ResultAsync.fromPromise(response.wait(), (err) =>
+    UnexpectedError.from(err),
+  ).andThen((receipt) => {
+    const hash = txHash(nonNullable(receipt?.hash));
+
+    if (receipt?.status === 0) {
+      return errAsync(
+        TransactionError.new({
+          txHash: hash,
+          request,
+        }),
+      );
+    }
+    return okAsync({
+      txHash: hash,
+      operations: request.operations, // TODO: check if this is correct
+    });
+  });
+}
+
+function sendTransactionAndWait(
   signer: Signer,
   request: TransactionRequest,
-): ResultAsync<TransactionExecutionResult, SigningError | TransactionError> {
-  return ResultAsync.fromPromise(sendTransaction(signer, request), (err) =>
-    SigningError.from(err),
-  )
-    .map((tx) => tx.wait())
-    .andThen((receipt) => {
-      const hash = txHash(nonNullable(receipt?.hash));
-
-      if (receipt?.status === 0) {
-        return errAsync(
-          TransactionError.new({
-            txHash: hash,
-            request,
-          }),
-        );
-      }
-      return okAsync({
-        txHash: hash,
-        operations: request.operations, // TODO: check if this is correct
-      });
-    });
+): ResultAsync<
+  TransactionResult,
+  SigningError | TransactionError | UnexpectedError
+> {
+  return sendTransaction(signer, request).andThen((tx) =>
+    waitForTransactionResult(request, tx),
+  );
 }
 
 /**

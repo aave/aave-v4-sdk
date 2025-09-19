@@ -9,7 +9,6 @@ import type { HasProcessedKnownTransactionRequest } from '@aave/graphql-next';
 import {
   type AnyVariables,
   invariant,
-  okAsync,
   ResultAsync,
   type TxHash,
 } from '@aave/types-next';
@@ -18,7 +17,7 @@ import { hasProcessedKnownTransaction } from './actions';
 import { type ClientConfig, configureContext } from './config';
 import {
   isHasProcessedKnownTransactionRequest,
-  type TransactionExecutionResult,
+  type TransactionResult,
 } from './types';
 
 export class AaveClient extends GqlClient {
@@ -39,18 +38,6 @@ export class AaveClient extends GqlClient {
   }
 
   /**
-   * @internal
-   */
-  readonly waitForSupportedTransaction = (
-    result: TransactionExecutionResult,
-  ): ResultAsync<TxHash, TimeoutError | UnexpectedError> => {
-    if (isHasProcessedKnownTransactionRequest(result)) {
-      return this.waitForTransaction(result);
-    }
-    return okAsync(result.txHash);
-  };
-
-  /**
    * Given the transaction hash of an Aave protocol transaction, wait for the transaction to be
    * processed by the Aave v4 API.
    *
@@ -60,7 +47,7 @@ export class AaveClient extends GqlClient {
    * @returns The transaction hash or a TimeoutError
    */
   readonly waitForTransaction = (
-    result: TransactionExecutionResult,
+    result: TransactionResult,
   ): ResultAsync<TxHash, TimeoutError | UnexpectedError> => {
     invariant(
       isHasProcessedKnownTransactionRequest(result),

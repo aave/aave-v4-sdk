@@ -44,10 +44,10 @@ import {
 import { errAsync, type TxHash } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
-  type ComplexTransactionHandler,
   cancel,
+  type PendingTransactionError,
   type SendTransactionError,
-  type SimpleTransactionHandler,
+  type TransactionHandler,
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
@@ -177,11 +177,13 @@ function refreshQueriesForReserveChange(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useSupply(
-  handler: ComplexTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   SupplyRequest,
   TxHash,
-  SendTransactionError | ValidationError<InsufficientBalanceError>
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
@@ -190,8 +192,16 @@ export function useSupply(
       .andThen((plan) => {
         switch (plan.__typename) {
           case 'TransactionRequest':
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
+
           case 'ApprovalRequired':
-            return handler(plan, { cancel });
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(() => handler(plan.originalTransaction, { cancel }))
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
 
           case 'InsufficientBalanceError':
             return errAsync(ValidationError.fromGqlNode(plan));
@@ -271,11 +281,13 @@ export function useSupplyAction(): UseAsyncTask<
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useBorrow(
-  handler: ComplexTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   BorrowRequest,
   TxHash,
-  SendTransactionError | ValidationError<InsufficientBalanceError>
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
@@ -284,8 +296,16 @@ export function useBorrow(
       .andThen((plan) => {
         switch (plan.__typename) {
           case 'TransactionRequest':
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
+
           case 'ApprovalRequired':
-            return handler(plan, { cancel });
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(() => handler(plan.originalTransaction, { cancel }))
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
 
           case 'InsufficientBalanceError':
             return errAsync(ValidationError.fromGqlNode(plan));
@@ -365,11 +385,13 @@ export function useBorrowAction(): UseAsyncTask<
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useRepay(
-  handler: ComplexTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   RepayRequest,
   TxHash,
-  SendTransactionError | ValidationError<InsufficientBalanceError>
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
@@ -378,8 +400,16 @@ export function useRepay(
       .andThen((plan) => {
         switch (plan.__typename) {
           case 'TransactionRequest':
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
+
           case 'ApprovalRequired':
-            return handler(plan, { cancel });
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(() => handler(plan.originalTransaction, { cancel }))
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
 
           case 'InsufficientBalanceError':
             return errAsync(ValidationError.fromGqlNode(plan));
@@ -459,11 +489,13 @@ export function useRepayAction(): UseAsyncTask<
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useWithdraw(
-  handler: ComplexTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   WithdrawRequest,
   TxHash,
-  SendTransactionError | ValidationError<InsufficientBalanceError>
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
@@ -472,8 +504,16 @@ export function useWithdraw(
       .andThen((plan) => {
         switch (plan.__typename) {
           case 'TransactionRequest':
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
+
           case 'ApprovalRequired':
-            return handler(plan, { cancel });
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(() => handler(plan.originalTransaction, { cancel }))
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
 
           case 'InsufficientBalanceError':
             return errAsync(ValidationError.fromGqlNode(plan));
@@ -543,17 +583,19 @@ export function useWithdrawAction(): UseAsyncTask<
  */
 
 export function useRenounceSpokeUserPositionManager(
-  handler: SimpleTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   RenounceSpokeUserPositionManagerRequest,
   TxHash,
-  SendTransactionError
+  SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
 
   return useAsyncTask((request: RenounceSpokeUserPositionManagerRequest) =>
     renounceSpokeUserPositionManager(client, request)
       .andThen((transaction) => handler(transaction, { cancel }))
+      .andThen((pendingTransaction) => pendingTransaction.wait())
+      .andThen(client.waitForTransaction)
       .andTee(() =>
         client.refreshQueryWhere(
           SpokePositionManagersQuery,
@@ -629,13 +671,19 @@ export function useRenounceSpokeUserPositionManagerAction(): UseAsyncTask<
  */
 
 export function useUpdateUserRiskPremium(
-  handler: SimpleTransactionHandler,
-): UseAsyncTask<UpdateUserRiskPremiumRequest, TxHash, SendTransactionError> {
+  handler: TransactionHandler,
+): UseAsyncTask<
+  UpdateUserRiskPremiumRequest,
+  TxHash,
+  SendTransactionError | PendingTransactionError
+> {
   const client = useAaveClient();
 
   return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
     updateUserRiskPremium(client, request)
       .andThen((transaction) => handler(transaction, { cancel }))
+      .andThen((pendingTransaction) => pendingTransaction.wait())
+      .andThen(client.waitForTransaction)
       .andTee(async () =>
         Promise.all([
           client.refreshQueryWhere(
@@ -724,15 +772,20 @@ export function useUpdateUserRiskPremiumAction(): UseAsyncTask<
  */
 
 export function useUpdateUserDynamicConfig(
-  handler: SimpleTransactionHandler,
-): UseAsyncTask<UpdateUserDynamicConfigRequest, TxHash, SendTransactionError> {
+  handler: TransactionHandler,
+): UseAsyncTask<
+  UpdateUserDynamicConfigRequest,
+  TxHash,
+  SendTransactionError | PendingTransactionError
+> {
   const client = useAaveClient();
 
   // TODO update relevant active queries once the location of dynamic config is clarified
   return useAsyncTask((request: UpdateUserDynamicConfigRequest) =>
-    updateUserDynamicConfig(client, request).andThen((transaction) =>
-      handler(transaction, { cancel }),
-    ),
+    updateUserDynamicConfig(client, request)
+      .andThen((transaction) => handler(transaction, { cancel }))
+      .andThen((pendingTransaction) => pendingTransaction.wait())
+      .andThen(client.waitForTransaction),
   );
 }
 
@@ -805,17 +858,19 @@ export function useUpdateUserDynamicConfigAction(): UseAsyncTask<
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetUserSupplyAsCollateral(
-  handler: SimpleTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   SetUserSupplyAsCollateralRequest,
   TxHash,
-  SendTransactionError
+  SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
 
   return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
     setUserSupplyAsCollateral(client, request)
       .andThen((transaction) => handler(transaction, { cancel }))
+      .andThen((pendingTransaction) => pendingTransaction.wait())
+      .andThen(client.waitForTransaction)
       .andTee(() =>
         Promise.all([
           // update user positions
@@ -967,11 +1022,13 @@ export function useSetUserSupplyAsCollateralAction(): UseAsyncTask<
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useLiquidatePosition(
-  handler: ComplexTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   LiquidatePositionRequest,
   TxHash,
-  SendTransactionError | ValidationError<InsufficientBalanceError>
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
@@ -980,8 +1037,16 @@ export function useLiquidatePosition(
     liquidatePosition(client, request).andThen((plan) => {
       switch (plan.__typename) {
         case 'TransactionRequest':
+          return handler(plan, { cancel })
+            .andThen((pendingTransaction) => pendingTransaction.wait())
+            .andThen(client.waitForTransaction);
+
         case 'ApprovalRequired':
-          return handler(plan, { cancel });
+          return handler(plan, { cancel })
+            .andThen((pendingTransaction) => pendingTransaction.wait())
+            .andThen(() => handler(plan.originalTransaction, { cancel }))
+            .andThen((pendingTransaction) => pendingTransaction.wait())
+            .andThen(client.waitForTransaction);
 
         case 'InsufficientBalanceError':
           return errAsync(ValidationError.fromGqlNode(plan));
@@ -1074,17 +1139,19 @@ export function useLiquidatePositionAction(): UseAsyncTask<
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetSpokeUserPositionManager(
-  handler: SimpleTransactionHandler,
+  handler: TransactionHandler,
 ): UseAsyncTask<
   SetSpokeUserPositionManagerRequest,
   TxHash,
-  SendTransactionError
+  SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
 
   return useAsyncTask((request: SetSpokeUserPositionManagerRequest) =>
     setSpokeUserPositionManager(client, request)
       .andThen((transaction) => handler(transaction, { cancel }))
+      .andThen((pendingTransaction) => pendingTransaction.wait())
+      .andThen(client.waitForTransaction)
       .andTee(() =>
         client.refreshQueryWhere(
           SpokePositionManagersQuery,

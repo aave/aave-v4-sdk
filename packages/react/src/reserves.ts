@@ -55,7 +55,7 @@ export type UseReservesArgs<T = Reserve[]> = Prettify<
  *       chainId: chainId(1)
  *     }
  *   },
- *   filter: ReservesFilterRequest.All,
+ *   filter: ReservesRequestFilter.All,
  *   orderBy: { name: 'ASC' },
  *   suspense: true,
  * });
@@ -104,7 +104,7 @@ export function useReserves<T = Reserve[]>(
  *       chainId: chainId(1)
  *     }
  *   },
- *   filter: ReservesFilterRequest.All,
+ *   filter: ReservesRequestFilter.All,
  *   orderBy: { name: 'ASC' },
  * });
  * ```
@@ -203,13 +203,13 @@ export function useReserves<T = Reserve[]>({
  * }
  * ```
  *
- * **Reserves with Highest Supply APY**
+ * **Reserves with Lowest Borrow APY**
  * ```ts
  * const [execute, { called, data, error, loading }] = useReservesAction();
  *
  * // …
  *
- * const result = await execute(…).map(pickHighestSupplyApyReserve);
+ * const result = await execute(…).map(pickLowestBorrowApyReserve);
  *
  * if (result.isOk()) {
  *   console.log(result.value); // Reserve | null
