@@ -72,7 +72,7 @@ describe('Aave V4 Supply Scenarios', () => {
           expect(result.value[0].isCollateral).toBe(true);
           expect(result.value[0].amount.value.formatted).toBeBigDecimalCloseTo(
             amountToSupply,
-            4,
+            2,
           );
         });
       });

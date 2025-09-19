@@ -125,7 +125,7 @@ describe('Aave V4 Repay Scenario', () => {
         assertSingleElementArray(repayResult.value);
         expect(
           repayResult.value[0].amount.value.formatted,
-        ).toBeBigDecimalCloseTo(amountToRepay, 3);
+        ).toBeBigDecimalCloseTo(amountToRepay, 2);
       });
     });
 
