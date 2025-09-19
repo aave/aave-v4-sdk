@@ -433,14 +433,14 @@ export type CancelSwapError =
  * const [sendTransaction] = useSendTransaction(wallet);
  * const [signSwapCancelWith] = useSignSwapCancelWith(wallet);
  *
- *  const [cancelSwap, {loading, error}] = useCancelSwap((plan: PrepareSwapCancelResult | TransactionRequest) => {
- *     switch (plan.__typename) {
- *         case 'TransactionRequest':
- *             return sendTransaction(plan);
+ * const [cancelSwap, {loading, error}] = useCancelSwap((plan: CancelSwapTypedData | TransactionRequest) => {
+ *   switch (plan.__typename) {
+ *     case 'TransactionRequest':
+ *       return sendTransaction(plan);
  *
- *         case 'CancelSwapTypedData':
- *             return signSwapCancelWith(plan.data);
- *     }
+ *     case 'CancelSwapTypedData':
+ *       return signSwapCancelWith(plan);
+ *   }
  * });
  *
  * const result = await cancelSwap({
@@ -448,8 +448,8 @@ export type CancelSwapError =
  * });
  *
  * if (result.isErr()) {
- *     console.error(result.error);
- *     return;
+ *   console.error(result.error);
+ *   return;
  * }
  *
  * // result.value: SwapCancelled
