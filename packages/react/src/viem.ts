@@ -3,8 +3,7 @@ import { permitTypedData } from '@aave/client-next/actions';
 import {
   sendTransactionAndWait,
   signERC20PermitWith,
-  signSwapByIntentWith,
-  signSwapCancelWith,
+  signSwapTypedDataWith,
 } from '@aave/client-next/viem';
 import type {
   CancelSwapTypedData,
@@ -94,62 +93,30 @@ export function useERC20Permit(
 export type SignSwapError = SigningError | UnexpectedError;
 
 /**
- * A hook that provides a way to sign swap by intent using a viem WalletClient instance.
+ * A hook that provides a way to sign swap typed data using a viem WalletClient instance.
  *
  * ```ts
  * const { data: wallet } = useWalletClient(); // wagmi hook
- * const [signSwapByIntent, { loading, error, data }] = useSignSwapByIntentWith(wallet);
+ * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith(wallet);
  *
  * const run = async () => {
- *   const result = await signSwapByIntent(swapByIntentTypedData);
+ *   const result = await signSwapTypedData(swapTypedData);
  *
  *   if (result.isErr()) {
  *     console.error(result.error);
  *     return;
  *   }
  *
- *   console.log('Swap by intent signed:', result.value);
+ *   console.log('Swap typed data signed:', result.value);
  * };
  * ```
  */
-export function useSignSwapByIntentWith(
+export function useSignSwapTypedDataWith(
   walletClient: WalletClient | undefined,
 ): UseAsyncTask<SwapByIntentTypedData, ERC712Signature, SignSwapError> {
   return useAsyncTask((typedData: SwapByIntentTypedData) => {
-    invariant(walletClient, 'Expected a WalletClient to sign swap by intent');
+    invariant(walletClient, 'Expected a WalletClient to sign swap typed data');
 
-    return signSwapByIntentWith(walletClient)(typedData);
-  });
-}
-
-/**
- * A hook that provides a way to sign swap cancellation using a viem WalletClient instance.
- *
- * ```ts
- * const { data: wallet } = useWalletClient(); // wagmi hook
- * const [signSwapCancel, { loading, error, data }] = useSignSwapCancelWith(wallet);
- *
- * const run = async () => {
- *   const result = await signSwapCancel(cancelSwapTypedData);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Swap cancellation signed:', result.value);
- * };
- * ```
- */
-export function useSignSwapCancelWith(
-  walletClient: WalletClient | undefined,
-): UseAsyncTask<CancelSwapTypedData, ERC712Signature, SignSwapError> {
-  return useAsyncTask((typedData: CancelSwapTypedData) => {
-    invariant(
-      walletClient,
-      'Expected a WalletClient to sign swap cancellation',
-    );
-
-    return signSwapCancelWith(walletClient)(typedData);
+    return signSwapTypedDataWith(walletClient)(typedData);
   });
 }

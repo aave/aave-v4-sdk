@@ -44,10 +44,6 @@ export type PermitHandler = (
   result: PermitTypedDataResponse,
 ) => ResultAsync<ERC712Signature, SigningError>;
 
-export type SwapByIntentHandler = (
-  result: SwapByIntentTypedData,
-) => ResultAsync<ERC712Signature, SigningError>;
-
-export type SwapCancelHandler = (
-  result: CancelSwapTypedData,
+export type SwapSignatureHandler = (
+  result: CancelSwapTypedData | SwapByIntentTypedData,
 ) => ResultAsync<ERC712Signature, SigningError>;

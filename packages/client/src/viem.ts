@@ -41,8 +41,7 @@ import { mainnet } from 'viem/chains';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
-  SwapByIntentHandler,
-  SwapCancelHandler,
+  SwapSignatureHandler,
   TransactionExecutionResult,
 } from './types';
 
@@ -179,37 +178,12 @@ export function signERC20PermitWith(walletClient: WalletClient): PermitHandler {
 }
 
 /**
- * Signs a swap by intent using the provided wallet client.
+ * Signs swap typed data using the provided wallet client.
  */
-export function signSwapByIntentWith(
+export function signSwapTypedDataWith(
   walletClient: WalletClient,
-): SwapByIntentHandler {
-  return (result: SwapByIntentTypedData) => {
-    invariant(walletClient.account, 'Wallet account is required');
-
-    return ResultAsync.fromPromise(
-      signTypedData(walletClient, {
-        account: walletClient.account,
-        domain: result.domain as TypedDataDomain,
-        types: result.types as TypedData,
-        primaryType: result.primaryType,
-        message: JSON.parse(result.message),
-      }),
-      (err) => SigningError.from(err),
-    ).map((hex) => ({
-      deadline: JSON.parse(result.message).deadline,
-      value: signatureFrom(hex),
-    }));
-  };
-}
-
-/**
- * Signs a swap cancellation using the provided wallet client.
- */
-export function signSwapCancelWith(
-  walletClient: WalletClient,
-): SwapCancelHandler {
-  return (result: CancelSwapTypedData) => {
+): SwapSignatureHandler {
+  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
     invariant(walletClient.account, 'Wallet account is required');
 
     return ResultAsync.fromPromise(
