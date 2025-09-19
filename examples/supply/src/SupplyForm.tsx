@@ -1,10 +1,10 @@
-import { useSendTransaction } from '@aave/react/viem';
 import {
   bigDecimal,
   evmAddress,
   type Reserve,
   useSupply,
 } from '@aave/react-next';
+import { useSendTransaction } from '@aave/react-next/viem';
 import { useState } from 'react';
 import type { WalletClient } from 'viem';
 
