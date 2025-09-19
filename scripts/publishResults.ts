@@ -53,7 +53,7 @@ function createMessageTestResults(
 
   result.message = `${testSuiteName}\n`;
   result.message += `Total tests ${totalTests}\n Pass ${success} / Fail ${failure}`;
-  const reportUrl = `https://github.com/aave/aave-sdk/actions/runs/${process.env.GITHUB_RUN_ID || ''}/`;
+  const reportUrl = `https://github.com/aave/aave-v4-sdk/actions/runs/${process.env.GITHUB_RUN_ID || ''}/`;
   result.message += `\n <${reportUrl}|Link Github Pipeline>`;
   return result;
 }
