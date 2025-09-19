@@ -87,22 +87,6 @@ export enum ApyMetric {
 }
 
 /**
- * The filter for best borrow reserve selection.
- */
-export enum BestBorrowReserveFilter {
-  LowestApy = 'LOWEST_APY',
-  LowestAverageApy = 'LOWEST_AVERAGE_APY',
-}
-
-/**
- * The filter for best supply reserve selection.
- */
-export enum BestSupplyReserveFilter {
-  HighestApy = 'HIGHEST_APY',
-  HighestAverageApy = 'HIGHEST_AVERAGE_APY',
-}
-
-/**
  * The currency for fiat amounts.
  */
 export enum Currency {
@@ -114,7 +98,7 @@ export enum Currency {
 /**
  * The filter for reserves request.
  */
-export enum ReservesFilterRequest {
+export enum ReservesRequestFilter {
   Supply = 'SUPPLY',
   Borrow = 'BORROW',
   All = 'ALL',
