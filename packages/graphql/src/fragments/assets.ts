@@ -37,7 +37,7 @@ export const HubAssetSettingsFragment = graphql(
         ...PercentValue
       }
       irStrategy
-      reinvestmentStrategy
+      reinvestmentController
     }`,
   [PercentValueFragment],
 );
