@@ -1,4 +1,4 @@
-import { assertOk, bigDecimal, evmAddress, invariant } from '@aave/client-next';
+import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
 import { borrow, userBorrows } from '@aave/client-next/actions';
 import {
   client,
