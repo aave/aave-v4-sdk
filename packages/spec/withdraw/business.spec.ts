@@ -36,6 +36,8 @@ describe('Aave V4 Withdraw Scenario', () => {
       });
 
       it('Then it should be reflected in the user supply positions', async () => {
+        const amountToWithdraw = bigDecimal('25');
+
         const balanceBefore = await getBalance(
           evmAddress(user.account!.address),
           ETHEREUM_USDC_ADDRESS,
@@ -48,7 +50,7 @@ describe('Aave V4 Withdraw Scenario', () => {
             chainId: reserve.chain.chainId,
           },
           amount: {
-            erc20: { exact: bigDecimal('25') },
+            erc20: { exact: amountToWithdraw },
           },
           sender: evmAddress(user.account!.address),
         })
@@ -70,14 +72,14 @@ describe('Aave V4 Withdraw Scenario', () => {
         assertOk(withdrawResult);
         assertSingleElementArray(withdrawResult.value);
         expect(
-          Number(withdrawResult.value[0].amount.value.formatted),
-        ).toBeCloseTo(75, 3);
+          withdrawResult.value[0].amount.value.formatted,
+        ).toBeBigDecimalCloseTo(bigDecimal('75'), 2);
 
         const balanceAfter = await getBalance(
           evmAddress(user.account!.address),
           ETHEREUM_USDC_ADDRESS,
         );
-        expect(balanceBefore + 25).toEqual(balanceAfter);
+        expect(balanceBefore + Number(amountToWithdraw)).toEqual(balanceAfter);
       });
     });
 
