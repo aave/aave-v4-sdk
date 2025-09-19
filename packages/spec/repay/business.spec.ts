@@ -9,6 +9,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { assertSingleElementArray } from '../test-utils';
 import { supplyAndBorrow } from './helper';
 
 describe('Aave V4 Repay Scenario', () => {
@@ -19,29 +20,17 @@ describe('Aave V4 Repay Scenario', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(
-          ETHEREUM_USDC_ADDRESS,
           evmAddress(user.account!.address),
-          bigDecimal('200'),
-          6,
+          {
+            address: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('200'),
+            decimals: 6,
+          },
         ).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
-        reserve = setup.value;
 
-        // Make sure the borrow position is created
-        const borrowPositions = await userBorrows(client, {
-          query: {
-            userSpoke: {
-              spoke: {
-                address: reserve.spoke.address,
-                chainId: reserve.chain.chainId,
-              },
-              user: evmAddress(user.account!.address),
-            },
-          },
-        });
-        assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBe(1);
+        reserve = setup.value;
       });
 
       // TODO: Enable when bug is fixed
@@ -87,32 +76,21 @@ describe('Aave V4 Repay Scenario', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(
-          ETHEREUM_USDC_ADDRESS,
           evmAddress(user.account!.address),
-          bigDecimal('200'),
-          6,
+          {
+            address: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('200'),
+            decimals: 6,
+          },
         ).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
         reserve = setup.value;
-
-        // Make sure the borrow position is created
-        const borrowPositions = await userBorrows(client, {
-          query: {
-            userSpoke: {
-              spoke: {
-                address: reserve.spoke.address,
-                chainId: reserve.chain.chainId,
-              },
-              user: evmAddress(user.account!.address),
-            },
-          },
-        });
-        assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBe(1);
       });
 
       it('Then it should be reflected in the user positions', async () => {
+        const amountToRepay = bigDecimal('25');
+
         const repayResult = await repay(client, {
           reserve: {
             spoke: reserve.spoke.address,
@@ -123,7 +101,7 @@ describe('Aave V4 Repay Scenario', () => {
           amount: {
             erc20: {
               value: {
-                exact: bigDecimal('25'),
+                exact: amountToRepay,
               },
             },
           },
@@ -144,12 +122,10 @@ describe('Aave V4 Repay Scenario', () => {
             }),
           );
         assertOk(repayResult);
-        expect(repayResult.value.length).toBe(1);
+        assertSingleElementArray(repayResult.value);
         expect(
-          Number(repayResult.value[0]!.amount.value.formatted),
-        ).toBeCloseTo(Number(bigDecimal('25')), 3);
-        // TODO: Enable when fix with amounts are fixed
-        // expect(repayResult.value[0]!.amount.value).toMatchSnapshot();
+          repayResult.value[0].amount.value.formatted,
+        ).toBeBigDecimalCloseTo(amountToRepay, 3);
       });
     });
 

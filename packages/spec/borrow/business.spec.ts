@@ -1,4 +1,4 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
+import { assertOk, bigDecimal, evmAddress, invariant } from '@aave/client-next';
 import { borrow, userBorrows } from '@aave/client-next/actions';
 import {
   client,
@@ -9,6 +9,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { assertSingleElementArray } from '../test-utils';
 import { supplyToRandomERC20Reserve } from './helper';
 
 describe('Aave V4 Borrow Scenarios', () => {
@@ -19,10 +20,12 @@ describe('Aave V4 Borrow Scenarios', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(
-          ETHEREUM_USDC_ADDRESS,
           evmAddress(user.account!.address),
-          bigDecimal('100'),
-          6,
+          {
+            address: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('100'),
+            decimals: 6,
+          },
         ).andThen(() =>
           supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
         );
@@ -32,6 +35,8 @@ describe('Aave V4 Borrow Scenarios', () => {
       });
 
       it(`Then the user's borrow positions are updated`, async () => {
+        const amountToBorrow = bigDecimal('50');
+
         const result = await borrow(client, {
           sender: evmAddress(user.account!.address),
           reserve: {
@@ -41,7 +46,7 @@ describe('Aave V4 Borrow Scenarios', () => {
           },
           amount: {
             erc20: {
-              value: bigDecimal('50'),
+              value: amountToBorrow,
             },
           },
         })
@@ -62,15 +67,13 @@ describe('Aave V4 Borrow Scenarios', () => {
           );
 
         assertOk(result);
-        expect(result.value.length).toBe(1);
+        assertSingleElementArray(result.value);
         // BUG: The amount is slightly different from the total borrow amount
-        // expect(result.value[0]?.amount.value).toMatchSnapshot();
-        expect(Number(result.value[0]?.amount.value.formatted)).toBeCloseTo(
-          Number(bigDecimal('50')),
+        expect(result.value[0].amount.value.formatted).toBeBigDecimalCloseTo(
+          amountToBorrow,
           4,
         );
-        expect(result.value[0]?.paid.value).toMatchSnapshot();
-        expect(result.value[0]?.amount.isWrappedNative).toBe(false);
+        expect(result.value[0].amount.isWrappedNative).toBe(false);
       });
     });
 

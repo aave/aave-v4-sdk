@@ -1,11 +1,5 @@
-import {
-  assertOk,
-  bigDecimal,
-  chainId,
-  evmAddress,
-  invariant,
-} from '@aave/client-next';
-import { reserves, supply, userSupplies } from '@aave/client-next/actions';
+import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/client-next';
+import { supply, userSupplies } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
@@ -14,6 +8,8 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { findReserveToSupply } from '../borrow/helper';
+import { assertSingleElementArray } from '../test-utils';
 
 describe('Aave V4 Supply Scenarios', () => {
   describe('Given a user and a Reserve', () => {
@@ -23,10 +19,12 @@ describe('Aave V4 Supply Scenarios', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(
-          ETHEREUM_USDC_ADDRESS,
           evmAddress(user.account!.address),
-          bigDecimal('100'),
-          6,
+          {
+            address: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('100'),
+            decimals: 6,
+          },
         );
 
         assertOk(setup);
@@ -34,28 +32,17 @@ describe('Aave V4 Supply Scenarios', () => {
 
       describe("Then the user's supply positions are updated", async () => {
         it('And the supplied tokens are set as collateral by default', async () => {
-          const listReserves = await reserves(client, {
-            query: {
-              tokens: [
-                {
-                  chainId: chainId(1),
-                  address: ETHEREUM_USDC_ADDRESS,
-                },
-              ],
-            },
-          });
-          assertOk(listReserves);
-          expect(listReserves.value.length > 0, 'No reserves found for USDC');
-          const reserveToSupply = listReserves.value.find(
-            (reserve) => reserve.canSupply === true,
+          const reserveToSupply = await findReserveToSupply(
+            client,
+            ETHEREUM_USDC_ADDRESS,
           );
-          invariant(reserveToSupply, 'No reserve found to supply to');
+          assertOk(reserveToSupply);
 
           const result = await supply(client, {
             reserve: {
-              reserveId: reserveToSupply.id,
+              reserveId: reserveToSupply.value.id,
               chainId: chainId(1),
-              spoke: reserveToSupply.spoke.address,
+              spoke: reserveToSupply.value.spoke.address,
             },
             amount: {
               erc20: {
@@ -71,7 +58,7 @@ describe('Aave V4 Supply Scenarios', () => {
                 query: {
                   userSpoke: {
                     spoke: {
-                      address: reserveToSupply.spoke.address,
+                      address: reserveToSupply.value.spoke.address,
                       chainId: chainId(1),
                     },
                     user: evmAddress(user.account!.address),
@@ -81,13 +68,10 @@ describe('Aave V4 Supply Scenarios', () => {
             );
           assertOk(result);
 
-          invariant(result.value.length > 0, 'No supply positions found');
-          expect(
-            result.value[0]!.isCollateral === true,
-            'Supply position should be set as collateral',
-          );
-          expect(Number(result.value[0]!.amount.value.formatted)).toBeCloseTo(
-            Number(amountToSupply),
+          assertSingleElementArray(result.value);
+          expect(result.value[0].isCollateral).toBe(true);
+          expect(result.value[0].amount.value.formatted).toBeBigDecimalCloseTo(
+            amountToSupply,
             4,
           );
         });
