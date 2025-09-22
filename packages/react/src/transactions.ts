@@ -1,4 +1,9 @@
-import type { AaveClient, UnexpectedError } from '@aave/client-next';
+import type {
+  AaveClient,
+  CurrencyQueryOptions,
+  UnexpectedError,
+} from '@aave/client-next';
+import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
 import {
   borrow,
   liquidatePosition,
@@ -22,6 +27,7 @@ import {
   isChainIdsVariant,
   isSpokeInputVariant,
   type LiquidatePositionRequest,
+  PreviewQuery,
   type PreviewRequest,
   type PreviewUserPosition,
   type RenounceSpokeUserPositionManagerRequest,
@@ -46,10 +52,15 @@ import { useAaveClient } from './context';
 import {
   cancel,
   type PendingTransactionError,
+  type ReadResult,
   type SendTransactionError,
+  type Suspendable,
+  type SuspendableResult,
+  type SuspenseResult,
   type TransactionHandler,
   type UseAsyncTask,
   useAsyncTask,
+  useSuspendableQuery,
 } from './helpers';
 
 function refreshQueriesForReserveChange(
@@ -1186,7 +1197,7 @@ export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
  * Preview the impact of a potential action on a user's position.
  *
  * ```tsx
- * const [getPreview, previewing] = usePreview();
+ * const [getPreview, previewing] = usePreviewAction();
  *
  * const loading = previewing.loading;
  * const error = previewing.error;
@@ -1219,7 +1230,7 @@ export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
  * console.log('Preview result:', result.value);
  * ```
  */
-export function usePreview(): UseAsyncTask<
+export function usePreviewAction(): UseAsyncTask<
   PreviewRequest,
   PreviewUserPosition,
   UnexpectedError
@@ -1227,4 +1238,82 @@ export function usePreview(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask((request: PreviewRequest) => preview(client, request));
+}
+
+export type UsePreviewArgs = PreviewRequest & CurrencyQueryOptions;
+
+/**
+ * Fetch a preview of the impact of a potential action on a user's position.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = usePreview({
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function usePreview(
+  args: UsePreviewArgs & Suspendable,
+): SuspenseResult<PreviewUserPosition>;
+
+/**
+ * Fetch a preview of the impact of a potential action on a user's position.
+ *
+ * ```tsx
+ * const { data, error, loading } = usePreview({
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ * });
+ * ```
+ */
+export function usePreview(
+  args: UsePreviewArgs,
+): ReadResult<PreviewUserPosition>;
+
+export function usePreview({
+  suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: UsePreviewArgs & {
+  suspense?: boolean;
+}): SuspendableResult<PreviewUserPosition> {
+  return useSuspendableQuery({
+    document: PreviewQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+  });
 }
