@@ -113,7 +113,7 @@ export function useERC20Permit(): UseAsyncTask<
   });
 }
 
-export type SignSwapError = SigningError | UnexpectedError;
+export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
  * A hook that provides a way to sign swap typed data using a Privy wallet.
@@ -136,7 +136,7 @@ export type SignSwapError = SigningError | UnexpectedError;
 export function useSignSwapTypedDataWith(): UseAsyncTask<
   SwapByIntentTypedData | CancelSwapTypedData,
   ERC712Signature,
-  SignSwapError
+  SignSwapTypedDataError
 > {
   const { signTypedData } = useSignTypedData();
 

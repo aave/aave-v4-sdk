@@ -93,7 +93,7 @@ export function useERC20Permit(
   });
 }
 
-export type SignSwapError = SigningError | UnexpectedError;
+export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
  * A hook that provides a way to sign swap typed data using an ethers Signer instance.
@@ -125,7 +125,7 @@ export function useSignSwapTypedDataWith(
 ): UseAsyncTask<
   SwapByIntentTypedData | CancelSwapTypedData,
   ERC712Signature,
-  SignSwapError
+  SignSwapTypedDataError
 > {
   return useAsyncTask(
     (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {

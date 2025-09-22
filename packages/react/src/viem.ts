@@ -89,7 +89,7 @@ export function useERC20Permit(
   });
 }
 
-export type SignSwapError = SigningError | UnexpectedError;
+export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
  * A hook that provides a way to sign swap typed data using a viem WalletClient instance.
@@ -112,7 +112,11 @@ export type SignSwapError = SigningError | UnexpectedError;
  */
 export function useSignSwapTypedDataWith(
   walletClient: WalletClient | undefined,
-): UseAsyncTask<SwapByIntentTypedData, ERC712Signature, SignSwapError> {
+): UseAsyncTask<
+  SwapByIntentTypedData,
+  ERC712Signature,
+  SignSwapTypedDataError
+> {
   return useAsyncTask((typedData: SwapByIntentTypedData) => {
     invariant(walletClient, 'Expected a WalletClient to sign swap typed data');
 
