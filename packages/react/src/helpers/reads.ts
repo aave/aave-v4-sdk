@@ -2,7 +2,11 @@ import { type StandardData, UnexpectedError } from '@aave/client-next';
 import { type AnyVariables, identity, invariant } from '@aave/types-next';
 import { useMemo } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
-import { ReadResult, type SuspendableResult } from './results';
+import {
+  ReadResult,
+  type SuspendableResult,
+  type SuspenseResult,
+} from './results';
 
 export type Selector<T, V> = (data: T) => V;
 
@@ -26,6 +30,53 @@ export type UseSuspendableQueryArgs<
 /**
  * @internal
  */
+export function useSuspendableQuery<
+  Value,
+  Output,
+  Variables extends AnyVariables,
+>({
+  document,
+  variables,
+  suspense,
+}: UseSuspendableQueryArgs<
+  Value,
+  Output,
+  Variables,
+  false
+>): ReadResult<Output>;
+/**
+ * @internal
+ */
+export function useSuspendableQuery<
+  Value,
+  Output,
+  Variables extends AnyVariables,
+>({
+  document,
+  variables,
+  suspense,
+}: UseSuspendableQueryArgs<
+  Value,
+  Output,
+  Variables,
+  true
+>): SuspenseResult<Output>;
+/**
+ * @internal
+ */
+export function useSuspendableQuery<
+  Value,
+  Output,
+  Variables extends AnyVariables,
+>({
+  document,
+  variables,
+  suspense,
+}: UseSuspendableQueryArgs<
+  Value,
+  Output,
+  Variables
+>): SuspendableResult<Output>;
 export function useSuspendableQuery<
   Value,
   Output,
