@@ -145,7 +145,7 @@ function refreshQueriesForReserveChange(
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *     case 'ApprovalRequired':
- *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *       return sendTransaction(plan.approval);
  *   }
  * });
  *
@@ -249,7 +249,7 @@ export function useSupplyAction(): UseAsyncTask<
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *     case 'ApprovalRequired':
- *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *       return sendTransaction(plan.approval);
  *   }
  * });
  *
@@ -353,7 +353,7 @@ export function useBorrowAction(): UseAsyncTask<
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *     case 'ApprovalRequired':
- *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *       return sendTransaction(plan.approval);
  *   }
  * });
  *
@@ -457,7 +457,7 @@ export function useRepayAction(): UseAsyncTask<
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *     case 'ApprovalRequired':
- *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *       return sendTransaction(plan.approval);
  *   }
  * });
  *
@@ -980,7 +980,7 @@ export function useSetUserSupplyAsCollateralAction(): UseAsyncTask<
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *     case 'ApprovalRequired':
- *       return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+ *       return sendTransaction(plan.approval);
  *   }
  * });
  *
