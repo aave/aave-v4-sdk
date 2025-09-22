@@ -45,6 +45,7 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
  *   sell: { erc20: evmAddress('0x6B175474E...') },
  *   amount: bigDecimal('1000'),
  *   kind: SwapKind.SELL,
+ *   from: evmAddress('0x742d35cc...'),
  * });
  * ```
  *

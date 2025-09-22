@@ -325,7 +325,7 @@ type HubAssetSettings {
   irStrategy: EvmAddress!
 
   """The reinvestment strategy"""
-  reinvestmentStrategy: EvmAddress
+  reinvestmentController: EvmAddress
 }
 
 type HubAssetSummary {
@@ -595,6 +595,8 @@ input PrepareLimitOrderSwapInput {
   quoteId: SwapQuoteId!
   newSellAmount: BigDecimal
   newBuyAmount: BigDecimal
+
+  """Slippage in basis points"""
   newSlippage: BigDecimal
   newReceiver: EvmAddress
 }
@@ -843,7 +845,7 @@ input ReserveInput {
 
 type ReserveSettings {
   collateralFactor: PercentValue!
-  liquidationBonus: PercentValue!
+  maxLiquidationBonus: PercentValue!
   collateralRisk: PercentValue!
   borrowable: Boolean!
   collateral: Boolean!
@@ -1089,11 +1091,6 @@ type SwapByIntent {
 input SwapByIntentInput {
   quoteId: SwapQuoteId!
   signature: ERC712Signature!
-
-  """
-  Whether the swap order creator is a smart contract wallet. If not provided, it will be inferred following the ERC-1271 standard.
-  """
-  isSenderSmartContractWallet: Boolean
 }
 
 type SwapByIntentTypeDefinition {
@@ -1172,11 +1169,16 @@ type SwapQuote {
   sellAmount: TokenAmount!
   buyAmount: TokenAmount!
   costs: SwapQuoteCosts!
+
+  """Minimum received amount after all costs and slippage"""
   minimumReceived: TokenAmount!
 }
 
 type SwapQuoteCosts {
+  """Network and provider costs"""
   networkCosts: TokenAmount!
+
+  """Aave partner fee amount"""
   partnerFeeAmount: TokenAmount!
 }
 
@@ -1225,6 +1227,11 @@ type SwapTransactionRequest {
 input SwapWithTransactionInput {
   quoteId: SwapQuoteId!
   permitSig: ERC712Signature
+
+  """
+  Whether the swap order creator is a smart contract wallet. If not provided, it will be inferred following the ERC-1271 standard.
+  """
+  isSenderSmartContractWallet: Boolean
 }
 
 input SwappableTokensRequest {

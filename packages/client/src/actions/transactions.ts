@@ -34,15 +34,17 @@ import type { AaveClient } from '../AaveClient';
  *
  * ```ts
  * const result = await borrow(client, {
- *   market: market.address,
  *   amount: {
  *     erc20: {
- *       currency: evmAddress('0x5678…'),
  *       value: bigDecimal('1000'),
  *     },
  *   },
- *   borrower: evmAddress('0x9abc…'),
- *   chainId: market.chain.chainId,
+ *   reserve: {
+ *     spoke: evmAddress('0x87870bca…'),
+ *     reserveId: reserveId(1),
+ *     chainId: chainId(1),
+ *   },
+ *   sender: evmAddress('0x9abc…'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -69,16 +71,20 @@ export function borrow(
  *
  * ```ts
  * const result = await supply(client, {
- *   market: market.address,
+ *   reserve: {
+ *     reserveId: "1234567890",
+ *     spoke: evmAddress('0x8787…'),
+ *     chainId: chainId(1),
+ *   },
  *   amount: {
  *     erc20: {
- *       currency: evmAddress('0x5678…'),
  *       value: bigDecimal('1000'),
  *     },
  *   },
- *   supplier: evmAddress('0x9abc…'),
- *   chainId: market.chain.chainId,
- * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
+ *   enableCollateral: true, // Optional, defaults to true
+ *   sender: evmAddress('0x9abc…'),
+ *   // onBehalfOf: evmAddress('0xdef0…'), // Optional, if supplying on behalf of another user
+ * });
  *
  * if (result.isErr()) {
  *   // Handle error, e.g. insufficient balance, signing error, etc.
@@ -104,17 +110,19 @@ export function supply(
  *
  * ```ts
  * const result = await repay(client, {
- *   market: market.address,
  *   amount: {
  *     erc20: {
- *       currency: evmAddress('0x5678…'),
  *       value: {
  *         exact: bigDecimal('500'),
  *       },
  *     },
  *   },
- *   borrower: evmAddress('0x9abc…'),
- *   chainId: market.chain.chainId,
+ *   sender: evmAddress('0x9abc…'),
+ *   reserve: {
+ *     spoke: evmAddress('0x87870bca…'),
+ *     reserveId: reserveId(1),
+ *     chainId: chainId(1),
+ *   },
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -306,67 +314,6 @@ export function updateUserRiskPremium(
 }
 
 /**
- * Creates a transaction to enable/disable a specific supplied asset as collateral.
- *
- * ```ts
- * const result = await collateralToggle(client, {
- *   market: market.address,
- *   underlyingToken: market.supplyReserves[n].underlyingToken.address,
- *   user: evmAddress('0x9abc…'),
- *   chainId: market.chain.chainId,
- * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
- *
- * if (result.isErr()) {
- *   // Handle error, e.g. signing error, etc.
- *   return;
- * }
- *
- * // result.value: TxHash
- * ```
- *
- * @param client - Aave client.
- * @param request - The collateral toggle request parameters.
- * @returns The transaction request data to toggle collateral.
- */
-// export function collateralToggle(
-//   client: AaveClient,
-//   request: CollateralToggleRequest,
-// ): ResultAsync<TransactionRequest, UnexpectedError> {
-//   return client.query(CollateralToggleQuery, { request });
-// }
-
-/**
- * Creates a transaction to liquidate a non-healthy position with Health Factor below 1.
- *
- * ```ts
- * const result = await liquidate(client, {
- *   collateralToken: evmAddress('0x1234…'),
- *   debtToken: evmAddress('0x5678…'),
- *   user: evmAddress('0x9abc…'),
- *   debtToCover: { max: true },
- *   chainId: chainId(1),
- * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
- *
- * if (result.isErr()) {
- *   // Handle error, e.g. signing error, etc.
- *   return;
- * }
- *
- * // result.value: TxHash
- * ```
- *
- * @param client - Aave client.
- * @param request - The liquidate request parameters.
- * @returns The transaction request data to liquidate position.
- */
-// export function liquidate(
-//   client: AaveClient,
-//   request: LiquidateRequest,
-// ): ResultAsync<TransactionRequest, UnexpectedError> {
-//   return client.query(LiquidateQuery, { request });
-// }
-
-/**
  * Creates a transaction to liquidate a user's position.
  *
  * ```ts
@@ -378,13 +325,10 @@ export function updateUserRiskPremium(
  *   collateral: reserveId(1),
  *   debt: reserveId(2),
  *   amount: {
- *     erc20: {
- *       currency: evmAddress('0x5678…'),
- *       value: '1000',
- *     },
+ *     exact: bigDecimal('1000'),
  *   },
  *   liquidator: evmAddress('0x9abc…'),
- *   borrower: evmAddress('0xdef0…'),
+ *   user: evmAddress('0xdef0…'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -461,18 +405,17 @@ export function setSpokeUserPositionManager(
  * const result = await preview(client, {
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
+ *       reserve: {
+ *         spoke: evmAddress('0x87870bca…'),
+ *         reserveId: reserveId(1),
  *         chainId: chainId(1),
  *       },
- *       reserve: reserveId(1),
  *       amount: {
  *         erc20: {
- *           currency: evmAddress('0x5678…'),
  *           value: '1000',
  *         },
  *       },
- *       supplier: evmAddress('0x9abc…'),
+ *       sender: evmAddress('0x9abc…'),
  *     },
  *   },
  * });

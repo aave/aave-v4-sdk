@@ -93,8 +93,6 @@ export const exchange = cacheExchange({
     // Value objects and result types
     ApprovalRequired: () => null,
     APYSample: () => null,
-    BigDecimalVariation: () => null,
-    BigDecimalWithChange: () => null,
     CancelSwapTypedData: () => null,
     CancelSwapTypeDefinition: () => null,
     DecimalValue: () => null,
@@ -104,6 +102,8 @@ export const exchange = cacheExchange({
     FiatAmountValueVariation: () => null,
     FiatAmountWithChange: () => null,
     ForkTopUpResponse: () => null,
+    HealthFactorChange: () => null,
+    HealthFactorVariation: () => null,
     HubAssetSettings: () => null,
     HubAssetSummary: () => null,
     HubAssetUserState: () => null,

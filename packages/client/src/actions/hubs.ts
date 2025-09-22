@@ -1,13 +1,15 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
   type Hub,
+  type HubAsset,
+  HubAssetsQuery,
+  type HubAssetsRequest,
   HubQuery,
   type HubRequest,
   HubsQuery,
   type HubsRequest,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
-
 import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
@@ -54,4 +56,28 @@ export function hubs(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Hub[], UnexpectedError> {
   return client.query(HubsQuery, { request, ...options });
+}
+
+/**
+ * Fetches hub assets for a specific chain and optional hub/user filtering.
+ *
+ * ```ts
+ * const result = await hubAssets(client, {
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub assets request parameters.
+ * @param options - The query options.
+ * @returns The hub assets array.
+ */
+export function hubAssets(
+  client: AaveClient,
+  request: HubAssetsRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<HubAsset[], UnexpectedError> {
+  return client.query(HubAssetsQuery, { request, ...options });
 }

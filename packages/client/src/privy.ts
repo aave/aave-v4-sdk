@@ -4,8 +4,10 @@ import {
   ValidationError,
 } from '@aave/core-next';
 import type {
+  CancelSwapTypedData,
   InsufficientBalanceError,
   PermitTypedDataResponse,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import {
@@ -22,7 +24,8 @@ import { waitForTransactionReceipt } from 'viem/actions';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
-  TransactionExecutionResult,
+  SwapSignatureHandler,
+  TransactionResult,
 } from './types';
 import { supportedChains, transactionError } from './viem';
 
@@ -49,7 +52,7 @@ function sendTransactionAndWait(
   privy: PrivyClient,
   request: TransactionRequest,
   walletId: string,
-): ResultAsync<TransactionExecutionResult, SigningError | TransactionError> {
+): ResultAsync<TransactionResult, SigningError | TransactionError> {
   // TODO: verify it's on the correct chain, ask to switch if possible
   // TODO: verify if wallet account is correct, switch if possible
   const publicClient = createPublicClient({
@@ -131,6 +134,33 @@ export function signERC20PermitWith(
       (err) => SigningError.from(err),
     ).map((response) => ({
       deadline: result.message.deadline,
+      value: signatureFrom(response.signature),
+    }));
+  };
+}
+
+/**
+ * Signs swap typed data using the provided Privy client.
+ */
+export function signSwapTypedDataWith(
+  privy: PrivyClient,
+  walletId: string,
+): SwapSignatureHandler {
+  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
+    const message = JSON.parse(result.message);
+    return ResultAsync.fromPromise(
+      privy.walletApi.ethereum.signTypedData({
+        walletId,
+        typedData: {
+          domain: result.domain,
+          types: result.types,
+          message,
+          primaryType: result.primaryType,
+        },
+      }),
+      (err) => SigningError.from(err),
+    ).map((response) => ({
+      deadline: message.deadline,
       value: signatureFrom(response.signature),
     }));
   };

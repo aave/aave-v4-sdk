@@ -1002,7 +1002,7 @@
             "args": []
           },
           {
-            "name": "reinvestmentStrategy",
+            "name": "reinvestmentController",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -3296,7 +3296,7 @@
             "args": []
           },
           {
-            "name": "liquidationBonus",
+            "name": "maxLiquidationBonus",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

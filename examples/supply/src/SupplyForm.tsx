@@ -1,10 +1,10 @@
-import { useSendTransaction } from '@aave/react/viem';
 import {
   bigDecimal,
   evmAddress,
   type Reserve,
   useSupply,
 } from '@aave/react-next';
+import { useSendTransaction } from '@aave/react-next/viem';
 import { useState } from 'react';
 import type { WalletClient } from 'viem';
 
@@ -20,18 +20,16 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
   const [supply, { loading, error }] = useSupply((plan) => {
     switch (plan.__typename) {
       case 'TransactionRequest':
-        setStatus('Sending transaction...');
-
-        return sendTransaction(plan);
+        setStatus('Sign the Supply Transaction in your wallet');
+        return sendTransaction(plan).andTee(() =>
+          setStatus('Sending Supply Transaction…'),
+        );
 
       case 'ApprovalRequired':
-        setStatus('Approval required. Sending approval transaction...');
-
-        return sendTransaction(plan.approval).andThen(() => {
-          setStatus('Approval sent. Now sending supply transaction...');
-
-          return sendTransaction(plan.originalTransaction);
-        });
+        setStatus('Sign the Approval Transaction in your wallet');
+        return sendTransaction(plan.approval).andTee(() =>
+          setStatus('Sending Approval Transaction…'),
+        );
     }
   });
 
@@ -60,6 +58,8 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
 
     if (result.isOk()) {
       setStatus('Supply successful!');
+    } else {
+      setStatus('Supply failed!');
     }
   };
 

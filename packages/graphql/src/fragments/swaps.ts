@@ -53,7 +53,6 @@ export type SwapQuote = FragmentOf<typeof SwapQuoteFragment>;
 
 export const SwapByIntentTypeDefinitionFragment = graphql(
   `fragment SwapByIntentTypeDefinition on SwapByIntentTypeDefinition {
-    __typename
     EIP712Domain {
       ...TypeField
     }
@@ -69,6 +68,7 @@ export type SwapByIntentTypeDefinition = FragmentOf<
 
 export const SwapByIntentTypedDataFragment = graphql(
   `fragment SwapByIntentTypedData on SwapByIntentTypedData {
+    __typename
     types {
       ...SwapByIntentTypeDefinition
     }
@@ -353,7 +353,6 @@ export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
 
 export const CancelSwapTypeDefinitionFragment = graphql(
   `fragment CancelSwapTypeDefinition on CancelSwapTypeDefinition {
-    __typename
     OrderCancellations {
       ...TypeField
     }
@@ -369,7 +368,6 @@ export type CancelSwapTypeDefinition = FragmentOf<
 
 export const CancelSwapTypedDataFragment = graphql(
   `fragment CancelSwapTypedData on CancelSwapTypedData {
-    __typename
     types {
       ...CancelSwapTypeDefinition
     }

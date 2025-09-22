@@ -1,11 +1,14 @@
 import {
   SigningError,
   TransactionError,
+  UnexpectedError,
   ValidationError,
 } from '@aave/core-next';
 import type {
+  CancelSwapTypedData,
   InsufficientBalanceError,
   PermitTypedDataResponse,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import {
@@ -20,48 +23,65 @@ import type { Signer, TransactionResponse } from 'ethers';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
-  TransactionExecutionResult,
+  SwapSignatureHandler,
+  TransactionResult,
 } from './types';
 
-async function sendTransaction(
+/**
+ * @internal
+ */
+export function sendTransaction(
   signer: Signer,
   request: TransactionRequest,
-): Promise<TransactionResponse> {
-  return signer.sendTransaction({
-    to: request.to,
-    data: request.data,
-    value: request.value,
-    from: request.from,
-  });
+): ResultAsync<TransactionResponse, SigningError> {
+  return ResultAsync.fromPromise(
+    signer.sendTransaction({
+      to: request.to,
+      data: request.data,
+      value: request.value,
+      from: request.from,
+    }),
+    (err) => SigningError.from(err),
+  );
 }
 
 /**
  * @internal
  */
-export function sendTransactionAndWait(
+export function waitForTransactionResult(
+  request: TransactionRequest,
+  response: TransactionResponse,
+): ResultAsync<TransactionResult, TransactionError | UnexpectedError> {
+  return ResultAsync.fromPromise(response.wait(), (err) =>
+    UnexpectedError.from(err),
+  ).andThen((receipt) => {
+    const hash = txHash(nonNullable(receipt?.hash));
+
+    if (receipt?.status === 0) {
+      return errAsync(
+        TransactionError.new({
+          txHash: hash,
+          request,
+        }),
+      );
+    }
+    return okAsync({
+      txHash: hash,
+      operations: request.operations, // TODO: check if this is correct
+    });
+  });
+}
+
+function sendTransactionAndWait(
   signer: Signer,
   request: TransactionRequest,
-): ResultAsync<TransactionExecutionResult, SigningError | TransactionError> {
-  return ResultAsync.fromPromise(sendTransaction(signer, request), (err) =>
-    SigningError.from(err),
-  )
-    .map((tx) => tx.wait())
-    .andThen((receipt) => {
-      const hash = txHash(nonNullable(receipt?.hash));
-
-      if (receipt?.status === 0) {
-        return errAsync(
-          TransactionError.new({
-            txHash: hash,
-            request,
-          }),
-        );
-      }
-      return okAsync({
-        txHash: hash,
-        operations: request.operations, // TODO: check if this is correct
-      });
-    });
+): ResultAsync<
+  TransactionResult,
+  SigningError | TransactionError | UnexpectedError
+> {
+  return sendTransaction(signer, request).andThen((tx) =>
+    waitForTransactionResult(request, tx),
+  );
 }
 
 /**
@@ -96,6 +116,22 @@ export function signERC20PermitWith(signer: Signer): PermitHandler {
       (err) => SigningError.from(err),
     ).map((signature) => ({
       deadline: result.message.deadline,
+      value: signatureFrom(signature),
+    }));
+  };
+}
+
+/**
+ * Signs swap typed data using the provided ethers signer.
+ */
+export function signSwapTypedDataWith(signer: Signer): SwapSignatureHandler {
+  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
+    const message = JSON.parse(result.message);
+    return ResultAsync.fromPromise(
+      signer.signTypedData(result.domain, result.types, message),
+      (err) => SigningError.from(err),
+    ).map((signature) => ({
+      deadline: message.deadline,
       value: signatureFrom(signature),
     }));
   };

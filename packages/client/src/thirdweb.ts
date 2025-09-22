@@ -4,8 +4,10 @@ import {
   ValidationError,
 } from '@aave/core-next';
 import type {
+  CancelSwapTypedData,
   InsufficientBalanceError,
   PermitTypedDataResponse,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import {
@@ -26,7 +28,8 @@ import {
 import type {
   ExecutionPlanHandler,
   PermitHandler,
-  TransactionExecutionResult,
+  SwapSignatureHandler,
+  TransactionResult,
 } from './types';
 
 async function sendTransaction(
@@ -46,7 +49,7 @@ async function sendTransaction(
 function sendTransactionAndWait(
   client: ThirdwebClient,
   request: TransactionRequest,
-): ResultAsync<TransactionExecutionResult, SigningError | TransactionError> {
+): ResultAsync<TransactionResult, SigningError | TransactionError> {
   const wallet = Engine.serverWallet({
     client,
     address: request.from,
@@ -135,6 +138,42 @@ export function signERC20PermitWith(client: ThirdwebClient): PermitHandler {
       SigningError.from(err),
     ).map((value) => ({
       deadline: result.message.deadline,
+      value,
+    }));
+  };
+}
+
+/**
+ * Signs swap typed data using the provided Thirdweb client.
+ */
+export function signSwapTypedDataWith(
+  client: ThirdwebClient,
+): SwapSignatureHandler {
+  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
+    const message = JSON.parse(result.message);
+
+    const signTypedDataPromise = async (): Promise<Signature> => {
+      const wallet = Engine.serverWallet({
+        client,
+        chain: defineChain({ id: result.domain.chainId }),
+        address: message.user,
+      });
+
+      const signature = await wallet.signTypedData({
+        // silence the rest of the type inference
+        types: result.types as Record<string, unknown>,
+        domain: result.domain,
+        primaryType: result.primaryType,
+        message,
+      });
+
+      return signatureFrom(signature);
+    };
+
+    return ResultAsync.fromPromise(signTypedDataPromise(), (err) =>
+      SigningError.from(err),
+    ).map((value) => ({
+      deadline: message.deadline,
       value,
     }));
   };
