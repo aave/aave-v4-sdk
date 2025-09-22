@@ -3,17 +3,17 @@ import {
   chainId,
   type FiatAmount,
   useExchangeRate,
-  useLiveExchangeRate,
+  useExchangeRateAction,
 } from '@aave/react-next';
 import { useState } from 'react';
 
 export function App() {
-  const { data, loading } = useLiveExchangeRate({
+  const { data, loading } = useExchangeRate({
     from: { native: chainId(1) },
     to: Currency.Usd,
   });
 
-  const [getExchangeRate, { loading: asyncLoading }] = useExchangeRate();
+  const [getExchangeRate, { loading: asyncLoading }] = useExchangeRateAction();
   const [exchangeRate, setExchangeRate] = useState<FiatAmount | null>(null);
 
   const handleGetRate = async (e: React.FormEvent) => {
@@ -27,10 +27,6 @@ export function App() {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
       <header>
@@ -39,11 +35,12 @@ export function App() {
 
       <div style={{ marginBottom: '40px' }}>
         <h2>Live Exchange Rate</h2>
-        {data && (
-          <div>
-            <strong>ETH to USD: ${data.value}</strong>
-          </div>
-        )}
+        <div>
+          <strong>
+            ETH to USD:{' '}
+            {loading ? 'Loading...' : data ? `$${data.value}` : 'No data'}
+          </strong>
+        </div>
       </div>
 
       <div>
@@ -54,7 +51,7 @@ export function App() {
           </button>
         </form>
         {exchangeRate && (
-          <div style={{ marginTop: '10px' }}>
+          <div>
             <strong>Current Rate: ${exchangeRate.value}</strong>
           </div>
         )}

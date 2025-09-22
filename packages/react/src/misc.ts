@@ -64,10 +64,10 @@ export function useAaveChains({
 }
 
 /**
- * Fetches the exchange rate between tokens and fiat currencies.
+ * Fetches exchange rates between tokens and fiat currencies.
  *
  * ```tsx
- * const [getExchangeRate, gettingRate] = useExchangeRate();
+ * const [getExchangeRate, gettingRate] = useExchangeRateAction();
  *
  * const loading = gettingRate.loading;
  * const error = gettingRate.error;
@@ -87,7 +87,7 @@ export function useAaveChains({
  * console.log('Exchange rate:', result.value);
  * ```
  */
-export function useExchangeRate(): UseAsyncTask<
+export function useExchangeRateAction(): UseAsyncTask<
   ExchangeRateRequest,
   FiatAmount,
   UnexpectedError
@@ -99,15 +99,15 @@ export function useExchangeRate(): UseAsyncTask<
   );
 }
 
-export type UseLiveExchangeRateArgs = ExchangeRateRequest;
+export type UseExchangeRateArgs = ExchangeRateRequest;
 
 /**
- * Fetches exchange rates between tokens and fiat currencies.
+ * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useLiveExchangeRate({
+ * const { data } = useExchangeRate({
  *   from: {
  *     erc20: {
  *       chainId: chainId(1),
@@ -119,15 +119,15 @@ export type UseLiveExchangeRateArgs = ExchangeRateRequest;
  * });
  * ```
  */
-export function useLiveExchangeRate(
-  args: UseLiveExchangeRateArgs & Suspendable,
+export function useExchangeRate(
+  args: UseExchangeRateArgs & Suspendable,
 ): SuspenseResult<FiatAmount>;
 
 /**
- * Fetches exchange rates between tokens and fiat currencies.
+ * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
  * ```tsx
- * const { data, error, loading } = useLiveExchangeRate({
+ * const { data, error, loading } = useExchangeRate({
  *   from: {
  *     erc20: {
  *       chainId: chainId(1),
@@ -140,21 +140,23 @@ export function useLiveExchangeRate(
  * <Component value={somewhere} fxRate={data} />
  * ```
  */
-export function useLiveExchangeRate(
-  args: UseLiveExchangeRateArgs,
+export function useExchangeRate(
+  args: UseExchangeRateArgs,
 ): ReadResult<FiatAmount>;
 
-export function useLiveExchangeRate({
+export function useExchangeRate({
   suspense = false,
   ...request
-}: UseLiveExchangeRateArgs & {
+}: UseExchangeRateArgs & {
   suspense?: boolean;
 }): SuspendableResult<FiatAmount> {
+  const client = useAaveClient();
+  const pollInterval = client.context.environment.exchangeRateInterval;
+
   return useSuspendableQuery({
     document: ExchangeRateQuery,
     variables: { request },
     suspense,
-    pollInterval: 10000,
-    requestPolicy: 'cache-and-network',
+    pollInterval,
   });
 }

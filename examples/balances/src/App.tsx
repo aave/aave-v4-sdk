@@ -6,8 +6,6 @@ export function App() {
     user: evmAddress('0x26D595DDDBAD81BF976EF6F24686A12A800B141F'),
   });
 
-  console.log(data);
-
   if (loading) {
     return <div>Loading...</div>;
   }

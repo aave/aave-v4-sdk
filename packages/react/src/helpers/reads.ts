@@ -1,7 +1,7 @@
 import { type StandardData, UnexpectedError } from '@aave/client-next';
 import { type AnyVariables, identity, invariant } from '@aave/types-next';
 import { useEffect, useMemo } from 'react';
-import { type RequestPolicy, type TypedDocumentNode, useQuery } from 'urql';
+import { type TypedDocumentNode, useQuery } from 'urql';
 import { ReadResult, type SuspendableResult } from './results';
 
 export type Selector<T, V> = (data: T) => V;
@@ -22,7 +22,6 @@ export type UseSuspendableQueryArgs<
   suspense: Suspense;
   selector?: Selector<Value, Output>;
   pollInterval?: number;
-  requestPolicy?: RequestPolicy;
 };
 
 /**
@@ -37,42 +36,34 @@ export function useSuspendableQuery<
   variables,
   suspense,
   selector = identity as Selector<Value, Output>,
-  pollInterval,
-  requestPolicy,
+  pollInterval = 0,
 }: UseSuspendableQueryArgs<
   Value,
   Output,
   Variables
 >): SuspendableResult<Output> {
-  const [result, executeQuery] = useQuery({
+  const [{ fetching, data, error }, executeQuery] = useQuery({
     query: document,
     variables,
     context: useMemo(
       () => ({
         suspense,
-        ...(requestPolicy && { requestPolicy }),
       }),
-      [suspense, requestPolicy],
+      [suspense],
     ),
   });
 
   useEffect(() => {
-    if (!pollInterval || pollInterval <= 0) return undefined;
+    if (pollInterval <= 0 || fetching) return undefined;
 
-    if (!result.fetching) {
-      const timerId = setTimeout(() => {
-        executeQuery({
-          requestPolicy: requestPolicy || 'cache-and-network',
-        });
-      }, pollInterval);
+    const timerId = setTimeout(() => {
+      executeQuery({
+        requestPolicy: 'network-only',
+      });
+    }, pollInterval);
 
-      return () => clearTimeout(timerId);
-    }
-
-    return undefined;
-  }, [result.fetching, executeQuery, pollInterval, requestPolicy]);
-
-  const { data, fetching, error } = result;
+    return () => clearTimeout(timerId);
+  }, [fetching, executeQuery, pollInterval]);
 
   if (fetching) {
     return ReadResult.Initial();

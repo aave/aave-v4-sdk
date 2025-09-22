@@ -8,6 +8,7 @@ export const production: EnvironmentConfig = {
   backend: 'https://api.v4.aave.com/graphql',
   indexingTimeout: 60_000,
   pollingInterval: 100,
+  exchangeRateInterval: 10000,
 };
 
 /**
@@ -18,6 +19,7 @@ export const staging: EnvironmentConfig = {
   backend: 'https://api.v4.staging.aave.com/graphql',
   indexingTimeout: 60_000,
   pollingInterval: 500,
+  exchangeRateInterval: 10000,
 };
 
 /**
@@ -28,4 +30,5 @@ export const local: EnvironmentConfig = {
   backend: 'http://localhost:3011/graphql',
   indexingTimeout: 60_000,
   pollingInterval: 1000,
+  exchangeRateInterval: 10000,
 };
