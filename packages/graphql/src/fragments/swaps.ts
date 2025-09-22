@@ -68,6 +68,7 @@ export type SwapByIntentTypeDefinition = FragmentOf<
 
 export const SwapByIntentTypedDataFragment = graphql(
   `fragment SwapByIntentTypedData on SwapByIntentTypedData {
+    __typename
     types {
       ...SwapByIntentTypeDefinition
     }

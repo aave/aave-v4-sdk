@@ -1,9 +1,10 @@
 import type { SigningError, UnexpectedError } from '@aave/client-next';
 import { permitTypedData } from '@aave/client-next/actions';
 import {
-  sendTransactionAndWait,
+  sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
+  waitForTransactionResult,
 } from '@aave/client-next/ethers';
 import type {
   CancelSwapTypedData,
@@ -16,6 +17,7 @@ import { invariant } from '@aave/types-next';
 import type { Signer } from 'ethers';
 import { useAaveClient } from './context';
 import {
+  PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
@@ -38,11 +40,12 @@ import {
  * @param signer - The ethers Signer to use for sending transactions.
  */
 export function useSendTransaction(signer: Signer): UseSendTransactionResult {
-  const client = useAaveClient();
-
   return useAsyncTask((request: TransactionRequest) => {
-    return sendTransactionAndWait(signer, request).andThen(
-      client.waitForSupportedTransaction,
+    return sendTransaction(signer, request).map(
+      (response) =>
+        new PendingTransaction(() =>
+          waitForTransactionResult(request, response),
+        ),
     );
   });
 }

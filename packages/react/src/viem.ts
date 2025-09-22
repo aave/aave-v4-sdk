@@ -1,9 +1,10 @@
 import type { SigningError, UnexpectedError } from '@aave/client-next';
 import { permitTypedData } from '@aave/client-next/actions';
 import {
-  sendTransactionAndWait,
+  sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
+  waitForTransactionResult,
 } from '@aave/client-next/viem';
 import type {
   ERC712Signature,
@@ -15,6 +16,7 @@ import { invariant } from '@aave/types-next';
 import type { WalletClient } from 'viem';
 import { useAaveClient } from './context';
 import {
+  PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
@@ -36,16 +38,17 @@ import {
 export function useSendTransaction(
   walletClient: WalletClient | undefined,
 ): UseSendTransactionResult {
-  const client = useAaveClient();
-
   return useAsyncTask((request: TransactionRequest) => {
     invariant(
       walletClient,
       'Expected a WalletClient to handle the operation result.',
     );
 
-    return sendTransactionAndWait(walletClient, request).andThen(
-      client.waitForSupportedTransaction,
+    return sendTransaction(walletClient, request).map(
+      (hash) =>
+        new PendingTransaction(() =>
+          waitForTransactionResult(walletClient, request, hash),
+        ),
     );
   });
 }

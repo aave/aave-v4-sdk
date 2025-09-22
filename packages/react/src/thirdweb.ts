@@ -18,15 +18,21 @@ import {
   signatureFrom,
   txHash,
 } from '@aave/types-next';
-import { defineChain, type ThirdwebClient } from 'thirdweb';
 import {
-  useActiveAccount,
-  useSendAndConfirmTransaction,
-  useSwitchActiveWalletChain,
-} from 'thirdweb/react';
+  defineChain,
+  prepareTransaction,
+  sendTransaction,
+  type ThirdwebClient,
+  waitForReceipt,
+} from 'thirdweb';
+import { useActiveAccount, useSwitchActiveWalletChain } from 'thirdweb/react';
 import { useAaveClient } from './context';
-import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
-import type { UseSendTransactionResult } from './helpers/writes';
+import {
+  PendingTransaction,
+  type UseAsyncTask,
+  type UseSendTransactionResult,
+  useAsyncTask,
+} from './helpers';
 
 /**
  * A hook that provides a way to send Aave transactions using a Thirdweb wallet.
@@ -36,43 +42,62 @@ import type { UseSendTransactionResult } from './helpers/writes';
 export function useSendTransaction(
   thirdwebClient: ThirdwebClient,
 ): UseSendTransactionResult {
-  const client = useAaveClient();
+  const account = useActiveAccount();
   const switchChain = useSwitchActiveWalletChain();
-  const { mutateAsync: sendAndConfirmTx } = useSendAndConfirmTransaction();
 
   return useAsyncTask((request: TransactionRequest) => {
-    return ResultAsync.fromPromise(
-      switchChain(defineChain({ id: request.chainId })),
-      (err) => UnexpectedError.from(err),
+    invariant(
+      account,
+      'No Account found. Ensure you have connected your wallet.',
+    );
+
+    const chain = defineChain({
+      id: request.chainId,
+      rpc: `https://${request.chainId}.rpc.thirdweb.com/${thirdwebClient.clientId}`,
+    });
+
+    return ResultAsync.fromPromise(switchChain(chain), (err) =>
+      UnexpectedError.from(err),
     )
       .andThen(() =>
         ResultAsync.fromPromise(
-          sendAndConfirmTx({
-            to: request.to,
-            data: request.data,
-            value: BigInt(request.value),
-            chain: {
-              id: request.chainId,
-              rpc: `https://${request.chainId}.rpc.thirdweb.com/${thirdwebClient.clientId}`,
-            },
-            client: thirdwebClient,
+          sendTransaction({
+            account,
+            transaction: prepareTransaction({
+              to: request.to,
+              data: request.data,
+              value: BigInt(request.value),
+              chain,
+              client: thirdwebClient,
+            }),
           }),
           (err) => SigningError.from(err),
         ),
       )
-      .andThen((receipt) =>
-        receipt.status === 'reverted'
-          ? TransactionError.new({
-              txHash: txHash(receipt.transactionHash),
-              request,
-            }).asResultAsync()
-          : okAsync(txHash(receipt.transactionHash)),
-      )
-      .map((hash) => ({
-        operations: request.operations,
-        txHash: hash,
-      }))
-      .andThen(client.waitForSupportedTransaction);
+      .map(
+        ({ transactionHash }) =>
+          new PendingTransaction(() =>
+            ResultAsync.fromPromise(
+              waitForReceipt({
+                client: thirdwebClient,
+                chain,
+                transactionHash,
+              }),
+              (err) => UnexpectedError.from(err),
+            ).andThen(({ status, transactionHash }) => {
+              if (status === 'reverted') {
+                return TransactionError.new({
+                  txHash: txHash(transactionHash),
+                  request,
+                }).asResultAsync();
+              }
+              return okAsync({
+                operations: request.operations,
+                txHash: txHash(transactionHash),
+              });
+            }),
+          ),
+      );
   });
 }
 

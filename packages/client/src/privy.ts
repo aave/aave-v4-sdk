@@ -25,7 +25,7 @@ import type {
   ExecutionPlanHandler,
   PermitHandler,
   SwapSignatureHandler,
-  TransactionExecutionResult,
+  TransactionResult,
 } from './types';
 import { supportedChains, transactionError } from './viem';
 
@@ -52,7 +52,7 @@ function sendTransactionAndWait(
   privy: PrivyClient,
   request: TransactionRequest,
   walletId: string,
-): ResultAsync<TransactionExecutionResult, SigningError | TransactionError> {
+): ResultAsync<TransactionResult, SigningError | TransactionError> {
   // TODO: verify it's on the correct chain, ask to switch if possible
   // TODO: verify if wallet account is correct, switch if possible
   const publicClient = createPublicClient({

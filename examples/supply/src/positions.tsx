@@ -85,7 +85,9 @@ export type AllUserPositionsProps = {
 export function AllUserPositions({ address, chainId }: AllUserPositionsProps) {
   const { data } = useUserPositions({
     user: address,
-    chainIds: [chainId],
+    filter: {
+      chainIds: [chainId],
+    },
   });
 
   return (

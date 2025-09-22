@@ -29,7 +29,7 @@ import type {
   ExecutionPlanHandler,
   PermitHandler,
   SwapSignatureHandler,
-  TransactionExecutionResult,
+  TransactionResult,
 } from './types';
 
 async function sendTransaction(
@@ -49,7 +49,7 @@ async function sendTransaction(
 function sendTransactionAndWait(
   client: ThirdwebClient,
   request: TransactionRequest,
-): ResultAsync<TransactionExecutionResult, SigningError | TransactionError> {
+): ResultAsync<TransactionResult, SigningError | TransactionError> {
   const wallet = Engine.serverWallet({
     client,
     address: request.from,

@@ -1,7 +1,7 @@
 import {
   type Reserve,
   type ReserveId,
-  ReservesFilterRequest,
+  ReservesRequestFilter,
   type Spoke,
   useReserves,
 } from '@aave/react-next';
@@ -20,7 +20,7 @@ export function ReserveSelector({ onChange, spoke }: ReserveSelectorProps) {
         address: spoke.address,
       },
     },
-    filter: ReservesFilterRequest.Supply,
+    filter: ReservesRequestFilter.Supply,
   });
 
   useEffect(() => {
