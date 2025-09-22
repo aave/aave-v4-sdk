@@ -3,11 +3,13 @@ import { permitTypedData } from '@aave/client-next/actions';
 import {
   sendTransaction,
   signERC20PermitWith,
+  signSwapTypedDataWith,
   waitForTransactionResult,
 } from '@aave/client-next/viem';
 import type {
   ERC712Signature,
   PermitTypedDataRequest,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import { invariant } from '@aave/types-next';
@@ -87,5 +89,40 @@ export function useERC20Permit(
     return permitTypedData(client, request).andThen(
       signERC20PermitWith(walletClient),
     );
+  });
+}
+
+export type SignSwapTypedDataError = SigningError | UnexpectedError;
+
+/**
+ * A hook that provides a way to sign swap typed data using a viem WalletClient instance.
+ *
+ * ```ts
+ * const { data: wallet } = useWalletClient(); // wagmi hook
+ * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith(wallet);
+ *
+ * const run = async () => {
+ *   const result = await signSwapTypedData(swapTypedData);
+ *
+ *   if (result.isErr()) {
+ *     console.error(result.error);
+ *     return;
+ *   }
+ *
+ *   console.log('Swap typed data signed:', result.value);
+ * };
+ * ```
+ */
+export function useSignSwapTypedDataWith(
+  walletClient: WalletClient | undefined,
+): UseAsyncTask<
+  SwapByIntentTypedData,
+  ERC712Signature,
+  SignSwapTypedDataError
+> {
+  return useAsyncTask((typedData: SwapByIntentTypedData) => {
+    invariant(walletClient, 'Expected a WalletClient to sign swap typed data');
+
+    return signSwapTypedDataWith(walletClient)(typedData);
   });
 }

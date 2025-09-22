@@ -77,7 +77,7 @@ export const graphql = initGraphQLTada<{
     SwapQuoteId: SwapQuoteId;
     SwapStatusFilter: SwapStatusFilter;
     TimeWindow: TimeWindow;
-    message: JSONString;
+    JSON: JSONString;
     TxHash: TxHash;
     UserPositionId: UserPositionId;
     Void: Void;

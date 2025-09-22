@@ -6,8 +6,10 @@ import {
   ValidationError,
 } from '@aave/core-next';
 import type {
+  CancelSwapTypedData,
   InsufficientBalanceError,
   PermitTypedDataResponse,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import {
@@ -39,6 +41,7 @@ import { mainnet } from 'viem/chains';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
+  SwapSignatureHandler,
   TransactionResult,
 } from './types';
 
@@ -191,6 +194,31 @@ export function signERC20PermitWith(walletClient: WalletClient): PermitHandler {
       (err) => SigningError.from(err),
     ).map((hex) => ({
       deadline: result.message.deadline,
+      value: signatureFrom(hex),
+    }));
+  };
+}
+
+/**
+ * Signs swap typed data using the provided wallet client.
+ */
+export function signSwapTypedDataWith(
+  walletClient: WalletClient,
+): SwapSignatureHandler {
+  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
+    invariant(walletClient.account, 'Wallet account is required');
+
+    return ResultAsync.fromPromise(
+      signTypedData(walletClient, {
+        account: walletClient.account,
+        domain: result.domain as TypedDataDomain,
+        types: result.types as TypedData,
+        primaryType: result.primaryType,
+        message: JSON.parse(result.message),
+      }),
+      (err) => SigningError.from(err),
+    ).map((hex) => ({
+      deadline: JSON.parse(result.message).deadline,
       value: signatureFrom(hex),
     }));
   };

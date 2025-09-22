@@ -5,8 +5,10 @@ import {
   ValidationError,
 } from '@aave/core-next';
 import type {
+  CancelSwapTypedData,
   InsufficientBalanceError,
   PermitTypedDataResponse,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import {
@@ -21,6 +23,7 @@ import type { Signer, TransactionResponse } from 'ethers';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
+  SwapSignatureHandler,
   TransactionResult,
 } from './types';
 
@@ -113,6 +116,22 @@ export function signERC20PermitWith(signer: Signer): PermitHandler {
       (err) => SigningError.from(err),
     ).map((signature) => ({
       deadline: result.message.deadline,
+      value: signatureFrom(signature),
+    }));
+  };
+}
+
+/**
+ * Signs swap typed data using the provided ethers signer.
+ */
+export function signSwapTypedDataWith(signer: Signer): SwapSignatureHandler {
+  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
+    const message = JSON.parse(result.message);
+    return ResultAsync.fromPromise(
+      signer.signTypedData(result.domain, result.types, message),
+      (err) => SigningError.from(err),
+    ).map((signature) => ({
+      deadline: message.deadline,
       value: signatureFrom(signature),
     }));
   };

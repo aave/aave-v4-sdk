@@ -6,8 +6,10 @@ import {
   waitForTransactionResult,
 } from '@aave/client-next/viem';
 import type {
+  CancelSwapTypedData,
   ERC712Signature,
   PermitTypedDataRequest,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import { invariant, ResultAsync, signatureFrom } from '@aave/types-next';
@@ -115,4 +117,51 @@ export function useERC20Permit(): UseAsyncTask<
       })),
     );
   });
+}
+
+export type SignSwapTypedDataError = SigningError | UnexpectedError;
+
+/**
+ * A hook that provides a way to sign swap typed data using a Privy wallet.
+ *
+ * ```ts
+ * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith();
+ *
+ * const run = async () => {
+ *   const result = await signSwapTypedData(swapTypedData);
+ *
+ *   if (result.isErr()) {
+ *     console.error(result.error);
+ *     return;
+ *   }
+ *
+ *   console.log('Swap typed data signed:', result.value);
+ * };
+ * ```
+ */
+export function useSignSwapTypedDataWith(): UseAsyncTask<
+  SwapByIntentTypedData | CancelSwapTypedData,
+  ERC712Signature,
+  SignSwapTypedDataError
+> {
+  const { signTypedData } = useSignTypedData();
+
+  return useAsyncTask(
+    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
+      const message = JSON.parse(typedData.message);
+
+      return ResultAsync.fromPromise(
+        signTypedData({
+          types: typedData.types,
+          primaryType: typedData.primaryType,
+          domain: typedData.domain,
+          message,
+        }),
+        (error) => SigningError.from(error),
+      ).map(({ signature }) => ({
+        deadline: message.deadline,
+        value: signatureFrom(signature),
+      }));
+    },
+  );
 }

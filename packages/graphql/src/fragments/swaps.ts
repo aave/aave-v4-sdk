@@ -353,7 +353,6 @@ export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
 
 export const CancelSwapTypeDefinitionFragment = graphql(
   `fragment CancelSwapTypeDefinition on CancelSwapTypeDefinition {
-    __typename
     OrderCancellations {
       ...TypeField
     }
@@ -369,7 +368,6 @@ export type CancelSwapTypeDefinition = FragmentOf<
 
 export const CancelSwapTypedDataFragment = graphql(
   `fragment CancelSwapTypedData on CancelSwapTypedData {
-    __typename
     types {
       ...CancelSwapTypeDefinition
     }

@@ -5,8 +5,10 @@ import {
 } from '@aave/client-next';
 import { permitTypedData } from '@aave/client-next/actions';
 import type {
+  CancelSwapTypedData,
   ERC712Signature,
   PermitTypedDataRequest,
+  SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
 import {
@@ -158,4 +160,54 @@ export function useERC20Permit(): UseAsyncTask<
       }),
     );
   });
+}
+
+export type SignSwapTypedDataError = SigningError | UnexpectedError;
+
+/**
+ * A hook that provides a way to sign swap typed data using a Thirdweb wallet.
+ *
+ * ```ts
+ * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith();
+ *
+ * const run = async () => {
+ *   const result = await signSwapTypedData(swapTypedData);
+ *
+ *   if (result.isErr()) {
+ *     console.error(result.error);
+ *     return;
+ *   }
+ *
+ *   console.log('Swap typed data signed:', result.value);
+ * };
+ * ```
+ */
+export function useSignSwapTypedDataWith(): UseAsyncTask<
+  SwapByIntentTypedData | CancelSwapTypedData,
+  ERC712Signature,
+  SignSwapTypedDataError
+> {
+  const account = useActiveAccount();
+
+  return useAsyncTask(
+    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
+      invariant(account, 'Expected an active account to sign swap typed data');
+
+      const message = JSON.parse(typedData.message);
+
+      return ResultAsync.fromPromise(
+        account.signTypedData({
+          // silence the rest of the type inference
+          types: typedData.types as Record<string, unknown>,
+          domain: typedData.domain,
+          primaryType: typedData.primaryType,
+          message,
+        }),
+        (err) => SigningError.from(err),
+      ).map((signature) => ({
+        deadline: message.deadline,
+        value: signatureFrom(signature),
+      }));
+    },
+  );
 }
