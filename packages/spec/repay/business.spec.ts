@@ -29,7 +29,6 @@ describe('Aave V4 Repay Scenario', () => {
         ).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
-
         reserve = setup.value;
       });
 
