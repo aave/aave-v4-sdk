@@ -23,7 +23,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve, supplyToReserve } from '../borrow/helper';
 import { supplyAndBorrow } from '../repay/helper';
 
-describe('Aave V4 Heal Factor Positions Scenarios', () => {
+describe('Aave V4 Health Factor Positions Scenarios', () => {
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
       const user = createNewWallet();
