@@ -3,6 +3,9 @@ import {
   type Chain,
   ChainsFilter,
   ChainsQuery,
+  ExchangeRateQuery,
+  type ExchangeRateRequest,
+  type FiatAmount,
   HasProcessedKnownTransactionQuery,
   type HasProcessedKnownTransactionRequest,
 } from '@aave/graphql-next';
@@ -43,4 +46,25 @@ export function hasProcessedKnownTransaction(
     { request },
     'network-only',
   );
+}
+
+/**
+ * Fetches the exchange rate between tokens and fiat currencies.
+ *
+ * ```ts
+ * const result = await exchangeRate(client, {
+ *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
+ *   to: Currency.Usd,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The exchange rate request parameters.
+ * @returns The exchange rate information as a fiat amount.
+ */
+export function exchangeRate(
+  client: AaveClient,
+  request: ExchangeRateRequest,
+): ResultAsync<FiatAmount, UnexpectedError> {
+  return client.query(ExchangeRateQuery, { request });
 }

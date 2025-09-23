@@ -1,6 +1,6 @@
 import { type StandardData, UnexpectedError } from '@aave/client-next';
 import { type AnyVariables, identity, invariant } from '@aave/types-next';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
 import {
   ReadResult,
@@ -25,6 +25,7 @@ export type UseSuspendableQueryArgs<
   variables: Variables;
   suspense: Suspense;
   selector?: Selector<Value, Output>;
+  pollInterval?: number;
 };
 
 /**
@@ -86,16 +87,34 @@ export function useSuspendableQuery<
   variables,
   suspense,
   selector = identity as Selector<Value, Output>,
+  pollInterval = 0,
 }: UseSuspendableQueryArgs<
   Value,
   Output,
   Variables
 >): SuspendableResult<Output> {
-  const [{ data, fetching, error }] = useQuery({
+  const [{ fetching, data, error }, executeQuery] = useQuery({
     query: document,
     variables,
-    context: useMemo(() => ({ suspense }), [suspense]),
+    context: useMemo(
+      () => ({
+        suspense,
+      }),
+      [suspense],
+    ),
   });
+
+  useEffect(() => {
+    if (pollInterval <= 0 || fetching) return undefined;
+
+    const timerId = setTimeout(() => {
+      executeQuery({
+        requestPolicy: 'network-only',
+      });
+    }, pollInterval);
+
+    return () => clearTimeout(timerId);
+  }, [fetching, executeQuery, pollInterval]);
 
   if (fetching) {
     return ReadResult.Initial();
