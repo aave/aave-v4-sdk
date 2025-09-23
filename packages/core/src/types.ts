@@ -6,6 +6,7 @@ export type EnvironmentConfig = {
   backend: string;
   indexingTimeout: number;
   pollingInterval: number;
+  exchangeRateInterval?: number;
 };
 
 /**

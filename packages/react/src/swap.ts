@@ -6,7 +6,6 @@ import {
 } from '@aave/client-next';
 import {
   cancelSwap,
-  exchangeRate,
   prepareSwap,
   prepareSwapCancel,
   swap,
@@ -21,8 +20,6 @@ import type {
   UnexpectedError,
 } from '@aave/core-next';
 import type {
-  ExchangeRateRequest,
-  FiatAmount,
   InsufficientBalanceError,
   PaginatedUserSwapsResult,
   PrepareSwapCancelRequest,
@@ -103,42 +100,6 @@ export function useSwapQuote(
 
   return useAsyncTask((request: SwapQuoteRequest) =>
     swapQuote(client, request, options),
-  );
-}
-
-/**
- * Fetches the exchange rate between tokens and fiat currencies.
- *
- * ```tsx
- * const [getExchangeRate, gettingRate] = useExchangeRate();
- *
- * const loading = gettingRate.loading;
- * const error = gettingRate.error;
- *
- * // …
- *
- * const result = await getExchangeRate({
- *   from: { erc20: { chainId: chainId(1), address: evmAddress('0xA0b86a33E6...') } },
- *   to: Currency.USD,
- * });
- *
- * if (result.isErr()) {
- *   console.error(result.error);
- *   return;
- * }
- *
- * console.log('Exchange rate:', result.value);
- * ```
- */
-export function useExchangeRate(): UseAsyncTask<
-  ExchangeRateRequest,
-  FiatAmount,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask((request: ExchangeRateRequest) =>
-    exchangeRate(client, request),
   );
 }
 
