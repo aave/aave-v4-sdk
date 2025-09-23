@@ -69,7 +69,7 @@ export const graphql = initGraphQLTada<{
     OrderDirection: OrderDirection;
     PageSize: PageSize;
     ReserveId: ReserveId;
-    ReservesFilterRequest: ReservesRequestFilter;
+    ReservesRequestFilter: ReservesRequestFilter;
     Signature: Signature;
     String: string;
     SwapId: SwapId;

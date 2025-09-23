@@ -933,11 +933,11 @@ export function useSetUserSupplyAsCollateral(
 
           // update hubs
           client.refreshQueryWhere(HubsQuery, (variables) =>
-            isChainIdsVariant(variables.request)
-              ? variables.request.chainIds.some(
+            isChainIdsVariant(variables.request.query)
+              ? variables.request.query.chainIds.some(
                   (chainId) => chainId === request.reserve.chainId,
                 )
-              : variables.request.tokens.some(
+              : variables.request.query.tokens.some(
                   (token) => token.chainId === request.reserve.chainId,
                 ),
           ),
