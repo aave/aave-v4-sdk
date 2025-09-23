@@ -181,8 +181,13 @@ input Erc20Input {
 }
 
 type Erc20Token {
+  """The token address"""
   address: EvmAddress!
+
+  """The chain its deployed to"""
   chain: Chain!
+
+  """The ERC20 token info"""
   info: TokenInfo!
 
   """
@@ -191,6 +196,9 @@ type Erc20Token {
   on the display screen, or whatever you decide makes sense
   """
   isWrappedNativeToken: Boolean!
+
+  """If permit is supported for the ERC20 token"""
+  permitSupported: Boolean!
 }
 
 scalar EvmAddress
@@ -403,7 +411,11 @@ input HubTokenInput {
   token: EvmAddress!
 }
 
-input HubsRequest @oneOf {
+input HubsRequest {
+  query: HubsRequestQuery!
+}
+
+input HubsRequestQuery @oneOf {
   """Get back all the hubs which have one of the underlying tokens supplied"""
   tokens: [Erc20Input!]
 
@@ -565,23 +577,9 @@ type PermitMessageData {
   deadline: Int!
 }
 
-input PermitRequest {
-  """The spender (when doing this with aave this is the market address)"""
-  spender: EvmAddress!
-
-  """The token you want to do the permit with"""
-  currency: EvmAddress!
-
-  """
-  The amount to permit - in human-readable form aka 0.001 eth is 0.001 eth here
-  """
-  amount: BigDecimal!
-
-  """The chain id the pool is deployed on"""
-  chainId: ChainId!
-
-  """The owner of the funds"""
-  owner: EvmAddress!
+input PermitRequest @oneOf {
+  supply: SupplyPermitRequest
+  repay: RepayPermitRequest
 }
 
 type PermitTypedDataResponse {
@@ -631,6 +629,7 @@ input PreviewAction @oneOf {
   borrow: BorrowRequest
   repay: RepayRequest
   withdraw: WithdrawRequest
+  setUserSupplyAsCollateral: SetUserSupplyAsCollateralRequest
 }
 
 input PreviewRequest {
@@ -755,6 +754,23 @@ input RepayErc20AmountInputWithPermit {
   permitSig: ERC712Signature
 }
 
+input RepayPermitRequest {
+  """The reserve"""
+  reserve: ReserveInput!
+
+  """The amount repaying"""
+  amount: AmountInput!
+
+  """The user sending the transaction (normally the user's wallet address)"""
+  sender: EvmAddress!
+
+  """
+  If not supplied, this will use `sender` which is the normal route - you can only use on
+  `onBehalfOf` if you're a position manager for that user
+  """
+  onBehalfOf: EvmAddress
+}
+
 input RepayRequest {
   """The reserve"""
   reserve: ReserveInput!
@@ -870,12 +886,6 @@ type ReserveUserState {
   borrowApy: PercentValue!
 }
 
-enum ReservesFilterRequest {
-  SUPPLY
-  BORROW
-  ALL
-}
-
 input ReservesRequest {
   """The reserve's request query"""
   query: ReservesRequestQuery!
@@ -886,16 +896,23 @@ input ReservesRequest {
   user: EvmAddress
 
   """The reserve's filter"""
-  filter: ReservesFilterRequest! = ALL
+  filter: ReservesRequestFilter! = ALL
 
   """The reserve's order by"""
-  orderBy: ReservesRequestOrderBy! = {name: ASC}
+  orderBy: ReservesRequestOrderBy! = {assetName: ASC}
+}
+
+enum ReservesRequestFilter {
+  SUPPLY
+  BORROW
+  ALL
 }
 
 input ReservesRequestOrderBy @oneOf {
-  name: OrderDirection
-  balance: OrderDirection
-  apy: OrderDirection
+  assetName: OrderDirection
+  userBalance: OrderDirection
+  supplyApy: OrderDirection
+  borrowApy: OrderDirection
   collateralFactor: OrderDirection
 }
 
@@ -1043,6 +1060,26 @@ type SupplyActivity {
   spoke: Spoke!
   reserve: ReserveInfo!
   amount: Erc20Amount!
+}
+
+input SupplyPermitRequest {
+  """The reserve"""
+  reserve: ReserveInput!
+
+  """The amount supplying"""
+  amount: ReserveErc20AmountInput!
+
+  """If you wish to enable collateral with it meaning you can borrow"""
+  enableCollateral: Boolean! = true
+
+  """The user sending the transaction (normally the user's wallet address)"""
+  sender: EvmAddress!
+
+  """
+  If not supplied, this will use `sender` which is the normal route - you can only use on
+  `onBehalfOf` if you're a position manager for that user
+  """
+  onBehalfOf: EvmAddress
 }
 
 input SupplyRequest {
@@ -1288,6 +1325,11 @@ type TransactionRequest {
 
 scalar TxHash
 
+input TxHashInput {
+  txHash: TxHash!
+  chainId: ChainId!
+}
+
 type TypeDefinition {
   EIP712Domain: [TypeField!]!
   Permit: [TypeField!]!
@@ -1404,6 +1446,7 @@ input UserBorrowsRequestOrderBy @oneOf {
 input UserHistoryFilter @oneOf {
   spoke: SpokeInput
   chainIds: [ChainId!]
+  txHash: TxHashInput
 }
 
 union UserHistoryItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | SwapActivity
@@ -1419,12 +1462,6 @@ input UserHistoryRequest {
 type UserPosition {
   """The user holding this position"""
   user: EvmAddress!
-
-  """The supplies within a position"""
-  supplies: [UserSupplyItem!]!
-
-  """The borrows within a position"""
-  borrows: [UserBorrowItem!]!
 
   """The user position ID"""
   id: UserPositionId!
@@ -1479,7 +1516,7 @@ input UserPositionsRequestFilter @oneOf {
 input UserPositionsRequestOrderBy @oneOf {
   created: OrderDirection
   balance: OrderDirection
-  apy: OrderDirection
+  netApy: OrderDirection
   healthFactor: OrderDirection
   netCollateral: OrderDirection
 }

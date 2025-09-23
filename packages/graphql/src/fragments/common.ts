@@ -71,6 +71,7 @@ export const Erc20TokenFragment = graphql(
       ...Chain
     }
     isWrappedNativeToken
+    permitSupported
   }`,
   [TokenInfoFragment, ChainFragment],
 );
