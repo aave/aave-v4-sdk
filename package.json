@@ -23,11 +23,8 @@
     "publish:results": "tsx scripts/publishResults.ts",
     "release": "pnpm changeset publish",
     "spec": "vitest --project spec",
-    "test:client:privy": "vitest --project client packages/client/src/privy.test.ts",
-    "test:client:thirdweb": "vitest --project client packages/client/src/thirdweb.test.ts",
-    "test:client": "vitest --project client",
     "test:react": "vitest --project react",
-    "test": "pnpm test:client && pnpm test:react",
+    "test": "pnpm test:react",
     "typecheck:spec": "pnpm --filter spec typecheck"
   },
   "license": "MIT",

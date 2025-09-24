@@ -1,5 +1,4 @@
 import { SigningError, UnexpectedError } from '@aave/client-next';
-import { permitTypedData } from '@aave/client-next/actions';
 import {
   sendTransaction,
   supportedChains,
@@ -15,13 +14,13 @@ import type {
 import { invariant, ResultAsync, signatureFrom } from '@aave/types-next';
 import { useSignTypedData, useWallets } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
-import { useAaveClient } from './context';
 import {
   PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
+import { usePermitTypedDataAction } from './permits';
 
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
@@ -72,16 +71,22 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  * A hook that provides a way to sign ERC20 permits using a Privy wallet.
  *
  * ```ts
+ * const { ready, authenticated, user } = usePrivy(); // privy hook
  * const [signERC20Permit, { loading, error, data }] = useERC20Permit();
  *
  * const run = async () => {
  *   const result = await signERC20Permit({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     underlyingToken: evmAddress('0x5678…'),
- *     amount: '42.42',
- *     spender: evmAddress('0x9abc…'),
- *     owner: evmAddress(account.address!),
+ *     supply: {
+ *       sender: evmAddress(user!.wallet!.address), // User's address
+ *       reserve: {
+ *         reserveId: reserve.id,
+ *         chainId: reserve.chain.chainId,
+ *         spoke: reserve.spoke.address,
+ *       },
+ *       amount: {
+ *         value: bigDecimal(42), // 42 USDC
+ *       },
+ *     },
  *   });
  *
  *   if (result.isErr()) {
@@ -89,7 +94,7 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  *     return;
  *   }
  *
- *   console.log('ERC20 permit signed:', result.value);
+ *   console.log('ERC20 Permit signature:', result.value);
  * };
  * ```
  */
@@ -98,11 +103,11 @@ export function useERC20Permit(): UseAsyncTask<
   ERC712Signature,
   SignERC20PermitError
 > {
-  const client = useAaveClient();
+  const [permitTypedData] = usePermitTypedDataAction();
   const { signTypedData } = useSignTypedData();
 
   return useAsyncTask((request: PermitTypedDataRequest) => {
-    return permitTypedData(client, request).andThen((response) =>
+    return permitTypedData(request).andThen((response) =>
       ResultAsync.fromPromise(
         signTypedData({
           types: response.types,

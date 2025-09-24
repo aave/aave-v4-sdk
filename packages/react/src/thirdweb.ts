@@ -3,7 +3,6 @@ import {
   TransactionError,
   UnexpectedError,
 } from '@aave/client-next';
-import { permitTypedData } from '@aave/client-next/actions';
 import type {
   CancelSwapTypedData,
   ERC712Signature,
@@ -26,13 +25,13 @@ import {
   waitForReceipt,
 } from 'thirdweb';
 import { useActiveAccount, useSwitchActiveWalletChain } from 'thirdweb/react';
-import { useAaveClient } from './context';
 import {
   PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
+import { usePermitTypedDataAction } from './permits';
 
 /**
  * A hook that provides a way to send Aave transactions using a Thirdweb wallet.
@@ -107,16 +106,22 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  * A hook that provides a way to sign ERC20 permits using a Thirdweb wallet.
  *
  * ```ts
+ * const account = useActiveAccount(); // thirdweb hook
  * const [signERC20Permit, { loading, error, data }] = useERC20Permit();
  *
  * const run = async () => {
  *   const result = await signERC20Permit({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     underlyingToken: evmAddress('0x5678…'),
- *     amount: '42.42',
- *     spender: evmAddress('0x9abc…'),
- *     owner: evmAddress(account.address!),
+ *     supply: {
+ *       sender: evmAddress(account.address), // User's address
+ *       reserve: {
+ *         reserveId: reserve.id,
+ *         chainId: reserve.chain.chainId,
+ *         spoke: reserve.spoke.address,
+ *       },
+ *       amount: {
+ *         value: bigDecimal(42), // 42 USDC
+ *       },
+ *     },
  *   });
  *
  *   if (result.isErr()) {
@@ -124,7 +129,7 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  *     return;
  *   }
  *
- *   console.log('ERC20 permit signed:', result.value);
+ *   console.log('ERC20 Permit signature:', result.value);
  * };
  * ```
  */
@@ -133,7 +138,7 @@ export function useERC20Permit(): UseAsyncTask<
   ERC712Signature,
   SignERC20PermitError
 > {
-  const client = useAaveClient();
+  const [permitTypedData] = usePermitTypedDataAction();
   const account = useActiveAccount();
 
   return useAsyncTask((request: PermitTypedDataRequest) => {
@@ -142,7 +147,7 @@ export function useERC20Permit(): UseAsyncTask<
       'No Account found. Ensure you have connected your wallet.',
     );
 
-    return permitTypedData(client, request).andThen((result) =>
+    return permitTypedData(request).andThen((result) =>
       ResultAsync.fromPromise(
         account.signTypedData({
           // silence the rest of the type inference
