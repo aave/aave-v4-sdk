@@ -84,7 +84,7 @@ input BorrowRequest {
 
 input CancelIntentSwapInput {
   id: SwapId!
-  signature: ERC712Signature!
+  signature: Signature!
 }
 
 union CancelSwapExecutionPlan = TransactionRequest | SwapCancelled
@@ -155,7 +155,7 @@ type DomainData {
   verifyingContract: EvmAddress!
 }
 
-input ERC712Signature {
+input ERC20PermitSignature {
   """The signature for the erc721"""
   value: Signature!
 
@@ -751,7 +751,7 @@ input RepayErc20AmountInputWithPermit {
   """
   The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
   """
-  permitSig: ERC712Signature
+  permitSig: ERC20PermitSignature
 }
 
 input RepayPermitRequest {
@@ -836,7 +836,7 @@ input ReserveErc20AmountInputWithPermit {
   """
   The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
   """
-  permitSig: ERC712Signature
+  permitSig: ERC20PermitSignature
 }
 
 scalar ReserveId
@@ -950,7 +950,7 @@ input SetSpokeUserPositionManagerRequest {
   user: EvmAddress!
 
   """The signature"""
-  signature: ERC712Signature
+  signature: ERC20PermitSignature
 }
 
 input SetUserSupplyAsCollateralRequest {
@@ -1127,7 +1127,7 @@ type SwapByIntent {
 
 input SwapByIntentInput {
   quoteId: SwapQuoteId!
-  signature: ERC712Signature!
+  signature: Signature!
 }
 
 type SwapByIntentTypeDefinition {
@@ -1263,7 +1263,7 @@ type SwapTransactionRequest {
 
 input SwapWithTransactionInput {
   quoteId: SwapQuoteId!
-  permitSig: ERC712Signature
+  permitSig: Signature
 
   """
   Whether the swap order creator is a smart contract wallet. If not provided, it will be inferred following the ERC-1271 standard.
