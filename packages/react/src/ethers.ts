@@ -1,5 +1,4 @@
 import type { SigningError, UnexpectedError } from '@aave/client-next';
-import { permitTypedData } from '@aave/client-next/actions';
 import {
   sendTransaction,
   signERC20PermitWith,
@@ -15,13 +14,13 @@ import type {
 } from '@aave/graphql-next';
 import { invariant } from '@aave/types-next';
 import type { Signer } from 'ethers';
-import { useAaveClient } from './context';
 import {
   PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
+import { usePermitTypedDataAction } from './permits';
 
 /**
  * A hook that provides a way to send Aave transactions using an ethers Signer instance.
@@ -65,12 +64,17 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  *
  * const run = async () => {
  *   const result = await signERC20Permit({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     underlyingToken: evmAddress('0x5678…'),
- *     amount: '42.42',
- *     spender: evmAddress('0x9abc…'),
- *     owner: evmAddress(await signer.getAddress()),
+ *     supply: {
+ *       sender: evmAddress(await signer.getAddress()), // User's address
+ *       reserve: {
+ *         reserveId: reserve.id,
+ *         chainId: reserve.chain.chainId,
+ *         spoke: reserve.spoke.address,
+ *       },
+ *       amount: {
+ *         value: bigDecimal(42), // 42 USDC
+ *       },
+ *     },
  *   });
  *
  *   if (result.isErr()) {
@@ -78,7 +82,7 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  *     return;
  *   }
  *
- *   console.log('ERC20 permit signed:', result.value);
+ *   console.log('ERC20 Permit signature:', result.value);
  * };
  * ```
  *
@@ -87,12 +91,10 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
 export function useERC20Permit(
   signer: Signer,
 ): UseAsyncTask<PermitTypedDataRequest, ERC712Signature, SignERC20PermitError> {
-  const client = useAaveClient();
+  const [permitTypedData] = usePermitTypedDataAction();
 
   return useAsyncTask((request: PermitTypedDataRequest) => {
-    return permitTypedData(client, request).andThen(
-      signERC20PermitWith(signer),
-    );
+    return permitTypedData(request).andThen(signERC20PermitWith(signer));
   });
 }
 

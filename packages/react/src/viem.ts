@@ -1,5 +1,4 @@
 import type { SigningError, UnexpectedError } from '@aave/client-next';
-import { permitTypedData } from '@aave/client-next/actions';
 import {
   sendTransaction,
   signERC20PermitWith,
@@ -14,13 +13,13 @@ import type {
 } from '@aave/graphql-next';
 import { invariant } from '@aave/types-next';
 import type { WalletClient } from 'viem';
-import { useAaveClient } from './context';
 import {
   PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
+import { usePermitTypedDataAction } from './permits';
 
 /**
  * A hook that provides a way to send Aave transactions using a viem WalletClient instance.
@@ -64,9 +63,17 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  *
  * const run = async () => {
  *   const result = await signERC20Permit({
- *     chainId: chainId(1), // Ethereum mainnet
- *     market: evmAddress('0x1234…'),
- *     user: evmAddress(account.address!),
+ *     supply: {
+ *       sender: evmAddress(wallet.account.address), // User's address
+ *       reserve: {
+ *         reserveId: reserve.id,
+ *         chainId: reserve.chain.chainId,
+ *         spoke: reserve.spoke.address,
+ *       },
+ *       amount: {
+ *         value: bigDecimal(42), // 42 USDC
+ *       },
+ *     },
  *   });
  *
  *   if (result.isErr()) {
@@ -74,21 +81,19 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  *     return;
  *   }
  *
- *   console.log('ERC20 permit signed:', result.value);
+ *   console.log('ERC20 Permit signature:', result.value);
  * };
  * ```
  */
 export function useERC20Permit(
   walletClient: WalletClient | undefined,
 ): UseAsyncTask<PermitTypedDataRequest, ERC712Signature, SignERC20PermitError> {
-  const client = useAaveClient();
+  const [permitTypedData] = usePermitTypedDataAction();
 
   return useAsyncTask((request: PermitTypedDataRequest) => {
     invariant(walletClient, 'Expected a WalletClient to sign ERC20 permits');
 
-    return permitTypedData(client, request).andThen(
-      signERC20PermitWith(walletClient),
-    );
+    return permitTypedData(request).andThen(signERC20PermitWith(walletClient));
   });
 }
 
