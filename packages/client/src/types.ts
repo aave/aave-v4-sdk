@@ -7,7 +7,7 @@ import type {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
-  ERC712Signature,
+  ERC20PermitSignature,
   ExecutionPlan,
   HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
@@ -47,8 +47,8 @@ export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
 
 export type PermitHandler = (
   result: PermitTypedDataResponse,
-) => ResultAsync<ERC712Signature, SigningError>;
+) => ResultAsync<ERC20PermitSignature, SigningError>;
 
 export type SwapSignatureHandler = (
   result: CancelSwapTypedData | SwapByIntentTypedData,
-) => ResultAsync<ERC712Signature, SigningError>;
+) => ResultAsync<ERC20PermitSignature, SigningError>;

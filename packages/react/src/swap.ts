@@ -35,7 +35,7 @@ import type {
 } from '@aave/graphql-next';
 import {
   type CancelSwapTypedData,
-  type ERC712Signature,
+  type ERC20PermitSignature,
   type PrepareSwapRequest,
   type SwapApprovalRequired,
   SwappableTokensQuery,
@@ -221,11 +221,13 @@ export type SwapHandler = (
   intent: SwapIntent,
   options: SwapHandlerOptions,
 ) => ResultAsync<
-  ERC712Signature | SwapReceipt,
+  ERC20PermitSignature | SwapReceipt,
   SendTransactionError | PendingTransactionError
 >;
 
-function isERC712Signature(signature: unknown): signature is ERC712Signature {
+function isERC20PermitSignature(
+  signature: unknown,
+): signature is ERC20PermitSignature {
   return (
     typeof signature === 'object' &&
     signature !== null &&
@@ -332,13 +334,16 @@ export function useSwapTokens(
 
           case 'SwapByIntent':
             return handler(preparePlan.data, { cancel }).andThen(
-              (signature) => {
-                invariant(isERC712Signature(signature), 'Invalid signature');
+              (signedTypedData) => {
+                invariant(
+                  isERC20PermitSignature(signedTypedData),
+                  'Invalid signature',
+                );
 
                 return swap(client, {
                   intent: {
                     quoteId: preparePlan.quote.quoteId,
-                    signature,
+                    signature: signedTypedData.value,
                   },
                 }).andThen(executeSwap);
               },
@@ -351,12 +356,15 @@ export function useSwapTokens(
               .andThen(() => handler(preparePlan.data, { cancel }))
               .map(PendingTransaction.ensure)
               .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen((signature) => {
-                invariant(isERC712Signature(signature), 'Invalid signature');
+              .andThen((signedTypedData) => {
+                invariant(
+                  isERC20PermitSignature(signedTypedData),
+                  'Invalid signature',
+                );
                 return swap(client, {
                   intent: {
                     quoteId: preparePlan.quote.quoteId,
-                    signature,
+                    signature: signedTypedData.value,
                   },
                 }).andThen(executeSwap);
               });
@@ -371,7 +379,7 @@ export function useSwapTokens(
 export type CancelSwapHandler = (
   data: CancelSwapTypedData | TransactionRequest,
 ) => ResultAsync<
-  ERC712Signature | PendingTransaction,
+  ERC20PermitSignature | PendingTransaction,
   SigningError | UnexpectedError
 >;
 
@@ -429,11 +437,14 @@ export function useCancelSwap(
         case 'SwapPendingSignature':
           return prepareSwapCancel(client, request)
             .andThen((result) => handler(result.data))
-            .andThen((signature) => {
-              invariant(isERC712Signature(signature), 'Invalid signature');
+            .andThen((signedTypedData) => {
+              invariant(
+                isERC20PermitSignature(signedTypedData),
+                'Invalid signature',
+              );
 
               return cancelSwap(client, {
-                intent: { id: request.id, signature },
+                intent: { id: request.id, signature: signedTypedData.value },
               });
             })
             .andThen((plan) => {

@@ -5,7 +5,7 @@ import {
 } from '@aave/client-next';
 import type {
   CancelSwapTypedData,
-  ERC712Signature,
+  ERC20PermitSignature,
   PermitTypedDataRequest,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -135,7 +135,7 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  */
 export function useERC20Permit(): UseAsyncTask<
   PermitTypedDataRequest,
-  ERC712Signature,
+  ERC20PermitSignature,
   SignERC20PermitError
 > {
   const [permitTypedData] = usePermitTypedDataAction();
@@ -189,7 +189,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  */
 export function useSignSwapTypedDataWith(): UseAsyncTask<
   SwapByIntentTypedData | CancelSwapTypedData,
-  ERC712Signature,
+  ERC20PermitSignature,
   SignSwapTypedDataError
 > {
   const account = useActiveAccount();
