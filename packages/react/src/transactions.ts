@@ -47,7 +47,7 @@ import {
   UserSummaryQuery,
   type WithdrawRequest,
 } from '@aave/graphql-next';
-import { errAsync, type TxHash } from '@aave/types-next';
+import { errAsync, type Prettify, type TxHash } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   cancel,
@@ -1230,17 +1230,16 @@ export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
  * console.log('Preview result:', result.value);
  * ```
  */
-export function usePreviewAction(): UseAsyncTask<
-  PreviewRequest,
-  PreviewUserPosition,
-  UnexpectedError
-> {
+export function usePreviewAction(
+  _: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<PreviewRequest, PreviewUserPosition, UnexpectedError> {
+  // TODO: wire up options once AAVE-1916 is implemented
   const client = useAaveClient();
 
   return useAsyncTask((request: PreviewRequest) => preview(client, request));
 }
 
-export type UsePreviewArgs = PreviewRequest & CurrencyQueryOptions;
+export type UsePreviewArgs = Prettify<PreviewRequest & CurrencyQueryOptions>;
 
 /**
  * Fetch a preview of the impact of a potential action on a user's position.
