@@ -9,7 +9,6 @@
 
 ## Testing instructions
 
-- Use `pnpm test:client --run` to run `@aave/client` tests.
 - Use `pnpm test:react --run` to run `@aave/react` tests.
 - Use `pnpm vitest --run --project <project-name> <path-to-test-file> -t "<test-name>"` to focus on one single test.
 
