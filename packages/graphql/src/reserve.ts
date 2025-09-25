@@ -36,3 +36,10 @@ export const ReservesQuery = graphql(
   [ReserveFragment],
 );
 export type ReservesRequest = RequestOf<typeof ReservesQuery>;
+
+export type ReservesRequestOrderBy = ReturnType<
+  typeof graphql.scalar<'ReservesRequestOrderBy'>
+>;
+export type ReservesRequestQuery = ReturnType<
+  typeof graphql.scalar<'ReservesRequestQuery'>
+>;

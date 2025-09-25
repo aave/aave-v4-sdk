@@ -6,7 +6,7 @@ import {
 import type {
   CancelSwapTypedData,
   ERC712Signature,
-  PermitTypedDataRequest,
+  PermitRequest,
   SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
@@ -134,14 +134,14 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  * ```
  */
 export function useERC20Permit(): UseAsyncTask<
-  PermitTypedDataRequest,
+  PermitRequest,
   ERC712Signature,
   SignERC20PermitError
 > {
   const [permitTypedData] = usePermitTypedDataAction();
   const account = useActiveAccount();
 
-  return useAsyncTask((request: PermitTypedDataRequest) => {
+  return useAsyncTask((request: PermitRequest) => {
     invariant(
       account,
       'No Account found. Ensure you have connected your wallet.',

@@ -1,7 +1,7 @@
 import type { UnexpectedError } from '@aave/client-next';
 import { permitTypedData } from '@aave/client-next/actions';
 import type {
-  PermitTypedDataRequest,
+  PermitRequest,
   PermitTypedDataResponse,
 } from '@aave/graphql-next';
 import { useAaveClient } from './context';
@@ -17,13 +17,13 @@ import { type UseAsyncTask, useAsyncTask } from './helpers';
  * (e.g., in an event handler when preparing to sign a permit).
  */
 export function usePermitTypedDataAction(): UseAsyncTask<
-  PermitTypedDataRequest,
+  PermitRequest,
   PermitTypedDataResponse,
   UnexpectedError
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: PermitTypedDataRequest) =>
+  return useAsyncTask((request: PermitRequest) =>
     permitTypedData(client, request),
   );
 }

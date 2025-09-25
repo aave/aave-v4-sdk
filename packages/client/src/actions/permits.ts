@@ -1,7 +1,7 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
+  type PermitRequest,
   PermitTypedDataQuery,
-  type PermitTypedDataRequest,
   type PermitTypedDataResponse,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
@@ -30,7 +30,7 @@ import type { AaveClient } from '../AaveClient';
  */
 export function permitTypedData(
   client: AaveClient,
-  request: PermitTypedDataRequest,
+  request: PermitRequest,
 ): ResultAsync<PermitTypedDataResponse, UnexpectedError> {
   return client.query(PermitTypedDataQuery, { request });
 }

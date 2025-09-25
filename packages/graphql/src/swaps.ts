@@ -113,3 +113,22 @@ export const UserSwapsQuery = graphql(
   [PaginatedUserSwapsResultFragment],
 );
 export type UserSwapsRequest = RequestOf<typeof UserSwapsQuery>;
+
+export type CancelIntentSwapInput = ReturnType<
+  typeof graphql.scalar<'CancelIntentSwapInput'>
+>;
+export type PrepareLimitOrderSwapInput = ReturnType<
+  typeof graphql.scalar<'PrepareLimitOrderSwapInput'>
+>;
+export type PrepareMarketOrderSwapInput = ReturnType<
+  typeof graphql.scalar<'PrepareMarketOrderSwapInput'>
+>;
+export type SwapByIntentInput = ReturnType<
+  typeof graphql.scalar<'SwapByIntentInput'>
+>;
+export type SwapWithTransactionInput = ReturnType<
+  typeof graphql.scalar<'SwapWithTransactionInput'>
+>;
+export type SwappableTokensRequestQuery = ReturnType<
+  typeof graphql.scalar<'SwappableTokensRequestQuery'>
+>;
