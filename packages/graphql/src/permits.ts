@@ -76,4 +76,12 @@ export const PermitTypedDataQuery = graphql(
   }`,
   [PermitTypedDataResponseFragment],
 );
-export type PermitTypedDataRequest = RequestOf<typeof PermitTypedDataQuery>;
+export type PermitRequest = RequestOf<typeof PermitTypedDataQuery>;
+
+export type RepayPermitRequest = ReturnType<
+  typeof graphql.scalar<'RepayPermitRequest'>
+>;
+
+export type SupplyPermitRequest = ReturnType<
+  typeof graphql.scalar<'SupplyPermitRequest'>
+>;

@@ -118,3 +118,31 @@ export const UserHistoryQuery = graphql(
   [PaginatedUserHistoryResultFragment],
 );
 export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
+
+export type UserBalancesRequestOrderBy = ReturnType<
+  typeof graphql.scalar<'UserBalancesRequestOrderBy'>
+>;
+export type UserBorrowsQueryRequest = ReturnType<
+  typeof graphql.scalar<'UserBorrowsQueryRequest'>
+>;
+export type UserBorrowsRequestOrderBy = ReturnType<
+  typeof graphql.scalar<'UserBorrowsRequestOrderBy'>
+>;
+export type UserHistoryFilter = ReturnType<
+  typeof graphql.scalar<'UserHistoryFilter'>
+>;
+export type UserPositionsRequestFilter = ReturnType<
+  typeof graphql.scalar<'UserPositionsRequestFilter'>
+>;
+export type UserPositionsRequestOrderBy = ReturnType<
+  typeof graphql.scalar<'UserPositionsRequestOrderBy'>
+>;
+export type UserSummaryFilter = ReturnType<
+  typeof graphql.scalar<'UserSummaryFilter'>
+>;
+export type UserSuppliesQueryRequest = ReturnType<
+  typeof graphql.scalar<'UserSuppliesQueryRequest'>
+>;
+export type UserSuppliesRequestOrderBy = ReturnType<
+  typeof graphql.scalar<'UserSuppliesRequestOrderBy'>
+>;

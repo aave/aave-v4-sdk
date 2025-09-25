@@ -40,3 +40,7 @@ export const HubAssetsQuery = graphql(
   [HubAssetFragment],
 );
 export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;
+
+export type HubsRequestQuery = ReturnType<
+  typeof graphql.scalar<'HubsRequestQuery'>
+>;
