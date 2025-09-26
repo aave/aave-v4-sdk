@@ -65,7 +65,7 @@ export function spokePositionManagers(
  *     chainId: chainId(1),
  *     address: evmAddress('0x878...'),
  *   },
- *   user: evmAddress('0x123...'),
+ *   userAddress: evmAddress('0x123...'),
  * });
  * ```
  *

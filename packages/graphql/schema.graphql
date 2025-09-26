@@ -1006,8 +1006,8 @@ input SpokePositionManagersRequest {
 }
 
 type SpokePositionManger {
-  name: String
   address: EvmAddress!
+  active: Boolean!
 }
 
 input SpokeTokenInput {
@@ -1023,14 +1023,15 @@ input SpokeTokenInput {
 
 input SpokeUserPositionManagersRequest {
   spoke: SpokeInput!
+  userAddress: EvmAddress!
   pageSize: PageSize!
   cursor: Cursor
 }
 
 type SpokeUserPositionManger {
-  name: String
   address: EvmAddress!
-  enabledAt: DateTime!
+  approved: Boolean!
+  active: Boolean!
 }
 
 input SpokesRequest @oneOf {

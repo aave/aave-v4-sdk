@@ -3570,15 +3570,18 @@
         "name": "SpokePositionManger",
         "fields": [
           {
-            "name": "name",
+            "name": "address",
             "type": {
-              "kind": "SCALAR",
-              "name": "Any"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
             },
             "args": []
           },
           {
-            "name": "address",
+            "name": "active",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3596,14 +3599,6 @@
         "name": "SpokeUserPositionManger",
         "fields": [
           {
-            "name": "name",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
             "name": "address",
             "type": {
               "kind": "NON_NULL",
@@ -3615,7 +3610,18 @@
             "args": []
           },
           {
-            "name": "enabledAt",
+            "name": "approved",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "active",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

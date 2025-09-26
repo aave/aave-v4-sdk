@@ -31,7 +31,7 @@ export const SpokePositionManagerFragment = graphql(
   `fragment SpokePositionManager on SpokePositionManger {
     __typename
     address
-    name
+    active
   }`,
 );
 
@@ -60,8 +60,8 @@ export const SpokeUserPositionManagerFragment = graphql(
   `fragment SpokeUserPositionManager on SpokeUserPositionManger {
     __typename
     address
-    enabledAt
-    name
+    approved
+    active
   }`,
 );
 
