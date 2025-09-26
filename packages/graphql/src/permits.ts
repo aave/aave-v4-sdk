@@ -61,8 +61,8 @@ export type PermitTypedDataResponse = FragmentOf<
   typeof PermitTypedDataResponseFragment
 >;
 
-export type ERC712Signature = ReturnType<
-  typeof graphql.scalar<'ERC712Signature'>
+export type ERC20PermitSignature = ReturnType<
+  typeof graphql.scalar<'ERC20PermitSignature'>
 >;
 
 /**

@@ -6,7 +6,7 @@ import {
   waitForTransactionResult,
 } from '@aave/client-next/viem';
 import type {
-  ERC712Signature,
+  ERC20PermitSignature,
   PermitRequest,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -87,7 +87,7 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  */
 export function useERC20Permit(
   walletClient: WalletClient | undefined,
-): UseAsyncTask<PermitRequest, ERC712Signature, SignERC20PermitError> {
+): UseAsyncTask<PermitRequest, ERC20PermitSignature, SignERC20PermitError> {
   const [permitTypedData] = usePermitTypedDataAction();
 
   return useAsyncTask((request: PermitRequest) => {
@@ -122,7 +122,7 @@ export function useSignSwapTypedDataWith(
   walletClient: WalletClient | undefined,
 ): UseAsyncTask<
   SwapByIntentTypedData,
-  ERC712Signature,
+  ERC20PermitSignature,
   SignSwapTypedDataError
 > {
   return useAsyncTask((typedData: SwapByIntentTypedData) => {
