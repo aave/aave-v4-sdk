@@ -46,3 +46,7 @@ export const ExchangeRateQuery = graphql(
   [FiatAmountFragment],
 );
 export type ExchangeRateRequest = RequestOf<typeof ExchangeRateQuery>;
+
+export type ExchangeRateRequestFrom = ReturnType<
+  typeof graphql.scalar<'ExchangeRateRequestFrom'>
+>;

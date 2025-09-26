@@ -192,3 +192,17 @@ export const UpdateUserDynamicConfigQuery = graphql(
 export type UpdateUserDynamicConfigRequest = RequestOf<
   typeof UpdateUserDynamicConfigQuery
 >;
+
+export type LiquidatePositionDebtAmount = ReturnType<
+  typeof graphql.scalar<'LiquidatePositionDebtAmount'>
+>;
+export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
+export type RepayAmountInputWithPermit = ReturnType<
+  typeof graphql.scalar<'RepayAmountInputWithPermit'>
+>;
+export type RepayErc20AmountInputWithPermit = ReturnType<
+  typeof graphql.scalar<'RepayErc20AmountInputWithPermit'>
+>;
+export type WithdrawReserveAmountInput = ReturnType<
+  typeof graphql.scalar<'WithdrawReserveAmountInput'>
+>;

@@ -8,10 +8,11 @@ import {
 import type {
   CancelSwapTypedData,
   ERC20PermitSignature,
-  PermitTypedDataRequest,
+  PermitRequest,
   SwapByIntentTypedData,
   TransactionRequest,
 } from '@aave/graphql-next';
+
 import { invariant } from '@aave/types-next';
 import type { Signer } from 'ethers';
 import {
@@ -90,14 +91,10 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  */
 export function useERC20Permit(
   signer: Signer,
-): UseAsyncTask<
-  PermitTypedDataRequest,
-  ERC20PermitSignature,
-  SignERC20PermitError
-> {
+): UseAsyncTask<PermitRequest, ERC20PermitSignature, SignERC20PermitError> {
   const [permitTypedData] = usePermitTypedDataAction();
 
-  return useAsyncTask((request: PermitTypedDataRequest) => {
+  return useAsyncTask((request: PermitRequest) => {
     return permitTypedData(request).andThen(signERC20PermitWith(signer));
   });
 }
