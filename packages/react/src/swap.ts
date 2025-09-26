@@ -40,6 +40,7 @@ import {
   type SwapApprovalRequired,
   SwappableTokensQuery,
   type SwappableTokensRequest,
+  SwapQuoteQuery,
   type Token,
   type TransactionRequest,
   UserSwapsQuery,
@@ -66,14 +67,73 @@ import {
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
+export type UseSwapQuoteArgs = Prettify<
+  SwapQuoteRequest & CurrencyQueryOptions
+>;
+
 /**
- * Fetches a swap quote for the specified trade parameters.
+ * Fetch a swap quote for the specified trade parameters.
+ *
+ * This signature supports React Suspense:
  *
  * ```tsx
- * const [getQuote, gettingQuote] = useSwapQuote();
+ * const { data } = useSwapQuote({
+ *   chainId: chainId(1),
+ *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
+ *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   amount: bigDecimal('1000'),
+ *   kind: SwapKind.SELL,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSwapQuote(
+  args: UseSwapQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+
+/**
+ * Fetch a swap quote for the specified trade parameters.
  *
- * const loading = gettingQuote.loading;
- * const error = gettingQuote.error;
+ * ```tsx
+ * const { data, error, loading } = useSwapQuote({
+ *   chainId: chainId(1),
+ *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
+ *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   amount: bigDecimal('1000'),
+ *   kind: SwapKind.SELL,
+ * });
+ * ```
+ */
+export function useSwapQuote(args: UseSwapQuoteArgs): ReadResult<SwapQuote>;
+
+export function useSwapQuote({
+  suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: UseSwapQuoteArgs & {
+  suspense?: boolean;
+}): SuspendableResult<SwapQuote> {
+  return useSuspendableQuery({
+    document: SwapQuoteQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+  });
+}
+
+/**
+ * Low-level hook to execute a swap quote action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow
+ * (e.g., in an event handler to get a fresh quote before executing a swap).
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useSwapQuoteAction();
  *
  * // …
  *
@@ -85,15 +145,14 @@ import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
  *   kind: SwapKind.SELL,
  * });
  *
- * if (result.isErr()) {
+ * if (result.isOk()) {
+ *   console.log('Swap quote:', result.value);
+ * } else {
  *   console.error(result.error);
- *   return;
  * }
- *
- * console.log('Swap quote:', result.value);
  * ```
  */
-export function useSwapQuote(
+export function useSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<SwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
