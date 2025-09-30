@@ -1231,9 +1231,9 @@ export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
  * ```
  */
 export function usePreviewAction(
-  _: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  _options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<PreviewRequest, PreviewUserPosition, UnexpectedError> {
-  // TODO: wire up options once AAVE-1916 is implemented
+  // TODO: wire up _options once AAVE-1916 is implemented
   const client = useAaveClient();
 
   return useAsyncTask((request: PreviewRequest) => preview(client, request));

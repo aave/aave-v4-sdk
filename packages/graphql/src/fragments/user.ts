@@ -145,7 +145,7 @@ export const UserBalanceFragment = graphql(
     balances {
       ...TokenAmount
     }
-    fiatAmount { #(currency: $currency) { TODO: restore when API is fixed
+    fiatAmount(currency: $currency) {
       ...FiatAmount
     }
     supplyApy(metric: HIGHEST) {
