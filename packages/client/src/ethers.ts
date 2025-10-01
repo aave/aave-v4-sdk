@@ -67,7 +67,7 @@ export function waitForTransactionResult(
     }
     return okAsync({
       txHash: hash,
-      operations: request.operations, // TODO: check if this is correct
+      operations: request.operations,
     });
   });
 }

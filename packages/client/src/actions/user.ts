@@ -232,11 +232,14 @@ export function userHistory(
  *
  * @param client - Aave client.
  * @param request - The user summary history request parameters.
+ * @param options - The query options.
  * @returns The user summary history items.
  */
 export function userSummaryHistory(
   client: AaveClient,
   request: UserSummaryHistoryRequest,
+  _options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
+  // TODO: wire up _options once AAVE-1982 is implemented
   return client.query(UserSummaryHistoryQuery, { request });
 }
