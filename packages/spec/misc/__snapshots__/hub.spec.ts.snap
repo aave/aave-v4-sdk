@@ -1,0 +1,151 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
+{
+  "__typename": "Hub",
+  "address": "0x4BB8658261CCF575Cb6148a257BE34b36D3D057f",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  "name": "ISO Stable",
+  "summary": Any<Object>,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
+{
+  "__typename": "Hub",
+  "address": "0x7E7c3EDCa4D39D0aFBD468Dec89cdEaF0AC770d3",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  "name": "Core",
+  "summary": Any<Object>,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
+{
+  "__typename": "Hub",
+  "address": "0xA5f18dFE4f0380b6C40411D7Ddb2c04034276805",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  "name": "ISO Gov",
+  "summary": Any<Object>,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by tokens) > Then it should return the expected data for each hub 1`] = `
+{
+  "__typename": "Hub",
+  "address": "0x7E7c3EDCa4D39D0aFBD468Dec89cdEaF0AC770d3",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  "name": "Core",
+  "summary": Any<Object>,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by tokens) > Then it should return the expected data for each hub 2`] = `
+{
+  "__typename": "Hub",
+  "address": "0xA5f18dFE4f0380b6C40411D7Ddb2c04034276805",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  "name": "ISO Gov",
+  "summary": Any<Object>,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by tokens) > Then it should return the expected data for each hub 3`] = `
+{
+  "__typename": "Hub",
+  "address": "0x4BB8658261CCF575Cb6148a257BE34b36D3D057f",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  "name": "ISO Stable",
+  "summary": Any<Object>,
+}
+`;
