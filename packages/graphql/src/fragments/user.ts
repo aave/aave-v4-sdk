@@ -1,15 +1,20 @@
 import type { FragmentOf } from 'gql.tada';
-import { graphql } from '../graphql';
+import { type FragmentDocumentFor, graphql } from '../graphql';
 import {
+  type DecimalValue,
   DecimalValueFragment,
   Erc20AmountFragment,
+  type FiatAmount,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
   HealthFactorChangeFragment,
   PaginatedResultInfoFragment,
+  type PercentValue,
   PercentValueFragment,
   PercentValueWithChangeFragment,
+  type TokenAmount,
   TokenAmountFragment,
+  type TokenInfo,
   TokenInfoFragment,
 } from './common';
 import { ReserveFragment, ReserveInfoFragment } from './reserve';
@@ -54,16 +59,16 @@ export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
     __typename
     totalPositions
-    netBalance {
+    netBalance(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalCollateral {
+    totalCollateral(currency: $currency) {
       ...FiatAmount
     }
-    totalSupplied {
+    totalSupplied(currency: $currency) {
       ...FiatAmount
     }
-    totalDebt {
+    totalDebt(currency: $currency) {
       ...FiatAmount
     }
     netApy {
@@ -133,7 +138,30 @@ export const UserPositionFragment = graphql(
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
 
-export const UserBalanceFragment = graphql(
+export interface UserBalance {
+  __typename: 'UserBalance';
+  info: TokenInfo;
+  totalAmount: DecimalValue;
+  balances: TokenAmount[];
+  fiatAmount: FiatAmount;
+  /**
+   * @deprecated Use `highestSupplyApy` instead. Removal slated for week commencing 6th October 2025.
+   */
+  supplyApy: PercentValue;
+  /**
+   * @deprecated Use `highestBorrowApy` instead. Removal slated for week commencing 6th October 2025.
+   */
+  borrowApy: PercentValue;
+  highestSupplyApy: PercentValue;
+  highestBorrowApy: PercentValue;
+  lowestSupplyApy: PercentValue;
+  lowestBorrowApy: PercentValue;
+}
+
+export const UserBalanceFragment: FragmentDocumentFor<
+  UserBalance,
+  'UserBalance'
+> = graphql(
   `fragment UserBalance on UserBalance {
     __typename
     info {
@@ -154,6 +182,18 @@ export const UserBalanceFragment = graphql(
     borrowApy(metric: HIGHEST) {
       ...PercentValue
     }
+    highestSupplyApy: supplyApy(metric: HIGHEST) {
+      ...PercentValue
+    }
+    highestBorrowApy: borrowApy(metric: HIGHEST) {
+      ...PercentValue
+    }
+    lowestSupplyApy: supplyApy(metric: LOWEST) {
+      ...PercentValue
+    }
+    lowestBorrowApy: borrowApy(metric: LOWEST) {
+      ...PercentValue
+    }
   }`,
   [
     TokenInfoFragment,
@@ -163,7 +203,6 @@ export const UserBalanceFragment = graphql(
     PercentValueFragment,
   ],
 );
-export type UserBalance = FragmentOf<typeof UserBalanceFragment>;
 
 // Activity Fragments
 export const BorrowActivityFragment = graphql(

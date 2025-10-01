@@ -163,7 +163,7 @@ export function useUserBorrows({
 }
 
 export type UseUserSummaryArgs = Prettify<
-  UserSummaryRequest & TimeWindowQueryOptions
+  UserSummaryRequest & TimeWindowQueryOptions & CurrencyQueryOptions
 >;
 
 /**
@@ -203,6 +203,7 @@ export function useUserSummary(
 
 export function useUserSummary({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: UseUserSummaryArgs & {
@@ -212,6 +213,7 @@ export function useUserSummary({
     document: UserSummaryQuery,
     variables: {
       request,
+      currency,
       timeWindow,
     },
     suspense,
@@ -436,7 +438,9 @@ export function useUserHistory({
   });
 }
 
-export type UseUserSummaryHistoryArgs = UserSummaryHistoryRequest;
+export type UseUserSummaryHistoryArgs = Prettify<
+  UserSummaryHistoryRequest & CurrencyQueryOptions
+>;
 
 /**
  * Fetch user summary history over time.
@@ -473,10 +477,12 @@ export function useUserSummaryHistory(
 
 export function useUserSummaryHistory({
   suspense = false,
+  currency: _currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserSummaryHistoryArgs & {
   suspense?: boolean;
 }): SuspendableResult<UserSummaryHistoryItem[]> {
+  // TODO: wire up currency once AAVE-1982 is implemented
   return useSuspendableQuery({
     document: UserSummaryHistoryQuery,
     variables: {
