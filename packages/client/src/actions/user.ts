@@ -24,7 +24,7 @@ import {
   type UserSuppliesRequest,
   type UserSupplyItem,
 } from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+import type { Prettify, ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
@@ -88,6 +88,10 @@ export function userBorrows(
   return client.query(UserBorrowsQuery, { request, ...options });
 }
 
+export type UserSummaryQueryOptions = Prettify<
+  CurrencyQueryOptions & TimeWindowQueryOptions
+>;
+
 /**
  * Fetches a user's summary across all positions.
  *
@@ -108,11 +112,15 @@ export function userBorrows(
 export function userSummary(
   client: AaveClient,
   request: UserSummaryRequest,
-  options: Required<TimeWindowQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: UserSummaryQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummary, UnexpectedError> {
   return client.query(UserSummaryQuery, {
     request,
-    timeWindow: options.timeWindow,
+    currency,
+    timeWindow,
   });
 }
 
@@ -138,9 +146,12 @@ export type UserPositionQueryOptions = CurrencyQueryOptions &
 export function userPositions(
   client: AaveClient,
   request: UserPositionsRequest,
-  options: Required<UserPositionQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: UserPositionQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition[], UnexpectedError> {
-  return client.query(UserPositionsQuery, { request, ...options });
+  return client.query(UserPositionsQuery, { request, currency, timeWindow });
 }
 
 /**
@@ -160,9 +171,12 @@ export function userPositions(
 export function userPosition(
   client: AaveClient,
   request: UserPositionRequest,
-  options: Required<UserPositionQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: UserPositionQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition | null, UnexpectedError> {
-  return client.query(UserPositionQuery, { request, ...options });
+  return client.query(UserPositionQuery, { request, currency, timeWindow });
 }
 
 /**

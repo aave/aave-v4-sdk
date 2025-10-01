@@ -39,7 +39,7 @@ export type UserBorrowsRequest = RequestOf<typeof UserBorrowsQuery>;
  * @internal
  */
 export const UserSummaryQuery = graphql(
-  `query UserSummary($request: UserSummaryRequest!, $timeWindow: TimeWindow!) {
+  `query UserSummary($request: UserSummaryRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userSummary(request: $request) {
       ...UserSummary
     }

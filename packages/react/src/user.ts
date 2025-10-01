@@ -163,7 +163,7 @@ export function useUserBorrows({
 }
 
 export type UseUserSummaryArgs = Prettify<
-  UserSummaryRequest & TimeWindowQueryOptions
+  UserSummaryRequest & TimeWindowQueryOptions & CurrencyQueryOptions
 >;
 
 /**
@@ -203,6 +203,7 @@ export function useUserSummary(
 
 export function useUserSummary({
   suspense = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: UseUserSummaryArgs & {
@@ -212,6 +213,7 @@ export function useUserSummary({
     document: UserSummaryQuery,
     variables: {
       request,
+      currency,
       timeWindow,
     },
     suspense,

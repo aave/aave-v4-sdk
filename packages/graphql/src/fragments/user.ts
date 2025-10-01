@@ -59,16 +59,16 @@ export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
     __typename
     totalPositions
-    netBalance {
+    netBalance(currency: $currency) {
       ...FiatAmountWithChange
     }
-    totalCollateral {
+    totalCollateral(currency: $currency) {
       ...FiatAmount
     }
-    totalSupplied {
+    totalSupplied(currency: $currency) {
       ...FiatAmount
     }
-    totalDebt {
+    totalDebt(currency: $currency) {
       ...FiatAmount
     }
     netApy {
