@@ -1,7 +1,6 @@
 import {
   assertOk,
   bigDecimal,
-  chainId,
   evmAddress,
   type Reserve,
 } from '@aave/client-next';
@@ -9,6 +8,7 @@ import { supply, userSupplies } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
+  ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
@@ -47,7 +47,7 @@ describe('Aave V4 Supply Scenarios', () => {
           const result = await supply(client, {
             reserve: {
               reserveId: reserveToSupply.value.id,
-              chainId: chainId(1),
+              chainId: ETHEREUM_FORK_ID,
               spoke: reserveToSupply.value.spoke.address,
             },
             amount: {
@@ -65,7 +65,7 @@ describe('Aave V4 Supply Scenarios', () => {
                   userSpoke: {
                     spoke: {
                       address: reserveToSupply.value.spoke.address,
-                      chainId: chainId(1),
+                      chainId: ETHEREUM_FORK_ID,
                     },
                     user: evmAddress(user.account!.address),
                   },

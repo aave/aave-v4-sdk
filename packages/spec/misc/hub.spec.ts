@@ -1,7 +1,8 @@
-import { assertOk, chainId } from '@aave/client-next';
+import { assertOk } from '@aave/client-next';
 import { hub, hubAssets, hubs } from '@aave/client-next/actions';
 import {
   client,
+  ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
@@ -13,7 +14,7 @@ describe('Aave V4 Hub Scenarios', () => {
     describe('When fetching hubs by chain ID(s)', () => {
       it('Then it should return the expected data for each hub', async () => {
         const result = await hubs(client, {
-          query: { chainIds: [chainId(1)] },
+          query: { chainIds: [ETHEREUM_FORK_ID] },
         });
         assertOk(result);
         result.value.forEach((hub) => {
@@ -32,7 +33,7 @@ describe('Aave V4 Hub Scenarios', () => {
           query: {
             tokens: tokens.map((token) => ({
               address: token,
-              chainId: chainId(1),
+              chainId: ETHEREUM_FORK_ID,
             })),
           },
         });
@@ -40,7 +41,7 @@ describe('Aave V4 Hub Scenarios', () => {
 
         for (const hub of listHubs.value) {
           const result = await hubAssets(client, {
-            chainId: chainId(1),
+            chainId: ETHEREUM_FORK_ID,
             hub: hub.address,
           });
           assertOk(result);
@@ -60,7 +61,7 @@ describe('Aave V4 Hub Scenarios', () => {
       it('Then it should return the expected data for the hub', async () => {
         const listHubs = await hubs(client, {
           query: {
-            chainIds: [chainId(1)],
+            chainIds: [ETHEREUM_FORK_ID],
           },
         });
         assertOk(listHubs);
@@ -68,7 +69,7 @@ describe('Aave V4 Hub Scenarios', () => {
 
         const result = await hub(client, {
           hub: listHubs.value[0].address,
-          chainId: chainId(1),
+          chainId: ETHEREUM_FORK_ID,
         });
         assertOk(result);
         expect(result.value).toMatchObject(listHubs.value[0]);
@@ -81,7 +82,7 @@ describe('Aave V4 Hub Scenarios', () => {
       it('Then it should return the expected data for assets in a hub', async () => {
         const listHubs = await hubs(client, {
           query: {
-            chainIds: [chainId(1)],
+            chainIds: [ETHEREUM_FORK_ID],
           },
         });
 
@@ -90,7 +91,7 @@ describe('Aave V4 Hub Scenarios', () => {
 
         const result = await hubAssets(client, {
           hub: listHubs.value[0].address,
-          chainId: chainId(1),
+          chainId: ETHEREUM_FORK_ID,
         });
         assertOk(result);
         assertNonEmptyArray(result.value);
