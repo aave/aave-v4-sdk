@@ -1,14 +1,20 @@
-import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/client-next';
+import {
+  assertOk,
+  bigDecimal,
+  evmAddress,
+  type Reserve,
+} from '@aave/client-next';
 import { supply, userSupplies } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
+  ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { findReserveToSupply } from '../borrow/helper';
+import { findReserveToSupply, supplyToReserve } from '../borrow/helper';
 import { assertSingleElementArray } from '../test-utils';
 
 describe('Aave V4 Supply Scenarios', () => {
@@ -41,7 +47,7 @@ describe('Aave V4 Supply Scenarios', () => {
           const result = await supply(client, {
             reserve: {
               reserveId: reserveToSupply.value.id,
-              chainId: chainId(1),
+              chainId: ETHEREUM_FORK_ID,
               spoke: reserveToSupply.value.spoke.address,
             },
             amount: {
@@ -59,7 +65,7 @@ describe('Aave V4 Supply Scenarios', () => {
                   userSpoke: {
                     spoke: {
                       address: reserveToSupply.value.spoke.address,
-                      chainId: chainId(1),
+                      chainId: ETHEREUM_FORK_ID,
                     },
                     user: evmAddress(user.account!.address),
                   },
@@ -79,9 +85,62 @@ describe('Aave V4 Supply Scenarios', () => {
     });
 
     describe('When the user supplies tokens with collateral disabled', () => {
-      it.todo(
-        `Then the user's supply positions are updated without collateral`,
-      );
+      const user = createNewWallet();
+      let reserve: Reserve;
+
+      beforeAll(async () => {
+        const setup = await fundErc20Address(
+          evmAddress(user.account!.address),
+          {
+            address: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('100'),
+            decimals: 6,
+          },
+        ).andThen(() => findReserveToSupply(client, ETHEREUM_USDC_ADDRESS));
+
+        assertOk(setup);
+        reserve = setup.value;
+      });
+
+      it(`Then the user's supply positions are updated without collateral`, async () => {
+        const result = await supplyToReserve(
+          client,
+          {
+            reserve: {
+              spoke: reserve.spoke.address,
+              reserveId: reserve.id,
+              chainId: reserve.chain.chainId,
+            },
+            amount: {
+              erc20: {
+                value: bigDecimal('50'),
+              },
+            },
+            sender: evmAddress(user.account!.address),
+            enableCollateral: false,
+          },
+          user,
+        ).andThen(() =>
+          userSupplies(client, {
+            query: {
+              userSpoke: {
+                spoke: {
+                  address: reserve.spoke.address,
+                  chainId: reserve.chain.chainId,
+                },
+                user: evmAddress(user.account!.address),
+              },
+            },
+          }),
+        );
+        assertOk(result);
+        assertSingleElementArray(result.value);
+        expect(result.value[0].isCollateral).toBe(false);
+        expect(result.value[0].amount.value.formatted).toBeBigDecimalCloseTo(
+          bigDecimal('50'),
+          2,
+        );
+      });
     });
 
     describe('When the user supplies tokens on behalf of another address', () => {

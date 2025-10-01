@@ -1,7 +1,6 @@
 import type { AaveClient, Reserve, SupplyRequest } from '@aave/client-next';
 import {
   bigDecimal,
-  chainId,
   type EvmAddress,
   evmAddress,
   invariant,
@@ -10,6 +9,7 @@ import {
   type TxHash,
 } from '@aave/client-next';
 import { reserves, supply } from '@aave/client-next/actions';
+import { ETHEREUM_FORK_ID } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { WalletClient } from 'viem';
 
@@ -31,7 +31,7 @@ export function findReserveToSupply(
     query: {
       tokens: [
         {
-          chainId: chainId(1),
+          chainId: ETHEREUM_FORK_ID,
           address: token,
         },
       ],

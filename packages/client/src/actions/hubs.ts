@@ -41,7 +41,9 @@ export function hub(
  *
  * ```ts
  * const result = await hubs(client, {
- *   chainIds: [chainId(1), chainId(137)]
+ *   query: {
+ *     chainIds: [chainId(1), chainId(137)]
+ *   }
  * });
  * ```
  *
@@ -64,8 +66,7 @@ export function hubs(
  * ```ts
  * const result = await hubAssets(client, {
  *   chainId: chainId(1),
- *   hub: evmAddress('0x123...'), // optional
- *   user: evmAddress('0x456...'), // optional
+ *   hub: evmAddress('0x123…'),
  * });
  * ```
  *

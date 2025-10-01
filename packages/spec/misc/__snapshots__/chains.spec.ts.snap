@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter ALL 1`] = `
+[
+  {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+]
+`;
+
+exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter MAINNET_ONLY 1`] = `
+[
+  {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+]
+`;
+
+exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter TESTNET_ONLY 1`] = `[]`;
