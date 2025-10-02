@@ -2,14 +2,6 @@ import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
 import { ChainFragment, PaginatedResultInfoFragment } from './common';
 
-export const SpokeConfigFragment = graphql(
-  `fragment SpokeConfig on SpokeConfig {
-    __typename
-    active
-  }`,
-);
-export type SpokeConfig = FragmentOf<typeof SpokeConfigFragment>;
-
 export const SpokeFragment = graphql(
   `fragment Spoke on Spoke {
     __typename
@@ -18,11 +10,8 @@ export const SpokeFragment = graphql(
     chain {
       ...Chain
     }
-    config {
-      ...SpokeConfig
-    }
   }`,
-  [ChainFragment, SpokeConfigFragment],
+  [ChainFragment],
 );
 
 export type Spoke = FragmentOf<typeof SpokeFragment>;
