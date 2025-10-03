@@ -1410,6 +1410,9 @@ input UserBalancesRequestFilter @oneOf {
 
   """The balances for the underlying attached to a spoke"""
   spoke: SpokeInput
+
+  """The balances for the swappable tokens"""
+  swappable: SwappableTokensRequestQuery
 }
 
 input UserBalancesRequestOrderBy @oneOf {
