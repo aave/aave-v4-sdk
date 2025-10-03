@@ -95,7 +95,13 @@ describe('Aave V4 Hub Scenarios', () => {
         });
         assertOk(result);
         assertNonEmptyArray(result.value);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        result.value.forEach((asset) => {
+          expect(asset).toMatchSnapshot({
+            hub: expect.any(Object),
+            summary: expect.any(Object),
+          });
+          expect(asset.hub.address).toBe(listHubs.value[0]!.address);
+        });
       });
     });
   });
