@@ -1509,7 +1509,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "SpokeUserPositionManger",
+                    "name": "SpokeUserPositionManager",
                     "ofType": null
                   }
                 }
@@ -3380,6 +3380,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "active",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -3552,7 +3563,18 @@
         "name": "SpokeConfig",
         "fields": [
           {
-            "name": "active",
+            "name": "nativeGateway",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "signatureGateway",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3572,13 +3594,27 @@
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "Any"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
             },
             "args": []
           },
           {
             "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "active",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3593,13 +3629,16 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SpokeUserPositionManger",
+        "name": "SpokeUserPositionManager",
         "fields": [
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "Any"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
             },
             "args": []
           },
@@ -3615,7 +3654,18 @@
             "args": []
           },
           {
-            "name": "enabledAt",
+            "name": "approvedOn",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "active",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5385,42 +5435,6 @@
         "name": "UserSummaryHistoryItem",
         "fields": [
           {
-            "name": "netBalance",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "borrows",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "supplies",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "healthFactor",
             "type": {
               "kind": "SCALAR",
@@ -5438,6 +5452,75 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "netBalance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "borrows",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "supplies",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []

@@ -390,13 +390,13 @@ export type PaginatedUserHistoryResult = FragmentOf<
 export const UserSummaryHistoryItemFragment = graphql(
   `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
     __typename
-    netBalance {
+    netBalance(currency: $currency) {
       ...FiatAmount
     }
-    borrows {
+    borrows(currency: $currency) {
       ...FiatAmount
     }
-    supplies {
+    supplies(currency: $currency) {
       ...FiatAmount
     }
     healthFactor

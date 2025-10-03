@@ -477,16 +477,16 @@ export function useUserSummaryHistory(
 
 export function useUserSummaryHistory({
   suspense = false,
-  currency: _currency = DEFAULT_QUERY_OPTIONS.currency,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserSummaryHistoryArgs & {
   suspense?: boolean;
 }): SuspendableResult<UserSummaryHistoryItem[]> {
-  // TODO: wire up currency once AAVE-1982 is implemented
   return useSuspendableQuery({
     document: UserSummaryHistoryQuery,
     variables: {
       request,
+      currency,
     },
     suspense,
   });

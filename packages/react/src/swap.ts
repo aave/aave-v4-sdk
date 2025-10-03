@@ -171,7 +171,7 @@ export type UseSwappableTokensArgs = SwappableTokensRequest;
  *
  * ```tsx
  * const { data } = useSwappableTokens({
- *   query: { chainId: chainId(1) },
+ *   query: { chainIds: [chainId(1)] },
  *   suspense: true,
  * });
  * ```
@@ -185,7 +185,7 @@ export function useSwappableTokens(
  *
  * ```tsx
  * const { data, error, loading } = useSwappableTokens({
- *   query: { chainId: chainId(1) },
+ *   query: { chainIds: [chainId(1)] },
  * });
  * ```
  */

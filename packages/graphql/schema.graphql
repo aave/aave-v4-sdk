@@ -528,7 +528,7 @@ type PaginatedSpokePositionManagerResult {
 }
 
 type PaginatedSpokeUserPositionManagerResult {
-  items: [SpokeUserPositionManger!]!
+  items: [SpokeUserPositionManager!]!
   pageInfo: PaginatedResultInfo!
 }
 
@@ -870,6 +870,7 @@ type ReserveSettings {
 type ReserveStatus {
   frozen: Boolean!
   paused: Boolean!
+  active: Boolean!
 }
 
 type ReserveSummary {
@@ -987,8 +988,8 @@ type Spoke {
 }
 
 type SpokeConfig {
-  """Is the spoke active"""
-  active: Boolean!
+  nativeGateway: EvmAddress!
+  signatureGateway: EvmAddress!
 }
 
 input SpokeInput {
@@ -1001,13 +1002,15 @@ input SpokeInput {
 
 input SpokePositionManagersRequest {
   spoke: SpokeInput!
+  includeInactive: Boolean
   pageSize: PageSize!
   cursor: Cursor
 }
 
 type SpokePositionManger {
-  name: String
+  name: String!
   address: EvmAddress!
+  active: Boolean!
 }
 
 input SpokeTokenInput {
@@ -1021,16 +1024,18 @@ input SpokeTokenInput {
   chainId: ChainId!
 }
 
-input SpokeUserPositionManagersRequest {
-  spoke: SpokeInput!
-  pageSize: PageSize!
-  cursor: Cursor
+type SpokeUserPositionManager {
+  name: String!
+  address: EvmAddress!
+  approvedOn: DateTime!
+  active: Boolean!
 }
 
-type SpokeUserPositionManger {
-  name: String
-  address: EvmAddress!
-  enabledAt: DateTime!
+input SpokeUserPositionManagersRequest {
+  spoke: SpokeInput!
+  user: EvmAddress!
+  pageSize: PageSize!
+  cursor: Cursor
 }
 
 input SpokesRequest @oneOf {
@@ -1276,7 +1281,7 @@ input SwappableTokensRequest {
 }
 
 input SwappableTokensRequestQuery {
-  chainId: ChainId!
+  chainIds: [ChainId!]!
 }
 
 enum TimeWindow {
@@ -1559,11 +1564,17 @@ input UserSummaryFilter @oneOf {
 }
 
 type UserSummaryHistoryItem {
-  netBalance: FiatAmount!
-  borrows: FiatAmount!
-  supplies: FiatAmount!
   healthFactor: BigDecimal
   date: DateTime!
+
+  """The net balance"""
+  netBalance(currency: Currency! = USD): FiatAmount!
+
+  """The borrows"""
+  borrows(currency: Currency! = USD): FiatAmount!
+
+  """The supplies"""
+  supplies(currency: Currency! = USD): FiatAmount!
 }
 
 input UserSummaryHistoryRequest {

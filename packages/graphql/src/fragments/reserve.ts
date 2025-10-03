@@ -32,6 +32,7 @@ export const ReserveStatusFragment = graphql(
     __typename
     frozen
     paused
+    active
   }`,
 );
 export type ReserveStatus = FragmentOf<typeof ReserveStatusFragment>;

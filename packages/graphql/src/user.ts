@@ -95,7 +95,7 @@ export type UserBalancesRequest = RequestOf<typeof UserBalancesQuery>;
  * @internal
  */
 export const UserSummaryHistoryQuery = graphql(
-  `query UserSummaryHistory($request: UserSummaryHistoryRequest!) {
+  `query UserSummaryHistory($request: UserSummaryHistoryRequest!, $currency: Currency!) {
     value: userSummaryHistory(request: $request) {
       ...UserSummaryHistoryItem
     }
