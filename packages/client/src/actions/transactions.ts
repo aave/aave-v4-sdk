@@ -28,6 +28,7 @@ import {
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
+import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
  * Creates a transaction to borrow from a market.
@@ -428,8 +429,9 @@ export function setSpokeUserPositionManager(
 export function preview(
   client: AaveClient,
   request: PreviewRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PreviewUserPosition, UnexpectedError> {
-  return client.query(PreviewQuery, { request });
+  return client.query(PreviewQuery, { request, ...options });
 }
 
 /**

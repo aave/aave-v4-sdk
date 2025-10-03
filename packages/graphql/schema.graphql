@@ -642,8 +642,8 @@ type PreviewUserPosition {
   riskPremium: PercentValueVariation!
   positionApy: PercentValueVariation!
   netApy: PercentValueVariation!
-  netCollateral: FiatAmountValueVariation!
-  netBalance: FiatAmountValueVariation!
+  netCollateral(currency: Currency! = USD): FiatAmountValueVariation!
+  netBalance(currency: Currency! = USD): FiatAmountValueVariation!
 }
 
 type Query {

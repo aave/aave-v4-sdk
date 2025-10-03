@@ -1231,12 +1231,13 @@ export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
  * ```
  */
 export function usePreviewAction(
-  _options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<PreviewRequest, PreviewUserPosition, UnexpectedError> {
-  // TODO: wire up _options once AAVE-1916 is implemented
   const client = useAaveClient();
 
-  return useAsyncTask((request: PreviewRequest) => preview(client, request));
+  return useAsyncTask((request: PreviewRequest) =>
+    preview(client, request, options),
+  );
 }
 
 export type UsePreviewArgs = Prettify<PreviewRequest & CurrencyQueryOptions>;
