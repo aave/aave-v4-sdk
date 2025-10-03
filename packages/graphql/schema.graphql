@@ -870,6 +870,7 @@ type ReserveSettings {
 type ReserveStatus {
   frozen: Boolean!
   paused: Boolean!
+  active: Boolean!
 }
 
 type ReserveSummary {
@@ -1276,7 +1277,7 @@ input SwappableTokensRequest {
 }
 
 input SwappableTokensRequestQuery {
-  chainId: ChainId!
+  chainIds: [ChainId!]!
 }
 
 enum TimeWindow {

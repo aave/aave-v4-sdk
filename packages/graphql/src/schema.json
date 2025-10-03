@@ -3380,6 +3380,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "active",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []

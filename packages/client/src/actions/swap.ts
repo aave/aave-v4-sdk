@@ -66,7 +66,7 @@ export function swapQuote(
  *
  * ```ts
  * const result = await swappableTokens(client, {
- *   query: { chainId: chainId(1) },
+ *   query: { chainIds: [chainId(1)] },
  * });
  * ```
  *
