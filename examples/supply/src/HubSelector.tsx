@@ -10,7 +10,9 @@ export function HubSelector({
   onChange: onMarketSelect,
 }: HubSelectorProps) {
   const { data: hubs, loading } = useHubs({
-    chainIds: [chainId],
+    query: {
+      chainIds: [chainId],
+    },
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
