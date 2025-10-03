@@ -252,8 +252,7 @@ export function userHistory(
 export function userSummaryHistory(
   client: AaveClient,
   request: UserSummaryHistoryRequest,
-  _options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
-  // TODO: wire up _options once AAVE-1982 is implemented
-  return client.query(UserSummaryHistoryQuery, { request });
+  return client.query(UserSummaryHistoryQuery, { request, ...options });
 }

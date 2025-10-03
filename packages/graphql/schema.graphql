@@ -1564,11 +1564,17 @@ input UserSummaryFilter @oneOf {
 }
 
 type UserSummaryHistoryItem {
-  netBalance: FiatAmount!
-  borrows: FiatAmount!
-  supplies: FiatAmount!
   healthFactor: BigDecimal
   date: DateTime!
+
+  """The net balance"""
+  netBalance(currency: Currency! = USD): FiatAmount!
+
+  """The borrows"""
+  borrows(currency: Currency! = USD): FiatAmount!
+
+  """The supplies"""
+  supplies(currency: Currency! = USD): FiatAmount!
 }
 
 input UserSummaryHistoryRequest {
