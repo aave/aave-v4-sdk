@@ -143,6 +143,7 @@ describe('Aave V4 Supply Scenarios', () => {
       });
     });
 
+    // TODO: Refactor scenario, because in V4 only Positions Manager can supply on behalf of another address
     describe('When the user supplies tokens on behalf of another address', () => {
       it.todo(`Then the other address's supply positions are updated`);
     });
