@@ -2,6 +2,15 @@ import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
 import { ChainFragment, PaginatedResultInfoFragment } from './common';
 
+export const SpokeConfigFragment = graphql(
+  `fragment SpokeConfig on SpokeConfig {
+    __typename
+    nativeGateway
+    signatureGateway
+  }`,
+);
+export type SpokeConfig = FragmentOf<typeof SpokeConfigFragment>;
+
 export const SpokeFragment = graphql(
   `fragment Spoke on Spoke {
     __typename
@@ -10,8 +19,11 @@ export const SpokeFragment = graphql(
     chain {
       ...Chain
     }
+    config {
+      ...SpokeConfig
+    }
   }`,
-  [ChainFragment],
+  [ChainFragment, SpokeConfigFragment],
 );
 
 export type Spoke = FragmentOf<typeof SpokeFragment>;
@@ -20,6 +32,7 @@ export const SpokePositionManagerFragment = graphql(
   `fragment SpokePositionManager on SpokePositionManger {
     __typename
     address
+    active
     name
   }`,
 );
@@ -46,10 +59,11 @@ export type PaginatedSpokePositionManagerResult = FragmentOf<
 >;
 
 export const SpokeUserPositionManagerFragment = graphql(
-  `fragment SpokeUserPositionManager on SpokeUserPositionManger {
+  `fragment SpokeUserPositionManager on SpokeUserPositionManager {
     __typename
     address
-    enabledAt
+    approvedOn
+    active
     name
   }`,
 );

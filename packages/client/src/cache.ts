@@ -86,7 +86,7 @@ export const exchange = cacheExchange({
     PaginatedUserHistoryResult: () => null,
     SpokeConfig: () => null,
     SpokePositionManger: () => null,
-    SpokeUserPositionManger: () => null,
+    SpokeUserPositionManager: () => null,
     SwapReceipt: () => null,
     SwapTransactionRequest: () => null,
 

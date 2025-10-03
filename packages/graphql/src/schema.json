@@ -1509,7 +1509,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "SpokeUserPositionManger",
+                    "name": "SpokeUserPositionManager",
                     "ofType": null
                   }
                 }
@@ -3563,7 +3563,18 @@
         "name": "SpokeConfig",
         "fields": [
           {
-            "name": "active",
+            "name": "nativeGateway",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "signatureGateway",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3583,13 +3594,27 @@
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "Any"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
             },
             "args": []
           },
           {
             "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "active",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3604,13 +3629,16 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SpokeUserPositionManger",
+        "name": "SpokeUserPositionManager",
         "fields": [
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "Any"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
             },
             "args": []
           },
@@ -3626,7 +3654,18 @@
             "args": []
           },
           {
-            "name": "enabledAt",
+            "name": "approvedOn",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "active",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

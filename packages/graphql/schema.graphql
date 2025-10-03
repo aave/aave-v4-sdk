@@ -528,7 +528,7 @@ type PaginatedSpokePositionManagerResult {
 }
 
 type PaginatedSpokeUserPositionManagerResult {
-  items: [SpokeUserPositionManger!]!
+  items: [SpokeUserPositionManager!]!
   pageInfo: PaginatedResultInfo!
 }
 
@@ -988,8 +988,8 @@ type Spoke {
 }
 
 type SpokeConfig {
-  """Is the spoke active"""
-  active: Boolean!
+  nativeGateway: EvmAddress!
+  signatureGateway: EvmAddress!
 }
 
 input SpokeInput {
@@ -1002,13 +1002,15 @@ input SpokeInput {
 
 input SpokePositionManagersRequest {
   spoke: SpokeInput!
+  includeInactive: Boolean
   pageSize: PageSize!
   cursor: Cursor
 }
 
 type SpokePositionManger {
-  name: String
+  name: String!
   address: EvmAddress!
+  active: Boolean!
 }
 
 input SpokeTokenInput {
@@ -1022,16 +1024,18 @@ input SpokeTokenInput {
   chainId: ChainId!
 }
 
-input SpokeUserPositionManagersRequest {
-  spoke: SpokeInput!
-  pageSize: PageSize!
-  cursor: Cursor
+type SpokeUserPositionManager {
+  name: String!
+  address: EvmAddress!
+  approvedOn: DateTime!
+  active: Boolean!
 }
 
-type SpokeUserPositionManger {
-  name: String
-  address: EvmAddress!
-  enabledAt: DateTime!
+input SpokeUserPositionManagersRequest {
+  spoke: SpokeInput!
+  user: EvmAddress!
+  pageSize: PageSize!
+  cursor: Cursor
 }
 
 input SpokesRequest @oneOf {
