@@ -16,6 +16,7 @@ import {
   chainId,
   errAsync,
   invariant,
+  isObject,
   okAsync,
   ResultAsync,
   signatureFrom,
@@ -25,6 +26,9 @@ import {
 import {
   type Chain,
   type defineChain,
+  type ProviderRpcError,
+  type RpcError,
+  SwitchChainError,
   TransactionExecutionError,
   type TypedData,
   type TypedDataDomain,
@@ -32,7 +36,7 @@ import {
   type WalletClient,
 } from 'viem';
 import {
-  sendTransaction as sendEip1559Transaction,
+  sendTransaction as sendTransactionWithViem,
   signTypedData,
   waitForTransactionReceipt,
 } from 'viem/actions';
@@ -44,6 +48,21 @@ import type {
   TransactionResult,
 } from './types';
 
+function isRpcError(err: unknown): err is RpcError {
+  return isObject(err) && 'code' in err && 'message' in err;
+}
+
+function isProviderRpcError(
+  err: unknown,
+): err is ProviderRpcError<{ originalError?: { code: number } }> {
+  return isObject(err) &&
+    'name' in err &&
+    'message' in err &&
+    'originalError' in err
+    ? isRpcError(err.originalError) && 'code' in err.originalError
+    : true;
+}
+
 /**
  * @internal
  */
@@ -54,18 +73,55 @@ export const supportedChains: Record<
   [chainId(mainnet.id)]: mainnet,
 };
 
-/**
- * @internal
- */
-export function sendTransaction(
+function ensureChain(
+  walletClient: WalletClient,
+  request: TransactionRequest,
+): ResultAsync<void, CancelError | SigningError> {
+  return ResultAsync.fromPromise(walletClient.getChainId(), (err) =>
+    SigningError.from(err),
+  ).andThen((chainId) => {
+    if (chainId === request.chainId) {
+      return okAsync();
+    }
+
+    return ResultAsync.fromPromise(
+      walletClient.switchChain({ id: request.chainId }),
+      (err) => SigningError.from(err),
+    ).orElse((err) => {
+      const code = isRpcError(err.cause)
+        ? err.cause.code
+        : // Unwrapping for MetaMask Mobile
+          // https://github.com/MetaMask/metamask-mobile/issues/2944#issuecomment-976988719
+          isProviderRpcError(err.cause)
+          ? err.cause.data?.originalError?.code
+          : undefined;
+
+      if (
+        code === SwitchChainError.code &&
+        request.chainId in supportedChains
+      ) {
+        return ResultAsync.fromPromise(
+          walletClient.addChain({ chain: supportedChains[request.chainId] }),
+          (err) => {
+            if (isRpcError(err) && err.code === UserRejectedRequestError.code) {
+              return CancelError.from(err);
+            }
+            return SigningError.from(err);
+          },
+        );
+      }
+
+      return err.asResultAsync();
+    });
+  });
+}
+
+function sendEip1559Transaction(
   walletClient: WalletClient,
   request: TransactionRequest,
 ): ResultAsync<TxHash, CancelError | SigningError> {
-  // TODO: verify it's on the correct chain, ask to switch if possible
-  // TODO: verify if wallet account is correct, switch if possible
-
   return ResultAsync.fromPromise(
-    sendEip1559Transaction(walletClient, {
+    sendTransactionWithViem(walletClient, {
       account: request.from,
       data: request.data,
       to: request.to,
@@ -85,6 +141,20 @@ export function sendTransaction(
       return SigningError.from(err);
     },
   ).map(txHash);
+}
+
+/**
+ * @internal
+ */
+export function sendTransaction(
+  walletClient: WalletClient,
+  request: TransactionRequest,
+): ResultAsync<TxHash, CancelError | SigningError> {
+  // TODO: verify if wallet account is correct, switch if possible
+
+  return ensureChain(walletClient, request).andThen((_) =>
+    sendEip1559Transaction(walletClient, request),
+  );
 }
 
 /**
