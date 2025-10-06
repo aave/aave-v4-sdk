@@ -148,10 +148,10 @@ export const PreviewUserPositionFragment = graphql(
     riskPremium {
       ...PercentValueVariation
     }
-    netCollateral {
+    netCollateral(currency: $currency) {
       ...FiatAmountValueVariation
     }
-    netBalance {
+    netBalance(currency: $currency) {
       ...FiatAmountValueVariation
     }
   }`,
@@ -169,7 +169,7 @@ export type PreviewUserPosition = FragmentOf<
  * @internal
  */
 export const PreviewQuery = graphql(
-  `query Preview($request: PreviewRequest!) {
+  `query Preview($request: PreviewRequest!, $currency: Currency! = USD) {
     value: preview(request: $request) {
       ...PreviewUserPosition
     }

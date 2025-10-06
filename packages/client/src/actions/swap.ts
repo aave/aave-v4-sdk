@@ -51,6 +51,7 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
  *
  * @param client - Aave client.
  * @param request - The swap quote request parameters.
+ * @param options - The query options.
  * @returns The swap quote including pricing and cost information.
  */
 export function swapQuote(
@@ -128,6 +129,7 @@ export function swappableTokens(
  *
  * @param client - Aave client.
  * @param request - The prepare swap request parameters.
+ * @param options - The query options.
  * @returns The prepared swap result containing details of the swap.
  */
 export function prepareSwap(
@@ -149,6 +151,7 @@ export function prepareSwap(
  *
  * @param client - Aave client.
  * @param request - The swap status request parameters.
+ * @param options - The query options.
  * @returns The current status of the swap.
  */
 export function swapStatus(
@@ -355,6 +358,7 @@ export function cancelSwap(
  *
  * @param client - Aave client.
  * @param request - The user swaps request parameters.
+ * @param options - The query options.
  * @returns The paginated list of user swaps with their status information.
  */
 export function userSwaps(
