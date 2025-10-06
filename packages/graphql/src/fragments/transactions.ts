@@ -15,10 +15,10 @@ export const TransactionRequestFragment = graphql(
 );
 export type TransactionRequest = FragmentOf<typeof TransactionRequestFragment>;
 
-export const ApprovalRequiredFragment = graphql(
-  `fragment ApprovalRequired on ApprovalRequired {
+export const Erc20ApprovalRequiredFragment = graphql(
+  `fragment Erc20ApprovalRequired on Erc20ApprovalRequired {
     __typename
-    approval {
+    transaction {
       ...TransactionRequest
     }
     reason
@@ -34,7 +34,26 @@ export const ApprovalRequiredFragment = graphql(
   }`,
   [TransactionRequestFragment, DecimalValueFragment],
 );
-export type ApprovalRequired = FragmentOf<typeof ApprovalRequiredFragment>;
+export type Erc20ApprovalRequired = FragmentOf<
+  typeof Erc20ApprovalRequiredFragment
+>;
+
+export const PreContractActionRequiredFragment = graphql(
+  `fragment PreContractActionRequired on PreContractActionRequired {
+    __typename
+    transaction {
+      ...TransactionRequest
+    }
+    reason
+    originalTransaction {
+      ...TransactionRequest
+    }
+  }`,
+  [TransactionRequestFragment],
+);
+export type PreContractActionRequired = FragmentOf<
+  typeof PreContractActionRequiredFragment
+>;
 
 export const InsufficientBalanceErrorFragment = graphql(
   `fragment InsufficientBalanceError on InsufficientBalanceError {
@@ -54,7 +73,8 @@ export type InsufficientBalanceError = FragmentOf<
 
 export type ExecutionPlan =
   | TransactionRequest
-  | ApprovalRequired
+  | Erc20ApprovalRequired
+  | PreContractActionRequired
   | InsufficientBalanceError;
 
 export const ExecutionPlanFragment: FragmentDocumentFor<
@@ -66,8 +86,11 @@ export const ExecutionPlanFragment: FragmentDocumentFor<
     ... on TransactionRequest {
       ...TransactionRequest
     }
-    ... on ApprovalRequired {
-      ...ApprovalRequired
+    ... on Erc20ApprovalRequired {
+      ...Erc20ApprovalRequired
+    }
+    ... on PreContractActionRequired {
+      ...PreContractActionRequired
     }
     ... on InsufficientBalanceError {
       ...InsufficientBalanceError
@@ -75,7 +98,8 @@ export const ExecutionPlanFragment: FragmentDocumentFor<
   }`,
   [
     TransactionRequestFragment,
-    ApprovalRequiredFragment,
+    Erc20ApprovalRequiredFragment,
+    PreContractActionRequiredFragment,
     InsufficientBalanceErrorFragment,
   ],
 );

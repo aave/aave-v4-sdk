@@ -22,21 +22,6 @@ input AmountInput @oneOf {
   max: AlwaysTrue
 }
 
-type ApprovalRequired {
-  """The transaction requires an approval first"""
-  approval: TransactionRequest!
-  reason: String!
-
-  """The required amount missing to be able to do the original transaction"""
-  requiredAmount: DecimalValue!
-
-  """The current allowance approved"""
-  currentAllowance: DecimalValue!
-
-  """The transaction to send after the approval is complete"""
-  originalTransaction: TransactionRequest!
-}
-
 enum ApyMetric {
   HIGHEST
   LOWEST
@@ -172,6 +157,23 @@ type Erc20Amount {
   token: Erc20Token!
 }
 
+type Erc20ApprovalRequired {
+  """The transaction requires an approval first"""
+  transaction: TransactionRequest!
+
+  """The reason for the approval"""
+  reason: String!
+
+  """The required amount missing to be able to do the original transaction"""
+  requiredAmount: DecimalValue!
+
+  """The current allowance approved"""
+  currentAllowance: DecimalValue!
+
+  """The transaction to send after the approval is complete"""
+  originalTransaction: TransactionRequest!
+}
+
 input Erc20Input {
   """The token address"""
   address: EvmAddress!
@@ -222,7 +224,7 @@ input ExchangeRateRequestFrom @oneOf {
   native: ChainId
 }
 
-union ExecutionPlan = TransactionRequest | ApprovalRequired | InsufficientBalanceError
+union ExecutionPlan = TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired | InsufficientBalanceError
 
 type FiatAmount {
   value: BigDecimal!
@@ -442,6 +444,8 @@ input LiquidatePositionDebtAmount @oneOf {
   max: AlwaysTrue
 }
 
+union LiquidatePositionExecutionPlan = TransactionRequest | Erc20ApprovalRequired | InsufficientBalanceError
+
 input LiquidatePositionRequest {
   """The spoke"""
   spoke: SpokeInput!
@@ -589,6 +593,17 @@ type PermitTypedDataResponse {
   message: PermitMessageData!
 }
 
+type PreContractActionRequired {
+  """The transaction requires a pre-contract action first"""
+  transaction: TransactionRequest!
+
+  """The reason for the pre-contract action"""
+  reason: String!
+
+  """The transaction to send after the approval is complete"""
+  originalTransaction: TransactionRequest!
+}
+
 input PrepareLimitOrderSwapInput {
   quoteId: SwapQuoteId!
   newSellAmount: BigDecimal
@@ -642,8 +657,8 @@ type PreviewUserPosition {
   riskPremium: PercentValueVariation!
   positionApy: PercentValueVariation!
   netApy: PercentValueVariation!
-  netCollateral(currency: Currency! = USD): FiatAmountValueVariation!
-  netBalance(currency: Currency! = USD): FiatAmountValueVariation!
+  netCollateral: FiatAmountValueVariation!
+  netBalance: FiatAmountValueVariation!
 }
 
 type Query {
@@ -670,7 +685,7 @@ type Query {
   setSpokeUserPositionManager(request: SetSpokeUserPositionManagerRequest!): TransactionRequest!
   renounceSpokeUserPositionManager(request: RenounceSpokeUserPositionManagerRequest!): TransactionRequest!
   setUserSupplyAsCollateral(request: SetUserSupplyAsCollateralRequest!): TransactionRequest!
-  liquidatePosition(request: LiquidatePositionRequest!): ExecutionPlan!
+  liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
   updateUserRiskPremium(request: UpdateUserRiskPremiumRequest!): TransactionRequest!
   updateUserDynamicConfig(request: UpdateUserDynamicConfigRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPosition!
@@ -1410,9 +1425,6 @@ input UserBalancesRequestFilter @oneOf {
 
   """The balances for the underlying attached to a spoke"""
   spoke: SpokeInput
-
-  """The balances for the swappable tokens"""
-  swappable: SwappableTokensRequestQuery
 }
 
 input UserBalancesRequestOrderBy @oneOf {
@@ -1437,7 +1449,6 @@ type UserBorrowItem {
 input UserBorrowsQueryRequest @oneOf {
   userSpoke: UserSpokeInput
   userPositionId: UserPositionId
-  userChains: UserChains
 }
 
 input UserBorrowsRequest {
@@ -1450,11 +1461,6 @@ input UserBorrowsRequestOrderBy @oneOf {
   balance: OrderDirection
   apy: OrderDirection
   paid: OrderDirection
-}
-
-input UserChains {
-  user: EvmAddress!
-  chainIds: [ChainId!]!
 }
 
 input UserHistoryFilter @oneOf {
@@ -1573,17 +1579,11 @@ input UserSummaryFilter @oneOf {
 }
 
 type UserSummaryHistoryItem {
+  netBalance: FiatAmount!
+  borrows: FiatAmount!
+  supplies: FiatAmount!
   healthFactor: BigDecimal
   date: DateTime!
-
-  """The net balance"""
-  netBalance(currency: Currency! = USD): FiatAmount!
-
-  """The borrows"""
-  borrows(currency: Currency! = USD): FiatAmount!
-
-  """The supplies"""
-  supplies(currency: Currency! = USD): FiatAmount!
 }
 
 input UserSummaryHistoryRequest {
@@ -1600,7 +1600,6 @@ input UserSummaryRequest {
 input UserSuppliesQueryRequest @oneOf {
   userSpoke: UserSpokeInput
   userPositionId: UserPositionId
-  userChains: UserChains
 }
 
 input UserSuppliesRequest {

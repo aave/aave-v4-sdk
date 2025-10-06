@@ -1,11 +1,19 @@
 import type { FragmentOf } from 'gql.tada';
-import { ExecutionPlanFragment, TransactionRequestFragment } from './fragments';
+import {
+  type Erc20ApprovalRequired,
+  Erc20ApprovalRequiredFragment,
+  ExecutionPlanFragment,
+  type InsufficientBalanceError,
+  InsufficientBalanceErrorFragment,
+  type TransactionRequest,
+  TransactionRequestFragment,
+} from './fragments';
 import {
   FiatAmountValueVariationFragment,
   HealthFactorVariationFragment,
   PercentValueVariationFragment,
 } from './fragments/common';
-import { graphql, type RequestOf } from './graphql';
+import { type FragmentDocumentFor, graphql, type RequestOf } from './graphql';
 
 /**
  * @internal
@@ -59,16 +67,44 @@ export const WithdrawQuery = graphql(
 );
 export type WithdrawRequest = RequestOf<typeof WithdrawQuery>;
 
+export type LiquidatePositionExecutionPlan =
+  | TransactionRequest
+  | Erc20ApprovalRequired
+  | InsufficientBalanceError;
+
+export const LiquidatePositionExecutionPlanFragment: FragmentDocumentFor<
+  LiquidatePositionExecutionPlan,
+  'LiquidatePositionExecutionPlan'
+> = graphql(
+  `fragment LiquidatePositionExecutionPlan on LiquidatePositionExecutionPlan {
+    __typename
+    ... on TransactionRequest {
+      ...TransactionRequest
+    }
+    ... on Erc20ApprovalRequired {
+      ...Erc20ApprovalRequired
+    }
+    ... on InsufficientBalanceError {
+      ...InsufficientBalanceError
+    }
+  }`,
+  [
+    TransactionRequestFragment,
+    Erc20ApprovalRequiredFragment,
+    InsufficientBalanceErrorFragment,
+  ],
+);
+
 /**
  * @internal
  */
 export const LiquidatePositionQuery = graphql(
   `query LiquidatePosition($request: LiquidatePositionRequest!) {
     value: liquidatePosition(request: $request) {
-      ...ExecutionPlan
+      ...LiquidatePositionExecutionPlan
     }
   }`,
-  [ExecutionPlanFragment],
+  [LiquidatePositionExecutionPlanFragment],
 );
 export type LiquidatePositionRequest = RequestOf<typeof LiquidatePositionQuery>;
 
