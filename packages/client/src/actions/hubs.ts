@@ -25,7 +25,7 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
  *
  * @param client - Aave client.
  * @param request - The hub request parameters.
- * @param options - The query options (currency only).
+ * @param options - The query options.
  * @returns The hub data, or null if not found.
  */
 export function hub(
@@ -49,7 +49,7 @@ export function hub(
  *
  * @param client - Aave client.
  * @param request - The hubs request parameters (either tokens or chainIds).
- * @param options - The query options (currency only).
+ * @param options - The query options.
  * @returns Array of hub data.
  */
 export function hubs(

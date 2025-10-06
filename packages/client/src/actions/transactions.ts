@@ -424,6 +424,7 @@ export function setSpokeUserPositionManager(
  *
  * @param client - Aave client.
  * @param request - The preview request parameters containing the action to preview.
+ * @param options - The query options.
  * @returns The preview result showing position changes.
  */
 export function preview(
