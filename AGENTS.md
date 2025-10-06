@@ -31,6 +31,7 @@ When updating the GraphQL schema in the SDK:
    - **Query-specific types**: colocate with their corresponding query files (permits.ts, transactions.ts, swaps.ts, user.ts, reserve.ts, hub.ts, misc.ts)
    - Use pattern: `export type InputName = ReturnType<typeof graphql.scalar<'InputName'>>;`
    - Exclude fork-related input types unless explicitly needed
+   - Ensure for all usage of `ReturnType<typeof graphql.scalar<'<input-name>'>>` there is a corresponding input type in `packages/graphql/src/graphql.ts`
 
 4. **Validate:**
    - Use `pnpm check` from `packages/graphql` to check integrity of GraphQL documents

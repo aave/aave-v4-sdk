@@ -125,6 +125,7 @@ export type UserBalancesRequestOrderBy = ReturnType<
 export type UserBorrowsQueryRequest = ReturnType<
   typeof graphql.scalar<'UserBorrowsQueryRequest'>
 >;
+export type UserChains = ReturnType<typeof graphql.scalar<'UserChains'>>;
 export type UserBorrowsRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserBorrowsRequestOrderBy'>
 >;
