@@ -146,7 +146,7 @@ function refreshQueriesForReserveChange(
  *       return sendTransaction(plan);
  *     case 'Erc20ApprovalRequired':
  *     case 'PreContractActionRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  *
@@ -252,7 +252,7 @@ export function useSupplyAction(): UseAsyncTask<
  *       return sendTransaction(plan);
  *     case 'Erc20ApprovalRequired':
  *     case 'PreContractActionRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  *
@@ -358,7 +358,7 @@ export function useBorrowAction(): UseAsyncTask<
  *       return sendTransaction(plan);
  *     case 'Erc20ApprovalRequired':
  *     case 'PreContractActionRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  *
@@ -464,7 +464,7 @@ export function useRepayAction(): UseAsyncTask<
  *       return sendTransaction(plan);
  *     case 'Erc20ApprovalRequired':
  *     case 'PreContractActionRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  *
@@ -989,7 +989,7 @@ export function useSetUserSupplyAsCollateralAction(): UseAsyncTask<
  *       return sendTransaction(plan);
  *     case 'Erc20ApprovalRequired':
  *     case 'PreContractActionRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  *

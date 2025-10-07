@@ -334,7 +334,7 @@ const [execute, { loading, error }] = useComplexTransaction((plan, { cancel }) =
 
     case 'Erc20ApprovalRequired':
     case 'PreContractActionRequired':
-      return sendTransaction(plan.approval);
+      return sendTransaction(plan.transaction);
   }
 });
 ```
@@ -352,7 +352,7 @@ const [execute, { loading, error }] = useComplexTransaction((plan, { cancel }) =
       return sendTransaction(plan);
 
     case 'Erc20ApprovalRequired':
-      return sendTransaction(plan.approval);
+      return sendTransaction(plan.transaction);
   }
 });
 ```

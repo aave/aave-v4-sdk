@@ -106,7 +106,7 @@ export function swappableTokens(
  *       );
  *
  *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(plan.approval)
+ *       return sendTransaction(plan.transaction)
  *         .andThen(signSwapByIntentWith(plan.data))
  *         .andThen((signature) => swap({ intent: { quoteId: quote.quoteId, signature } }))
  *         .andThen((plan) => {
@@ -259,7 +259,7 @@ export function waitForSwapOutcome(
  *         .map(() => plan.orderReceipt);
  *
  *     case 'SwapApprovalRequired':
- *       return sendTransaction(plan.approval)
+ *       return sendTransaction(plan.transaction)
  *         .andThen(() => sendTransaction(plan.originalTransaction))
  *         .map(() => plan.originalTransaction.orderReceipt);
  *

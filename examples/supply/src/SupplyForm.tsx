@@ -28,7 +28,7 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
       case 'Erc20ApprovalRequired':
       case 'PreContractActionRequired':
         setStatus('Sign the Approval Transaction in your wallet');
-        return sendTransaction(plan.approval).andTee(() =>
+        return sendTransaction(plan.transaction).andTee(() =>
           setStatus('Sending Approval Transaction…'),
         );
     }

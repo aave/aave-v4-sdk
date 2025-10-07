@@ -309,7 +309,7 @@ function isERC20PermitSignature(
  *
  *     case 'SwapApprovalRequired':
  *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.transaction);
  *
  *     case 'SwapTransactionRequest':
  *       return sendTransaction(plan.transaction);
