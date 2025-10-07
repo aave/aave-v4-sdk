@@ -101,10 +101,14 @@ export function sendWith(
       case 'TransactionRequest':
         return sendTransactionAndWait(privy, result, walletId);
 
-      case 'ApprovalRequired':
-        return sendTransactionAndWait(privy, result.approval, walletId).andThen(
-          () =>
-            sendTransactionAndWait(privy, result.originalTransaction, walletId),
+      case 'Erc20ApprovalRequired':
+      case 'PreContractActionRequired':
+        return sendTransactionAndWait(
+          privy,
+          result.transaction,
+          walletId,
+        ).andThen(() =>
+          sendTransactionAndWait(privy, result.originalTransaction, walletId),
         );
 
       case 'InsufficientBalanceError':

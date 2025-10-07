@@ -59,12 +59,6 @@ input BorrowRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input CancelIntentSwapInput {
@@ -99,6 +93,7 @@ type Chain {
   isTestnet: Boolean!
   nativeWrappedToken: EvmAddress!
   nativeInfo: TokenInfo!
+  nativeGateway: EvmAddress!
 }
 
 """A supported blockchain chain ID"""
@@ -657,8 +652,8 @@ type PreviewUserPosition {
   riskPremium: PercentValueVariation!
   positionApy: PercentValueVariation!
   netApy: PercentValueVariation!
-  netCollateral: FiatAmountValueVariation!
-  netBalance: FiatAmountValueVariation!
+  netCollateral(currency: Currency! = USD): FiatAmountValueVariation!
+  netBalance(currency: Currency! = USD): FiatAmountValueVariation!
 }
 
 type Query {
@@ -795,12 +790,6 @@ input RepayRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 type Reserve {
@@ -1114,12 +1103,6 @@ input SupplyRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 type SwapActivity {
@@ -1425,6 +1408,9 @@ input UserBalancesRequestFilter @oneOf {
 
   """The balances for the underlying attached to a spoke"""
   spoke: SpokeInput
+
+  """The balances for the swappable tokens"""
+  swappable: SwappableTokensRequestQuery
 }
 
 input UserBalancesRequestOrderBy @oneOf {
@@ -1449,6 +1435,7 @@ type UserBorrowItem {
 input UserBorrowsQueryRequest @oneOf {
   userSpoke: UserSpokeInput
   userPositionId: UserPositionId
+  userChains: UserChains
 }
 
 input UserBorrowsRequest {
@@ -1461,6 +1448,11 @@ input UserBorrowsRequestOrderBy @oneOf {
   balance: OrderDirection
   apy: OrderDirection
   paid: OrderDirection
+}
+
+input UserChains {
+  user: EvmAddress!
+  chainIds: [ChainId!]!
 }
 
 input UserHistoryFilter @oneOf {
@@ -1579,11 +1571,17 @@ input UserSummaryFilter @oneOf {
 }
 
 type UserSummaryHistoryItem {
-  netBalance: FiatAmount!
-  borrows: FiatAmount!
-  supplies: FiatAmount!
   healthFactor: BigDecimal
   date: DateTime!
+
+  """The net balance"""
+  netBalance(currency: Currency! = USD): FiatAmount!
+
+  """The borrows"""
+  borrows(currency: Currency! = USD): FiatAmount!
+
+  """The supplies"""
+  supplies(currency: Currency! = USD): FiatAmount!
 }
 
 input UserSummaryHistoryRequest {
@@ -1600,6 +1598,7 @@ input UserSummaryRequest {
 input UserSuppliesQueryRequest @oneOf {
   userSpoke: UserSpokeInput
   userPositionId: UserPositionId
+  userChains: UserChains
 }
 
 input UserSuppliesRequest {
@@ -1654,12 +1653,6 @@ input WithdrawRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input WithdrawReserveAmountInput @oneOf {

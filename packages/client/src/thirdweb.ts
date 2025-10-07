@@ -97,8 +97,9 @@ export function sendWith(client: ThirdwebClient): ExecutionPlanHandler {
       case 'TransactionRequest':
         return sendTransactionAndWait(client, result);
 
-      case 'ApprovalRequired':
-        return sendTransactionAndWait(client, result.approval).andThen(() =>
+      case 'Erc20ApprovalRequired':
+      case 'PreContractActionRequired':
+        return sendTransactionAndWait(client, result.transaction).andThen(() =>
           sendTransactionAndWait(client, result.originalTransaction),
         );
 

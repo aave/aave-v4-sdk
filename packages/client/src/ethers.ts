@@ -95,8 +95,9 @@ export function sendWith(signer: Signer): ExecutionPlanHandler {
       case 'TransactionRequest':
         return sendTransactionAndWait(signer, result);
 
-      case 'ApprovalRequired':
-        return sendTransactionAndWait(signer, result.approval).andThen(() =>
+      case 'Erc20ApprovalRequired':
+      case 'PreContractActionRequired':
+        return sendTransactionAndWait(signer, result.transaction).andThen(() =>
           sendTransactionAndWait(signer, result.originalTransaction),
         );
 

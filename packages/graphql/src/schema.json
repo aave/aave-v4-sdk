@@ -304,6 +304,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "nativeGateway",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -2021,7 +2032,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "netBalance",
@@ -2033,7 +2055,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -5499,42 +5532,6 @@
         "name": "UserSummaryHistoryItem",
         "fields": [
           {
-            "name": "netBalance",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "borrows",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "supplies",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "healthFactor",
             "type": {
               "kind": "SCALAR",
@@ -5552,6 +5549,75 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "netBalance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "borrows",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "supplies",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []

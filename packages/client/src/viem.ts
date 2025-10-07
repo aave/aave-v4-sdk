@@ -164,8 +164,9 @@ export function sendWith(walletClient: WalletClient): ExecutionPlanHandler {
       case 'TransactionRequest':
         return sendTransactionAndWait(walletClient, result);
 
-      case 'ApprovalRequired':
-        return sendTransactionAndWait(walletClient, result.approval).andThen(
+      case 'Erc20ApprovalRequired':
+      case 'PreContractActionRequired':
+        return sendTransactionAndWait(walletClient, result.transaction).andThen(
           () =>
             sendTransactionAndWait(walletClient, result.originalTransaction),
         );
