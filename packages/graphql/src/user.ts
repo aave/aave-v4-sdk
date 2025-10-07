@@ -122,7 +122,7 @@ export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
 export type UserBalancesRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserBalancesRequestOrderBy'>
 >;
-export type UserBorrowsQueryRequest = ReturnType<
+export type UserBorrowsRequestQuery = ReturnType<
   typeof graphql.scalar<'UserBorrowsQueryRequest'>
 >;
 export type UserChains = ReturnType<typeof graphql.scalar<'UserChains'>>;
@@ -141,7 +141,7 @@ export type UserPositionsRequestOrderBy = ReturnType<
 export type UserSummaryFilter = ReturnType<
   typeof graphql.scalar<'UserSummaryFilter'>
 >;
-export type UserSuppliesQueryRequest = ReturnType<
+export type UserSuppliesRequestQuery = ReturnType<
   typeof graphql.scalar<'UserSuppliesQueryRequest'>
 >;
 export type UserSuppliesRequestOrderBy = ReturnType<
