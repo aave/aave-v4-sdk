@@ -144,7 +144,8 @@ function refreshQueriesForReserveChange(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'ApprovalRequired':
+ *     case 'Erc20ApprovalRequired':
+ *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.approval);
  *   }
  * });
@@ -249,7 +250,8 @@ export function useSupplyAction(): UseAsyncTask<
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'ApprovalRequired':
+ *     case 'Erc20ApprovalRequired':
+ *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.approval);
  *   }
  * });
@@ -354,7 +356,8 @@ export function useBorrowAction(): UseAsyncTask<
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'ApprovalRequired':
+ *     case 'Erc20ApprovalRequired':
+ *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.approval);
  *   }
  * });
@@ -459,7 +462,8 @@ export function useRepayAction(): UseAsyncTask<
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'ApprovalRequired':
+ *     case 'Erc20ApprovalRequired':
+ *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.approval);
  *   }
  * });
@@ -983,7 +987,8 @@ export function useSetUserSupplyAsCollateralAction(): UseAsyncTask<
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'ApprovalRequired':
+ *     case 'Erc20ApprovalRequired':
+ *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.approval);
  *   }
  * });
@@ -1094,10 +1099,10 @@ export function useLiquidatePositionAction(): UseAsyncTask<
  * A hook that provides a way to set or remove a position manager for a user on a specific spoke.
  *
  * **Position managers** can perform transactions on behalf of other users, including:
- * - Supply assets using `onBehalfOf`
- * - Borrow assets using `onBehalfOf`
- * - Withdraw assets using `onBehalfOf`
- * - Enable/disable collateral using `onBehalfOf`
+ * - Supply assets
+ * - Borrow assets
+ * - Withdraw assets
+ * - Enable/disable collateral
  *
  * The `signature` parameter is an **ERC712 signature** that must be signed by the **user**
  * (the account granting permissions) to authorize the position manager. The signature contains:

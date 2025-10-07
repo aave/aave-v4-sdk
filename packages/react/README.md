@@ -332,8 +332,9 @@ const [execute, { loading, error }] = useComplexTransaction((plan, { cancel }) =
     case 'TransactionRequest':
       return sendTransaction(plan);
 
-    case 'ApprovalRequired':
-      return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+    case 'Erc20ApprovalRequired':
+    case 'PreContractActionRequired':
+      return sendTransaction(plan.approval);
   }
 });
 ```
@@ -350,8 +351,8 @@ const [execute, { loading, error }] = useComplexTransaction((plan, { cancel }) =
     case 'TransactionRequest':
       return sendTransaction(plan);
 
-    case 'ApprovalRequired':
-      return sendTransaction(plan.approval).andThen(() => sendTransaction(plan.originalTransaction));
+    case 'Erc20ApprovalRequired':
+      return sendTransaction(plan.approval);
   }
 });
 ```

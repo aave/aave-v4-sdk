@@ -85,9 +85,7 @@ function sendTransactionAndWait(
 }
 
 /**
- * Creates a transaction handler that sends transactions using the provided ethers signer.
- *
- * The handler handles {@link TransactionRequest} by signing and sending, {@link ApprovalRequired} by sending both approval and original transactions, and returns validation errors for {@link InsufficientBalanceError}.
+ * Creates an execution plan handler that sends transactions using the provided ethers signer.
  */
 export function sendWith(signer: Signer): ExecutionPlanHandler {
   return (result) => {
