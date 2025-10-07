@@ -64,7 +64,7 @@ export function SupplyForm({
         case 'PreContractActionRequired':
           setStatus('Approval required. Sending approval transaction...');
 
-          return sendTransaction(plan.approval).andThen(() => {
+          return sendTransaction(plan.transaction).andThen(() => {
             setStatus('Approval sent. Now sending supply transaction...');
 
             return sendTransaction(plan.originalTransaction);
