@@ -5,7 +5,6 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
-  InsufficientBalanceError,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -88,9 +87,7 @@ function sendTransactionAndWait(
 }
 
 /**
- * Creates a transaction handler that sends transactions using the provided Privy client.
- *
- * The handler handles {@link TransactionRequest} by signing and sending, {@link ApprovalRequired} by sending both approval and original transactions, and returns validation errors for {@link InsufficientBalanceError}.
+ * Creates an execution plan handler that sends transactions using the provided Privy client.
  */
 export function sendWith(
   privy: PrivyClient,
@@ -101,10 +98,14 @@ export function sendWith(
       case 'TransactionRequest':
         return sendTransactionAndWait(privy, result, walletId);
 
-      case 'ApprovalRequired':
-        return sendTransactionAndWait(privy, result.approval, walletId).andThen(
-          () =>
-            sendTransactionAndWait(privy, result.originalTransaction, walletId),
+      case 'Erc20ApprovalRequired':
+      case 'PreContractActionRequired':
+        return sendTransactionAndWait(
+          privy,
+          result.transaction,
+          walletId,
+        ).andThen(() =>
+          sendTransactionAndWait(privy, result.originalTransaction, walletId),
         );
 
       case 'InsufficientBalanceError':

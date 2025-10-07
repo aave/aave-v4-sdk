@@ -6,7 +6,11 @@ import {
   type TransactionError,
   type UnexpectedError,
 } from '@aave/core-next';
-import type { ApprovalRequired, TransactionRequest } from '@aave/graphql-next';
+import type {
+  Erc20ApprovalRequired,
+  PreContractActionRequired,
+  TransactionRequest,
+} from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import { invariant } from '@aave/types-next';
 import type { UseAsyncTask } from './tasks';
@@ -72,6 +76,9 @@ export type UseSendTransactionResult = UseAsyncTask<
  * The handler for sending Aave transactions.
  */
 export type TransactionHandler = (
-  result: TransactionRequest | ApprovalRequired,
+  result:
+    | TransactionRequest
+    | Erc20ApprovalRequired
+    | PreContractActionRequired,
   options: TransactionHandlerOptions,
 ) => ResultAsync<PendingTransaction, SendTransactionError>;

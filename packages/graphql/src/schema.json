@@ -39,72 +39,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "ApprovalRequired",
-        "fields": [
-          {
-            "name": "approval",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "reason",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "requiredAmount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "DecimalValue",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "currentAllowance",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "DecimalValue",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "originalTransaction",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
         "name": "BorrowActivity",
         "fields": [
           {
@@ -370,6 +304,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "nativeGateway",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -555,6 +500,72 @@
       },
       {
         "kind": "OBJECT",
+        "name": "Erc20ApprovalRequired",
+        "fields": [
+          {
+            "name": "transaction",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "reason",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "requiredAmount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalValue",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "currentAllowance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalValue",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "originalTransaction",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "Erc20Token",
         "fields": [
           {
@@ -627,7 +638,11 @@
           },
           {
             "kind": "OBJECT",
-            "name": "ApprovalRequired"
+            "name": "Erc20ApprovalRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "PreContractActionRequired"
           },
           {
             "kind": "OBJECT",
@@ -1215,6 +1230,24 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "LiquidatePositionExecutionPlan",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "TransactionRequest"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Erc20ApprovalRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -1848,6 +1881,48 @@
       },
       {
         "kind": "OBJECT",
+        "name": "PreContractActionRequired",
+        "fields": [
+          {
+            "name": "transaction",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "reason",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "originalTransaction",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "PrepareSwapCancelResult",
         "fields": [
           {
@@ -2406,7 +2481,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "ExecutionPlan",
+                "name": "LiquidatePositionExecutionPlan",
                 "ofType": null
               }
             },

@@ -7,7 +7,6 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
-  InsufficientBalanceError,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -154,9 +153,7 @@ function sendTransactionAndWait(
 }
 
 /**
- * Creates a transaction handler that sends transactions using the provided wallet client.
- *
- * The handler handles {@link TransactionRequest} by signing and sending, {@link ApprovalRequired} by sending both approval and original transactions, and returns validation errors for {@link InsufficientBalanceError}.
+ * Creates an execution plan handler that sends transactions using the provided wallet client.
  */
 export function sendWith(walletClient: WalletClient): ExecutionPlanHandler {
   return (result) => {
@@ -164,8 +161,9 @@ export function sendWith(walletClient: WalletClient): ExecutionPlanHandler {
       case 'TransactionRequest':
         return sendTransactionAndWait(walletClient, result);
 
-      case 'ApprovalRequired':
-        return sendTransactionAndWait(walletClient, result.approval).andThen(
+      case 'Erc20ApprovalRequired':
+      case 'PreContractActionRequired':
+        return sendTransactionAndWait(walletClient, result.transaction).andThen(
           () =>
             sendTransactionAndWait(walletClient, result.originalTransaction),
         );

@@ -84,7 +84,6 @@ export function borrow(
  *   },
  *   enableCollateral: true, // Optional, defaults to true
  *   sender: evmAddress('0x9abc…'),
- *   // onBehalfOf: evmAddress('0xdef0…'), // Optional, if supplying on behalf of another user
  * });
  *
  * if (result.isErr()) {
@@ -193,15 +192,6 @@ export function repay(
  * ```ts
  * amount: {
  *   native: bigDecimal('0.5'), // For ETH on Ethereum
- * }
- * ```
- *
- * **On behalf of another user (position manager only):**
- * ```ts
- * {
- *   // ... other fields
- *   sender: evmAddress('0xManager…'),
- *   onBehalfOf: evmAddress('0xUser…'),
  * }
  * ```
  *
@@ -355,10 +345,10 @@ export function liquidatePosition(
  * Sets or removes a position manager for a user on a specific spoke.
  *
  * **Position managers** can perform transactions on behalf of other users, including:
- * - Supply assets using `onBehalfOf`
- * - Borrow assets using `onBehalfOf`
- * - Withdraw assets using `onBehalfOf`
- * - Enable/disable collateral using `onBehalfOf`
+ * - Supply assets
+ * - Borrow assets
+ * - Withdraw assets
+ * - Enable/disable collateral
  *
  * The `signature` parameter is an **ERC712 signature** that must be signed by the **user**
  * (the account granting permissions) to authorize the position manager. The signature contains:

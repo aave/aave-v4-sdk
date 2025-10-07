@@ -59,10 +59,11 @@ export function SupplyForm({
           setStatus('Sending transaction...');
           return sendTransaction(plan);
 
-        case 'ApprovalRequired':
+        case 'Erc20ApprovalRequired':
+        case 'PreContractActionRequired':
           setStatus('Approval required. Sending approval transaction...');
 
-          return sendTransaction(plan.approval).andThen(() => {
+          return sendTransaction(plan.transaction).andThen(() => {
             setStatus('Approval sent. Now sending supply transaction...');
 
             return sendTransaction(plan.originalTransaction);

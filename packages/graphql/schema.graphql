@@ -22,21 +22,6 @@ input AmountInput @oneOf {
   max: AlwaysTrue
 }
 
-type ApprovalRequired {
-  """The transaction requires an approval first"""
-  approval: TransactionRequest!
-  reason: String!
-
-  """The required amount missing to be able to do the original transaction"""
-  requiredAmount: DecimalValue!
-
-  """The current allowance approved"""
-  currentAllowance: DecimalValue!
-
-  """The transaction to send after the approval is complete"""
-  originalTransaction: TransactionRequest!
-}
-
 enum ApyMetric {
   HIGHEST
   LOWEST
@@ -74,12 +59,6 @@ input BorrowRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input CancelIntentSwapInput {
@@ -114,6 +93,7 @@ type Chain {
   isTestnet: Boolean!
   nativeWrappedToken: EvmAddress!
   nativeInfo: TokenInfo!
+  nativeGateway: EvmAddress!
 }
 
 """A supported blockchain chain ID"""
@@ -172,6 +152,23 @@ type Erc20Amount {
   token: Erc20Token!
 }
 
+type Erc20ApprovalRequired {
+  """The transaction requires an approval first"""
+  transaction: TransactionRequest!
+
+  """The reason for the approval"""
+  reason: String!
+
+  """The required amount missing to be able to do the original transaction"""
+  requiredAmount: DecimalValue!
+
+  """The current allowance approved"""
+  currentAllowance: DecimalValue!
+
+  """The transaction to send after the approval is complete"""
+  originalTransaction: TransactionRequest!
+}
+
 input Erc20Input {
   """The token address"""
   address: EvmAddress!
@@ -222,7 +219,7 @@ input ExchangeRateRequestFrom @oneOf {
   native: ChainId
 }
 
-union ExecutionPlan = TransactionRequest | ApprovalRequired | InsufficientBalanceError
+union ExecutionPlan = TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired | InsufficientBalanceError
 
 type FiatAmount {
   value: BigDecimal!
@@ -442,6 +439,8 @@ input LiquidatePositionDebtAmount @oneOf {
   max: AlwaysTrue
 }
 
+union LiquidatePositionExecutionPlan = TransactionRequest | Erc20ApprovalRequired | InsufficientBalanceError
+
 input LiquidatePositionRequest {
   """The spoke"""
   spoke: SpokeInput!
@@ -589,6 +588,17 @@ type PermitTypedDataResponse {
   message: PermitMessageData!
 }
 
+type PreContractActionRequired {
+  """The transaction requires a pre-contract action first"""
+  transaction: TransactionRequest!
+
+  """The reason for the pre-contract action"""
+  reason: String!
+
+  """The transaction to send after the approval is complete"""
+  originalTransaction: TransactionRequest!
+}
+
 input PrepareLimitOrderSwapInput {
   quoteId: SwapQuoteId!
   newSellAmount: BigDecimal
@@ -670,7 +680,7 @@ type Query {
   setSpokeUserPositionManager(request: SetSpokeUserPositionManagerRequest!): TransactionRequest!
   renounceSpokeUserPositionManager(request: RenounceSpokeUserPositionManagerRequest!): TransactionRequest!
   setUserSupplyAsCollateral(request: SetUserSupplyAsCollateralRequest!): TransactionRequest!
-  liquidatePosition(request: LiquidatePositionRequest!): ExecutionPlan!
+  liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
   updateUserRiskPremium(request: UpdateUserRiskPremiumRequest!): TransactionRequest!
   updateUserDynamicConfig(request: UpdateUserDynamicConfigRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPosition!
@@ -763,12 +773,6 @@ input RepayPermitRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input RepayRequest {
@@ -780,12 +784,6 @@ input RepayRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 type Reserve {
@@ -961,12 +959,6 @@ input SetUserSupplyAsCollateralRequest {
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
 
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
-
   """If you want to enable the collateral or disable"""
   enableCollateral: Boolean!
 }
@@ -1079,12 +1071,6 @@ input SupplyPermitRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input SupplyRequest {
@@ -1099,12 +1085,6 @@ input SupplyRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 type SwapActivity {
@@ -1655,12 +1635,6 @@ input WithdrawRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input WithdrawReserveAmountInput @oneOf {

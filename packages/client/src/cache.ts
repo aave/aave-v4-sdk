@@ -91,13 +91,13 @@ export const exchange = cacheExchange({
     SwapTransactionRequest: () => null,
 
     // Value objects and result types
-    ApprovalRequired: () => null,
     APYSample: () => null,
     CancelSwapTypedData: () => null,
     CancelSwapTypeDefinition: () => null,
     DecimalValue: () => null,
     DomainData: () => null,
     Erc20Amount: () => null,
+    Erc20ApprovalRequired: () => null,
     FiatAmount: () => null,
     FiatAmountValueVariation: () => null,
     FiatAmountWithChange: () => null,
@@ -115,6 +115,7 @@ export const exchange = cacheExchange({
     PercentValueWithChange: () => null,
     PermitMessageData: () => null,
     PermitTypedDataResponse: () => null,
+    PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PreviewUserPosition: () => null,
     ReserveSettings: () => null,
