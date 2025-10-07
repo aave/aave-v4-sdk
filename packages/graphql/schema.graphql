@@ -1393,6 +1393,9 @@ input UserBalancesRequestFilter @oneOf {
 
   """The balances for the swappable tokens"""
   swappable: SwappableTokensRequestQuery
+
+  """The balances for the user position id"""
+  userPositionId: UserPositionId
 }
 
 input UserBalancesRequestOrderBy @oneOf {
