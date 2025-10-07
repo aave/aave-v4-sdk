@@ -207,7 +207,8 @@ export function useSupply(
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(client.waitForTransaction);
 
-          case 'ApprovalRequired':
+          case 'Erc20ApprovalRequired':
+          case 'PreContractActionRequired':
             return handler(plan, { cancel })
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(() => handler(plan.originalTransaction, { cancel }))
@@ -311,7 +312,8 @@ export function useBorrow(
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(client.waitForTransaction);
 
-          case 'ApprovalRequired':
+          case 'Erc20ApprovalRequired':
+          case 'PreContractActionRequired':
             return handler(plan, { cancel })
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(() => handler(plan.originalTransaction, { cancel }))
@@ -415,7 +417,8 @@ export function useRepay(
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(client.waitForTransaction);
 
-          case 'ApprovalRequired':
+          case 'Erc20ApprovalRequired':
+          case 'PreContractActionRequired':
             return handler(plan, { cancel })
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(() => handler(plan.originalTransaction, { cancel }))
@@ -519,7 +522,8 @@ export function useWithdraw(
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(client.waitForTransaction);
 
-          case 'ApprovalRequired':
+          case 'Erc20ApprovalRequired':
+          case 'PreContractActionRequired':
             return handler(plan, { cancel })
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(() => handler(plan.originalTransaction, { cancel }))
@@ -1052,7 +1056,8 @@ export function useLiquidatePosition(
             .andThen((pendingTransaction) => pendingTransaction.wait())
             .andThen(client.waitForTransaction);
 
-        case 'ApprovalRequired':
+        case 'Erc20ApprovalRequired':
+        case 'PreContractActionRequired':
           return handler(plan, { cancel })
             .andThen((pendingTransaction) => pendingTransaction.wait())
             .andThen(() => handler(plan.originalTransaction, { cancel }))
