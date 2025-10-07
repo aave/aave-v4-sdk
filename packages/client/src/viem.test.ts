@@ -18,14 +18,14 @@ import { setupRpcInterceptor } from './rpc.helpers';
 import { createNewWallet } from './test-utils';
 import { sendWith } from './viem';
 
-const walletClient = createNewWallet();
+const walletClient = await createNewWallet();
 
 describe(`Given a viem's WalletClient instance`, () => {
   describe(`And the '${sendWith.name}' handler is used to send a TransactionRequest`, () => {
     const request: TransactionRequest = {
       __typename: 'TransactionRequest',
-      to: evmAddress(walletClient.account!.address),
-      from: evmAddress(walletClient.account!.address),
+      to: evmAddress(walletClient.account.address),
+      from: evmAddress(walletClient.account.address),
       data: '0x' as BlockchainData,
       value: 0n,
       chainId: chainId(1),

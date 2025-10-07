@@ -21,21 +21,19 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { findReserveToSupply, supplyToReserve } from '../borrow/helper';
 import { assertSingleElementArray } from '../test-utils';
 
+const user = await createNewWallet();
+
 describe('Aave V4 Supply Scenarios', () => {
   describe('Given a user and a Reserve', () => {
     describe('When the user supplies tokens', () => {
-      const user = createNewWallet();
       const amountToSupply = bigDecimal('94');
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('100'),
-            decimals: 6,
-          },
-        );
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('100'),
+          decimals: 6,
+        });
 
         assertOk(setup);
       });
@@ -59,7 +57,7 @@ describe('Aave V4 Supply Scenarios', () => {
                 value: amountToSupply,
               },
             },
-            sender: evmAddress(user.account!.address),
+            sender: evmAddress(user.account.address),
           })
             .andThen(sendWith(user))
             .andThen(client.waitForTransaction)
@@ -71,7 +69,7 @@ describe('Aave V4 Supply Scenarios', () => {
                       address: reserveToSupply.value.spoke.address,
                       chainId: ETHEREUM_FORK_ID,
                     },
-                    user: evmAddress(user.account!.address),
+                    user: evmAddress(user.account.address),
                   },
                 },
               }),
@@ -89,18 +87,14 @@ describe('Aave V4 Supply Scenarios', () => {
     });
 
     describe('When the user supplies tokens with collateral disabled', () => {
-      const user = createNewWallet();
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('100'),
-            decimals: 6,
-          },
-        ).andThen(() => findReserveToSupply(client, ETHEREUM_USDC_ADDRESS));
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('100'),
+          decimals: 6,
+        }).andThen(() => findReserveToSupply(client, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
         reserve = setup.value;
@@ -120,7 +114,7 @@ describe('Aave V4 Supply Scenarios', () => {
                 value: bigDecimal('50'),
               },
             },
-            sender: evmAddress(user.account!.address),
+            sender: evmAddress(user.account.address),
             enableCollateral: false,
           },
           user,
@@ -132,7 +126,7 @@ describe('Aave V4 Supply Scenarios', () => {
                   address: reserve.spoke.address,
                   chainId: reserve.chain.chainId,
                 },
-                user: evmAddress(user.account!.address),
+                user: evmAddress(user.account.address),
               },
             },
           }),
@@ -153,19 +147,15 @@ describe('Aave V4 Supply Scenarios', () => {
     });
 
     describe('When the user supplies tokens using a permit signature', () => {
-      const user = createNewWallet();
       const amountToSupply = bigDecimal('94');
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('100'),
-            decimals: 6,
-          },
-        ).andThen(() => findReserveToSupply(client, ETHEREUM_USDC_ADDRESS));
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('100'),
+          decimals: 6,
+        }).andThen(() => findReserveToSupply(client, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
         reserve = setup.value;
@@ -183,7 +173,7 @@ describe('Aave V4 Supply Scenarios', () => {
               chainId: reserve.chain.chainId,
               spoke: reserve.spoke.address,
             },
-            sender: evmAddress(user.account!.address),
+            sender: evmAddress(user.account.address),
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
@@ -200,7 +190,7 @@ describe('Aave V4 Supply Scenarios', () => {
               permitSig: signature.value,
             },
           },
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
         })
           .andTee((tx) =>
             annotate(`plan supply with permit: ${JSON.stringify(tx, null, 2)}`),
@@ -216,7 +206,7 @@ describe('Aave V4 Supply Scenarios', () => {
                     address: reserve.spoke.address,
                     chainId: ETHEREUM_FORK_ID,
                   },
-                  user: evmAddress(user.account!.address),
+                  user: evmAddress(user.account.address),
                 },
               },
             }),

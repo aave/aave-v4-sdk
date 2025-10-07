@@ -24,12 +24,14 @@ import {
   txHash,
 } from '@aave/types-next';
 import {
+  type Account,
   type Chain,
   type defineChain,
   type ProviderRpcError,
   type RpcError,
   SwitchChainError,
   TransactionExecutionError,
+  type Transport,
   type TypedData,
   type TypedDataDomain,
   UserRejectedRequestError,
@@ -117,12 +119,12 @@ function ensureChain(
 }
 
 function sendEip1559Transaction(
-  walletClient: WalletClient,
+  walletClient: WalletClient<Transport, Chain, Account>,
   request: TransactionRequest,
 ): ResultAsync<TxHash, CancelError | SigningError> {
   return ResultAsync.fromPromise(
     sendTransactionWithViem(walletClient, {
-      account: request.from,
+      account: walletClient.account,
       data: request.data,
       to: request.to,
       value: BigInt(request.value),
@@ -143,6 +145,12 @@ function sendEip1559Transaction(
   ).map(txHash);
 }
 
+function isWalletClientWithAccount(
+  walletClient: WalletClient,
+): walletClient is WalletClient<Transport, Chain, Account> {
+  return walletClient.account !== undefined;
+}
+
 /**
  * @internal
  */
@@ -150,7 +158,10 @@ export function sendTransaction(
   walletClient: WalletClient,
   request: TransactionRequest,
 ): ResultAsync<TxHash, CancelError | SigningError> {
-  // TODO: verify if wallet account is correct, switch if possible
+  invariant(
+    isWalletClientWithAccount(walletClient),
+    'Wallet client with account is required',
+  );
 
   return ensureChain(walletClient, request).andThen((_) =>
     sendEip1559Transaction(walletClient, request),

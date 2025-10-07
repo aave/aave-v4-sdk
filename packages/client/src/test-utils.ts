@@ -10,6 +10,7 @@ import {
   ResultAsync,
 } from '@aave/types-next';
 import {
+  type Account,
   type Chain,
   createPublicClient,
   createWalletClient,
@@ -17,6 +18,7 @@ import {
   http,
   parseEther,
   parseUnits,
+  type Transport,
   type WalletClient,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
@@ -95,14 +97,18 @@ export const client = AaveClient.create({
   },
 });
 
-export function createNewWallet(
+export async function createNewWallet(
   privateKey: `0x${string}` = generatePrivateKey(),
-): WalletClient {
-  return createWalletClient({
+): Promise<WalletClient<Transport, Chain, Account>> {
+  const wallet = createWalletClient({
     account: privateKeyToAccount(privateKey),
     chain: ethereumForkChain,
     transport: http(),
   });
+
+  await fundNativeAddress(evmAddress(wallet.account.address));
+
+  return wallet;
 }
 
 // Tenderly RPC type for setBalance

@@ -7,12 +7,12 @@ import {
 } from '@aave/client-next';
 import { borrow } from '@aave/client-next/actions';
 import { sendWith } from '@aave/client-next/viem';
-import type { WalletClient } from 'viem';
+import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { findReserveToSupply, supplyToReserve } from '../borrow/helper';
 
 export function supplyAndBorrow(
   client: AaveClient,
-  user: WalletClient,
+  user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
   amount = bigDecimal('100'),
 ): ResultAsync<Reserve, Error> {
@@ -26,13 +26,13 @@ export function supplyAndBorrow(
           spoke: reserve.spoke.address,
         },
         amount: { erc20: { value: amount } },
-        sender: evmAddress(user.account!.address),
+        sender: evmAddress(user.account.address),
       },
       user,
     )
       .andThen(() =>
         borrow(client, {
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
           reserve: {
             spoke: reserve.spoke.address,
             reserveId: reserve.id,

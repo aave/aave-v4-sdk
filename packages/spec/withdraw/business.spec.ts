@@ -13,21 +13,19 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve } from '../borrow/helper';
 import { assertSingleElementArray } from '../test-utils';
 
+const user = await createNewWallet();
+
 describe('Aave V4 Withdraw Scenario', () => {
   describe('Given a user with a supply position', () => {
     describe('When the user withdraws part of their supply', () => {
-      const user = createNewWallet();
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('200'),
-            decimals: 6,
-          },
-        ).andThen(() =>
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('200'),
+          decimals: 6,
+        }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
         );
 
@@ -39,7 +37,7 @@ describe('Aave V4 Withdraw Scenario', () => {
         const amountToWithdraw = bigDecimal('25');
 
         const balanceBefore = await getBalance(
-          evmAddress(user.account!.address),
+          evmAddress(user.account.address),
           ETHEREUM_USDC_ADDRESS,
         );
 
@@ -52,7 +50,7 @@ describe('Aave V4 Withdraw Scenario', () => {
           amount: {
             erc20: { exact: amountToWithdraw },
           },
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
@@ -64,7 +62,7 @@ describe('Aave V4 Withdraw Scenario', () => {
                     address: reserve.spoke.address,
                     chainId: reserve.chain.chainId,
                   },
-                  user: evmAddress(user.account!.address),
+                  user: evmAddress(user.account.address),
                 },
               },
             }),
@@ -76,7 +74,7 @@ describe('Aave V4 Withdraw Scenario', () => {
         ).toBeBigDecimalCloseTo(bigDecimal('75'), 2);
 
         const balanceAfter = await getBalance(
-          evmAddress(user.account!.address),
+          evmAddress(user.account.address),
           ETHEREUM_USDC_ADDRESS,
         );
         expect(balanceBefore + Number(amountToWithdraw)).toEqual(balanceAfter);
@@ -84,18 +82,14 @@ describe('Aave V4 Withdraw Scenario', () => {
     });
 
     describe('When the user withdraws all of their supply', () => {
-      const user = createNewWallet();
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('200'),
-            decimals: 6,
-          },
-        ).andThen(() =>
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('200'),
+          decimals: 6,
+        }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
         );
 
@@ -104,7 +98,7 @@ describe('Aave V4 Withdraw Scenario', () => {
       });
       it('Then it should be reflected in the user supply positions', async () => {
         const balanceBefore = await getBalance(
-          evmAddress(user.account!.address),
+          evmAddress(user.account.address),
           ETHEREUM_USDC_ADDRESS,
         );
 
@@ -114,7 +108,7 @@ describe('Aave V4 Withdraw Scenario', () => {
             reserveId: reserve.id,
             chainId: reserve.chain.chainId,
           },
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
           amount: {
             erc20: {
               max: true,
@@ -131,7 +125,7 @@ describe('Aave V4 Withdraw Scenario', () => {
                     address: reserve.spoke.address,
                     chainId: reserve.chain.chainId,
                   },
-                  user: evmAddress(user.account!.address),
+                  user: evmAddress(user.account.address),
                 },
               },
             }),
@@ -140,7 +134,7 @@ describe('Aave V4 Withdraw Scenario', () => {
         expect(withdrawResult.value.length).toBe(0);
 
         const balanceAfter = await getBalance(
-          evmAddress(user.account!.address),
+          evmAddress(user.account.address),
           ETHEREUM_USDC_ADDRESS,
         );
         expect(balanceAfter).toBeGreaterThan(balanceBefore);

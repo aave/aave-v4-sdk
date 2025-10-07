@@ -12,21 +12,19 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { assertSingleElementArray } from '../test-utils';
 import { supplyAndBorrow } from './helper';
 
+const user = await createNewWallet();
+
 describe('Aave V4 Repay Scenario', () => {
   describe('Given a user with a borrow position', () => {
     describe('When the user repays their loan', () => {
-      const user = createNewWallet();
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('200'),
-            decimals: 6,
-          },
-        ).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('200'),
+          decimals: 6,
+        }).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
         reserve = setup.value;
@@ -40,7 +38,7 @@ describe('Aave V4 Repay Scenario', () => {
             reserveId: reserve.id,
             chainId: reserve.chain.chainId,
           },
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
           amount: {
             erc20: {
               value: {
@@ -59,7 +57,7 @@ describe('Aave V4 Repay Scenario', () => {
                     address: reserve.spoke.address,
                     chainId: reserve.chain.chainId,
                   },
-                  user: evmAddress(user.account!.address),
+                  user: evmAddress(user.account.address),
                 },
               },
             }),
@@ -70,18 +68,14 @@ describe('Aave V4 Repay Scenario', () => {
     });
 
     describe('When the user repays a partial amount of their loan', () => {
-      const user = createNewWallet();
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('200'),
-            decimals: 6,
-          },
-        ).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('200'),
+          decimals: 6,
+        }).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
         reserve = setup.value;
@@ -96,7 +90,7 @@ describe('Aave V4 Repay Scenario', () => {
             reserveId: reserve.id,
             chainId: reserve.chain.chainId,
           },
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
           amount: {
             erc20: {
               value: {
@@ -115,7 +109,7 @@ describe('Aave V4 Repay Scenario', () => {
                     address: reserve.spoke.address,
                     chainId: reserve.chain.chainId,
                   },
-                  user: evmAddress(user.account!.address),
+                  user: evmAddress(user.account.address),
                 },
               },
             }),

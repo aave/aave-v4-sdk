@@ -23,20 +23,17 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve, supplyToReserve } from '../borrow/helper';
 import { supplyAndBorrow } from '../repay/helper';
 
+const user = await createNewWallet();
+
 describe('Aave V4 Health Factor Positions Scenarios', () => {
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
-      const user = createNewWallet();
-
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('200'),
-            decimals: 6,
-          },
-        ).andThen(() =>
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('200'),
+          decimals: 6,
+        }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
         );
 
@@ -45,7 +42,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
       it('Then the health factor should be null', async () => {
         const summary = await userSummary(client, {
-          user: evmAddress(user.account!.address),
+          user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
@@ -56,18 +53,14 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
     });
 
     describe('And the user has a one borrow position', () => {
-      const user = createNewWallet();
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('300'),
-            decimals: 6,
-          },
-        ).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('300'),
+          decimals: 6,
+        }).andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDC_ADDRESS));
 
         assertOk(setup);
         reserve = setup.value;
@@ -76,7 +69,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
       describe('When the user checks the health factor', () => {
         it('Then the health factor should be a number greater than 1', async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -91,7 +84,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         beforeAll(async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -109,7 +102,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
                 chainId: reserve.chain.chainId,
               },
               enableCollateral: true,
-              sender: evmAddress(user.account!.address),
+              sender: evmAddress(user.account.address),
             },
             user,
           );
@@ -119,7 +112,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         it('Then the health factor should be greater than before supplying more collateral', async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -136,7 +129,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         beforeAll(async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -150,7 +143,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
               reserveId: reserve.id,
               chainId: reserve.chain.chainId,
             },
-            sender: evmAddress(user.account!.address),
+            sender: evmAddress(user.account.address),
             amount: {
               erc20: {
                 value: {
@@ -167,7 +160,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         it('Then the health factor should be greater than before repaying partially', async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -184,7 +177,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         beforeAll(async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -193,7 +186,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           HFBeforeBorrow = summary.value.lowestHealthFactor!;
 
           const setup = await borrow(client, {
-            sender: evmAddress(user.account!.address),
+            sender: evmAddress(user.account.address),
             reserve: {
               spoke: reserve.spoke.address,
               reserveId: reserve.id,
@@ -213,7 +206,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         it('Then the health factor should be less than before borrowing more money', async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -230,7 +223,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         beforeAll(async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -244,7 +237,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
               reserveId: reserve.id,
               chainId: reserve.chain.chainId,
             },
-            sender: evmAddress(user.account!.address),
+            sender: evmAddress(user.account.address),
             amount: {
               erc20: {
                 exact: bigDecimal('25'),
@@ -259,7 +252,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         it('Then the health factor should be less than before withdrawing collateral', async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },
@@ -279,7 +272,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
               reserveId: reserve.id,
               chainId: reserve.chain.chainId,
             },
-            sender: evmAddress(user.account!.address),
+            sender: evmAddress(user.account.address),
             amount: {
               erc20: {
                 value: {
@@ -298,7 +291,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         it('Then the health factor should be null', async () => {
           const summary = await userSummary(client, {
-            user: evmAddress(user.account!.address),
+            user: evmAddress(user.account.address),
             filter: {
               chainIds: [ETHEREUM_FORK_ID],
             },

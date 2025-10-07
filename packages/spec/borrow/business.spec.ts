@@ -12,21 +12,19 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { assertSingleElementArray } from '../test-utils';
 import { supplyToRandomERC20Reserve } from './helper';
 
+const user = await createNewWallet();
+
 describe('Aave V4 Borrow Scenarios', () => {
   describe('Given a user with a supply position as collateral', () => {
     describe('When the user borrows an ERC20 asset', () => {
-      const user = createNewWallet();
       let reserve: Reserve;
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(
-          evmAddress(user.account!.address),
-          {
-            address: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('100'),
-            decimals: 6,
-          },
-        ).andThen(() =>
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('100'),
+          decimals: 6,
+        }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
         );
 
@@ -38,7 +36,7 @@ describe('Aave V4 Borrow Scenarios', () => {
         const amountToBorrow = bigDecimal('50');
 
         const result = await borrow(client, {
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
           reserve: {
             spoke: reserve.spoke.address,
             reserveId: reserve.id,
@@ -60,7 +58,7 @@ describe('Aave V4 Borrow Scenarios', () => {
                     address: reserve.spoke.address,
                     chainId: reserve.chain.chainId,
                   },
-                  user: evmAddress(user.account!.address),
+                  user: evmAddress(user.account.address),
                 },
               },
             }),

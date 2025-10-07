@@ -11,12 +11,12 @@ import {
 import { reserves, supply } from '@aave/client-next/actions';
 import { ETHEREUM_FORK_ID } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
-import type { WalletClient } from 'viem';
+import type { Account, Chain, Transport, WalletClient } from 'viem';
 
 export function supplyToReserve(
   client: AaveClient,
   request: SupplyRequest,
-  user: WalletClient,
+  user: WalletClient<Transport, Chain, Account>,
 ): ResultAsync<TxHash, Error> {
   return supply(client, request)
     .andThen(sendWith(user))
@@ -55,7 +55,7 @@ export function findReserveToSupply(
 
 export function supplyToRandomERC20Reserve(
   client: AaveClient,
-  user: WalletClient,
+  user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
   amount = bigDecimal('100'),
 ): ResultAsync<Reserve, Error> {
@@ -69,7 +69,7 @@ export function supplyToRandomERC20Reserve(
           spoke: reserve.spoke.address,
         },
         amount: { erc20: { value: amount } },
-        sender: evmAddress(user.account!.address),
+        sender: evmAddress(user.account.address),
       },
       user,
     ).map(() => reserve),
