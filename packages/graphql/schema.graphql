@@ -773,12 +773,6 @@ input RepayPermitRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input RepayRequest {
@@ -965,12 +959,6 @@ input SetUserSupplyAsCollateralRequest {
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
 
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
-
   """If you want to enable the collateral or disable"""
   enableCollateral: Boolean!
 }
@@ -1083,12 +1071,6 @@ input SupplyPermitRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """
-  If not supplied, this will use `sender` which is the normal route - you can only use on
-  `onBehalfOf` if you're a position manager for that user
-  """
-  onBehalfOf: EvmAddress
 }
 
 input SupplyRequest {

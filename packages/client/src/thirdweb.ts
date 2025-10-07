@@ -5,7 +5,6 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
-  InsufficientBalanceError,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
