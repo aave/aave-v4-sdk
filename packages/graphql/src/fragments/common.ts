@@ -256,3 +256,31 @@ export const HealthFactorVariationFragment = graphql(
 export type HealthFactorVariation = FragmentOf<
   typeof HealthFactorVariationFragment
 >;
+
+export const HealthFactorErrorFragment = graphql(
+  `fragment HealthFactorError on HealthFactorError {
+    __typename
+    reason
+    current
+    after
+  }`,
+);
+export type HealthFactorError = FragmentOf<typeof HealthFactorErrorFragment>;
+
+export type HealthFactorResult = HealthFactorVariation | HealthFactorError;
+
+export const HealthFactorResultFragment: FragmentDocumentFor<
+  HealthFactorResult,
+  'HealthFactorResult'
+> = graphql(
+  `fragment HealthFactorResult on HealthFactorResult {
+    __typename
+    ... on HealthFactorVariation {
+      ...HealthFactorVariation
+    }
+    ... on HealthFactorError {
+      ...HealthFactorError
+    }
+  }`,
+  [HealthFactorVariationFragment, HealthFactorErrorFragment],
+);
