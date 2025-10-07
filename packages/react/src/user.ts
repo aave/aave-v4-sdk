@@ -2,8 +2,10 @@ import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
   type TimeWindowQueryOptions,
+  type UnexpectedError,
 } from '@aave/client-next';
 import type { UserPositionQueryOptions } from '@aave/client-next/actions';
+import { userHistory } from '@aave/client-next/actions';
 import {
   type PaginatedUserHistoryResult,
   type UserBalance,
@@ -30,11 +32,14 @@ import {
   type UserSupplyItem,
 } from '@aave/graphql-next';
 import type { Prettify } from '@aave/types-next';
+import { useAaveClient } from './context';
 import {
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
+  type UseAsyncTask,
+  useAsyncTask,
   useSuspendableQuery,
 } from './helpers';
 
@@ -436,6 +441,28 @@ export function useUserHistory({
     },
     suspense,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link userHistory} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook does not actively watch for updates. Use it to fetch user history on demand
+ * (e.g., in an event handler when paginating or refining filters).
+ */
+export function useUserHistoryAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<
+  UserHistoryRequest,
+  PaginatedUserHistoryResult,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask((request: UserHistoryRequest) =>
+    userHistory(client, request, options),
+  );
 }
 
 export type UseUserSummaryHistoryArgs = Prettify<
