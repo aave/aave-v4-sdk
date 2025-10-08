@@ -10,7 +10,7 @@ import {
 } from './fragments';
 import {
   FiatAmountValueVariationFragment,
-  HealthFactorVariationFragment,
+  HealthFactorResultFragment,
   PercentValueVariationFragment,
 } from './fragments/common';
 import { type FragmentDocumentFor, graphql, type RequestOf } from './graphql';
@@ -173,7 +173,7 @@ export const PreviewUserPositionFragment = graphql(
     __typename
     id
     healthFactor {
-      ...HealthFactorVariation
+      ...HealthFactorResult
     }
     positionApy {
       ...PercentValueVariation
@@ -192,7 +192,7 @@ export const PreviewUserPositionFragment = graphql(
     }
   }`,
   [
-    HealthFactorVariationFragment,
+    HealthFactorResultFragment,
     PercentValueVariationFragment,
     FiatAmountValueVariationFragment,
   ],

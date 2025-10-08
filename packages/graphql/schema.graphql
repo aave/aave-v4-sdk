@@ -282,6 +282,14 @@ type HealthFactorChange {
   change(window: TimeWindow! = LAST_DAY): PercentValue!
 }
 
+type HealthFactorError {
+  reason: String!
+  current: BigDecimal
+  after: BigDecimal
+}
+
+union HealthFactorResult = HealthFactorVariation | HealthFactorError
+
 type HealthFactorVariation {
   current: BigDecimal
   after: BigDecimal
@@ -648,7 +656,7 @@ input PreviewRequest {
 
 type PreviewUserPosition {
   id: UserPositionId!
-  healthFactor: HealthFactorVariation
+  healthFactor: HealthFactorResult!
   riskPremium: PercentValueVariation!
   positionApy: PercentValueVariation!
   netApy: PercentValueVariation!

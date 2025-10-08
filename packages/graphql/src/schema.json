@@ -829,6 +829,54 @@
       },
       {
         "kind": "OBJECT",
+        "name": "HealthFactorError",
+        "fields": [
+          {
+            "name": "reason",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "current",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "HealthFactorResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "HealthFactorVariation"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "HealthFactorError"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
         "name": "HealthFactorVariation",
         "fields": [
           {
@@ -1980,9 +2028,12 @@
           {
             "name": "healthFactor",
             "type": {
-              "kind": "OBJECT",
-              "name": "HealthFactorVariation",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "HealthFactorResult",
+                "ofType": null
+              }
             },
             "args": []
           },
