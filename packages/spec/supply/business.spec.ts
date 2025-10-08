@@ -147,11 +147,6 @@ describe('Aave V4 Supply Scenarios', () => {
       });
     });
 
-    // TODO: Refactor scenario, because in V4 only Positions Manager can supply on behalf of another address
-    describe('When the user supplies tokens on behalf of another address', () => {
-      it.todo(`Then the other address's supply positions are updated`);
-    });
-
     describe('When the user supplies tokens using a permit signature', () => {
       const user = createNewWallet();
       const amountToSupply = bigDecimal('94');
@@ -229,13 +224,6 @@ describe('Aave V4 Supply Scenarios', () => {
           amountToSupply,
           2,
         );
-      });
-    });
-
-    // TODO: Refactor scenario, because in V4 only Positions Manager can supply on behalf of another address
-    describe('When the user supplies tokens on behalf of another address using a permit signature', () => {
-      describe('Then the supply succeeds without requiring ERC20 approval', () => {
-        it.todo(`And the other user's supply positions are updated`);
       });
     });
 
