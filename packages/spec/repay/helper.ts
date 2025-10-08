@@ -14,7 +14,7 @@ export function supplyAndBorrow(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
-  amount = bigDecimal('150'),
+  amount = bigDecimal('200'),
 ): ResultAsync<Reserve, Error> {
   return findReserveToSupply(client, token).andThen((reserve) =>
     supplyToReserve(
@@ -40,7 +40,7 @@ export function supplyAndBorrow(
           },
           amount: {
             erc20: {
-              value: bigDecimal(Number(amount) / 3),
+              value: bigDecimal(Number(amount) / 4),
             },
           },
         }),

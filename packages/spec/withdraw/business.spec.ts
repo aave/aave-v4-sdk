@@ -22,7 +22,7 @@ describe('Aave V4 Withdraw Scenario', () => {
     beforeEach(async () => {
       const setup = await fundErc20Address(evmAddress(user.account!.address), {
         address: ETHEREUM_USDC_ADDRESS,
-        amount: bigDecimal('200'),
+        amount: bigDecimal('300'),
         decimals: 6,
       }).andThen(() =>
         supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
@@ -74,7 +74,7 @@ describe('Aave V4 Withdraw Scenario', () => {
         assertSingleElementArray(withdrawResult.value);
         expect(
           withdrawResult.value[0].amount.value.formatted,
-        ).toBeBigDecimalCloseTo(bigDecimal('75'), 2);
+        ).toBeBigDecimalCloseTo(bigDecimal('175'), 2);
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),

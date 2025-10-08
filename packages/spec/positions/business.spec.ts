@@ -31,7 +31,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_USDC_ADDRESS,
-          amount: bigDecimal('200'),
+          amount: bigDecimal('300'),
           decimals: 6,
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),

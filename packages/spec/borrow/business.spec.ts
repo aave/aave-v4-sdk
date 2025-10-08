@@ -1,5 +1,5 @@
 import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { borrow, userBorrows } from '@aave/client-next/actions';
+import { borrow, userBorrows, userSupplies } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
@@ -22,7 +22,7 @@ describe('Aave V4 Borrow Scenarios', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_USDC_ADDRESS,
-          amount: bigDecimal('100'),
+          amount: bigDecimal('300'),
           decimals: 6,
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
@@ -33,7 +33,19 @@ describe('Aave V4 Borrow Scenarios', () => {
       });
 
       it(`Then the user's borrow positions are updated`, async () => {
-        const amountToBorrow = bigDecimal('50');
+        const position = await userSupplies(client, {
+          query: {
+            userChains: {
+              chainIds: [reserve.chain.chainId],
+              user: evmAddress(user.account.address),
+            },
+          },
+        });
+
+        assertOk(position);
+        assertSingleElementArray(position.value);
+        const amountToBorrow =
+          position.value[0].reserve.userState!.borrowable.value.formatted;
 
         const result = await borrow(client, {
           sender: evmAddress(user.account.address),

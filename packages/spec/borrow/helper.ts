@@ -43,7 +43,7 @@ export function findReserveToSupply(
       `No reserves found for the token ${token}`,
     );
     const reserveToSupply = listReserves.find(
-      (reserve) => reserve.canSupply === true,
+      (reserve) => reserve.status.active === true,
     );
     invariant(
       reserveToSupply,
@@ -57,7 +57,7 @@ export function supplyToRandomERC20Reserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
-  amount = bigDecimal('100'),
+  amount = bigDecimal('200'),
 ): ResultAsync<Reserve, Error> {
   return findReserveToSupply(client, token).andThen((reserve) =>
     supplyToReserve(
