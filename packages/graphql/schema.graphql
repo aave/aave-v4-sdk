@@ -1425,14 +1425,16 @@ input UserBorrowsQueryRequest @oneOf {
 
 input UserBorrowsRequest {
   query: UserBorrowsQueryRequest!
-  orderBy: UserBorrowsRequestOrderBy! = {name: ASC}
+  orderBy: UserBorrowsRequestOrderBy! = {amount: DESC}
+
+  """If you wish to include zero balances in the results"""
+  includeZeroBalances: Boolean! = false
 }
 
 input UserBorrowsRequestOrderBy @oneOf {
-  name: OrderDirection
-  balance: OrderDirection
+  assetName: OrderDirection
+  amount: OrderDirection
   apy: OrderDirection
-  paid: OrderDirection
 }
 
 input UserChains {
@@ -1588,14 +1590,16 @@ input UserSuppliesQueryRequest @oneOf {
 
 input UserSuppliesRequest {
   query: UserSuppliesQueryRequest!
-  orderBy: UserSuppliesRequestOrderBy! = {name: ASC}
+  orderBy: UserSuppliesRequestOrderBy! = {amount: DESC}
+
+  """If you wish to include zero balances in the results"""
+  includeZeroBalances: Boolean! = false
 }
 
 input UserSuppliesRequestOrderBy @oneOf {
-  name: OrderDirection
-  balance: OrderDirection
+  assetName: OrderDirection
+  amount: OrderDirection
   apy: OrderDirection
-  earned: OrderDirection
 }
 
 type UserSupplyItem {
