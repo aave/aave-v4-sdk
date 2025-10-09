@@ -19,7 +19,7 @@ export function supplyWETHAndBorrowMax(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
-): ResultAsync<Reserve, Error> {
+): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
   return findReserveToSupply(client, user, ETHEREUM_WETH_ADDRESS).andThen(
     (reserveToSupply) =>
       supplyToReserve(
@@ -52,7 +52,10 @@ export function supplyWETHAndBorrowMax(
           })
             .andThen(sendWith(user))
             .andThen(client.waitForTransaction)
-            .map(() => reserveToBorrow),
+            .map(() => ({
+              borrowReserve: reserveToBorrow,
+              supplyReserve: reserveToSupply,
+            })),
         ),
   );
 }
