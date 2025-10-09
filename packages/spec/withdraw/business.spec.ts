@@ -18,6 +18,7 @@ const user = await createNewWallet();
 describe('Aave V4 Withdraw Scenario', () => {
   describe('Given a user with a supply position', () => {
     let reserve: Reserve;
+    const amountToSupply = 200;
 
     beforeEach(async () => {
       const setup = await fundErc20Address(evmAddress(user.account!.address), {
@@ -25,7 +26,10 @@ describe('Aave V4 Withdraw Scenario', () => {
         amount: bigDecimal('300'),
         decimals: 6,
       }).andThen(() =>
-        supplyToRandomERC20Reserve(client, user, ETHEREUM_USDC_ADDRESS),
+        supplyToRandomERC20Reserve(client, user, {
+          token: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal(amountToSupply),
+        }),
       );
 
       assertOk(setup);
@@ -38,7 +42,7 @@ describe('Aave V4 Withdraw Scenario', () => {
       }) => {
         annotate(`account address: ${evmAddress(user.account!.address)}`);
         annotate(`reserve id: ${reserve.id}`);
-        const amountToWithdraw = bigDecimal('25');
+        const amountToWithdraw = 50;
         const balanceBefore = await getBalance(
           evmAddress(user.account.address),
           ETHEREUM_USDC_ADDRESS,
@@ -51,7 +55,7 @@ describe('Aave V4 Withdraw Scenario', () => {
             chainId: reserve.chain.chainId,
           },
           amount: {
-            erc20: { exact: amountToWithdraw },
+            erc20: { exact: bigDecimal(amountToWithdraw) },
           },
           sender: evmAddress(user.account.address),
         })
@@ -74,13 +78,13 @@ describe('Aave V4 Withdraw Scenario', () => {
         assertSingleElementArray(withdrawResult.value);
         expect(
           withdrawResult.value[0].amount.value.formatted,
-        ).toBeBigDecimalCloseTo(bigDecimal('175'), 2);
+        ).toBeBigDecimalCloseTo(amountToSupply - amountToWithdraw, 2);
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),
           ETHEREUM_USDC_ADDRESS,
         );
-        expect(balanceBefore + Number(amountToWithdraw)).toEqual(balanceAfter);
+        expect(balanceBefore + amountToWithdraw).toEqual(balanceAfter);
       });
     });
 
