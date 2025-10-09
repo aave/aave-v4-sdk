@@ -40,7 +40,7 @@ import type {
 } from './enums';
 import type { introspection } from './graphql-env';
 
-export type { FragmentOf } from 'gql.tada';
+export type { FragmentOf, ResultOf, VariablesOf } from 'gql.tada';
 
 export const graphql = initGraphQLTada<{
   disableMasking: true;

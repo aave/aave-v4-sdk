@@ -29,6 +29,7 @@ import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
   type TimeWindowQueryOptions,
 } from '../options';
 
@@ -226,9 +227,13 @@ export function userBalances(
 export function userHistory(
   client: AaveClient,
   request: UserHistoryRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
-  return client.query(UserHistoryQuery, { request, ...options });
+  return client.query(
+    UserHistoryQuery,
+    { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
+    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+  );
 }
 
 /**
