@@ -41,7 +41,8 @@ describe('Aave V4 Borrow Scenarios', () => {
         assertOk(reserveToBorrow);
         const amountToBorrow =
           reserveToBorrow.value.userState!.borrowable.value.formatted;
-
+        // Amount to borrow should be greater than 0 as I supplied to a reserve in the same spoke
+        expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
         const result = await borrow(client, {
           sender: evmAddress(user.account.address),
           reserve: {
