@@ -6,47 +6,56 @@ import {
   type ResultAsync,
 } from '@aave/client-next';
 import { borrow } from '@aave/client-next/actions';
+import { ETHEREUM_WETH_ADDRESS } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
-import type { WalletClient } from 'viem';
-import { findReserveToSupply, supplyToReserve } from '../borrow/helper';
+import type { Account, Chain, Transport, WalletClient } from 'viem';
+import {
+  findReserveToBorrow,
+  findReserveToSupply,
+  supplyToReserve,
+} from '../borrow/helper';
 
-export function supplyAndBorrow(
+export function supplyWETHAndBorrowMax(
   client: AaveClient,
-  user: WalletClient,
+  user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
-  amount = bigDecimal('150'),
-): ResultAsync<Reserve, Error> {
-  return findReserveToSupply(client, token).andThen((reserve) =>
-    supplyToReserve(
-      client,
-      {
-        reserve: {
-          reserveId: reserve.id,
-          chainId: reserve.chain.chainId,
-          spoke: reserve.spoke.address,
-        },
-        amount: { erc20: { value: amount } },
-        sender: evmAddress(user.account!.address),
-      },
-      user,
-    )
-      .andThen(() =>
-        borrow(client, {
-          sender: evmAddress(user.account!.address),
+): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
+  return findReserveToSupply(client, user, ETHEREUM_WETH_ADDRESS).andThen(
+    (reserveToSupply) =>
+      supplyToReserve(
+        client,
+        {
           reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
+            reserveId: reserveToSupply.id,
+            chainId: reserveToSupply.chain.chainId,
+            spoke: reserveToSupply.spoke.address,
           },
-          amount: {
-            erc20: {
-              value: bigDecimal(Number(amount) / 3),
-            },
-          },
-        }),
+          amount: { erc20: { value: bigDecimal(0.1) } },
+          sender: evmAddress(user.account.address),
+        },
+        user,
       )
-      .andThen(sendWith(user))
-      .andThen(client.waitForTransaction)
-      .map(() => reserve),
+        .andThen(() => findReserveToBorrow(client, user, token))
+        .andThen((reserveToBorrow) =>
+          borrow(client, {
+            sender: evmAddress(user.account.address),
+            reserve: {
+              spoke: reserveToBorrow.spoke.address,
+              reserveId: reserveToBorrow.id,
+              chainId: reserveToBorrow.chain.chainId,
+            },
+            amount: {
+              erc20: {
+                value: reserveToBorrow.userState!.borrowable.value.formatted,
+              },
+            },
+          })
+            .andThen(sendWith(user))
+            .andThen(client.waitForTransaction)
+            .map(() => ({
+              borrowReserve: reserveToBorrow,
+              supplyReserve: reserveToSupply,
+            })),
+        ),
   );
 }

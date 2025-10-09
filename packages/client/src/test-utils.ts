@@ -10,6 +10,7 @@ import {
   ResultAsync,
 } from '@aave/types-next';
 import {
+  type Account,
   type Chain,
   createPublicClient,
   createWalletClient,
@@ -17,6 +18,7 @@ import {
   http,
   parseEther,
   parseUnits,
+  type Transport,
   type WalletClient,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
@@ -64,9 +66,11 @@ export const ETHEREUM_SPOKE_GOB_ADDRESS = evmAddress(
 
 export const ETHEREUM_MARKET_ETH_CORRELATED_EMODE_CATEGORY = 1;
 
-const ETHEREUM_FORK_RPC_URL = import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC;
+export const ETHEREUM_FORK_RPC_URL = import.meta.env
+  .ETHEREUM_TENDERLY_PUBLIC_RPC;
 
-const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env.ETHEREUM_TENDERLY_ADMIN_RPC;
+export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
+  .ETHEREUM_TENDERLY_ADMIN_RPC;
 
 export const ethereumForkChain: Chain = defineChain({
   id: ETHEREUM_FORK_ID,
@@ -93,13 +97,17 @@ export const client = AaveClient.create({
   },
 });
 
-export function createNewWallet(privateKey?: `0x${string}`): WalletClient {
-  const privateKeyToUse = privateKey ?? generatePrivateKey();
+export async function createNewWallet(
+  privateKey: `0x${string}` = generatePrivateKey(),
+): Promise<WalletClient<Transport, Chain, Account>> {
   const wallet = createWalletClient({
-    account: privateKeyToAccount(privateKeyToUse),
+    account: privateKeyToAccount(privateKey),
     chain: ethereumForkChain,
     transport: http(),
   });
+
+  await fundNativeAddress(evmAddress(wallet.account.address));
+
   return wallet;
 }
 
