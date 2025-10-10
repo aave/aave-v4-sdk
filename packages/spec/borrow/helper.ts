@@ -30,14 +30,14 @@ export function supplyToReserve(
 export function findReserveToBorrow(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-  token: EvmAddress,
+  params: { token: EvmAddress; spoke?: EvmAddress },
 ): ResultAsync<Reserve, Error> {
   return reserves(client, {
     query: {
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
-        token: token,
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        token: params.token,
+        spoke: params.spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -45,14 +45,14 @@ export function findReserveToBorrow(
   }).map((listReserves) => {
     invariant(
       listReserves.length > 0,
-      `No reserves found for the token ${token}`,
+      `No reserves found for the token ${params.token}`,
     );
     const reserveToBorrow = listReserves.find(
       (reserve) => reserve.canBorrow === true,
     );
     invariant(
       reserveToBorrow,
-      `No reserve found to borrow from for the token ${token}`,
+      `No reserve found to borrow from for the token ${params.token}`,
     );
     return reserveToBorrow;
   });
@@ -61,14 +61,14 @@ export function findReserveToBorrow(
 export function findReserveToSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-  token: EvmAddress,
+  params: { token: EvmAddress; spoke?: EvmAddress },
 ): ResultAsync<Reserve, Error> {
   return reserves(client, {
     query: {
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
-        token: token,
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        token: params.token,
+        spoke: params.spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -76,14 +76,14 @@ export function findReserveToSupply(
   }).map((listReserves) => {
     invariant(
       listReserves.length > 0,
-      `No reserves found for the token ${token}`,
+      `No reserves found for the token ${params.token}`,
     );
     const reserveToSupply = listReserves.find(
       (reserve) => reserve.canSupply && reserve.canUseAsCollateral,
     );
     invariant(
       reserveToSupply,
-      `No reserve found to supply to for the token ${token}`,
+      `No reserve found to supply to for the token ${params.token}`,
     );
     return reserveToSupply;
   });
@@ -92,13 +92,14 @@ export function findReserveToSupply(
 export function findReserveNativeSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
+  spoke?: EvmAddress,
 ): ResultAsync<Reserve, Error> {
   return reserves(client, {
     query: {
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: ETHEREUM_WETH_ADDRESS,
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -126,8 +127,9 @@ export function supplyToNativeReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   amount: BigDecimal,
+  spoke?: EvmAddress,
 ): ResultAsync<Reserve, Error> {
-  return findReserveNativeSupply(client, user).andThen((reserve) =>
+  return findReserveNativeSupply(client, user, spoke).andThen((reserve) =>
     supplyToReserve(
       client,
       {
@@ -150,22 +152,27 @@ export function supplyToNativeReserve(
 export function supplyToRandomERC20Reserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-  { token, amount }: { token: EvmAddress; amount: BigDecimal },
+  {
+    token,
+    amount,
+    spoke,
+  }: { token: EvmAddress; amount: BigDecimal; spoke?: EvmAddress },
 ): ResultAsync<Reserve, Error> {
-  return findReserveToSupply(client, user, token).andThen((reserve) =>
-    supplyToReserve(
-      client,
-      {
-        reserve: {
-          reserveId: reserve.id,
-          chainId: reserve.chain.chainId,
-          spoke: reserve.spoke.address,
+  return findReserveToSupply(client, user, { token, spoke }).andThen(
+    (reserve) =>
+      supplyToReserve(
+        client,
+        {
+          reserve: {
+            reserveId: reserve.id,
+            chainId: reserve.chain.chainId,
+            spoke: reserve.spoke.address,
+          },
+          amount: { erc20: { value: amount } },
+          sender: evmAddress(user.account.address),
+          enableCollateral: true,
         },
-        amount: { erc20: { value: amount } },
-        sender: evmAddress(user.account.address),
-        enableCollateral: true,
-      },
-      user,
-    ).map(() => reserve),
+        user,
+      ).map(() => reserve),
   );
 }

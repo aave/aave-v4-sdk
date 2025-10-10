@@ -38,11 +38,9 @@ describe('Supplying Assets on Aave V4', () => {
 
       it("Then the user's supply position is updated and the tokens are enabled as collateral by default", async () => {
         const amountToSupply = bigDecimal('50');
-        const reserveToSupply = await findReserveToSupply(
-          client,
-          user,
-          ETHEREUM_USDC_ADDRESS,
-        );
+        const reserveToSupply = await findReserveToSupply(client, user, {
+          token: ETHEREUM_USDC_ADDRESS,
+        });
         assertOk(reserveToSupply);
 
         const result = await supply(client, {
@@ -100,11 +98,9 @@ describe('Supplying Assets on Aave V4', () => {
       });
 
       it("Then the user's supply position is updated and the tokens are not enabled as collateral", async () => {
-        const reserve = await findReserveToSupply(
-          client,
-          user,
-          ETHEREUM_WETH_ADDRESS,
-        );
+        const reserve = await findReserveToSupply(client, user, {
+          token: ETHEREUM_WETH_ADDRESS,
+        });
         assertOk(reserve);
         const amountToSupply = bigDecimal('0.1');
 
@@ -168,11 +164,9 @@ describe('Supplying Assets on Aave V4', () => {
         annotate,
       }) => {
         const amountToSupply = bigDecimal('50');
-        const reserve = await findReserveToSupply(
-          client,
-          user,
-          ETHEREUM_GHO_ADDRESS,
-        );
+        const reserve = await findReserveToSupply(client, user, {
+          token: ETHEREUM_GHO_ADDRESS,
+        });
         assertOk(reserve);
 
         const signature = await permitTypedData(client, {

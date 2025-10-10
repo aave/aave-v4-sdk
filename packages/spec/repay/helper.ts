@@ -20,43 +20,44 @@ export function supplyWETHAndBorrowMax(
   user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
-  return findReserveToSupply(client, user, ETHEREUM_WETH_ADDRESS).andThen(
-    (reserveToSupply) =>
-      supplyToReserve(
-        client,
-        {
-          reserve: {
-            reserveId: reserveToSupply.id,
-            chainId: reserveToSupply.chain.chainId,
-            spoke: reserveToSupply.spoke.address,
-          },
-          amount: { erc20: { value: bigDecimal(0.1) } },
-          sender: evmAddress(user.account.address),
-          enableCollateral: true,
+  return findReserveToSupply(client, user, {
+    token: ETHEREUM_WETH_ADDRESS,
+  }).andThen((reserveToSupply) =>
+    supplyToReserve(
+      client,
+      {
+        reserve: {
+          reserveId: reserveToSupply.id,
+          chainId: reserveToSupply.chain.chainId,
+          spoke: reserveToSupply.spoke.address,
         },
-        user,
-      )
-        .andThen(() => findReserveToBorrow(client, user, token))
-        .andThen((reserveToBorrow) =>
-          borrow(client, {
-            sender: evmAddress(user.account.address),
-            reserve: {
-              spoke: reserveToBorrow.spoke.address,
-              reserveId: reserveToBorrow.id,
-              chainId: reserveToBorrow.chain.chainId,
+        amount: { erc20: { value: bigDecimal(0.1) } },
+        sender: evmAddress(user.account.address),
+        enableCollateral: true,
+      },
+      user,
+    )
+      .andThen(() => findReserveToBorrow(client, user, { token }))
+      .andThen((reserveToBorrow) =>
+        borrow(client, {
+          sender: evmAddress(user.account.address),
+          reserve: {
+            spoke: reserveToBorrow.spoke.address,
+            reserveId: reserveToBorrow.id,
+            chainId: reserveToBorrow.chain.chainId,
+          },
+          amount: {
+            erc20: {
+              value: reserveToBorrow.userState!.borrowable.value.formatted,
             },
-            amount: {
-              erc20: {
-                value: reserveToBorrow.userState!.borrowable.value.formatted,
-              },
-            },
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction)
-            .map(() => ({
-              borrowReserve: reserveToBorrow,
-              supplyReserve: reserveToSupply,
-            })),
-        ),
+          },
+        })
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction)
+          .map(() => ({
+            borrowReserve: reserveToBorrow,
+            supplyReserve: reserveToSupply,
+          })),
+      ),
   );
 }
