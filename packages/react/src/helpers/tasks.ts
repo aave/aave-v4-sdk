@@ -1,5 +1,5 @@
 import { invariant, type ResultAsync } from '@aave/types-next';
-import { type DependencyList, useCallback, useState } from 'react';
+import { type DependencyList, useCallback, useRef, useState } from 'react';
 
 /**
  * An async task is a function that can be executed multiple times and that can be in a pending state.
@@ -137,16 +137,18 @@ export function useAsyncTask<
   deps: DependencyList,
 ): UseAsyncTask<TInput, TValue, TError> {
   const [state, setState] = useState(AsyncTaskState.Idle<TValue, TError>());
+  const loadingRef = useRef(false);
   // biome-ignore lint/correctness/useExhaustiveDependencies: useAsyncTask is a low-level hook
   const handle = useCallback(handler, deps);
 
   const execute = useCallback(
     (input: TInput) => {
       invariant(
-        !state.loading,
+        !loadingRef.current,
         'Cannot execute a task while another is in progress.',
       );
 
+      loadingRef.current = true;
       setState(({ data }) => {
         return {
           called: true,
@@ -158,14 +160,18 @@ export function useAsyncTask<
 
       const result = handle(input);
 
-      result.match(
-        (value) => setState(AsyncTaskState.Success(value)),
-        (error) => setState(AsyncTaskState.Failed(error)),
-      );
+      result
+        .andTee(() => {
+          loadingRef.current = false;
+        })
+        .match(
+          (value) => setState(AsyncTaskState.Success(value)),
+          (error) => setState(AsyncTaskState.Failed(error)),
+        );
 
       return result;
     },
-    [handle, state],
+    [handle],
   );
 
   return [execute, state];
