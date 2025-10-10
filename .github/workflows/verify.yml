@@ -48,6 +48,10 @@ jobs:
       - name: Setup Repository
         uses: ./.github/actions/setup
 
+      - name: Lint
+        shell: bash
+        run: pnpm lint
+
       - name: GraphQL Check
         shell: bash
         run: pnpm check:graphql

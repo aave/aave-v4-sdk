@@ -460,8 +460,9 @@ export function useUserHistoryAction(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: UserHistoryRequest) =>
-    userHistory(client, request, options),
+  return useAsyncTask(
+    (request: UserHistoryRequest) => userHistory(client, request, options),
+    [client, options],
   );
 }
 

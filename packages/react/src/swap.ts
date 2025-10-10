@@ -52,6 +52,7 @@ import {
   type ResultAsync,
   ResultAwareError,
 } from '@aave/types-next';
+import { useCallback } from 'react';
 import { useAaveClient } from './context';
 import {
   type CancelOperation,
@@ -157,8 +158,9 @@ export function useSwapQuoteAction(
 ): UseAsyncTask<SwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
-  return useAsyncTask((request: SwapQuoteRequest) =>
-    swapQuote(client, request, options),
+  return useAsyncTask(
+    (request: SwapQuoteRequest) => swapQuote(client, request, options),
+    [client, options],
   );
 }
 
@@ -346,38 +348,41 @@ export function useSwapTokens(
 > {
   const client = useAaveClient();
 
-  function executeSwap(
-    plan: SwapExecutionPlan,
-  ): ResultAsync<
-    SwapReceipt,
-    | SendTransactionError
-    | PendingTransactionError
-    | ValidationError<InsufficientBalanceError>
-  > {
-    switch (plan.__typename) {
-      case 'SwapTransactionRequest':
-        return handler(plan, { cancel })
-          .map(PendingTransaction.ensure)
-          .andThen((pendingTransaction) => pendingTransaction.wait())
-          .andThen(() => {
-            return okAsync(plan.orderReceipt);
-          });
-      case 'SwapApprovalRequired':
-        return handler(plan, { cancel })
-          .map(PendingTransaction.ensure)
-          .andThen((pendingTransaction) => pendingTransaction.wait())
-          .andThen(() => handler(plan.originalTransaction, { cancel }))
-          .map(PendingTransaction.ensure)
-          .andThen((pendingTransaction) => pendingTransaction.wait())
-          .andThen(() => {
-            return okAsync(plan.originalTransaction.orderReceipt);
-          });
-      case 'InsufficientBalanceError':
-        return errAsync(ValidationError.fromGqlNode(plan));
-      case 'SwapReceipt':
-        return okAsync(plan);
-    }
-  }
+  const executeSwap = useCallback(
+    (
+      plan: SwapExecutionPlan,
+    ): ResultAsync<
+      SwapReceipt,
+      | SendTransactionError
+      | PendingTransactionError
+      | ValidationError<InsufficientBalanceError>
+    > => {
+      switch (plan.__typename) {
+        case 'SwapTransactionRequest':
+          return handler(plan, { cancel })
+            .map(PendingTransaction.ensure)
+            .andThen((pendingTransaction) => pendingTransaction.wait())
+            .andThen(() => {
+              return okAsync(plan.orderReceipt);
+            });
+        case 'SwapApprovalRequired':
+          return handler(plan, { cancel })
+            .map(PendingTransaction.ensure)
+            .andThen((pendingTransaction) => pendingTransaction.wait())
+            .andThen(() => handler(plan.originalTransaction, { cancel }))
+            .map(PendingTransaction.ensure)
+            .andThen((pendingTransaction) => pendingTransaction.wait())
+            .andThen(() => {
+              return okAsync(plan.originalTransaction.orderReceipt);
+            });
+        case 'InsufficientBalanceError':
+          return errAsync(ValidationError.fromGqlNode(plan));
+        case 'SwapReceipt':
+          return okAsync(plan);
+      }
+    },
+    [handler],
+  );
 
   return useAsyncTask(
     ({
@@ -432,6 +437,7 @@ export function useSwapTokens(
             return errAsync(ValidationError.fromGqlNode(preparePlan));
         }
       }),
+    [client, handler, executeSwap],
   );
 }
 
@@ -489,53 +495,55 @@ export function useCancelSwap(
 ): UseAsyncTask<PrepareSwapCancelRequest, SwapCancelled, CancelSwapError> {
   const client = useAaveClient();
 
-  return useAsyncTask((request) =>
-    swapStatus(client, { id: request.id }).andThen((status) => {
-      switch (status.__typename) {
-        case 'SwapOpen':
-        case 'SwapPendingSignature':
-          return prepareSwapCancel(client, request)
-            .andThen((result) => handler(result.data))
-            .andThen((signedTypedData) => {
-              invariant(
-                isERC20PermitSignature(signedTypedData),
-                'Invalid signature',
-              );
+  return useAsyncTask(
+    (request) =>
+      swapStatus(client, { id: request.id }).andThen((status) => {
+        switch (status.__typename) {
+          case 'SwapOpen':
+          case 'SwapPendingSignature':
+            return prepareSwapCancel(client, request)
+              .andThen((result) => handler(result.data))
+              .andThen((signedTypedData) => {
+                invariant(
+                  isERC20PermitSignature(signedTypedData),
+                  'Invalid signature',
+                );
 
-              return cancelSwap(client, {
-                intent: { id: request.id, signature: signedTypedData.value },
+                return cancelSwap(client, {
+                  intent: { id: request.id, signature: signedTypedData.value },
+                });
+              })
+              .andThen((plan) => {
+                if (plan.__typename === 'SwapCancelled') {
+                  return okAsync(plan);
+                }
+
+                return (
+                  handler(plan)
+                    .map(PendingTransaction.ensure)
+                    .andThen((pendingTransaction) => pendingTransaction.wait())
+                    // TODO: verify that if fails cause too early, we need to waitForSwapOutcome(client)({ id: request.id })
+                    .andThen(() => swapStatus(client, { id: request.id }))
+                    .andThen((status) => {
+                      if (status.__typename === 'SwapCancelled') {
+                        return okAsync(status);
+                      }
+                      return errAsync(
+                        new CannotCancelSwapError('Failed to cancel swap'),
+                      );
+                    })
+                );
               });
-            })
-            .andThen((plan) => {
-              if (plan.__typename === 'SwapCancelled') {
-                return okAsync(plan);
-              }
 
-              return (
-                handler(plan)
-                  .map(PendingTransaction.ensure)
-                  .andThen((pendingTransaction) => pendingTransaction.wait())
-                  // TODO: verify that if fails cause too early, we need to waitForSwapOutcome(client)({ id: request.id })
-                  .andThen(() => swapStatus(client, { id: request.id }))
-                  .andThen((status) => {
-                    if (status.__typename === 'SwapCancelled') {
-                      return okAsync(status);
-                    }
-                    return errAsync(
-                      new CannotCancelSwapError('Failed to cancel swap'),
-                    );
-                  })
-              );
-            });
+          case 'SwapCancelled':
+            return okAsync(status);
 
-        case 'SwapCancelled':
-          return okAsync(status);
-
-        default:
-          return errAsync(
-            new CannotCancelSwapError('Swap cannot longer be cancelled'),
-          );
-      }
-    }),
+          default:
+            return errAsync(
+              new CannotCancelSwapError('Swap cannot longer be cancelled'),
+            );
+        }
+      }),
+    [client, handler],
   );
 }

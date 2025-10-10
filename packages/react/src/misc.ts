@@ -94,8 +94,9 @@ export function useExchangeRateAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: ExchangeRateRequest) =>
-    exchangeRate(client, request),
+  return useAsyncTask(
+    (request: ExchangeRateRequest) => exchangeRate(client, request),
+    [client],
   );
 }
 

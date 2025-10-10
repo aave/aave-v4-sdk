@@ -44,60 +44,63 @@ export function useSendTransaction(
   const account = useActiveAccount();
   const switchChain = useSwitchActiveWalletChain();
 
-  return useAsyncTask((request: TransactionRequest) => {
-    invariant(
-      account,
-      'No Account found. Ensure you have connected your wallet.',
-    );
-
-    const chain = defineChain({
-      id: request.chainId,
-      rpc: `https://${request.chainId}.rpc.thirdweb.com/${thirdwebClient.clientId}`,
-    });
-
-    return ResultAsync.fromPromise(switchChain(chain), (err) =>
-      UnexpectedError.from(err),
-    )
-      .andThen(() =>
-        ResultAsync.fromPromise(
-          sendTransaction({
-            account,
-            transaction: prepareTransaction({
-              to: request.to,
-              data: request.data,
-              value: BigInt(request.value),
-              chain,
-              client: thirdwebClient,
-            }),
-          }),
-          (err) => SigningError.from(err),
-        ),
-      )
-      .map(
-        ({ transactionHash }) =>
-          new PendingTransaction(() =>
-            ResultAsync.fromPromise(
-              waitForReceipt({
-                client: thirdwebClient,
-                chain,
-                transactionHash,
-              }),
-              (err) => UnexpectedError.from(err),
-            ).andThen(({ status, transactionHash }) => {
-              if (status === 'reverted') {
-                return TransactionError.new({
-                  txHash: txHash(transactionHash),
-                  request,
-                }).asResultAsync();
-              }
-              return okAsync({
-                operations: request.operations,
-                txHash: txHash(transactionHash),
-              });
-            }),
-          ),
+  return useAsyncTask(
+    (request: TransactionRequest) => {
+      invariant(
+        account,
+        'No Account found. Ensure you have connected your wallet.',
       );
-  });
+
+      const chain = defineChain({
+        id: request.chainId,
+        rpc: `https://${request.chainId}.rpc.thirdweb.com/${thirdwebClient.clientId}`,
+      });
+
+      return ResultAsync.fromPromise(switchChain(chain), (err) =>
+        UnexpectedError.from(err),
+      )
+        .andThen(() =>
+          ResultAsync.fromPromise(
+            sendTransaction({
+              account,
+              transaction: prepareTransaction({
+                to: request.to,
+                data: request.data,
+                value: BigInt(request.value),
+                chain,
+                client: thirdwebClient,
+              }),
+            }),
+            (err) => SigningError.from(err),
+          ),
+        )
+        .map(
+          ({ transactionHash }) =>
+            new PendingTransaction(() =>
+              ResultAsync.fromPromise(
+                waitForReceipt({
+                  client: thirdwebClient,
+                  chain,
+                  transactionHash,
+                }),
+                (err) => UnexpectedError.from(err),
+              ).andThen(({ status, transactionHash }) => {
+                if (status === 'reverted') {
+                  return TransactionError.new({
+                    txHash: txHash(transactionHash),
+                    request,
+                  }).asResultAsync();
+                }
+                return okAsync({
+                  operations: request.operations,
+                  txHash: txHash(transactionHash),
+                });
+              }),
+            ),
+        );
+    },
+    [account, switchChain, thirdwebClient],
+  );
 }
 
 export type SignERC20PermitError = SigningError | UnexpectedError;
@@ -141,30 +144,33 @@ export function useERC20Permit(): UseAsyncTask<
   const [permitTypedData] = usePermitTypedDataAction();
   const account = useActiveAccount();
 
-  return useAsyncTask((request: PermitRequest) => {
-    invariant(
-      account,
-      'No Account found. Ensure you have connected your wallet.',
-    );
+  return useAsyncTask(
+    (request: PermitRequest) => {
+      invariant(
+        account,
+        'No Account found. Ensure you have connected your wallet.',
+      );
 
-    return permitTypedData(request).andThen((result) =>
-      ResultAsync.fromPromise(
-        account.signTypedData({
-          // silence the rest of the type inference
-          types: result.types as Record<string, unknown>,
-          domain: result.domain,
-          primaryType: result.primaryType,
-          message: result.message,
+      return permitTypedData(request).andThen((result) =>
+        ResultAsync.fromPromise(
+          account.signTypedData({
+            // silence the rest of the type inference
+            types: result.types as Record<string, unknown>,
+            domain: result.domain,
+            primaryType: result.primaryType,
+            message: result.message,
+          }),
+          (err) => SigningError.from(err),
+        ).map((signature) => {
+          return {
+            deadline: result.message.deadline,
+            value: signatureFrom(signature),
+          };
         }),
-        (err) => SigningError.from(err),
-      ).map((signature) => {
-        return {
-          deadline: result.message.deadline,
-          value: signatureFrom(signature),
-        };
-      }),
-    );
-  });
+      );
+    },
+    [account, permitTypedData],
+  );
 }
 
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
@@ -214,5 +220,6 @@ export function useSignSwapTypedDataWith(): UseAsyncTask<
         value: signatureFrom(signature),
       }));
     },
+    [account],
   );
 }

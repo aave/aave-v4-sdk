@@ -40,14 +40,17 @@ import { usePermitTypedDataAction } from './permits';
  * @param signer - The ethers Signer to use for sending transactions.
  */
 export function useSendTransaction(signer: Signer): UseSendTransactionResult {
-  return useAsyncTask((request: TransactionRequest) => {
-    return sendTransaction(signer, request).map(
-      (response) =>
-        new PendingTransaction(() =>
-          waitForTransactionResult(request, response),
-        ),
-    );
-  });
+  return useAsyncTask(
+    (request: TransactionRequest) => {
+      return sendTransaction(signer, request).map(
+        (response) =>
+          new PendingTransaction(() =>
+            waitForTransactionResult(request, response),
+          ),
+      );
+    },
+    [signer],
+  );
 }
 
 export type SignERC20PermitError = SigningError | UnexpectedError;
@@ -94,9 +97,12 @@ export function useERC20Permit(
 ): UseAsyncTask<PermitRequest, ERC20PermitSignature, SignERC20PermitError> {
   const [permitTypedData] = usePermitTypedDataAction();
 
-  return useAsyncTask((request: PermitRequest) => {
-    return permitTypedData(request).andThen(signERC20PermitWith(signer));
-  });
+  return useAsyncTask(
+    (request: PermitRequest) => {
+      return permitTypedData(request).andThen(signERC20PermitWith(signer));
+    },
+    [permitTypedData, signer],
+  );
 }
 
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
@@ -139,5 +145,6 @@ export function useSignSwapTypedDataWith(
 
       return signSwapTypedDataWith(signer)(typedData);
     },
+    [signer],
   );
 }
