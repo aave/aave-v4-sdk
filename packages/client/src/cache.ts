@@ -77,7 +77,7 @@ export const exchange = cacheExchange({
 
         const { txHash, chainId } = args.request.filter.txHash;
 
-        // Collect all cached pages for Query.userHistory
+        // Collect all cached activities matching txHash
         const matches = cache
           .inspectFields('Query')
           .filter((f) => f.fieldName === 'userHistory')
@@ -99,7 +99,7 @@ export const exchange = cacheExchange({
             const itemTxHash = cache.resolve(ref, 'txHash') as TxHash;
             if (itemTxHash !== txHash) return false;
 
-            // Verify chainId if spoke.chain.chainId exists
+            // Verify chainId via spoke.chain.chainId if present
             const spokeRef = cache.resolve(ref, 'spoke') as string | null;
             if (spokeRef) {
               const chainRef = cache.resolve(spokeRef, 'chain') as
@@ -117,7 +117,7 @@ export const exchange = cacheExchange({
           .sort((a, b) => {
             const ta = cache.resolve(a, 'id') as DateTime;
             const tb = cache.resolve(b, 'id') as DateTime;
-            return tb.localeCompare(ta); // desc
+            return tb.localeCompare(ta);
           });
 
         if (matches.length === 0) return undefined;

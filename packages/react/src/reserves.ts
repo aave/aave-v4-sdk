@@ -223,8 +223,9 @@ export function useReservesAction(
 ): UseAsyncTask<ReservesRequest, Reserve[], UnexpectedError> {
   const client = useAaveClient();
 
-  return useAsyncTask((request: ReservesRequest) =>
-    reserves(client, request, options),
+  return useAsyncTask(
+    (request: ReservesRequest) => reserves(client, request, options),
+    [client, options],
   );
 }
 

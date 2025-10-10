@@ -37,19 +37,22 @@ import { usePermitTypedDataAction } from './permits';
 export function useSendTransaction(
   walletClient: WalletClient | undefined,
 ): UseSendTransactionResult {
-  return useAsyncTask((request: TransactionRequest) => {
-    invariant(
-      walletClient,
-      'Expected a WalletClient to handle the operation result.',
-    );
+  return useAsyncTask(
+    (request: TransactionRequest) => {
+      invariant(
+        walletClient,
+        'Expected a WalletClient to handle the operation result.',
+      );
 
-    return sendTransaction(walletClient, request).map(
-      (hash) =>
-        new PendingTransaction(() =>
-          waitForTransactionResult(walletClient, request, hash),
-        ),
-    );
-  });
+      return sendTransaction(walletClient, request).map(
+        (hash) =>
+          new PendingTransaction(() =>
+            waitForTransactionResult(walletClient, request, hash),
+          ),
+      );
+    },
+    [walletClient],
+  );
 }
 
 export type SignERC20PermitError = SigningError | UnexpectedError;
@@ -90,11 +93,16 @@ export function useERC20Permit(
 ): UseAsyncTask<PermitRequest, ERC20PermitSignature, SignERC20PermitError> {
   const [permitTypedData] = usePermitTypedDataAction();
 
-  return useAsyncTask((request: PermitRequest) => {
-    invariant(walletClient, 'Expected a WalletClient to sign ERC20 permits');
+  return useAsyncTask(
+    (request: PermitRequest) => {
+      invariant(walletClient, 'Expected a WalletClient to sign ERC20 permits');
 
-    return permitTypedData(request).andThen(signERC20PermitWith(walletClient));
-  });
+      return permitTypedData(request).andThen(
+        signERC20PermitWith(walletClient),
+      );
+    },
+    [permitTypedData, walletClient],
+  );
 }
 
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
@@ -125,9 +133,15 @@ export function useSignSwapTypedDataWith(
   ERC20PermitSignature,
   SignSwapTypedDataError
 > {
-  return useAsyncTask((typedData: SwapByIntentTypedData) => {
-    invariant(walletClient, 'Expected a WalletClient to sign swap typed data');
+  return useAsyncTask(
+    (typedData: SwapByIntentTypedData) => {
+      invariant(
+        walletClient,
+        'Expected a WalletClient to sign swap typed data',
+      );
 
-    return signSwapTypedDataWith(walletClient)(typedData);
-  });
+      return signSwapTypedDataWith(walletClient)(typedData);
+    },
+    [walletClient],
+  );
 }

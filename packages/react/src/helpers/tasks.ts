@@ -1,5 +1,5 @@
 import { invariant, type ResultAsync } from '@aave/types-next';
-import { useCallback, useState } from 'react';
+import { type DependencyList, useCallback, useState } from 'react';
 
 /**
  * An async task is a function that can be executed multiple times and that can be in a pending state.
@@ -132,8 +132,13 @@ export function useAsyncTask<
   TValue,
   TError,
   TResult extends ResultAsync<TValue, TError>,
->(handler: AsyncTask<TInput, TResult>): UseAsyncTask<TInput, TValue, TError> {
+>(
+  handler: AsyncTask<TInput, TResult>,
+  deps: DependencyList,
+): UseAsyncTask<TInput, TValue, TError> {
   const [state, setState] = useState(AsyncTaskState.Idle<TValue, TError>());
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useAsyncTask is a low-level hook
+  const handle = useCallback(handler, deps);
 
   const execute = useCallback(
     (input: TInput) => {
@@ -151,7 +156,7 @@ export function useAsyncTask<
         };
       });
 
-      const result = handler(input);
+      const result = handle(input);
 
       result.match(
         (value) => setState(AsyncTaskState.Success(value)),
@@ -160,7 +165,7 @@ export function useAsyncTask<
 
       return result;
     },
-    [handler, state],
+    [handle, state],
   );
 
   return [execute, state];
