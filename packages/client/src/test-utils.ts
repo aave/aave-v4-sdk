@@ -273,3 +273,21 @@ export async function getBalance(
     (Number(balance) / 10 ** Number(decimals)).toFixed(decimals),
   );
 }
+
+// Function to get native token (ETH) balance
+export async function getNativeBalance(address: EvmAddress): Promise<number> {
+  const publicClient = createPublicClient({
+    chain: ethereumForkChain,
+    transport: http(ETHEREUM_FORK_RPC_URL),
+  });
+
+  const balance = await publicClient.getBalance({
+    address: address,
+  });
+
+  // Convert from wei to ETH (18 decimals)
+  const decimals = 18;
+  return Number.parseFloat(
+    (Number(balance) / 10 ** decimals).toFixed(decimals),
+  );
+}

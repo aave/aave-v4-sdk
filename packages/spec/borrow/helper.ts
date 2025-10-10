@@ -12,6 +12,7 @@ import { reserves, supply } from '@aave/client-next/actions';
 import {
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
@@ -91,13 +92,12 @@ export function findReserveToSupply(
 export function findReserveNativeSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-  token: EvmAddress,
 ): ResultAsync<Reserve, Error> {
   return reserves(client, {
     query: {
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
-        token: token,
+        token: ETHEREUM_WETH_ADDRESS,
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
       },
     },
@@ -106,7 +106,7 @@ export function findReserveNativeSupply(
   }).map((listReserves) => {
     invariant(
       listReserves.length > 0,
-      `No reserves found for the token ${token}`,
+      `No reserves found for the token ${ETHEREUM_WETH_ADDRESS}`,
     );
     const reserveToSupply = listReserves.find(
       (reserve) =>
@@ -116,10 +116,35 @@ export function findReserveNativeSupply(
     );
     invariant(
       reserveToSupply,
-      `No reserve found to supply to for the token ${token}`,
+      `No reserve found to supply to for the token ${ETHEREUM_WETH_ADDRESS}`,
     );
     return reserveToSupply;
   });
+}
+
+export function supplyToNativeReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  amount: BigDecimal,
+): ResultAsync<Reserve, Error> {
+  return findReserveNativeSupply(client, user).andThen((reserve) =>
+    supplyToReserve(
+      client,
+      {
+        reserve: {
+          reserveId: reserve.id,
+          chainId: reserve.chain.chainId,
+          spoke: reserve.spoke.address,
+        },
+        amount: {
+          native: amount,
+        },
+        sender: evmAddress(user.account.address),
+        enableCollateral: false, // TODO: set to true when contracts are deployed
+      },
+      user,
+    ).map(() => reserve),
+  );
 }
 
 export function supplyToRandomERC20Reserve(

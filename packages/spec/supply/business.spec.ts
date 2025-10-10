@@ -244,11 +244,7 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user supplies native tokens', () => {
       // TODO: enable when contracts are deployed
       it.skip("Then the user's supply position is updated and the tokens are enabled as collateral by default", async () => {
-        const reserve = await findReserveNativeSupply(
-          client,
-          user,
-          ETHEREUM_WETH_ADDRESS,
-        );
+        const reserve = await findReserveNativeSupply(client, user);
         assertOk(reserve);
 
         const result = await supplyToReserve(
@@ -292,11 +288,7 @@ describe('Supplying Assets on Aave V4', () => {
 
     describe('When the user supplies native tokens with collateral disabled', () => {
       it("Then the user's supply position is updated without the tokens are disabled as collateral", async () => {
-        const reserve = await findReserveNativeSupply(
-          client,
-          user,
-          ETHEREUM_WETH_ADDRESS,
-        );
+        const reserve = await findReserveNativeSupply(client, user);
         assertOk(reserve);
 
         const result = await supplyToReserve(
