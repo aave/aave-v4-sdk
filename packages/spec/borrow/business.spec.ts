@@ -23,11 +23,11 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_WETH_ADDRESS,
-          amount: bigDecimal('1.0'),
+          amount: bigDecimal('0.2'),
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
             token: ETHEREUM_WETH_ADDRESS,
-            amount: bigDecimal('0.5'),
+            amount: bigDecimal('0.1'),
           }),
         );
 
@@ -88,11 +88,11 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('1.0'),
+          amount: bigDecimal('0.2'),
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('0.5'),
+            amount: bigDecimal('0.1'),
             spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
           }),
         );

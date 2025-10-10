@@ -1,23 +1,24 @@
 import { assertOk, bigDecimal, evmAddress, invariant } from '@aave/client-next';
-import { permitTypedData, repay, userBorrows } from '@aave/client-next/actions';
+import { repay, userBorrows } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
+  getNativeBalance,
 } from '@aave/client-next/test-utils';
-import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
+import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
-import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyWETHAndBorrowMax } from './helper';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { supplyWETHAndBorrowMax, supplyWSTETHAndBorrowETH } from './helper';
 
 const user = await createNewWallet();
 
-describe('Aave V4 Repay Scenario', () => {
-  describe('Given a user with a borrow position', () => {
-    describe('When the user repays their loan', () => {
+describe('Repaying Loans on Aave V4', () => {
+  describe('Given a user and a reserve with an active borrow position', () => {
+    describe('When the user repays the full loan amount', () => {
       let reserve: Reserve;
 
       beforeAll(async () => {
@@ -40,7 +41,7 @@ describe('Aave V4 Repay Scenario', () => {
         reserve = setup.value.borrowReserve;
       }, 60_000);
       // TODO: Enable when bug is fixed
-      it.skip('Then it should be reflected in the user positions', async () => {
+      it.skip("Then the user's borrow position is closed and the repayment is reflected in their positions", async () => {
         const repayResult = await repay(client, {
           reserve: {
             spoke: reserve.spoke.address,
@@ -76,7 +77,7 @@ describe('Aave V4 Repay Scenario', () => {
       });
     });
 
-    describe('When the user repays a partial amount of their loan', () => {
+    describe('When the user repays a partial amount of the loan', () => {
       let reserve: Reserve;
 
       beforeAll(async () => {
@@ -99,7 +100,7 @@ describe('Aave V4 Repay Scenario', () => {
         reserve = setup.value.borrowReserve;
       }, 60_000);
 
-      it('Then it should be reflected in the user positions', async () => {
+      it("Then the user's borrow position is updated to reflect the reduced outstanding balance", async () => {
         const borrowBefore = await userBorrows(client, {
           query: {
             userSpoke: {
@@ -164,32 +165,23 @@ describe('Aave V4 Repay Scenario', () => {
         );
       });
     });
+  });
 
-    describe('When the user repays a loan with a permit signature', () => {
-      let reserve: Reserve;
+  describe('Given a user and a reserve that supports repayments in native tokens', () => {
+    let reserve: Reserve;
 
-      beforeAll(async () => {
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WETH_ADDRESS,
-          amount: bigDecimal('1.0'),
-        })
-          .andThen(() =>
-            fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_GHO_ADDRESS,
-              amount: bigDecimal('300'),
-            }),
-          )
-          .andThen(() =>
-            supplyWETHAndBorrowMax(client, user, ETHEREUM_GHO_ADDRESS),
-          );
+    beforeEach(async () => {
+      const setup = await fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_WSTETH_ADDRESS,
+        amount: bigDecimal('0.5'),
+      }).andThen(() => supplyWSTETHAndBorrowETH(client, user));
 
-        assertOk(setup);
-        reserve = setup.value.borrowReserve;
-      }, 60_000);
+      assertOk(setup);
+      reserve = setup.value.borrowReserve;
+    }, 60_000);
 
-      it('Then it should allow to repay their own loan without needing for an ERC20 Approval transaction', async ({
-        annotate,
-      }) => {
+    describe('When the user repays a partial amount of the loan in native tokens', () => {
+      it("Then the user's borrow position is updated to reflect the reduced outstanding balance", async () => {
         const borrowBefore = await userBorrows(client, {
           query: {
             userSpoke: {
@@ -204,27 +196,16 @@ describe('Aave V4 Repay Scenario', () => {
         assertOk(borrowBefore);
         const positionBefore = borrowBefore.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_GHO_ADDRESS
+            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
           );
         });
         invariant(positionBefore, 'No position found');
         const amountBorrowed = Number(positionBefore.amount.value.formatted);
         const amountToRepay = amountBorrowed / 2;
 
-        const signature = await permitTypedData(client, {
-          repay: {
-            amount: {
-              exact: bigDecimal(amountToRepay),
-            },
-            reserve: {
-              reserveId: reserve.id,
-              chainId: reserve.chain.chainId,
-              spoke: reserve.spoke.address,
-            },
-            sender: evmAddress(user.account!.address),
-          },
-        }).andThen(signERC20PermitWith(user));
-        assertOk(signature);
+        const balanceBefore = await getNativeBalance(
+          evmAddress(user.account.address),
+        );
 
         const repayResult = await repay(client, {
           reserve: {
@@ -232,19 +213,14 @@ describe('Aave V4 Repay Scenario', () => {
             reserveId: reserve.id,
             chainId: reserve.chain.chainId,
           },
-          sender: evmAddress(user.account!.address),
+          sender: evmAddress(user.account.address),
           amount: {
-            erc20: {
-              permitSig: signature.value,
-              value: {
-                exact: bigDecimal(amountToRepay),
-              },
+            native: {
+              exact: bigDecimal(amountToRepay),
             },
           },
         })
-          .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
           .andThen(sendWith(user))
-          .andTee((tx) => annotate(`tx hash: ${tx.txHash}`))
           .andThen(client.waitForTransaction)
           .andThen(() =>
             userBorrows(client, {
@@ -254,7 +230,7 @@ describe('Aave V4 Repay Scenario', () => {
                     address: reserve.spoke.address,
                     chainId: reserve.chain.chainId,
                   },
-                  user: evmAddress(user.account!.address),
+                  user: evmAddress(user.account.address),
                 },
               },
             }),
@@ -262,7 +238,7 @@ describe('Aave V4 Repay Scenario', () => {
         assertOk(repayResult);
         const positionAfter = repayResult.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_GHO_ADDRESS
+            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
           );
         });
         invariant(positionAfter, 'No position found');
@@ -270,6 +246,55 @@ describe('Aave V4 Repay Scenario', () => {
           amountToRepay,
           2,
         );
+
+        const balanceAfter = await getNativeBalance(
+          evmAddress(user.account.address),
+        );
+        expect(balanceAfter).toBeCloseTo(balanceBefore - amountToRepay, 4);
+      });
+    });
+
+    describe('When the user repays the full loan amount in native tokens', () => {
+      it("Then the user's borrow position is closed and the repayment is reflected in their positions", async () => {
+        const balanceBefore = await getNativeBalance(
+          evmAddress(user.account.address),
+        );
+
+        const repayResult = await repay(client, {
+          reserve: {
+            spoke: reserve.spoke.address,
+            reserveId: reserve.id,
+            chainId: reserve.chain.chainId,
+          },
+          sender: evmAddress(user.account.address),
+          amount: {
+            native: {
+              max: true,
+            },
+          },
+        })
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction)
+          .andThen(() =>
+            userBorrows(client, {
+              query: {
+                userSpoke: {
+                  spoke: {
+                    address: reserve.spoke.address,
+                    chainId: reserve.chain.chainId,
+                  },
+                  user: evmAddress(user.account.address),
+                },
+              },
+            }),
+          );
+        assertOk(repayResult);
+        expect(repayResult.value.length).toBe(0);
+
+        const balanceAfter = await getNativeBalance(
+          evmAddress(user.account.address),
+        );
+        expect(balanceAfter).toBeLessThan(balanceBefore);
       });
     });
   });

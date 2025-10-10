@@ -6,7 +6,11 @@ import {
   type ResultAsync,
 } from '@aave/client-next';
 import { borrow } from '@aave/client-next/actions';
-import { ETHEREUM_WETH_ADDRESS } from '@aave/client-next/test-utils';
+import {
+  ETHEREUM_SPOKE_EMODE_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
+} from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import {
@@ -50,6 +54,56 @@ export function supplyWETHAndBorrowMax(
             erc20: {
               value: reserveToBorrow.userState!.borrowable.value.formatted,
             },
+          },
+        })
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction)
+          .map(() => ({
+            borrowReserve: reserveToBorrow,
+            supplyReserve: reserveToSupply,
+          })),
+      ),
+  );
+}
+
+export function supplyWSTETHAndBorrowETH(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
+  return findReserveToSupply(client, user, {
+    token: ETHEREUM_WSTETH_ADDRESS,
+    spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+  }).andThen((reserveToSupply) =>
+    supplyToReserve(
+      client,
+      {
+        reserve: {
+          reserveId: reserveToSupply.id,
+          chainId: reserveToSupply.chain.chainId,
+          spoke: reserveToSupply.spoke.address,
+        },
+        amount: { erc20: { value: bigDecimal(0.1) } },
+        sender: evmAddress(user.account.address),
+        enableCollateral: true,
+      },
+      user,
+    )
+      .andThen(() =>
+        findReserveToBorrow(client, user, {
+          token: ETHEREUM_WETH_ADDRESS,
+          spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+        }),
+      )
+      .andThen((reserveToBorrow) =>
+        borrow(client, {
+          sender: evmAddress(user.account.address),
+          reserve: {
+            spoke: reserveToBorrow.spoke.address,
+            reserveId: reserveToBorrow.id,
+            chainId: reserveToBorrow.chain.chainId,
+          },
+          amount: {
+            native: reserveToBorrow.userState!.borrowable.value.formatted,
           },
         })
           .andThen(sendWith(user))
