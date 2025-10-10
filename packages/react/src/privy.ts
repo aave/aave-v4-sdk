@@ -34,35 +34,38 @@ import { usePermitTypedDataAction } from './permits';
 export function useSendTransaction(): UseSendTransactionResult {
   const { wallets } = useWallets();
 
-  return useAsyncTask((request: TransactionRequest) => {
-    const wallet = wallets.find((wallet) => wallet.address === request.from);
+  return useAsyncTask(
+    (request: TransactionRequest) => {
+      const wallet = wallets.find((wallet) => wallet.address === request.from);
 
-    invariant(
-      wallet,
-      `Expected a connected wallet with address ${request.from} to be found.`,
-    );
-
-    return ResultAsync.fromPromise(
-      wallet.switchChain(request.chainId),
-      (error) => UnexpectedError.from(error),
-    )
-      .map(() => wallet.getEthereumProvider())
-      .map((provider) =>
-        createWalletClient({
-          account: request.from,
-          chain: supportedChains[request.chainId],
-          transport: custom(provider),
-        }),
-      )
-      .andThen((walletClient) =>
-        sendTransaction(walletClient, request).map(
-          (hash) =>
-            new PendingTransaction(() =>
-              waitForTransactionResult(walletClient, request, hash),
-            ),
-        ),
+      invariant(
+        wallet,
+        `Expected a connected wallet with address ${request.from} to be found.`,
       );
-  });
+
+      return ResultAsync.fromPromise(
+        wallet.switchChain(request.chainId),
+        (error) => UnexpectedError.from(error),
+      )
+        .map(() => wallet.getEthereumProvider())
+        .map((provider) =>
+          createWalletClient({
+            account: request.from,
+            chain: supportedChains[request.chainId],
+            transport: custom(provider),
+          }),
+        )
+        .andThen((walletClient) =>
+          sendTransaction(walletClient, request).map(
+            (hash) =>
+              new PendingTransaction(() =>
+                waitForTransactionResult(walletClient, request, hash),
+              ),
+          ),
+        );
+    },
+    [wallets],
+  );
 }
 
 export type SignERC20PermitError = SigningError | UnexpectedError;
@@ -106,22 +109,25 @@ export function useERC20Permit(): UseAsyncTask<
   const [permitTypedData] = usePermitTypedDataAction();
   const { signTypedData } = useSignTypedData();
 
-  return useAsyncTask((request: PermitRequest) => {
-    return permitTypedData(request).andThen((response) =>
-      ResultAsync.fromPromise(
-        signTypedData({
-          types: response.types,
-          primaryType: response.primaryType,
-          domain: response.domain,
-          message: response.message,
-        }),
-        (error) => SigningError.from(error),
-      ).map(({ signature }) => ({
-        deadline: response.message.deadline,
-        value: signatureFrom(signature),
-      })),
-    );
-  });
+  return useAsyncTask(
+    (request: PermitRequest) => {
+      return permitTypedData(request).andThen((response) =>
+        ResultAsync.fromPromise(
+          signTypedData({
+            types: response.types,
+            primaryType: response.primaryType,
+            domain: response.domain,
+            message: response.message,
+          }),
+          (error) => SigningError.from(error),
+        ).map(({ signature }) => ({
+          deadline: response.message.deadline,
+          value: signatureFrom(signature),
+        })),
+      );
+    },
+    [permitTypedData, signTypedData],
+  );
 }
 
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
@@ -168,5 +174,6 @@ export function useSignSwapTypedDataWith(): UseAsyncTask<
         value: signatureFrom(signature),
       }));
     },
+    [signTypedData],
   );
 }

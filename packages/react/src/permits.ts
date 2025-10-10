@@ -23,7 +23,8 @@ export function usePermitTypedDataAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: PermitRequest) =>
-    permitTypedData(client, request),
+  return useAsyncTask(
+    (request: PermitRequest) => permitTypedData(client, request),
+    [client],
   );
 }

@@ -199,28 +199,30 @@ export function useSupply(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: SupplyRequest) =>
-    supply(client, request)
-      .andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+  return useAsyncTask(
+    (request: SupplyRequest) =>
+      supply(client, request)
+        .andThen((plan) => {
+          switch (plan.__typename) {
+            case 'TransactionRequest':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'Erc20ApprovalRequired':
-          case 'PreContractActionRequired':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(plan.originalTransaction, { cancel }))
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+            case 'Erc20ApprovalRequired':
+            case 'PreContractActionRequired':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }))
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      })
-      .andTee(refreshQueriesForReserveChange(client, request)),
+            case 'InsufficientBalanceError':
+              return errAsync(ValidationError.fromGqlNode(plan));
+          }
+        })
+        .andTee(refreshQueriesForReserveChange(client, request)),
+    [client, handler],
   );
 }
 
@@ -238,7 +240,10 @@ export function useSupplyAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: SupplyRequest) => supply(client, request));
+  return useAsyncTask(
+    (request: SupplyRequest) => supply(client, request),
+    [client],
+  );
 }
 
 /**
@@ -305,28 +310,30 @@ export function useBorrow(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: BorrowRequest) =>
-    borrow(client, request)
-      .andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+  return useAsyncTask(
+    (request: BorrowRequest) =>
+      borrow(client, request)
+        .andThen((plan) => {
+          switch (plan.__typename) {
+            case 'TransactionRequest':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'Erc20ApprovalRequired':
-          case 'PreContractActionRequired':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(plan.originalTransaction, { cancel }))
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+            case 'Erc20ApprovalRequired':
+            case 'PreContractActionRequired':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }))
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      })
-      .andTee(refreshQueriesForReserveChange(client, request)),
+            case 'InsufficientBalanceError':
+              return errAsync(ValidationError.fromGqlNode(plan));
+          }
+        })
+        .andTee(refreshQueriesForReserveChange(client, request)),
+    [client, handler],
   );
 }
 
@@ -344,7 +351,10 @@ export function useBorrowAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: BorrowRequest) => borrow(client, request));
+  return useAsyncTask(
+    (request: BorrowRequest) => borrow(client, request),
+    [client],
+  );
 }
 
 /**
@@ -411,28 +421,30 @@ export function useRepay(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: RepayRequest) =>
-    repay(client, request)
-      .andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+  return useAsyncTask(
+    (request: RepayRequest) =>
+      repay(client, request)
+        .andThen((plan) => {
+          switch (plan.__typename) {
+            case 'TransactionRequest':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'Erc20ApprovalRequired':
-          case 'PreContractActionRequired':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(plan.originalTransaction, { cancel }))
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+            case 'Erc20ApprovalRequired':
+            case 'PreContractActionRequired':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }))
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      })
-      .andTee(refreshQueriesForReserveChange(client, request)),
+            case 'InsufficientBalanceError':
+              return errAsync(ValidationError.fromGqlNode(plan));
+          }
+        })
+        .andTee(refreshQueriesForReserveChange(client, request)),
+    [client, handler],
   );
 }
 
@@ -450,7 +462,10 @@ export function useRepayAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: RepayRequest) => repay(client, request));
+  return useAsyncTask(
+    (request: RepayRequest) => repay(client, request),
+    [client],
+  );
 }
 
 /**
@@ -517,28 +532,30 @@ export function useWithdraw(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: WithdrawRequest) =>
-    withdraw(client, request)
-      .andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+  return useAsyncTask(
+    (request: WithdrawRequest) =>
+      withdraw(client, request)
+        .andThen((plan) => {
+          switch (plan.__typename) {
+            case 'TransactionRequest':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'Erc20ApprovalRequired':
-          case 'PreContractActionRequired':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(plan.originalTransaction, { cancel }))
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+            case 'Erc20ApprovalRequired':
+            case 'PreContractActionRequired':
+              return handler(plan, { cancel })
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }))
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      })
-      .andTee(refreshQueriesForReserveChange(client, request)),
+            case 'InsufficientBalanceError':
+              return errAsync(ValidationError.fromGqlNode(plan));
+          }
+        })
+        .andTee(refreshQueriesForReserveChange(client, request)),
+    [client, handler],
   );
 }
 
@@ -556,7 +573,10 @@ export function useWithdrawAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: WithdrawRequest) => withdraw(client, request));
+  return useAsyncTask(
+    (request: WithdrawRequest) => withdraw(client, request),
+    [client],
+  );
 }
 
 /**
@@ -610,19 +630,21 @@ export function useRenounceSpokeUserPositionManager(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: RenounceSpokeUserPositionManagerRequest) =>
-    renounceSpokeUserPositionManager(client, request)
-      .andThen((transaction) => handler(transaction, { cancel }))
-      .andThen((pendingTransaction) => pendingTransaction.wait())
-      .andThen(client.waitForTransaction)
-      .andTee(() =>
-        client.refreshQueryWhere(
-          SpokePositionManagersQuery,
-          (variables) =>
-            variables.request.spoke.chainId === request.spoke.chainId &&
-            variables.request.spoke.address === request.spoke.address,
+  return useAsyncTask(
+    (request: RenounceSpokeUserPositionManagerRequest) =>
+      renounceSpokeUserPositionManager(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(client.waitForTransaction)
+        .andTee(() =>
+          client.refreshQueryWhere(
+            SpokePositionManagersQuery,
+            (variables) =>
+              variables.request.spoke.chainId === request.spoke.chainId &&
+              variables.request.spoke.address === request.spoke.address,
+          ),
         ),
-      ),
+    [client, handler],
   );
 }
 
@@ -640,8 +662,10 @@ export function useRenounceSpokeUserPositionManagerAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: RenounceSpokeUserPositionManagerRequest) =>
-    renounceSpokeUserPositionManager(client, request),
+  return useAsyncTask(
+    (request: RenounceSpokeUserPositionManagerRequest) =>
+      renounceSpokeUserPositionManager(client, request),
+    [client],
   );
 }
 
@@ -698,32 +722,34 @@ export function useUpdateUserRiskPremium(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
-    updateUserRiskPremium(client, request)
-      .andThen((transaction) => handler(transaction, { cancel }))
-      .andThen((pendingTransaction) => pendingTransaction.wait())
-      .andThen(client.waitForTransaction)
-      .andTee(async () =>
-        Promise.all([
-          client.refreshQueryWhere(
-            UserPositionsQuery,
-            (variables, data) =>
-              variables.request.user === request.sender &&
-              data.some(
-                (position) =>
-                  position.spoke.chain.chainId === request.spoke.chainId &&
-                  position.spoke.address === request.spoke.address,
-              ),
-          ),
-          client.refreshQueryWhere(
-            UserPositionQuery,
-            (_, data) =>
-              data?.spoke.chain.chainId === request.spoke.chainId &&
-              data?.spoke.address === request.spoke.address &&
-              data.user === request.sender,
-          ),
-        ]),
-      ),
+  return useAsyncTask(
+    (request: UpdateUserRiskPremiumRequest) =>
+      updateUserRiskPremium(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(client.waitForTransaction)
+        .andTee(async () =>
+          Promise.all([
+            client.refreshQueryWhere(
+              UserPositionsQuery,
+              (variables, data) =>
+                variables.request.user === request.sender &&
+                data.some(
+                  (position) =>
+                    position.spoke.chain.chainId === request.spoke.chainId &&
+                    position.spoke.address === request.spoke.address,
+                ),
+            ),
+            client.refreshQueryWhere(
+              UserPositionQuery,
+              (_, data) =>
+                data?.spoke.chain.chainId === request.spoke.chainId &&
+                data?.spoke.address === request.spoke.address &&
+                data.user === request.sender,
+            ),
+          ]),
+        ),
+    [client, handler],
   );
 }
 
@@ -741,8 +767,10 @@ export function useUpdateUserRiskPremiumAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: UpdateUserRiskPremiumRequest) =>
-    updateUserRiskPremium(client, request),
+  return useAsyncTask(
+    (request: UpdateUserRiskPremiumRequest) =>
+      updateUserRiskPremium(client, request),
+    [client],
   );
 }
 
@@ -800,11 +828,13 @@ export function useUpdateUserDynamicConfig(
   const client = useAaveClient();
 
   // TODO update relevant active queries once the location of dynamic config is clarified
-  return useAsyncTask((request: UpdateUserDynamicConfigRequest) =>
-    updateUserDynamicConfig(client, request)
-      .andThen((transaction) => handler(transaction, { cancel }))
-      .andThen((pendingTransaction) => pendingTransaction.wait())
-      .andThen(client.waitForTransaction),
+  return useAsyncTask(
+    (request: UpdateUserDynamicConfigRequest) =>
+      updateUserDynamicConfig(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(client.waitForTransaction),
+    [client, handler],
   );
 }
 
@@ -822,8 +852,10 @@ export function useUpdateUserDynamicConfigAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: UpdateUserDynamicConfigRequest) =>
-    updateUserDynamicConfig(client, request),
+  return useAsyncTask(
+    (request: UpdateUserDynamicConfigRequest) =>
+      updateUserDynamicConfig(client, request),
+    [client],
   );
 }
 
@@ -885,77 +917,80 @@ export function useSetUserSupplyAsCollateral(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
-    setUserSupplyAsCollateral(client, request)
-      .andThen((transaction) => handler(transaction, { cancel }))
-      .andThen((pendingTransaction) => pendingTransaction.wait())
-      .andThen(client.waitForTransaction)
-      .andTee(() =>
-        Promise.all([
-          // update user positions
-          client.refreshQueryWhere(
-            UserPositionsQuery,
-            (variables, data) =>
-              variables.request.user === request.sender &&
-              data.some(
-                (position) =>
-                  position.spoke.chain.chainId === request.reserve.chainId &&
-                  position.spoke.address === request.reserve.spoke,
-              ),
-          ),
-          client.refreshQueryWhere(
-            UserPositionQuery,
-            (_, data) =>
-              data?.spoke.chain.chainId === request.reserve.chainId &&
-              data?.spoke.address === request.reserve.spoke &&
-              data.user === request.sender,
-          ),
+  return useAsyncTask(
+    (request: SetUserSupplyAsCollateralRequest) =>
+      setUserSupplyAsCollateral(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(client.waitForTransaction)
+        .andTee(() =>
+          Promise.all([
+            // update user positions
+            client.refreshQueryWhere(
+              UserPositionsQuery,
+              (variables, data) =>
+                variables.request.user === request.sender &&
+                data.some(
+                  (position) =>
+                    position.spoke.chain.chainId === request.reserve.chainId &&
+                    position.spoke.address === request.reserve.spoke,
+                ),
+            ),
+            client.refreshQueryWhere(
+              UserPositionQuery,
+              (_, data) =>
+                data?.spoke.chain.chainId === request.reserve.chainId &&
+                data?.spoke.address === request.reserve.spoke &&
+                data.user === request.sender,
+            ),
 
-          // update user summary
-          client.refreshQueryWhere(UserSummaryQuery, (variables) =>
-            variables.request.user === request.sender &&
-            isSpokeInputVariant(variables.request.filter)
-              ? variables.request.filter.spoke.chainId ===
-                  request.reserve.chainId &&
-                variables.request.filter.spoke.address === request.reserve.spoke
-              : isChainIdsVariant(variables.request.filter)
-                ? variables.request.filter.chainIds.some(
+            // update user summary
+            client.refreshQueryWhere(UserSummaryQuery, (variables) =>
+              variables.request.user === request.sender &&
+              isSpokeInputVariant(variables.request.filter)
+                ? variables.request.filter.spoke.chainId ===
+                    request.reserve.chainId &&
+                  variables.request.filter.spoke.address ===
+                    request.reserve.spoke
+                : isChainIdsVariant(variables.request.filter)
+                  ? variables.request.filter.chainIds.some(
+                      (chainId) => chainId === request.reserve.chainId,
+                    )
+                  : false,
+            ),
+
+            // update reserves
+            client.refreshQueryWhere(ReservesQuery, (_, data) =>
+              data.some((reserve) => reserve.id === request.reserve.reserveId),
+            ),
+
+            // update spokes
+            client.refreshQueryWhere(SpokesQuery, (_, data) =>
+              data.some(
+                (spoke) =>
+                  spoke.chain.chainId === request.reserve.chainId &&
+                  spoke.address === request.reserve.spoke,
+              ),
+            ),
+
+            // update hubs
+            client.refreshQueryWhere(HubsQuery, (variables) =>
+              isChainIdsVariant(variables.request.query)
+                ? variables.request.query.chainIds.some(
                     (chainId) => chainId === request.reserve.chainId,
                   )
-                : false,
-          ),
-
-          // update reserves
-          client.refreshQueryWhere(ReservesQuery, (_, data) =>
-            data.some((reserve) => reserve.id === request.reserve.reserveId),
-          ),
-
-          // update spokes
-          client.refreshQueryWhere(SpokesQuery, (_, data) =>
-            data.some(
-              (spoke) =>
-                spoke.chain.chainId === request.reserve.chainId &&
-                spoke.address === request.reserve.spoke,
+                : variables.request.query.tokens.some(
+                    (token) => token.chainId === request.reserve.chainId,
+                  ),
             ),
-          ),
-
-          // update hubs
-          client.refreshQueryWhere(HubsQuery, (variables) =>
-            isChainIdsVariant(variables.request.query)
-              ? variables.request.query.chainIds.some(
-                  (chainId) => chainId === request.reserve.chainId,
-                )
-              : variables.request.query.tokens.some(
-                  (token) => token.chainId === request.reserve.chainId,
-                ),
-          ),
-          client.refreshQueryWhere(
-            HubQuery,
-            (variables) =>
-              variables.request.chainId === request.reserve.chainId,
-          ),
-        ]),
-      ),
+            client.refreshQueryWhere(
+              HubQuery,
+              (variables) =>
+                variables.request.chainId === request.reserve.chainId,
+            ),
+          ]),
+        ),
+    [client, handler],
   );
 }
 
@@ -973,8 +1008,10 @@ export function useSetUserSupplyAsCollateralAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: SetUserSupplyAsCollateralRequest) =>
-    setUserSupplyAsCollateral(client, request),
+  return useAsyncTask(
+    (request: SetUserSupplyAsCollateralRequest) =>
+      setUserSupplyAsCollateral(client, request),
+    [client],
   );
 }
 
@@ -1052,27 +1089,29 @@ export function useLiquidatePosition(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: LiquidatePositionRequest) =>
-    // TODO: update the relevant read queries
-    liquidatePosition(client, request).andThen((plan) => {
-      switch (plan.__typename) {
-        case 'TransactionRequest':
-          return handler(plan, { cancel })
-            .andThen((pendingTransaction) => pendingTransaction.wait())
-            .andThen(client.waitForTransaction);
+  return useAsyncTask(
+    (request: LiquidatePositionRequest) =>
+      // TODO: update the relevant read queries
+      liquidatePosition(client, request).andThen((plan) => {
+        switch (plan.__typename) {
+          case 'TransactionRequest':
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
 
-        case 'Erc20ApprovalRequired':
-        case 'PreContractActionRequired':
-          return handler(plan, { cancel })
-            .andThen((pendingTransaction) => pendingTransaction.wait())
-            .andThen(() => handler(plan.originalTransaction, { cancel }))
-            .andThen((pendingTransaction) => pendingTransaction.wait())
-            .andThen(client.waitForTransaction);
+          case 'Erc20ApprovalRequired':
+          case 'PreContractActionRequired':
+            return handler(plan, { cancel })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(() => handler(plan.originalTransaction, { cancel }))
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
 
-        case 'InsufficientBalanceError':
-          return errAsync(ValidationError.fromGqlNode(plan));
-      }
-    }),
+          case 'InsufficientBalanceError':
+            return errAsync(ValidationError.fromGqlNode(plan));
+        }
+      }),
+    [client, handler],
   );
 }
 
@@ -1090,8 +1129,9 @@ export function useLiquidatePositionAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: LiquidatePositionRequest) =>
-    liquidatePosition(client, request),
+  return useAsyncTask(
+    (request: LiquidatePositionRequest) => liquidatePosition(client, request),
+    [client],
   );
 }
 
@@ -1168,19 +1208,21 @@ export function useSetSpokeUserPositionManager(
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: SetSpokeUserPositionManagerRequest) =>
-    setSpokeUserPositionManager(client, request)
-      .andThen((transaction) => handler(transaction, { cancel }))
-      .andThen((pendingTransaction) => pendingTransaction.wait())
-      .andThen(client.waitForTransaction)
-      .andTee(() =>
-        client.refreshQueryWhere(
-          SpokePositionManagersQuery,
-          (variables) =>
-            variables.request.spoke.chainId === request.spoke.chainId &&
-            variables.request.spoke.address === request.spoke.address,
+  return useAsyncTask(
+    (request: SetSpokeUserPositionManagerRequest) =>
+      setSpokeUserPositionManager(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(client.waitForTransaction)
+        .andTee(() =>
+          client.refreshQueryWhere(
+            SpokePositionManagersQuery,
+            (variables) =>
+              variables.request.spoke.chainId === request.spoke.chainId &&
+              variables.request.spoke.address === request.spoke.address,
+          ),
         ),
-      ),
+    [client, handler],
   );
 }
 
@@ -1198,8 +1240,10 @@ export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
 > {
   const client = useAaveClient();
 
-  return useAsyncTask((request: SetSpokeUserPositionManagerRequest) =>
-    setSpokeUserPositionManager(client, request),
+  return useAsyncTask(
+    (request: SetSpokeUserPositionManagerRequest) =>
+      setSpokeUserPositionManager(client, request),
+    [client],
   );
 }
 
@@ -1245,8 +1289,9 @@ export function usePreviewAction(
 ): UseAsyncTask<PreviewRequest, PreviewUserPosition, UnexpectedError> {
   const client = useAaveClient();
 
-  return useAsyncTask((request: PreviewRequest) =>
-    preview(client, request, options),
+  return useAsyncTask(
+    (request: PreviewRequest) => preview(client, request, options),
+    [client, options],
   );
 }
 
