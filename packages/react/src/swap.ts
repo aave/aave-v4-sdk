@@ -159,8 +159,9 @@ export function useSwapQuoteAction(
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: SwapQuoteRequest) => swapQuote(client, request, options),
-    [client, options],
+    (request: SwapQuoteRequest) =>
+      swapQuote(client, request, { currency: options.currency }),
+    [client, options.currency],
   );
 }
 

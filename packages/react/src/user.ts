@@ -450,6 +450,9 @@ export function useUserHistory({
  * @remarks
  * This hook does not actively watch for updates. Use it to fetch user history on demand
  * (e.g., in an event handler when paginating or refining filters).
+ *
+ * @param options - The query options.
+ * @returns The user history.
  */
 export function useUserHistoryAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
@@ -461,8 +464,9 @@ export function useUserHistoryAction(
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: UserHistoryRequest) => userHistory(client, request, options),
-    [client, options],
+    (request: UserHistoryRequest) =>
+      userHistory(client, request, { currency: options.currency }),
+    [client, options.currency],
   );
 }
 
