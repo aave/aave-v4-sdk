@@ -20,7 +20,6 @@ import {
 import { ValidationError } from '@aave/core-next';
 import {
   type BorrowRequest,
-  type ExecutionPlan,
   HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
@@ -38,7 +37,6 @@ import {
   SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
-  type TransactionRequest,
   type UpdateUserDynamicConfigRequest,
   type UpdateUserRiskPremiumRequest,
   UserBalancesQuery,
@@ -227,26 +225,6 @@ export function useSupply(
 }
 
 /**
- * Low-level hook to execute a {@link supply} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useSupply} for a higher-level API that updates the relevant read hooks.
- */
-export function useSupplyAction(): UseAsyncTask<
-  SupplyRequest,
-  ExecutionPlan,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: SupplyRequest) => supply(client, request),
-    [client],
-  );
-}
-
-/**
  * A hook that provides a way to borrow assets from an Aave reserve.
  *
  * ```ts
@@ -334,26 +312,6 @@ export function useBorrow(
         })
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
-  );
-}
-
-/**
- * Low-level hook to execute a {@link borrow} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useBorrow} for a higher-level API that updates the relevant read hooks.
- */
-export function useBorrowAction(): UseAsyncTask<
-  BorrowRequest,
-  ExecutionPlan,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: BorrowRequest) => borrow(client, request),
-    [client],
   );
 }
 
@@ -449,26 +407,6 @@ export function useRepay(
 }
 
 /**
- * Low-level hook to execute a {@link repay} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useRepay} for a higher-level API that updates the relevant read hooks.
- */
-export function useRepayAction(): UseAsyncTask<
-  RepayRequest,
-  ExecutionPlan,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: RepayRequest) => repay(client, request),
-    [client],
-  );
-}
-
-/**
  * A hook that provides a way to withdraw supplied assets from an Aave reserve.
  *
  * ```ts
@@ -560,26 +498,6 @@ export function useWithdraw(
 }
 
 /**
- * Low-level hook to execute a {@link withdraw} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useWithdraw} for a higher-level API that updates the relevant read hooks.
- */
-export function useWithdrawAction(): UseAsyncTask<
-  WithdrawRequest,
-  ExecutionPlan,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: WithdrawRequest) => withdraw(client, request),
-    [client],
-  );
-}
-
-/**
  * A hook that provides a way to renounce a position manager of a user for a specific spoke.
  *
  * ```ts
@@ -645,27 +563,6 @@ export function useRenounceSpokeUserPositionManager(
           ),
         ),
     [client, handler],
-  );
-}
-
-/**
- * Low-level hook to execute a {@link renounceSpokeUserPositionManager} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useRenounceSpokeUserPositionManager} for a higher-level API that handles transactions.
- */
-export function useRenounceSpokeUserPositionManagerAction(): UseAsyncTask<
-  RenounceSpokeUserPositionManagerRequest,
-  TransactionRequest,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: RenounceSpokeUserPositionManagerRequest) =>
-      renounceSpokeUserPositionManager(client, request),
-    [client],
   );
 }
 
@@ -754,27 +651,6 @@ export function useUpdateUserRiskPremium(
 }
 
 /**
- * Low-level hook to execute a {@link updateUserRiskPremium} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useUpdateUserRiskPremium} for a higher-level API that handles transactions.
- */
-export function useUpdateUserRiskPremiumAction(): UseAsyncTask<
-  UpdateUserRiskPremiumRequest,
-  TransactionRequest,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: UpdateUserRiskPremiumRequest) =>
-      updateUserRiskPremium(client, request),
-    [client],
-  );
-}
-
-/**
  * A hook that provides a way to update the user dynamic configuration for a spoke.
  *
  * ```ts
@@ -835,27 +711,6 @@ export function useUpdateUserDynamicConfig(
         .andThen((pendingTransaction) => pendingTransaction.wait())
         .andThen(client.waitForTransaction),
     [client, handler],
-  );
-}
-
-/**
- * Low-level hook to execute a {@link updateUserDynamicConfig} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useUpdateUserDynamicConfig} for a higher-level API that handles transactions.
- */
-export function useUpdateUserDynamicConfigAction(): UseAsyncTask<
-  UpdateUserDynamicConfigRequest,
-  TransactionRequest,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: UpdateUserDynamicConfigRequest) =>
-      updateUserDynamicConfig(client, request),
-    [client],
   );
 }
 
@@ -995,27 +850,6 @@ export function useSetUserSupplyAsCollateral(
 }
 
 /**
- * Low-level hook to execute a {@link setUserSupplyAsCollateral} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useSetUserSupplyAsCollateral} for a higher-level API that handles transactions.
- */
-export function useSetUserSupplyAsCollateralAction(): UseAsyncTask<
-  SetUserSupplyAsCollateralRequest,
-  TransactionRequest,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: SetUserSupplyAsCollateralRequest) =>
-      setUserSupplyAsCollateral(client, request),
-    [client],
-  );
-}
-
-/**
  * A hook that provides a way to liquidate a user's position.
  *
  * ```ts
@@ -1116,26 +950,6 @@ export function useLiquidatePosition(
 }
 
 /**
- * Low-level hook to execute a {@link liquidatePosition} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useLiquidatePosition} for a higher-level API that updates the relevant read hooks.
- */
-export function useLiquidatePositionAction(): UseAsyncTask<
-  LiquidatePositionRequest,
-  ExecutionPlan,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: LiquidatePositionRequest) => liquidatePosition(client, request),
-    [client],
-  );
-}
-
-/**
  * A hook that provides a way to set or remove a position manager for a user on a specific spoke.
  *
  * **Position managers** can perform transactions on behalf of other users, including:
@@ -1223,27 +1037,6 @@ export function useSetSpokeUserPositionManager(
           ),
         ),
     [client, handler],
-  );
-}
-
-/**
- * Low-level hook to execute a {@link setSpokeUserPositionManager} action directly.
- *
- * @remarks
- * This hook **does not** update any read/cache state or trigger follow-up effects.
- * Prefer {@link useSetSpokeUserPositionManager} for a higher-level API that handles transactions.
- */
-export function useSetSpokeUserPositionManagerAction(): UseAsyncTask<
-  SetSpokeUserPositionManagerRequest,
-  TransactionRequest,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: SetSpokeUserPositionManagerRequest) =>
-      setSpokeUserPositionManager(client, request),
-    [client],
   );
 }
 
