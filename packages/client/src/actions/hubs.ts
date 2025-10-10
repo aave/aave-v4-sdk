@@ -11,7 +11,11 @@ import {
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
-import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
+} from '../options';
 
 /**
  * Fetches a specific hub by address and chain ID.
@@ -31,9 +35,13 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 export function hub(
   client: AaveClient,
   request: HubRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Hub | null, UnexpectedError> {
-  return client.query(HubQuery, { request, ...options });
+  return client.query(
+    HubQuery,
+    { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
+    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+  );
 }
 
 /**
