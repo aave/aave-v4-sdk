@@ -48,6 +48,16 @@ export type ReserveErc20AmountInputWithPermit = ReturnType<
   typeof graphql.scalar<'ReserveErc20AmountInputWithPermit'>
 >;
 export type TxHashInput = ReturnType<typeof graphql.scalar<'TxHashInput'>>;
+
+/**
+ * @internal
+ */
+export function isTxHashInputVariant<T>(
+  input: T,
+): input is T & { txHash: TxHashInput } {
+  return isObject(input) && 'txHash' in input && input.txHash != null;
+}
+
 export type UserSpokeInput = ReturnType<
   typeof graphql.scalar<'UserSpokeInput'>
 >;
