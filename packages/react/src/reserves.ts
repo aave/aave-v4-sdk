@@ -224,8 +224,9 @@ export function useReservesAction(
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: ReservesRequest) => reserves(client, request, options),
-    [client, options],
+    (request: ReservesRequest) =>
+      reserves(client, request, { currency: options.currency }),
+    [client, options.currency],
   );
 }
 

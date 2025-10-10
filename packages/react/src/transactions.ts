@@ -1083,8 +1083,9 @@ export function usePreviewAction(
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: PreviewRequest) => preview(client, request, options),
-    [client, options],
+    (request: PreviewRequest) =>
+      preview(client, request, { currency: options.currency }),
+    [client, options.currency],
   );
 }
 
