@@ -32,6 +32,7 @@ export function supplyWETHAndBorrowMax(
           },
           amount: { erc20: { value: bigDecimal(0.1) } },
           sender: evmAddress(user.account.address),
+          enableCollateral: true,
         },
         user,
       )

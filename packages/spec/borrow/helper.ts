@@ -88,6 +88,40 @@ export function findReserveToSupply(
   });
 }
 
+export function findReserveNativeSupply(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  token: EvmAddress,
+): ResultAsync<Reserve, Error> {
+  return reserves(client, {
+    query: {
+      spokeToken: {
+        chainId: ETHEREUM_FORK_ID,
+        token: token,
+        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+      },
+    },
+    user: evmAddress(user.account.address),
+    filter: ReservesRequestFilter.Supply,
+  }).map((listReserves) => {
+    invariant(
+      listReserves.length > 0,
+      `No reserves found for the token ${token}`,
+    );
+    const reserveToSupply = listReserves.find(
+      (reserve) =>
+        reserve.canSupply &&
+        reserve.canUseAsCollateral &&
+        reserve.asset.underlying.isWrappedNativeToken,
+    );
+    invariant(
+      reserveToSupply,
+      `No reserve found to supply to for the token ${token}`,
+    );
+    return reserveToSupply;
+  });
+}
+
 export function supplyToRandomERC20Reserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,

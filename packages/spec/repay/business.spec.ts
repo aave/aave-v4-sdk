@@ -38,7 +38,7 @@ describe('Aave V4 Repay Scenario', () => {
 
         assertOk(setup);
         reserve = setup.value.borrowReserve;
-      });
+      }, 60_000);
       // TODO: Enable when bug is fixed
       it.skip('Then it should be reflected in the user positions', async () => {
         const repayResult = await repay(client, {
@@ -97,7 +97,7 @@ describe('Aave V4 Repay Scenario', () => {
 
         assertOk(setup);
         reserve = setup.value.borrowReserve;
-      });
+      }, 60_000);
 
       it('Then it should be reflected in the user positions', async () => {
         const borrowBefore = await userBorrows(client, {
@@ -185,7 +185,7 @@ describe('Aave V4 Repay Scenario', () => {
 
         assertOk(setup);
         reserve = setup.value.borrowReserve;
-      });
+      }, 60_000);
 
       it('Then it should allow to repay their own loan without needing for an ERC20 Approval transaction', async ({
         annotate,

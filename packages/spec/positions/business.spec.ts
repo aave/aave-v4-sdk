@@ -79,7 +79,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
         assertOk(setup);
         usedReserves = setup.value;
-      });
+      }, 60_000);
 
       describe('When the user checks the health factor', () => {
         it('Then the health factor should be a number greater than 1', async () => {
