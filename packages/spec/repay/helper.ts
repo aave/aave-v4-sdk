@@ -82,7 +82,7 @@ export function supplyWSTETHAndBorrowETH(
           chainId: reserveToSupply.chain.chainId,
           spoke: reserveToSupply.spoke.address,
         },
-        amount: { erc20: { value: bigDecimal(0.1) } },
+        amount: { erc20: { value: bigDecimal(0.2) } },
         sender: evmAddress(user.account.address),
         enableCollateral: true,
       },

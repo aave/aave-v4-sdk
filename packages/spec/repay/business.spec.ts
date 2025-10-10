@@ -11,7 +11,7 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyWETHAndBorrowMax, supplyWSTETHAndBorrowETH } from './helper';
 
 const user = await createNewWallet();
@@ -170,7 +170,7 @@ describe('Repaying Loans on Aave V4', () => {
   describe('Given a user and a reserve that supports repayments in native tokens', () => {
     let reserve: Reserve;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       const setup = await fundErc20Address(evmAddress(user.account.address), {
         address: ETHEREUM_WSTETH_ADDRESS,
         amount: bigDecimal('0.5'),
