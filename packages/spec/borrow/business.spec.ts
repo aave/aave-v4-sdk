@@ -3,8 +3,8 @@ import { borrow, userBorrows } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_EMODE_ADDRESS,
+  ETHEREUM_USDS_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
@@ -35,11 +35,13 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
       });
       it(`Then the user's borrow position is updated to reflect the ERC20 loan`, async () => {
         const reserveToBorrow = await findReserveToBorrow(client, user, {
-          token: ETHEREUM_GHO_ADDRESS,
+          token: ETHEREUM_USDS_ADDRESS,
         });
         assertOk(reserveToBorrow);
-        const amountToBorrow =
-          reserveToBorrow.value.userState!.borrowable.value.formatted;
+        const amountToBorrow = bigDecimal(
+          Number(reserveToBorrow.value.userState!.borrowable.value.formatted) *
+            0.1,
+        );
         expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
         const result = await borrow(client, {
           sender: evmAddress(user.account.address),
