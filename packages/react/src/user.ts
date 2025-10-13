@@ -5,7 +5,12 @@ import {
   type UnexpectedError,
 } from '@aave/client-next';
 import type { UserPositionQueryOptions } from '@aave/client-next/actions';
-import { userHistory } from '@aave/client-next/actions';
+import {
+  userBalances,
+  userHistory,
+  userPositions,
+  userSupplies,
+} from '@aave/client-next/actions';
 import {
   type PaginatedUserHistoryResult,
   type UserBalance,
@@ -103,6 +108,49 @@ export function useUserSupplies({
     },
     suspense,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link userSupplies} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on user supplies.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useUserSuppliesAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // UserSupplyItem[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useUserSuppliesAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<UserSuppliesRequest, UserSupplyItem[], UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: UserSuppliesRequest) =>
+      userSupplies(client, request, { currency: options.currency }),
+    [client, options.currency],
+  );
 }
 
 export type UseUserBorrowsArgs = Prettify<
@@ -281,6 +329,50 @@ export function useUserPositions({
   });
 }
 
+/**
+ * Low-level hook to execute a {@link userPositions} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on user positions.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useUserPositionsAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     chainIds: [chainId(1), chainId(137)]
+ *   },
+ *   orderBy: { balance: 'DESC' },
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // UserPosition[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useUserPositionsAction(
+  options: UserPositionQueryOptions = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<UserPositionsRequest, UserPosition[], UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: UserPositionsRequest) =>
+      userPositions(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
+  );
+}
+
 export type UseUserPositionArgs = Prettify<
   UserPositionRequest & UserPositionQueryOptions
 >;
@@ -385,6 +477,46 @@ export function useUserBalances({
     },
     suspense,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link userBalances} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on user balances.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useUserBalancesAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     chainIds: [chainId(1), chainId(137)]
+ *   },
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // UserBalance[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useUserBalancesAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<UserBalancesRequest, UserBalance[], UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: UserBalancesRequest) =>
+      userBalances(client, request, { currency: options.currency }),
+    [client, options.currency],
+  );
 }
 
 export type UseUserHistoryArgs = Prettify<

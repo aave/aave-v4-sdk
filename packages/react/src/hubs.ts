@@ -1,7 +1,9 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type UnexpectedError,
 } from '@aave/client-next';
+import { hubs } from '@aave/client-next/actions';
 import {
   type Hub,
   type HubAsset,
@@ -13,11 +15,14 @@ import {
   type HubsRequest,
 } from '@aave/graphql-next';
 import type { Prettify } from '@aave/types-next';
+import { useAaveClient } from './context';
 import {
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
+  type UseAsyncTask,
+  useAsyncTask,
   useSuspendableQuery,
 } from './helpers';
 
@@ -169,4 +174,43 @@ export function useHubAssets({
     },
     suspense,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link hubs} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on the hubs.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useHubsAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: {
+ *     chainIds: [chainId(1), chainId(137)]
+ *   }
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // Hub[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useHubsAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<HubsRequest, Hub[], UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: HubsRequest) =>
+      hubs(client, request, { currency: options.currency }),
+    [client, options.currency],
+  );
 }
