@@ -50,6 +50,18 @@ expect.extend({
     };
   },
 
+  toBeBigDecimalLessThan(received: string, expected: number | string) {
+    const numValue = Number(received);
+    const pass = !Number.isNaN(numValue) && numValue < Number(expected);
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected "${received}" not to be less than ${expected}`
+          : `expected "${received}" to be less than ${expected}, but got ${numValue}`,
+    };
+  },
+
   toBeBetweenDates(received: string, start: Date, end: Date) {
     const receivedDate = new Date(received);
     const pass =
