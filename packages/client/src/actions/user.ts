@@ -134,7 +134,9 @@ export type UserPositionQueryOptions = CurrencyQueryOptions &
  * ```ts
  * const result = await userPositions(client, {
  *   user: evmAddress('0x742d35cc…'),
- *   chainIds: [chainId(1), chainId(137)],
+ *   filter: {
+ *     chainIds: [chainId(1), chainId(137)],
+ *   },
  *   orderBy: { balance: 'DESC' },
  * });
  * ```
