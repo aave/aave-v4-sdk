@@ -3,6 +3,7 @@ import {
   bigDecimal,
   type EvmAddress,
   evmAddress,
+  invariant,
   type ResultAsync,
 } from '@aave/client-next';
 import { borrow } from '@aave/client-next/actions';
@@ -19,11 +20,18 @@ import {
   supplyToReserve,
 } from '../borrow/helper';
 
-export function supplyWETHAndBorrowMax(
+export function supplyWETHAndBorrow(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   token: EvmAddress,
+  percentToBorrow?: number, // 0 - 1
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
+  if (percentToBorrow) {
+    invariant(
+      percentToBorrow >= 0 && percentToBorrow <= 1,
+      'Percent to borrow must be between 0 and 1',
+    );
+  }
   return findReserveToSupply(client, user, {
     token: ETHEREUM_WETH_ADDRESS,
   }).andThen((reserveToSupply) =>
@@ -41,7 +49,7 @@ export function supplyWETHAndBorrowMax(
       },
       user,
     )
-      .andThen(() => findReserveToBorrow(client, user, { token }))
+      .andThen(() => findReserveToBorrow(client, user, { token: token }))
       .andThen((reserveToBorrow) =>
         borrow(client, {
           sender: evmAddress(user.account.address),
@@ -52,7 +60,10 @@ export function supplyWETHAndBorrowMax(
           },
           amount: {
             erc20: {
-              value: reserveToBorrow.userState!.borrowable.value.formatted,
+              value: bigDecimal(
+                Number(reserveToBorrow.userState!.borrowable.value.formatted) *
+                  (percentToBorrow ?? 0.25),
+              ),
             },
           },
         })

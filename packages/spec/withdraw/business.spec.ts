@@ -4,6 +4,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
   getBalance,
   getNativeBalance,
@@ -157,12 +158,12 @@ describe('Withdrawing Assets on Aave V4', () => {
       assertOk(setup);
       reserve = setup.value;
     });
+
     describe('When the user withdraws part of their supplied native tokens', () => {
       it('Then the user receives the partial amount in native tokens and their supply position is updated', async ({
         annotate,
       }) => {
         annotate(`account address: ${evmAddress(user.account!.address)}`);
-        annotate(`reserve id: ${reserve.id}`);
         const amountToWithdraw = amountToSupply / 2;
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
@@ -207,7 +208,6 @@ describe('Withdrawing Assets on Aave V4', () => {
         annotate,
       }) => {
         annotate(`account address: ${evmAddress(user.account!.address)}`);
-        annotate(`reserve id: ${reserve.id}`);
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );
@@ -238,7 +238,13 @@ describe('Withdrawing Assets on Aave V4', () => {
             }),
           );
         assertOk(withdrawResult);
-        expect(withdrawResult.value.length).toBe(0);
+        if (withdrawResult.value.length > 0) {
+          // check exactly position WETH is closed, in case other tests failed
+          assertSingleElementArray(withdrawResult.value);
+          expect(
+            withdrawResult.value[0].reserve.asset.underlying.address,
+          ).not.toBe(ETHEREUM_WETH_ADDRESS);
+        }
 
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),

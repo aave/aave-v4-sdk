@@ -23,7 +23,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve, supplyToReserve } from '../borrow/helper';
-import { supplyWETHAndBorrowMax } from '../repay/helper';
+import { supplyWETHAndBorrow } from '../repay/helper';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -74,7 +74,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             }),
           )
           .andThen(() =>
-            supplyWETHAndBorrowMax(client, user, ETHEREUM_USDC_ADDRESS),
+            supplyWETHAndBorrow(client, user, ETHEREUM_USDC_ADDRESS),
           );
 
         assertOk(setup);

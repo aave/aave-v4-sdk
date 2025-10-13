@@ -12,7 +12,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyWETHAndBorrowMax, supplyWSTETHAndBorrowETH } from './helper';
+import { supplyWETHAndBorrow, supplyWSTETHAndBorrowETH } from './helper';
 
 const user = await createNewWallet();
 
@@ -34,7 +34,7 @@ describe('Repaying Loans on Aave V4', () => {
             }),
           )
           .andThen(() =>
-            supplyWETHAndBorrowMax(client, user, ETHEREUM_USDC_ADDRESS),
+            supplyWETHAndBorrow(client, user, ETHEREUM_USDC_ADDRESS),
           );
 
         assertOk(setup);
@@ -93,7 +93,7 @@ describe('Repaying Loans on Aave V4', () => {
             }),
           )
           .andThen(() =>
-            supplyWETHAndBorrowMax(client, user, ETHEREUM_USDC_ADDRESS),
+            supplyWETHAndBorrow(client, user, ETHEREUM_USDC_ADDRESS),
           );
 
         assertOk(setup);

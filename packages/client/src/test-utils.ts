@@ -44,8 +44,8 @@ export const ETHEREUM_USDC_ADDRESS = evmAddress(
   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 );
 
-export const ETHEREUM_DAI_ADDRESS = evmAddress(
-  '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+export const ETHEREUM_USDS_ADDRESS = evmAddress(
+  '0xdC035D45d973E3EC169d2276DDab16f1e407384F',
 );
 
 export const ETHEREUM_WSTETH_ADDRESS = evmAddress(
@@ -102,17 +102,24 @@ export const client = AaveClient.create({
 });
 
 export async function createNewWallet(
-  privateKey: `0x${string}` = generatePrivateKey(),
+  privateKey?: `0x${string}`,
 ): Promise<WalletClient<Transport, Chain, Account>> {
-  const wallet = createWalletClient({
+  if (!privateKey) {
+    const wallet = createWalletClient({
+      account: privateKeyToAccount(generatePrivateKey()),
+      chain: ethereumForkChain,
+      transport: http(),
+    });
+
+    await fundNativeAddress(evmAddress(wallet.account.address));
+
+    return wallet;
+  }
+  return createWalletClient({
     account: privateKeyToAccount(privateKey),
     chain: ethereumForkChain,
     transport: http(),
   });
-
-  await fundNativeAddress(evmAddress(wallet.account.address));
-
-  return wallet;
 }
 
 // Tenderly RPC type for setBalance
