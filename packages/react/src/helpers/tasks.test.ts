@@ -53,12 +53,12 @@ describe(`Given the '${useAsyncTask.name}' hook`, () => {
           useAsyncTask((input: string) => okAsync(input), []),
         );
 
-        await expect(async () => {
-          await act(async () => {
+        await act(async () => {
+          await expect(async () => {
             result.current[0]('test');
             result.current[0]('test');
-          });
-        }).rejects.toThrow(InvariantError);
+          }).rejects.toThrow(InvariantError);
+        });
       });
     });
 
