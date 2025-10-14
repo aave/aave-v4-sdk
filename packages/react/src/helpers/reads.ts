@@ -17,20 +17,19 @@ import {
 export type Selector<T, V> = (data: T) => V;
 
 export type Pausable<T> = Prettify<
-  | (T & { pause?: never })
-  | (NullishDeep<T> & {
-      /**
-       * Prevents the hook from automatically executing GraphQL query operations.
-       *
-       * @experimental This is an experimental feature and may change in the future.
-       *
-       * @remarks
-       * `pause` may be set to `true` to stop the query operation from executing
-       * automatically. The hook will stop receiving updates and won’t execute the query
-       * operation until it’s set to `false`.
-       */
-      pause: boolean;
-    })
+  NullishDeep<T> & {
+    /**
+     * Prevents the hook from automatically executing GraphQL query operations.
+     *
+     * @experimental This is an experimental feature and may change in the future.
+     *
+     * @remarks
+     * `pause` may be set to `true` to stop the query operation from executing
+     * automatically. The hook will stop receiving updates and won’t execute the query
+     * operation until it’s set to `false`.
+     */
+    pause: boolean;
+  }
 >;
 
 export type Suspendable = { suspense: true };
@@ -46,7 +45,7 @@ export type UseSuspendableQueryArgs<
   Pause extends boolean = never,
 > = {
   document: TypedDocumentNode<StandardData<Value>, Variables>;
-  variables: Pause extends boolean ? NullishDeep<Variables> : Variables;
+  variables?: Pause extends boolean ? NullishDeep<Variables> : Variables;
   suspense: Suspense;
   selector?: Selector<Value, Output>;
   pollInterval?: number;
@@ -60,6 +59,7 @@ export function useSuspendableQuery<
   Value,
   Output,
   Variables extends AnyVariables,
+  Pausable extends boolean = never,
 >({
   document,
   variables,
@@ -69,8 +69,9 @@ export function useSuspendableQuery<
   Value,
   Output,
   Variables,
-  false
->): ReadResult<Output>;
+  false,
+  Pausable
+>): ReadResult<Output, UnexpectedError, Pausable>;
 /**
  * @internal
  */
@@ -78,6 +79,7 @@ export function useSuspendableQuery<
   Value,
   Output,
   Variables extends AnyVariables,
+  Pausable extends boolean = never,
 >({
   document,
   variables,
@@ -87,8 +89,9 @@ export function useSuspendableQuery<
   Value,
   Output,
   Variables,
-  true
->): SuspenseResult<Output>;
+  true,
+  Pausable
+>): SuspenseResult<Output, Pausable>;
 /**
  * @internal
  */
@@ -96,6 +99,7 @@ export function useSuspendableQuery<
   Value,
   Output,
   Variables extends AnyVariables,
+  Pausable extends boolean = never,
 >({
   document,
   variables,
@@ -106,8 +110,8 @@ export function useSuspendableQuery<
   Output,
   Variables,
   boolean,
-  boolean
->): SuspendableResult<Output>;
+  Pausable
+>): SuspendableResult<Output, UnexpectedError, Pausable>;
 /**
  * Implementation.
  */
@@ -128,7 +132,7 @@ export function useSuspendableQuery<
   Variables,
   boolean,
   boolean
->): SuspendableResult<Output> {
+>): SuspendableResult<Output, UnexpectedError, boolean> {
   const [{ fetching, data, error }, executeQuery] = useQuery({
     query: document,
     variables: variables as Variables,
@@ -152,6 +156,10 @@ export function useSuspendableQuery<
 
     return () => clearTimeout(timerId);
   }, [fetching, executeQuery, pollInterval]);
+
+  if (pause) {
+    return ReadResult.Paused();
+  }
 
   if (fetching) {
     return ReadResult.Initial();

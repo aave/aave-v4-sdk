@@ -36,7 +36,7 @@ import {
   type UserSuppliesRequest,
   type UserSupplyItem,
 } from '@aave/graphql-next';
-import type { Prettify } from '@aave/types-next';
+import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type Pausable,
@@ -520,7 +520,7 @@ export function useUserBalancesAction(
   );
 }
 
-export type UseUserHistoryArgs = Pausable<
+export type UseUserHistoryArgs = Prettify<
   UserHistoryRequest & CurrencyQueryOptions
 >;
 
@@ -543,6 +543,10 @@ export function useUserHistory(
   args: UseUserHistoryArgs & Suspendable,
 ): SuspenseResult<PaginatedUserHistoryResult>;
 
+export function useUserHistory(
+  args: Pausable<UseUserHistoryArgs> & Suspendable,
+): SuspenseResult<PaginatedUserHistoryResult, true>;
+
 /**
  * Fetch user transaction history with pagination.
  *
@@ -558,15 +562,19 @@ export function useUserHistory(
 export function useUserHistory(
   args: UseUserHistoryArgs,
 ): ReadResult<PaginatedUserHistoryResult>;
+export function useUserHistory(
+  args: Pausable<UseUserHistoryArgs>,
+): ReadResult<PaginatedUserHistoryResult, UnexpectedError, true>;
 
 export function useUserHistory({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseUserHistoryArgs & {
+}: NullishDeep<UseUserHistoryArgs> & {
   suspense?: boolean;
-}): SuspendableResult<PaginatedUserHistoryResult> {
+  pause?: boolean;
+}): SuspendableResult<PaginatedUserHistoryResult, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserHistoryQuery,
     variables: {
