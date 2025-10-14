@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "@aave/client-next": "workspace:*",
-    "type-fest": "^4.41.0"
-
+    "type-fest": "^5.1.0"
   },
   "devDependencies": {
     "typescript": "^5.9.2",
