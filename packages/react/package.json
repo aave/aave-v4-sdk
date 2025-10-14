@@ -68,7 +68,6 @@
     "@aave/core-next": "workspace:*",
     "@aave/graphql-next": "workspace:*",
     "@aave/types-next": "workspace:*",
-    "type-fest": "^5.1.0",
     "urql": "^4.2.2"
   },
   "devDependencies": {

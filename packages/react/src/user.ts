@@ -39,6 +39,7 @@ import {
 import type { Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
+  type Pausable,
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
@@ -519,7 +520,7 @@ export function useUserBalancesAction(
   );
 }
 
-export type UseUserHistoryArgs = Prettify<
+export type UseUserHistoryArgs = Pausable<
   UserHistoryRequest & CurrencyQueryOptions
 >;
 
@@ -560,6 +561,7 @@ export function useUserHistory(
 
 export function useUserHistory({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
 }: UseUserHistoryArgs & {
@@ -572,6 +574,7 @@ export function useUserHistory({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
