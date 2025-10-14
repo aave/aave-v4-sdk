@@ -61,7 +61,7 @@
     "@aave/types-next": "workspace:*",
     "gql.tada": "^1.8.13",
     "graphql": "^16.11.0",
-    "type-fest": "^4.41.0"
+    "type-fest": "^5.1.0"
   },
   "devDependencies": {
     "@urql/introspection": "^1.2.1",
