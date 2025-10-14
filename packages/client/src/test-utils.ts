@@ -29,7 +29,7 @@ export const environment =
   import.meta.env.ENVIRONMENT === 'local' ? local : staging;
 
 export const ETHEREUM_FORK_ID = chainId(
-  Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID),
+  Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
 );
 
 export const ETHEREUM_GHO_ADDRESS = evmAddress(
