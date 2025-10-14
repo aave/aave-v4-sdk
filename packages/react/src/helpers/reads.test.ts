@@ -42,7 +42,6 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
           document: HealthQuery,
-          variables: {},
           suspense: false,
         }),
       );
@@ -68,7 +67,6 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
           document: HealthQuery,
-          variables: {},
           suspense: false,
         }),
       );
@@ -81,12 +79,27 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
     });
   });
 
+  describe('When rendering with suspense disabled and pause is true', () => {
+    it('Then it should return the bespoke paused state', async () => {
+      const { result } = renderHookWithinContext(() =>
+        useSuspendableQuery({
+          document: HealthQuery,
+          suspense: false,
+          pause: true,
+        }),
+      );
+
+      expect(result.current.loading).toBeUndefined;
+      expect(result.current.data).toBeUndefined();
+      expect(result.current.error).toBeUndefined();
+    });
+  });
+
   describe('When rendering with suspense enabled', () => {
     it('Then it should suspend and render once the query is resolved', async () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
           document: HealthQuery,
-          variables: {},
           suspense: true,
         }),
       );
@@ -112,7 +125,6 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
         () =>
           useSuspendableQuery({
             document: HealthQuery,
-            variables: {},
             suspense: true,
           }),
         // biome-ignore lint/suspicious/noExplicitAny: not worth the effort
@@ -126,6 +138,22 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
         expect.any(UnexpectedError),
         expect.any(Object),
       );
+    });
+  });
+
+  describe('When rendering with suspense enabled and pause is true', () => {
+    it('Then it should return the bespoke paused state', async () => {
+      const { result } = renderHookWithinContext(() =>
+        useSuspendableQuery({
+          document: HealthQuery,
+          suspense: true,
+          pause: true,
+        }),
+      );
+
+      expect(result.current.loading).toBeUndefined;
+      expect(result.current.data).toBeUndefined();
+      expect(result.current.error).toBeUndefined();
     });
   });
 });
