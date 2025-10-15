@@ -40,6 +40,8 @@ import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
@@ -532,39 +534,76 @@ export type UseUserHistoryArgs = Prettify<
  * ```tsx
  * const { data } = useUserHistory({
  *   user: evmAddress('0x742d35cc…'),
- *   chainId: chainId(1),
- *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
- *   pageSize: 'FIFTY',
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
  *   suspense: true,
  * });
+ *
+ * // data.items: UserHistoryItem[]
  * ```
  */
 export function useUserHistory(
   args: UseUserHistoryArgs & Suspendable,
 ): SuspenseResult<PaginatedUserHistoryResult>;
-
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * Paused suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ *
+ * // data?.items: UserHistoryItem[] | undefined
+ * ```
+ */
 export function useUserHistory(
   args: Pausable<UseUserHistoryArgs> & Suspendable,
-): SuspenseResult<PaginatedUserHistoryResult, true>;
-
+): PausableSuspenseResult<PaginatedUserHistoryResult>;
 /**
  * Fetch user transaction history with pagination.
  *
  * ```tsx
  * const { data, error, loading } = useUserHistory({
  *   user: evmAddress('0x742d35cc…'),
- *   chainId: chainId(1),
- *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
- *   pageSize: 'FIFTY',
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
  * });
  * ```
  */
 export function useUserHistory(
   args: UseUserHistoryArgs,
 ): ReadResult<PaginatedUserHistoryResult>;
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * Paused loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
+ *   pause: true,
+ * });
+ *
+ * // data?.items: UserHistoryItem[] | undefined
+ * // error: UnexpectedError | undefined
+ * // loading: boolean | undefined
+ * ```
+ */
 export function useUserHistory(
   args: Pausable<UseUserHistoryArgs>,
-): ReadResult<PaginatedUserHistoryResult, UnexpectedError, true>;
+): PausableReadResult<PaginatedUserHistoryResult>;
 
 export function useUserHistory({
   suspense = false,
