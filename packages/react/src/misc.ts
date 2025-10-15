@@ -10,8 +10,12 @@ import {
   ChainsQuery,
   ExchangeRateQuery,
 } from '@aave/graphql-next';
+import type { NullishDeep } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
+  type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
@@ -38,7 +42,22 @@ export type UseAaveChainsArgs = {
 export function useAaveChains(
   args: UseAaveChainsArgs & Suspendable,
 ): SuspenseResult<Chain[]>;
-
+/**
+ * Fetches the list of supported chains.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useAaveChains({
+ *   filter: ChainsFilter.ALL,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAaveChains(
+  args: Pausable<UseAaveChainsArgs> & Suspendable,
+): PausableSuspenseResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
  *
@@ -49,17 +68,35 @@ export function useAaveChains(
  * ```
  */
 export function useAaveChains(args: UseAaveChainsArgs): ReadResult<Chain[]>;
+/**
+ * Fetches the list of supported chains.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useAaveChains({
+ *   filter: ChainsFilter.ALL,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAaveChains(
+  args: Pausable<UseAaveChainsArgs>,
+): PausableReadResult<Chain[]>;
 
 export function useAaveChains({
   suspense = false,
+  pause = false,
   filter = ChainsFilter.ALL,
-}: UseAaveChainsArgs & {
+}: NullishDeep<UseAaveChainsArgs> & {
   suspense?: boolean;
-}): SuspendableResult<Chain[]> {
+  pause?: boolean;
+}): SuspendableResult<Chain[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: ChainsQuery,
     variables: { filter },
     suspense,
+    pause,
   });
 }
 
@@ -123,7 +160,28 @@ export type UseExchangeRateArgs = ExchangeRateRequest;
 export function useExchangeRate(
   args: UseExchangeRateArgs & Suspendable,
 ): SuspenseResult<FiatAmount>;
-
+/**
+ * Fetches exchange rates between tokens and fiat currencies with automatic polling.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useExchangeRate({
+ *   from: {
+ *     erc20: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0xA0b86a33E6...')
+ *     }
+ *   },
+ *   to: Currency.Usd,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useExchangeRate(
+  args: Pausable<UseExchangeRateArgs> & Suspendable,
+): PausableSuspenseResult<FiatAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -144,13 +202,36 @@ export function useExchangeRate(
 export function useExchangeRate(
   args: UseExchangeRateArgs,
 ): ReadResult<FiatAmount>;
+/**
+ * Fetches exchange rates between tokens and fiat currencies with automatic polling.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useExchangeRate({
+ *   from: {
+ *     erc20: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0xA0b86a33E6...')
+ *     }
+ *   },
+ *   to: Currency.Usd,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useExchangeRate(
+  args: Pausable<UseExchangeRateArgs>,
+): PausableReadResult<FiatAmount>;
 
 export function useExchangeRate({
   suspense = false,
+  pause = false,
   ...request
-}: UseExchangeRateArgs & {
+}: NullishDeep<UseExchangeRateArgs> & {
   suspense?: boolean;
-}): SuspendableResult<FiatAmount> {
+  pause?: boolean;
+}): SuspendableResult<FiatAmount, UnexpectedError, boolean> {
   const client = useAaveClient();
   const pollInterval = client.context.environment.exchangeRateInterval;
 
@@ -158,6 +239,7 @@ export function useExchangeRate({
     document: ExchangeRateQuery,
     variables: { request },
     suspense,
+    pause,
     pollInterval,
   });
 }

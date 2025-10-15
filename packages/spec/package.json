@@ -4,9 +4,6 @@
   "description": "End-to-end specs for Aave v4 protocol, API, and SDK.",
   "private": true,
   "type": "module",
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
   "dependencies": {
     "@aave/client-next": "workspace:*",
     "type-fest": "^5.1.0"

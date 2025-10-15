@@ -7,11 +7,7 @@ import type { UnexpectedError } from '@aave/client-next';
  * - Rely on the `loading` value to determine if the `data` or `error` can be evaluated.
  * - If `error` is `undefined`, then `data` value will be available.
  */
-export type ReadResult<
-  T,
-  E extends UnexpectedError = UnexpectedError,
-  Pausable extends boolean = false,
-> =
+export type ReadResult<T, E extends UnexpectedError = UnexpectedError> =
   | {
       data: undefined;
       error: undefined;
@@ -26,61 +22,104 @@ export type ReadResult<
       data: undefined;
       error: E;
       loading: false;
+    };
+
+/**
+ * A read hook result that supports pausing.
+ */
+export type PausableReadResult<T, E extends UnexpectedError = UnexpectedError> =
+  | {
+      data: T | undefined;
+      error: E | undefined;
+      loading: false;
+      paused: true;
     }
-  | (Pausable extends true
-      ? {
-          data: undefined;
-          error: undefined;
-          loading: undefined;
-        }
-      : never);
+  | {
+      data: undefined;
+      error: undefined;
+      loading: true;
+      paused: false;
+    }
+  | {
+      data: T;
+      error: undefined;
+      loading: false;
+      paused: false;
+    }
+  | {
+      data: undefined;
+      error: E;
+      loading: false;
+      paused: false;
+    };
 
 /**
  * @internal
  */
 export const ReadResult = {
-  Initial: <T, E extends UnexpectedError = UnexpectedError>(): ReadResult<
+  Initial: <
     T,
-    E
-  > => ({
+    E extends UnexpectedError = UnexpectedError,
+  >(): PausableReadResult<T, E> => ({
     data: undefined,
     error: undefined,
     loading: true,
+    paused: false,
   }),
   Success: <T, E extends UnexpectedError = UnexpectedError>(
     data: T,
-  ): ReadResult<T, E> => ({
+  ): PausableReadResult<T, E> => ({
     data,
     error: undefined,
     loading: false,
+    paused: false,
   }),
   Failure: <T, E extends UnexpectedError = UnexpectedError>(
     error: E,
-  ): ReadResult<T, E> => ({
+  ): PausableReadResult<T, E> => ({
     data: undefined,
     error,
     loading: false,
+    paused: false,
   }),
-  Paused: <T, E extends UnexpectedError = UnexpectedError>(): ReadResult<
-    T,
-    E,
-    boolean
-  > => ({
-    data: undefined,
-    error: undefined,
-    loading: undefined,
+  Paused: <T, E extends UnexpectedError = UnexpectedError>(
+    data: T | undefined,
+    error: E | undefined,
+  ): PausableReadResult<T, E> => ({
+    data,
+    error,
+    loading: false,
+    paused: true,
   }),
 };
 
 /**
- * A read hook result that supports React Suspense
+ * A read hook result that supports React Suspense.
  */
-export type SuspenseResult<T, Pausable extends boolean = false> = {
-  data: Pausable extends true ? T | undefined : T;
+export type SuspenseResult<T> = {
+  data: T;
 };
+
+/**
+ * A read hook result that supports React Suspense and can be paused.
+ */
+export type PausableSuspenseResult<T> =
+  | {
+      paused: true;
+      data: undefined;
+    }
+  | {
+      paused: false;
+      data: T;
+    };
 
 export type SuspendableResult<
   T,
   E extends UnexpectedError = UnexpectedError,
   Pausable extends boolean = false,
-> = ReadResult<T, E, Pausable> | SuspenseResult<T, Pausable>;
+> =
+  | ReadResult<T, E>
+  | SuspenseResult<T>
+  | (Pausable extends true
+      ? PausableReadResult<T, E> | PausableSuspenseResult<T>
+      : never);

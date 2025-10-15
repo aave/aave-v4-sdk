@@ -45,10 +45,18 @@ import {
   UserSummaryQuery,
   type WithdrawRequest,
 } from '@aave/graphql-next';
-import { errAsync, type Prettify, type TxHash } from '@aave/types-next';
+import {
+  errAsync,
+  type NullishDeep,
+  type Prettify,
+  type TxHash,
+} from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   cancel,
+  type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   type PendingTransactionError,
   type ReadResult,
   type SendTransactionError,
@@ -1121,7 +1129,37 @@ export type UsePreviewArgs = Prettify<PreviewRequest & CurrencyQueryOptions>;
 export function usePreview(
   args: UsePreviewArgs & Suspendable,
 ): SuspenseResult<PreviewUserPosition>;
-
+/**
+ * Fetch a preview of the impact of a potential action on a user's position.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = usePreview({
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function usePreview(
+  args: Pausable<UsePreviewArgs> & Suspendable,
+): PausableSuspenseResult<PreviewUserPosition>;
 /**
  * Fetch a preview of the impact of a potential action on a user's position.
  *
@@ -1149,14 +1187,46 @@ export function usePreview(
 export function usePreview(
   args: UsePreviewArgs,
 ): ReadResult<PreviewUserPosition>;
+/**
+ * Fetch a preview of the impact of a potential action on a user's position.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = usePreview({
+ *   action: {
+ *     supply: {
+ *       spoke: {
+ *         address: evmAddress('0x87870bca…'),
+ *         chainId: chainId(1),
+ *       },
+ *       reserve: reserveId(1),
+ *       amount: {
+ *         erc20: {
+ *           currency: evmAddress('0x5678…'),
+ *           value: '1000',
+ *         },
+ *       },
+ *       supplier: evmAddress('0x9abc…'),
+ *     },
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function usePreview(
+  args: Pausable<UsePreviewArgs>,
+): PausableReadResult<PreviewUserPosition>;
 
 export function usePreview({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UsePreviewArgs & {
+}: NullishDeep<UsePreviewArgs> & {
   suspense?: boolean;
-}): SuspendableResult<PreviewUserPosition> {
+  pause?: boolean;
+}): SuspendableResult<PreviewUserPosition, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: PreviewQuery,
     variables: {
@@ -1164,5 +1234,6 @@ export function usePreview({
       currency,
     },
     suspense,
+    pause,
   });
 }

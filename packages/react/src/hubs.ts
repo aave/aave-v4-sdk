@@ -14,9 +14,12 @@ import {
   HubsQuery,
   type HubsRequest,
 } from '@aave/graphql-next';
-import type { Prettify } from '@aave/types-next';
+import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
+  type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
@@ -45,7 +48,23 @@ export type UseHubArgs = Prettify<HubRequest & CurrencyQueryOptions>;
 export function useHub(
   args: UseHubArgs & Suspendable,
 ): SuspenseResult<Hub | null>;
-
+/**
+ * Fetch a specific hub by address and chain ID.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useHub({
+ *   hub: evmAddress('0x123...'),
+ *   chainId: chainId(1),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHub(
+  args: Pausable<UseHubArgs> & Suspendable,
+): PausableSuspenseResult<Hub | null>;
 /**
  * Fetch a specific hub by address and chain ID.
  *
@@ -58,14 +77,32 @@ export function useHub(
  * ```
  */
 export function useHub(args: UseHubArgs): ReadResult<Hub | null>;
+/**
+ * Fetch a specific hub by address and chain ID.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useHub({
+ *   hub: evmAddress('0x123...'),
+ *   chainId: chainId(1),
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHub(
+  args: Pausable<UseHubArgs>,
+): PausableReadResult<Hub | null>;
 
 export function useHub({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseHubArgs & {
+}: NullishDeep<UseHubArgs> & {
   suspense?: boolean;
-}): SuspendableResult<Hub | null> {
+  pause?: boolean;
+}): SuspendableResult<Hub | null, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: HubQuery,
     variables: {
@@ -73,6 +110,7 @@ export function useHub({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
@@ -85,31 +123,61 @@ export type UseHubsArgs = Prettify<HubsRequest & CurrencyQueryOptions>;
  *
  * ```tsx
  * const { data } = useHubs({
- *   chainIds: [chainId(1), chainId(137)],
+ *   query: { chainIds: [chainId(1)] },
  *   suspense: true,
  * });
  * ```
  */
 export function useHubs(args: UseHubsArgs & Suspendable): SuspenseResult<Hub[]>;
-
+/**
+ * Fetch multiple hubs based on specified criteria.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useHubs({
+ *   query: { chainIds: [chainId(1)] },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubs(
+  args: Pausable<UseHubsArgs> & Suspendable,
+): PausableSuspenseResult<Hub[]>;
 /**
  * Fetch multiple hubs based on specified criteria.
  *
  * ```tsx
  * const { data, error, loading } = useHubs({
- *   chainIds: [chainId(1), chainId(137)],
+ *   query: { chainIds: [chainId(1)] },
  * });
  * ```
  */
 export function useHubs(args: UseHubsArgs): ReadResult<Hub[]>;
+/**
+ * Fetch multiple hubs based on specified criteria.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useHubs({
+ *   query: { chainIds: [chainId(1)] },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubs(args: Pausable<UseHubsArgs>): PausableReadResult<Hub[]>;
 
 export function useHubs({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseHubsArgs & {
+}: NullishDeep<UseHubsArgs> & {
   suspense?: boolean;
-}): SuspendableResult<Hub[]> {
+  pause?: boolean;
+}): SuspendableResult<Hub[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: HubsQuery,
     variables: {
@@ -117,6 +185,7 @@ export function useHubs({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
@@ -143,7 +212,24 @@ export type UseHubAssetsArgs = Prettify<
 export function useHubAssets(
   args: UseHubAssetsArgs & Suspendable,
 ): SuspenseResult<HubAsset[]>;
-
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubAssets(
+  args: Pausable<UseHubAssetsArgs> & Suspendable,
+): PausableSuspenseResult<HubAsset[]>;
 /**
  * Fetch hub assets for a specific chain and optional hub/user filtering.
  *
@@ -158,14 +244,33 @@ export function useHubAssets(
  * ```
  */
 export function useHubAssets(args: UseHubAssetsArgs): ReadResult<HubAsset[]>;
+/**
+ * Fetch hub assets for a specific chain and optional hub/user filtering.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useHubAssets({
+ *   chainId: chainId(1),
+ *   hub: evmAddress('0x123...'), // optional
+ *   user: evmAddress('0x456...'), // optional
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubAssets(
+  args: Pausable<UseHubAssetsArgs>,
+): PausableReadResult<HubAsset[]>;
 
 export function useHubAssets({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseHubAssetsArgs & {
+}: NullishDeep<UseHubAssetsArgs> & {
   suspense?: boolean;
-}): SuspendableResult<HubAsset[]> {
+  pause?: boolean;
+}): SuspendableResult<HubAsset[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: HubAssetsQuery,
     variables: {
@@ -173,6 +278,7 @@ export function useHubAssets({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
