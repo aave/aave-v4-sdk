@@ -1,3 +1,4 @@
+import type { UnexpectedError } from '@aave/client-next';
 import {
   type PaginatedSpokePositionManagerResult,
   type PaginatedSpokeUserPositionManagerResult,
@@ -9,7 +10,11 @@ import {
   SpokeUserPositionManagersQuery,
   type SpokeUserPositionManagersRequest,
 } from '@aave/graphql-next';
+import type { NullishDeep } from '@aave/types-next';
 import {
+  type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
@@ -34,7 +39,22 @@ export type UseSpokesArgs = SpokesRequest;
 export function useSpokes(
   args: UseSpokesArgs & Suspendable,
 ): SuspenseResult<Spoke[]>;
-
+/**
+ * Fetch spokes based on specified criteria.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSpokes({
+ *     chainIds: [chainId(1)],
+ *     suspense: true,
+ *     pause: true,
+ * });
+ * ```
+ */
+export function useSpokes(
+  args: Pausable<UseSpokesArgs> & Suspendable,
+): PausableSuspenseResult<Spoke[]>;
 /**
  * Fetch spokes based on specified criteria.
  *
@@ -46,19 +66,37 @@ export function useSpokes(
  * ```
  */
 export function useSpokes(args: UseSpokesArgs): ReadResult<Spoke[]>;
+/**
+ * Fetch spokes based on specified criteria.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSpokes({
+ *     chainIds: [chainId(1)],
+ *     pause: true,
+ * });
+ * ```
+ */
+export function useSpokes(
+  args: Pausable<UseSpokesArgs>,
+): PausableReadResult<Spoke[]>;
 
 export function useSpokes({
   suspense = false,
+  pause = false,
   ...request
-}: UseSpokesArgs & {
+}: NullishDeep<UseSpokesArgs> & {
   suspense?: boolean;
-}): SuspendableResult<Spoke[]> {
+  pause?: boolean;
+}): SuspendableResult<Spoke[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: SpokesQuery,
     variables: {
       request,
     },
     suspense,
+    pause,
   });
 }
 
@@ -82,7 +120,25 @@ export type UseSpokePositionManagersArgs = SpokePositionManagersRequest;
 export function useSpokePositionManagers(
   args: UseSpokePositionManagersArgs & Suspendable,
 ): SuspenseResult<PaginatedSpokePositionManagerResult>;
-
+/**
+ * Fetches all the positions manager for a specific spoke.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSpokePositionManagers({
+ *     spoke: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0x878...'),
+ *     },
+ *     suspense: true,
+ *     pause: true,
+ * });
+ * ```
+ */
+export function useSpokePositionManagers(
+  args: Pausable<UseSpokePositionManagersArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedSpokePositionManagerResult>;
 /**
  * Fetches all the positions manager for a specific spoke.
  *
@@ -99,19 +155,44 @@ export function useSpokePositionManagers(
 export function useSpokePositionManagers(
   args: UseSpokePositionManagersArgs,
 ): ReadResult<PaginatedSpokePositionManagerResult>;
+/**
+ * Fetches all the positions manager for a specific spoke.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSpokePositionManagers({
+ *     spoke: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0x878...'),
+ *     },
+ *     pause: true,
+ * });
+ * ```
+ */
+export function useSpokePositionManagers(
+  args: Pausable<UseSpokePositionManagersArgs>,
+): PausableReadResult<PaginatedSpokePositionManagerResult>;
 
 export function useSpokePositionManagers({
   suspense = false,
+  pause = false,
   ...request
-}: UseSpokePositionManagersArgs & {
+}: NullishDeep<UseSpokePositionManagersArgs> & {
   suspense?: boolean;
-}): SuspendableResult<PaginatedSpokePositionManagerResult> {
+  pause?: boolean;
+}): SuspendableResult<
+  PaginatedSpokePositionManagerResult,
+  UnexpectedError,
+  boolean
+> {
   return useSuspendableQuery({
     document: SpokePositionManagersQuery,
     variables: {
       request,
     },
     suspense,
+    pause,
   });
 }
 
@@ -136,7 +217,26 @@ export type UseSpokeUserPositionManagersArgs = SpokeUserPositionManagersRequest;
 export function useSpokeUserPositionManagers(
   args: UseSpokeUserPositionManagersArgs & Suspendable,
 ): SuspenseResult<PaginatedSpokeUserPositionManagerResult>;
-
+/**
+ * Fetches all the position managers of a user for a specific spoke
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSpokeUserPositionManagers({
+ *     spoke: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0x878...'),
+ *     },
+ *     user: evmAddress('0x123...'),
+ *     suspense: true,
+ *     pause: true,
+ * });
+ * ```
+ */
+export function useSpokeUserPositionManagers(
+  args: Pausable<UseSpokeUserPositionManagersArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedSpokeUserPositionManagerResult>;
 /**
  * Fetches all the position managers of a user for a specific spoke
  *
@@ -154,18 +254,44 @@ export function useSpokeUserPositionManagers(
 export function useSpokeUserPositionManagers(
   args: UseSpokeUserPositionManagersArgs,
 ): ReadResult<PaginatedSpokeUserPositionManagerResult>;
+/**
+ * Fetches all the position managers of a user for a specific spoke
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSpokeUserPositionManagers({
+ *     spoke: {
+ *       chainId: chainId(1),
+ *       address: evmAddress('0x878...'),
+ *     },
+ *     user: evmAddress('0x123...'),
+ *     pause: true,
+ * });
+ * ```
+ */
+export function useSpokeUserPositionManagers(
+  args: Pausable<UseSpokeUserPositionManagersArgs>,
+): PausableReadResult<PaginatedSpokeUserPositionManagerResult>;
 
 export function useSpokeUserPositionManagers({
   suspense = false,
+  pause = false,
   ...request
-}: UseSpokeUserPositionManagersArgs & {
+}: NullishDeep<UseSpokeUserPositionManagersArgs> & {
   suspense?: boolean;
-}): SuspendableResult<PaginatedSpokeUserPositionManagerResult> {
+  pause?: boolean;
+}): SuspendableResult<
+  PaginatedSpokeUserPositionManagerResult,
+  UnexpectedError,
+  boolean
+> {
   return useSuspendableQuery({
     document: SpokeUserPositionManagersQuery,
     variables: {
       request,
     },
     suspense,
+    pause,
   });
 }

@@ -47,6 +47,7 @@ import {
 } from '@aave/graphql-next';
 import {
   invariant,
+  type NullishDeep,
   okAsync,
   type Prettify,
   type ResultAsync,
@@ -57,6 +58,9 @@ import { useAaveClient } from './context';
 import {
   type CancelOperation,
   cancel,
+  type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   PendingTransaction,
   type PendingTransactionError,
   type ReadResult,
@@ -91,7 +95,27 @@ export type UseSwapQuoteArgs = Prettify<
 export function useSwapQuote(
   args: UseSwapQuoteArgs & Suspendable,
 ): SuspenseResult<SwapQuote>;
-
+/**
+ * Fetch a swap quote for the specified trade parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSwapQuote({
+ *   chainId: chainId(1),
+ *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
+ *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   amount: bigDecimal('1000'),
+ *   kind: SwapKind.SELL,
+ *   from: evmAddress('0x742d35cc...'),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSwapQuote(
+  args: Pausable<UseSwapQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
 /**
  * Fetch a swap quote for the specified trade parameters.
  *
@@ -106,14 +130,36 @@ export function useSwapQuote(
  * ```
  */
 export function useSwapQuote(args: UseSwapQuoteArgs): ReadResult<SwapQuote>;
+/**
+ * Fetch a swap quote for the specified trade parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSwapQuote({
+ *   chainId: chainId(1),
+ *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
+ *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   amount: bigDecimal('1000'),
+ *   kind: SwapKind.SELL,
+ *   from: evmAddress('0x742d35cc...'),
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSwapQuote(
+  args: Pausable<UseSwapQuoteArgs>,
+): PausableReadResult<SwapQuote>;
 
 export function useSwapQuote({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseSwapQuoteArgs & {
+}: NullishDeep<UseSwapQuoteArgs> & {
   suspense?: boolean;
-}): SuspendableResult<SwapQuote> {
+  pause?: boolean;
+}): SuspendableResult<SwapQuote, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: SwapQuoteQuery,
     variables: {
@@ -121,6 +167,7 @@ export function useSwapQuote({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
@@ -182,7 +229,22 @@ export type UseSwappableTokensArgs = SwappableTokensRequest;
 export function useSwappableTokens(
   args: UseSwappableTokensArgs & Suspendable,
 ): SuspenseResult<Token[]>;
-
+/**
+ * Fetch the list of tokens available for swapping on a specific chain.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSwappableTokens({
+ *   query: { chainIds: [chainId(1)] },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSwappableTokens(
+  args: Pausable<UseSwappableTokensArgs> & Suspendable,
+): PausableSuspenseResult<Token[]>;
 /**
  * Fetch the list of tokens available for swapping on a specific chain.
  *
@@ -195,19 +257,37 @@ export function useSwappableTokens(
 export function useSwappableTokens(
   args: UseSwappableTokensArgs,
 ): ReadResult<Token[]>;
+/**
+ * Fetch the list of tokens available for swapping on a specific chain.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSwappableTokens({
+ *   query: { chainIds: [chainId(1)] },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSwappableTokens(
+  args: Pausable<UseSwappableTokensArgs>,
+): PausableReadResult<Token[]>;
 
 export function useSwappableTokens({
   suspense = false,
+  pause = false,
   ...request
-}: UseSwappableTokensArgs & {
+}: NullishDeep<UseSwappableTokensArgs> & {
   suspense?: boolean;
-}): SuspendableResult<Token[]> {
+  pause?: boolean;
+}): SuspendableResult<Token[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: SwappableTokensQuery,
     variables: {
       request,
     },
     suspense,
+    pause,
   });
 }
 
@@ -232,7 +312,24 @@ export type UseUserSwapsArgs = Prettify<
 export function useUserSwaps(
   args: UseUserSwapsArgs & Suspendable,
 ): SuspenseResult<PaginatedUserSwapsResult>;
-
+/**
+ * Fetch the user's swap history for a specific chain.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserSwaps({
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x742d35cc...'),
+ *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserSwaps(
+  args: Pausable<UseUserSwapsArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedUserSwapsResult>;
 /**
  * Fetch the user's swap history for a specific chain.
  *
@@ -247,14 +344,33 @@ export function useUserSwaps(
 export function useUserSwaps(
   args: UseUserSwapsArgs,
 ): ReadResult<PaginatedUserSwapsResult>;
+/**
+ * Fetch the user's swap history for a specific chain.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserSwaps({
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x742d35cc...'),
+ *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserSwaps(
+  args: Pausable<UseUserSwapsArgs>,
+): PausableReadResult<PaginatedUserSwapsResult>;
 
 export function useUserSwaps({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseUserSwapsArgs & {
+}: NullishDeep<UseUserSwapsArgs> & {
   suspense?: boolean;
-}): SuspendableResult<PaginatedUserSwapsResult> {
+  pause?: boolean;
+}): SuspendableResult<PaginatedUserSwapsResult, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserSwapsQuery,
     variables: {
@@ -262,6 +378,7 @@ export function useUserSwaps({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
