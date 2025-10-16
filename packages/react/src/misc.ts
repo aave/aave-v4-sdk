@@ -1,3 +1,4 @@
+import type { CurrencyQueryOptions } from '@aave/client-next';
 import { exchangeRate } from '@aave/client-next/actions';
 import type { UnexpectedError } from '@aave/core-next';
 import type {
@@ -9,8 +10,15 @@ import {
   ChainsFilter,
   ChainsQuery,
   ExchangeRateQuery,
+  type NativeAmount,
 } from '@aave/graphql-next';
-import type { NullishDeep } from '@aave/types-next';
+import {
+  type ChainId,
+  type NullishDeep,
+  never,
+  type Prettify,
+  type TxHash,
+} from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type Pausable,
@@ -242,4 +250,89 @@ export function useExchangeRate({
     pause,
     pollInterval,
   });
+}
+
+export type UseNetworkFeeArgs = Prettify<
+  {
+    chainId: ChainId;
+    txHash: TxHash;
+  } & CurrencyQueryOptions
+>;
+
+/**
+ * Fetches the network fee for a transaction.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useNetworkFee({
+ *   chainId: chainId(1),
+ *   txHash: txHash('0x123...'),
+ *   suspense: true,
+ * });
+ *
+ * data: NativeAmount
+ * ```
+ */
+export function useNetworkFee(
+  args: UseNetworkFeeArgs & Suspendable,
+): SuspenseResult<NativeAmount>;
+/**
+ * Fetches the network fee for a transaction.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data, paused } = useNetworkFee({
+ *   chainId: chainId(1),
+ *   txHash: txHash('0x123...'),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ *
+ * data: NativeAmount | undefined
+ * ```
+ */
+export function useNetworkFee(
+  args: Pausable<UseNetworkFeeArgs> & Suspendable,
+): PausableSuspenseResult<NativeAmount>;
+/**
+ * Fetches the network fee for a transaction.
+ *
+ * ```tsx
+ * const { data, error, loading } = useNetworkFee({
+ *   chainId: chainId(1),
+ *   txHash: txHash('0x123...'),
+ * });
+ * ```
+ */
+export function useNetworkFee(
+  args: UseNetworkFeeArgs,
+): ReadResult<NativeAmount>;
+/**
+ * Fetches the network fee for a transaction.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useNetworkFee({
+ *   chainId: chainId(1),
+ *   txHash: txHash('0x123...'),
+ *   pause: true,
+ * });
+ *
+ * data: NativeAmount | undefined
+ * ```
+ */
+export function useNetworkFee(
+  args: Pausable<UseNetworkFeeArgs>,
+): PausableReadResult<NativeAmount>;
+
+export function useNetworkFee(
+  _: NullishDeep<UseNetworkFeeArgs> & {
+    suspense?: boolean;
+    pause?: boolean;
+  },
+): SuspendableResult<NativeAmount, UnexpectedError, boolean> {
+  never('Not implemented');
 }
