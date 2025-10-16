@@ -1,6 +1,13 @@
-import { assertOk, bigDecimal, evmAddress, invariant } from '@aave/client-next';
+import {
+  assertOk,
+  bigDecimal,
+  Currency,
+  evmAddress,
+  invariant,
+} from '@aave/client-next';
 import {
   permitTypedData,
+  preview,
   supply,
   userSupplies,
 } from '@aave/client-next/actions';
@@ -29,14 +36,14 @@ describe('Supplying Assets on Aave V4', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_USDC_ADDRESS,
-          amount: bigDecimal('100'),
+          amount: bigDecimal('200'),
           decimals: 6,
         });
 
         assertOk(setup);
       });
 
-      it("Then the user's supply position is updated and the tokens are enabled as collateral by default", async () => {
+      it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
         const amountToSupply = bigDecimal('50');
         const reserveToSupply = await findReserveToSupply(client, user, {
           token: ETHEREUM_USDC_ADDRESS,
@@ -87,6 +94,42 @@ describe('Supplying Assets on Aave V4', () => {
       });
     });
 
+    describe('When the user wants to preview the supply action before performing it', () => {
+      it('Then the user can review the supply details before proceeding', async () => {
+        const amountToSupply = bigDecimal('50');
+        const reserve = await findReserveToSupply(client, user, {
+          token: ETHEREUM_USDC_ADDRESS,
+        });
+        assertOk(reserve);
+
+        const previewResult = await preview(
+          client,
+          {
+            action: {
+              supply: {
+                reserve: {
+                  reserveId: reserve.value.id,
+                  chainId: ETHEREUM_FORK_ID,
+                  spoke: reserve.value.spoke.address,
+                },
+                amount: {
+                  erc20: {
+                    value: amountToSupply,
+                  },
+                },
+                sender: evmAddress(user.account.address),
+              },
+            },
+          },
+          { currency: Currency.Usd },
+        );
+        assertOk(previewResult);
+        expect(previewResult.value).toMatchSnapshot({
+          id: expect.any(String),
+        });
+      });
+    });
+
     describe('When the user supplies tokens with collateral disabled', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
@@ -97,7 +140,7 @@ describe('Supplying Assets on Aave V4', () => {
         assertOk(setup);
       });
 
-      it("Then the user's supply position is updated and the tokens are not enabled as collateral", async () => {
+      it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const reserve = await findReserveToSupply(client, user, {
           token: ETHEREUM_WETH_ADDRESS,
         });
@@ -160,14 +203,16 @@ describe('Supplying Assets on Aave V4', () => {
         assertOk(setup);
       });
 
-      it('Then the supply succeeds without prior ERC20 approval', async ({
+      it('Then the supply is processed without requiring prior ERC20 approval', async ({
         annotate,
       }) => {
+        annotate(`account address: ${evmAddress(user.account.address)}`);
         const amountToSupply = bigDecimal('50');
         const reserve = await findReserveToSupply(client, user, {
           token: ETHEREUM_GHO_ADDRESS,
         });
         assertOk(reserve);
+        annotate(`reserve id: ${reserve.value.id}`);
 
         const signature = await permitTypedData(client, {
           supply: {
@@ -198,9 +243,6 @@ describe('Supplying Assets on Aave V4', () => {
           },
           sender: evmAddress(user.account.address),
         })
-          .andTee((tx) =>
-            annotate(`plan supply with permit: ${JSON.stringify(tx, null, 2)}`),
-          )
           .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
@@ -235,9 +277,40 @@ describe('Supplying Assets on Aave V4', () => {
   });
 
   describe('Given a user and a reserve that supports native token deposits', () => {
+    describe('When the user wants to preview the supply action before performing it', () => {
+      it('Then the user can review the supply details before proceeding', async () => {
+        const amountToSupply = bigDecimal('0.01');
+        const reserve = await findReserveToSupply(client, user, {
+          token: ETHEREUM_USDC_ADDRESS,
+        });
+        assertOk(reserve);
+
+        const previewResult = await preview(
+          client,
+          {
+            action: {
+              supply: {
+                reserve: {
+                  reserveId: reserve.value.id,
+                  chainId: ETHEREUM_FORK_ID,
+                  spoke: reserve.value.spoke.address,
+                },
+                amount: {
+                  native: amountToSupply,
+                },
+                sender: evmAddress(user.account.address),
+              },
+            },
+          },
+          { currency: Currency.Eur },
+        );
+        assertOk(previewResult);
+      });
+    });
+
     describe('When the user supplies native tokens', () => {
       // TODO: enable when contracts are deployed
-      it.skip("Then the user's supply position is updated and the tokens are enabled as collateral by default", async () => {
+      it.skip('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
         const reserve = await findReserveNativeSupply(client, user);
         assertOk(reserve);
 
@@ -281,7 +354,7 @@ describe('Supplying Assets on Aave V4', () => {
     });
 
     describe('When the user supplies native tokens with collateral disabled', () => {
-      it("Then the user's supply position is updated without the tokens are disabled as collateral", async () => {
+      it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const reserve = await findReserveNativeSupply(client, user);
         assertOk(reserve);
 
