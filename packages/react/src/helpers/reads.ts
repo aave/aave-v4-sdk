@@ -140,7 +140,7 @@ export function useSuspendableQuery<
   });
 
   useEffect(() => {
-    if (pollInterval <= 0 || fetching) return undefined;
+    if (pollInterval <= 0 || fetching || pause) return undefined;
 
     const timerId = setTimeout(() => {
       executeQuery({
@@ -149,7 +149,7 @@ export function useSuspendableQuery<
     }, pollInterval);
 
     return () => clearTimeout(timerId);
-  }, [fetching, executeQuery, pollInterval]);
+  }, [fetching, executeQuery, pollInterval, pause]);
 
   if (pause) {
     return ReadResult.Paused(
