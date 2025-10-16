@@ -9,6 +9,8 @@ import {
 import { useEffect, useMemo } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
 import {
+  type PausableReadResult,
+  type PausableSuspenseResult,
   ReadResult,
   type SuspendableResult,
   type SuspenseResult,
@@ -65,13 +67,9 @@ export function useSuspendableQuery<
   variables,
   suspense,
   pause,
-}: UseSuspendableQueryArgs<
-  Value,
-  Output,
-  Variables,
-  false,
-  Pausable
->): ReadResult<Output, UnexpectedError, Pausable>;
+}: UseSuspendableQueryArgs<Value, Output, Variables, false, Pausable>):
+  | ReadResult<Output>
+  | PausableReadResult<Output>;
 /**
  * @internal
  */
@@ -85,13 +83,9 @@ export function useSuspendableQuery<
   variables,
   suspense,
   pause,
-}: UseSuspendableQueryArgs<
-  Value,
-  Output,
-  Variables,
-  true,
-  Pausable
->): SuspenseResult<Output, Pausable>;
+}: UseSuspendableQueryArgs<Value, Output, Variables, true, Pausable>):
+  | SuspenseResult<Output>
+  | PausableSuspenseResult<Output>;
 /**
  * @internal
  */
@@ -158,7 +152,10 @@ export function useSuspendableQuery<
   }, [fetching, executeQuery, pollInterval]);
 
   if (pause) {
-    return ReadResult.Paused();
+    return ReadResult.Paused(
+      data ? selector(data.value) : undefined,
+      error ? UnexpectedError.from(error) : undefined,
+    );
   }
 
   if (fetching) {

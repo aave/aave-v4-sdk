@@ -151,9 +151,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
         }),
       );
 
-      expect(result.current.loading).toBeUndefined;
       expect(result.current.data).toBeUndefined();
-      expect(result.current.error).toBeUndefined();
     });
   });
 });

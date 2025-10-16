@@ -14,9 +14,12 @@ import {
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
 } from '@aave/graphql-next';
-import type { Prettify } from '@aave/types-next';
+import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
+  type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   type ReadResult,
   type Selector,
   type Suspendable,
@@ -92,7 +95,27 @@ export type UseReservesArgs<T = Reserve[]> = Prettify<
 export function useReserves<T = Reserve[]>(
   args: UseReservesArgs<T> & Suspendable,
 ): SuspenseResult<T>;
-
+/**
+ * Fetch reserves based on specified criteria.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useReserves<T = Reserve[]>(
+  args: Pausable<UseReservesArgs<T>> & Suspendable,
+): PausableSuspenseResult<T>;
 /**
  * Fetch reserves based on specified criteria.
  *
@@ -138,15 +161,37 @@ export function useReserves<T = Reserve[]>(
 export function useReserves<T = Reserve[]>(
   args: UseReservesArgs<T>,
 ): ReadResult<T>;
+/**
+ * Fetch reserves based on specified criteria.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useReserves({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useReserves<T = Reserve[]>(
+  args: Pausable<UseReservesArgs<T>>,
+): PausableReadResult<T>;
 
 export function useReserves<T = Reserve[]>({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   selector,
   ...request
-}: UseReservesArgs<T> & {
+}: NullishDeep<UseReservesArgs<T>> & {
   suspense?: boolean;
-}): SuspendableResult<T> {
+  pause?: boolean;
+}): SuspendableResult<T, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: ReservesQuery,
     variables: {
@@ -154,7 +199,8 @@ export function useReserves<T = Reserve[]>({
       currency,
     },
     suspense,
-    selector,
+    pause,
+    selector: (selector || undefined) as Selector<Reserve[], T> | undefined,
   });
 }
 
@@ -252,7 +298,27 @@ export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
 export function useBorrowApyHistory(
   args: UseBorrowApyHistoryArgs & Suspendable,
 ): SuspenseResult<APYSample[]>;
-
+/**
+ * Fetch borrow APY history for a specific reserve over time.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useBorrowApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useBorrowApyHistory(
+  args: Pausable<UseBorrowApyHistoryArgs> & Suspendable,
+): PausableSuspenseResult<APYSample[]>;
 /**
  * Fetch borrow APY history for a specific reserve over time.
  *
@@ -270,19 +336,42 @@ export function useBorrowApyHistory(
 export function useBorrowApyHistory(
   args: UseBorrowApyHistoryArgs,
 ): ReadResult<APYSample[]>;
+/**
+ * Fetch borrow APY history for a specific reserve over time.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useBorrowApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useBorrowApyHistory(
+  args: Pausable<UseBorrowApyHistoryArgs>,
+): PausableReadResult<APYSample[]>;
 
 export function useBorrowApyHistory({
   suspense = false,
+  pause = false,
   ...request
-}: UseBorrowApyHistoryArgs & {
+}: NullishDeep<UseBorrowApyHistoryArgs> & {
   suspense?: boolean;
-}): SuspendableResult<APYSample[]> {
+  pause?: boolean;
+}): SuspendableResult<APYSample[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: BorrowApyHistoryQuery,
     variables: {
       request,
     },
     suspense,
+    pause,
   });
 }
 
@@ -308,7 +397,27 @@ export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
 export function useSupplyApyHistory(
   args: UseSupplyApyHistoryArgs & Suspendable,
 ): SuspenseResult<APYSample[]>;
-
+/**
+ * Fetch supply APY history for a specific reserve over time.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSupplyApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSupplyApyHistory(
+  args: Pausable<UseSupplyApyHistoryArgs> & Suspendable,
+): PausableSuspenseResult<APYSample[]>;
 /**
  * Fetch supply APY history for a specific reserve over time.
  *
@@ -326,18 +435,41 @@ export function useSupplyApyHistory(
 export function useSupplyApyHistory(
   args: UseSupplyApyHistoryArgs,
 ): ReadResult<APYSample[]>;
+/**
+ * Fetch supply APY history for a specific reserve over time.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSupplyApyHistory({
+ *   spoke: {
+ *     address: evmAddress('0x123...'),
+ *     chainId: chainId(1)
+ *   },
+ *   reserve: reserveId(1),
+ *   window: TimeWindow.LastWeek,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSupplyApyHistory(
+  args: Pausable<UseSupplyApyHistoryArgs>,
+): PausableReadResult<APYSample[]>;
 
 export function useSupplyApyHistory({
   suspense = false,
+  pause = false,
   ...request
-}: UseSupplyApyHistoryArgs & {
+}: NullishDeep<UseSupplyApyHistoryArgs> & {
   suspense?: boolean;
-}): SuspendableResult<APYSample[]> {
+  pause?: boolean;
+}): SuspendableResult<APYSample[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: SupplyApyHistoryQuery,
     variables: {
       request,
     },
     suspense,
+    pause,
   });
 }

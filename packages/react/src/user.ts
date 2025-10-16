@@ -7,6 +7,7 @@ import {
 import type { UserPositionQueryOptions } from '@aave/client-next/actions';
 import {
   userBalances,
+  userBorrows,
   userHistory,
   userPositions,
   userSupplies,
@@ -40,6 +41,8 @@ import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type Pausable,
+  type PausableReadResult,
+  type PausableSuspenseResult,
   type ReadResult,
   type Suspendable,
   type SuspendableResult,
@@ -74,7 +77,30 @@ export type UseUserSuppliesArgs = Prettify<
 export function useUserSupplies(
   args: UseUserSuppliesArgs & Suspendable,
 ): SuspenseResult<UserSupplyItem[]>;
-
+/**
+ * Fetch all user supply positions.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserSupplies({
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ *
+ * // data?.length: number | undefined
+ * ```
+ */
+export function useUserSupplies(
+  args: Pausable<UseUserSuppliesArgs> & Suspendable,
+): PausableSuspenseResult<UserSupplyItem[]>;
 /**
  * Fetch all user supply positions.
  *
@@ -93,14 +119,42 @@ export function useUserSupplies(
 export function useUserSupplies(
   args: UseUserSuppliesArgs,
 ): ReadResult<UserSupplyItem[]>;
+/**
+ * Fetch all user supply positions.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserSupplies({
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ *   pause: true,
+ * });
+ *
+ * // data?.length: number | undefined
+ * // error: UnexpectedError | undefined
+ * // loading: boolean | undefined
+ * // paused: boolean
+ * ```
+ */
+export function useUserSupplies(
+  args: Pausable<UseUserSuppliesArgs>,
+): PausableReadResult<UserSupplyItem[]>;
 
 export function useUserSupplies({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseUserSuppliesArgs & {
+}: NullishDeep<UseUserSuppliesArgs> & {
   suspense?: boolean;
-}): SuspendableResult<UserSupplyItem[]> {
+  pause?: boolean;
+}): SuspendableResult<UserSupplyItem[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserSuppliesQuery,
     variables: {
@@ -108,6 +162,7 @@ export function useUserSupplies({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
@@ -179,7 +234,28 @@ export type UseUserBorrowsArgs = Prettify<
 export function useUserBorrows(
   args: UseUserBorrowsArgs & Suspendable,
 ): SuspenseResult<UserBorrowItem[]>;
-
+/**
+ * Fetch all user borrow positions.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserBorrows({
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserBorrows(
+  args: Pausable<UseUserBorrowsArgs> & Suspendable,
+): PausableSuspenseResult<UserBorrowItem[]>;
 /**
  * Fetch all user borrow positions.
  *
@@ -198,14 +274,37 @@ export function useUserBorrows(
 export function useUserBorrows(
   args: UseUserBorrowsArgs,
 ): ReadResult<UserBorrowItem[]>;
+/**
+ * Fetch all user borrow positions.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserBorrows({
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserBorrows(
+  args: Pausable<UseUserBorrowsArgs>,
+): PausableReadResult<UserBorrowItem[]>;
 
 export function useUserBorrows({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseUserBorrowsArgs & {
+}: NullishDeep<UseUserBorrowsArgs> & {
   suspense?: boolean;
-}): SuspendableResult<UserBorrowItem[]> {
+  pause?: boolean;
+}): SuspendableResult<UserBorrowItem[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserBorrowsQuery,
     variables: {
@@ -213,7 +312,51 @@ export function useUserBorrows({
       currency,
     },
     suspense,
+    pause,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link userBorrows} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on user borrows.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useUserBorrowsAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // UserBorrowItem[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useUserBorrowsAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<UserBorrowsRequest, UserBorrowItem[], UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: UserBorrowsRequest) =>
+      userBorrows(client, request, { currency: options.currency }),
+    [client, options.currency],
+  );
 }
 
 export type UseUserSummaryArgs = Prettify<
@@ -238,7 +381,25 @@ export type UseUserSummaryArgs = Prettify<
 export function useUserSummary(
   args: UseUserSummaryArgs & Suspendable,
 ): SuspenseResult<UserSummary>;
-
+/**
+ * Fetch a user's financial summary.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserSummary({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserSummary(
+  args: Pausable<UseUserSummaryArgs> & Suspendable,
+): PausableSuspenseResult<UserSummary>;
 /**
  * Fetch a user's financial summary.
  *
@@ -254,15 +415,35 @@ export function useUserSummary(
 export function useUserSummary(
   args: UseUserSummaryArgs,
 ): ReadResult<UserSummary>;
+/**
+ * Fetch a user's financial summary.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserSummary({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserSummary(
+  args: Pausable<UseUserSummaryArgs>,
+): PausableReadResult<UserSummary>;
 
 export function useUserSummary({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
-}: UseUserSummaryArgs & {
+}: NullishDeep<UseUserSummaryArgs> & {
   suspense?: boolean;
-}): SuspendableResult<UserSummary> {
+  pause?: boolean;
+}): SuspendableResult<UserSummary, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserSummaryQuery,
     variables: {
@@ -271,6 +452,7 @@ export function useUserSummary({
       timeWindow,
     },
     suspense,
+    pause,
   });
 }
 
@@ -295,7 +477,24 @@ export type UseUserPositionsArgs = Prettify<
 export function useUserPositions(
   args: UseUserPositionsArgs & Suspendable,
 ): SuspenseResult<UserPosition[]>;
-
+/**
+ * Fetch all user positions across specified chains.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserPositions({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserPositions(
+  args: Pausable<UseUserPositionsArgs> & Suspendable,
+): PausableSuspenseResult<UserPosition[]>;
 /**
  * Fetch all user positions across specified chains.
  *
@@ -310,15 +509,34 @@ export function useUserPositions(
 export function useUserPositions(
   args: UseUserPositionsArgs,
 ): ReadResult<UserPosition[]>;
+/**
+ * Fetch all user positions across specified chains.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserPositions({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   orderBy: { balance: 'DESC' },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserPositions(
+  args: Pausable<UseUserPositionsArgs>,
+): PausableReadResult<UserPosition[]>;
 
 export function useUserPositions({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
-}: UseUserPositionsArgs & {
+}: NullishDeep<UseUserPositionsArgs> & {
   suspense?: boolean;
-}): SuspendableResult<UserPosition[]> {
+  pause?: boolean;
+}): SuspendableResult<UserPosition[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserPositionsQuery,
     variables: {
@@ -327,6 +545,7 @@ export function useUserPositions({
       timeWindow,
     },
     suspense,
+    pause,
   });
 }
 
@@ -394,7 +613,23 @@ export type UseUserPositionArgs = Prettify<
 export function useUserPosition(
   args: UseUserPositionArgs & Suspendable,
 ): SuspenseResult<UserPosition>;
-
+/**
+ * Fetch a specific user position by ID.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserPosition({
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserPosition(
+  args: Pausable<UseUserPositionArgs> & Suspendable,
+): PausableSuspenseResult<UserPosition>;
 /**
  * Fetch a specific user position by ID.
  *
@@ -408,15 +643,33 @@ export function useUserPosition(
 export function useUserPosition(
   args: UseUserPositionArgs,
 ): ReadResult<UserPosition>;
+/**
+ * Fetch a specific user position by ID.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserPosition({
+ *   id: userPositionId('dGVzdEJhc2U2NA=='),
+ *   user: evmAddress('0x742d35cc…'),
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserPosition(
+  args: Pausable<UseUserPositionArgs>,
+): PausableReadResult<UserPosition>;
 
 export function useUserPosition({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
-}: UseUserPositionArgs & {
+}: NullishDeep<UseUserPositionArgs> & {
   suspense?: boolean;
-}): SuspendableResult<UserPosition | null> {
+  pause?: boolean;
+}): SuspendableResult<UserPosition | null, UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserPositionQuery,
     variables: {
@@ -425,6 +678,7 @@ export function useUserPosition({
       timeWindow,
     },
     suspense,
+    pause,
   });
 }
 
@@ -448,7 +702,23 @@ export type UseUserBalancesArgs = Prettify<
 export function useUserBalances(
   args: UseUserBalancesArgs & Suspendable,
 ): SuspenseResult<UserBalance[]>;
-
+/**
+ * Fetch all user balances across specified chains.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserBalances({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserBalances(
+  args: Pausable<UseUserBalancesArgs> & Suspendable,
+): PausableSuspenseResult<UserBalance[]>;
 /**
  * Fetch all user balances across specified chains.
  *
@@ -462,14 +732,32 @@ export function useUserBalances(
 export function useUserBalances(
   args: UseUserBalancesArgs,
 ): ReadResult<UserBalance[]>;
+/**
+ * Fetch all user balances across specified chains.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserBalances({
+ *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(137)],
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserBalances(
+  args: Pausable<UseUserBalancesArgs>,
+): PausableReadResult<UserBalance[]>;
 
 export function useUserBalances({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseUserBalancesArgs & {
+}: NullishDeep<UseUserBalancesArgs> & {
   suspense?: boolean;
-}): SuspendableResult<UserBalance[]> {
+  pause?: boolean;
+}): SuspendableResult<UserBalance[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserBalancesQuery,
     variables: {
@@ -477,6 +765,7 @@ export function useUserBalances({
       currency,
     },
     suspense,
+    pause,
   });
 }
 
@@ -532,39 +821,76 @@ export type UseUserHistoryArgs = Prettify<
  * ```tsx
  * const { data } = useUserHistory({
  *   user: evmAddress('0x742d35cc…'),
- *   chainId: chainId(1),
- *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
- *   pageSize: 'FIFTY',
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
  *   suspense: true,
  * });
+ *
+ * // data.items: UserHistoryItem[]
  * ```
  */
 export function useUserHistory(
   args: UseUserHistoryArgs & Suspendable,
 ): SuspenseResult<PaginatedUserHistoryResult>;
-
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ *
+ * // data?.items: UserHistoryItem[] | undefined
+ * ```
+ */
 export function useUserHistory(
   args: Pausable<UseUserHistoryArgs> & Suspendable,
-): SuspenseResult<PaginatedUserHistoryResult, true>;
-
+): PausableSuspenseResult<PaginatedUserHistoryResult>;
 /**
  * Fetch user transaction history with pagination.
  *
  * ```tsx
  * const { data, error, loading } = useUserHistory({
  *   user: evmAddress('0x742d35cc…'),
- *   chainId: chainId(1),
- *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
- *   pageSize: 'FIFTY',
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
  * });
  * ```
  */
 export function useUserHistory(
   args: UseUserHistoryArgs,
 ): ReadResult<PaginatedUserHistoryResult>;
+/**
+ * Fetch user transaction history with pagination.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   filter: {
+ *     chainId: chainId(1),
+ *   },
+ *   pause: true,
+ * });
+ *
+ * // data?.items: UserHistoryItem[] | undefined
+ * // error: UnexpectedError | undefined
+ * // loading: boolean | undefined
+ * ```
+ */
 export function useUserHistory(
   args: Pausable<UseUserHistoryArgs>,
-): ReadResult<PaginatedUserHistoryResult, UnexpectedError, true>;
+): PausableReadResult<PaginatedUserHistoryResult>;
 
 export function useUserHistory({
   suspense = false,
@@ -634,7 +960,24 @@ export type UseUserSummaryHistoryArgs = Prettify<
 export function useUserSummaryHistory(
   args: UseUserSummaryHistoryArgs & Suspendable,
 ): SuspenseResult<UserSummaryHistoryItem[]>;
-
+/**
+ * Fetch user summary history over time.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserSummaryHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: TimeWindow.LastWeek,
+ *   filter: { chainIds: [chainId(1)] },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserSummaryHistory(
+  args: Pausable<UseUserSummaryHistoryArgs> & Suspendable,
+): PausableSuspenseResult<UserSummaryHistoryItem[]>;
 /**
  * Fetch user summary history over time.
  *
@@ -649,14 +992,33 @@ export function useUserSummaryHistory(
 export function useUserSummaryHistory(
   args: UseUserSummaryHistoryArgs,
 ): ReadResult<UserSummaryHistoryItem[]>;
+/**
+ * Fetch user summary history over time.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserSummaryHistory({
+ *   user: evmAddress('0x742d35cc…'),
+ *   window: TimeWindow.LastWeek,
+ *   filter: { chainIds: [chainId(1)] },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserSummaryHistory(
+  args: Pausable<UseUserSummaryHistoryArgs>,
+): PausableReadResult<UserSummaryHistoryItem[]>;
 
 export function useUserSummaryHistory({
   suspense = false,
+  pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: UseUserSummaryHistoryArgs & {
+}: NullishDeep<UseUserSummaryHistoryArgs> & {
   suspense?: boolean;
-}): SuspendableResult<UserSummaryHistoryItem[]> {
+  pause?: boolean;
+}): SuspendableResult<UserSummaryHistoryItem[], UnexpectedError, boolean> {
   return useSuspendableQuery({
     document: UserSummaryHistoryQuery,
     variables: {
@@ -664,5 +1026,6 @@ export function useUserSummaryHistory({
       currency,
     },
     suspense,
+    pause,
   });
 }

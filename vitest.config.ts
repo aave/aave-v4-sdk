@@ -26,6 +26,11 @@ export default defineConfig({
           name: 'spec',
           include: ['packages/spec/**/*.spec.ts'],
           environment: 'node',
+          typecheck: {
+            enabled: true,
+            include: ['packages/spec/**/*.spec.ts'],
+            tsconfig: 'packages/spec/tsconfig.json',
+          },
         },
       },
       {
@@ -34,6 +39,11 @@ export default defineConfig({
           name: 'react',
           environment: 'happy-dom',
           include: ['packages/react/**/*.test.{ts,tsx}'],
+          typecheck: {
+            enabled: true,
+            include: ['packages/react/**/*.test-d.ts'],
+            tsconfig: 'packages/react/tsconfig.json',
+          },
         },
       },
       {
