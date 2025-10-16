@@ -1,5 +1,5 @@
 import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { borrow, userBorrows } from '@aave/client-next/actions';
+import { borrow, preview, userBorrows } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
@@ -19,6 +19,50 @@ const user = await createNewWallet();
 
 describe('Feature: Borrowing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
+    describe('When the user wants to preview the borrow action before performing it', () => {
+      beforeAll(async () => {
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: ETHEREUM_WETH_ADDRESS,
+          amount: bigDecimal('0.2'),
+        }).andThen(() =>
+          supplyToRandomERC20Reserve(client, user, {
+            token: ETHEREUM_WETH_ADDRESS,
+            amount: bigDecimal('0.1'),
+          }),
+        );
+
+        assertOk(setup);
+      });
+      it('Then the user can review the borrow details before proceeding', async () => {
+        const reserve = await findReserveToBorrow(client, user, {
+          token: ETHEREUM_USDS_ADDRESS,
+        });
+        assertOk(reserve);
+        const previewResult = await preview(client, {
+          action: {
+            borrow: {
+              reserve: {
+                reserveId: reserve.value.id,
+                chainId: reserve.value.chain.chainId,
+                spoke: reserve.value.spoke.address,
+              },
+              amount: {
+                erc20: {
+                  value: bigDecimal('0.1'),
+                },
+              },
+              sender: evmAddress(user.account.address),
+            },
+          },
+        });
+        assertOk(previewResult);
+        expect(
+          previewResult.value.healthFactor.after,
+        ).toBeBigDecimalGreaterThan(10);
+        expect(previewResult.value.healthFactor.current).toBeNull();
+      });
+    });
+
     describe('When the user borrows an ERC20 asset', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
