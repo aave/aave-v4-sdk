@@ -9,8 +9,7 @@ import {
 import { describe, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
 
-// TODO: Enable and refactor after fixed AAVE-2159
-describe.skip('Borrow APY History on Aave V4', () => {
+describe('Borrow APY History on Aave V4', () => {
   describe('Given a reserve with borrow activity', () => {
     describe('When fetching borrow APY history with different time windows', () => {
       const timeWindowOptions = Object.values(TimeWindow);
