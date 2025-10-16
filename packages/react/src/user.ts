@@ -7,6 +7,7 @@ import {
 import type { UserPositionQueryOptions } from '@aave/client-next/actions';
 import {
   userBalances,
+  userBorrows,
   userHistory,
   userPositions,
   userSupplies,
@@ -313,6 +314,49 @@ export function useUserBorrows({
     suspense,
     pause,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link userBorrows} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on user borrows.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useUserBorrowsAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: {
+ *     userSpoke: {
+ *       spoke: { address: evmAddress('0x87870bca…'), chainId: chainId(1) },
+ *       user: evmAddress('0x742d35cc…'),
+ *     },
+ *   },
+ *   orderBy: { name: 'ASC' },
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // UserBorrowItem[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useUserBorrowsAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<UserBorrowsRequest, UserBorrowItem[], UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: UserBorrowsRequest) =>
+      userBorrows(client, request, { currency: options.currency }),
+    [client, options.currency],
+  );
 }
 
 export type UseUserSummaryArgs = Prettify<
