@@ -154,7 +154,7 @@ export function fundNativeAddress(
     transport: http(ETHEREUM_FORK_RPC_URL_ADMIN),
   });
 
-  const amountInWei = parseEther(amount);
+  const amountInWei = parseEther(amount.toString());
   const amountHex = `0x${amountInWei.toString(16)}`;
 
   return ResultAsync.fromPromise(
@@ -193,7 +193,10 @@ export function fundErc20Address(
   });
 
   // Convert amount to the smallest unit (e.g., wei for 18 decimals)
-  const amountInSmallestUnit = parseUnits(token.amount, token.decimals ?? 18);
+  const amountInSmallestUnit = parseUnits(
+    token.amount.toString(),
+    token.decimals ?? 18,
+  );
   const amountHex = `0x${amountInSmallestUnit.toString(16)}`;
 
   return ResultAsync.fromPromise(

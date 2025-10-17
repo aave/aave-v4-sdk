@@ -23,7 +23,7 @@ import {
   type WithdrawActivity,
 } from '@aave/graphql-next';
 import introspectedSchema from '@aave/graphql-next/schema';
-import type { DateTime, TxHash } from '@aave/types-next';
+import { BigDecimal, type DateTime, type TxHash } from '@aave/types-next';
 import {
   cacheExchange,
   type Resolver,
@@ -34,14 +34,69 @@ const transformToBigInt: Resolver = (parent, _args, _cache, info) => {
   return BigInt(parent[info.fieldName] as string) as unknown as Scalar;
 };
 
+const transformToBigDecimal: Resolver = (parent, _args, _cache, info) => {
+  return BigDecimal.new(parent[info.fieldName] as string);
+};
+
+const transformToNullableBigDecimal: Resolver = (
+  parent,
+  _args,
+  _cache,
+  info,
+) => {
+  const value = parent[info.fieldName];
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return transformToBigDecimal(parent, _args, _cache, info);
+};
+
 export const exchange = cacheExchange({
   schema: introspectedSchema,
   resolvers: {
     PercentNumber: {
       onChainValue: transformToBigInt,
+      value: transformToBigDecimal,
+      normalized: transformToBigDecimal,
     },
     DecimalNumber: {
       onChainValue: transformToBigInt,
+      value: transformToBigDecimal,
+    },
+    FiatAmount: {
+      value: transformToBigDecimal,
+    },
+    AssetPriceSample: {
+      amount: transformToBigDecimal,
+    },
+    HubAssetSummary: {
+      supplied: transformToBigDecimal,
+      borrowed: transformToBigDecimal,
+      availableLiquidity: transformToBigDecimal,
+    },
+    HubSummary: {
+      utilizationRate: transformToBigDecimal,
+    },
+    Reserve: {
+      borrowCap: transformToBigDecimal,
+      supplyCap: transformToBigDecimal,
+    },
+    HealthFactorError: {
+      current: transformToNullableBigDecimal,
+      after: transformToNullableBigDecimal,
+    },
+    HealthFactorVariation: {
+      current: transformToNullableBigDecimal,
+      after: transformToNullableBigDecimal,
+    },
+    HealthFactorWithChange: {
+      current: transformToNullableBigDecimal,
+    },
+    UserSummary: {
+      lowestHealthFactor: transformToNullableBigDecimal,
+    },
+    UserSummaryHistoryItem: {
+      healthFactor: transformToNullableBigDecimal,
     },
     TransactionRequest: {
       value: transformToBigInt,
