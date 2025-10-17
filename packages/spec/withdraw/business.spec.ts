@@ -1,5 +1,5 @@
 import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { userSupplies, withdraw } from '@aave/client-next/actions';
+import { preview, userSupplies, withdraw } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
@@ -90,6 +90,36 @@ describe('Withdrawing Assets on Aave V4', () => {
           ETHEREUM_USDC_ADDRESS,
         );
         expect(balanceBefore + amountToWithdraw).toEqual(balanceAfter);
+      });
+    });
+
+    describe('When the user wants to preview the withdrawal action before performing it', () => {
+      it('Then the user can review the withdrawal details before proceeding', async () => {
+        const amountToWithdraw = amountToSupply / 3;
+
+        const previewResult = await preview(client, {
+          action: {
+            withdraw: {
+              reserve: {
+                reserveId: reserve.id,
+                chainId: reserve.chain.chainId,
+                spoke: reserve.spoke.address,
+              },
+              sender: evmAddress(user.account.address),
+              amount: {
+                erc20: {
+                  exact: bigDecimal(amountToWithdraw),
+                },
+              },
+            },
+          },
+        });
+        assertOk(previewResult);
+        expect(
+          previewResult.value.netCollateral.after.value,
+        ).toBeBigDecimalLessThan(
+          previewResult.value.netCollateral.current.value,
+        );
       });
     });
 
