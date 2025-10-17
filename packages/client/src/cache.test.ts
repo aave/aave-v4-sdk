@@ -8,7 +8,7 @@ import {
   nonNullable,
 } from '@aave/types-next';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { hub, hubs, reserves, supply, userHistory } from './actions';
+import { activities, hub, hubs, reserves, supply } from './actions';
 import {
   client,
   createNewWallet,
@@ -102,19 +102,19 @@ describe('Given the Aave SDK normalized graph cache', () => {
     });
 
     it('Then it should leverage cached data whenever possible', async () => {
-      const primed = await userHistory(client, {
-        user: evmAddress(user.account.address),
-        filter: {
+      const primed = await activities(client, {
+        query: {
           chainIds: [ETHEREUM_FORK_ID],
         },
+        user: evmAddress(user.account.address),
       });
       assertOk(primed);
 
-      const result = await userHistory(
+      const result = await activities(
         client,
         {
           user: evmAddress(user.account.address),
-          filter: {
+          query: {
             txHash: {
               txHash:
                 primed.value.items[0]?.txHash ?? never('Expected a tx hash'),

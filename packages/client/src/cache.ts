@@ -171,7 +171,6 @@ export const exchange = cacheExchange({
     PaginatedResultInfo: () => null,
     PaginatedSpokePositionManagerResult: () => null,
     PaginatedSpokeUserPositionManagerResult: () => null,
-    PaginatedUserHistoryResult: () => null,
     PaginatedUserSwapsResult: () => null,
     SpokeConfig: () => null,
     SpokePositionManger: () => null,
