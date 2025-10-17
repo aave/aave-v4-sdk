@@ -1,10 +1,13 @@
 import type {
   AaveClient,
+  ActivitiesRequest,
   CurrencyQueryOptions,
+  PaginatedActivitiesResult,
   UnexpectedError,
 } from '@aave/client-next';
 import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
 import {
+  activities,
   borrow,
   liquidatePosition,
   preview,
@@ -19,6 +22,7 @@ import {
 } from '@aave/client-next/actions';
 import { ValidationError } from '@aave/core-next';
 import {
+  ActivitiesQuery,
   type BorrowRequest,
   HubQuery,
   HubsQuery,
@@ -1236,4 +1240,130 @@ export function usePreview({
     suspense,
     pause,
   });
+}
+
+export type UseActivitiesArgs = Prettify<
+  ActivitiesRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch paginated list of activities.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useActivities({
+ *   query: {
+ *     chainId: chainId(1),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ * });
+ *
+ * // data.items: ActivityItem[]
+ * ```
+ */
+export function useActivities(
+  args: UseActivitiesArgs & Suspendable,
+): SuspenseResult<PaginatedActivitiesResult>;
+/**
+ * Fetch paginated list of activities.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useActivities({
+ *   query: {
+ *     chainId: chainId(1),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ *
+ * // data?.items: ActivityItem[] | undefined
+ * ```
+ */
+export function useActivities(
+  args: Pausable<UseActivitiesArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedActivitiesResult>;
+/**
+ * Fetch paginated list of activities.
+ *
+ * ```tsx
+ * const { data, error, loading } = useActivities({
+ *   query: {
+ *     chainId: chainId(1),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ */
+export function useActivities(
+  args: UseActivitiesArgs,
+): ReadResult<PaginatedActivitiesResult>;
+/**
+ * Fetch paginated list of activities.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading } = useActivities({
+ *   query: {
+ *     chainId: chainId(1),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   pause: true,
+ * });
+ *
+ * // data?.items: ActivityItem[] | undefined
+ * // error: UnexpectedError | undefined
+ * // loading: boolean | undefined
+ * ```
+ */
+export function useActivities(
+  args: Pausable<UseActivitiesArgs>,
+): PausableReadResult<PaginatedActivitiesResult>;
+
+export function useActivities({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseActivitiesArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<PaginatedActivitiesResult, UnexpectedError, boolean> {
+  return useSuspendableQuery({
+    document: ActivitiesQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+  });
+}
+
+/**
+ * Low-level hook to execute a {@link activities} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook does not actively watch for updates. Use it to fetch activities on demand
+ * (e.g., in an event handler when paginating or refining filters).
+ *
+ * @param options - The query options.
+ * @returns The user history.
+ */
+export function useActivitiesAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<ActivitiesRequest, PaginatedActivitiesResult, UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: ActivitiesRequest) =>
+      activities(client, request, { currency: options.currency }),
+    [client, options.currency],
+  );
 }
