@@ -168,6 +168,7 @@ export const exchange = cacheExchange({
     NativeToken: (data: NativeToken) => data.chain.chainId.toString(),
 
     // Entities without keys will be embedded directly on the parent entity
+    PaginatedActivitiesResult: () => null,
     PaginatedResultInfo: () => null,
     PaginatedSpokePositionManagerResult: () => null,
     PaginatedSpokeUserPositionManagerResult: () => null,
