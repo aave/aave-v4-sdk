@@ -58,9 +58,6 @@ export function isTxHashInputVariant<T>(
   return isObject(input) && 'txHash' in input && input.txHash != null;
 }
 
-export type UserSpokeInput = ReturnType<
-  typeof graphql.scalar<'UserSpokeInput'>
->;
 export type HubTokenInput = ReturnType<typeof graphql.scalar<'HubTokenInput'>>;
 export type SpokeTokenInput = ReturnType<
   typeof graphql.scalar<'SpokeTokenInput'>

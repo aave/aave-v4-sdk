@@ -1,4 +1,5 @@
 import {
+  type ActivitiesQuery,
   type BorrowActivity,
   type Chain,
   type Erc20Token,
@@ -17,7 +18,6 @@ import {
   type SwapByIntent,
   type SwapByIntentWithApprovalRequired,
   type SwapByTransaction,
-  type UserHistoryQuery,
   type UserPosition,
   type VariablesOf,
   type WithdrawActivity,
@@ -37,11 +37,11 @@ const transformToBigInt: Resolver = (parent, _args, _cache, info) => {
 export const exchange = cacheExchange({
   schema: introspectedSchema,
   resolvers: {
-    PercentValue: {
-      raw: transformToBigInt,
+    PercentNumber: {
+      onChainValue: transformToBigInt,
     },
-    DecimalValue: {
-      raw: transformToBigInt,
+    DecimalNumber: {
+      onChainValue: transformToBigInt,
     },
     TransactionRequest: {
       value: transformToBigInt,
@@ -65,22 +65,22 @@ export const exchange = cacheExchange({
         };
       },
 
-      userHistory: (
+      activities: (
         _parent,
-        args: VariablesOf<typeof UserHistoryQuery>,
+        args: VariablesOf<typeof ActivitiesQuery>,
         cache,
       ) => {
         // Bail out if not a txHash filter lookup
-        if (!isTxHashInputVariant(args.request.filter)) {
-          return cache.resolve('Query', 'userHistory', args);
+        if (!isTxHashInputVariant(args.request.query)) {
+          return cache.resolve('Query', 'activities', args);
         }
 
-        const { txHash, chainId } = args.request.filter.txHash;
+        const { txHash, chainId } = args.request.query.txHash;
 
         // Collect all cached activities matching txHash
         const matches = cache
           .inspectFields('Query')
-          .filter((f) => f.fieldName === 'userHistory')
+          .filter((f) => f.fieldName === 'activities')
           .reduce((set, f) => {
             const pageRef = cache.resolve('Query', f.fieldKey) as string | null;
             if (!pageRef) return set;
@@ -123,7 +123,7 @@ export const exchange = cacheExchange({
         if (matches.length === 0) return undefined;
 
         return {
-          __typename: 'PaginatedUserHistoryResult',
+          __typename: 'PaginatedActivitiesResult',
           items: matches,
           pageInfo: {
             __typename: 'PaginatedResultInfo',
@@ -172,6 +172,7 @@ export const exchange = cacheExchange({
     PaginatedSpokePositionManagerResult: () => null,
     PaginatedSpokeUserPositionManagerResult: () => null,
     PaginatedUserHistoryResult: () => null,
+    PaginatedUserSwapsResult: () => null,
     SpokeConfig: () => null,
     SpokePositionManger: () => null,
     SpokeUserPositionManager: () => null,
@@ -180,9 +181,15 @@ export const exchange = cacheExchange({
 
     // Value objects and result types
     APYSample: () => null,
+    Asset: () => null,
+    AssetBorrowSample: () => null,
+    AssetPriceSample: () => null,
+    AssetSummary: () => null,
+    AssetSupplySample: () => null,
     CancelSwapTypedData: () => null,
     CancelSwapTypeDefinition: () => null,
-    DecimalValue: () => null,
+    DecimalNumber: () => null,
+    DecimalNumberWithChange: () => null,
     DomainData: () => null,
     Erc20Amount: () => null,
     Erc20ApprovalRequired: () => null,
@@ -190,17 +197,18 @@ export const exchange = cacheExchange({
     FiatAmountValueVariation: () => null,
     FiatAmountWithChange: () => null,
     ForkTopUpResponse: () => null,
-    HealthFactorChange: () => null,
+    HealthFactorError: () => null,
     HealthFactorVariation: () => null,
+    HealthFactorWithChange: () => null,
     HubAssetSettings: () => null,
     HubAssetSummary: () => null,
     HubAssetUserState: () => null,
     HubSummary: () => null,
     InsufficientBalanceError: () => null,
     NativeAmount: () => null,
-    PercentValue: () => null,
-    PercentValueVariation: () => null,
-    PercentValueWithChange: () => null,
+    PercentNumber: () => null,
+    PercentNumberVariation: () => null,
+    PercentNumberWithChange: () => null,
     PermitMessageData: () => null,
     PermitTypedDataResponse: () => null,
     PreContractActionRequired: () => null,
@@ -226,8 +234,10 @@ export const exchange = cacheExchange({
     TypeField: () => null,
     UserBalance: () => null,
     UserBorrowItem: () => null,
+    UserBorrowSummary: () => null,
     UserSummary: () => null,
     UserSummaryHistoryItem: () => null,
     UserSupplyItem: () => null,
+    UserSupplySummary: () => null,
   },
 });

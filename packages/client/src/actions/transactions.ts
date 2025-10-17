@@ -1,10 +1,13 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
+  ActivitiesQuery,
+  type ActivitiesRequest,
   BorrowQuery,
   type BorrowRequest,
   type ExecutionPlan,
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
+  type PaginatedActivitiesResult,
   PreviewQuery,
   type PreviewRequest,
   type PreviewUserPosition,
@@ -28,7 +31,11 @@ import {
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
-import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
+} from '../options';
 
 /**
  * Creates a transaction to borrow from a market.
@@ -449,4 +456,34 @@ export function setUserSupplyAsCollateral(
   request: SetUserSupplyAsCollateralRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
   return client.query(SetUserSupplyAsCollateralQuery, { request });
+}
+
+/**
+ * Fetches paginated list of activities.
+ *
+ * ```ts
+ * const result = await activities(client, {
+ *   query: {
+ *     chainIds: [chainId(1)],
+ *   },
+ *   user: evmAddress('0x742d35cc…'), // Optional
+ *   types: [ActivityType.Supply, ActivityType.Borrow, ActivityType.Withdraw, ActivityType.Repay],
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The activities request parameters.
+ * @param options - The query options.
+ * @returns The paginated list of activities.
+ */
+export function activities(
+  client: AaveClient,
+  request: ActivitiesRequest,
+  options: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PaginatedActivitiesResult, UnexpectedError> {
+  return client.query(
+    ActivitiesQuery,
+    { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
+    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+  );
 }

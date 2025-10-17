@@ -3,7 +3,7 @@ import { type FragmentDocumentFor, graphql } from '../graphql';
 import { DomainDataFragment, TypeFieldFragment } from '../permits';
 import {
   PaginatedResultInfoFragment,
-  PercentValueFragment,
+  PercentNumberFragment,
   TokenAmountFragment,
 } from './common';
 import {
@@ -19,7 +19,7 @@ export const SwapQuoteCostsFragment = graphql(
     networkCosts {
       ...TokenAmount
     }
-    partnerFeeAmount {
+    partnerFee {
       ...TokenAmount
     }
   }`,
@@ -32,12 +32,12 @@ export const SwapQuoteFragment = graphql(
     __typename
     quoteId
     suggestedSlippage {
-      ...PercentValue
+      ...PercentNumber
     }
-    sellAmount {
+    desiredSell {
       ...TokenAmount
     }
-    buyAmount {
+    desiredBuy {
       ...TokenAmount
     }
     costs {
@@ -47,7 +47,7 @@ export const SwapQuoteFragment = graphql(
       ...TokenAmount
     }
   }`,
-  [PercentValueFragment, TokenAmountFragment, SwapQuoteCostsFragment],
+  [PercentNumberFragment, TokenAmountFragment, SwapQuoteCostsFragment],
 );
 export type SwapQuote = FragmentOf<typeof SwapQuoteFragment>;
 
@@ -264,13 +264,13 @@ export const SwapOpenFragment = graphql(
   `fragment SwapOpen on SwapOpen {
     __typename
     swapId
-    createAt
+    createdAt
     deadline
     explorerLink
-    sellAmount {
+    desiredSell {
       ...TokenAmount
     }
-    buyAmount {
+    desiredBuy {
       ...TokenAmount
     }
   }`,
@@ -294,16 +294,16 @@ export const SwapFulfilledFragment = graphql(
   `fragment SwapFulfilled on SwapFulfilled {
     __typename
     txHash
-    sellAmount {
+    desiredSell {
       ...TokenAmount
     }
-    buyAmount {
+    desiredBuy {
       ...TokenAmount
     }
-    executedSellAmount {
+    sold {
       ...TokenAmount
     }
-    executedBuyAmount {
+    bought {
       ...TokenAmount
     }
     createdAt

@@ -8,20 +8,16 @@ import type { UserPositionQueryOptions } from '@aave/client-next/actions';
 import {
   userBalances,
   userBorrows,
-  userHistory,
   userPositions,
   userSupplies,
 } from '@aave/client-next/actions';
 import {
-  type PaginatedUserHistoryResult,
   type UserBalance,
   UserBalancesQuery,
   type UserBalancesRequest,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
-  UserHistoryQuery,
-  type UserHistoryRequest,
   type UserPosition,
   UserPositionQuery,
   type UserPositionRequest,
@@ -805,136 +801,6 @@ export function useUserBalancesAction(
   return useAsyncTask(
     (request: UserBalancesRequest) =>
       userBalances(client, request, { currency: options.currency }),
-    [client, options.currency],
-  );
-}
-
-export type UseUserHistoryArgs = Prettify<
-  UserHistoryRequest & CurrencyQueryOptions
->;
-
-/**
- * Fetch user transaction history with pagination.
- *
- * This signature supports React Suspense:
- *
- * ```tsx
- * const { data } = useUserHistory({
- *   user: evmAddress('0x742d35cc…'),
- *   filter: {
- *     chainId: chainId(1),
- *   },
- *   suspense: true,
- * });
- *
- * // data.items: UserHistoryItem[]
- * ```
- */
-export function useUserHistory(
-  args: UseUserHistoryArgs & Suspendable,
-): SuspenseResult<PaginatedUserHistoryResult>;
-/**
- * Fetch user transaction history with pagination.
- *
- * Pausable suspense mode.
- *
- * ```tsx
- * const { data } = useUserHistory({
- *   user: evmAddress('0x742d35cc…'),
- *   filter: {
- *     chainId: chainId(1),
- *   },
- *   suspense: true,
- *   pause: true,
- * });
- *
- * // data?.items: UserHistoryItem[] | undefined
- * ```
- */
-export function useUserHistory(
-  args: Pausable<UseUserHistoryArgs> & Suspendable,
-): PausableSuspenseResult<PaginatedUserHistoryResult>;
-/**
- * Fetch user transaction history with pagination.
- *
- * ```tsx
- * const { data, error, loading } = useUserHistory({
- *   user: evmAddress('0x742d35cc…'),
- *   filter: {
- *     chainId: chainId(1),
- *   },
- * });
- * ```
- */
-export function useUserHistory(
-  args: UseUserHistoryArgs,
-): ReadResult<PaginatedUserHistoryResult>;
-/**
- * Fetch user transaction history with pagination.
- *
- * Pausable loading state mode.
- *
- * ```tsx
- * const { data, error, loading } = useUserHistory({
- *   user: evmAddress('0x742d35cc…'),
- *   filter: {
- *     chainId: chainId(1),
- *   },
- *   pause: true,
- * });
- *
- * // data?.items: UserHistoryItem[] | undefined
- * // error: UnexpectedError | undefined
- * // loading: boolean | undefined
- * ```
- */
-export function useUserHistory(
-  args: Pausable<UseUserHistoryArgs>,
-): PausableReadResult<PaginatedUserHistoryResult>;
-
-export function useUserHistory({
-  suspense = false,
-  pause = false,
-  currency = DEFAULT_QUERY_OPTIONS.currency,
-  ...request
-}: NullishDeep<UseUserHistoryArgs> & {
-  suspense?: boolean;
-  pause?: boolean;
-}): SuspendableResult<PaginatedUserHistoryResult, UnexpectedError, boolean> {
-  return useSuspendableQuery({
-    document: UserHistoryQuery,
-    variables: {
-      request,
-      currency,
-    },
-    suspense,
-    pause,
-  });
-}
-
-/**
- * Low-level hook to execute a {@link userHistory} action directly.
- *
- * @experimental This hook is experimental and may be subject to breaking changes.
- * @remarks
- * This hook does not actively watch for updates. Use it to fetch user history on demand
- * (e.g., in an event handler when paginating or refining filters).
- *
- * @param options - The query options.
- * @returns The user history.
- */
-export function useUserHistoryAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<
-  UserHistoryRequest,
-  PaginatedUserHistoryResult,
-  UnexpectedError
-> {
-  const client = useAaveClient();
-
-  return useAsyncTask(
-    (request: UserHistoryRequest) =>
-      userHistory(client, request, { currency: options.currency }),
     [client, options.currency],
   );
 }

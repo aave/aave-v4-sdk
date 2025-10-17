@@ -1,26 +1,68 @@
+import type { BigDecimal } from '@aave/types-next';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 
-export const DecimalValueFragment = graphql(
-  `fragment DecimalValue on DecimalValue {
-    __typename
-    raw
-    decimals
-    formatted
-  }`,
-);
-export type DecimalValue = FragmentOf<typeof DecimalValueFragment>;
+export type DecimalNumber = {
+  __typename: 'DecimalNumber';
+  onChainValue: bigint;
+  decimals: number;
+  value: BigDecimal;
+  /**
+   * @deprecated Use `value` instead. Removal slated for week commencing 27th October 2025.
+   */
+  formatted: BigDecimal;
+  /**
+   * @deprecated Use `onChainValue` instead. Removal slated for week commencing 27th October 2025.
+   */
+  raw: bigint;
+};
 
-export const PercentValueFragment = graphql(
-  `fragment PercentValue on PercentValue {
+export const DecimalNumberFragment: FragmentDocumentFor<DecimalNumber> =
+  graphql(`fragment DecimalNumber on DecimalNumber {
     __typename
-    raw
+    onChainValue
     decimals
     value
-    formatted
-  }`,
-);
-export type PercentValue = FragmentOf<typeof PercentValueFragment>;
+    formatted: value
+    raw: onChainValue
+  }`);
+
+/**
+ * @deprecated Use {@link DecimalNumber} instead. Removal slated for week commencing 27th October 2025.
+ */
+export type DecimalValue = DecimalNumber;
+
+export type PercentNumber = {
+  __typename: 'PercentNumber';
+  onChainValue: bigint;
+  decimals: number;
+  value: BigDecimal;
+  normalized: BigDecimal;
+  /**
+   * @deprecated Use `normalized` instead. Removal slated for week commencing 27th October 2025.
+   */
+  formatted: BigDecimal;
+  /**
+   * @deprecated Use `onChainValue` instead. Removal slated for week commencing 27th October 2025.
+   */
+  raw: bigint;
+};
+
+export const PercentNumberFragment: FragmentDocumentFor<PercentNumber> =
+  graphql(`fragment PercentNumber on PercentNumber {
+    __typename
+    onChainValue
+    decimals
+    value
+    normalized
+    raw: onChainValue
+    formatted: value
+  }`);
+
+/**
+ * @deprecated Use {@link PercentNumber} instead. Removal slated for week commencing 27th October 2025.
+ */
+export type PercentValue = PercentNumber;
 
 export const FiatAmountFragment = graphql(
   `fragment FiatAmount on FiatAmount {
@@ -91,40 +133,74 @@ export const NativeTokenFragment = graphql(
 );
 export type NativeToken = FragmentOf<typeof NativeTokenFragment>;
 
-export const Erc20AmountFragment = graphql(
+export type Erc20Amount = {
+  __typename: 'Erc20Amount';
+  token: Erc20Token;
+  amount: DecimalNumber;
+  fiatAmount: FiatAmount;
+  fiatRate: DecimalNumber;
+  isWrappedNative: boolean;
+  /**
+   * @deprecated Use `value` instead. Removal slated for week commencing 27th October 2025.
+   */
+  value: DecimalNumber;
+};
+export const Erc20AmountFragment: FragmentDocumentFor<Erc20Amount> = graphql(
   `fragment Erc20Amount on Erc20Amount {
     __typename
     token {
       ...Erc20Token
     }
-    value {
-      ...DecimalValue
+    amount {
+      ...DecimalNumber
     }
     fiatAmount(currency: $currency){
       ...FiatAmount
     }
     fiatRate(currency: $currency){
-      ...DecimalValue
+      ...DecimalNumber
     }
     isWrappedNative
+    value: amount {
+      ...DecimalNumber
+    }
   }`,
-  [Erc20TokenFragment, DecimalValueFragment, FiatAmountFragment],
+  [Erc20TokenFragment, DecimalNumberFragment, FiatAmountFragment],
 );
-export type Erc20Amount = FragmentOf<typeof Erc20AmountFragment>;
 
-export const NativeAmountFragment = graphql(
+export type NativeAmount = {
+  __typename: 'NativeAmount';
+  token: NativeToken;
+  amount: DecimalNumber;
+  fiatAmount: FiatAmount;
+  fiatRate: DecimalNumber;
+  /**
+   * @deprecated Use `value` instead. Removal slated for week commencing 27th October 2025.
+   */
+  value: DecimalNumber;
+};
+
+export const NativeAmountFragment: FragmentDocumentFor<NativeAmount> = graphql(
   `fragment NativeAmount on NativeAmount {
     __typename
     token {
       ...NativeToken
     }
-    value {
-      ...DecimalValue
+    amount {
+      ...DecimalNumber
+    }
+    fiatAmount(currency: $currency){
+      ...FiatAmount
+    }
+    fiatRate(currency: $currency){
+      ...DecimalNumber
+    }
+    value: amount {
+      ...DecimalNumber
     }
   }`,
-  [NativeTokenFragment, DecimalValueFragment],
+  [NativeTokenFragment, DecimalNumberFragment, FiatAmountFragment],
 );
-export type NativeAmount = FragmentOf<typeof NativeAmountFragment>;
 
 export type TokenAmount = Erc20Amount | NativeAmount;
 
@@ -159,37 +235,63 @@ export const TokenFragment: FragmentDocumentFor<Token, 'Token'> = graphql(
   [Erc20TokenFragment, NativeTokenFragment],
 );
 
-export const FiatAmountWithChangeFragment = graphql(
-  `fragment FiatAmountWithChange on FiatAmountWithChange {
+export type FiatAmountWithChange = {
+  __typename: 'FiatAmountWithChange';
+  current: FiatAmount;
+  change: PercentNumber;
+  /**
+   * @deprecated Use `current` instead. Removal slated for week commencing 27th October 2025.
+   */
+  amount: FiatAmount;
+};
+export const FiatAmountWithChangeFragment: FragmentDocumentFor<FiatAmountWithChange> =
+  graphql(
+    `fragment FiatAmountWithChange on FiatAmountWithChange {
     __typename
-    amount {
+    current {
       ...FiatAmount
     }
     change(window: $timeWindow){
-      ...PercentValue
+      ...PercentNumber
+    }
+    amount: current {
+      ...FiatAmount
     }
   }`,
-  [FiatAmountFragment, PercentValueFragment],
-);
-export type FiatAmountWithChange = FragmentOf<
-  typeof FiatAmountWithChangeFragment
->;
+    [FiatAmountFragment, PercentNumberFragment],
+  );
 
-export const PercentValueWithChangeFragment = graphql(
-  `fragment PercentValueWithChange on PercentValueWithChange {
+export type PercentNumberWithChange = {
+  __typename: 'PercentNumberWithChange';
+  current: PercentNumber;
+  change: PercentNumber;
+  /**
+   * @deprecated Use `current` instead. Removal slated for week commencing 27th October 2025.
+   */
+  amount: PercentNumber;
+};
+
+export const PercentNumberWithChangeFragment: FragmentDocumentFor<PercentNumberWithChange> =
+  graphql(
+    `fragment PercentNumberWithChange on PercentNumberWithChange {
     __typename
-    amount {
-      ...PercentValue
+    current {
+      ...PercentNumber
     }
     change(window: $timeWindow){
-      ...PercentValue
+      ...PercentNumber
+    }
+    amount: current {
+      ...PercentNumber
     }
   }`,
-  [PercentValueFragment],
-);
-export type PercentValueWithChange = FragmentOf<
-  typeof PercentValueWithChangeFragment
->;
+    [PercentNumberFragment],
+  );
+
+/**
+ * @deprecated Use {@link PercentNumberWithChange} instead. Removal slated for week commencing 27th October 2025.
+ */
+export type PercentValueWithChange = PercentNumberWithChange;
 
 export const PaginatedResultInfoFragment = graphql(
   `fragment PaginatedResultInfo on PaginatedResultInfo {
@@ -202,21 +304,25 @@ export type PaginatedResultInfo = FragmentOf<
   typeof PaginatedResultInfoFragment
 >;
 
-export const PercentValueVariationFragment = graphql(
-  `fragment PercentValueVariation on PercentValueVariation {
+export const PercentNumberVariationFragment = graphql(
+  `fragment PercentNumberVariation on PercentNumberVariation {
     __typename
     current {
-      ...PercentValue
+      ...PercentNumber
     }
     after {
-      ...PercentValue
+      ...PercentNumber
     }
   }`,
-  [PercentValueFragment],
+  [PercentNumberFragment],
 );
-export type PercentValueVariation = FragmentOf<
-  typeof PercentValueVariationFragment
+export type PercentNumberVariation = FragmentOf<
+  typeof PercentNumberVariationFragment
 >;
+/**
+ * @deprecated Use {@link PercentNumberVariation} instead. Removal slated for week commencing 27th October 2025.
+ */
+export type PercentValueVariation = PercentNumberVariation;
 
 export const FiatAmountValueVariationFragment = graphql(
   `fragment FiatAmountValueVariation on FiatAmountValueVariation {
@@ -234,17 +340,30 @@ export type FiatAmountValueVariation = FragmentOf<
   typeof FiatAmountValueVariationFragment
 >;
 
-export const HealthFactorChangeFragment = graphql(
-  `fragment HealthFactorChange on HealthFactorChange {
+export type HealthFactorWithChange = {
+  __typename: 'HealthFactorWithChange';
+  current: BigDecimal;
+  change: PercentNumber;
+  /**
+   * @deprecated Use `current` instead. Removal slated for week commencing 27th October 2025.
+   */
+  value: BigDecimal;
+};
+export const HealthFactorWithChangeFragment = graphql(
+  `fragment HealthFactorWithChange on HealthFactorWithChange {
     __typename
-    value
+    current
     change(window: $timeWindow) {
-      ...PercentValue
+      ...PercentNumber
     }
+    value: current
   }`,
-  [PercentValueFragment],
+  [PercentNumberFragment],
 );
-export type HealthFactorChange = FragmentOf<typeof HealthFactorChangeFragment>;
+/**
+ * @deprecated Use {@link HealthFactorWithChange} instead. Removal slated for week commencing 27th October 2025.
+ */
+export type HealthFactorChange = HealthFactorWithChange;
 
 export const HealthFactorVariationFragment = graphql(
   `fragment HealthFactorVariation on HealthFactorVariation {

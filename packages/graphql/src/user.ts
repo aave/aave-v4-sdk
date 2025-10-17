@@ -1,5 +1,4 @@
 import {
-  PaginatedUserHistoryResultFragment,
   UserBalanceFragment,
   UserBorrowItemFragment,
   UserPositionFragment,
@@ -105,32 +104,19 @@ export const UserSummaryHistoryQuery = graphql(
 export type UserSummaryHistoryRequest = RequestOf<
   typeof UserSummaryHistoryQuery
 >;
-
-/**
- * @internal
- */
-export const UserHistoryQuery = graphql(
-  `query UserHistory($request: UserHistoryRequest!, $currency: Currency!) {
-    value: userHistory(request: $request) {
-      ...PaginatedUserHistoryResult
-    }
-  }`,
-  [PaginatedUserHistoryResultFragment],
-);
-export type UserHistoryRequest = RequestOf<typeof UserHistoryQuery>;
-
+export type UserSpokeInput = ReturnType<
+  typeof graphql.scalar<'UserSpokeInput'>
+>;
 export type UserBalancesRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserBalancesRequestOrderBy'>
 >;
 export type UserBorrowsRequestQuery = ReturnType<
   typeof graphql.scalar<'UserBorrowsQueryRequest'>
 >;
+export type UserToken = ReturnType<typeof graphql.scalar<'UserToken'>>;
 export type UserChains = ReturnType<typeof graphql.scalar<'UserChains'>>;
 export type UserBorrowsRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserBorrowsRequestOrderBy'>
->;
-export type UserHistoryFilter = ReturnType<
-  typeof graphql.scalar<'UserHistoryFilter'>
 >;
 export type UserPositionsRequestFilter = ReturnType<
   typeof graphql.scalar<'UserPositionsRequestFilter'>

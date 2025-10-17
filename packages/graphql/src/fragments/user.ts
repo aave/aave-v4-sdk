@@ -1,59 +1,126 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 import {
-  type DecimalValue,
-  DecimalValueFragment,
+  type DecimalNumber,
+  DecimalNumberFragment,
+  type Erc20Amount,
   Erc20AmountFragment,
   type FiatAmount,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
-  HealthFactorChangeFragment,
-  PaginatedResultInfoFragment,
-  type PercentValue,
-  PercentValueFragment,
-  PercentValueWithChangeFragment,
+  HealthFactorWithChangeFragment,
+  type PercentNumber,
+  PercentNumberFragment,
+  PercentNumberWithChangeFragment,
   type TokenAmount,
   TokenAmountFragment,
   type TokenInfo,
   TokenInfoFragment,
 } from './common';
-import { ReserveFragment, ReserveInfoFragment } from './reserve';
+import { type Reserve, ReserveFragment } from './reserve';
 import { SpokeFragment } from './spoke';
 
-export const UserSupplyItemFragment = graphql(
-  `fragment UserSupplyItem on UserSupplyItem {
+export const UserSupplySummaryFragment = graphql(
+  `fragment UserSupplySummary on UserSupplySummary {
     __typename
-    amount {
+    withdrawn {
       ...Erc20Amount
     }
-    earned {
+    totalSupplied {
+      ...Erc20Amount
+    }
+  }`,
+  [Erc20AmountFragment],
+);
+export type UserSupplySummary = FragmentOf<typeof UserSupplySummaryFragment>;
+
+export type UserSupplyItem = {
+  __typename: 'UserSupplyItem';
+  reserve: Reserve;
+  principal: Erc20Amount;
+  withdrawable: Erc20Amount;
+  isCollateral: boolean;
+  summary: UserSupplySummary;
+  /**
+   * @deprecated Use `withdrawable` instead. Removal slated for week commencing 27th October 2025.
+   */
+  amount: Erc20Amount;
+};
+export const UserSupplyItemFragment: FragmentDocumentFor<
+  UserSupplyItem,
+  'UserSupplyItem'
+> = graphql(
+  `fragment UserSupplyItem on UserSupplyItem {
+    __typename
+    reserve {
+      ...Reserve
+    }
+    principal {
+      ...Erc20Amount
+    }
+    withdrawable {
       ...Erc20Amount
     }
     isCollateral
-    reserve {
-      ...Reserve
+    summary {
+      ...UserSupplySummary
+    }
+    amount: withdrawable {
+      ...Erc20Amount
     }
   }`,
-  [Erc20AmountFragment, ReserveFragment],
+  [Erc20AmountFragment, ReserveFragment, UserSupplySummaryFragment],
 );
-export type UserSupplyItem = FragmentOf<typeof UserSupplyItemFragment>;
 
-export const UserBorrowItemFragment = graphql(
+export const UserBorrowSummaryFragment = graphql(
+  `fragment UserBorrowSummary on UserBorrowSummary {
+    __typename
+    repaid {
+      ...Erc20Amount
+    }
+    totalBorrowed {
+      ...Erc20Amount
+    }
+  }`,
+  [Erc20AmountFragment],
+);
+export type UserBorrowSummary = FragmentOf<typeof UserBorrowSummaryFragment>;
+
+export type UserBorrowItem = {
+  __typename: 'UserBorrowItem';
+  reserve: Reserve;
+  principal: Erc20Amount;
+  debt: Erc20Amount;
+  summary: UserBorrowSummary;
+  /**
+   * @deprecated Use `debt` instead. Removal slated for week commencing 27th October 2025.
+   */
+  amount: Erc20Amount;
+};
+export const UserBorrowItemFragment: FragmentDocumentFor<
+  UserBorrowItem,
+  'UserBorrowItem'
+> = graphql(
   `fragment UserBorrowItem on UserBorrowItem {
     __typename
-    amount {
+    principal {
       ...Erc20Amount
     }
-    paid {
+    debt {
       ...Erc20Amount
     }
     reserve {
       ...Reserve
     }
+    summary {
+      ...UserBorrowSummary
+    }
+    amount: principal {
+      ...Erc20Amount
+    }
   }`,
-  [Erc20AmountFragment, ReserveFragment],
+  [Erc20AmountFragment, ReserveFragment, UserBorrowSummaryFragment],
 );
-export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
 
 export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
@@ -72,14 +139,14 @@ export const UserSummaryFragment = graphql(
       ...FiatAmount
     }
     netApy {
-      ...PercentValue
+      ...PercentNumber
     }
     netFeeEarned {
       ...FiatAmount
     }
     lowestHealthFactor
   }`,
-  [FiatAmountWithChangeFragment, FiatAmountFragment, PercentValueFragment],
+  [FiatAmountWithChangeFragment, FiatAmountFragment, PercentNumberFragment],
 );
 export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
 
@@ -92,7 +159,7 @@ export const UserPositionFragment = graphql(
     }
     user
     netApy {
-      ...PercentValue
+      ...PercentNumber
     }
     netCollateral(currency: $currency) {
       ...FiatAmountWithChange
@@ -110,30 +177,30 @@ export const UserPositionFragment = graphql(
       ...FiatAmountWithChange
     }
     netSupplyApy {
-      ...PercentValueWithChange
+      ...PercentNumberWithChange
     }
     netBorrowApy {
-      ...PercentValueWithChange
+      ...PercentNumberWithChange
     }
     healthFactor {
-      ...HealthFactorChange
+      ...HealthFactorWithChange
     }
     riskPremium {
-      ...PercentValue
+      ...PercentNumber
     }
     betterRiskPremium {
-      ...PercentValue
+      ...PercentNumber
     }
     netBalancePercentChange(window: $timeWindow){
-      ...PercentValue
+      ...PercentNumber
     }
   }`,
   [
     SpokeFragment,
-    PercentValueFragment,
+    PercentNumberFragment,
     FiatAmountWithChangeFragment,
-    PercentValueWithChangeFragment,
-    HealthFactorChangeFragment,
+    PercentNumberWithChangeFragment,
+    HealthFactorWithChangeFragment,
   ],
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
@@ -141,21 +208,21 @@ export type UserPosition = FragmentOf<typeof UserPositionFragment>;
 export interface UserBalance {
   __typename: 'UserBalance';
   info: TokenInfo;
-  totalAmount: DecimalValue;
+  totalAmount: DecimalNumber;
   balances: TokenAmount[];
   fiatAmount: FiatAmount;
   /**
-   * @deprecated Use `highestSupplyApy` instead. Removal slated for week commencing 6th October 2025.
+   * @deprecated Use `highestSupplyApy` instead. Removal slated for week commencing 27th October 2025.
    */
-  supplyApy: PercentValue;
+  supplyApy: PercentNumber;
   /**
-   * @deprecated Use `highestBorrowApy` instead. Removal slated for week commencing 6th October 2025.
+   * @deprecated Use `highestBorrowApy` instead. Removal slated for week commencing 27th October 2025.
    */
-  borrowApy: PercentValue;
-  highestSupplyApy: PercentValue;
-  highestBorrowApy: PercentValue;
-  lowestSupplyApy: PercentValue;
-  lowestBorrowApy: PercentValue;
+  borrowApy: PercentNumber;
+  highestSupplyApy: PercentNumber;
+  highestBorrowApy: PercentNumber;
+  lowestSupplyApy: PercentNumber;
+  lowestBorrowApy: PercentNumber;
 }
 
 export const UserBalanceFragment: FragmentDocumentFor<
@@ -168,7 +235,7 @@ export const UserBalanceFragment: FragmentDocumentFor<
       ...TokenInfo
     }
     totalAmount {
-      ...DecimalValue
+      ...DecimalNumber
     }
     balances {
       ...TokenAmount
@@ -177,215 +244,32 @@ export const UserBalanceFragment: FragmentDocumentFor<
       ...FiatAmount
     }
     supplyApy(metric: HIGHEST) {
-      ...PercentValue
+      ...PercentNumber
     }
     borrowApy(metric: HIGHEST) {
-      ...PercentValue
+      ...PercentNumber
     }
     highestSupplyApy: supplyApy(metric: HIGHEST) {
-      ...PercentValue
+      ...PercentNumber
     }
     highestBorrowApy: borrowApy(metric: HIGHEST) {
-      ...PercentValue
+      ...PercentNumber
     }
     lowestSupplyApy: supplyApy(metric: LOWEST) {
-      ...PercentValue
+      ...PercentNumber
     }
     lowestBorrowApy: borrowApy(metric: LOWEST) {
-      ...PercentValue
+      ...PercentNumber
     }
   }`,
   [
     TokenInfoFragment,
-    DecimalValueFragment,
+    DecimalNumberFragment,
     TokenAmountFragment,
     FiatAmountFragment,
-    PercentValueFragment,
+    PercentNumberFragment,
   ],
 );
-
-// Activity Fragments
-export const BorrowActivityFragment = graphql(
-  `fragment BorrowActivity on BorrowActivity {
-    __typename
-    id
-    timestamp
-    txHash
-    spoke {
-      ...Spoke
-    }
-    reserve {
-      ...ReserveInfo
-    }
-    amount {
-      ...Erc20Amount
-    }
-  }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
-);
-export type BorrowActivity = FragmentOf<typeof BorrowActivityFragment>;
-
-export const SupplyActivityFragment = graphql(
-  `fragment SupplyActivity on SupplyActivity {
-    __typename
-    id
-    timestamp
-    txHash
-    spoke {
-      ...Spoke
-    }
-    reserve {
-      ...ReserveInfo
-    }
-    amount {
-      ...Erc20Amount
-    }
-  }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
-);
-export type SupplyActivity = FragmentOf<typeof SupplyActivityFragment>;
-
-export const WithdrawActivityFragment = graphql(
-  `fragment WithdrawActivity on WithdrawActivity {
-    __typename
-    id
-    timestamp
-    txHash
-    spoke {
-      ...Spoke
-    }
-    reserve {
-      ...ReserveInfo
-    }
-    amount {
-      ...Erc20Amount
-    }
-  }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
-);
-export type WithdrawActivity = FragmentOf<typeof WithdrawActivityFragment>;
-
-export const RepayActivityFragment = graphql(
-  `fragment RepayActivity on RepayActivity {
-    __typename
-    id
-    timestamp
-    txHash
-    spoke {
-      ...Spoke
-    }
-    reserve {
-      ...ReserveInfo
-    }
-    amount {
-      ...Erc20Amount
-    }
-  }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
-);
-export type RepayActivity = FragmentOf<typeof RepayActivityFragment>;
-
-export const LiquidatedActivityFragment = graphql(
-  `fragment LiquidatedActivity on LiquidatedActivity {
-    __typename
-    id
-    timestamp
-    txHash
-    spoke {
-      ...Spoke
-    }
-    collateralReserve {
-      ...ReserveInfo
-    }
-    debtReserve {
-      ...ReserveInfo
-    }
-    collateralAmount {
-      ...Erc20Amount
-    }
-    debtAmount {
-      ...Erc20Amount
-    }
-    liquidator
-  }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
-);
-export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
-
-export const SwapActivityFragment = graphql(
-  `fragment SwapActivity on SwapActivity {
-    __typename
-    id
-    timestamp
-    txHash
-    sellAmount {
-      ...TokenAmount
-    }
-    buyAmount {
-      ...TokenAmount
-    }
-    executedSellAmount {
-      ...TokenAmount
-    }
-    executedBuyAmount {
-      ...TokenAmount
-    }
-    createdAt
-    fulfilledAt
-    explorerLink
-  }`,
-  [TokenAmountFragment],
-);
-export type SwapActivity = FragmentOf<typeof SwapActivityFragment>;
-
-export const UserHistoryItemFragment = graphql(
-  `fragment UserHistoryItem on UserHistoryItem {
-    __typename
-    ... on BorrowActivity {
-      ...BorrowActivity
-    }
-    ... on SupplyActivity {
-      ...SupplyActivity
-    }
-    ... on WithdrawActivity {
-      ...WithdrawActivity
-    }
-    ... on RepayActivity {
-      ...RepayActivity
-    }
-    ... on LiquidatedActivity {
-      ...LiquidatedActivity
-    }
-    ... on SwapActivity {
-      ...SwapActivity
-    }
-  }`,
-  [
-    BorrowActivityFragment,
-    SupplyActivityFragment,
-    WithdrawActivityFragment,
-    RepayActivityFragment,
-    LiquidatedActivityFragment,
-    SwapActivityFragment,
-  ],
-);
-export type UserHistoryItem = FragmentOf<typeof UserHistoryItemFragment>;
-
-export const PaginatedUserHistoryResultFragment = graphql(
-  `fragment PaginatedUserHistoryResult on PaginatedUserHistoryResult {
-    __typename
-    items {
-      ...UserHistoryItem
-    }
-    pageInfo {
-      ...PaginatedResultInfo
-    }
-  }`,
-  [UserHistoryItemFragment, PaginatedResultInfoFragment],
-);
-export type PaginatedUserHistoryResult = FragmentOf<
-  typeof PaginatedUserHistoryResultFragment
->;
 
 export const UserSummaryHistoryItemFragment = graphql(
   `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
@@ -413,9 +297,9 @@ export const APYSampleFragment = graphql(
     __typename
     date
     avgRate {
-      ...PercentValue
+      ...PercentNumber
     }
   }`,
-  [PercentValueFragment],
+  [PercentNumberFragment],
 );
 export type APYSample = FragmentOf<typeof APYSampleFragment>;
