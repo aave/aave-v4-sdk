@@ -1,4 +1,3 @@
-import { TokenFragment } from './fragments/common';
 import {
   CancelSwapExecutionPlanFragment,
   PaginatedUserSwapsResultFragment,
@@ -7,7 +6,8 @@ import {
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
   SwapStatusFragment,
-} from './fragments/swaps';
+  TokenFragment,
+} from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
 /**

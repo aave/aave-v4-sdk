@@ -28,7 +28,259 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "ActivityItem",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "BorrowActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SupplyActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "WithdrawActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "RepayActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "LiquidatedActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SwapActivity"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Asset",
+        "fields": [
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "summary",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AssetSummary",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "price",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmountWithChange",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AssetBorrowSample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AssetPriceSample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AssetSummary",
+        "fields": [
+          {
+            "name": "totalSupplyCap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalSupplied",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalSuppliable",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalBorrowCap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalBorrowed",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalBorrowable",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AssetSupplySample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -99,7 +351,7 @@
             "args": []
           },
           {
-            "name": "amount",
+            "name": "borrowed",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -321,10 +573,10 @@
       },
       {
         "kind": "OBJECT",
-        "name": "DecimalValue",
+        "name": "DecimalNumber",
         "fields": [
           {
-            "name": "raw",
+            "name": "onChainValue",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -346,7 +598,7 @@
             "args": []
           },
           {
-            "name": "formatted",
+            "name": "value",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -355,6 +607,48 @@
               }
             },
             "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DecimalNumberWithChange",
+        "fields": [
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "change",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "window",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -415,12 +709,12 @@
         "name": "Erc20Amount",
         "fields": [
           {
-            "name": "value",
+            "name": "amount",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -455,7 +749,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -531,7 +825,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -543,7 +837,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -726,7 +1020,7 @@
         "name": "FiatAmountWithChange",
         "fields": [
           {
-            "name": "amount",
+            "name": "current",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -743,7 +1037,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -785,44 +1079,6 @@
               "name": "Any"
             },
             "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "HealthFactorChange",
-        "fields": [
-          {
-            "name": "value",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
-            "name": "change",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValue",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "window",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
           }
         ],
         "interfaces": []
@@ -894,6 +1150,44 @@
               "name": "Any"
             },
             "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HealthFactorWithChange",
+        "fields": [
+          {
+            "name": "current",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "change",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "window",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -1058,7 +1352,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1129,7 +1423,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1141,7 +1435,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1153,7 +1447,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1165,7 +1459,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1244,6 +1538,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "utilizationRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -1258,7 +1563,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -1270,7 +1575,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -1371,7 +1676,7 @@
             "args": []
           },
           {
-            "name": "collateralAmount",
+            "name": "collateral",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -1383,7 +1688,7 @@
             "args": []
           },
           {
-            "name": "debtAmount",
+            "name": "debt",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -1425,12 +1730,12 @@
             "args": []
           },
           {
-            "name": "value",
+            "name": "amount",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -1465,7 +1770,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -1508,6 +1813,43 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PaginatedActivitiesResult",
+        "fields": [
+          {
+            "name": "items",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "UNION",
+                    "name": "ActivityItem",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedResultInfo",
                 "ofType": null
               }
             },
@@ -1615,43 +1957,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PaginatedUserHistoryResult",
-        "fields": [
-          {
-            "name": "items",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "UNION",
-                    "name": "UserHistoryItem",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "pageInfo",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PaginatedResultInfo",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
         "name": "PaginatedUserSwapsResult",
         "fields": [
           {
@@ -1689,10 +1994,10 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PercentValue",
+        "name": "PercentNumber",
         "fields": [
           {
-            "name": "raw",
+            "name": "onChainValue",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -1725,7 +2030,7 @@
             "args": []
           },
           {
-            "name": "formatted",
+            "name": "normalized",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -1740,7 +2045,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PercentValueVariation",
+        "name": "PercentNumberVariation",
         "fields": [
           {
             "name": "current",
@@ -1748,7 +2053,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1760,7 +2065,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1771,15 +2076,15 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PercentValueWithChange",
+        "name": "PercentNumberWithChange",
         "fields": [
           {
-            "name": "amount",
+            "name": "current",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -1791,7 +2096,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -2043,19 +2348,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValueVariation",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "positionApy",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentValueVariation",
+                "name": "PercentNumberVariation",
                 "ofType": null
               }
             },
@@ -2067,7 +2360,19 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValueVariation",
+                "name": "PercentNumberVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "portfolioApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberVariation",
                 "ofType": null
               }
             },
@@ -2197,6 +2502,113 @@
                 "kind": "OBJECT",
                 "name": "FiatAmount",
                 "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "asset",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Asset",
+              "ofType": null
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "assetSupplyHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AssetSupplySample",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "assetBorrowHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AssetBorrowSample",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "assetPriceHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AssetPriceSample",
+                    "ofType": null
+                  }
+                }
               }
             },
             "args": [
@@ -2764,29 +3176,6 @@
             ]
           },
           {
-            "name": "userHistory",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PaginatedUserHistoryResult",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
             "name": "userSummary",
             "type": {
               "kind": "NON_NULL",
@@ -2923,6 +3312,29 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "activities",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedActivitiesResult",
+                "ofType": null
               }
             },
             "args": [
@@ -3216,7 +3628,7 @@
             "args": []
           },
           {
-            "name": "amount",
+            "name": "repaid",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3448,7 +3860,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -3460,7 +3872,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -3472,7 +3884,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -3491,6 +3903,17 @@
           },
           {
             "name": "collateral",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "suppliable",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3577,7 +4000,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -3589,7 +4012,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -3644,7 +4067,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -3888,7 +4311,7 @@
             "args": []
           },
           {
-            "name": "amount",
+            "name": "supplied",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3940,7 +4363,7 @@
             "args": []
           },
           {
-            "name": "sellAmount",
+            "name": "desiredSell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3952,7 +4375,7 @@
             "args": []
           },
           {
-            "name": "buyAmount",
+            "name": "desiredBuy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3964,7 +4387,7 @@
             "args": []
           },
           {
-            "name": "executedSellAmount",
+            "name": "sold",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3976,7 +4399,7 @@
             "args": []
           },
           {
-            "name": "executedBuyAmount",
+            "name": "bought",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4358,7 +4781,7 @@
             "args": []
           },
           {
-            "name": "sellAmount",
+            "name": "desiredSell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4370,7 +4793,7 @@
             "args": []
           },
           {
-            "name": "buyAmount",
+            "name": "desiredBuy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4382,7 +4805,7 @@
             "args": []
           },
           {
-            "name": "executedSellAmount",
+            "name": "sold",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4394,7 +4817,7 @@
             "args": []
           },
           {
-            "name": "executedBuyAmount",
+            "name": "bought",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4465,7 +4888,7 @@
             "args": []
           },
           {
-            "name": "createAt",
+            "name": "createdAt",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4498,7 +4921,7 @@
             "args": []
           },
           {
-            "name": "sellAmount",
+            "name": "desiredSell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4510,7 +4933,7 @@
             "args": []
           },
           {
-            "name": "buyAmount",
+            "name": "desiredBuy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4585,14 +5008,14 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
             "args": []
           },
           {
-            "name": "sellAmount",
+            "name": "desiredSell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4604,7 +5027,7 @@
             "args": []
           },
           {
-            "name": "buyAmount",
+            "name": "desiredBuy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4659,7 +5082,7 @@
             "args": []
           },
           {
-            "name": "partnerFeeAmount",
+            "name": "partnerFee",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5037,7 +5460,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalValue",
+                "name": "DecimalNumber",
                 "ofType": null
               }
             },
@@ -5072,7 +5495,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -5095,7 +5518,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -5132,7 +5555,7 @@
             "args": []
           },
           {
-            "name": "amount",
+            "name": "principal",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5144,7 +5567,50 @@
             "args": []
           },
           {
-            "name": "paid",
+            "name": "debt",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "summary",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserBorrowSummary",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserBorrowSummary",
+        "fields": [
+          {
+            "name": "repaid",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalBorrowed",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5157,36 +5623,6 @@
           }
         ],
         "interfaces": []
-      },
-      {
-        "kind": "UNION",
-        "name": "UserHistoryItem",
-        "possibleTypes": [
-          {
-            "kind": "OBJECT",
-            "name": "BorrowActivity"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "SupplyActivity"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "WithdrawActivity"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "RepayActivity"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "LiquidatedActivity"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "SwapActivity"
-          }
-        ]
       },
       {
         "kind": "OBJECT",
@@ -5335,7 +5771,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -5347,7 +5783,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValueWithChange",
+                "name": "PercentNumberWithChange",
                 "ofType": null
               }
             },
@@ -5359,7 +5795,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValueWithChange",
+                "name": "PercentNumberWithChange",
                 "ofType": null
               }
             },
@@ -5371,7 +5807,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "HealthFactorChange",
+                "name": "HealthFactorWithChange",
                 "ofType": null
               }
             },
@@ -5381,7 +5817,7 @@
             "name": "betterRiskPremium",
             "type": {
               "kind": "OBJECT",
-              "name": "PercentValue",
+              "name": "PercentNumber",
               "ofType": null
             },
             "args": []
@@ -5392,7 +5828,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -5404,7 +5840,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -5549,7 +5985,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentValue",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -5690,19 +6126,7 @@
             "args": []
           },
           {
-            "name": "amount",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "earned",
+            "name": "principal",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5720,6 +6144,61 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "withdrawable",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "summary",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserSupplySummary",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserSupplySummary",
+        "fields": [
+          {
+            "name": "withdrawn",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalSupplied",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
               }
             },
             "args": []
@@ -5789,7 +6268,7 @@
             "args": []
           },
           {
-            "name": "amount",
+            "name": "withdrawn",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

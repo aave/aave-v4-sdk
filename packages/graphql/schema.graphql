@@ -1,7 +1,24 @@
 type APYSample {
   date: DateTime!
-  avgRate: PercentValue!
+  avgRate: PercentNumber!
 }
+
+input ActivitiesRequest {
+  query: ActivitiesRequestQuery!
+  user: EvmAddress
+  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, SWAP, LIQUIDATED]
+  pageSize: PageSize! = FIFTY
+  cursor: Cursor
+}
+
+input ActivitiesRequestQuery @oneOf {
+  hub: HubInput
+  spoke: SpokeInput
+  chainIds: [ChainId!]
+  txHash: TxHashInput
+}
+
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | SwapActivity
 
 enum ActivityType {
   BORROW
@@ -27,7 +44,57 @@ enum ApyMetric {
   LOWEST
 }
 
+type Asset {
+  token: Erc20Token!
+  summary: AssetSummary!
+  price(currency: Currency! = USD): FiatAmountWithChange!
+}
+
+input AssetBorrowHistoryRequest {
+  token: Erc20Input!
+  window: TimeWindow!
+}
+
+type AssetBorrowSample {
+  date: DateTime!
+  amount: DecimalNumber!
+}
+
 scalar AssetId
+
+input AssetPriceHistoryRequest {
+  token: Erc20Input!
+  currency: Currency!
+  window: TimeWindow!
+}
+
+type AssetPriceSample {
+  date: DateTime!
+  amount: BigDecimal!
+}
+
+input AssetRequest {
+  token: Erc20Input!
+}
+
+type AssetSummary {
+  totalSupplyCap: DecimalNumberWithChange!
+  totalSupplied: DecimalNumberWithChange!
+  totalSuppliable: DecimalNumberWithChange!
+  totalBorrowCap: DecimalNumberWithChange!
+  totalBorrowed: DecimalNumberWithChange!
+  totalBorrowable: DecimalNumberWithChange!
+}
+
+input AssetSupplyHistoryRequest {
+  token: Erc20Input!
+  window: TimeWindow!
+}
+
+type AssetSupplySample {
+  date: DateTime!
+  amount: DecimalNumber!
+}
 
 scalar BigDecimal
 
@@ -47,7 +114,7 @@ type BorrowActivity {
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
-  amount: Erc20Amount!
+  borrowed: Erc20Amount!
 }
 
 input BorrowRequest {
@@ -115,17 +182,22 @@ scalar Cursor
 
 scalar DateTime
 
-type DecimalValue {
-  """
-  The raw value before any formatting (should be used if you want to do any math)
-  """
-  raw: BigInt!
+type DecimalNumber {
+  """The on-chain representation of `value`, stored as an integer."""
+  onChainValue: BigInt!
 
-  """The decimals"""
+  """
+  The number of decimals defining how many fractional digits the number supports.
+  """
   decimals: Int!
 
-  """The formatted value which is {raw} / 1e{decimals}"""
-  formatted: BigDecimal!
+  """The normalized value computed as `onChainValue / 10^decimals`."""
+  value: BigDecimal!
+}
+
+type DecimalNumberWithChange {
+  current: DecimalNumber!
+  change(window: TimeWindow! = LAST_DAY): DecimalNumber!
 }
 
 type DomainData {
@@ -145,9 +217,9 @@ input ERC20PermitSignature {
 
 type Erc20Amount {
   """The value"""
-  value: DecimalValue!
+  amount: DecimalNumber!
   fiatAmount(currency: Currency! = USD): FiatAmount!
-  fiatRate(currency: Currency! = USD): DecimalValue!
+  fiatRate(currency: Currency! = USD): DecimalNumber!
   isWrappedNative: Boolean!
   token: Erc20Token!
 }
@@ -160,10 +232,10 @@ type Erc20ApprovalRequired {
   reason: String!
 
   """The required amount missing to be able to do the original transaction"""
-  requiredAmount: DecimalValue!
+  requiredAmount: DecimalNumber!
 
   """The current allowance approved"""
-  currentAllowance: DecimalValue!
+  currentAllowance: DecimalNumber!
 
   """The transaction to send after the approval is complete"""
   originalTransaction: TransactionRequest!
@@ -206,6 +278,11 @@ input ExchangeRateRequest {
 
   """The currency to get the result in"""
   to: Currency!
+
+  """
+  The date time to get the exchange rate at, if not provided the latest rate is returned
+  """
+  at: DateTime
 }
 
 input ExchangeRateRequestFrom @oneOf {
@@ -233,8 +310,8 @@ type FiatAmountValueVariation {
 }
 
 type FiatAmountWithChange {
-  amount: FiatAmount!
-  change(window: TimeWindow! = LAST_DAY): PercentValue!
+  current: FiatAmount!
+  change(window: TimeWindow! = LAST_DAY): PercentNumber!
 }
 
 input ForkTopUpErc20 {
@@ -277,11 +354,6 @@ input HasProcessedKnownTransactionRequest {
   txHash: TxHash!
 }
 
-type HealthFactorChange {
-  value: BigDecimal
-  change(window: TimeWindow! = LAST_DAY): PercentValue!
-}
-
 type HealthFactorError {
   reason: String!
   current: BigDecimal
@@ -293,6 +365,11 @@ union HealthFactorResult = HealthFactorVariation | HealthFactorError
 type HealthFactorVariation {
   current: BigDecimal
   after: BigDecimal
+}
+
+type HealthFactorWithChange {
+  current: BigDecimal
+  change(window: TimeWindow! = LAST_DAY): PercentNumber!
 }
 
 type Hub {
@@ -332,7 +409,7 @@ type HubAssetSettings {
   feeReceiver: EvmAddress!
 
   """The liquidity fee"""
-  liquidityFee: PercentValue!
+  liquidityFee: PercentNumber!
 
   """The ir strategy"""
   irStrategy: EvmAddress!
@@ -352,16 +429,16 @@ type HubAssetSummary {
   availableLiquidity: BigDecimal!
 
   """The supply APY"""
-  supplyApy: PercentValue!
+  supplyApy: PercentNumber!
 
   """The borrow APY"""
-  borrowApy: PercentValue!
+  borrowApy: PercentNumber!
 
   """The net APY"""
-  netApy: PercentValue!
+  netApy: PercentNumber!
 
   """The utilization rate"""
-  utilizationRate: PercentValue!
+  utilizationRate: PercentNumber!
 }
 
 type HubAssetUserState {
@@ -372,7 +449,15 @@ type HubAssetUserState {
 input HubAssetsRequest {
   hub: EvmAddress!
   user: EvmAddress
+  orderBy: HubAssetsRequestOrderBy! = {assetName: ASC}
   chainId: ChainId!
+}
+
+input HubAssetsRequestOrderBy @oneOf {
+  assetName: OrderDirection
+  availableLiquidity: OrderDirection
+  supplyApy: OrderDirection
+  borrowApy: OrderDirection
 }
 
 input HubInput {
@@ -408,6 +493,11 @@ type HubSummary {
   The total spoke reserves aggregated supply caps using this hub, showed in fiat as each asset has a different value
   """
   totalSupplyCap: FiatAmount!
+
+  """
+  The utilization rate"
+  """
+  utilizationRate: BigDecimal!
 }
 
 input HubTokenInput {
@@ -418,6 +508,13 @@ input HubTokenInput {
 
 input HubsRequest {
   query: HubsRequestQuery!
+  orderBy: HubsRequestOrderBy! = {name: ASC}
+}
+
+input HubsRequestOrderBy @oneOf {
+  name: OrderDirection
+  totalBorrowed: OrderDirection
+  totalSupplied: OrderDirection
 }
 
 input HubsRequestQuery @oneOf {
@@ -430,10 +527,10 @@ input HubsRequestQuery @oneOf {
 
 type InsufficientBalanceError {
   """The amount required to do the original transaction"""
-  required: DecimalValue!
+  required: DecimalNumber!
 
   """The amount available in the wallet"""
-  available: DecimalValue!
+  available: DecimalNumber!
 }
 
 """A scalar that can represent any JSON value."""
@@ -476,8 +573,8 @@ type LiquidatedActivity {
   spoke: Spoke!
   collateralReserve: ReserveInfo!
   debtReserve: ReserveInfo!
-  collateralAmount: Erc20Amount!
-  debtAmount: Erc20Amount!
+  collateral: Erc20Amount!
+  debt: Erc20Amount!
   liquidator: EvmAddress!
 }
 
@@ -486,13 +583,13 @@ type NativeAmount {
   token: NativeToken!
 
   """The value"""
-  value: DecimalValue!
+  amount: DecimalNumber!
 
   """The fiat amount"""
   fiatAmount(currency: Currency! = USD): FiatAmount!
 
   """The fiat rate"""
-  fiatRate(currency: Currency! = USD): DecimalValue!
+  fiatRate(currency: Currency! = USD): DecimalNumber!
 }
 
 type NativeToken {
@@ -521,6 +618,11 @@ enum PageSize {
   FIFTY
 }
 
+type PaginatedActivitiesResult {
+  items: [ActivityItem!]!
+  pageInfo: PaginatedResultInfo!
+}
+
 type PaginatedResultInfo {
   """The cursor to the previous page of results, if any."""
   prev: Cursor
@@ -539,41 +641,35 @@ type PaginatedSpokeUserPositionManagerResult {
   pageInfo: PaginatedResultInfo!
 }
 
-type PaginatedUserHistoryResult {
-  items: [UserHistoryItem!]!
-  pageInfo: PaginatedResultInfo!
-}
-
 type PaginatedUserSwapsResult {
   items: [SwapStatus!]!
   pageInfo: PaginatedResultInfo!
 }
 
-type PercentValue {
-  """The raw none normalized percentage (the value that lives onchain)"""
-  raw: BigInt!
+type PercentNumber {
+  """
+  The on-chain representation of the percentage, stored in basis points (bps).
+  """
+  onChainValue: BigInt!
 
-  """The decimals representing the precision of the onchain raw value"""
+  """The number of decimals defining the precision of `bps`."""
   decimals: Int!
 
-  """The normalized percentage (1.0 = 100%)"""
+  """The human-friendly percentage value formatted for display."""
   value: BigDecimal!
 
-  """
-  The human-readable formatted value you can render on a UI straight away.
-  For example, this will turn `0.01232343` to `1.23`, it will always round to `2` decimal points.
-  """
-  formatted: BigDecimal!
+  """The normalized percentage value where 1.0 represents 100%."""
+  normalized: BigDecimal!
 }
 
-type PercentValueVariation {
-  current: PercentValue!
-  after: PercentValue!
+type PercentNumberVariation {
+  current: PercentNumber!
+  after: PercentNumber!
 }
 
-type PercentValueWithChange {
-  amount: PercentValue!
-  change(window: TimeWindow! = LAST_DAY): PercentValue!
+type PercentNumberWithChange {
+  current: PercentNumber!
+  change(window: TimeWindow! = LAST_DAY): PercentNumber!
 }
 
 type PermitMessageData {
@@ -657,9 +753,9 @@ input PreviewRequest {
 type PreviewUserPosition {
   id: UserPositionId!
   healthFactor: HealthFactorResult!
-  riskPremium: PercentValueVariation!
-  positionApy: PercentValueVariation!
-  netApy: PercentValueVariation!
+  riskPremium: PercentNumberVariation!
+  netApy: PercentNumberVariation!
+  portfolioApy: PercentNumberVariation!
   netCollateral(currency: Currency! = USD): FiatAmountValueVariation!
   netBalance(currency: Currency! = USD): FiatAmountValueVariation!
 }
@@ -673,6 +769,10 @@ type Query {
 
   """Get the exchange rate of tokens > currency or currency > currency"""
   exchangeRate(request: ExchangeRateRequest!): FiatAmount!
+  asset(request: AssetRequest!): Asset
+  assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
+  assetBorrowHistory(request: AssetBorrowHistoryRequest!): [AssetBorrowSample!]!
+  assetPriceHistory(request: AssetPriceHistoryRequest!): [AssetPriceSample!]!
 
   """Fetch a list of hubs depending on your search criteria"""
   hubs(request: HubsRequest!): [Hub!]!
@@ -704,7 +804,6 @@ type Query {
   """
   userBalances(request: UserBalancesRequest!): [UserBalance!]!
   userBorrows(request: UserBorrowsRequest!): [UserBorrowItem!]!
-  userHistory(request: UserHistoryRequest!): PaginatedUserHistoryResult!
   userSummary(request: UserSummaryRequest!): UserSummary!
   userSummaryHistory(request: UserSummaryHistoryRequest!): [UserSummaryHistoryItem!]!
   userPositions(request: UserPositionsRequest!): [UserPosition!]!
@@ -719,6 +818,7 @@ type Query {
   cater for the race condition.
   """
   hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
+  activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
   swapQuote(request: SwapQuoteRequest!): SwapQuote!
   prepareSwap(request: PrepareSwapRequest!): PrepareSwapResult!
   swap(request: SwapRequest!): SwapExecutionPlan!
@@ -749,7 +849,7 @@ type RepayActivity {
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
-  amount: Erc20Amount!
+  repaid: Erc20Amount!
 }
 
 input RepayAmountInputWithPermit @oneOf {
@@ -866,11 +966,12 @@ input ReserveInput {
 }
 
 type ReserveSettings {
-  collateralFactor: PercentValue!
-  maxLiquidationBonus: PercentValue!
-  collateralRisk: PercentValue!
+  collateralFactor: PercentNumber!
+  maxLiquidationBonus: PercentNumber!
+  collateralRisk: PercentNumber!
   borrowable: Boolean!
   collateral: Boolean!
+  suppliable: Boolean!
 }
 
 type ReserveStatus {
@@ -882,15 +983,15 @@ type ReserveStatus {
 type ReserveSummary {
   supplied: Erc20Amount!
   borrowed: Erc20Amount!
-  supplyApy: PercentValue!
-  borrowApy: PercentValue!
+  supplyApy: PercentNumber!
+  borrowApy: PercentNumber!
 }
 
 type ReserveUserState {
   balance: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
-  borrowApy: PercentValue!
+  borrowApy: PercentNumber!
 }
 
 input ReservesRequest {
@@ -919,7 +1020,9 @@ input ReservesRequestOrderBy @oneOf {
   assetName: OrderDirection
   userBalance: OrderDirection
   supplyApy: OrderDirection
+  supplyAvailable: OrderDirection
   borrowApy: OrderDirection
+  borrowAvailable: OrderDirection
   collateralFactor: OrderDirection
 }
 
@@ -1064,7 +1167,7 @@ type SupplyActivity {
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
-  amount: Erc20Amount!
+  supplied: Erc20Amount!
 }
 
 input SupplyPermitRequest {
@@ -1099,10 +1202,10 @@ type SwapActivity {
   id: ID!
   timestamp: DateTime!
   txHash: TxHash!
-  sellAmount: TokenAmount!
-  buyAmount: TokenAmount!
-  executedSellAmount: TokenAmount!
-  executedBuyAmount: TokenAmount!
+  desiredSell: TokenAmount!
+  desiredBuy: TokenAmount!
+  sold: TokenAmount!
+  bought: TokenAmount!
   createdAt: DateTime!
   fulfilledAt: DateTime!
   explorerLink: String!
@@ -1161,10 +1264,10 @@ type SwapExpired {
 
 type SwapFulfilled {
   txHash: String!
-  sellAmount: TokenAmount!
-  buyAmount: TokenAmount!
-  executedSellAmount: TokenAmount!
-  executedBuyAmount: TokenAmount!
+  desiredSell: TokenAmount!
+  desiredBuy: TokenAmount!
+  sold: TokenAmount!
+  bought: TokenAmount!
   createdAt: DateTime!
   fulfilledAt: DateTime!
   explorerLink: String!
@@ -1180,11 +1283,11 @@ enum SwapKind {
 
 type SwapOpen {
   swapId: SwapId!
-  createAt: DateTime!
+  createdAt: DateTime!
   deadline: DateTime!
   explorerLink: String!
-  sellAmount: TokenAmount!
-  buyAmount: TokenAmount!
+  desiredSell: TokenAmount!
+  desiredBuy: TokenAmount!
 }
 
 type SwapPendingSignature {
@@ -1195,9 +1298,9 @@ type SwapPendingSignature {
 
 type SwapQuote {
   quoteId: SwapQuoteId!
-  suggestedSlippage: PercentValue!
-  sellAmount: TokenAmount!
-  buyAmount: TokenAmount!
+  suggestedSlippage: PercentNumber!
+  desiredSell: TokenAmount!
+  desiredBuy: TokenAmount!
   costs: SwapQuoteCosts!
 
   """Minimum received amount after all costs and slippage"""
@@ -1209,7 +1312,7 @@ type SwapQuoteCosts {
   networkCosts: TokenAmount!
 
   """Aave partner fee amount"""
-  partnerFeeAmount: TokenAmount!
+  partnerFee: TokenAmount!
 }
 
 scalar SwapQuoteId
@@ -1264,12 +1367,19 @@ input SwapWithTransactionInput {
   isSenderSmartContractWallet: Boolean
 }
 
+input SwappableTokenInput @oneOf {
+  native: ChainId
+  erc20: Erc20Input
+}
+
 input SwappableTokensRequest {
   query: SwappableTokensRequestQuery
 }
 
-input SwappableTokensRequestQuery {
-  chainIds: [ChainId!]!
+input SwappableTokensRequestQuery @oneOf {
+  chainIds: [ChainId!]
+  from: SwappableTokenInput
+  to: SwappableTokenInput
 }
 
 enum TimeWindow {
@@ -1363,16 +1473,16 @@ type UserBalance {
   balances: [TokenAmount!]!
 
   """The total amount summed across all balances"""
-  totalAmount: DecimalValue!
+  totalAmount: DecimalNumber!
 
   """The total fiat amount summed across all balances"""
   fiatAmount(currency: Currency! = USD): FiatAmount!
 
   """The supply APY dependent on what you pass in for the `metric`"""
-  supplyApy(metric: ApyMetric! = HIGHEST): PercentValue!
+  supplyApy(metric: ApyMetric! = HIGHEST): PercentNumber!
 
   """The borrow APY dependent on what you pass in for the `metric`"""
-  borrowApy(metric: ApyMetric! = HIGHEST): PercentValue!
+  borrowApy(metric: ApyMetric! = HIGHEST): PercentNumber!
 }
 
 input UserBalancesRequest {
@@ -1418,15 +1528,27 @@ type UserBorrowItem {
   """The reserve borrowed from"""
   reserve: Reserve!
 
-  """The amount borrowed"""
-  amount: Erc20Amount!
+  """The amount borrowed on this reserve"""
+  principal: Erc20Amount!
 
-  """The amount paid back of the borrow so far"""
-  paid: Erc20Amount!
+  """
+  The overall debt including accrued interests\"""
+  """
+  debt: Erc20Amount!
+
+  """A summary of historic activities on this borrow position"""
+  summary: UserBorrowSummary!
+}
+
+type UserBorrowSummary {
+  """The amount repaid over time"""
+  repaid: Erc20Amount!
+  totalBorrowed: Erc20Amount!
 }
 
 input UserBorrowsQueryRequest @oneOf {
   userSpoke: UserSpokeInput
+  userToken: UserToken
   userPositionId: UserPositionId
   userChains: UserChains
 }
@@ -1450,22 +1572,6 @@ input UserChains {
   chainIds: [ChainId!]!
 }
 
-input UserHistoryFilter @oneOf {
-  spoke: SpokeInput
-  chainIds: [ChainId!]
-  txHash: TxHashInput
-}
-
-union UserHistoryItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | SwapActivity
-
-input UserHistoryRequest {
-  user: EvmAddress!
-  activityTypes: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, SWAP, LIQUIDATED]
-  filter: UserHistoryFilter!
-  pageSize: PageSize! = FIFTY
-  cursor: Cursor
-}
-
 type UserPosition {
   """The user holding this position"""
   user: EvmAddress!
@@ -1487,13 +1593,13 @@ type UserPosition {
 
   """The net collateral which is `totalCollateral` - `totalDebt`"""
   netCollateral(currency: Currency! = USD): FiatAmountWithChange!
-  netApy: PercentValue!
-  netSupplyApy: PercentValueWithChange!
-  netBorrowApy: PercentValueWithChange!
-  healthFactor: HealthFactorChange!
-  betterRiskPremium: PercentValue
-  riskPremium: PercentValue!
-  netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentValue!
+  netApy: PercentNumber!
+  netSupplyApy: PercentNumberWithChange!
+  netBorrowApy: PercentNumberWithChange!
+  healthFactor: HealthFactorWithChange!
+  betterRiskPremium: PercentNumber
+  riskPremium: PercentNumber!
+  netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentNumber!
   spoke: Spoke!
 }
 
@@ -1551,7 +1657,7 @@ type UserSummary {
   """
   Net APY = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
   """
-  netApy: PercentValue!
+  netApy: PercentNumber!
 
   """Interest earned (net fee earned)"""
   netFeeEarned: FiatAmount!
@@ -1592,6 +1698,7 @@ input UserSummaryRequest {
 
 input UserSuppliesQueryRequest @oneOf {
   userSpoke: UserSpokeInput
+  userToken: UserToken
   userPositionId: UserPositionId
   userChains: UserChains
 }
@@ -1614,14 +1721,23 @@ type UserSupplyItem {
   """The reserve supplied to"""
   reserve: Reserve!
 
-  """The amount of supplied shares"""
-  amount: Erc20Amount!
-
-  """The amount earned since supplying"""
-  earned: Erc20Amount!
+  """The amount supplied to this reserve"""
+  principal: Erc20Amount!
 
   """If this supply is used as collateral"""
   isCollateral: Boolean!
+
+  """The overall amount you can withdraw, including accrued interests"""
+  withdrawable: Erc20Amount!
+
+  """A summary of historic activities on this supply position"""
+  summary: UserSupplySummary!
+}
+
+type UserSupplySummary {
+  """The amount withdrawn over time"""
+  withdrawn: Erc20Amount!
+  totalSupplied: Erc20Amount!
 }
 
 input UserSwapsRequest {
@@ -1632,13 +1748,18 @@ input UserSwapsRequest {
   cursor: Cursor
 }
 
+input UserToken {
+  user: EvmAddress!
+  token: Erc20Input!
+}
+
 type WithdrawActivity {
   id: ID!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
-  amount: Erc20Amount!
+  withdrawn: Erc20Amount!
 }
 
 input WithdrawRequest {
