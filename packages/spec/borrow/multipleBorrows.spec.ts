@@ -26,7 +26,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
             token: ETHEREUM_WETH_ADDRESS,
-            amount: bigDecimal('1.5'),
+            amount: bigDecimal('1.0'),
           }),
         );
 

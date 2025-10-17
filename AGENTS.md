@@ -1,5 +1,5 @@
 # AGENTS.md
- 
+
 ## Dev environment tips
 
 - Use `nvm use` to use the correct Node.js version.
