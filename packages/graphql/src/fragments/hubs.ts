@@ -17,6 +17,7 @@ export const HubSummaryFragment = graphql(
     totalSupplyCap {
       ...FiatAmount
     }
+    utilizationRate
   }`,
   [FiatAmountFragment],
 );

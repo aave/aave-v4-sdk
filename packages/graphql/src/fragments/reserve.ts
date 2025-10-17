@@ -22,6 +22,7 @@ export const ReserveSettingsFragment = graphql(
     }
     borrowable
     collateral
+    suppliable
   }`,
   [PercentNumberFragment],
 );
