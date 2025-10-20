@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { InvariantError } from './helpers';
-import { BigDecimal, bigDecimal } from './number';
+import { bigDecimal } from './number';
 
 describe('Given a BigDecimal class', () => {
   describe('When the input is not a number', () => {
@@ -16,22 +16,22 @@ describe('Given a BigDecimal class', () => {
     });
   });
 
+  // TODO: delete once strict mode is enabled again
   describe('When using the Number(BigDecimal) cosntructor', () => {
+    it('Then it should return the number representation of the BigDecimal', () => {
+      const number = bigDecimal('10.12345678901');
+      expect(Number(number)).toBe(10.12345678901);
+    });
+  });
+
+  describe.skip('When using the Number(BigDecimal) cosntructor', () => {
     it('Then it should throw an InvariantError', () => {
       const number = bigDecimal('10.12345678901');
       expect(() => Number(number)).toThrow(InvariantError);
     });
   });
 
-  describe('When using the BigDecimal.new((Number) constructor', () => {
-    it('Then it should throw an InvariantError', () => {
-      expect(() => BigDecimal.new(10 as unknown as string)).toThrow(
-        InvariantError,
-      );
-    });
-  });
-
-  describe('When using BigDecimal#valueOf is invoked', () => {
+  describe.skip('When using BigDecimal#valueOf is invoked', () => {
     it('Then it should throw an InvariantError', () => {
       const number = bigDecimal('10.12345678901');
       // @ts-expect-error - we want to test the error case

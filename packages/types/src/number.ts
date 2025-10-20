@@ -2,14 +2,13 @@ import Big from 'big.js';
 import type { Tagged } from 'type-fest';
 import { InvariantError, invariant } from './helpers';
 
-Big.strict = true;
+// TODO: renable once interface migration is complete
+Big.strict = false;
 
 /**
  * A high precision decimal number.
  */
 export class BigDecimal extends Big {
-  readonly STRICT = true;
-
   private constructor(value: string) {
     super(value);
   }
