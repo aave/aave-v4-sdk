@@ -89,7 +89,7 @@ export function useSpokes({
 }: NullishDeep<UseSpokesArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<Spoke[], UnexpectedError, boolean> {
+}): SuspendableResult<Spoke[], UnexpectedError> {
   return useSuspendableQuery({
     document: SpokesQuery,
     variables: {
@@ -181,11 +181,7 @@ export function useSpokePositionManagers({
 }: NullishDeep<UseSpokePositionManagersArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<
-  PaginatedSpokePositionManagerResult,
-  UnexpectedError,
-  boolean
-> {
+}): SuspendableResult<PaginatedSpokePositionManagerResult, UnexpectedError> {
   return useSuspendableQuery({
     document: SpokePositionManagersQuery,
     variables: {
@@ -283,8 +279,7 @@ export function useSpokeUserPositionManagers({
   pause?: boolean;
 }): SuspendableResult<
   PaginatedSpokeUserPositionManagerResult,
-  UnexpectedError,
-  boolean
+  UnexpectedError
 > {
   return useSuspendableQuery({
     document: SpokeUserPositionManagersQuery,

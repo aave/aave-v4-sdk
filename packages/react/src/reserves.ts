@@ -191,7 +191,7 @@ export function useReserves<T = Reserve[]>({
 }: NullishDeep<UseReservesArgs<T>> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<T, UnexpectedError, boolean> {
+}): SuspendableResult<T, UnexpectedError> {
   return useSuspendableQuery({
     document: ReservesQuery,
     variables: {
@@ -364,7 +364,7 @@ export function useBorrowApyHistory({
 }: NullishDeep<UseBorrowApyHistoryArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<APYSample[], UnexpectedError, boolean> {
+}): SuspendableResult<APYSample[], UnexpectedError> {
   return useSuspendableQuery({
     document: BorrowApyHistoryQuery,
     variables: {
@@ -463,7 +463,7 @@ export function useSupplyApyHistory({
 }: NullishDeep<UseSupplyApyHistoryArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<APYSample[], UnexpectedError, boolean> {
+}): SuspendableResult<APYSample[], UnexpectedError> {
   return useSuspendableQuery({
     document: SupplyApyHistoryQuery,
     variables: {

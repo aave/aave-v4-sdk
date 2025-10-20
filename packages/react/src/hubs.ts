@@ -102,7 +102,7 @@ export function useHub({
 }: NullishDeep<UseHubArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<Hub | null, UnexpectedError, boolean> {
+}): SuspendableResult<Hub | null, UnexpectedError> {
   return useSuspendableQuery({
     document: HubQuery,
     variables: {
@@ -177,7 +177,7 @@ export function useHubs({
 }: NullishDeep<UseHubsArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<Hub[], UnexpectedError, boolean> {
+}): SuspendableResult<Hub[], UnexpectedError> {
   return useSuspendableQuery({
     document: HubsQuery,
     variables: {
@@ -270,7 +270,7 @@ export function useHubAssets({
 }: NullishDeep<UseHubAssetsArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<HubAsset[], UnexpectedError, boolean> {
+}): SuspendableResult<HubAsset[], UnexpectedError> {
   return useSuspendableQuery({
     document: HubAssetsQuery,
     variables: {

@@ -1230,7 +1230,7 @@ export function usePreview({
 }: NullishDeep<UsePreviewArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<PreviewUserPosition, UnexpectedError, boolean> {
+}): SuspendableResult<PreviewUserPosition, UnexpectedError> {
   return useSuspendableQuery({
     document: PreviewQuery,
     variables: {
@@ -1333,7 +1333,7 @@ export function useActivities({
 }: NullishDeep<UseActivitiesArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<PaginatedActivitiesResult, UnexpectedError, boolean> {
+}): SuspendableResult<PaginatedActivitiesResult, UnexpectedError> {
   return useSuspendableQuery({
     document: ActivitiesQuery,
     variables: {

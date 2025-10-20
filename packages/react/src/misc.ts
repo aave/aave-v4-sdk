@@ -99,7 +99,7 @@ export function useAaveChains({
 }: NullishDeep<UseAaveChainsArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<Chain[], UnexpectedError, boolean> {
+}): SuspendableResult<Chain[], UnexpectedError> {
   return useSuspendableQuery({
     document: ChainsQuery,
     variables: { filter },
@@ -239,7 +239,7 @@ export function useExchangeRate({
 }: NullishDeep<UseExchangeRateArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<FiatAmount, UnexpectedError, boolean> {
+}): SuspendableResult<FiatAmount, UnexpectedError> {
   const client = useAaveClient();
   const pollInterval = client.context.environment.exchangeRateInterval;
 

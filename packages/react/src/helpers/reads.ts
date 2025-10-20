@@ -105,7 +105,7 @@ export function useSuspendableQuery<
   Variables,
   boolean,
   Pausable
->): SuspendableResult<Output, UnexpectedError, Pausable>;
+>): SuspendableResult<Output, UnexpectedError>;
 /**
  * Implementation.
  */
@@ -126,7 +126,7 @@ export function useSuspendableQuery<
   Variables,
   boolean,
   boolean
->): SuspendableResult<Output, UnexpectedError, boolean> {
+>): SuspendableResult<Output, UnexpectedError> {
   const [{ fetching, data, error }, executeQuery] = useQuery({
     query: document,
     variables: variables as Variables,
