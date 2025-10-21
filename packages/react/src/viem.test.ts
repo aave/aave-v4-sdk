@@ -1,4 +1,7 @@
-import { ETHEREUM_WETH_ADDRESS } from '@aave/client-next/test-utils';
+import {
+  ETHEREUM_FORK_RPC_URL,
+  ETHEREUM_WETH_ADDRESS,
+} from '@aave/client-next/test-utils';
 import type { SupplyActivity } from '@aave/graphql-next';
 import {
   Currency,
@@ -13,9 +16,25 @@ import {
   type ID,
   txHash,
 } from '@aave/types-next';
+import { defineChain } from 'viem';
+import { mainnet } from 'viem/chains';
 import { describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from './test-utils';
 import { useNetworkFee } from './viem';
+
+// TODO replace this temp hack with correct fork ID once the new tenderly fork is available
+vi.mock('@aave/client-next/viem', () => ({
+  supportedChains: {
+    [chainId(1)]: defineChain({
+      ...mainnet,
+      rpcUrls: {
+        default: {
+          http: [ETHEREUM_FORK_RPC_URL],
+        },
+      },
+    }),
+  },
+}));
 
 describe('Given the viem adapters are used', () => {
   describe('When the useNetworkFee hook is used with an ActivityItem', () => {
