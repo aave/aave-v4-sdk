@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Available Position Managers in a Spoke on Aave V4 > Given a user who wants to fetch position managers for a specific spoke > When fetching position managers with default settings > Then it should return active position managers 1`] = `
+[
+  {
+    "__typename": "SpokePositionManger",
+    "active": true,
+    "address": "0x2bBD93E1F5919629258b51904D450ec57EDFf963",
+    "name": "Native Gateway",
+  },
+  {
+    "__typename": "SpokePositionManger",
+    "active": true,
+    "address": "0x47f1B9F5c3BC9dE3C563a9dBd178d410509b719F",
+    "name": "Signature Gateway",
+  },
+]
+`;
