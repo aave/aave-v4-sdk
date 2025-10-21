@@ -159,7 +159,7 @@ export function useSwapQuote({
 }: NullishDeep<UseSwapQuoteArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<SwapQuote, UnexpectedError, boolean> {
+}): SuspendableResult<SwapQuote, UnexpectedError> {
   return useSuspendableQuery({
     document: SwapQuoteQuery,
     variables: {
@@ -280,7 +280,7 @@ export function useSwappableTokens({
 }: NullishDeep<UseSwappableTokensArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<Token[], UnexpectedError, boolean> {
+}): SuspendableResult<Token[], UnexpectedError> {
   return useSuspendableQuery({
     document: SwappableTokensQuery,
     variables: {
@@ -370,7 +370,7 @@ export function useUserSwaps({
 }: NullishDeep<UseUserSwapsArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<PaginatedUserSwapsResult, UnexpectedError, boolean> {
+}): SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> {
   return useSuspendableQuery({
     document: UserSwapsQuery,
     variables: {

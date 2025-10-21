@@ -1,3 +1,4 @@
+import type { CurrencyQueryOptions } from '@aave/client-next';
 import { exchangeRate } from '@aave/client-next/actions';
 import type { UnexpectedError } from '@aave/core-next';
 import type {
@@ -6,11 +7,13 @@ import type {
   FiatAmount,
 } from '@aave/graphql-next';
 import {
+  type ActivityItem,
   ChainsFilter,
   ChainsQuery,
   ExchangeRateQuery,
+  type NativeAmount,
 } from '@aave/graphql-next';
-import type { NullishDeep } from '@aave/types-next';
+import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type Pausable,
@@ -91,7 +94,7 @@ export function useAaveChains({
 }: NullishDeep<UseAaveChainsArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<Chain[], UnexpectedError, boolean> {
+}): SuspendableResult<Chain[], UnexpectedError> {
   return useSuspendableQuery({
     document: ChainsQuery,
     variables: { filter },
@@ -231,7 +234,7 @@ export function useExchangeRate({
 }: NullishDeep<UseExchangeRateArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<FiatAmount, UnexpectedError, boolean> {
+}): SuspendableResult<FiatAmount, UnexpectedError> {
   const client = useAaveClient();
   const pollInterval = client.context.environment.exchangeRateInterval;
 
@@ -243,3 +246,85 @@ export function useExchangeRate({
     pollInterval,
   });
 }
+
+export type UseNetworkFeeRequestQuery = {
+  activity: ActivityItem;
+};
+
+export type UseNetworkFeeArgs = Prettify<
+  {
+    query: UseNetworkFeeRequestQuery;
+  } & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch the network fee for an ActivityItem.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ */
+export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
+  /**
+   * Fetches the network fee for a transaction.
+   *
+   * This signature supports React Suspense:
+   *
+   * ```tsx
+   * const { data } = useNetworkFee({
+   *   chainId: chainId(1),
+   *   txHash: txHash('0x123...'),
+   *   suspense: true,
+   * });
+   *
+   * data: NativeAmount
+   * ```
+   */
+  ((args: UseNetworkFeeArgs & Suspendable) => SuspenseResult<T>) &
+    /**
+     * Fetches the network fee for a transaction.
+     *
+     * Pausable suspense mode.
+     *
+     * ```tsx
+     * const { data, paused } = useNetworkFee({
+     *   chainId: chainId(1),
+     *   txHash: txHash('0x123...'),
+     *   suspense: true,
+     *   pause: true,
+     * });
+     *
+     * data: NativeAmount | undefined
+     * ```
+     */
+    ((
+      args: Pausable<UseNetworkFeeArgs, Partial<UseNetworkFeeArgs>> &
+        Suspendable,
+    ) => PausableSuspenseResult<T>) &
+    /**
+     * Fetches the network fee for a transaction.
+     *
+     * ```tsx
+     * const { data, error, loading } = useNetworkFee({
+     *   chainId: chainId(1),
+     *   txHash: txHash('0x123...'),
+     * });
+     * ```
+     */
+    ((args: UseNetworkFeeArgs) => ReadResult<T>) &
+    /**
+     * Fetches the network fee for a transaction.
+     *
+     * Pausable loading state mode.
+     *
+     * ```tsx
+     * const { data, error, loading, paused } = useNetworkFee({
+     *   chainId: chainId(1),
+     *   txHash: txHash('0x123...'),
+     *   pause: true,
+     * });
+     *
+     * data: NativeAmount | undefined
+     * ```
+     */
+    ((
+      args: Pausable<UseNetworkFeeArgs, Partial<UseNetworkFeeArgs>>,
+    ) => PausableReadResult<T>);

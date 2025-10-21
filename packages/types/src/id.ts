@@ -14,6 +14,10 @@ export type ReserveId = Tagged<number, 'ReserveId'>;
 
 /**
  * Creates a reserve identifier from a given value.
+ *
+ * @remarks
+ * This is meant to be used in tests and POC context. In normal ciscumstances
+ * use the `Reserve.id` retrieved from another API call.
  */
 export function reserveId(value: number): ReserveId {
   invariant(
@@ -30,6 +34,10 @@ export type UserPositionId = Tagged<string, 'UserPositionId'>;
 
 /**
  * Creates a user position identifier from a given base64 value.
+ *
+ * @remarks
+ * This is meant to be used in tests and POC context. In normal ciscumstances
+ * use the `UserPosition.id` retrieved from another API call.
  */
 export function userPositionId(value: string): UserPositionId {
   invariant(
@@ -48,6 +56,14 @@ export function userPositionId(value: string): UserPositionId {
  * A swap identifier.
  */
 export type SwapId = Tagged<string, 'SwapId'>;
+
+/**
+ * Creates a type-safe swap Id.
+ *
+ * @remarks
+ * This is meant to be used in tests and POC context. In normal ciscumstances
+ * use the `Swap.id` retrieved from another API call.
+ */
 export function swapId(value: string): SwapId {
   invariant(isValidHexString(value), `Invalid SwapId: ${value}`);
   return value as SwapId;
@@ -57,6 +73,13 @@ export function swapId(value: string): SwapId {
  * A swap quote identifier.
  */
 export type SwapQuoteId = Tagged<string, 'SwapQuoteId'>;
+/**
+ * Creates a type-safe Swap Quote ID.
+ *
+ * @remarks
+ * This is meant to be used in tests and POC context. In normal ciscumstances
+ * use the `SwapQuote.id` retrieved from another API call.
+ */
 export function swapQuoteId(value: string): SwapQuoteId {
   invariant(isValidHexString(value), `Invalid SwapQuoteId: ${value}`);
   return value as SwapQuoteId;

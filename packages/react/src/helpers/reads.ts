@@ -18,8 +18,8 @@ import {
 
 export type Selector<T, V> = (data: T) => V;
 
-export type Pausable<T> = Prettify<
-  NullishDeep<T> & {
+export type Pausable<T, WhenPaused = NullishDeep<T>> = Prettify<
+  WhenPaused & {
     /**
      * Prevents the hook from automatically executing GraphQL query operations.
      *
@@ -105,7 +105,7 @@ export function useSuspendableQuery<
   Variables,
   boolean,
   Pausable
->): SuspendableResult<Output, UnexpectedError, Pausable>;
+>): SuspendableResult<Output, UnexpectedError>;
 /**
  * Implementation.
  */
@@ -126,7 +126,7 @@ export function useSuspendableQuery<
   Variables,
   boolean,
   boolean
->): SuspendableResult<Output, UnexpectedError, boolean> {
+>): SuspendableResult<Output, UnexpectedError> {
   const [{ fetching, data, error }, executeQuery] = useQuery({
     query: document,
     variables: variables as Variables,
@@ -140,7 +140,7 @@ export function useSuspendableQuery<
   });
 
   useEffect(() => {
-    if (pollInterval <= 0 || fetching) return undefined;
+    if (pollInterval <= 0 || fetching || pause) return undefined;
 
     const timerId = setTimeout(() => {
       executeQuery({
@@ -149,7 +149,7 @@ export function useSuspendableQuery<
     }, pollInterval);
 
     return () => clearTimeout(timerId);
-  }, [fetching, executeQuery, pollInterval]);
+  }, [fetching, executeQuery, pollInterval, pause]);
 
   if (pause) {
     return ReadResult.Paused(
@@ -159,7 +159,7 @@ export function useSuspendableQuery<
   }
 
   if (fetching) {
-    return ReadResult.Initial();
+    return ReadResult.Loading();
   }
 
   if (error) {
