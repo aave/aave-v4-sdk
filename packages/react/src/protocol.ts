@@ -4,7 +4,14 @@ import {
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client-next';
-import { type Asset, AssetQuery, type AssetRequest } from '@aave/graphql-next';
+import {
+  type Asset,
+  AssetPriceHistoryQuery,
+  type AssetPriceHistoryRequest,
+  type AssetPriceSample,
+  AssetQuery,
+  type AssetRequest,
+} from '@aave/graphql-next';
 import type { NullishDeep, Prettify } from '@aave/types-next';
 import {
   type Pausable,
@@ -96,6 +103,89 @@ export function useAsset({
       request,
       currency,
       timeWindow,
+    },
+    suspense,
+    pause,
+  });
+}
+
+export type UseAssetPriceHistoryArgs = AssetPriceHistoryRequest;
+
+/**
+ * Fetch historical price data for a specific asset.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useAssetPriceHistory({
+ *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useAssetPriceHistory(
+  args: UseAssetPriceHistoryArgs & Suspendable,
+): SuspenseResult<AssetPriceSample[]>;
+/**
+ * Fetch historical price data for a specific asset.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useAssetPriceHistory({
+ *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetPriceHistory(
+  args: Pausable<UseAssetPriceHistoryArgs> & Suspendable,
+): PausableSuspenseResult<AssetPriceSample[]>;
+/**
+ * Fetch historical price data for a specific asset.
+ *
+ * ```tsx
+ * const { data, error, loading } = useAssetPriceHistory({
+ *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useAssetPriceHistory(
+  args: UseAssetPriceHistoryArgs,
+): ReadResult<AssetPriceSample[]>;
+/**
+ * Fetch historical price data for a specific asset.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useAssetPriceHistory({
+ *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetPriceHistory(
+  args: Pausable<UseAssetPriceHistoryArgs>,
+): PausableReadResult<AssetPriceSample[]>;
+
+export function useAssetPriceHistory({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseAssetPriceHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<AssetPriceSample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: AssetPriceHistoryQuery,
+    variables: {
+      request,
     },
     suspense,
     pause,
