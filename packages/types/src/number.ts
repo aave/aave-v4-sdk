@@ -227,6 +227,42 @@ export class BigDecimal extends Big {
   static isBigDecimal(value: unknown): value is BigDecimal {
     return value instanceof BigDecimal;
   }
+
+  /**
+   * Returns the minimum value from the provided BigDecimal values.
+   *
+   * @param first - The first value to compare.
+   * @param second - The second value to compare.
+   * @param others - The other values to compare.
+   * @returns The minimum value.
+   */
+  static min(
+    first: BigDecimal,
+    second: BigDecimal,
+    ...others: BigDecimal[]
+  ): BigDecimal {
+    return [second, ...others].reduce<BigDecimal>((min, current) => {
+      return min.lt(current) ? min : current;
+    }, first);
+  }
+
+  /**
+   * Returns the maximum value from the provided BigDecimal values.
+   *
+   * @param first - The first value to compare.
+   * @param second - The second value to compare.
+   * @param others - The other values to compare.
+   * @returns The maximum value.
+   */
+  static max(
+    first: BigDecimal,
+    second: BigDecimal,
+    ...others: BigDecimal[]
+  ): BigDecimal {
+    return [second, ...others].reduce<BigDecimal>((max, current) => {
+      return max.gt(current) ? max : current;
+    }, first);
+  }
 }
 
 /**

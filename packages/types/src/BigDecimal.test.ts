@@ -266,4 +266,52 @@ describe('Given a BigDecimal class', () => {
       expect(a.lte('150')).toBe(true);
     });
   });
+
+  describe('When calling static min(values) method', () => {
+    it('Then it should return the minimum value from multiple arguments', () => {
+      const result = BigDecimal.min(
+        bigDecimal('10'),
+        bigDecimal('5'),
+        bigDecimal('20'),
+        bigDecimal('3'),
+      );
+      expect(result.toString()).toBe('3');
+      expect(BigDecimal.isBigDecimal(result)).toBe(true);
+    });
+
+    it('Then it should handle negative numbers', () => {
+      const result = BigDecimal.min(
+        bigDecimal('10'),
+        bigDecimal('-5'),
+        bigDecimal('20'),
+        bigDecimal('-3'),
+      );
+      expect(result.toString()).toBe('-5');
+      expect(BigDecimal.isBigDecimal(result)).toBe(true);
+    });
+  });
+
+  describe('When calling static max(values) method', () => {
+    it('Then it should return the maximum value from multiple arguments', () => {
+      const result = BigDecimal.max(
+        bigDecimal('10'),
+        bigDecimal('5'),
+        bigDecimal('20'),
+        bigDecimal('3'),
+      );
+      expect(result.toString()).toBe('20');
+      expect(BigDecimal.isBigDecimal(result)).toBe(true);
+    });
+
+    it('Then it should handle negative numbers', () => {
+      const result = BigDecimal.max(
+        bigDecimal('-10'),
+        bigDecimal('-5'),
+        bigDecimal('-20'),
+        bigDecimal('-3'),
+      );
+      expect(result.toString()).toBe('-3');
+      expect(BigDecimal.isBigDecimal(result)).toBe(true);
+    });
+  });
 });
