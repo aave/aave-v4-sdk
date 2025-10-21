@@ -7,6 +7,8 @@ import type {
 } from '@aave/types-next';
 import type { FragmentOf } from 'gql.tada';
 import {
+  type Chain,
+  ChainFragment,
   type Erc20Amount,
   Erc20AmountFragment,
   type Erc20ApprovalRequired,
@@ -281,11 +283,13 @@ export type WithdrawReserveAmountInput = ReturnType<
 export type BorrowActivity = {
   __typename: 'BorrowActivity';
   id: ID;
+  user: EvmAddress;
   timestamp: DateTime;
   txHash: TxHash;
   spoke: Spoke;
   reserve: ReserveInfo;
   borrowed: Erc20Amount;
+  chain: Chain;
   /**
    * @deprecated Use `borrowed` instead. Removal slated for week commencing 27th October 2025.
    */
@@ -298,6 +302,7 @@ export const BorrowActivityFragment: FragmentDocumentFor<
   `fragment BorrowActivity on BorrowActivity {
     __typename
     id
+    user
     timestamp
     txHash
     spoke {
@@ -309,21 +314,26 @@ export const BorrowActivityFragment: FragmentDocumentFor<
     borrowed {
       ...Erc20Amount
     }
+    chain {
+      ...Chain
+    }
     amount: borrowed {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
 );
 
 export type SupplyActivity = {
   __typename: 'SupplyActivity';
   id: ID;
+  user: EvmAddress;
   timestamp: DateTime;
   txHash: TxHash;
   spoke: Spoke;
   reserve: ReserveInfo;
   supplied: Erc20Amount;
+  chain: Chain;
   amount: Erc20Amount;
 };
 export const SupplyActivityFragment: FragmentDocumentFor<
@@ -333,6 +343,7 @@ export const SupplyActivityFragment: FragmentDocumentFor<
   `fragment SupplyActivity on SupplyActivity {
     __typename
     id
+    user
     timestamp
     txHash
     spoke {
@@ -344,21 +355,26 @@ export const SupplyActivityFragment: FragmentDocumentFor<
     supplied {
       ...Erc20Amount
     }
+    chain {
+      ...Chain
+    }
     amount: supplied {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
 );
 
 export type WithdrawActivity = {
   __typename: 'WithdrawActivity';
   id: ID;
+  user: EvmAddress;
   timestamp: DateTime;
   txHash: TxHash;
   spoke: Spoke;
   reserve: ReserveInfo;
   withdrawn: Erc20Amount;
+  chain: Chain;
   /**
    * @deprecated Use `withdrawn` instead. Removal slated for week commencing 27th October 2025.
    */
@@ -371,6 +387,7 @@ export const WithdrawActivityFragment: FragmentDocumentFor<
   `fragment WithdrawActivity on WithdrawActivity {
     __typename
     id
+    user
     timestamp
     txHash
     spoke {
@@ -382,21 +399,26 @@ export const WithdrawActivityFragment: FragmentDocumentFor<
     withdrawn {
       ...Erc20Amount
     }
+    chain {
+      ...Chain
+    }
     amount: withdrawn {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
 );
 
 export type RepayActivity = {
   __typename: 'RepayActivity';
   id: ID;
+  user: EvmAddress;
   timestamp: DateTime;
   txHash: TxHash;
   spoke: Spoke;
   reserve: ReserveInfo;
   repaid: Erc20Amount;
+  chain: Chain;
   /**
    * @deprecated Use `repaid` instead. Removal slated for week commencing 27th October 2025.
    */
@@ -409,6 +431,7 @@ export const RepayActivityFragment: FragmentDocumentFor<
   `fragment RepayActivity on RepayActivity {
     __typename
     id
+    user
     timestamp
     txHash
     spoke {
@@ -420,16 +443,20 @@ export const RepayActivityFragment: FragmentDocumentFor<
     repaid {
       ...Erc20Amount
     }
+    chain {
+      ...Chain
+    }
     amount: repaid {
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
 );
 
 export type LiquidatedActivity = {
   __typename: 'LiquidatedActivity';
   id: ID;
+  user: EvmAddress;
   timestamp: DateTime;
   txHash: TxHash;
   spoke: Spoke;
@@ -438,6 +465,7 @@ export type LiquidatedActivity = {
   collateral: Erc20Amount;
   debt: Erc20Amount;
   liquidator: EvmAddress;
+  chain: Chain;
   /**
    * @deprecated Use `collateral` instead. Removal slated for week commencing 27th October 2025.
    */
@@ -454,6 +482,7 @@ export const LiquidatedActivityFragment: FragmentDocumentFor<
   `fragment LiquidatedActivity on LiquidatedActivity {
     __typename
     id
+    user
     timestamp
     txHash
     spoke {
@@ -472,6 +501,9 @@ export const LiquidatedActivityFragment: FragmentDocumentFor<
       ...Erc20Amount
     }
     liquidator
+    chain {
+      ...Chain
+    }
     collateralAmount: collateral {
       ...Erc20Amount
     }
@@ -479,12 +511,13 @@ export const LiquidatedActivityFragment: FragmentDocumentFor<
       ...Erc20Amount
     }
   }`,
-  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment],
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
 );
 
 export type SwapActivity = {
   __typename: 'SwapActivity';
   id: ID;
+  user: EvmAddress;
   timestamp: DateTime;
   txHash: TxHash;
   desiredSell: TokenAmount;
@@ -494,6 +527,7 @@ export type SwapActivity = {
   createdAt: DateTime;
   fulfilledAt: DateTime;
   explorerLink: string;
+  chain: Chain;
   /**
    * @deprecated Use `desiredSell` instead. Removal slated for week commencing 27th October 2025.
    */
@@ -518,6 +552,7 @@ export const SwapActivityFragment: FragmentDocumentFor<
   `fragment SwapActivity on SwapActivity {
     __typename
     id
+    user
     timestamp
     txHash
     desiredSell {
@@ -535,6 +570,9 @@ export const SwapActivityFragment: FragmentDocumentFor<
     createdAt
     fulfilledAt
     explorerLink
+    chain {
+      ...Chain
+    }
     sellAmount: desiredSell {
       ...TokenAmount
     }
@@ -548,7 +586,7 @@ export const SwapActivityFragment: FragmentDocumentFor<
       ...TokenAmount
     }
   }`,
-  [TokenAmountFragment],
+  [TokenAmountFragment, ChainFragment],
 );
 
 export const ActivityItemFragment = graphql(

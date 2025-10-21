@@ -167,7 +167,7 @@
             "args": []
           },
           {
-            "name": "amount",
+            "name": "price",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -305,6 +305,17 @@
             "args": []
           },
           {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -357,6 +368,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
                 "ofType": null
               }
             },
@@ -1618,6 +1641,17 @@
             "args": []
           },
           {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -1706,6 +1740,18 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
               }
             },
             "args": []
@@ -3582,6 +3628,17 @@
             "args": []
           },
           {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -3634,6 +3691,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
                 "ofType": null
               }
             },
@@ -4265,6 +4334,17 @@
             "args": []
           },
           {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -4321,6 +4401,18 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -4331,6 +4423,17 @@
         "fields": [
           {
             "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4439,6 +4542,18 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
               }
             },
             "args": []
@@ -6222,6 +6337,17 @@
             "args": []
           },
           {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -6274,6 +6400,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
                 "ofType": null
               }
             },
