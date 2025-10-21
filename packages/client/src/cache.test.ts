@@ -1,6 +1,7 @@
-import { ReservesRequestFilter } from '@aave/graphql-next';
+import { Currency, ReservesRequestFilter } from '@aave/graphql-next';
 import {
   assertOk,
+  BigDecimal,
   bigDecimal,
   chainId,
   evmAddress,
@@ -8,7 +9,14 @@ import {
   nonNullable,
 } from '@aave/types-next';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { hub, hubs, reserves, supply, userHistory } from './actions';
+import {
+  activities,
+  exchangeRate,
+  hub,
+  hubs,
+  reserves,
+  supply,
+} from './actions';
 import {
   client,
   createNewWallet,
@@ -20,6 +28,19 @@ import { sendWith } from './viem';
 const user = await createNewWallet();
 
 describe('Given the Aave SDK normalized graph cache', () => {
+  describe('when fetching any field of BigDecimal scalar type', () => {
+    it('Then it should return a BigDecimal instance in its place', async () => {
+      const result = await exchangeRate(client, {
+        from: {
+          native: chainId(1),
+        },
+        to: Currency.Usd,
+      });
+      assertOk(result);
+      expect(BigDecimal.isBigDecimal(result.value.value)).toBe(true);
+    });
+  });
+
   describe(`When fetching a single 'Hub'`, () => {
     it('Then it should leverage cached data whenever possible', async () => {
       const primed = await hubs(client, {
@@ -102,19 +123,19 @@ describe('Given the Aave SDK normalized graph cache', () => {
     });
 
     it('Then it should leverage cached data whenever possible', async () => {
-      const primed = await userHistory(client, {
-        user: evmAddress(user.account.address),
-        filter: {
+      const primed = await activities(client, {
+        query: {
           chainIds: [ETHEREUM_FORK_ID],
         },
+        user: evmAddress(user.account.address),
       });
       assertOk(primed);
 
-      const result = await userHistory(
+      const result = await activities(
         client,
         {
           user: evmAddress(user.account.address),
-          filter: {
+          query: {
             txHash: {
               txHash:
                 primed.value.items[0]?.txHash ?? never('Expected a tx hash'),

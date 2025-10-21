@@ -4,7 +4,7 @@ import { HubAssetFragment } from './assets';
 import {
   ChainFragment,
   Erc20AmountFragment,
-  PercentValueFragment,
+  PercentNumberFragment,
 } from './common';
 import { SpokeFragment } from './spoke';
 
@@ -12,18 +12,19 @@ export const ReserveSettingsFragment = graphql(
   `fragment ReserveSettings on ReserveSettings {
     __typename
     collateralFactor {
-      ...PercentValue
+      ...PercentNumber
     }
     maxLiquidationBonus {
-      ...PercentValue
+      ...PercentNumber
     }
     collateralRisk {
-      ...PercentValue
+      ...PercentNumber
     }
     borrowable
     collateral
+    suppliable
   }`,
-  [PercentValueFragment],
+  [PercentNumberFragment],
 );
 export type ReserveSettings = FragmentOf<typeof ReserveSettingsFragment>;
 
@@ -47,13 +48,13 @@ export const ReserveSummaryFragment = graphql(
       ...Erc20Amount
     }
     supplyApy {
-      ...PercentValue
+      ...PercentNumber
     }
     borrowApy {
-      ...PercentValue
+      ...PercentNumber
     }
   }`,
-  [Erc20AmountFragment, PercentValueFragment],
+  [Erc20AmountFragment, PercentNumberFragment],
 );
 export type ReserveSummary = FragmentOf<typeof ReserveSummaryFragment>;
 
@@ -70,10 +71,10 @@ export const ReserveUserStateFragment = graphql(
       ...Erc20Amount
     }
     borrowApy {
-      ...PercentValue
+      ...PercentNumber
     }
   }`,
-  [Erc20AmountFragment, PercentValueFragment],
+  [Erc20AmountFragment, PercentNumberFragment],
 );
 export type ReserveUserState = FragmentOf<typeof ReserveUserStateFragment>;
 

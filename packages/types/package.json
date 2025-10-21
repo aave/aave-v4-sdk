@@ -35,6 +35,8 @@
     "build": "tsup"
   },
   "dependencies": {
+    "@types/big.js": "^6.2.2",
+    "big.js": "^7.0.1",
     "neverthrow": "^8.2.0",
     "type-fest": "^5.1.0"
   },

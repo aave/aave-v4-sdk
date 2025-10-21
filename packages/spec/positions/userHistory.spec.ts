@@ -4,7 +4,7 @@ import {
   evmAddress,
   PageSize,
 } from '@aave/client-next';
-import { userHistory } from '@aave/client-next/actions';
+import { activities } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
@@ -23,26 +23,26 @@ describe('Aave V4 History Scenario', () => {
   describe('Given a user with prior history of transactions', () => {
     beforeAll(async () => {
       // NOTE: Enable when you want to recreate the user history
-      // await recreateUserHistory(client, user);
+      // await recreateac(client, user);
     }, 160_000);
 
-    describe('When fetching the user history by activity type', () => {
+    describe('When fetching the user activities by activity type', () => {
       const activityTypes = Object.values(ActivityType);
 
       it.each(activityTypes)(
         'Then it should be possible to filter them by %s activity',
         async (activityType) => {
-          const history = await userHistory(client, {
+          const result = await activities(client, {
             user: evmAddress(user.account.address),
-            activityTypes: [activityType],
-            filter: {
+            types: [activityType],
+            query: {
               chainIds: [ETHEREUM_FORK_ID],
             },
           });
 
-          assertOk(history);
+          assertOk(result);
 
-          history.value.items.forEach((item) => {
+          result.value.items.forEach((item) => {
             const typenameToActivityType: Record<string, ActivityType> = {
               BorrowActivity: ActivityType.Borrow,
               SupplyActivity: ActivityType.Supply,
@@ -61,18 +61,18 @@ describe('Aave V4 History Scenario', () => {
 
     describe('When fetching multiple activity types', () => {
       it('Then it should return history for all specified activity types', async () => {
-        const history = await userHistory(client, {
+        const result = await activities(client, {
           user: evmAddress(user.account.address),
-          activityTypes: [ActivityType.Supply, ActivityType.Borrow],
-          filter: {
+          types: [ActivityType.Supply, ActivityType.Borrow],
+          query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
         });
 
-        assertOk(history);
+        assertOk(result);
 
         const expectedTypes = ['SupplyActivity', 'BorrowActivity'];
-        history.value.items.forEach((item) => {
+        result.value.items.forEach((item) => {
           expect(expectedTypes).toContain(item.__typename);
         });
       });
@@ -80,20 +80,20 @@ describe('Aave V4 History Scenario', () => {
 
     describe('When fetching filtered user history', () => {
       it('Then it should be possible to filter them by chainIds', async () => {
-        const history = await userHistory(client, {
+        const result = await activities(client, {
           user: evmAddress(user.account.address),
-          filter: {
+          query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
         });
 
-        assertOk(history);
+        assertOk(result);
       });
 
       it('Then it should be possible to filter them by spoke', async () => {
-        const history = await userHistory(client, {
+        const result = await activities(client, {
           user: evmAddress(user.account.address),
-          filter: {
+          query: {
             spoke: {
               address: ETHEREUM_SPOKE_CORE_ADDRESS,
               chainId: ETHEREUM_FORK_ID,
@@ -101,30 +101,30 @@ describe('Aave V4 History Scenario', () => {
           },
         });
 
-        assertOk(history);
-        assertNonEmptyArray(history.value.items);
+        assertOk(result);
+        assertNonEmptyArray(result.value.items);
       });
     });
 
     describe('When fetching user history with pagination', () => {
       it('Then it should respect the pageSize parameter', async () => {
-        const history = await userHistory(client, {
+        const result = await activities(client, {
           user: evmAddress(user.account.address),
-          filter: {
+          query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           pageSize: PageSize.Ten,
         });
 
-        assertOk(history);
-        expect(history.value.items.length).toBeLessThanOrEqual(10);
+        assertOk(result);
+        expect(result.value.items.length).toBeLessThanOrEqual(10);
       });
 
       it('Then it should support pagination with cursor', async () => {
         // First page
-        const firstPage = await userHistory(client, {
+        const firstPage = await activities(client, {
           user: evmAddress(user.account.address),
-          filter: {
+          query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           pageSize: PageSize.Ten,
@@ -134,9 +134,9 @@ describe('Aave V4 History Scenario', () => {
         expect(firstPage.value.pageInfo.next).not.toBeNull();
         const firstPageItemIds = firstPage.value.items.map((item) => item.id);
 
-        const secondPage = await userHistory(client, {
+        const secondPage = await activities(client, {
           user: evmAddress(user.account.address),
-          filter: {
+          query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           pageSize: PageSize.Ten,

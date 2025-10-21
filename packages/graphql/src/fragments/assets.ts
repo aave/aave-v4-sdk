@@ -2,7 +2,7 @@ import { type FragmentOf, graphql } from '../graphql';
 import {
   Erc20AmountFragment,
   Erc20TokenFragment,
-  PercentValueFragment,
+  PercentNumberFragment,
 } from './common';
 import { HubFragment } from './hubs';
 
@@ -13,19 +13,19 @@ export const HubAssetSummaryFragment = graphql(
       borrowed
       availableLiquidity
       supplyApy {
-        ...PercentValue
+        ...PercentNumber
       }
       borrowApy {
-        ...PercentValue
+        ...PercentNumber
       }
       netApy {
-        ...PercentValue
+        ...PercentNumber
       }
       utilizationRate {
-        ...PercentValue
+        ...PercentNumber
       }
     }`,
-  [PercentValueFragment],
+  [PercentNumberFragment],
 );
 export type HubAssetSummary = FragmentOf<typeof HubAssetSummaryFragment>;
 
@@ -34,12 +34,12 @@ export const HubAssetSettingsFragment = graphql(
       __typename
       feeReceiver
       liquidityFee {
-        ...PercentValue
+        ...PercentNumber
       }
       irStrategy
       reinvestmentController
     }`,
-  [PercentValueFragment],
+  [PercentNumberFragment],
 );
 export type HubAssetSettings = FragmentOf<typeof HubAssetSettingsFragment>;
 

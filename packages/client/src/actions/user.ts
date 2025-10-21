@@ -1,14 +1,11 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
-  type PaginatedUserHistoryResult,
   type UserBalance,
   UserBalancesQuery,
   type UserBalancesRequest,
   type UserBorrowItem,
   UserBorrowsQuery,
   type UserBorrowsRequest,
-  UserHistoryQuery,
-  type UserHistoryRequest,
   type UserPosition,
   UserPositionQuery,
   type UserPositionRequest,
@@ -29,7 +26,6 @@ import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
-  type RequestPolicyOptions,
   type TimeWindowQueryOptions,
 } from '../options';
 
@@ -205,37 +201,6 @@ export function userBalances(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBalance[], UnexpectedError> {
   return client.query(UserBalancesQuery, { request, ...options });
-}
-
-/**
- * Fetches user transaction history with pagination.
- *
- * ```ts
- * const result = await userHistory(client, {
- *   user: evmAddress('0x742d35cc…'),
- *   filter: {
- *     chainIds: [chainId(1)],
- *   },
- *   activityTypes: ['SUPPLY', 'BORROW', 'WITHDRAW', 'REPAY'],
- *   pageSize: 'FIFTY',
- * });
- * ```
- *
- * @param client - Aave client.
- * @param request - The user history request parameters.
- * @param options - The query options.
- * @returns The paginated user transaction history.
- */
-export function userHistory(
-  client: AaveClient,
-  request: UserHistoryRequest,
-  options: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PaginatedUserHistoryResult, UnexpectedError> {
-  return client.query(
-    UserHistoryQuery,
-    { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
-  );
 }
 
 /**

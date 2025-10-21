@@ -1,18 +1,37 @@
+import type {
+  DateTime,
+  EvmAddress,
+  ID,
+  TxHash,
+  UserPositionId,
+} from '@aave/types-next';
 import type { FragmentOf } from 'gql.tada';
 import {
+  type Chain,
+  ChainFragment,
+  type Erc20Amount,
+  Erc20AmountFragment,
   type Erc20ApprovalRequired,
   Erc20ApprovalRequiredFragment,
   ExecutionPlanFragment,
+  type FiatAmountValueVariation,
+  FiatAmountValueVariationFragment,
+  type HealthFactorResult,
+  HealthFactorResultFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
+  PaginatedResultInfoFragment,
+  type PercentNumberVariation,
+  PercentNumberVariationFragment,
+  type ReserveInfo,
+  ReserveInfoFragment,
+  type Spoke,
+  SpokeFragment,
+  type TokenAmount,
+  TokenAmountFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './fragments';
-import {
-  FiatAmountValueVariationFragment,
-  HealthFactorResultFragment,
-  PercentValueVariationFragment,
-} from './fragments/common';
 import { type FragmentDocumentFor, graphql, type RequestOf } from './graphql';
 
 /**
@@ -168,21 +187,38 @@ export type UpdateUserRiskPremiumRequest = RequestOf<
   typeof UpdateUserRiskPremiumQuery
 >;
 
-export const PreviewUserPositionFragment = graphql(
+export type PreviewUserPosition = {
+  __typename: 'PreviewUserPosition';
+  id: UserPositionId;
+  healthFactor: HealthFactorResult;
+  portfolioApy: PercentNumberVariation;
+  netApy: PercentNumberVariation;
+  riskPremium: PercentNumberVariation;
+  netCollateral: FiatAmountValueVariation;
+  netBalance: FiatAmountValueVariation;
+  /**
+   * @deprecated Use `netApy` instead. Removal slated for week commencing 27th October 2025.
+   */
+  positionApy: PercentNumberVariation;
+};
+export const PreviewUserPositionFragment: FragmentDocumentFor<
+  PreviewUserPosition,
+  'PreviewUserPosition'
+> = graphql(
   `fragment PreviewUserPosition on PreviewUserPosition {
     __typename
     id
     healthFactor {
       ...HealthFactorResult
     }
-    positionApy {
-      ...PercentValueVariation
+    portfolioApy {
+      ...PercentNumberVariation
     }
     netApy {
-      ...PercentValueVariation
+      ...PercentNumberVariation
     }
     riskPremium {
-      ...PercentValueVariation
+      ...PercentNumberVariation
     }
     netCollateral(currency: $currency) {
       ...FiatAmountValueVariation
@@ -190,16 +226,16 @@ export const PreviewUserPositionFragment = graphql(
     netBalance(currency: $currency) {
       ...FiatAmountValueVariation
     }
+    positionApy: portfolioApy {
+      ...PercentNumberVariation
+    }
   }`,
   [
     HealthFactorResultFragment,
-    PercentValueVariationFragment,
+    PercentNumberVariationFragment,
     FiatAmountValueVariationFragment,
   ],
 );
-export type PreviewUserPosition = FragmentOf<
-  typeof PreviewUserPositionFragment
->;
 
 /**
  * @internal
@@ -241,4 +277,384 @@ export type RepayErc20AmountInputWithPermit = ReturnType<
 >;
 export type WithdrawReserveAmountInput = ReturnType<
   typeof graphql.scalar<'WithdrawReserveAmountInput'>
+>;
+
+// Activity Fragments
+export type BorrowActivity = {
+  __typename: 'BorrowActivity';
+  id: ID;
+  user: EvmAddress;
+  timestamp: DateTime;
+  txHash: TxHash;
+  spoke: Spoke;
+  reserve: ReserveInfo;
+  borrowed: Erc20Amount;
+  chain: Chain;
+  /**
+   * @deprecated Use `borrowed` instead. Removal slated for week commencing 27th October 2025.
+   */
+  amount: Erc20Amount;
+};
+export const BorrowActivityFragment: FragmentDocumentFor<
+  BorrowActivity,
+  'BorrowActivity'
+> = graphql(
+  `fragment BorrowActivity on BorrowActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    borrowed {
+      ...Erc20Amount
+    }
+    chain {
+      ...Chain
+    }
+    amount: borrowed {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
+);
+
+export type SupplyActivity = {
+  __typename: 'SupplyActivity';
+  id: ID;
+  user: EvmAddress;
+  timestamp: DateTime;
+  txHash: TxHash;
+  spoke: Spoke;
+  reserve: ReserveInfo;
+  supplied: Erc20Amount;
+  chain: Chain;
+  amount: Erc20Amount;
+};
+export const SupplyActivityFragment: FragmentDocumentFor<
+  SupplyActivity,
+  'SupplyActivity'
+> = graphql(
+  `fragment SupplyActivity on SupplyActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    supplied {
+      ...Erc20Amount
+    }
+    chain {
+      ...Chain
+    }
+    amount: supplied {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
+);
+
+export type WithdrawActivity = {
+  __typename: 'WithdrawActivity';
+  id: ID;
+  user: EvmAddress;
+  timestamp: DateTime;
+  txHash: TxHash;
+  spoke: Spoke;
+  reserve: ReserveInfo;
+  withdrawn: Erc20Amount;
+  chain: Chain;
+  /**
+   * @deprecated Use `withdrawn` instead. Removal slated for week commencing 27th October 2025.
+   */
+  amount: Erc20Amount;
+};
+export const WithdrawActivityFragment: FragmentDocumentFor<
+  WithdrawActivity,
+  'WithdrawActivity'
+> = graphql(
+  `fragment WithdrawActivity on WithdrawActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    withdrawn {
+      ...Erc20Amount
+    }
+    chain {
+      ...Chain
+    }
+    amount: withdrawn {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
+);
+
+export type RepayActivity = {
+  __typename: 'RepayActivity';
+  id: ID;
+  user: EvmAddress;
+  timestamp: DateTime;
+  txHash: TxHash;
+  spoke: Spoke;
+  reserve: ReserveInfo;
+  repaid: Erc20Amount;
+  chain: Chain;
+  /**
+   * @deprecated Use `repaid` instead. Removal slated for week commencing 27th October 2025.
+   */
+  amount: Erc20Amount;
+};
+export const RepayActivityFragment: FragmentDocumentFor<
+  RepayActivity,
+  'RepayActivity'
+> = graphql(
+  `fragment RepayActivity on RepayActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    repaid {
+      ...Erc20Amount
+    }
+    chain {
+      ...Chain
+    }
+    amount: repaid {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
+);
+
+export type LiquidatedActivity = {
+  __typename: 'LiquidatedActivity';
+  id: ID;
+  user: EvmAddress;
+  timestamp: DateTime;
+  txHash: TxHash;
+  spoke: Spoke;
+  collateralReserve: ReserveInfo;
+  debtReserve: ReserveInfo;
+  collateral: Erc20Amount;
+  debt: Erc20Amount;
+  liquidator: EvmAddress;
+  chain: Chain;
+  /**
+   * @deprecated Use `collateral` instead. Removal slated for week commencing 27th October 2025.
+   */
+  collateralAmount: Erc20Amount;
+  /**
+   * @deprecated Use `debt` instead. Removal slated for week commencing 27th October 2025.
+   */
+  debtAmount: Erc20Amount;
+};
+export const LiquidatedActivityFragment: FragmentDocumentFor<
+  LiquidatedActivity,
+  'LiquidatedActivity'
+> = graphql(
+  `fragment LiquidatedActivity on LiquidatedActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    collateralReserve {
+      ...ReserveInfo
+    }
+    debtReserve {
+      ...ReserveInfo
+    }
+    collateral {
+      ...Erc20Amount
+    }
+    debt {
+      ...Erc20Amount
+    }
+    liquidator
+    chain {
+      ...Chain
+    }
+    collateralAmount: collateral {
+      ...Erc20Amount
+    }
+    debtAmount: debt {
+      ...Erc20Amount
+    }
+  }`,
+  [SpokeFragment, Erc20AmountFragment, ReserveInfoFragment, ChainFragment],
+);
+
+export type SwapActivity = {
+  __typename: 'SwapActivity';
+  id: ID;
+  user: EvmAddress;
+  timestamp: DateTime;
+  txHash: TxHash;
+  desiredSell: TokenAmount;
+  desiredBuy: TokenAmount;
+  sold: TokenAmount;
+  bought: TokenAmount;
+  createdAt: DateTime;
+  fulfilledAt: DateTime;
+  explorerLink: string;
+  chain: Chain;
+  /**
+   * @deprecated Use `desiredSell` instead. Removal slated for week commencing 27th October 2025.
+   */
+  sellAmount: TokenAmount;
+  /**
+   * @deprecated Use `desiredBuy` instead. Removal slated for week commencing 27th October 2025.
+   */
+  buyAmount: TokenAmount;
+  /**
+   * @deprecated Use `sold` instead. Removal slated for week commencing 27th October 2025.
+   */
+  executedSellAmount: TokenAmount;
+  /**
+   * @deprecated Use `bought` instead. Removal slated for week commencing 27th October 2025.
+   */
+  executedBuyAmount: TokenAmount;
+};
+export const SwapActivityFragment: FragmentDocumentFor<
+  SwapActivity,
+  'SwapActivity'
+> = graphql(
+  `fragment SwapActivity on SwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    desiredSell {
+      ...TokenAmount
+    }
+    desiredBuy {
+      ...TokenAmount
+    }
+    sold {
+      ...TokenAmount
+    }
+    bought {
+      ...TokenAmount
+    }
+    createdAt
+    fulfilledAt
+    explorerLink
+    chain {
+      ...Chain
+    }
+    sellAmount: desiredSell {
+      ...TokenAmount
+    }
+    buyAmount: desiredBuy {
+      ...TokenAmount
+    }
+    executedSellAmount: sold {
+      ...TokenAmount
+    }
+    executedBuyAmount: bought {
+      ...TokenAmount
+    }
+  }`,
+  [TokenAmountFragment, ChainFragment],
+);
+
+export const ActivityItemFragment = graphql(
+  `fragment ActivityItem on ActivityItem {
+    __typename
+    ... on BorrowActivity {
+      ...BorrowActivity
+    }
+    ... on SupplyActivity {
+      ...SupplyActivity
+    }
+    ... on WithdrawActivity {
+      ...WithdrawActivity
+    }
+    ... on RepayActivity {
+      ...RepayActivity
+    }
+    ... on LiquidatedActivity {
+      ...LiquidatedActivity
+    }
+    ... on SwapActivity {
+      ...SwapActivity
+    }
+  }`,
+  [
+    BorrowActivityFragment,
+    SupplyActivityFragment,
+    WithdrawActivityFragment,
+    RepayActivityFragment,
+    LiquidatedActivityFragment,
+    SwapActivityFragment,
+  ],
+);
+export type ActivityItem = FragmentOf<typeof ActivityItemFragment>;
+/**
+ * @deprecated Use {@link ActivityItem} instead. Removal slated for week commencing 27th October 2025.
+ */
+export type UserHistoryItem = ActivityItem;
+
+export const PaginatedActivitiesResultFragment = graphql(
+  `fragment PaginatedActivitiesResult on PaginatedActivitiesResult {
+    __typename
+    items {
+      ...ActivityItem
+    }
+    pageInfo {
+      ...PaginatedResultInfo
+    }
+  }`,
+  [ActivityItemFragment, PaginatedResultInfoFragment],
+);
+export type PaginatedActivitiesResult = FragmentOf<
+  typeof PaginatedActivitiesResultFragment
+>;
+
+/**
+ * @internal
+ */
+export const ActivitiesQuery = graphql(
+  `query Activities($request: ActivitiesRequest!, $currency: Currency!) {
+    value: activities(request: $request) {
+      ...PaginatedActivitiesResult
+    }
+  }`,
+  [PaginatedActivitiesResultFragment],
+);
+export type ActivitiesRequest = RequestOf<typeof ActivitiesQuery>;
+
+export type ActivitiesRequestQuery = ReturnType<
+  typeof graphql.scalar<'ActivitiesRequestQuery'>
 >;
