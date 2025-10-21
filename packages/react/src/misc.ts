@@ -296,7 +296,8 @@ export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
      * ```
      */
     ((
-      args: Pausable<UseNetworkFeeArgs> & Suspendable,
+      args: Pausable<UseNetworkFeeArgs, Partial<UseNetworkFeeArgs>> &
+        Suspendable,
     ) => PausableSuspenseResult<T>) &
     /**
      * Fetches the network fee for a transaction.
@@ -324,4 +325,6 @@ export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
      * data: NativeAmount | undefined
      * ```
      */
-    ((args: Pausable<UseNetworkFeeArgs>) => PausableReadResult<T>);
+    ((
+      args: Pausable<UseNetworkFeeArgs, Partial<UseNetworkFeeArgs>>,
+    ) => PausableReadResult<T>);

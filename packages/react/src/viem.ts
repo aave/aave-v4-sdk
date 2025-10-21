@@ -21,7 +21,6 @@ import {
   bigDecimal,
   type DateTime,
   invariant,
-  type NullishDeep,
   never,
   ResultAsync,
   type TxHash,
@@ -174,9 +173,9 @@ export function useSignSwapTypedDataWith(
 }
 
 function extractTransactionDetails(
-  query: NullishDeep<UseNetworkFeeRequestQuery> | null | undefined,
+  query: UseNetworkFeeRequestQuery | null | undefined,
 ): [Chain, TxHash, DateTime] | [undefined, undefined] {
-  return query?.activity?.chain &&
+  return query?.activity.chain &&
     query.activity.txHash &&
     query.activity.timestamp
     ? [query.activity.chain, query.activity.txHash, query.activity.timestamp]
@@ -261,8 +260,8 @@ export const useNetworkFee: UseNetworkFee = (({
   pause = false,
   suspense = false,
 }: {
-  query: UseNetworkFeeRequestQuery;
-  currency: Currency;
+  query?: UseNetworkFeeRequestQuery;
+  currency?: Currency;
   pause?: boolean;
   suspense?: boolean;
 }): SuspendableResult<NativeAmount, UnexpectedError> => {

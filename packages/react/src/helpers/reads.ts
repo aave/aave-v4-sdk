@@ -18,8 +18,8 @@ import {
 
 export type Selector<T, V> = (data: T) => V;
 
-export type Pausable<T> = Prettify<
-  NullishDeep<T> & {
+export type Pausable<T, WhenPaused = NullishDeep<T>> = Prettify<
+  WhenPaused & {
     /**
      * Prevents the hook from automatically executing GraphQL query operations.
      *
