@@ -1,5 +1,6 @@
 import type { FragmentOf } from 'gql.tada';
 import {
+  DecimalNumberFragment,
   DecimalNumberWithChangeFragment,
   Erc20TokenFragment,
   FiatAmountWithChangeFragment,
@@ -14,6 +15,30 @@ export const AssetPriceSampleFragment = graphql(
     }`,
 );
 export type AssetPriceSample = FragmentOf<typeof AssetPriceSampleFragment>;
+
+export const AssetSupplySampleFragment = graphql(
+  `fragment AssetSupplySample on AssetSupplySample {
+      __typename
+      date
+      amount {
+        ...DecimalNumber
+      }
+    }`,
+  [DecimalNumberFragment],
+);
+export type AssetSupplySample = FragmentOf<typeof AssetSupplySampleFragment>;
+
+export const AssetBorrowSampleFragment = graphql(
+  `fragment AssetBorrowSample on AssetBorrowSample {
+      __typename
+      date
+      amount {
+        ...DecimalNumber
+      }
+    }`,
+  [DecimalNumberFragment],
+);
+export type AssetBorrowSample = FragmentOf<typeof AssetBorrowSampleFragment>;
 
 export const AssetSummaryFragment = graphql(
   `fragment AssetSummary on AssetSummary {
@@ -83,3 +108,33 @@ export const AssetPriceHistoryQuery = graphql(
   [AssetPriceSampleFragment],
 );
 export type AssetPriceHistoryRequest = RequestOf<typeof AssetPriceHistoryQuery>;
+
+/**
+ * @internal
+ */
+export const AssetSupplyHistoryQuery = graphql(
+  `query AssetSupplyHistory($request: AssetSupplyHistoryRequest!) {
+      value: assetSupplyHistory(request: $request) {
+        ...AssetSupplySample
+      }
+    }`,
+  [AssetSupplySampleFragment],
+);
+export type AssetSupplyHistoryRequest = RequestOf<
+  typeof AssetSupplyHistoryQuery
+>;
+
+/**
+ * @internal
+ */
+export const AssetBorrowHistoryQuery = graphql(
+  `query AssetBorrowHistory($request: AssetBorrowHistoryRequest!) {
+      value: assetBorrowHistory(request: $request) {
+        ...AssetBorrowSample
+      }
+    }`,
+  [AssetBorrowSampleFragment],
+);
+export type AssetBorrowHistoryRequest = RequestOf<
+  typeof AssetBorrowHistoryQuery
+>;
