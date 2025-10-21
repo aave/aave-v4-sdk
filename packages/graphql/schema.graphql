@@ -52,7 +52,7 @@ type Asset {
 
 input AssetBorrowHistoryRequest {
   token: Erc20Input!
-  window: TimeWindow!
+  window: TimeWindow! = LAST_DAY
 }
 
 type AssetBorrowSample {
@@ -64,13 +64,13 @@ scalar AssetId
 
 input AssetPriceHistoryRequest {
   token: Erc20Input!
-  currency: Currency!
-  window: TimeWindow!
+  currency: Currency! = USD
+  window: TimeWindow! = LAST_DAY
 }
 
 type AssetPriceSample {
   date: DateTime!
-  amount: BigDecimal!
+  price: BigDecimal!
 }
 
 input AssetRequest {
@@ -88,7 +88,7 @@ type AssetSummary {
 
 input AssetSupplyHistoryRequest {
   token: Erc20Input!
-  window: TimeWindow!
+  window: TimeWindow! = LAST_DAY
 }
 
 type AssetSupplySample {
@@ -105,16 +105,18 @@ scalar BlockchainData
 input BorrowAPYHistoryRequest {
   spoke: SpokeInput!
   reserve: ReserveId!
-  window: TimeWindow!
+  window: TimeWindow! = LAST_DAY
 }
 
 type BorrowActivity {
   id: ID!
+  user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
   borrowed: Erc20Amount!
+  chain: Chain!
 }
 
 input BorrowRequest {
@@ -218,7 +220,11 @@ input ERC20PermitSignature {
 type Erc20Amount {
   """The value"""
   amount: DecimalNumber!
+
+  """The fiat amount"""
   fiatAmount(currency: Currency! = USD): FiatAmount!
+
+  """The fiat rate"""
   fiatRate(currency: Currency! = USD): DecimalNumber!
   isWrappedNative: Boolean!
   token: Erc20Token!
@@ -568,6 +574,7 @@ input LiquidatePositionRequest {
 
 type LiquidatedActivity {
   id: ID!
+  user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
@@ -576,6 +583,7 @@ type LiquidatedActivity {
   collateral: Erc20Amount!
   debt: Erc20Amount!
   liquidator: EvmAddress!
+  chain: Chain!
 }
 
 type NativeAmount {
@@ -845,11 +853,13 @@ input RenounceSpokeUserPositionManagerRequest {
 
 type RepayActivity {
   id: ID!
+  user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
   repaid: Erc20Amount!
+  chain: Chain!
 }
 
 input RepayAmountInputWithPermit @oneOf {
@@ -1158,16 +1168,18 @@ input SpokesRequest @oneOf {
 input SupplyAPYHistoryRequest {
   spoke: SpokeInput!
   reserve: ReserveId!
-  window: TimeWindow!
+  window: TimeWindow! = LAST_DAY
 }
 
 type SupplyActivity {
   id: ID!
+  user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
   supplied: Erc20Amount!
+  chain: Chain!
 }
 
 input SupplyPermitRequest {
@@ -1200,6 +1212,7 @@ input SupplyRequest {
 
 type SwapActivity {
   id: ID!
+  user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
   desiredSell: TokenAmount!
@@ -1209,6 +1222,7 @@ type SwapActivity {
   createdAt: DateTime!
   fulfilledAt: DateTime!
   explorerLink: String!
+  chain: Chain!
 }
 
 type SwapApprovalRequired {
@@ -1688,7 +1702,7 @@ type UserSummaryHistoryItem {
 input UserSummaryHistoryRequest {
   user: EvmAddress!
   filter: UserSummaryFilter
-  window: TimeWindow!
+  window: TimeWindow! = LAST_DAY
 }
 
 input UserSummaryRequest {
@@ -1755,11 +1769,13 @@ input UserToken {
 
 type WithdrawActivity {
   id: ID!
+  user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
   spoke: Spoke!
   reserve: ReserveInfo!
   withdrawn: Erc20Amount!
+  chain: Chain!
 }
 
 input WithdrawRequest {
