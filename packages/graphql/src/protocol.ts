@@ -6,6 +6,15 @@ import {
 } from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
+export const AssetPriceSampleFragment = graphql(
+  `fragment AssetPriceSample on AssetPriceSample {
+      __typename
+      date
+      price
+    }`,
+);
+export type AssetPriceSample = FragmentOf<typeof AssetPriceSampleFragment>;
+
 export const AssetSummaryFragment = graphql(
   `fragment AssetSummary on AssetSummary {
       __typename
@@ -61,3 +70,16 @@ export const AssetQuery = graphql(
   [AssetFragment],
 );
 export type AssetRequest = RequestOf<typeof AssetQuery>;
+
+/**
+ * @internal
+ */
+export const AssetPriceHistoryQuery = graphql(
+  `query AssetPriceHistory($request: AssetPriceHistoryRequest!) {
+      value: assetPriceHistory(request: $request) {
+        ...AssetPriceSample
+      }
+    }`,
+  [AssetPriceSampleFragment],
+);
+export type AssetPriceHistoryRequest = RequestOf<typeof AssetPriceHistoryQuery>;

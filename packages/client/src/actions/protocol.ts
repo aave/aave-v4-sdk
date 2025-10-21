@@ -1,5 +1,12 @@
 import type { UnexpectedError } from '@aave/core-next';
-import { type Asset, AssetQuery, type AssetRequest } from '@aave/graphql-next';
+import {
+  type Asset,
+  AssetPriceHistoryQuery,
+  type AssetPriceHistoryRequest,
+  type AssetPriceSample,
+  AssetQuery,
+  type AssetRequest,
+} from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 import {
@@ -37,6 +44,34 @@ export function asset(
       currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
       timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
     },
+    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+  );
+}
+
+/**
+ * Fetches historical price data for a specific asset.
+ *
+ * ```ts
+ * const result = await assetPriceHistory(client, {
+ *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The asset price history request parameters.
+ * @param options - The query options.
+ * @returns Array of asset price samples over time.
+ */
+export function assetPriceHistory(
+  client: AaveClient,
+  request: AssetPriceHistoryRequest,
+  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<AssetPriceSample[], UnexpectedError> {
+  return client.query(
+    AssetPriceHistoryQuery,
+    { request },
     options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
   );
 }
