@@ -2,3 +2,4 @@ packages:
   - 'packages/*'
   - 'examples/hubs'
   - 'examples/supply'
+  - 'examples/exchange-rates'
