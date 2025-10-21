@@ -1,4 +1,4 @@
-import { InvariantError } from '@aave/client-next';
+import { type BigDecimal, InvariantError } from '@aave/client-next';
 import type { NonEmptyTuple } from 'type-fest';
 
 export function assertNonEmptyArray<T>(
@@ -18,16 +18,16 @@ export function assertSingleElementArray<T>(
 }
 
 export function isOrderedNumerically(
-  values: string[],
+  values: BigDecimal[],
   order: 'asc' | 'desc',
 ): boolean {
   for (let i = 0; i < values.length - 1; i++) {
-    const current = Number(values[i]);
-    const next = Number(values[i + 1]);
+    const current = values[i]!;
+    const next = values[i + 1]!;
 
     if (
-      (order === 'desc' && current < next) ||
-      (order === 'asc' && current > next)
+      (order === 'desc' && current.lt(next)) ||
+      (order === 'asc' && current.gt(next))
     ) {
       return false;
     }
