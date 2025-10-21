@@ -1,11 +1,17 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
   type Asset,
+  AssetBorrowHistoryQuery,
+  type AssetBorrowHistoryRequest,
+  type AssetBorrowSample,
   AssetPriceHistoryQuery,
   type AssetPriceHistoryRequest,
   type AssetPriceSample,
   AssetQuery,
   type AssetRequest,
+  AssetSupplyHistoryQuery,
+  type AssetSupplyHistoryRequest,
+  type AssetSupplySample,
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
@@ -71,6 +77,60 @@ export function assetPriceHistory(
 ): ResultAsync<AssetPriceSample[], UnexpectedError> {
   return client.query(
     AssetPriceHistoryQuery,
+    { request },
+    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+  );
+}
+
+/**
+ * Fetches historical supply data for a specific asset.
+ *
+ * ```ts
+ * const result = await assetSupplyHistory(client, {
+ *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The asset supply history request parameters.
+ * @param options - The query options.
+ * @returns Array of asset supply samples over time.
+ */
+export function assetSupplyHistory(
+  client: AaveClient,
+  request: AssetSupplyHistoryRequest,
+  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<AssetSupplySample[], UnexpectedError> {
+  return client.query(
+    AssetSupplyHistoryQuery,
+    { request },
+    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+  );
+}
+
+/**
+ * Fetches historical borrow data for a specific asset.
+ *
+ * ```ts
+ * const result = await assetBorrowHistory(client, {
+ *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The asset borrow history request parameters.
+ * @param options - The query options.
+ * @returns Array of asset borrow samples over time.
+ */
+export function assetBorrowHistory(
+  client: AaveClient,
+  request: AssetBorrowHistoryRequest,
+  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<AssetBorrowSample[], UnexpectedError> {
+  return client.query(
+    AssetBorrowHistoryQuery,
     { request },
     options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
   );
