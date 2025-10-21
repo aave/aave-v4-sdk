@@ -26,8 +26,9 @@
     "test:aave-2151": "vitest --run --project spec packages/spec/borrow/multipleBorrows.spec.ts",
     "test:client": "vitest --project client",
     "test:react": "vitest --project react",
+    "test:react:viem": "vitest --project react packages/react/src/viem.test.ts",
     "test:types": "vitest --project types",
-    "test": "pnpm test:client && pnpm test:react"
+    "test": "pnpm test:types && pnpm test:client && pnpm test:react"
   },
   "license": "MIT",
   "devDependencies": {

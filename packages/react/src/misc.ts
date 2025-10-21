@@ -7,18 +7,13 @@ import type {
   FiatAmount,
 } from '@aave/graphql-next';
 import {
+  type ActivityItem,
   ChainsFilter,
   ChainsQuery,
   ExchangeRateQuery,
   type NativeAmount,
 } from '@aave/graphql-next';
-import {
-  type ChainId,
-  type NullishDeep,
-  never,
-  type Prettify,
-  type TxHash,
-} from '@aave/types-next';
+import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
 import {
   type Pausable,
@@ -252,87 +247,81 @@ export function useExchangeRate({
   });
 }
 
+export type UseNetworkFeeRequestQuery = {
+  activity: ActivityItem;
+};
+
 export type UseNetworkFeeArgs = Prettify<
   {
-    chainId: ChainId;
-    txHash: TxHash;
+    query: UseNetworkFeeRequestQuery;
   } & CurrencyQueryOptions
 >;
 
 /**
- * Fetches the network fee for a transaction.
+ * Fetch the network fee for an ActivityItem.
  *
- * This signature supports React Suspense:
- *
- * ```tsx
- * const { data } = useNetworkFee({
- *   chainId: chainId(1),
- *   txHash: txHash('0x123...'),
- *   suspense: true,
- * });
- *
- * data: NativeAmount
- * ```
+ * @experimental This hook is experimental and may be subject to breaking changes.
  */
-export function useNetworkFee(
-  args: UseNetworkFeeArgs & Suspendable,
-): SuspenseResult<NativeAmount>;
-/**
- * Fetches the network fee for a transaction.
- *
- * Pausable suspense mode.
- *
- * ```tsx
- * const { data, paused } = useNetworkFee({
- *   chainId: chainId(1),
- *   txHash: txHash('0x123...'),
- *   suspense: true,
- *   pause: true,
- * });
- *
- * data: NativeAmount | undefined
- * ```
- */
-export function useNetworkFee(
-  args: Pausable<UseNetworkFeeArgs> & Suspendable,
-): PausableSuspenseResult<NativeAmount>;
-/**
- * Fetches the network fee for a transaction.
- *
- * ```tsx
- * const { data, error, loading } = useNetworkFee({
- *   chainId: chainId(1),
- *   txHash: txHash('0x123...'),
- * });
- * ```
- */
-export function useNetworkFee(
-  args: UseNetworkFeeArgs,
-): ReadResult<NativeAmount>;
-/**
- * Fetches the network fee for a transaction.
- *
- * Pausable loading state mode.
- *
- * ```tsx
- * const { data, error, loading, paused } = useNetworkFee({
- *   chainId: chainId(1),
- *   txHash: txHash('0x123...'),
- *   pause: true,
- * });
- *
- * data: NativeAmount | undefined
- * ```
- */
-export function useNetworkFee(
-  args: Pausable<UseNetworkFeeArgs>,
-): PausableReadResult<NativeAmount>;
-
-export function useNetworkFee(
-  _: NullishDeep<UseNetworkFeeArgs> & {
-    suspense?: boolean;
-    pause?: boolean;
-  },
-): SuspendableResult<NativeAmount, UnexpectedError, boolean> {
-  never('Not implemented');
-}
+export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
+  /**
+   * Fetches the network fee for a transaction.
+   *
+   * This signature supports React Suspense:
+   *
+   * ```tsx
+   * const { data } = useNetworkFee({
+   *   chainId: chainId(1),
+   *   txHash: txHash('0x123...'),
+   *   suspense: true,
+   * });
+   *
+   * data: NativeAmount
+   * ```
+   */
+  ((args: UseNetworkFeeArgs & Suspendable) => SuspenseResult<T>) &
+    /**
+     * Fetches the network fee for a transaction.
+     *
+     * Pausable suspense mode.
+     *
+     * ```tsx
+     * const { data, paused } = useNetworkFee({
+     *   chainId: chainId(1),
+     *   txHash: txHash('0x123...'),
+     *   suspense: true,
+     *   pause: true,
+     * });
+     *
+     * data: NativeAmount | undefined
+     * ```
+     */
+    ((
+      args: Pausable<UseNetworkFeeArgs> & Suspendable,
+    ) => PausableSuspenseResult<T>) &
+    /**
+     * Fetches the network fee for a transaction.
+     *
+     * ```tsx
+     * const { data, error, loading } = useNetworkFee({
+     *   chainId: chainId(1),
+     *   txHash: txHash('0x123...'),
+     * });
+     * ```
+     */
+    ((args: UseNetworkFeeArgs) => ReadResult<T>) &
+    /**
+     * Fetches the network fee for a transaction.
+     *
+     * Pausable loading state mode.
+     *
+     * ```tsx
+     * const { data, error, loading, paused } = useNetworkFee({
+     *   chainId: chainId(1),
+     *   txHash: txHash('0x123...'),
+     *   pause: true,
+     * });
+     *
+     * data: NativeAmount | undefined
+     * ```
+     */
+    ((args: Pausable<UseNetworkFeeArgs>) => PausableReadResult<T>);

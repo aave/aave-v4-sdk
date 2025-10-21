@@ -1,24 +1,51 @@
-import type { SigningError, UnexpectedError } from '@aave/client-next';
+import { type SigningError, UnexpectedError } from '@aave/client-next';
 import {
   sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
+  supportedChains,
   waitForTransactionResult,
 } from '@aave/client-next/viem';
-import type {
-  ERC20PermitSignature,
-  PermitRequest,
-  SwapByIntentTypedData,
-  TransactionRequest,
+import {
+  type Chain,
+  Currency,
+  type ERC20PermitSignature,
+  type FiatAmount,
+  type NativeAmount,
+  type PermitRequest,
+  type SwapByIntentTypedData,
+  type TransactionRequest,
+  type TxHashInput,
 } from '@aave/graphql-next';
-import { invariant } from '@aave/types-next';
-import type { WalletClient } from 'viem';
+import {
+  bigDecimal,
+  type DateTime,
+  invariant,
+  type NullishDeep,
+  never,
+  ResultAsync,
+  type TxHash,
+} from '@aave/types-next';
+import { useEffect } from 'react';
+import {
+  createPublicClient,
+  http,
+  type TransactionReceipt,
+  type WalletClient,
+} from 'viem';
 import {
   PendingTransaction,
+  ReadResult,
+  type SuspendableResult,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
+import {
+  type UseNetworkFee,
+  type UseNetworkFeeRequestQuery,
+  useExchangeRate,
+} from './misc';
 import { usePermitTypedDataAction } from './permits';
 
 /**
@@ -145,3 +172,147 @@ export function useSignSwapTypedDataWith(
     [walletClient],
   );
 }
+
+function extractTransactionDetails(
+  query: NullishDeep<UseNetworkFeeRequestQuery> | null | undefined,
+): [Chain, TxHash, DateTime] | [undefined, undefined] {
+  return query?.activity?.chain &&
+    query.activity.txHash &&
+    query.activity.timestamp
+    ? [query.activity.chain, query.activity.txHash, query.activity.timestamp]
+    : [undefined, undefined];
+}
+
+function useTransactionReceipt(): UseAsyncTask<
+  TxHashInput,
+  TransactionReceipt,
+  UnexpectedError
+> {
+  return useAsyncTask(({ chainId, txHash }: TxHashInput) => {
+    const publicClient = createPublicClient({
+      chain: supportedChains[chainId] ?? never(`Unsupported chain ${chainId}`),
+      transport: http(),
+    });
+
+    return ResultAsync.fromPromise(
+      publicClient.getTransactionReceipt({ hash: txHash }),
+      (error) => UnexpectedError.from(error),
+    );
+  }, []);
+}
+
+function createNetworkFeeAmount(
+  receipt: TransactionReceipt,
+  chain: Chain,
+  rate: FiatAmount,
+): NativeAmount {
+  const value = bigDecimal(receipt.gasUsed * receipt.effectiveGasPrice).rescale(
+    -chain.nativeInfo.decimals,
+  );
+
+  const amount = {
+    __typename: 'DecimalNumber',
+    decimals: chain.nativeInfo.decimals,
+    onChainValue: receipt.gasUsed,
+    value,
+
+    // TODO remove aliasese below in due course
+    formatted: value,
+    raw: receipt.gasUsed,
+  } as const;
+
+  return {
+    __typename: 'NativeAmount',
+    token: {
+      __typename: 'NativeToken',
+      info: chain.nativeInfo,
+      chain,
+    },
+    amount,
+    fiatAmount: {
+      __typename: 'FiatAmount',
+      value: value.mul(rate.value),
+      name: rate.name,
+      symbol: rate.symbol,
+    },
+    fiatRate: {
+      __typename: 'DecimalNumber',
+      decimals: 2,
+      onChainValue: BigInt(rate.value.mul(10 ** 2).toString()),
+      value: rate.value,
+
+      // TODO remove aliasese below in due course
+      formatted: rate.value,
+      raw: BigInt(rate.value.mul(10 ** 2).toString()),
+    },
+    // TODO remove alias in due course
+    value: amount,
+  };
+}
+
+/**
+ * Fetch the network fee for an ActivityItem.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ */
+export const useNetworkFee: UseNetworkFee = (({
+  query,
+  currency = Currency.Usd,
+  pause = false,
+  suspense = false,
+}: {
+  query: UseNetworkFeeRequestQuery;
+  currency: Currency;
+  pause?: boolean;
+  suspense?: boolean;
+}): SuspendableResult<NativeAmount, UnexpectedError> => {
+  const [fetchReceipt, receipt] = useTransactionReceipt();
+
+  const [chain, txHash, timestamp] = extractTransactionDetails(query);
+
+  const rate = useExchangeRate({
+    from: chain
+      ? {
+          native: chain.chainId,
+        }
+      : undefined,
+    to: currency,
+    at: timestamp,
+    pause,
+    ...(suspense ? { suspense } : {}),
+  });
+
+  useEffect(() => {
+    if (pause || !chain || !txHash || receipt.called) return;
+
+    fetchReceipt({ chainId: chain.chainId, txHash });
+  }, [fetchReceipt, chain, txHash, pause, receipt.called]);
+
+  if (rate.paused) {
+    return ReadResult.Paused(
+      chain && receipt.data && rate.data
+        ? createNetworkFeeAmount(receipt.data, chain, rate.data)
+        : undefined,
+      rate.error ? rate.error : undefined,
+    );
+  }
+
+  if (!receipt.called || receipt.loading || rate.loading) {
+    return ReadResult.Loading();
+  }
+
+  if (receipt.error || rate.error) {
+    return ReadResult.Failure(
+      receipt.error ?? rate.error ?? never('Unknown error'),
+    );
+  }
+
+  invariant(
+    receipt.data && chain && rate.data,
+    'Expected receipt, chain, and rate data',
+  );
+
+  return ReadResult.Success(
+    createNetworkFeeAmount(receipt.data, chain, rate.data),
+  );
+}) as UseNetworkFee;
