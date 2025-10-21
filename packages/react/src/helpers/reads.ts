@@ -159,7 +159,7 @@ export function useSuspendableQuery<
   }
 
   if (fetching) {
-    return ReadResult.Initial();
+    return ReadResult.Loading();
   }
 
   if (error) {

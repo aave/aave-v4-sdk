@@ -57,7 +57,7 @@ export type PausableReadResult<T, E extends UnexpectedError = UnexpectedError> =
  * @internal
  */
 export const ReadResult = {
-  Initial: <
+  Loading: <
     T,
     E extends UnexpectedError = UnexpectedError,
   >(): PausableReadResult<T, E> => ({
