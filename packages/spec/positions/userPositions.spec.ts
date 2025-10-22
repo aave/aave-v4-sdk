@@ -96,8 +96,8 @@ describe('Aave V4 Positions Scenario', () => {
         });
         assertOk(positions);
         expect(
-          positions.value[0]?.netBalance.amount.value,
-        ).toBeBigDecimalLessThan(positions.value[1]?.netBalance.amount.value);
+          positions.value[0]?.netBalance.current.value,
+        ).toBeBigDecimalLessThan(positions.value[1]?.netBalance.current.value);
 
         positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -108,9 +108,9 @@ describe('Aave V4 Positions Scenario', () => {
         });
         assertOk(positions);
         expect(
-          positions.value[0]?.netBalance.amount.value,
+          positions.value[0]?.netBalance.current.value,
         ).toBeBigDecimalGreaterThan(
-          positions.value[1]?.netBalance.amount.value,
+          positions.value[1]?.netBalance.current.value,
         );
       });
 
@@ -150,8 +150,8 @@ describe('Aave V4 Positions Scenario', () => {
         });
         assertOk(positions);
         expect(
-          positions.value[0]?.healthFactor.value,
-        ).toBeBigDecimalGreaterThan(positions.value[1]?.healthFactor.value);
+          positions.value[0]?.healthFactor.current,
+        ).toBeBigDecimalGreaterThan(positions.value[1]?.healthFactor.current);
 
         positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -161,8 +161,8 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { healthFactor: OrderDirection.Asc },
         });
         assertOk(positions);
-        expect(positions.value[0]?.healthFactor.value).toBeBigDecimalLessThan(
-          positions.value[1]?.healthFactor.value,
+        expect(positions.value[0]?.healthFactor.current).toBeBigDecimalLessThan(
+          positions.value[1]?.healthFactor.current,
         );
       });
 

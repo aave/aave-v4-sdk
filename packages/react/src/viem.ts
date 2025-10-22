@@ -237,8 +237,6 @@ function createNetworkFeeAmount(
       onChainValue: BigInt(rate.value.mul(10 ** 2).toString()),
       value: rate.value,
     },
-    // TODO remove alias in due course
-    value: amount,
   };
 }
 

@@ -88,7 +88,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toBe(true);
-        expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
+        expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
         );
@@ -128,7 +128,6 @@ describe('Supplying Assets on Aave V4', () => {
         expect(previewResult.value).toMatchSnapshot({
           id: expect.any(String),
           portfolioApy: expect.any(Object),
-          positionApy: expect.any(Object),
           netBalance: expect.any(Object),
           netCollateral: expect.any(Object),
           netApy: expect.any(Object),
@@ -192,7 +191,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toEqual(false);
-        expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
+        expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           3,
         );
@@ -275,7 +274,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toBe(true);
-        expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
+        expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
         );
