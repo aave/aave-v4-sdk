@@ -57,7 +57,7 @@ export type PausableReadResult<T, E extends UnexpectedError = UnexpectedError> =
  * @internal
  */
 export const ReadResult = {
-  Initial: <
+  Loading: <
     T,
     E extends UnexpectedError = UnexpectedError,
   >(): PausableReadResult<T, E> => ({
@@ -113,13 +113,8 @@ export type PausableSuspenseResult<T> =
       data: T;
     };
 
-export type SuspendableResult<
-  T,
-  E extends UnexpectedError = UnexpectedError,
-  Pausable extends boolean = false,
-> =
+export type SuspendableResult<T, E extends UnexpectedError = UnexpectedError> =
   | ReadResult<T, E>
   | SuspenseResult<T>
-  | (Pausable extends true
-      ? PausableReadResult<T, E> | PausableSuspenseResult<T>
-      : never);
+  | PausableReadResult<T, E>
+  | PausableSuspenseResult<T>;

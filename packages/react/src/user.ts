@@ -150,7 +150,7 @@ export function useUserSupplies({
 }: NullishDeep<UseUserSuppliesArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<UserSupplyItem[], UnexpectedError, boolean> {
+}): SuspendableResult<UserSupplyItem[], UnexpectedError> {
   return useSuspendableQuery({
     document: UserSuppliesQuery,
     variables: {
@@ -300,7 +300,7 @@ export function useUserBorrows({
 }: NullishDeep<UseUserBorrowsArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<UserBorrowItem[], UnexpectedError, boolean> {
+}): SuspendableResult<UserBorrowItem[], UnexpectedError> {
   return useSuspendableQuery({
     document: UserBorrowsQuery,
     variables: {
@@ -439,7 +439,7 @@ export function useUserSummary({
 }: NullishDeep<UseUserSummaryArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<UserSummary, UnexpectedError, boolean> {
+}): SuspendableResult<UserSummary, UnexpectedError> {
   return useSuspendableQuery({
     document: UserSummaryQuery,
     variables: {
@@ -532,7 +532,7 @@ export function useUserPositions({
 }: NullishDeep<UseUserPositionsArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<UserPosition[], UnexpectedError, boolean> {
+}): SuspendableResult<UserPosition[], UnexpectedError> {
   return useSuspendableQuery({
     document: UserPositionsQuery,
     variables: {
@@ -665,7 +665,7 @@ export function useUserPosition({
 }: NullishDeep<UseUserPositionArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<UserPosition | null, UnexpectedError, boolean> {
+}): SuspendableResult<UserPosition | null, UnexpectedError> {
   return useSuspendableQuery({
     document: UserPositionQuery,
     variables: {
@@ -753,7 +753,7 @@ export function useUserBalances({
 }: NullishDeep<UseUserBalancesArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<UserBalance[], UnexpectedError, boolean> {
+}): SuspendableResult<UserBalance[], UnexpectedError> {
   return useSuspendableQuery({
     document: UserBalancesQuery,
     variables: {
@@ -884,7 +884,7 @@ export function useUserSummaryHistory({
 }: NullishDeep<UseUserSummaryHistoryArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<UserSummaryHistoryItem[], UnexpectedError, boolean> {
+}): SuspendableResult<UserSummaryHistoryItem[], UnexpectedError> {
   return useSuspendableQuery({
     document: UserSummaryHistoryQuery,
     variables: {

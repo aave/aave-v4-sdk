@@ -32,6 +32,25 @@ export const DecimalNumberFragment: FragmentDocumentFor<DecimalNumber> =
  */
 export type DecimalValue = DecimalNumber;
 
+export type DecimalNumberWithChange = {
+  __typename: 'DecimalNumberWithChange';
+  current: DecimalNumber;
+  change: DecimalNumber;
+};
+export const DecimalNumberWithChangeFragment: FragmentDocumentFor<DecimalNumberWithChange> =
+  graphql(
+    `fragment DecimalNumberWithChange on DecimalNumberWithChange {
+    __typename
+    current {
+      ...DecimalNumber
+    }
+    change(window: $timeWindow) {
+      ...DecimalNumber
+    }
+  }`,
+    [DecimalNumberFragment],
+  );
+
 export type PercentNumber = {
   __typename: 'PercentNumber';
   onChainValue: bigint;

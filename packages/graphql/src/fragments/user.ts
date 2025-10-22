@@ -20,27 +20,12 @@ import {
 import { type Reserve, ReserveFragment } from './reserve';
 import { SpokeFragment } from './spoke';
 
-export const UserSupplySummaryFragment = graphql(
-  `fragment UserSupplySummary on UserSupplySummary {
-    __typename
-    withdrawn {
-      ...Erc20Amount
-    }
-    totalSupplied {
-      ...Erc20Amount
-    }
-  }`,
-  [Erc20AmountFragment],
-);
-export type UserSupplySummary = FragmentOf<typeof UserSupplySummaryFragment>;
-
 export type UserSupplyItem = {
   __typename: 'UserSupplyItem';
   reserve: Reserve;
   principal: Erc20Amount;
   withdrawable: Erc20Amount;
   isCollateral: boolean;
-  summary: UserSupplySummary;
   /**
    * @deprecated Use `withdrawable` instead. Removal slated for week commencing 27th October 2025.
    */
@@ -62,36 +47,18 @@ export const UserSupplyItemFragment: FragmentDocumentFor<
       ...Erc20Amount
     }
     isCollateral
-    summary {
-      ...UserSupplySummary
-    }
     amount: withdrawable {
       ...Erc20Amount
     }
   }`,
-  [Erc20AmountFragment, ReserveFragment, UserSupplySummaryFragment],
+  [Erc20AmountFragment, ReserveFragment],
 );
-
-export const UserBorrowSummaryFragment = graphql(
-  `fragment UserBorrowSummary on UserBorrowSummary {
-    __typename
-    repaid {
-      ...Erc20Amount
-    }
-    totalBorrowed {
-      ...Erc20Amount
-    }
-  }`,
-  [Erc20AmountFragment],
-);
-export type UserBorrowSummary = FragmentOf<typeof UserBorrowSummaryFragment>;
 
 export type UserBorrowItem = {
   __typename: 'UserBorrowItem';
   reserve: Reserve;
   principal: Erc20Amount;
   debt: Erc20Amount;
-  summary: UserBorrowSummary;
   /**
    * @deprecated Use `debt` instead. Removal slated for week commencing 27th October 2025.
    */
@@ -112,14 +79,11 @@ export const UserBorrowItemFragment: FragmentDocumentFor<
     reserve {
       ...Reserve
     }
-    summary {
-      ...UserBorrowSummary
-    }
     amount: principal {
       ...Erc20Amount
     }
   }`,
-  [Erc20AmountFragment, ReserveFragment, UserBorrowSummaryFragment],
+  [Erc20AmountFragment, ReserveFragment],
 );
 
 export const UserSummaryFragment = graphql(
@@ -192,6 +156,9 @@ export const UserPositionFragment = graphql(
       ...PercentNumber
     }
     netBalancePercentChange(window: $timeWindow){
+      ...PercentNumber
+    }
+    averageCollateralFactor {
       ...PercentNumber
     }
   }`,

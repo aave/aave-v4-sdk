@@ -1615,6 +1615,7 @@ type UserPosition {
   riskPremium: PercentNumber!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentNumber!
   spoke: Spoke!
+  averageCollateralFactor: PercentNumber!
 }
 
 scalar UserPositionId
@@ -1689,13 +1690,13 @@ type UserSummaryHistoryItem {
   healthFactor: BigDecimal
   date: DateTime!
 
-  """The net balance"""
+  """The aggregated net balance for the time period"""
   netBalance(currency: Currency! = USD): FiatAmount!
 
-  """The borrows"""
+  """The aggregated borrows for the time period"""
   borrows(currency: Currency! = USD): FiatAmount!
 
-  """The supplies"""
+  """The aggregated supplies for the time period"""
   supplies(currency: Currency! = USD): FiatAmount!
 }
 
