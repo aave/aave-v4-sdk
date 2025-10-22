@@ -314,4 +314,71 @@ describe('Given a BigDecimal class', () => {
       expect(BigDecimal.isBigDecimal(result)).toBe(true);
     });
   });
+
+  describe('When calling toDisplayString() method', () => {
+    it.each([
+      ['123.456', 4, '123.5'],
+      ['123.456', 2, '123'],
+      ['0.0012345', 3, '0.00123'],
+      ['123456789', 5, '123456789'],
+      ['-123.456', 4, '-123.5'],
+    ])(
+      'Then it should format %s to %i significant digits as %s',
+      (value, sigDigits, expected) => {
+        const number = bigDecimal(value);
+        expect(number.toDisplayString(sigDigits)).toBe(expected);
+      },
+    );
+
+    describe('with minFractionDigits', () => {
+      it.each([
+        ['0', 3, 2, '0.00'],
+        ['123', 3, 2, '123.00'],
+        ['123.4', 4, 3, '123.400'],
+      ])(
+        'Then it should apply minFractionDigits for %s with %i sigDigits and minFractionDigits=%i as %s',
+        (value, sigDigits, minFractionDigits, expected) => {
+          const number = bigDecimal(value);
+          expect(number.toDisplayString(sigDigits, { minFractionDigits })).toBe(
+            expected,
+          );
+        },
+      );
+    });
+
+    describe('with trimTrailingZeros', () => {
+      it.each([
+        ['123.4500', 5, '123.45'],
+        ['123.000', 3, '123'],
+      ])(
+        'Then it should trim trailing zeros for %s with %i sigDigits as %s',
+        (value, sigDigits, expected) => {
+          const number = bigDecimal(value);
+          expect(
+            number.toDisplayString(sigDigits, {
+              trimTrailingZeros: true,
+            }),
+          ).toBe(expected);
+        },
+      );
+    });
+
+    describe('with combined options', () => {
+      it.each([
+        ['123.4', 4, 3, '123.4'],
+        ['123', 3, 2, '123'],
+      ])(
+        'Then it should apply combined options for %s with %i sigDigits, minFractionDigits=%i, and trimTrailingZeros as %s',
+        (value, sigDigits, minFractionDigits, expected) => {
+          const number = bigDecimal(value);
+          expect(
+            number.toDisplayString(sigDigits, {
+              minFractionDigits,
+              trimTrailingZeros: true,
+            }),
+          ).toBe(expected);
+        },
+      );
+    });
+  });
 });

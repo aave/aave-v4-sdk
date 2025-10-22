@@ -212,6 +212,64 @@ export class BigDecimal extends Big {
   }
 
   /**
+   * Returns a formatted string representation of this BigDecimal for display purposes.
+   *
+   * The precision behavior adapts based on the number's magnitude:
+   * - For numbers >= 1: Always displays the full integer part, with decimal precision
+   *   controlled by the precision parameter (representing orders of magnitude for decimals).
+   * - For numbers < 1: Uses traditional significant figures behavior.
+   *
+   * @param precision - Precision control parameter.
+   * For numbers >= 1: Total digits to display (integer + decimal).
+   * For numbers < 1: Number of significant figures.
+   * @param opts - Optional formatting options.
+   * @param opts.rounding - The rounding mode to apply (default: RoundingMode.HalfUp).
+   * @param opts.minFractionDigits - The minimum number of digits to display
+   * after the decimal point (default: 0).
+   * @param opts.trimTrailingZeros - When true, removes trailing zeros after
+   * the decimal point for a cleaner display (default: false).
+   *
+   * @returns A string representing the rounded and formatted number.
+   */
+  public toDisplayString(
+    precision: number,
+    opts?: {
+      rounding?: RoundingMode;
+      minFractionDigits?: number;
+      trimTrailingZeros?: boolean;
+    },
+  ): string {
+    const {
+      rounding = RoundingMode.HalfUp,
+      minFractionDigits = 0,
+      trimTrailingZeros = false,
+    } = opts ?? {};
+
+    // Zero shortcut
+    if (this.eq(0)) {
+      return minFractionDigits > 0 ? `0.${'0'.repeat(minFractionDigits)}` : '0';
+    }
+
+    const rounded = this.applyAdaptivePrecision(precision, rounding);
+    let str = rounded.toFixed();
+
+    // Ensure minimum fraction digits
+    if (minFractionDigits > 0) {
+      const [intPart, fracPart = ''] = str.split('.');
+      if (fracPart.length < minFractionDigits) {
+        str = `${intPart}.${fracPart.padEnd(minFractionDigits, '0')}`;
+      }
+    }
+
+    // Optionally trim trailing zeros
+    if (trimTrailingZeros && str.includes('.')) {
+      str = str.replace(/\.?0+$/, '');
+    }
+
+    return str;
+  }
+
+  /**
    * @internal
    */
   static new(value: string): BigDecimal {
@@ -262,6 +320,29 @@ export class BigDecimal extends Big {
     return [second, ...others].reduce<BigDecimal>((max, current) => {
       return max.gt(current) ? max : current;
     }, first);
+  }
+
+  private getIntegerDigitCount(): number {
+    const absStr = this.abs().toFixed();
+    const [integerPart] = absStr.split('.');
+    return integerPart?.length ?? absStr.length;
+  }
+
+  private applyAdaptivePrecision(
+    precision: number,
+    rounding: RoundingMode,
+  ): BigDecimal {
+    const absValue = this.abs();
+
+    // For numbers >= 1, keep all integer digits and control decimal precision
+    if (absValue.gte(1)) {
+      const integerDigits = this.getIntegerDigitCount();
+      const decimalPlaces = Math.max(0, precision - integerDigits);
+      return this.round(decimalPlaces, rounding);
+    }
+
+    // For numbers < 1, use traditional significant figures
+    return this.prec(precision, rounding);
   }
 }
 
