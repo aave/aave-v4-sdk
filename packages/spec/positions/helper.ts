@@ -19,7 +19,7 @@ import { supplyToRandomERC20Reserve } from '../borrow/helper';
 import { supplyWETHAndBorrow, supplyWSTETHAndBorrowETH } from '../repay/helper';
 
 // TODO: missing following actions to add: repay, liquidated and swap
-export const recreateUserHistory = async (
+export const recreateUserActivities = async (
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
 ) => {
@@ -74,6 +74,37 @@ export const recreateUserHistory = async (
     )
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction)
+    .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
+    .andThen(() => supplyWSTETHAndBorrowETH(client, user));
+  assertOk(setup);
+};
+
+export const recreateUserSummary = async (
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+) => {
+  const setup = await fundErc20Address(evmAddress(user.account.address), {
+    address: ETHEREUM_WETH_ADDRESS,
+    amount: bigDecimal('0.5'),
+  })
+    .andThen(() =>
+      fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_WSTETH_ADDRESS,
+        amount: bigDecimal('0.5'),
+      }),
+    )
+    .andThen(() =>
+      fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_GHO_ADDRESS,
+        amount: bigDecimal('100'),
+      }),
+    )
+    .andThen(() =>
+      supplyToRandomERC20Reserve(client, user, {
+        token: ETHEREUM_GHO_ADDRESS,
+        amount: bigDecimal('100'),
+      }),
+    )
     .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
     .andThen(() => supplyWSTETHAndBorrowETH(client, user));
   assertOk(setup);

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the user supplies tokens to the reserve > Then the user can have a preview before supplying 1`] = `
+exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the user wants to preview the supply action before performing it > Then the user can review the supply details before proceeding 1`] = `
 {
   "__typename": "PreviewUserPosition",
   "healthFactor": {
@@ -10,20 +10,24 @@ exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the use
   },
   "id": Any<String>,
   "netApy": {
-    "__typename": "PercentValueVariation",
+    "__typename": "PercentNumberVariation",
     "after": {
-      "__typename": "PercentValue",
-      "decimals": 27,
-      "formatted": "0",
-      "raw": 0n,
-      "value": "0",
+      "__typename": "PercentNumber",
+      "decimals": 2,
+      "formatted": "2.5",
+      "normalized": "250",
+      "onChainValue": 250n,
+      "raw": 250n,
+      "value": "2.5",
     },
     "current": {
-      "__typename": "PercentValue",
-      "decimals": 0,
-      "formatted": "0",
-      "raw": 0n,
-      "value": "0",
+      "__typename": "PercentNumber",
+      "decimals": 2,
+      "formatted": "2.5",
+      "normalized": "250",
+      "onChainValue": 250n,
+      "raw": 250n,
+      "value": "2.5",
     },
   },
   "netBalance": {
@@ -32,13 +36,13 @@ exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the use
       "__typename": "FiatAmount",
       "name": "USD",
       "symbol": "$",
-      "value": "49.99",
+      "value": "100",
     },
     "current": {
       "__typename": "FiatAmount",
       "name": "USD",
       "symbol": "$",
-      "value": "0",
+      "value": "50.01",
     },
   },
   "netCollateral": {
@@ -56,36 +60,25 @@ exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the use
       "value": "0",
     },
   },
-  "positionApy": {
-    "__typename": "PercentValueVariation",
-    "after": {
-      "__typename": "PercentValue",
-      "decimals": 2,
-      "formatted": "250.0",
-      "raw": 250n,
-      "value": "2.5",
-    },
-    "current": {
-      "__typename": "PercentValue",
-      "decimals": 2,
-      "formatted": "250.0",
-      "raw": 250n,
-      "value": "2.5",
-    },
-  },
+  "portfolioApy": Any<Object>,
+  "positionApy": Any<Object>,
   "riskPremium": {
-    "__typename": "PercentValueVariation",
+    "__typename": "PercentNumberVariation",
     "after": {
-      "__typename": "PercentValue",
-      "decimals": 0,
+      "__typename": "PercentNumber",
+      "decimals": 27,
       "formatted": "0",
+      "normalized": "0",
+      "onChainValue": 0n,
       "raw": 0n,
       "value": "0",
     },
     "current": {
-      "__typename": "PercentValue",
+      "__typename": "PercentNumber",
       "decimals": 0,
       "formatted": "0",
+      "normalized": "0",
+      "onChainValue": 0n,
       "raw": 0n,
       "value": "0",
     },

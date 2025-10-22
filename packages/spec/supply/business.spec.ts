@@ -61,6 +61,7 @@ describe('Supplying Assets on Aave V4', () => {
               value: amountToSupply,
             },
           },
+          enableCollateral: true,
           sender: evmAddress(user.account.address),
         })
           .andThen(sendWith(user))
@@ -87,7 +88,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toBe(true);
-        expect(supplyPosition.amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
         );
@@ -126,6 +127,8 @@ describe('Supplying Assets on Aave V4', () => {
         assertOk(previewResult);
         expect(previewResult.value).toMatchSnapshot({
           id: expect.any(String),
+          portfolioApy: expect.any(Object),
+          positionApy: expect.any(Object),
         });
       });
     });
@@ -186,7 +189,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toEqual(false);
-        expect(supplyPosition.amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           3,
         );
@@ -225,6 +228,7 @@ describe('Supplying Assets on Aave V4', () => {
               spoke: reserve.value.spoke.address,
             },
             sender: evmAddress(user.account.address),
+            enableCollateral: true,
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
@@ -268,7 +272,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toBe(true);
-        expect(supplyPosition.amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
         );
