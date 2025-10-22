@@ -80,7 +80,7 @@ describe('Querying User Summary on Aave V4', () => {
           { currency: Currency.Eur },
         );
         assertOk(summaryEUR);
-        expect(summaryEUR.value.netBalance.amount.name).toBe('EUR');
+        expect(summaryEUR.value.netBalance.current.name).toBe('EUR');
         expect(summaryEUR.value.totalCollateral.name).toBe('EUR');
         expect(summaryEUR.value.totalSupplied.name).toBe('EUR');
         expect(summaryEUR.value.totalDebt.name).toBe('EUR');
@@ -93,7 +93,7 @@ describe('Querying User Summary on Aave V4', () => {
           { currency: Currency.Gbp },
         );
         assertOk(summaryGBP);
-        expect(summaryGBP.value.netBalance.amount.name).toBe('GBP');
+        expect(summaryGBP.value.netBalance.current.name).toBe('GBP');
         expect(summaryGBP.value.totalCollateral.name).toBe('GBP');
         expect(summaryGBP.value.totalSupplied.name).toBe('GBP');
         expect(summaryGBP.value.totalDebt.name).toBe('GBP');

@@ -123,8 +123,8 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { netApy: OrderDirection.Desc },
         });
         assertOk(positions);
-        expect(positions.value[0]?.netApy.formatted).toBeBigDecimalGreaterThan(
-          positions.value[1]?.netApy.formatted,
+        expect(positions.value[0]?.netApy.value).toBeBigDecimalGreaterThan(
+          positions.value[1]?.netApy.value,
         );
 
         positions = await userPositions(client, {
@@ -135,8 +135,8 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { netApy: OrderDirection.Asc },
         });
         assertOk(positions);
-        expect(positions.value[0]?.netApy.formatted).toBeBigDecimalLessThan(
-          positions.value[1]?.netApy.formatted,
+        expect(positions.value[0]?.netApy.value).toBeBigDecimalLessThan(
+          positions.value[1]?.netApy.value,
         );
       });
 
@@ -198,9 +198,9 @@ describe('Aave V4 Positions Scenario', () => {
         });
         assertOk(positions);
         expect(
-          positions.value[0]?.netCollateral.amount.value,
+          positions.value[0]?.netCollateral.current.value,
         ).toBeBigDecimalGreaterThan(
-          positions.value[1]?.netCollateral.amount.value,
+          positions.value[1]?.netCollateral.current.value,
         );
 
         positions = await userPositions(client, {
@@ -212,9 +212,9 @@ describe('Aave V4 Positions Scenario', () => {
         });
         assertOk(positions);
         expect(
-          positions.value[0]?.netCollateral.amount.value,
+          positions.value[0]?.netCollateral.current.value,
         ).toBeBigDecimalLessThan(
-          positions.value[1]?.netCollateral.amount.value,
+          positions.value[1]?.netCollateral.current.value,
         );
       });
     });

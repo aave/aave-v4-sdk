@@ -47,7 +47,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             amount: {
               erc20: {
                 value: bigDecimal(
-                  Number(reserve.userState!.borrowable.value.formatted) * 0.1,
+                  Number(reserve.userState!.borrowable.amount.value) * 0.1,
                 ),
               },
             },
@@ -71,7 +71,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             amount: {
               erc20: {
                 value: bigDecimal(
-                  Number(reserve.userState!.borrowable.value.formatted) * 0.1,
+                  Number(reserve.userState!.borrowable.amount.value) * 0.1,
                 ),
               },
             },
@@ -105,8 +105,8 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
         );
         expect(usdcPosition).toBeDefined();
-        expect(usdcPosition!.amount.value.formatted).toBeBigDecimalCloseTo(
-          Number(firstBorrow.value.userState!.borrowable.value.formatted) * 0.1,
+        expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
+          Number(firstBorrow.value.userState!.borrowable.amount.value) * 0.1,
           2,
         );
 
@@ -116,9 +116,8 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
         );
         expect(usdsPosition).toBeDefined();
-        expect(usdsPosition!.amount.value.formatted).toBeBigDecimalCloseTo(
-          Number(secondBorrow.value.userState!.borrowable.value.formatted) *
-            0.1,
+        expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(
+          Number(secondBorrow.value.userState!.borrowable.amount.value) * 0.1,
           2,
         );
       });
