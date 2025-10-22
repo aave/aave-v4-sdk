@@ -194,6 +194,9 @@ export const UserPositionFragment = graphql(
     netBalancePercentChange(window: $timeWindow){
       ...PercentNumber
     }
+    averageCollateralFactor {
+      ...PercentNumber
+    }
   }`,
   [
     SpokeFragment,

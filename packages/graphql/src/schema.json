@@ -5983,6 +5983,18 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "averageCollateralFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
