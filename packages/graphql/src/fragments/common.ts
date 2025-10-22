@@ -2,31 +2,14 @@ import type { BigDecimal } from '@aave/types-next';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 
-export type DecimalNumber = {
-  __typename: 'DecimalNumber';
-  onChainValue: bigint;
-  decimals: number;
-  value: BigDecimal;
-  /**
-   * @deprecated Use `value` instead. Removal slated for week commencing 27th October 2025.
-   */
-  formatted: BigDecimal;
-  /**
-   * @deprecated Use `onChainValue` instead. Removal slated for week commencing 27th October 2025.
-   */
-  raw: bigint;
-};
-
-export const DecimalNumberFragment: FragmentDocumentFor<DecimalNumber> =
+export const DecimalNumberFragment =
   graphql(`fragment DecimalNumber on DecimalNumber {
     __typename
     onChainValue
     decimals
     value
-    formatted: value
-    raw: onChainValue
   }`);
-
+export type DecimalNumber = FragmentOf<typeof DecimalNumberFragment>;
 /**
  * @deprecated Use {@link DecimalNumber} instead. Removal slated for week commencing 27th October 2025.
  */
