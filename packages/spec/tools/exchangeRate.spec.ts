@@ -1,4 +1,4 @@
-import { assertOk, Currency } from '@aave/client-next';
+import { assertOk, BigDecimal, Currency } from '@aave/client-next';
 import { exchangeRate } from '@aave/client-next/actions';
 import {
   client,
@@ -24,7 +24,7 @@ describe('Exchange Rate on Aave V4', () => {
 
         assertOk(result);
         expect(result.value).toMatchSnapshot({
-          value: expect.any(String),
+          value: expect.any(BigDecimal),
         });
       });
     });
@@ -40,7 +40,7 @@ describe('Exchange Rate on Aave V4', () => {
 
         assertOk(result);
         expect(result.value).toMatchSnapshot({
-          value: expect.any(String),
+          value: expect.any(BigDecimal),
         });
       });
     });
@@ -63,7 +63,7 @@ describe('Exchange Rate on Aave V4', () => {
 
           assertOk(result);
           expect(result.value).toMatchSnapshot({
-            value: expect.any(String),
+            value: expect.any(BigDecimal),
           });
         },
       );
@@ -80,7 +80,7 @@ describe('Exchange Rate on Aave V4', () => {
 
         assertOk(result);
         expect(result.value).toMatchSnapshot({
-          value: expect.any(String),
+          value: expect.any(BigDecimal),
         });
       });
     });

@@ -9,7 +9,6 @@ import {
 import { describe, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
 
-// TODO: Enable and refactor after fixed AAVE-2159
 describe('Supply APY History on Aave V4', () => {
   describe('Given a reserve with supply activity', () => {
     describe('When fetching supply APY history with different time windows', () => {
