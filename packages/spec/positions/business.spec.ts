@@ -295,8 +295,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           });
           assertOk(totalBorrowed);
           assertSingleElementArray(totalBorrowed.value);
-          const totalBorrowedAmount =
-            totalBorrowed.value[0].amount.value.formatted;
+          const totalBorrowedAmount = totalBorrowed.value[0].amount.value.value;
 
           const setup = await repay(client, {
             reserve: {

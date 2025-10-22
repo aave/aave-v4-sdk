@@ -87,7 +87,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toBe(true);
-        expect(supplyPosition.amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(supplyPosition.amount.value.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
         );
@@ -186,7 +186,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toEqual(false);
-        expect(supplyPosition.amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(supplyPosition.amount.value.value).toBeBigDecimalCloseTo(
           amountToSupply,
           3,
         );
@@ -268,7 +268,7 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toBe(true);
-        expect(supplyPosition.amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(supplyPosition.amount.value.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
         );

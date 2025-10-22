@@ -83,8 +83,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         });
         assertOk(reserveToBorrow);
         const amountToBorrow = bigDecimal(
-          Number(reserveToBorrow.value.userState!.borrowable.value.formatted) *
-            0.1,
+          Number(reserveToBorrow.value.userState!.borrowable.value.value) * 0.1,
         );
         expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
         const result = await borrow(client, {
@@ -119,7 +118,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         assertOk(result);
         assertSingleElementArray(result.value);
         // BUG: The amount is slightly different from the total borrow amount
-        expect(result.value[0].amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(result.value[0].amount.value.value).toBeBigDecimalCloseTo(
           amountToBorrow,
           2,
         );
@@ -152,7 +151,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         });
         assertOk(reserveToBorrow);
         const amountToBorrow =
-          reserveToBorrow.value.userState!.borrowable.value.formatted;
+          reserveToBorrow.value.userState!.borrowable.value.value;
 
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
@@ -197,7 +196,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         );
 
         // BUG: The amount is slightly different from the total borrow amount
-        expect(result.value[0].amount.value.formatted).toBeBigDecimalCloseTo(
+        expect(result.value[0].amount.value.value).toBeBigDecimalCloseTo(
           amountToBorrow,
           4,
         );

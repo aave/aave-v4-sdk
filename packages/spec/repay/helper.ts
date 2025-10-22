@@ -61,7 +61,7 @@ export function supplyWETHAndBorrow(
           amount: {
             erc20: {
               value: bigDecimal(
-                Number(reserveToBorrow.userState!.borrowable.value.formatted) *
+                Number(reserveToBorrow.userState!.borrowable.value.value) *
                   (percentToBorrow ?? 0.25),
               ),
             },
@@ -114,7 +114,7 @@ export function supplyWSTETHAndBorrowETH(
             chainId: reserveToBorrow.chain.chainId,
           },
           amount: {
-            native: reserveToBorrow.userState!.borrowable.value.formatted,
+            native: reserveToBorrow.userState!.borrowable.value.value,
           },
         })
           .andThen(sendWith(user))
