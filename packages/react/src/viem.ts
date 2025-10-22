@@ -9,6 +9,7 @@ import {
 import {
   type Chain,
   Currency,
+  type DecimalNumber,
   type ERC20PermitSignature,
   type FiatAmount,
   type NativeAmount,
@@ -209,16 +210,12 @@ function createNetworkFeeAmount(
     -chain.nativeInfo.decimals,
   );
 
-  const amount = {
+  const amount: DecimalNumber = {
     __typename: 'DecimalNumber',
     decimals: chain.nativeInfo.decimals,
     onChainValue: receipt.gasUsed,
     value,
-
-    // TODO remove aliasese below in due course
-    formatted: value,
-    raw: receipt.gasUsed,
-  } as const;
+  };
 
   return {
     __typename: 'NativeAmount',
@@ -239,10 +236,6 @@ function createNetworkFeeAmount(
       decimals: 2,
       onChainValue: BigInt(rate.value.mul(10 ** 2).toString()),
       value: rate.value,
-
-      // TODO remove aliasese below in due course
-      formatted: rate.value,
-      raw: BigInt(rate.value.mul(10 ** 2).toString()),
     },
     // TODO remove alias in due course
     value: amount,
