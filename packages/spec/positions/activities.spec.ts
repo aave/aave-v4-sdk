@@ -19,14 +19,14 @@ const user = await createNewWallet(
   '0x8970d4cd97cbd4d0c589d6347be12ac2ae36e008d12b5ec991001b415c3b4b1b',
 );
 
-describe('Aave V4 History Scenario', () => {
-  describe('Given a user with prior history of transactions', () => {
+describe('Query User Activities on Aave V4', () => {
+  describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
-      // NOTE: Enable when you want to recreate the user history
-      // await recreateac(client, user);
+      // NOTE: Enable when you want to recreate the user activities
+      // await recreateUserActivities(client, user);
     }, 160_000);
 
-    describe('When fetching the user activities by activity type', () => {
+    describe('When fetching the user activities by activity type filter', () => {
       const activityTypes = Object.values(ActivityType);
 
       it.each(activityTypes)(
