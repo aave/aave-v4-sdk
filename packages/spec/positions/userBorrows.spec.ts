@@ -158,7 +158,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         assertOk(borrowPositions);
         expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
         let listOrderAmount = borrowPositions.value.map(
-          (elem) => elem.amount.value.value,
+          (elem) => elem.debt.amount.value,
         );
         expect(isOrderedNumerically(listOrderAmount, 'desc')).toBe(true);
 
@@ -174,7 +174,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         assertOk(borrowPositions);
         expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
         listOrderAmount = borrowPositions.value.map(
-          (elem) => elem.amount.value.value,
+          (elem) => elem.debt.amount.value,
         );
         expect(isOrderedNumerically(listOrderAmount, 'asc')).toBe(true);
       });

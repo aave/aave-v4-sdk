@@ -182,7 +182,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionBefore, 'No position found');
-        const amountBorrowed = Number(positionBefore.amount.value.value);
+        const amountBorrowed = Number(positionBefore.debt.amount.value);
         const amountToRepay = amountBorrowed / 2;
 
         const repayResult = await repay(client, {
@@ -222,7 +222,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionAfter, 'No position found');
-        expect(positionAfter.amount.value.value).toBeBigDecimalCloseTo(
+        expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
           amountToRepay,
           2,
         );
@@ -274,7 +274,7 @@ describe('Repaying Loans on Aave V4', () => {
             );
           });
           invariant(positionBefore, 'No position found');
-          const amountBorrowed = Number(positionBefore.amount.value.value);
+          const amountBorrowed = Number(positionBefore.debt.amount.value);
           const amountToRepay = amountBorrowed / 2;
 
           const signature = await permitTypedData(client, {
@@ -332,7 +332,7 @@ describe('Repaying Loans on Aave V4', () => {
             );
           });
           invariant(positionAfter, 'No position found');
-          expect(positionAfter.amount.value.value).toBeBigDecimalCloseTo(
+          expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
             amountToRepay,
             2,
           );
@@ -374,7 +374,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionBefore, 'No position found');
-        const amountBorrowed = Number(positionBefore.amount.value.value);
+        const amountBorrowed = Number(positionBefore.debt.amount.value);
         const amountToRepay = amountBorrowed / 2;
 
         const balanceBefore = await getNativeBalance(
@@ -416,7 +416,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionAfter, 'No position found');
-        expect(positionAfter.amount.value.value).toBeBigDecimalCloseTo(
+        expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
           amountToRepay,
           2,
         );

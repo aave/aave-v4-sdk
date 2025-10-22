@@ -66,7 +66,6 @@ describe('Given the viem adapters are used', () => {
       spoke: {} as Spoke,
       reserve: {} as ReserveInfo,
       supplied: {} as Erc20Amount,
-      amount: {} as Erc20Amount,
     };
 
     it('Then it should return the expected network fee', async () => {
