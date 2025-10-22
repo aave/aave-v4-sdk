@@ -128,7 +128,6 @@ describe('Supplying Assets on Aave V4', () => {
         expect(previewResult.value).toMatchSnapshot({
           id: expect.any(String),
           portfolioApy: expect.any(Object),
-          positionApy: expect.any(Object),
           netBalance: expect.any(Object),
           netCollateral: expect.any(Object),
           netApy: expect.any(Object),
