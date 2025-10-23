@@ -1,5 +1,4 @@
 import type { Primitive, Tagged } from 'type-fest';
-import { tag } from './tag';
 
 /**
  * A void value.
@@ -10,12 +9,6 @@ export type Void = Tagged<undefined, 'Void'>;
  * An opaque pagination cursor.
  */
 export type Cursor = Tagged<string, 'Cursor'>;
-
-/**
- * A DateTime string in ISO 8601 format.
- */
-export type DateTime = Tagged<string, 'DateTime'>;
-export const dateTime = tag<DateTime>;
 
 /**
  * A JSON value.

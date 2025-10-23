@@ -23,7 +23,7 @@ import {
   type WithdrawActivity,
 } from '@aave/graphql-next';
 import introspectedSchema from '@aave/graphql-next/schema';
-import { BigDecimal, type DateTime, type TxHash } from '@aave/types-next';
+import { BigDecimal, type TxHash } from '@aave/types-next';
 import {
   cacheExchange,
   type Resolver,
@@ -51,6 +51,18 @@ const transformToNullableBigDecimal: Resolver = (
   return transformToBigDecimal(parent, _args, _cache, info);
 };
 
+const transformToDate: Resolver = (parent, _args, _cache, info) => {
+  return new Date(parent[info.fieldName] as string);
+};
+
+const transformToNullableDate: Resolver = (parent, _args, _cache, info) => {
+  const value = parent[info.fieldName];
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return transformToDate(parent, _args, _cache, info);
+};
+
 export const exchange = cacheExchange({
   schema: introspectedSchema,
   resolvers: {
@@ -68,6 +80,7 @@ export const exchange = cacheExchange({
     },
     AssetPriceSample: {
       price: transformToBigDecimal,
+      date: transformToDate,
     },
     HubAssetSummary: {
       supplied: transformToBigDecimal,
@@ -97,9 +110,65 @@ export const exchange = cacheExchange({
     },
     UserSummaryHistoryItem: {
       healthFactor: transformToNullableBigDecimal,
+      date: transformToDate,
     },
     TransactionRequest: {
       value: transformToBigInt,
+    },
+    APYSample: {
+      date: transformToDate,
+    },
+    AssetBorrowSample: {
+      date: transformToDate,
+    },
+    AssetSupplySample: {
+      date: transformToDate,
+    },
+    BorrowActivity: {
+      timestamp: transformToDate,
+    },
+    LiquidatedActivity: {
+      timestamp: transformToDate,
+    },
+    RepayActivity: {
+      timestamp: transformToDate,
+    },
+    SupplyActivity: {
+      timestamp: transformToDate,
+    },
+    WithdrawActivity: {
+      timestamp: transformToDate,
+    },
+    SpokeUserPositionManager: {
+      approvedOn: transformToDate,
+    },
+    SwapActivity: {
+      timestamp: transformToDate,
+      createdAt: transformToDate,
+      fulfilledAt: transformToDate,
+    },
+    SwapCancelled: {
+      createdAt: transformToDate,
+      cancelledAt: transformToNullableDate,
+    },
+    SwapExpired: {
+      createdAt: transformToDate,
+      expiredAt: transformToDate,
+    },
+    SwapFulfilled: {
+      createdAt: transformToDate,
+      fulfilledAt: transformToDate,
+    },
+    SwapOpen: {
+      createdAt: transformToDate,
+      deadline: transformToDate,
+    },
+    SwapPendingSignature: {
+      createdAt: transformToDate,
+      deadline: transformToDate,
+    },
+    SwapReceipt: {
+      createdAt: transformToDate,
     },
     // Intentionally omitted to keep it as BigIntString
     // PermitMessageData: {
@@ -170,9 +239,9 @@ export const exchange = cacheExchange({
             return true;
           })
           .sort((a, b) => {
-            const ta = cache.resolve(a, 'id') as DateTime;
-            const tb = cache.resolve(b, 'id') as DateTime;
-            return tb.localeCompare(ta);
+            const ta = cache.resolve(a, 'timestamp') as Date;
+            const tb = cache.resolve(b, 'timestamp') as Date;
+            return tb.getTime() <= ta.getTime() ? 1 : -1;
           });
 
         if (matches.length === 0) return undefined;

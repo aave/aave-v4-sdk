@@ -437,10 +437,6 @@ export const ActivityItemFragment = graphql(
   ],
 );
 export type ActivityItem = FragmentOf<typeof ActivityItemFragment>;
-/**
- * @deprecated Use {@link ActivityItem} instead. Removal slated for week commencing 27th October 2025.
- */
-export type UserHistoryItem = ActivityItem;
 
 export const PaginatedActivitiesResultFragment = graphql(
   `fragment PaginatedActivitiesResult on PaginatedActivitiesResult {

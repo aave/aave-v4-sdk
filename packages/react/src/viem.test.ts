@@ -9,13 +9,7 @@ import {
   type ReserveInfo,
   type Spoke,
 } from '@aave/graphql-next';
-import {
-  chainId,
-  dateTime,
-  evmAddress,
-  type ID,
-  txHash,
-} from '@aave/types-next';
+import { chainId, evmAddress, type ID, txHash } from '@aave/types-next';
 import { defineChain } from 'viem';
 import { mainnet } from 'viem/chains';
 import { describe, expect, it, vi } from 'vitest';
@@ -41,7 +35,7 @@ describe('Given the viem adapters are used', () => {
     const activity: SupplyActivity = {
       __typename: 'SupplyActivity',
       id: '0x123-supply-1' as ID,
-      timestamp: dateTime('2025-10-20T12:00:00Z'),
+      timestamp: new Date('2025-10-20T12:00:00Z'),
       txHash: txHash(
         // the first ERC-20 token creation tx
         '0x9e7b5966b33b4393f250bfcf45eed7751d44981b6d8dec9422a0bd2a2c698306',
