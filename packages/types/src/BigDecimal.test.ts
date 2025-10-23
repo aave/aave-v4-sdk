@@ -40,6 +40,33 @@ describe('Given a BigDecimal class', () => {
     });
   });
 
+  describe('When calling toApproximateNumber() method', () => {
+    it('Then it should clamp values larger than Number.MAX_VALUE', () => {
+      const number = bigDecimal('1e500');
+      expect(number.toApproximateNumber()).toBe(Number.MAX_VALUE);
+    });
+
+    it('Then it should clamp values smaller than -Number.MAX_VALUE', () => {
+      const number = bigDecimal('-1e500');
+      expect(number.toApproximateNumber()).toBe(-Number.MAX_VALUE);
+    });
+
+    it('Then it should round subnormal positive values to 0', () => {
+      const number = bigDecimal('1e-500');
+      expect(number.toApproximateNumber()).toBe(0);
+    });
+
+    it('Then it should round subnormal negative values to -0', () => {
+      const number = bigDecimal('-1e-500');
+      expect(number.toApproximateNumber()).toBe(-0);
+    });
+
+    it('Then it should convert regular values accurately', () => {
+      const number = bigDecimal('123.456');
+      expect(number.toApproximateNumber()).toBe(123.456);
+    });
+  });
+
   describe('When calling arithmetic methods', () => {
     it('Then methods should accept BigDecimalSource (string, number, BigDecimal)', () => {
       const a = bigDecimal('10');
