@@ -9,10 +9,6 @@ export const DecimalNumberFragment =
     value
   }`);
 export type DecimalNumber = FragmentOf<typeof DecimalNumberFragment>;
-/**
- * @deprecated Use {@link DecimalNumber} instead. Removal slated for week commencing 27th October 2025.
- */
-export type DecimalValue = DecimalNumber;
 
 export const DecimalNumberWithChangeFragment = graphql(
   `fragment DecimalNumberWithChange on DecimalNumberWithChange {
@@ -40,11 +36,6 @@ export const PercentNumberFragment = graphql(
   }`,
 );
 export type PercentNumber = FragmentOf<typeof PercentNumberFragment>;
-
-/**
- * @deprecated Use {@link PercentNumber} instead. Removal slated for week commencing 27th October 2025.
- */
-export type PercentValue = PercentNumber;
 
 export const FiatAmountFragment = graphql(
   `fragment FiatAmount on FiatAmount {
@@ -221,11 +212,6 @@ export type PercentNumberWithChange = FragmentOf<
   typeof PercentNumberWithChangeFragment
 >;
 
-/**
- * @deprecated Use {@link PercentNumberWithChange} instead. Removal slated for week commencing 27th October 2025.
- */
-export type PercentValueWithChange = PercentNumberWithChange;
-
 export const PaginatedResultInfoFragment = graphql(
   `fragment PaginatedResultInfo on PaginatedResultInfo {
     __typename
@@ -252,10 +238,6 @@ export const PercentNumberVariationFragment = graphql(
 export type PercentNumberVariation = FragmentOf<
   typeof PercentNumberVariationFragment
 >;
-/**
- * @deprecated Use {@link PercentNumberVariation} instead. Removal slated for week commencing 27th October 2025.
- */
-export type PercentValueVariation = PercentNumberVariation;
 
 export const FiatAmountValueVariationFragment = graphql(
   `fragment FiatAmountValueVariation on FiatAmountValueVariation {
@@ -286,10 +268,6 @@ export const HealthFactorWithChangeFragment = graphql(
 export type HealthFactorWithChange = FragmentOf<
   typeof HealthFactorWithChangeFragment
 >;
-/**
- * @deprecated Use {@link HealthFactorWithChange} instead. Removal slated for week commencing 27th October 2025.
- */
-export type HealthFactorChange = HealthFactorWithChange;
 
 export const HealthFactorVariationFragment = graphql(
   `fragment HealthFactorVariation on HealthFactorVariation {

@@ -5,7 +5,6 @@ import type {
   BlockchainData,
   ChainId,
   Cursor,
-  DateTime,
   EvmAddress,
   ID,
   JSONString,
@@ -58,7 +57,7 @@ export const graphql = initGraphQLTada<{
     ChainId: ChainId;
     Currency: Currency;
     Cursor: Cursor;
-    DateTime: DateTime;
+    DateTime: Date;
     EvmAddress: EvmAddress;
     Float: number;
     HubAssetStatusType: HubAssetStatusType;
