@@ -82,11 +82,6 @@ export const exchange = cacheExchange({
       price: transformToBigDecimal,
       date: transformToDate,
     },
-    HubAssetSummary: {
-      supplied: transformToBigDecimal,
-      borrowed: transformToBigDecimal,
-      availableLiquidity: transformToBigDecimal,
-    },
     HubSummary: {
       utilizationRate: transformToBigDecimal,
     },

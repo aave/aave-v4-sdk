@@ -9,9 +9,15 @@ import { HubFragment } from './hubs';
 export const HubAssetSummaryFragment = graphql(
   `fragment HubAssetSummary on HubAssetSummary {
       __typename
-      supplied
-      borrowed
-      availableLiquidity
+      supplied {
+        ...Erc20Amount
+      }
+      borrowed {
+        ...Erc20Amount
+      }
+      availableLiquidity {
+        ...Erc20Amount
+      }
       supplyApy {
         ...PercentNumber
       }
@@ -25,7 +31,7 @@ export const HubAssetSummaryFragment = graphql(
         ...PercentNumber
       }
     }`,
-  [PercentNumberFragment],
+  [Erc20AmountFragment, PercentNumberFragment],
 );
 export type HubAssetSummary = FragmentOf<typeof HubAssetSummaryFragment>;
 
