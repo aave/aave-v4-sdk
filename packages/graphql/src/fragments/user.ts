@@ -20,6 +20,9 @@ export const UserSupplyItemFragment = graphql(
     reserve {
       ...Reserve
     }
+    interest {
+      ...Erc20Amount
+    }
     principal {
       ...Erc20Amount
     }
@@ -36,6 +39,9 @@ export const UserBorrowItemFragment = graphql(
   `fragment UserBorrowItem on UserBorrowItem {
     __typename
     principal {
+      ...Erc20Amount
+    }
+    interest {
       ...Erc20Amount
     }
     debt {

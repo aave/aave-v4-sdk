@@ -179,9 +179,6 @@ export const PreviewUserPositionFragment = graphql(
     healthFactor {
       ...HealthFactorResult
     }
-    portfolioApy {
-      ...PercentNumberVariation
-    }
     netApy {
       ...PercentNumberVariation
     }

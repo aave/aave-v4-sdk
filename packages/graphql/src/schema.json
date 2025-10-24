@@ -1412,8 +1412,9 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
               }
             },
             "args": []
@@ -1423,8 +1424,9 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
               }
             },
             "args": []
@@ -1434,8 +1436,9 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
               }
             },
             "args": []
@@ -2402,18 +2405,6 @@
           },
           {
             "name": "netApy",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumberVariation",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "portfolioApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5694,38 +5685,7 @@
             "args": []
           },
           {
-            "name": "summary",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserBorrowSummary",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "UserBorrowSummary",
-        "fields": [
-          {
-            "name": "repaid",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "totalBorrowed",
+            "name": "interest",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6265,17 +6225,6 @@
             "args": []
           },
           {
-            "name": "isCollateral",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
             "name": "withdrawable",
             "type": {
               "kind": "NON_NULL",
@@ -6288,26 +6237,7 @@
             "args": []
           },
           {
-            "name": "summary",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserSupplySummary",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "UserSupplySummary",
-        "fields": [
-          {
-            "name": "withdrawn",
+            "name": "interest",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6319,13 +6249,12 @@
             "args": []
           },
           {
-            "name": "totalSupplied",
+            "name": "isCollateral",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
