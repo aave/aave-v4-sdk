@@ -36,6 +36,9 @@ export enum RoundingMode {
  * A high precision decimal number.
  */
 export class BigDecimal extends Big {
+  private static readonly MAX_VAL = BigDecimal.new(Number.MAX_VALUE.toString()); // ≈ 1.7976931348623157e+308
+  private static readonly MIN_VAL = BigDecimal.new(Number.MIN_VALUE.toString()); // ≈ 5e-324 (smallest positive subnormal)
+
   private constructor(value: string | Big) {
     super(value);
   }
@@ -267,6 +270,43 @@ export class BigDecimal extends Big {
     }
 
     return str;
+  }
+
+  /**
+   * Returns a JavaScript `number` approximation of this BigDecimal, safely clamped
+   * within the finite range of representable values.
+   *
+   * This method performs a best-effort conversion to a native `number` while ensuring
+   * that:
+   * - Values larger than `Number.MAX_VALUE` are clamped to `Number.MAX_VALUE`.
+   * - Values smaller than `-Number.MAX_VALUE` are clamped to `-Number.MAX_VALUE`.
+   * - Subnormal magnitudes smaller than `Number.MIN_VALUE` are rounded to `0` (preserving sign).
+   *
+   * Use this method only when precision loss is acceptable — for example, when displaying
+   * approximate numeric values or interfacing with APIs that require `number` types.
+   *
+   * @returns A finite `number` approximation of this BigDecimal.
+   *
+   * @example
+   * ```ts
+   * const x = bigDecimal('1e500');
+   * x.toApproximateNumber(); // → 1.7976931348623157e+308 (clamped)
+   *
+   * const y = bigDecimal('0.0000000000000000000000000000001');
+   * y.toApproximateNumber(); // → 0
+   *
+   * const z = bigDecimal('123.456');
+   * z.toApproximateNumber(); // → 123.456
+   * ```
+   */
+  public toApproximateNumber(): number {
+    if (this.gt(BigDecimal.MAX_VAL)) return Number.MAX_VALUE;
+    if (this.lt(BigDecimal.MAX_VAL.times(-1))) return -Number.MAX_VALUE;
+
+    // subnormal underflow -> preserve sign as -0 when negative
+    if (this.abs().lt(BigDecimal.MIN_VAL)) return this.lt('0') ? -0 : 0;
+
+    return Number(this.toString());
   }
 
   /**

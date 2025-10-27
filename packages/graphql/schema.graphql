@@ -426,13 +426,13 @@ type HubAssetSettings {
 
 type HubAssetSummary {
   """The supplied amount"""
-  supplied: BigDecimal!
+  supplied: Erc20Amount!
 
   """The borrowed amount"""
-  borrowed: BigDecimal!
+  borrowed: Erc20Amount!
 
   """The available liquidity"""
-  availableLiquidity: BigDecimal!
+  availableLiquidity: Erc20Amount!
 
   """The supply APY"""
   supplyApy: PercentNumber!
@@ -762,8 +762,9 @@ type PreviewUserPosition {
   id: UserPositionId!
   healthFactor: HealthFactorResult!
   riskPremium: PercentNumberVariation!
+
+  """The net APY for one user position on a current spoke"""
   netApy: PercentNumberVariation!
-  portfolioApy: PercentNumberVariation!
   netCollateral(currency: Currency! = USD): FiatAmountValueVariation!
   netBalance(currency: Currency! = USD): FiatAmountValueVariation!
 }
@@ -1545,19 +1546,11 @@ type UserBorrowItem {
   """The amount borrowed on this reserve"""
   principal: Erc20Amount!
 
-  """
-  The overall debt including accrued interests\"""
-  """
+  """The overall debt including accrued interests"""
   debt: Erc20Amount!
 
-  """A summary of historic activities on this borrow position"""
-  summary: UserBorrowSummary!
-}
-
-type UserBorrowSummary {
-  """The amount repaid over time"""
-  repaid: Erc20Amount!
-  totalBorrowed: Erc20Amount!
+  """The interest incurred on the loan"""
+  interest: Erc20Amount!
 }
 
 input UserBorrowsQueryRequest @oneOf {
@@ -1739,20 +1732,14 @@ type UserSupplyItem {
   """The amount supplied to this reserve"""
   principal: Erc20Amount!
 
-  """If this supply is used as collateral"""
-  isCollateral: Boolean!
-
   """The overall amount you can withdraw, including accrued interests"""
   withdrawable: Erc20Amount!
 
-  """A summary of historic activities on this supply position"""
-  summary: UserSupplySummary!
-}
+  """The interest amount earned on supplying"""
+  interest: Erc20Amount!
 
-type UserSupplySummary {
-  """The amount withdrawn over time"""
-  withdrawn: Erc20Amount!
-  totalSupplied: Erc20Amount!
+  """If this supply is used as collateral"""
+  isCollateral: Boolean!
 }
 
 input UserSwapsRequest {

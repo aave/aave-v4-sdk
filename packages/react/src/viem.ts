@@ -20,7 +20,6 @@ import {
 } from '@aave/graphql-next';
 import {
   bigDecimal,
-  type DateTime,
   invariant,
   never,
   ResultAsync,
@@ -175,12 +174,12 @@ export function useSignSwapTypedDataWith(
 
 function extractTransactionDetails(
   query: UseNetworkFeeRequestQuery | null | undefined,
-): [Chain, TxHash, DateTime] | [undefined, undefined] {
+): [Chain, TxHash, Date] | [undefined, undefined, undefined] {
   return query?.activity.chain &&
     query.activity.txHash &&
     query.activity.timestamp
     ? [query.activity.chain, query.activity.txHash, query.activity.timestamp]
-    : [undefined, undefined];
+    : [undefined, undefined, undefined];
 }
 
 function useTransactionReceipt(): UseAsyncTask<
@@ -237,8 +236,6 @@ function createNetworkFeeAmount(
       onChainValue: BigInt(rate.value.mul(10 ** 2).toString()),
       value: rate.value,
     },
-    // TODO remove alias in due course
-    value: amount,
   };
 }
 

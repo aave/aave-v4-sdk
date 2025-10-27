@@ -41,6 +41,18 @@ describe('Given the Aave SDK normalized graph cache', () => {
     });
   });
 
+  describe('when fetching any field of DateTime scalar type', () => {
+    it('Then it should return a Date instance in its place', async () => {
+      const result = await activities(client, {
+        query: {
+          chainIds: [chainId(1)],
+        },
+      });
+      assertOk(result);
+      expect(result.value.items[0]!.timestamp).toBeInstanceOf(Date);
+    });
+  });
+
   describe(`When fetching a single 'Hub'`, () => {
     it('Then it should leverage cached data whenever possible', async () => {
       const primed = await hubs(client, {

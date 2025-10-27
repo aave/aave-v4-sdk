@@ -1,44 +1,27 @@
 import type { FragmentOf } from 'gql.tada';
-import { type FragmentDocumentFor, graphql } from '../graphql';
+import { graphql } from '../graphql';
 import {
-  type DecimalNumber,
   DecimalNumberFragment,
-  type Erc20Amount,
   Erc20AmountFragment,
-  type FiatAmount,
   FiatAmountFragment,
   FiatAmountWithChangeFragment,
   HealthFactorWithChangeFragment,
-  type PercentNumber,
   PercentNumberFragment,
   PercentNumberWithChangeFragment,
-  type TokenAmount,
   TokenAmountFragment,
-  type TokenInfo,
   TokenInfoFragment,
 } from './common';
-import { type Reserve, ReserveFragment } from './reserve';
+import { ReserveFragment } from './reserve';
 import { SpokeFragment } from './spoke';
 
-export type UserSupplyItem = {
-  __typename: 'UserSupplyItem';
-  reserve: Reserve;
-  principal: Erc20Amount;
-  withdrawable: Erc20Amount;
-  isCollateral: boolean;
-  /**
-   * @deprecated Use `withdrawable` instead. Removal slated for week commencing 27th October 2025.
-   */
-  amount: Erc20Amount;
-};
-export const UserSupplyItemFragment: FragmentDocumentFor<
-  UserSupplyItem,
-  'UserSupplyItem'
-> = graphql(
+export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
     __typename
     reserve {
       ...Reserve
+    }
+    interest {
+      ...Erc20Amount
     }
     principal {
       ...Erc20Amount
@@ -47,30 +30,18 @@ export const UserSupplyItemFragment: FragmentDocumentFor<
       ...Erc20Amount
     }
     isCollateral
-    amount: withdrawable {
-      ...Erc20Amount
-    }
   }`,
   [Erc20AmountFragment, ReserveFragment],
 );
+export type UserSupplyItem = FragmentOf<typeof UserSupplyItemFragment>;
 
-export type UserBorrowItem = {
-  __typename: 'UserBorrowItem';
-  reserve: Reserve;
-  principal: Erc20Amount;
-  debt: Erc20Amount;
-  /**
-   * @deprecated Use `debt` instead. Removal slated for week commencing 27th October 2025.
-   */
-  amount: Erc20Amount;
-};
-export const UserBorrowItemFragment: FragmentDocumentFor<
-  UserBorrowItem,
-  'UserBorrowItem'
-> = graphql(
+export const UserBorrowItemFragment = graphql(
   `fragment UserBorrowItem on UserBorrowItem {
     __typename
     principal {
+      ...Erc20Amount
+    }
+    interest {
       ...Erc20Amount
     }
     debt {
@@ -79,12 +50,10 @@ export const UserBorrowItemFragment: FragmentDocumentFor<
     reserve {
       ...Reserve
     }
-    amount: principal {
-      ...Erc20Amount
-    }
   }`,
   [Erc20AmountFragment, ReserveFragment],
 );
+export type UserBorrowItem = FragmentOf<typeof UserBorrowItemFragment>;
 
 export const UserSummaryFragment = graphql(
   `fragment UserSummary on UserSummary {
@@ -172,30 +141,7 @@ export const UserPositionFragment = graphql(
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
 
-export interface UserBalance {
-  __typename: 'UserBalance';
-  info: TokenInfo;
-  totalAmount: DecimalNumber;
-  balances: TokenAmount[];
-  fiatAmount: FiatAmount;
-  /**
-   * @deprecated Use `highestSupplyApy` instead. Removal slated for week commencing 27th October 2025.
-   */
-  supplyApy: PercentNumber;
-  /**
-   * @deprecated Use `highestBorrowApy` instead. Removal slated for week commencing 27th October 2025.
-   */
-  borrowApy: PercentNumber;
-  highestSupplyApy: PercentNumber;
-  highestBorrowApy: PercentNumber;
-  lowestSupplyApy: PercentNumber;
-  lowestBorrowApy: PercentNumber;
-}
-
-export const UserBalanceFragment: FragmentDocumentFor<
-  UserBalance,
-  'UserBalance'
-> = graphql(
+export const UserBalanceFragment = graphql(
   `fragment UserBalance on UserBalance {
     __typename
     info {
@@ -209,12 +155,6 @@ export const UserBalanceFragment: FragmentDocumentFor<
     }
     fiatAmount(currency: $currency) {
       ...FiatAmount
-    }
-    supplyApy(metric: HIGHEST) {
-      ...PercentNumber
-    }
-    borrowApy(metric: HIGHEST) {
-      ...PercentNumber
     }
     highestSupplyApy: supplyApy(metric: HIGHEST) {
       ...PercentNumber
@@ -237,6 +177,7 @@ export const UserBalanceFragment: FragmentDocumentFor<
     PercentNumberFragment,
   ],
 );
+export type UserBalance = FragmentOf<typeof UserBalanceFragment>;
 
 export const UserSummaryHistoryItemFragment = graphql(
   `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
