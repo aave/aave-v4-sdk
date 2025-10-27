@@ -61,8 +61,14 @@ export const AssetSummaryFragment = graphql(
       totalBorrowable {
         ...DecimalNumberWithChange
       }
+      totalSuppliedFiat(currency: $currency) {
+        ...FiatAmountWithChange
+      }
+      totalBorrowedFiat(currency: $currency) {
+        ...FiatAmountWithChange
+      }
     }`,
-  [DecimalNumberWithChangeFragment],
+  [DecimalNumberWithChangeFragment, FiatAmountWithChangeFragment],
 );
 export type AssetSummary = FragmentOf<typeof AssetSummaryFragment>;
 
