@@ -12,7 +12,6 @@ exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the use
   "netApy": Any<Object>,
   "netBalance": Any<Object>,
   "netCollateral": Any<Object>,
-  "portfolioApy": Any<Object>,
   "positionApy": Any<Object>,
   "riskPremium": {
     "__typename": "PercentNumberVariation",
