@@ -5,6 +5,8 @@ import {
   type Spoke,
   SpokePositionManagersQuery,
   type SpokePositionManagersRequest,
+  SpokeQuery,
+  type SpokeRequest,
   SpokesQuery,
   type SpokesRequest,
   SpokeUserPositionManagersQuery,
@@ -21,6 +23,105 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from './helpers';
+
+export type UseSpokeArgs = SpokeRequest;
+
+/**
+ * Fetch a specific spoke by address and chain ID.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSpoke({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   suspense: true,
+ * });
+ * // data will be Spoke | null
+ * ```
+ */
+export function useSpoke(
+  args: UseSpokeArgs & Suspendable,
+): SuspenseResult<Spoke | null>;
+/**
+ * Fetch a specific spoke by address and chain ID.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSpoke({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSpoke(
+  args: Pausable<UseSpokeArgs> & Suspendable,
+): PausableSuspenseResult<Spoke | null>;
+/**
+ * Fetch a specific spoke by address and chain ID.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSpoke({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ * });
+ * // data will be Spoke | null
+ * ```
+ */
+export function useSpoke(args: UseSpokeArgs): ReadResult<Spoke | null>;
+/**
+ * Fetch a specific spoke by address and chain ID.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSpoke({
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSpoke(
+  args: Pausable<UseSpokeArgs>,
+): PausableReadResult<Spoke | null>;
+
+export function useSpoke({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseSpokeArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<Spoke | null, UnexpectedError> {
+  return useSuspendableQuery({
+    document: SpokeQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+  });
+}
 
 export type UseSpokesArgs = SpokesRequest;
 

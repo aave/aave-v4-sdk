@@ -30,6 +30,7 @@ export const UserSupplyItemFragment = graphql(
       ...Erc20Amount
     }
     isCollateral
+    createdAt
   }`,
   [Erc20AmountFragment, ReserveFragment],
 );
@@ -50,6 +51,7 @@ export const UserBorrowItemFragment = graphql(
     reserve {
       ...Reserve
     }
+    createdAt
   }`,
   [Erc20AmountFragment, ReserveFragment],
 );
@@ -91,6 +93,7 @@ export const UserPositionFragment = graphql(
       ...Spoke
     }
     user
+    createdAt
     netApy {
       ...PercentNumber
     }

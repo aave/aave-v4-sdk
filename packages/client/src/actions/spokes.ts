@@ -5,6 +5,8 @@ import {
   type Spoke,
   SpokePositionManagersQuery,
   type SpokePositionManagersRequest,
+  SpokeQuery,
+  type SpokeRequest,
   SpokesQuery,
   type SpokesRequest,
   SpokeUserPositionManagersQuery,
@@ -12,6 +14,31 @@ import {
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
+
+/**
+ * Fetches a specific spoke by address and chain ID.
+ *
+ * ```ts
+ * const result = await spoke(client, {
+ *   query: {
+ *     spoke: {
+ *       address: evmAddress('0x123...'),
+ *       chainId: chainId(1)
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The spoke request parameters.
+ * @returns The spoke data, or null if not found.
+ */
+export function spoke(
+  client: AaveClient,
+  request: SpokeRequest,
+): ResultAsync<Spoke | null, UnexpectedError> {
+  return client.query(SpokeQuery, { request });
+}
 
 /**
  * Fetches spokes based on specified criteria.

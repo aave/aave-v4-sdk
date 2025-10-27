@@ -8,6 +8,8 @@ import type {
 } from '@aave/graphql-next';
 import {
   type ActivityItem,
+  ChainQuery,
+  type ChainRequest,
   ChainsFilter,
   ChainsQuery,
   ExchangeRateQuery,
@@ -26,6 +28,85 @@ import {
   useSuspendableQuery,
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
+
+export type UseAaveChainArgs = ChainRequest;
+
+/**
+ * Fetch a specific chain by chain ID.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useAaveChain({
+ *   chainId: chainId(1),
+ *   suspense: true,
+ * });
+ * // data will be Chain | null
+ * ```
+ */
+export function useAaveChain(
+  args: UseAaveChainArgs & Suspendable,
+): SuspenseResult<Chain | null>;
+/**
+ * Fetch a specific chain by chain ID.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useAaveChain({
+ *   chainId: chainId(1),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAaveChain(
+  args: Pausable<UseAaveChainArgs> & Suspendable,
+): PausableSuspenseResult<Chain | null>;
+/**
+ * Fetch a specific chain by chain ID.
+ *
+ * ```tsx
+ * const { data, error, loading } = useAaveChain({
+ *   chainId: chainId(1),
+ * });
+ * // data will be Chain | null
+ * ```
+ */
+export function useAaveChain(args: UseAaveChainArgs): ReadResult<Chain | null>;
+/**
+ * Fetch a specific chain by chain ID.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useAaveChain({
+ *   chainId: chainId(1),
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAaveChain(
+  args: Pausable<UseAaveChainArgs>,
+): PausableReadResult<Chain | null>;
+
+export function useAaveChain({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseAaveChainArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<Chain | null, UnexpectedError> {
+  return useSuspendableQuery({
+    document: ChainQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+  });
+}
 
 export type UseAaveChainsArgs = {
   filter?: ChainsFilter;
