@@ -3,12 +3,14 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type UnexpectedError,
 } from '@aave/client-next';
-import { reserves } from '@aave/client-next/actions';
+import { reserve, reserves } from '@aave/client-next/actions';
 import {
   type APYSample,
   type BorrowAPYHistoryRequest,
   BorrowApyHistoryQuery,
   type Reserve,
+  ReserveQuery,
+  type ReserveRequest,
   ReservesQuery,
   type ReservesRequest,
   type SupplyAPYHistoryRequest,
@@ -29,6 +31,166 @@ import {
   useAsyncTask,
   useSuspendableQuery,
 } from './helpers';
+
+export type UseReserveArgs = Prettify<ReserveRequest & CurrencyQueryOptions>;
+
+/**
+ * Fetch a specific reserve by reserve ID, spoke, and chain.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useReserve({
+ *   query: {
+ *     reserve: {
+ *       spoke: {
+ *         address: evmAddress('0x123...'),
+ *         chainId: chainId(1)
+ *       },
+ *       reserveId: reserveId(1)
+ *     }
+ *   },
+ *   user: evmAddress('0xabc...'),
+ *   suspense: true,
+ * });
+ * // data will be Reserve | null
+ * ```
+ */
+export function useReserve(
+  args: UseReserveArgs & Suspendable,
+): SuspenseResult<Reserve | null>;
+/**
+ * Fetch a specific reserve by reserve ID, spoke, and chain.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useReserve({
+ *   query: {
+ *     reserve: {
+ *       spoke: {
+ *         address: evmAddress('0x123...'),
+ *         chainId: chainId(1)
+ *       },
+ *       reserveId: reserveId(1)
+ *     }
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useReserve(
+  args: Pausable<UseReserveArgs> & Suspendable,
+): PausableSuspenseResult<Reserve | null>;
+/**
+ * Fetch a specific reserve by reserve ID, spoke, and chain.
+ *
+ * ```tsx
+ * const { data, error, loading } = useReserve({
+ *   query: {
+ *     reserve: {
+ *       spoke: {
+ *         address: evmAddress('0x123...'),
+ *         chainId: chainId(1)
+ *       },
+ *       reserveId: reserveId(1)
+ *     }
+ *   },
+ *   user: evmAddress('0xabc...'),
+ * });
+ * // data will be Reserve | null
+ * ```
+ */
+export function useReserve(args: UseReserveArgs): ReadResult<Reserve | null>;
+/**
+ * Fetch a specific reserve by reserve ID, spoke, and chain.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useReserve({
+ *   query: {
+ *     reserve: {
+ *       spoke: {
+ *         address: evmAddress('0x123...'),
+ *         chainId: chainId(1)
+ *       },
+ *       reserveId: reserveId(1)
+ *     }
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useReserve(
+  args: Pausable<UseReserveArgs>,
+): PausableReadResult<Reserve | null>;
+
+export function useReserve({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseReserveArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<Reserve | null, UnexpectedError> {
+  return useSuspendableQuery({
+    document: ReserveQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+  });
+}
+
+/**
+ * Low-level hook to execute a {@link reserve} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on the reserve.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useReserveAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: {
+ *     reserve: {
+ *       spoke: {
+ *         address: evmAddress('0x1234…'),
+ *         chainId: chainId(1)
+ *       },
+ *       reserveId: reserveId(1)
+ *     }
+ *   }
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // Reserve | null
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useReserveAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<ReserveRequest, Reserve | null, UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: ReserveRequest) =>
+      reserve(client, request, { currency: options.currency }),
+    [client, options.currency],
+  );
+}
 
 export type UseReservesArgs<T = Reserve[]> = Prettify<
   ReservesRequest &

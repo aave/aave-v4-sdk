@@ -84,6 +84,8 @@ type AssetSummary {
   totalBorrowCap: DecimalNumberWithChange!
   totalBorrowed: DecimalNumberWithChange!
   totalBorrowable: DecimalNumberWithChange!
+  totalSuppliedFiat(currency: Currency! = USD): FiatAmountWithChange!
+  totalBorrowedFiat(currency: Currency! = USD): FiatAmountWithChange!
 }
 
 input AssetSupplyHistoryRequest {
@@ -167,6 +169,11 @@ type Chain {
 
 """A supported blockchain chain ID"""
 scalar ChainId
+
+input ChainRequest {
+  """The chain id"""
+  chainId: ChainId!
+}
 
 enum ChainsFilter {
   TESTNET_ONLY
@@ -771,6 +778,7 @@ type PreviewUserPosition {
 
 type Query {
   health: Boolean!
+  chain(request: ChainRequest!): Chain
   chains(filter: ChainsFilter!): [Chain!]!
 
   """Generate EIP-712 typed data for EIP-2612 permit signature"""
@@ -787,6 +795,7 @@ type Query {
   hubs(request: HubsRequest!): [Hub!]!
   hub(request: HubRequest!): Hub
   hubAssets(request: HubAssetsRequest!): [HubAsset!]!
+  reserve(request: ReserveRequest!): Reserve
   reserves(request: ReservesRequest!): [Reserve!]!
   supply(request: SupplyRequest!): ExecutionPlan!
   borrow(request: BorrowRequest!): ExecutionPlan!
@@ -803,6 +812,7 @@ type Query {
   preview(request: PreviewRequest!): PreviewUserPosition!
   borrowApyHistory(request: BorrowAPYHistoryRequest!): [APYSample!]!
   supplyApyHistory(request: SupplyAPYHistoryRequest!): [APYSample!]!
+  spoke(request: SpokeRequest!): Spoke
 
   """Lists all spokes"""
   spokes(request: SpokesRequest!): [Spoke!]!
@@ -976,6 +986,21 @@ input ReserveInput {
   reserveId: ReserveId!
 }
 
+input ReserveRequest {
+  """The reserve request query"""
+  query: ReserveRequestQuery!
+
+  """
+  The user who is doing the query (this injects user state into some of the return objects)
+  """
+  user: EvmAddress
+}
+
+input ReserveRequestQuery {
+  """Reserve lookup parameters"""
+  reserve: ReserveInput!
+}
+
 type ReserveSettings {
   collateralFactor: PercentNumber!
   maxLiquidationBonus: PercentNumber!
@@ -1125,6 +1150,16 @@ type SpokePositionManger {
   name: String!
   address: EvmAddress!
   active: Boolean!
+}
+
+input SpokeRequest {
+  """The spoke request query"""
+  query: SpokeRequestQuery!
+}
+
+input SpokeRequestQuery {
+  """Spoke lookup parameters"""
+  spoke: SpokeInput!
 }
 
 input SpokeTokenInput {
@@ -1551,6 +1586,14 @@ type UserBorrowItem {
 
   """The interest incurred on the loan"""
   interest: Erc20Amount!
+
+  """
+  When the borrow was created.
+  This is null if they have no supply item, for
+  example, when using include_zero_balances this comes
+  back as principal and debt as 0
+  """
+  createdAt: DateTime
 }
 
 input UserBorrowsQueryRequest @oneOf {
@@ -1570,6 +1613,7 @@ input UserBorrowsRequest {
 
 input UserBorrowsRequestOrderBy @oneOf {
   assetName: OrderDirection
+  created: OrderDirection
   amount: OrderDirection
   apy: OrderDirection
 }
@@ -1582,6 +1626,7 @@ input UserChains {
 type UserPosition {
   """The user holding this position"""
   user: EvmAddress!
+  createdAt: DateTime!
 
   """The user position ID"""
   id: UserPositionId!
@@ -1721,6 +1766,7 @@ input UserSuppliesRequest {
 
 input UserSuppliesRequestOrderBy @oneOf {
   assetName: OrderDirection
+  created: OrderDirection
   amount: OrderDirection
   apy: OrderDirection
 }
@@ -1740,6 +1786,14 @@ type UserSupplyItem {
 
   """If this supply is used as collateral"""
   isCollateral: Boolean!
+
+  """
+  When the supply was created.
+  This is null if they have no supply item, for
+  example, when using include_zero_balances this comes
+  back as principal and withdrawable as 0
+  """
+  createdAt: DateTime
 }
 
 input UserSwapsRequest {

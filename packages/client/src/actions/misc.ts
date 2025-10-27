@@ -1,6 +1,8 @@
 import type { UnexpectedError } from '@aave/core-next';
 import {
   type Chain,
+  ChainQuery,
+  type ChainRequest,
   ChainsFilter,
   ChainsQuery,
   ExchangeRateQuery,
@@ -11,6 +13,26 @@ import {
 } from '@aave/graphql-next';
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
+
+/**
+ * Fetches a specific chain by chain ID.
+ *
+ * ```ts
+ * const result = await chain(client, {
+ *   chainId: chainId(1),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The chain request parameters.
+ * @returns The chain data, or null if not found.
+ */
+export function chain(
+  client: AaveClient,
+  request: ChainRequest,
+): ResultAsync<Chain | null, UnexpectedError> {
+  return client.query(ChainQuery, { request });
+}
 
 /**
  * Fetches the list of supported chains.

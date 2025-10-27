@@ -4,6 +4,19 @@ import { graphql, type RequestOf } from './graphql';
 /**
  * @internal
  */
+export const ChainQuery = graphql(
+  `query Chain($request: ChainRequest!) {
+    value: chain(request: $request) {
+      ...Chain
+    }
+  }`,
+  [ChainFragment],
+);
+export type ChainRequest = RequestOf<typeof ChainQuery>;
+
+/**
+ * @internal
+ */
 export const ChainsQuery = graphql(
   `query Chains($filter: ChainsFilter!) {
     value: chains(filter: $filter) {

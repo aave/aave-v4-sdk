@@ -255,6 +255,52 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "totalSuppliedFiat",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmountWithChange",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "totalBorrowedFiat",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FiatAmountWithChange",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -2480,6 +2526,26 @@
             "args": []
           },
           {
+            "name": "chain",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Chain",
+              "ofType": null
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
             "name": "chains",
             "type": {
               "kind": "NON_NULL",
@@ -2725,6 +2791,26 @@
                   }
                 }
               }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "reserve",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Reserve",
+              "ofType": null
             },
             "args": [
               {
@@ -3111,6 +3197,26 @@
                   }
                 }
               }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "spoke",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Spoke",
+              "ofType": null
             },
             "args": [
               {
@@ -5695,6 +5801,14 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "createdAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -5705,6 +5819,17 @@
         "fields": [
           {
             "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "createdAt",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6256,6 +6381,14 @@
                 "kind": "SCALAR",
                 "name": "Any"
               }
+            },
+            "args": []
+          },
+          {
+            "name": "createdAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           }

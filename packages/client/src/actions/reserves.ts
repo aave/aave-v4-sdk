@@ -4,6 +4,8 @@ import {
   type BorrowAPYHistoryRequest,
   BorrowApyHistoryQuery,
   type Reserve,
+  ReserveQuery,
+  type ReserveRequest,
   ReservesQuery,
   type ReservesRequest,
   type SupplyAPYHistoryRequest,
@@ -12,6 +14,37 @@ import {
 import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
+
+/**
+ * Fetches a specific reserve by reserve ID, spoke, and chain.
+ *
+ * ```ts
+ * const result = await reserve(client, {
+ *   query: {
+ *     reserve: {
+ *       spoke: {
+ *         address: evmAddress('0x123...'),
+ *         chainId: chainId(1)
+ *       },
+ *       reserveId: reserveId(1)
+ *     }
+ *   },
+ *   user: evmAddress('0xabc...')
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The reserve request parameters.
+ * @param options - The query options.
+ * @returns The reserve data, or null if not found.
+ */
+export function reserve(
+  client: AaveClient,
+  request: ReserveRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<Reserve | null, UnexpectedError> {
+  return client.query(ReserveQuery, { request, ...options });
+}
 
 /**
  * Fetches reserves based on specified criteria.

@@ -27,6 +27,20 @@ export const SupplyApyHistoryQuery = graphql(
 );
 export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
 
+export const ReserveQuery = graphql(
+  `query Reserve($request: ReserveRequest!, $currency: Currency!) {
+    value: reserve(request: $request) {
+      ...Reserve
+    }
+  }`,
+  [ReserveFragment],
+);
+export type ReserveRequest = RequestOf<typeof ReserveQuery>;
+
+export type ReserveRequestQuery = ReturnType<
+  typeof graphql.scalar<'ReserveRequestQuery'>
+>;
+
 export const ReservesQuery = graphql(
   `query Reserves($request: ReservesRequest!, $currency: Currency!) {
     value: reserves(request: $request) {

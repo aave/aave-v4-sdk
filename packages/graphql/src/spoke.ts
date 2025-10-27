@@ -8,6 +8,23 @@ import { graphql, type RequestOf } from './graphql';
 /**
  * @internal
  */
+export const SpokeQuery = graphql(
+  `query Spoke($request: SpokeRequest!) {
+    value: spoke(request: $request) {
+      ...Spoke
+    }
+  }`,
+  [SpokeFragment],
+);
+export type SpokeRequest = RequestOf<typeof SpokeQuery>;
+
+export type SpokeRequestQuery = ReturnType<
+  typeof graphql.scalar<'SpokeRequestQuery'>
+>;
+
+/**
+ * @internal
+ */
 export const SpokesQuery = graphql(
   `query Spokes($request: SpokesRequest!) {
     value: spokes(request: $request) {
