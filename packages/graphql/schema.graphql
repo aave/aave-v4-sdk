@@ -42,6 +42,7 @@ input AmountInput @oneOf {
 enum ApyMetric {
   HIGHEST
   LOWEST
+  AVERAGE
 }
 
 type Asset {
@@ -86,6 +87,12 @@ type AssetSummary {
   totalBorrowable: DecimalNumberWithChange!
   totalSuppliedFiat(currency: Currency! = USD): FiatAmountWithChange!
   totalBorrowedFiat(currency: Currency! = USD): FiatAmountWithChange!
+
+  """The supply APY dependent on what you pass in for the `metric`"""
+  supplyApy(metric: ApyMetric! = AVERAGE): PercentNumber!
+
+  """The borrow APY dependent on what you pass in for the `metric`"""
+  borrowApy(metric: ApyMetric! = AVERAGE): PercentNumber!
 }
 
 input AssetSupplyHistoryRequest {
@@ -670,10 +677,10 @@ type PercentNumber {
   """The number of decimals defining the precision of `bps`."""
   decimals: Int!
 
-  """The human-friendly percentage value formatted for display."""
+  """The percentage value where 1.0 represents 100%."""
   value: BigDecimal!
 
-  """The normalized percentage value where 1.0 represents 100%."""
+  """The human-friendly percentage value formatted for display."""
   normalized: BigDecimal!
 }
 
@@ -1080,6 +1087,9 @@ input ReservesRequestQuery @oneOf {
 
   """Get all tokens on a hub"""
   hub: HubInput
+
+  """Get all the reserves on based on user position id"""
+  userPositionId: UserPositionId
 }
 
 input SetSpokeUserPositionManagerRequest {
