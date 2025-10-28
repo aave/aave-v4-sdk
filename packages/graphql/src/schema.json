@@ -301,6 +301,52 @@
                 }
               }
             ]
+          },
+          {
+            "name": "supplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "metric",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "borrowApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "metric",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []

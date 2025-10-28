@@ -84,6 +84,7 @@ export enum ActivityType {
 export enum ApyMetric {
   Highest = 'HIGHEST',
   Lowest = 'LOWEST',
+  Average = 'AVERAGE',
 }
 
 /**
