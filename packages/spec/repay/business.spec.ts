@@ -10,6 +10,7 @@ import {
   createNewWallet,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
@@ -150,7 +151,7 @@ describe('Repaying Loans on Aave V4', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
+          address: ETHEREUM_USDS_ADDRESS,
           amount: bigDecimal('300'),
           decimals: 6,
         })
@@ -162,8 +163,8 @@ describe('Repaying Loans on Aave V4', () => {
           )
           .andThen(() =>
             supplyAndBorrow(client, user, {
-              tokenToSupply: ETHEREUM_USDC_ADDRESS,
-              tokenToBorrow: ETHEREUM_WSTETH_ADDRESS,
+              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
+              tokenToBorrow: ETHEREUM_USDS_ADDRESS,
             }),
           );
 
@@ -186,7 +187,7 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(borrowBefore);
         const positionBefore = borrowBefore.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS
+            position.reserve.asset.underlying.address === ETHEREUM_USDS_ADDRESS
           );
         });
         invariant(positionBefore, 'No position found');
@@ -226,7 +227,7 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(repayResult);
         const positionAfter = repayResult.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS
+            position.reserve.asset.underlying.address === ETHEREUM_USDS_ADDRESS
           );
         });
         invariant(positionAfter, 'No position found');
@@ -381,8 +382,7 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(borrowBefore);
         const positionBefore = borrowBefore.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address ===
-            ETHEREUM_WSTETH_ADDRESS
+            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
           );
         });
         invariant(positionBefore, 'No position found');
@@ -424,8 +424,7 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(repayResult);
         const positionAfter = repayResult.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address ===
-            ETHEREUM_WSTETH_ADDRESS
+            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
           );
         });
         invariant(positionAfter, 'No position found');

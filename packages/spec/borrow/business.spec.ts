@@ -50,7 +50,9 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
                 },
                 amount: {
                   erc20: {
-                    value: bigDecimal('0.1'),
+                    value: bigDecimal(
+                      Number(reserve.userState!.borrowable.amount.value) * 0.2,
+                    ),
                   },
                 },
                 sender: evmAddress(user.account.address),

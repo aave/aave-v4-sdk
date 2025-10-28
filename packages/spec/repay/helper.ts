@@ -19,6 +19,7 @@ import {
   findReserveToSupply,
   supplyToReserve,
 } from '../borrow/helper';
+import { sleep } from '../helpers/tools';
 
 export function supplyAndBorrow(
   client: AaveClient,
@@ -49,6 +50,7 @@ export function supplyAndBorrow(
       sender: evmAddress(user.account.address),
       enableCollateral: true,
     })
+      .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
       .andThen(() =>
         findReserveToBorrow(client, user, { token: params.tokenToBorrow }),
       )
@@ -97,6 +99,7 @@ export function supplyWSTETHAndBorrowETH(
       sender: evmAddress(user.account.address),
       enableCollateral: true,
     })
+      .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
       .andThen(() =>
         findReserveToBorrow(client, user, {
           token: ETHEREUM_WETH_ADDRESS,

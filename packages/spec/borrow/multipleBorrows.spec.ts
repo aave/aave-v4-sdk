@@ -12,6 +12,7 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { sleep } from '../helpers/tools';
 import { findReserveToBorrow, supplyToRandomERC20Reserve } from './helper';
 
 const user = await createNewWallet();
@@ -34,6 +35,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
       }, 120_000);
 
       it('Then the user has two active borrow positions with correct amounts', async () => {
+        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const firstBorrow = await findReserveToBorrow(client, user, {
           token: ETHEREUM_USDC_ADDRESS,
         }).andThen((reserve) =>
