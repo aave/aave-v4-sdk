@@ -28,7 +28,7 @@ export function AaveContextProvider({
 }
 
 /**
- * Retrieve the injected {@link AaveClient} from the context.
+ * @internal
  */
 export function useAaveClient(): AaveClient {
   const client = useContext(AaveContext);
