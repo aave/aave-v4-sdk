@@ -109,7 +109,7 @@ export function useAaveChain({
 }
 
 export type UseAaveChainsArgs = {
-  filter?: ChainsFilter;
+  filter: ChainsFilter;
 };
 /**
  * Fetches the list of supported chains.
@@ -151,7 +151,7 @@ export function useAaveChains(
  * });
  * ```
  */
-export function useAaveChains(args: UseAaveChainsArgs): ReadResult<Chain[]>;
+export function useAaveChains(args?: UseAaveChainsArgs): ReadResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
  *
@@ -165,17 +165,19 @@ export function useAaveChains(args: UseAaveChainsArgs): ReadResult<Chain[]>;
  * ```
  */
 export function useAaveChains(
-  args: Pausable<UseAaveChainsArgs>,
+  args?: Pausable<UseAaveChainsArgs>,
 ): PausableReadResult<Chain[]>;
 
-export function useAaveChains({
-  suspense = false,
-  pause = false,
-  filter = ChainsFilter.ALL,
-}: NullishDeep<UseAaveChainsArgs> & {
-  suspense?: boolean;
-  pause?: boolean;
-}): SuspendableResult<Chain[], UnexpectedError> {
+export function useAaveChains(
+  {
+    suspense = false,
+    pause = false,
+    filter,
+  }: NullishDeep<UseAaveChainsArgs> & {
+    suspense?: boolean;
+    pause?: boolean;
+  } = { filter: ChainsFilter.ALL },
+): SuspendableResult<Chain[], UnexpectedError> {
   return useSuspendableQuery({
     document: ChainsQuery,
     variables: { filter },
