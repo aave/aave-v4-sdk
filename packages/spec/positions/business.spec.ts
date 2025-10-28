@@ -23,7 +23,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve, supplyToReserve } from '../borrow/helper';
-import { supplyWETHAndBorrow } from '../repay/helper';
+import { supplyAndBorrow } from '../repay/helper';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -74,7 +74,10 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             }),
           )
           .andThen(() =>
-            supplyWETHAndBorrow(client, user, ETHEREUM_USDC_ADDRESS),
+            supplyAndBorrow(client, user, {
+              tokenToSupply: ETHEREUM_USDC_ADDRESS,
+              tokenToBorrow: ETHEREUM_WETH_ADDRESS,
+            }),
           );
 
         assertOk(setup);
@@ -107,20 +110,16 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeSupply = summary.value.lowestHealthFactor!;
 
-          const setup = await supplyToReserve(
-            client,
-            {
-              amount: { erc20: { value: bigDecimal('0.1') } },
-              reserve: {
-                spoke: usedReserves.supplyReserve.spoke.address,
-                reserveId: usedReserves.supplyReserve.id,
-                chainId: usedReserves.supplyReserve.chain.chainId,
-              },
-              enableCollateral: true,
-              sender: evmAddress(user.account.address),
+          const setup = await supplyToReserve(client, user, {
+            amount: { erc20: { value: bigDecimal('0.1') } },
+            reserve: {
+              spoke: usedReserves.supplyReserve.spoke.address,
+              reserveId: usedReserves.supplyReserve.id,
+              chainId: usedReserves.supplyReserve.chain.chainId,
             },
-            user,
-          );
+            enableCollateral: true,
+            sender: evmAddress(user.account.address),
+          });
 
           assertOk(setup);
         });

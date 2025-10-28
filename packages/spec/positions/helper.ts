@@ -16,7 +16,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { supplyToRandomERC20Reserve } from '../borrow/helper';
-import { supplyWETHAndBorrow, supplyWSTETHAndBorrowETH } from '../repay/helper';
+import { supplyAndBorrow, supplyWSTETHAndBorrowETH } from '../repay/helper';
 
 // TODO: missing following actions to add: repay, liquidated and swap
 export const recreateUserActivities = async (
@@ -74,7 +74,12 @@ export const recreateUserActivities = async (
     )
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction)
-    .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
+    .andThen(() =>
+      supplyAndBorrow(client, user, {
+        tokenToSupply: ETHEREUM_USDS_ADDRESS,
+        tokenToBorrow: ETHEREUM_WETH_ADDRESS,
+      }),
+    )
     .andThen(() => supplyWSTETHAndBorrowETH(client, user));
   assertOk(setup);
 };
@@ -105,7 +110,12 @@ export const recreateUserSummary = async (
         amount: bigDecimal('100'),
       }),
     )
-    .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
+    .andThen(() =>
+      supplyAndBorrow(client, user, {
+        tokenToSupply: ETHEREUM_USDS_ADDRESS,
+        tokenToBorrow: ETHEREUM_WETH_ADDRESS,
+      }),
+    )
     .andThen(() => supplyWSTETHAndBorrowETH(client, user));
   assertOk(setup);
 };

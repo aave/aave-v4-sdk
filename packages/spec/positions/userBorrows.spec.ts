@@ -41,8 +41,11 @@ describe('Querying User Borrow Positions on Aave V4', () => {
       //       amount: bigDecimal('100'),
       //     }),
       //   )
-      //   .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
-      //   .andThen(() => supplyWSTETHAndBorrowETH(client, user));
+      //   .andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
+      //   .andThen(() => supplyAndBorrow(client, user, {
+      //     tokenToSupply: ETHEREUM_USDS_ADDRESS,
+      //     tokenToBorrow: ETHEREUM_WETH_ADDRESS,
+      //   }));
       // assertOk(setup);
     }, 120_000);
 

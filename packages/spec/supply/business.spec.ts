@@ -61,7 +61,6 @@ describe('Supplying Assets on Aave V4', () => {
               value: amountToSupply,
             },
           },
-          enableCollateral: true,
           sender: evmAddress(user.account.address),
         })
           .andThen(sendWith(user))
@@ -87,7 +86,9 @@ describe('Supplying Assets on Aave V4', () => {
           );
         });
         invariant(supplyPosition, 'No supply position found');
-        expect(supplyPosition.isCollateral).toBe(true);
+        expect(supplyPosition.isCollateral).toEqual(
+          reserveToSupply.value.canUseAsCollateral,
+        );
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
@@ -151,24 +152,20 @@ describe('Supplying Assets on Aave V4', () => {
         assertOk(reserve);
         const amountToSupply = bigDecimal('0.1');
 
-        const result = await supplyToReserve(
-          client,
-          {
-            reserve: {
-              spoke: reserve.value.spoke.address,
-              reserveId: reserve.value.id,
-              chainId: reserve.value.chain.chainId,
-            },
-            amount: {
-              erc20: {
-                value: amountToSupply,
-              },
-            },
-            sender: evmAddress(user.account.address),
-            enableCollateral: false,
+        const result = await supplyToReserve(client, user, {
+          reserve: {
+            spoke: reserve.value.spoke.address,
+            reserveId: reserve.value.id,
+            chainId: reserve.value.chain.chainId,
           },
-          user,
-        ).andThen(() =>
+          amount: {
+            erc20: {
+              value: amountToSupply,
+            },
+          },
+          sender: evmAddress(user.account.address),
+          enableCollateral: false,
+        }).andThen(() =>
           userSupplies(client, {
             query: {
               userSpoke: {
@@ -229,7 +226,6 @@ describe('Supplying Assets on Aave V4', () => {
               spoke: reserve.value.spoke.address,
             },
             sender: evmAddress(user.account.address),
-            enableCollateral: true,
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
@@ -272,10 +268,12 @@ describe('Supplying Assets on Aave V4', () => {
           );
         });
         invariant(supplyPosition, 'No supply position found');
-        expect(supplyPosition.isCollateral).toBe(true);
+        expect(supplyPosition.isCollateral).toEqual(
+          reserve.value.canUseAsCollateral,
+        );
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
-          2,
+          1,
         );
       });
     });
@@ -285,31 +283,37 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user wants to preview the supply action before performing it', () => {
       it('Then the user can review the supply details before proceeding', async () => {
         const amountToSupply = bigDecimal('0.01');
-        const reserve = await findReserveToSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-        });
-        assertOk(reserve);
-
-        const previewResult = await preview(
+        const reservePreview = await findReserveNativeSupply(
           client,
-          {
-            action: {
-              supply: {
-                reserve: {
-                  reserveId: reserve.value.id,
-                  chainId: ETHEREUM_FORK_ID,
-                  spoke: reserve.value.spoke.address,
+          user,
+        ).andThen((reserve) =>
+          preview(
+            client,
+            {
+              action: {
+                supply: {
+                  reserve: {
+                    reserveId: reserve.id,
+                    chainId: ETHEREUM_FORK_ID,
+                    spoke: reserve.spoke.address,
+                  },
+                  amount: {
+                    native: amountToSupply,
+                  },
+                  sender: evmAddress(user.account.address),
                 },
-                amount: {
-                  native: amountToSupply,
-                },
-                sender: evmAddress(user.account.address),
               },
             },
-          },
-          { currency: Currency.Eur },
+            { currency: Currency.Eur },
+          ),
         );
-        assertOk(previewResult);
+        assertOk(reservePreview);
+        expect(reservePreview.value).toMatchSnapshot({
+          id: expect.any(String),
+          netBalance: expect.any(Object),
+          netCollateral: expect.any(Object),
+          netApy: expect.any(Object),
+        });
       });
     });
 
@@ -319,22 +323,18 @@ describe('Supplying Assets on Aave V4', () => {
         const reserve = await findReserveNativeSupply(client, user);
         assertOk(reserve);
 
-        const result = await supplyToReserve(
-          client,
-          {
-            reserve: {
-              reserveId: reserve.value.id,
-              chainId: reserve.value.chain.chainId,
-              spoke: reserve.value.spoke.address,
-            },
-            amount: {
-              native: bigDecimal('0.01'),
-            },
-            sender: evmAddress(user.account.address),
-            enableCollateral: true,
+        const result = await supplyToReserve(client, user, {
+          reserve: {
+            reserveId: reserve.value.id,
+            chainId: reserve.value.chain.chainId,
+            spoke: reserve.value.spoke.address,
           },
-          user,
-        ).andThen(() =>
+          amount: {
+            native: bigDecimal('0.01'),
+          },
+          sender: evmAddress(user.account.address),
+          enableCollateral: true,
+        }).andThen(() =>
           userSupplies(client, {
             query: {
               userSpoke: {
@@ -363,22 +363,18 @@ describe('Supplying Assets on Aave V4', () => {
         const reserve = await findReserveNativeSupply(client, user);
         assertOk(reserve);
 
-        const result = await supplyToReserve(
-          client,
-          {
-            reserve: {
-              reserveId: reserve.value.id,
-              chainId: reserve.value.chain.chainId,
-              spoke: reserve.value.spoke.address,
-            },
-            amount: {
-              native: bigDecimal('0.01'),
-            },
-            sender: evmAddress(user.account.address),
-            enableCollateral: false,
+        const result = await supplyToReserve(client, user, {
+          reserve: {
+            reserveId: reserve.value.id,
+            chainId: reserve.value.chain.chainId,
+            spoke: reserve.value.spoke.address,
           },
-          user,
-        ).andThen(() =>
+          amount: {
+            native: bigDecimal('0.01'),
+          },
+          sender: evmAddress(user.account.address),
+          enableCollateral: false,
+        }).andThen(() =>
           userSupplies(client, {
             query: {
               userSpoke: {

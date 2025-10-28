@@ -7,7 +7,7 @@ import {
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
@@ -21,11 +21,11 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WETH_ADDRESS,
+          address: ETHEREUM_WSTETH_ADDRESS,
           amount: bigDecimal('2'),
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_WETH_ADDRESS,
+            token: ETHEREUM_WSTETH_ADDRESS,
             amount: bigDecimal('1.0'),
           }),
         );

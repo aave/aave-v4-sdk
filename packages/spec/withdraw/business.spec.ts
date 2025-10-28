@@ -13,8 +13,9 @@ import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  findReserveToSupply,
   supplyToNativeReserve,
-  supplyToRandomERC20Reserve,
+  supplyToReserve,
 } from '../borrow/helper';
 import { assertSingleElementArray } from '../test-utils';
 
@@ -23,7 +24,7 @@ const user = await createNewWallet();
 describe('Withdrawing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position', () => {
     let reserve: Reserve;
-    const amountToSupply = 50;
+    const amountToSupply = 100;
 
     beforeEach(async () => {
       const setup = await fundErc20Address(evmAddress(user.account!.address), {
@@ -31,10 +32,23 @@ describe('Withdrawing Assets on Aave V4', () => {
         amount: bigDecimal('100'),
         decimals: 6,
       }).andThen(() =>
-        supplyToRandomERC20Reserve(client, user, {
+        findReserveToSupply(client, user, {
           token: ETHEREUM_USDC_ADDRESS,
-          amount: bigDecimal(amountToSupply),
-        }),
+        }).andThen((reserve) =>
+          supplyToReserve(client, user, {
+            reserve: {
+              reserveId: reserve.id,
+              chainId: reserve.chain.chainId,
+              spoke: reserve.spoke.address,
+            },
+            amount: {
+              erc20: {
+                value: bigDecimal('100'),
+              },
+            },
+            sender: evmAddress(user.account.address),
+          }).map(() => reserve),
+        ),
       );
 
       assertOk(setup);

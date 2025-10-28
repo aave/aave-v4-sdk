@@ -13,7 +13,7 @@ import {
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -28,19 +28,13 @@ const user = await createNewWallet();
 
 // Get the user balances for the protocol. This will only return assets that can be used on the protocol
 describe('Querying User Balances on Aave V4', () => {
-  describe('Given a user with more than one supply position in the protocol', () => {
+  describe('Given a user with one supply position and multiple tokens to use on the protocol', () => {
     beforeAll(async () => {
       const setup = await fundErc20Address(evmAddress(user.account.address), {
         address: ETHEREUM_USDC_ADDRESS,
         amount: bigDecimal('100'),
         decimals: 6,
       })
-        .andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('50'),
-          }),
-        )
         .andThen(() =>
           fundErc20Address(evmAddress(user.account.address), {
             address: ETHEREUM_USDS_ADDRESS,
@@ -49,8 +43,14 @@ describe('Querying User Balances on Aave V4', () => {
         )
         .andThen(() =>
           fundErc20Address(evmAddress(user.account.address), {
-            address: ETHEREUM_WETH_ADDRESS,
+            address: ETHEREUM_WSTETH_ADDRESS,
             amount: bigDecimal('100'),
+          }),
+        )
+        .andThen(() =>
+          supplyToRandomERC20Reserve(client, user, {
+            token: ETHEREUM_WSTETH_ADDRESS,
+            amount: bigDecimal('50'),
           }),
         );
       assertOk(setup);

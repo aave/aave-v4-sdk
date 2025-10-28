@@ -26,7 +26,10 @@ describe('Querying User Summary on Aave V4', () => {
       //       amount: bigDecimal('0.5'),
       //     }),
       //   )
-      //   // .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
+      //   .andThen(() => supplyAndBorrow(client, user, {
+      //     tokenToSupply: ETHEREUM_USDS_ADDRESS,
+      //     tokenToBorrow: ETHEREUM_WETH_ADDRESS,
+      //   })
       //   .andThen(() => supplyWSTETHAndBorrowETH(client, user));
       // assertOk(setup);
     }, 120_000);
