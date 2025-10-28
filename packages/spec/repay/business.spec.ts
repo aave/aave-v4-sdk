@@ -50,8 +50,7 @@ describe('Repaying Loans on Aave V4', () => {
         reserve = setup.value.borrowReserve;
       }, 60_000);
 
-      // TODO: Enable when bug is fixed
-      it.skip("Then the borrow position is closed and the repayment is reflected in the user's positions", async () => {
+      it("Then the borrow position is closed and the repayment is reflected in the user's positions", async () => {
         const repayResult = await repay(client, {
           reserve: {
             spoke: reserve.spoke.address,

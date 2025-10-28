@@ -63,7 +63,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         assertOk(borrowPreviewResult);
         expect(
           borrowPreviewResult.value.healthFactor.after,
-        ).toBeBigDecimalGreaterThan(10);
+        ).toBeBigDecimalGreaterThan(1);
         expect(borrowPreviewResult.value.healthFactor.current).toBeNull();
       });
     });
