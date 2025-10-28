@@ -11,7 +11,7 @@ import {
 import { reserves, supply } from '@aave/client-next/actions';
 import {
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
@@ -37,7 +37,7 @@ export function findReserveToBorrow(
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: params.token,
-        spoke: params.spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: params.spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -68,7 +68,7 @@ export function findReserveToSupply(
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: params.token,
-        spoke: params.spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: params.spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -102,7 +102,7 @@ export function findReserveNativeSupply(
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: ETHEREUM_WETH_ADDRESS,
-        spoke: spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),

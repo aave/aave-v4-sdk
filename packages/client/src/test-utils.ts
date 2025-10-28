@@ -60,12 +60,16 @@ export const ETHEREUM_SPOKE_CORE_ADDRESS = evmAddress(
   '0x89914a22E30CDf88A06e801E407ca82520210a79',
 );
 
-export const ETHEREUM_HUB_GOB_ADDRESS = evmAddress(
-  '0xc2C1Da9815f7aFa00Fe49d5B8b5fBeE454FF1caA',
-);
-
 export const ETHEREUM_SPOKE_EMODE_ADDRESS = evmAddress(
   '0xBf0c5c03e3D9059ef51F18B9DE48C741dc339672',
+);
+
+export const ETHEREUM_SPOKE_ISO_STABLE_ADDRESS = evmAddress(
+  '0xCc51b78aFF1d1c483Ff303bd687EFF42B993ee95',
+);
+
+export const ETHEREUM_SPOKE_ISO_GOV_ADDRESS = evmAddress(
+  '0xc2C1Da9815f7aFa00Fe49d5B8b5fBeE454FF1caA',
 );
 
 export const ETHEREUM_MARKET_ETH_CORRELATED_EMODE_CATEGORY = 1;
@@ -105,8 +109,10 @@ export async function createNewWallet(
   privateKey?: `0x${string}`,
 ): Promise<WalletClient<Transport, Chain, Account>> {
   if (!privateKey) {
+    const privateKey = generatePrivateKey();
+    console.log('privateKey', privateKey);
     const wallet = createWalletClient({
-      account: privateKeyToAccount(generatePrivateKey()),
+      account: privateKeyToAccount(privateKey),
       chain: ethereumForkChain,
       transport: http(),
     });
