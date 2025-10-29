@@ -8,7 +8,6 @@ import {
 import {
   borrow,
   repay,
-  userBorrows,
   userSummary,
   withdraw,
 } from '@aave/client-next/actions';
@@ -16,15 +15,14 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve, supplyToReserve } from '../borrow/helper';
-import { supplyWETHAndBorrow } from '../repay/helper';
-import { assertSingleElementArray } from '../test-utils';
+import { supplyAndBorrow } from '../repay/helper';
 
 const user = await createNewWallet();
 
@@ -33,13 +31,12 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
     describe('When the user checks the health factor', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
-          amount: bigDecimal('300'),
-          decimals: 6,
+          address: ETHEREUM_WSTETH_ADDRESS,
+          amount: bigDecimal('0.5'),
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
-            amount: bigDecimal('200'),
+            token: ETHEREUM_WSTETH_ADDRESS,
+            amount: bigDecimal('0.3'),
           }),
         );
 
@@ -63,18 +60,20 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
-          amount: bigDecimal('300'),
-          decimals: 6,
+          address: ETHEREUM_WSTETH_ADDRESS,
+          amount: bigDecimal('0.5'),
         })
           .andThen(() =>
             fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_WETH_ADDRESS,
-              amount: bigDecimal('1.0'),
+              address: ETHEREUM_USDS_ADDRESS,
+              amount: bigDecimal('500'),
             }),
           )
           .andThen(() =>
-            supplyWETHAndBorrow(client, user, ETHEREUM_USDC_ADDRESS),
+            supplyAndBorrow(client, user, {
+              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
+              tokenToBorrow: ETHEREUM_USDS_ADDRESS,
+            }),
           );
 
         assertOk(setup);
@@ -107,20 +106,16 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeSupply = summary.value.lowestHealthFactor!;
 
-          const setup = await supplyToReserve(
-            client,
-            {
-              amount: { erc20: { value: bigDecimal('0.1') } },
-              reserve: {
-                spoke: usedReserves.supplyReserve.spoke.address,
-                reserveId: usedReserves.supplyReserve.id,
-                chainId: usedReserves.supplyReserve.chain.chainId,
-              },
-              enableCollateral: true,
-              sender: evmAddress(user.account.address),
+          const setup = await supplyToReserve(client, user, {
+            amount: { erc20: { value: bigDecimal('0.1') } },
+            reserve: {
+              spoke: usedReserves.supplyReserve.spoke.address,
+              reserveId: usedReserves.supplyReserve.id,
+              chainId: usedReserves.supplyReserve.chain.chainId,
             },
-            user,
-          );
+            enableCollateral: true,
+            sender: evmAddress(user.account.address),
+          });
 
           assertOk(setup);
         });
@@ -281,22 +276,6 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
       describe('When the user repays completely the borrow position', () => {
         beforeAll(async () => {
-          // TODO: remove this once the bug is fixed
-          const totalBorrowed = await userBorrows(client, {
-            query: {
-              userSpoke: {
-                spoke: {
-                  address: usedReserves.borrowReserve.spoke.address,
-                  chainId: usedReserves.borrowReserve.chain.chainId,
-                },
-                user: evmAddress(user.account.address),
-              },
-            },
-          });
-          assertOk(totalBorrowed);
-          assertSingleElementArray(totalBorrowed.value);
-          const totalBorrowedAmount = totalBorrowed.value[0].debt.amount.value;
-
           const setup = await repay(client, {
             reserve: {
               spoke: usedReserves.borrowReserve.spoke.address,
@@ -307,9 +286,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             amount: {
               erc20: {
                 value: {
-                  exact: totalBorrowedAmount,
-                  // TODO: Enable when bug is fixed
-                  // max: true,
+                  max: true,
                 },
               },
             },
@@ -328,11 +305,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             },
           });
           assertOk(summary);
-          expect(summary.value.lowestHealthFactor).toBeBigDecimalGreaterThan(
-            10000000,
-          );
-          // TODO: Enable when bug is fixed
-          // expect(summary.value.lowestHealthFactor).toBeNull();
+          expect(summary.value.lowestHealthFactor).toBeNull();
         });
       });
     });

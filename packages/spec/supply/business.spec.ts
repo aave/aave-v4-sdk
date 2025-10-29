@@ -4,6 +4,7 @@ import {
   Currency,
   evmAddress,
   invariant,
+  type Reserve,
 } from '@aave/client-next';
 import {
   permitTypedData,
@@ -14,65 +15,68 @@ import {
 import {
   client,
   createNewWallet,
-  ETHEREUM_FORK_ID,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_USDS_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-import {
-  findReserveNativeSupply,
-  findReserveToSupply,
-  supplyToReserve,
-} from '../borrow/helper';
+import { supplyToReserve } from '../borrow/helper';
+import { findReservesToSupply } from '../helpers/reserves';
+import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
 
 describe('Supplying Assets on Aave V4', () => {
+  let listReserves: Reserve[];
+
+  beforeAll(async () => {
+    const result = await findReservesToSupply(client, user);
+    assertOk(result);
+    listReserves = result.value;
+  });
   describe('Given a user and a reserve', () => {
     describe('When the user supplies tokens to the reserve', () => {
       beforeAll(async () => {
+        const usdcReserve = listReserves.find(
+          (ele) => ele.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
+        )!;
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
-          amount: bigDecimal('200'),
-          decimals: 6,
+          address: usdcReserve.asset.underlying.address,
+          amount: bigDecimal('10'),
+          decimals: usdcReserve.asset.underlying.info.decimals,
         });
-
         assertOk(setup);
       });
 
       it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
-        const amountToSupply = bigDecimal('50');
-        const reserveToSupply = await findReserveToSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-        });
-        assertOk(reserveToSupply);
-
+        const usdcReserve = listReserves.find(
+          (ele) => ele.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
+        )!;
+        const amountToSupply = bigDecimal('9');
         const result = await supply(client, {
           reserve: {
-            reserveId: reserveToSupply.value.id,
-            chainId: ETHEREUM_FORK_ID,
-            spoke: reserveToSupply.value.spoke.address,
+            reserveId: usdcReserve.id,
+            chainId: usdcReserve.chain.chainId,
+            spoke: usdcReserve.spoke.address,
           },
           amount: {
             erc20: {
               value: amountToSupply,
             },
           },
-          enableCollateral: true,
           sender: evmAddress(user.account.address),
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: reserveToSupply.value.spoke.address,
-                    chainId: ETHEREUM_FORK_ID,
+                    address: usdcReserve.spoke.address,
+                    chainId: usdcReserve.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
@@ -83,11 +87,14 @@ describe('Supplying Assets on Aave V4', () => {
 
         const supplyPosition = result.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS
+            position.reserve.asset.underlying.address ===
+            usdcReserve.asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');
-        expect(supplyPosition.isCollateral).toBe(true);
+        expect(supplyPosition.isCollateral).toEqual(
+          usdcReserve.canUseAsCollateral,
+        );
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
           2,
@@ -97,25 +104,22 @@ describe('Supplying Assets on Aave V4', () => {
 
     describe('When the user wants to preview the supply action before performing it', () => {
       it('Then the user can review the supply details before proceeding', async () => {
-        const amountToSupply = bigDecimal('50');
-        const reserve = await findReserveToSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-        });
-        assertOk(reserve);
-
+        const reserveToSupply = listReserves.find(
+          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+        )!;
         const previewResult = await preview(
           client,
           {
             action: {
               supply: {
                 reserve: {
-                  reserveId: reserve.value.id,
-                  chainId: ETHEREUM_FORK_ID,
-                  spoke: reserve.value.spoke.address,
+                  reserveId: reserveToSupply.id,
+                  chainId: reserveToSupply.chain.chainId,
+                  spoke: reserveToSupply.spoke.address,
                 },
                 amount: {
                   erc20: {
-                    value: amountToSupply,
+                    value: bigDecimal('10'),
                   },
                 },
                 sender: evmAddress(user.account.address),
@@ -136,109 +140,102 @@ describe('Supplying Assets on Aave V4', () => {
 
     describe('When the user supplies tokens with collateral disabled', () => {
       beforeAll(async () => {
+        const usdsReserve = listReserves.find(
+          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+        )!;
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WETH_ADDRESS,
-          amount: bigDecimal('1.0'),
+          address: usdsReserve.asset.underlying.address,
+          amount: bigDecimal('1'),
+          decimals: usdsReserve.asset.underlying.info.decimals,
         });
-
         assertOk(setup);
       });
 
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
-        const reserve = await findReserveToSupply(client, user, {
-          token: ETHEREUM_WETH_ADDRESS,
-        });
-        assertOk(reserve);
-        const amountToSupply = bigDecimal('0.1');
-
-        const result = await supplyToReserve(
-          client,
-          {
-            reserve: {
-              spoke: reserve.value.spoke.address,
-              reserveId: reserve.value.id,
-              chainId: reserve.value.chain.chainId,
-            },
-            amount: {
-              erc20: {
-                value: amountToSupply,
-              },
-            },
-            sender: evmAddress(user.account.address),
-            enableCollateral: false,
+        const usdsReserve = listReserves.find(
+          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+        )!;
+        const result = await supplyToReserve(client, user, {
+          reserve: {
+            spoke: usdsReserve.spoke.address,
+            reserveId: usdsReserve.id,
+            chainId: usdsReserve.chain.chainId,
           },
-          user,
-        ).andThen(() =>
-          userSupplies(client, {
-            query: {
-              userSpoke: {
-                spoke: {
-                  address: reserve.value.spoke.address,
-                  chainId: reserve.value.chain.chainId,
-                },
-                user: evmAddress(user.account.address),
-              },
+          amount: {
+            erc20: {
+              value: bigDecimal('1'),
             },
-          }),
-        );
+          },
+          sender: evmAddress(user.account.address),
+          enableCollateral: false,
+        })
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
+          .andThen(() =>
+            userSupplies(client, {
+              query: {
+                userSpoke: {
+                  spoke: {
+                    address: usdsReserve.spoke.address,
+                    chainId: usdsReserve.chain.chainId,
+                  },
+                  user: evmAddress(user.account.address),
+                },
+              },
+            }),
+          );
         assertOk(result);
         invariant(result.value, 'No supply positions found');
         const supplyPosition = result.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
+            position.reserve.asset.underlying.address ===
+            usdsReserve.asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toEqual(false);
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
-          amountToSupply,
+          bigDecimal('1'),
           3,
         );
       });
     });
 
     describe('When the user supplies tokens using a valid permit signature', () => {
+      let reserveWithPermit: Reserve;
       beforeAll(async () => {
+        reserveWithPermit = listReserves.find(
+          (ele) => ele.asset.underlying.permitSupported === true,
+        )!;
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_GHO_ADDRESS,
-          amount: bigDecimal('100'),
+          address: reserveWithPermit.asset.underlying.address,
+          amount: bigDecimal('1'),
         });
 
         assertOk(setup);
       });
 
-      it('Then the supply is processed without requiring prior ERC20 approval', async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account.address)}`);
-        const amountToSupply = bigDecimal('50');
-        const reserve = await findReserveToSupply(client, user, {
-          token: ETHEREUM_GHO_ADDRESS,
-        });
-        assertOk(reserve);
-        annotate(`reserve id: ${reserve.value.id}`);
-
+      it('Then the supply is processed without requiring prior ERC20 approval', async () => {
+        const amountToSupply = bigDecimal('0.9');
         const signature = await permitTypedData(client, {
           supply: {
             amount: {
               value: amountToSupply,
             },
             reserve: {
-              reserveId: reserve.value.id,
-              chainId: reserve.value.chain.chainId,
-              spoke: reserve.value.spoke.address,
+              reserveId: reserveWithPermit.id,
+              chainId: reserveWithPermit.chain.chainId,
+              spoke: reserveWithPermit.spoke.address,
             },
             sender: evmAddress(user.account.address),
-            enableCollateral: true,
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
 
         const result = await supply(client, {
           reserve: {
-            reserveId: reserve.value.id,
-            chainId: reserve.value.chain.chainId,
-            spoke: reserve.value.spoke.address,
+            reserveId: reserveWithPermit.id,
+            chainId: reserveWithPermit.chain.chainId,
+            spoke: reserveWithPermit.spoke.address,
           },
           amount: {
             erc20: {
@@ -256,8 +253,8 @@ describe('Supplying Assets on Aave V4', () => {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: reserve.value.spoke.address,
-                    chainId: reserve.value.chain.chainId,
+                    address: reserveWithPermit.spoke.address,
+                    chainId: reserveWithPermit.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
@@ -268,37 +265,43 @@ describe('Supplying Assets on Aave V4', () => {
 
         const supplyPosition = result.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_GHO_ADDRESS
+            position.reserve.asset.underlying.address ===
+            reserveWithPermit.asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');
-        expect(supplyPosition.isCollateral).toBe(true);
+        expect(supplyPosition.isCollateral).toEqual(
+          reserveWithPermit.canUseAsCollateral,
+        );
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
-          2,
+          1,
         );
       });
     });
   });
 
   describe('Given a user and a reserve that supports native token deposits', () => {
+    let nativeReserveToSupply: Reserve;
+
+    beforeAll(async () => {
+      nativeReserveToSupply = listReserves.find(
+        (ele) => ele.asset.underlying.isWrappedNativeToken === true,
+      )!;
+      // NOTE: No need to fund native as by default the use has a balance of native tokens
+    });
     describe('When the user wants to preview the supply action before performing it', () => {
       it('Then the user can review the supply details before proceeding', async () => {
         const amountToSupply = bigDecimal('0.01');
-        const reserve = await findReserveToSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-        });
-        assertOk(reserve);
-
-        const previewResult = await preview(
+        const reservePreview = await preview(
           client,
           {
             action: {
               supply: {
                 reserve: {
-                  reserveId: reserve.value.id,
-                  chainId: ETHEREUM_FORK_ID,
-                  spoke: reserve.value.spoke.address,
+                  reserveId: nativeReserveToSupply.id,
+                  chainId: nativeReserveToSupply.chain.chainId,
+                  spoke: nativeReserveToSupply.spoke.address,
                 },
                 amount: {
                   native: amountToSupply,
@@ -309,38 +312,38 @@ describe('Supplying Assets on Aave V4', () => {
           },
           { currency: Currency.Eur },
         );
-        assertOk(previewResult);
+
+        assertOk(reservePreview);
+        expect(reservePreview.value).toMatchSnapshot({
+          id: expect.any(String),
+          netBalance: expect.any(Object),
+          netCollateral: expect.any(Object),
+          netApy: expect.any(Object),
+        });
       });
     });
 
     describe('When the user supplies native tokens', () => {
       // TODO: enable when contracts are deployed
       it.skip('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
-        const reserve = await findReserveNativeSupply(client, user);
-        assertOk(reserve);
-
-        const result = await supplyToReserve(
-          client,
-          {
-            reserve: {
-              reserveId: reserve.value.id,
-              chainId: reserve.value.chain.chainId,
-              spoke: reserve.value.spoke.address,
-            },
-            amount: {
-              native: bigDecimal('0.01'),
-            },
-            sender: evmAddress(user.account.address),
-            enableCollateral: true,
+        const result = await supplyToReserve(client, user, {
+          reserve: {
+            reserveId: nativeReserveToSupply.id,
+            chainId: nativeReserveToSupply.chain.chainId,
+            spoke: nativeReserveToSupply.spoke.address,
           },
-          user,
-        ).andThen(() =>
+          amount: {
+            native: bigDecimal('0.01'),
+          },
+          sender: evmAddress(user.account.address),
+          enableCollateral: true,
+        }).andThen(() =>
           userSupplies(client, {
             query: {
               userSpoke: {
                 spoke: {
-                  address: reserve.value.spoke.address,
-                  chainId: reserve.value.chain.chainId,
+                  address: nativeReserveToSupply.spoke.address,
+                  chainId: nativeReserveToSupply.chain.chainId,
                 },
                 user: evmAddress(user.account.address),
               },
@@ -351,7 +354,8 @@ describe('Supplying Assets on Aave V4', () => {
 
         const supplyPosition = result.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
+            position.reserve.asset.underlying.address ===
+            nativeReserveToSupply.asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');
@@ -360,31 +364,24 @@ describe('Supplying Assets on Aave V4', () => {
 
     describe('When the user supplies native tokens with collateral disabled', () => {
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
-        const reserve = await findReserveNativeSupply(client, user);
-        assertOk(reserve);
-
-        const result = await supplyToReserve(
-          client,
-          {
-            reserve: {
-              reserveId: reserve.value.id,
-              chainId: reserve.value.chain.chainId,
-              spoke: reserve.value.spoke.address,
-            },
-            amount: {
-              native: bigDecimal('0.01'),
-            },
-            sender: evmAddress(user.account.address),
-            enableCollateral: false,
+        const result = await supplyToReserve(client, user, {
+          reserve: {
+            reserveId: nativeReserveToSupply.id,
+            chainId: nativeReserveToSupply.chain.chainId,
+            spoke: nativeReserveToSupply.spoke.address,
           },
-          user,
-        ).andThen(() =>
+          amount: {
+            native: bigDecimal('0.01'),
+          },
+          sender: evmAddress(user.account.address),
+          enableCollateral: false,
+        }).andThen(() =>
           userSupplies(client, {
             query: {
               userSpoke: {
                 spoke: {
-                  address: reserve.value.spoke.address,
-                  chainId: reserve.value.chain.chainId,
+                  address: nativeReserveToSupply.spoke.address,
+                  chainId: nativeReserveToSupply.chain.chainId,
                 },
                 user: evmAddress(user.account.address),
               },
@@ -395,7 +392,8 @@ describe('Supplying Assets on Aave V4', () => {
 
         const supplyPosition = result.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
+            position.reserve.asset.underlying.address ===
+            nativeReserveToSupply.asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');

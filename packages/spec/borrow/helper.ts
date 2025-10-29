@@ -11,7 +11,7 @@ import {
 import { reserves, supply } from '@aave/client-next/actions';
 import {
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
@@ -19,8 +19,8 @@ import type { Account, Chain, Transport, WalletClient } from 'viem';
 
 export function supplyToReserve(
   client: AaveClient,
-  request: SupplyRequest,
   user: WalletClient<Transport, Chain, Account>,
+  request: SupplyRequest,
 ): ResultAsync<TxHash, Error> {
   return supply(client, request)
     .andThen(sendWith(user))
@@ -37,7 +37,7 @@ export function findReserveToBorrow(
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: params.token,
-        spoke: params.spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: params.spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -61,14 +61,14 @@ export function findReserveToBorrow(
 export function findReserveToSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-  params: { token: EvmAddress; spoke?: EvmAddress },
+  params: { token: EvmAddress; spoke?: EvmAddress; asCollateral?: boolean },
 ): ResultAsync<Reserve, Error> {
   return reserves(client, {
     query: {
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: params.token,
-        spoke: params.spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: params.spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -79,7 +79,9 @@ export function findReserveToSupply(
       `No reserves found for the token ${params.token}`,
     );
     const reserveToSupply = listReserves.find(
-      (reserve) => reserve.canSupply && reserve.canUseAsCollateral,
+      (reserve) =>
+        reserve.canSupply &&
+        (params.asCollateral ? reserve.canUseAsCollateral === true : true),
     );
     invariant(
       reserveToSupply,
@@ -93,13 +95,14 @@ export function findReserveNativeSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   spoke?: EvmAddress,
+  asCollateral?: boolean,
 ): ResultAsync<Reserve, Error> {
   return reserves(client, {
     query: {
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: ETHEREUM_WETH_ADDRESS,
-        spoke: spoke ?? ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
       },
     },
     user: evmAddress(user.account.address),
@@ -112,7 +115,7 @@ export function findReserveNativeSupply(
     const reserveToSupply = listReserves.find(
       (reserve) =>
         reserve.canSupply &&
-        reserve.canUseAsCollateral &&
+        (asCollateral ? reserve.canUseAsCollateral === true : true) &&
         reserve.asset.underlying.isWrappedNativeToken,
     );
     invariant(
@@ -130,22 +133,18 @@ export function supplyToNativeReserve(
   spoke?: EvmAddress,
 ): ResultAsync<Reserve, Error> {
   return findReserveNativeSupply(client, user, spoke).andThen((reserve) =>
-    supplyToReserve(
-      client,
-      {
-        reserve: {
-          reserveId: reserve.id,
-          chainId: reserve.chain.chainId,
-          spoke: reserve.spoke.address,
-        },
-        amount: {
-          native: amount,
-        },
-        sender: evmAddress(user.account.address),
-        enableCollateral: false, // TODO: set to true when contracts are deployed
+    supplyToReserve(client, user, {
+      reserve: {
+        reserveId: reserve.id,
+        chainId: reserve.chain.chainId,
+        spoke: reserve.spoke.address,
       },
-      user,
-    ).map(() => reserve),
+      amount: {
+        native: amount,
+      },
+      sender: evmAddress(user.account.address),
+      enableCollateral: false, // TODO: set to true when contracts are deployed
+    }).map(() => reserve),
   );
 }
 
@@ -156,23 +155,25 @@ export function supplyToRandomERC20Reserve(
     token,
     amount,
     spoke,
-  }: { token: EvmAddress; amount: BigDecimal; spoke?: EvmAddress },
+  }: {
+    token: EvmAddress;
+    amount: BigDecimal;
+    spoke?: EvmAddress;
+  },
 ): ResultAsync<Reserve, Error> {
-  return findReserveToSupply(client, user, { token, spoke }).andThen(
-    (reserve) =>
-      supplyToReserve(
-        client,
-        {
-          reserve: {
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
-            spoke: reserve.spoke.address,
-          },
-          amount: { erc20: { value: amount } },
-          sender: evmAddress(user.account.address),
-          enableCollateral: true,
-        },
-        user,
-      ).map(() => reserve),
+  return findReserveToSupply(client, user, {
+    token,
+    spoke,
+    asCollateral: true,
+  }).andThen((reserve) =>
+    supplyToReserve(client, user, {
+      reserve: {
+        reserveId: reserve.id,
+        chainId: reserve.chain.chainId,
+        spoke: reserve.spoke.address,
+      },
+      amount: { erc20: { value: amount } },
+      sender: evmAddress(user.account.address),
+    }).map(() => reserve),
   );
 }

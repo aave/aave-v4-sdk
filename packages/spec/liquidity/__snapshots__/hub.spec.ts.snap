@@ -3,19 +3,121 @@
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 1`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "0",
+  "assetId": "1",
   "hub": Any<Object>,
   "settings": {
     "__typename": "HubAssetSettings",
-    "feeReceiver": "0x4B643A17BB9Bc4186617fD4F29A75Ae4350F6e53",
-    "irStrategy": "0xa5ea1c565fd011897233CA97b610B3f167253BBB",
+    "feeReceiver": "0xbbF7c28516CEB9c09527Ff5e770fCC523A0C1b59",
+    "irStrategy": "0x11466ebc9C1b8dF600F69CE5a549f43CDB52aa5c",
     "liquidityFee": {
       "__typename": "PercentNumber",
       "decimals": 4,
-      "formatted": "0.1",
+      "normalized": "50",
+      "onChainValue": 5000n,
+      "value": "0.5",
+    },
+    "reinvestmentController": null,
+  },
+  "summary": Any<Object>,
+  "underlying": {
+    "__typename": "Erc20Token",
+    "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+    "chain": {
+      "__typename": "Chain",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "isTestnet": false,
+      "name": "Ethereum",
+      "nativeInfo": {
+        "__typename": "TokenInfo",
+        "decimals": 18,
+        "icon": "https://statics.aave.com/ethereum.svg",
+        "name": "Ether",
+        "symbol": "ETH",
+      },
+      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
+    "info": {
+      "__typename": "TokenInfo",
+      "decimals": 8,
+      "icon": "https://token-logos.family.co/asset?id=1:0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf&token=cbBTC",
+      "name": "Coinbase Wrapped BTC",
+      "symbol": "cbBTC",
+    },
+    "isWrappedNativeToken": false,
+    "permitSupported": true,
+  },
+  "userState": null,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 2`] = `
+{
+  "__typename": "HubAsset",
+  "assetId": "5",
+  "hub": Any<Object>,
+  "settings": {
+    "__typename": "HubAssetSettings",
+    "feeReceiver": "0xbbF7c28516CEB9c09527Ff5e770fCC523A0C1b59",
+    "irStrategy": "0x11466ebc9C1b8dF600F69CE5a549f43CDB52aa5c",
+    "liquidityFee": {
+      "__typename": "PercentNumber",
+      "decimals": 4,
+      "normalized": "5",
+      "onChainValue": 500n,
+      "value": "0.05",
+    },
+    "reinvestmentController": null,
+  },
+  "summary": Any<Object>,
+  "underlying": {
+    "__typename": "Erc20Token",
+    "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+    "chain": {
+      "__typename": "Chain",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "isTestnet": false,
+      "name": "Ethereum",
+      "nativeInfo": {
+        "__typename": "TokenInfo",
+        "decimals": 18,
+        "icon": "https://statics.aave.com/ethereum.svg",
+        "name": "Ether",
+        "symbol": "ETH",
+      },
+      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
+    "info": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://token-logos.family.co/asset?id=1:0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f&token=GHO",
+      "name": "Gho Token",
+      "symbol": "GHO",
+    },
+    "isWrappedNativeToken": false,
+    "permitSupported": true,
+  },
+  "userState": null,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 3`] = `
+{
+  "__typename": "HubAsset",
+  "assetId": "4",
+  "hub": Any<Object>,
+  "settings": {
+    "__typename": "HubAssetSettings",
+    "feeReceiver": "0xbbF7c28516CEB9c09527Ff5e770fCC523A0C1b59",
+    "irStrategy": "0x11466ebc9C1b8dF600F69CE5a549f43CDB52aa5c",
+    "liquidityFee": {
+      "__typename": "PercentNumber",
+      "decimals": 4,
       "normalized": "10",
       "onChainValue": 1000n,
-      "raw": 1000n,
       "value": "0.1",
     },
     "reinvestmentController": null,
@@ -54,22 +156,20 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 }
 `;
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 2`] = `
+exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 4`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "1",
+  "assetId": "3",
   "hub": Any<Object>,
   "settings": {
     "__typename": "HubAssetSettings",
-    "feeReceiver": "0x4B643A17BB9Bc4186617fD4F29A75Ae4350F6e53",
-    "irStrategy": "0xa5ea1c565fd011897233CA97b610B3f167253BBB",
+    "feeReceiver": "0xbbF7c28516CEB9c09527Ff5e770fCC523A0C1b59",
+    "irStrategy": "0x11466ebc9C1b8dF600F69CE5a549f43CDB52aa5c",
     "liquidityFee": {
       "__typename": "PercentNumber",
       "decimals": 4,
-      "formatted": "0.1",
       "normalized": "10",
       "onChainValue": 1000n,
-      "raw": 1000n,
       "value": "0.1",
     },
     "reinvestmentController": null,
@@ -77,7 +177,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
   "summary": Any<Object>,
   "underlying": {
     "__typename": "Erc20Token",
-    "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+    "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
     "chain": {
       "__typename": "Chain",
       "chainId": 1,
@@ -97,9 +197,165 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
     "info": {
       "__typename": "TokenInfo",
       "decimals": 18,
-      "icon": "https://token-logos.family.co/asset?id=1:0x9D39A5DE30e57443BfF2A8307A4256c8797A3497&token=sUSDe",
-      "name": "Staked USDe",
-      "symbol": "sUSDe",
+      "icon": "https://token-logos.family.co/asset?id=1:0xdC035D45d973E3EC169d2276DDab16f1e407384F&token=USDS",
+      "name": "USDS Stablecoin",
+      "symbol": "USDS",
+    },
+    "isWrappedNativeToken": false,
+    "permitSupported": true,
+  },
+  "userState": null,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 5`] = `
+{
+  "__typename": "HubAsset",
+  "assetId": "2",
+  "hub": Any<Object>,
+  "settings": {
+    "__typename": "HubAssetSettings",
+    "feeReceiver": "0xbbF7c28516CEB9c09527Ff5e770fCC523A0C1b59",
+    "irStrategy": "0x11466ebc9C1b8dF600F69CE5a549f43CDB52aa5c",
+    "liquidityFee": {
+      "__typename": "PercentNumber",
+      "decimals": 4,
+      "normalized": "50",
+      "onChainValue": 5000n,
+      "value": "0.5",
+    },
+    "reinvestmentController": null,
+  },
+  "summary": Any<Object>,
+  "underlying": {
+    "__typename": "Erc20Token",
+    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    "chain": {
+      "__typename": "Chain",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "isTestnet": false,
+      "name": "Ethereum",
+      "nativeInfo": {
+        "__typename": "TokenInfo",
+        "decimals": 18,
+        "icon": "https://statics.aave.com/ethereum.svg",
+        "name": "Ether",
+        "symbol": "ETH",
+      },
+      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
+    "info": {
+      "__typename": "TokenInfo",
+      "decimals": 8,
+      "icon": "https://token-logos.family.co/asset?id=1:0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599&token=WBTC",
+      "name": "Wrapped BTC",
+      "symbol": "WBTC",
+    },
+    "isWrappedNativeToken": false,
+    "permitSupported": false,
+  },
+  "userState": null,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 6`] = `
+{
+  "__typename": "HubAsset",
+  "assetId": "0",
+  "hub": Any<Object>,
+  "settings": {
+    "__typename": "HubAssetSettings",
+    "feeReceiver": "0xbbF7c28516CEB9c09527Ff5e770fCC523A0C1b59",
+    "irStrategy": "0x11466ebc9C1b8dF600F69CE5a549f43CDB52aa5c",
+    "liquidityFee": {
+      "__typename": "PercentNumber",
+      "decimals": 4,
+      "normalized": "10",
+      "onChainValue": 1000n,
+      "value": "0.1",
+    },
+    "reinvestmentController": null,
+  },
+  "summary": Any<Object>,
+  "underlying": {
+    "__typename": "Erc20Token",
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "chain": {
+      "__typename": "Chain",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "isTestnet": false,
+      "name": "Ethereum",
+      "nativeInfo": {
+        "__typename": "TokenInfo",
+        "decimals": 18,
+        "icon": "https://statics.aave.com/ethereum.svg",
+        "name": "Ether",
+        "symbol": "ETH",
+      },
+      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
+    "info": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://token-logos.family.co/asset?id=1:0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&token=WETH",
+      "name": "Wrapped Ether",
+      "symbol": "WETH",
+    },
+    "isWrappedNativeToken": true,
+    "permitSupported": false,
+  },
+  "userState": null,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 7`] = `
+{
+  "__typename": "HubAsset",
+  "assetId": "6",
+  "hub": Any<Object>,
+  "settings": {
+    "__typename": "HubAssetSettings",
+    "feeReceiver": "0xbbF7c28516CEB9c09527Ff5e770fCC523A0C1b59",
+    "irStrategy": "0x11466ebc9C1b8dF600F69CE5a549f43CDB52aa5c",
+    "liquidityFee": {
+      "__typename": "PercentNumber",
+      "decimals": 4,
+      "normalized": "5",
+      "onChainValue": 500n,
+      "value": "0.05",
+    },
+    "reinvestmentController": null,
+  },
+  "summary": Any<Object>,
+  "underlying": {
+    "__typename": "Erc20Token",
+    "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+    "chain": {
+      "__typename": "Chain",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "isTestnet": false,
+      "name": "Ethereum",
+      "nativeInfo": {
+        "__typename": "TokenInfo",
+        "decimals": 18,
+        "icon": "https://statics.aave.com/ethereum.svg",
+        "name": "Ether",
+        "symbol": "ETH",
+      },
+      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
+    "info": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://token-logos.family.co/asset?id=1:0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0&token=wstETH",
+      "name": "Wrapped liquid staked Ether 2.0",
+      "symbol": "wstETH",
     },
     "isWrappedNativeToken": false,
     "permitSupported": true,
@@ -109,31 +365,6 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 `;
 
 exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
-{
-  "__typename": "Hub",
-  "address": "0x4BB8658261CCF575Cb6148a257BE34b36D3D057f",
-  "chain": {
-    "__typename": "Chain",
-    "chainId": 1,
-    "explorerUrl": "https://etherscan.io",
-    "icon": "https://statics.aave.com/ethereum.svg",
-    "isTestnet": false,
-    "name": "Ethereum",
-    "nativeInfo": {
-      "__typename": "TokenInfo",
-      "decimals": 18,
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "name": "Ether",
-      "symbol": "ETH",
-    },
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-  },
-  "name": "ISO Stable",
-  "summary": Any<Object>,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
 {
   "__typename": "Hub",
   "address": "0x7E7c3EDCa4D39D0aFBD468Dec89cdEaF0AC770d3",
@@ -158,7 +389,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
 }
 `;
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
 {
   "__typename": "Hub",
   "address": "0xA5f18dFE4f0380b6C40411D7Ddb2c04034276805",
@@ -179,6 +410,31 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
   },
   "name": "ISO Gov",
+  "summary": Any<Object>,
+}
+`;
+
+exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
+{
+  "__typename": "Hub",
+  "address": "0x4BB8658261CCF575Cb6148a257BE34b36D3D057f",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 1,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isTestnet": false,
+    "name": "Ethereum",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  },
+  "name": "ISO Stable",
   "summary": Any<Object>,
 }
 `;

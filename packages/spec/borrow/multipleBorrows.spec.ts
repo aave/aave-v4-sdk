@@ -12,6 +12,7 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { sleep } from '../helpers/tools';
 import { findReserveToBorrow, supplyToRandomERC20Reserve } from './helper';
 
 const user = await createNewWallet();
@@ -21,12 +22,13 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WETH_ADDRESS,
-          amount: bigDecimal('2'),
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('200'),
+          decimals: 6,
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_WETH_ADDRESS,
-            amount: bigDecimal('1.0'),
+            token: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('100'),
           }),
         );
 
@@ -34,8 +36,9 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
       }, 120_000);
 
       it('Then the user has two active borrow positions with correct amounts', async () => {
+        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const firstBorrow = await findReserveToBorrow(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
+          token: ETHEREUM_WETH_ADDRESS,
         }).andThen((reserve) =>
           borrow(client, {
             sender: evmAddress(user.account.address),

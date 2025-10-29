@@ -32,24 +32,20 @@ describe('Setting Supply as Collateral in Aave V4', () => {
           }),
         )
         .andThen((reserve) =>
-          supplyToReserve(
-            client,
-            {
-              reserve: {
-                chainId: reserve.chain.chainId,
-                reserveId: reserve.id,
-                spoke: reserve.spoke.address,
-              },
-              amount: {
-                erc20: {
-                  value: bigDecimal('100'),
-                },
-              },
-              sender: evmAddress(user.account.address),
-              enableCollateral: false,
+          supplyToReserve(client, user, {
+            reserve: {
+              chainId: reserve.chain.chainId,
+              reserveId: reserve.id,
+              spoke: reserve.spoke.address,
             },
-            user,
-          ),
+            amount: {
+              erc20: {
+                value: bigDecimal('100'),
+              },
+            },
+            sender: evmAddress(user.account.address),
+            enableCollateral: false,
+          }),
         );
 
       assertOk(setup);
