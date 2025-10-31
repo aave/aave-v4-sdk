@@ -26,8 +26,8 @@ export function isOrderedNumerically(
     const next = values[i + 1]!;
 
     if (
-      (order === 'desc' && current.lt(next)) ||
-      (order === 'asc' && current.gt(next))
+      (order === 'desc' && (current.lt(next) || current.eq(next))) ||
+      (order === 'asc' && (current.gt(next) || current.eq(next)))
     ) {
       return false;
     }
