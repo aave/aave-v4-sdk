@@ -1,6 +1,6 @@
 import {
   ETHEREUM_FORK_RPC_URL,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import type { SupplyActivity } from '@aave/graphql-next';
 import {
@@ -48,7 +48,7 @@ describe('Given the viem adapters are used', () => {
         icon: 'https://example.com/eth-icon.png',
         explorerUrl: 'https://etherscan.io',
         isTestnet: false,
-        nativeWrappedToken: ETHEREUM_WETH_ADDRESS,
+        nativeWrappedToken: ETHEREUM_TOKENS.WETH,
         nativeInfo: {
           __typename: 'TokenInfo',
           name: 'Ethereum',
@@ -56,6 +56,10 @@ describe('Given the viem adapters are used', () => {
           icon: 'https://example.com/eth-icon.png',
           decimals: 18,
         },
+        nativeGateway: evmAddress('0x0000000000000000000000000000000000000000'),
+        signatureGateway: evmAddress(
+          '0x0000000000000000000000000000000000000000',
+        ),
       },
       spoke: {} as Spoke,
       reserve: {} as ReserveInfo,

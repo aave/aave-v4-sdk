@@ -21,7 +21,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_TOKENS,
 } from './test-utils';
 import { sendWith } from './viem';
 
@@ -85,7 +85,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
           tokens: [
             {
               chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_WETH_ADDRESS,
+              address: ETHEREUM_TOKENS.WETH,
             },
           ],
         },
