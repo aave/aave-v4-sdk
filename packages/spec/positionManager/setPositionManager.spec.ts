@@ -22,27 +22,27 @@ import { beforeAll, describe, expect, it } from 'vitest';
 const user = await createNewWallet();
 
 describe('Authorizing Position Managers on Aave V4', () => {
-  describe('Given a user and a spoke with available position managers', () => {
-    let managerAddress: EvmAddress[];
+  let managerAddress: EvmAddress[];
 
-    beforeAll(async () => {
-      // Get available position managers
-      const managers = await spokePositionManagers(client, {
-        spoke: {
-          chainId: ETHEREUM_FORK_ID,
-          address: ETHEREUM_SPOKES.CORE_SPOKE,
-        },
-        pageSize: PageSize.Ten,
-      });
-
-      assertOk(managers);
-      invariant(
-        managers.value.items.length > 0,
-        'No position managers available',
-      );
-      managerAddress = managers.value.items.map((m) => m.address);
+  beforeAll(async () => {
+    // Get available position managers
+    const managers = await spokePositionManagers(client, {
+      spoke: {
+        chainId: ETHEREUM_FORK_ID,
+        address: ETHEREUM_SPOKES.CORE_SPOKE,
+      },
+      pageSize: PageSize.Ten,
     });
 
+    assertOk(managers);
+    invariant(
+      managers.value.items.length > 0,
+      'No position managers available',
+    );
+    managerAddress = managers.value.items.map((m) => m.address);
+  });
+
+  describe('Given a user and a spoke with available position managers', () => {
     describe('When querying user position managers before authorization', () => {
       it('Then the user has no authorized position managers initially', async () => {
         const userManagers = await spokeUserPositionManagers(client, {
@@ -93,11 +93,6 @@ describe('Authorizing Position Managers on Aave V4', () => {
         );
       });
     });
-
-    describe('When fetching position managers with pagination', () => {
-      // TODO: Enable pagination when possible to add more than 10 managers
-      it.todo('Then it should return paginated results');
-    });
   });
 
   describe('Given a user with an authorized position manager', () => {
@@ -119,7 +114,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
               address: ETHEREUM_SPOKES.CORE_SPOKE,
               chainId: ETHEREUM_FORK_ID,
             },
-            manager: userManagers.value.items[0]!.address,
+            manager: managerAddress[0]!,
             approve: true,
             user: evmAddress(user.account.address),
           })
@@ -139,7 +134,6 @@ describe('Authorizing Position Managers on Aave V4', () => {
           user: evmAddress(user.account.address),
           pageSize: PageSize.Ten,
         });
-
         assertOk(allUserManagers);
         invariant(
           allUserManagers.value.items.length >= 1,
@@ -159,7 +153,6 @@ describe('Authorizing Position Managers on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction);
-
         assertOk(revokeResult);
 
         const revokedUserManagers = await spokeUserPositionManagers(client, {
