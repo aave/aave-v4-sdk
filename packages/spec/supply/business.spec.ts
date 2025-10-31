@@ -20,7 +20,7 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToReserve } from '../borrow/helper';
+import { supplyToReserve } from '../helpers/borrowSupply';
 import { findReservesToSupply } from '../helpers/reserves';
 import { sleep } from '../helpers/tools';
 

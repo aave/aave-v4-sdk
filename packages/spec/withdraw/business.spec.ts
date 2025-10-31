@@ -11,7 +11,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToReserve } from '../borrow/helper';
+import { supplyToReserve } from '../helpers/borrowSupply';
 import { findReservesToSupply } from '../helpers/reserves';
 import { assertSingleElementArray } from '../test-utils';
 
@@ -57,11 +57,7 @@ describe('Withdrawing Assets on Aave V4', () => {
     });
 
     describe('When the user withdraws part of their supplied tokens', () => {
-      it("Then the user's supply position is updated to reflect the partial withdrawal", async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account!.address)}`);
-        annotate(`reserve id: ${reserveErc20.id}`);
+      it("Then the user's supply position is updated to reflect the partial withdrawal", async () => {
         const amountToWithdraw = amountToSupply / 2;
         const balanceBefore = await getBalance(
           evmAddress(user.account.address),
@@ -208,10 +204,7 @@ describe('Withdrawing Assets on Aave V4', () => {
     });
 
     describe('When the user withdraws part of their supplied native tokens', () => {
-      it('Then the user receives the partial amount in native tokens and their supply position is updated', async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account!.address)}`);
+      it('Then the user receives the partial amount in native tokens and their supply position is updated', async () => {
         const amountToWithdraw = amountToSupply / 2;
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
@@ -252,10 +245,7 @@ describe('Withdrawing Assets on Aave V4', () => {
     });
 
     describe('When the user withdraws all of their supplied native tokens', () => {
-      it('Then the user receives the full amount in native tokens and their supply position is closed', async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account!.address)}`);
+      it('Then the user receives the full amount in native tokens and their supply position is closed', async () => {
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );

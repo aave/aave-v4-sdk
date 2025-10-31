@@ -16,7 +16,7 @@ import {
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToReserve } from '../borrow/helper';
+import { supplyToReserve } from '../helpers/borrowSupply';
 import { findReservesToSupply } from '../helpers/reserves';
 import {
   assertSingleElementArray,

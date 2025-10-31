@@ -10,17 +10,14 @@ import {
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import { supplyToRandomERC20Reserve } from '../borrow/helper';
-import {
-  borrowFromReserve,
-  supplyToReserve,
-  withdrawFromReserve,
-} from '../helpers/borrowSupply';
+import { borrowFromReserve, supplyToReserve } from '../helpers/borrowSupply';
 import {
   findReservesToBorrow,
   findReservesToSupply,
 } from '../helpers/reserves';
 import { supplyAndBorrow, supplyWSTETHAndBorrowETH } from '../repay/helper';
+import { supplyToRandomERC20Reserve } from './borrowSupply';
+import { withdrawFromReserve } from './withdrawRepay';
 
 // TODO: missing following actions to add: repay, liquidated and swap
 export const recreateUserActivities = async (

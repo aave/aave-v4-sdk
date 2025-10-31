@@ -14,7 +14,7 @@ import {
   findReserveToBorrow,
   findReserveToSupply,
   supplyToReserve,
-} from '../borrow/helper';
+} from '../helpers/borrowSupply';
 import { sleep } from '../helpers/tools';
 
 export function supplyAndBorrow(
