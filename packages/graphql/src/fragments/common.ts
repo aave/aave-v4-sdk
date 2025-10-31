@@ -70,6 +70,8 @@ export const ChainFragment = graphql(
     nativeInfo {
       ...TokenInfo
     }
+    nativeGateway
+    signatureGateway
   }`,
   [TokenInfoFragment],
 );
