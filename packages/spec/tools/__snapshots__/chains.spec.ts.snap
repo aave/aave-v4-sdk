@@ -4,11 +4,11 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to list available chai
 [
   {
     "__typename": "Chain",
-    "chainId": 1,
+    "chainId": 123456789,
     "explorerUrl": "https://etherscan.io",
     "icon": "https://statics.aave.com/ethereum.svg",
-    "isTestnet": false,
-    "name": "Ethereum",
+    "isTestnet": true,
+    "name": "ForkedEthereum",
     "nativeInfo": {
       "__typename": "TokenInfo",
       "decimals": 18,
@@ -21,15 +21,17 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to list available chai
 ]
 `;
 
-exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter MAINNET_ONLY 1`] = `
+exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter MAINNET_ONLY 1`] = `[]`;
+
+exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter TESTNET_ONLY 1`] = `
 [
   {
     "__typename": "Chain",
-    "chainId": 1,
+    "chainId": 123456789,
     "explorerUrl": "https://etherscan.io",
     "icon": "https://statics.aave.com/ethereum.svg",
-    "isTestnet": false,
-    "name": "Ethereum",
+    "isTestnet": true,
+    "name": "ForkedEthereum",
     "nativeInfo": {
       "__typename": "TokenInfo",
       "decimals": 18,
@@ -41,5 +43,3 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to list available chai
   },
 ]
 `;
-
-exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter TESTNET_ONLY 1`] = `[]`;
