@@ -86,6 +86,8 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
     });
 
     describe('And the user has a one borrow position', () => {
+      let amountBorrowed: number;
+
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: usedReserves.supplyReserve.asset.underlying.address,
@@ -100,6 +102,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
         );
 
         assertOk(setup);
+        amountBorrowed = setup.value.amountBorrowed;
       }, 60_000);
 
       describe('When the user checks the health factor', () => {
@@ -169,23 +172,33 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeRepay = summary.value.lowestHealthFactor!;
 
-          const setup = await repay(client, {
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
+          const setup = await fundErc20Address(
+            evmAddress(user.account.address),
+            {
+              address: usedReserves.borrowReserve.asset.underlying.address,
+              amount: bigDecimal(amountBorrowed * 2),
+              decimals:
+                usedReserves.borrowReserve.asset.underlying.info.decimals,
             },
-            sender: evmAddress(user.account.address),
-            amount: {
-              erc20: {
-                value: {
-                  exact: bigDecimal('100'),
+          ).andThen(() =>
+            repay(client, {
+              reserve: {
+                spoke: usedReserves.borrowReserve.spoke.address,
+                reserveId: usedReserves.borrowReserve.id,
+                chainId: usedReserves.borrowReserve.chain.chainId,
+              },
+              sender: evmAddress(user.account.address),
+              amount: {
+                erc20: {
+                  value: {
+                    exact: bigDecimal(amountBorrowed * 0.5),
+                  },
                 },
               },
-            },
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction);
+            })
+              .andThen(sendWith(user))
+              .andThen(client.waitForTransaction),
+          );
 
           assertOk(setup);
         });
@@ -226,7 +239,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             },
             amount: {
               erc20: {
-                value: bigDecimal('50'),
+                value: bigDecimal(amountBorrowed * 0.3),
               },
             },
           })
@@ -298,23 +311,33 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
       describe('When the user repays completely the borrow position', () => {
         beforeAll(async () => {
-          const setup = await repay(client, {
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
+          const setup = await fundErc20Address(
+            evmAddress(user.account.address),
+            {
+              address: usedReserves.borrowReserve.asset.underlying.address,
+              amount: bigDecimal(amountBorrowed * 2),
+              decimals:
+                usedReserves.borrowReserve.asset.underlying.info.decimals,
             },
-            sender: evmAddress(user.account.address),
-            amount: {
-              erc20: {
-                value: {
-                  max: true,
+          ).andThen(() =>
+            repay(client, {
+              reserve: {
+                spoke: usedReserves.borrowReserve.spoke.address,
+                reserveId: usedReserves.borrowReserve.id,
+                chainId: usedReserves.borrowReserve.chain.chainId,
+              },
+              sender: evmAddress(user.account.address),
+              amount: {
+                erc20: {
+                  value: {
+                    max: true,
+                  },
                 },
               },
-            },
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction);
+            })
+              .andThen(sendWith(user))
+              .andThen(client.waitForTransaction),
+          );
 
           assertOk(setup);
         });

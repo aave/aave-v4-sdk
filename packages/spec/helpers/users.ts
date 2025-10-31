@@ -3,6 +3,7 @@ import {
   assertOk,
   bigDecimal,
   evmAddress,
+  invariant,
 } from '@aave/client-next';
 import {
   ETHEREUM_SPOKES,
@@ -124,5 +125,93 @@ export const recreateUserSummary = async (
       }),
     )
     .andThen(() => supplyWSTETHAndBorrowETH(client, user));
+  assertOk(setup);
+};
+
+export const recreateUserSupplies = async (
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+) => {
+  const supplyReserves = await findReservesToSupply(client, user, {
+    spoke: ETHEREUM_SPOKES.CORE_SPOKE,
+  });
+  assertOk(supplyReserves);
+  const wethReserve = supplyReserves.value.find(
+    (reserve) => reserve.asset.underlying.address === ETHEREUM_TOKENS.WETH,
+  );
+  invariant(wethReserve, 'WETH reserve not found');
+
+  const usdcReserve = supplyReserves.value.find(
+    (reserve) => reserve.asset.underlying.address === ETHEREUM_TOKENS.USDC,
+  );
+  invariant(usdcReserve, 'USDC reserve not found');
+
+  const usdsReserve = supplyReserves.value.find(
+    (reserve) => reserve.asset.underlying.address === ETHEREUM_TOKENS.USDS,
+  );
+  invariant(usdsReserve, 'USDS reserve not found');
+
+  const setup = await fundErc20Address(evmAddress(user.account.address), {
+    address: ETHEREUM_TOKENS.WETH,
+    amount: bigDecimal('0.5'),
+  })
+    .andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: {
+          reserveId: wethReserve.id,
+          chainId: wethReserve.chain.chainId,
+          spoke: wethReserve.spoke.address,
+        },
+        amount: {
+          erc20: {
+            value: bigDecimal('0.3'),
+          },
+        },
+        sender: evmAddress(user.account.address),
+      }),
+    )
+    .andThen(() =>
+      fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_TOKENS.USDC,
+        amount: bigDecimal('50'),
+        decimals: 6,
+      }),
+    )
+    .andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: {
+          reserveId: usdcReserve.id,
+          chainId: usdcReserve.chain.chainId,
+          spoke: usdcReserve.spoke.address,
+        },
+        amount: {
+          erc20: {
+            value: bigDecimal('40'),
+          },
+        },
+        sender: evmAddress(user.account.address),
+      }),
+    )
+    .andThen(() =>
+      fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_TOKENS.USDS,
+        amount: bigDecimal('50'),
+      }),
+    )
+    .andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: {
+          reserveId: usdsReserve.id,
+          chainId: usdsReserve.chain.chainId,
+          spoke: usdsReserve.spoke.address,
+        },
+        amount: {
+          erc20: {
+            value: bigDecimal('40'),
+          },
+        },
+        sender: evmAddress(user.account.address),
+      }),
+    );
   assertOk(setup);
 };

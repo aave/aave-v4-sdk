@@ -6,7 +6,8 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKES,
 } from '@aave/client-next/test-utils';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
   assertSingleElementArray,
   isOrderedAlphabetically,
@@ -14,50 +15,15 @@ import {
 } from '../test-utils';
 
 const user = await createNewWallet(
-  '0x666806ff6ba3358a4ff90145a66fa682bbc61c599520148f114162408e98e462',
+  '0x91e5f8c7bb59132f3b053615bec1d82e647bdcc49bc691fc602cdcb1b890416a',
 );
 
 describe('Querying User Supply Positions on Aave V4', () => {
   describe('Given a user with multiple active supply positions', () => {
-    beforeAll(async () => {
-      // NOTE: Enable when needed to create userSupplies position for a new user
-      // const setup = await fundErc20Address(evmAddress(user.account.address), {
-      //   address: ETHEREUM_WETH_ADDRESS,
-      //   amount: bigDecimal('0.5'),
-      // })
-      //   .andThen(() =>
-      //     supplyToRandomERC20Reserve(client, user, {
-      //       token: ETHEREUM_WETH_ADDRESS,
-      //       amount: bigDecimal('0.3'),
-      //     }),
-      //   )
-      //   .andThen(() =>
-      //     fundErc20Address(evmAddress(user.account.address), {
-      //       address: ETHEREUM_USDC_ADDRESS,
-      //       amount: bigDecimal('50'),
-      //       decimals: 6,
-      //     }),
-      //   )
-      //   .andThen(() =>
-      //     supplyToRandomERC20Reserve(client, user, {
-      //       token: ETHEREUM_USDC_ADDRESS,
-      //       amount: bigDecimal('40'),
-      //     }),
-      //   )
-      //   .andThen(() =>
-      //     fundErc20Address(evmAddress(user.account.address), {
-      //       address: ETHEREUM_USDS_ADDRESS,
-      //       amount: bigDecimal('50'),
-      //     }),
-      //   )
-      //   .andThen(() =>
-      //     supplyToRandomERC20Reserve(client, user, {
-      //       token: ETHEREUM_USDS_ADDRESS,
-      //       amount: bigDecimal('40'),
-      //     }),
-      //   );
-      // assertOk(setup);
-    }, 120_000);
+    // NOTE: Enable when needed to create userSupplies position for a new user
+    // beforeAll(async () => {
+    // await recreateUserSupplies(client, user);
+    // }, 120_000);
 
     describe('When the user queries their supply positions by spoke', () => {
       it('Then the matching supply positions are returned', async () => {

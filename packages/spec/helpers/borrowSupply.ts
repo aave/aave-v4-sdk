@@ -53,7 +53,7 @@ export function supplyAndBorrow(
     amountToSupply?: BigDecimal;
     percentToBorrow?: number;
   },
-): ResultAsync<TxHash, Error> {
+): ResultAsync<{ txHash: TxHash; amountBorrowed: number }, Error> {
   return supplyToReserve(client, user, {
     reserve: {
       reserveId: params.supplyReserve.id,
@@ -77,8 +77,12 @@ export function supplyAndBorrow(
         user: evmAddress(user.account.address),
       }),
     )
-    .andThen((borrowReserveInfo) =>
-      borrow(client, {
+    .andThen((borrowReserveInfo) => {
+      const amountBorrowed =
+        Number(borrowReserveInfo!.userState!.borrowable.amount.value) *
+        (params.percentToBorrow ?? 0.25);
+
+      return borrow(client, {
         sender: evmAddress(user.account.address),
         reserve: {
           spoke: borrowReserveInfo!.spoke.address,
@@ -87,18 +91,15 @@ export function supplyAndBorrow(
         },
         amount: {
           erc20: {
-            value: bigDecimal(
-              Number(borrowReserveInfo!.userState!.borrowable.amount.value) *
-                (params.percentToBorrow ?? 0.25),
-            ),
+            value: bigDecimal(amountBorrowed),
           },
         },
       })
         .andThen(sendWith(user))
-        .andThen(client.waitForTransaction),
-    );
+        .andThen(client.waitForTransaction)
+        .map((txHash) => ({ txHash, amountBorrowed }));
+    });
 }
-
 // ** Deprecated this functions and use the ones above ** //
 // ------------------------------------------------------ //
 
