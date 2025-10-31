@@ -9,7 +9,6 @@ import {
   borrow,
   preview,
   reserve,
-  spoke,
   userBorrows,
 } from '@aave/client-next/actions';
 import {

@@ -1,12 +1,14 @@
 import type {
   AaveClient,
   BigDecimal,
+  BorrowRequest,
   Reserve,
   SupplyRequest,
   TxHash,
+  WithdrawRequest,
 } from '@aave/client-next';
 import { bigDecimal, evmAddress, type ResultAsync } from '@aave/client-next';
-import { borrow, reserve, supply } from '@aave/client-next/actions';
+import { borrow, reserve, supply, withdraw } from '@aave/client-next/actions';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 
@@ -18,6 +20,26 @@ export function supplyToReserve(
   request: SupplyRequest,
 ): ResultAsync<TxHash, Error> {
   return supply(client, request)
+    .andThen(sendWith(user))
+    .andThen(client.waitForTransaction);
+}
+
+export function borrowFromReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  request: BorrowRequest,
+): ResultAsync<TxHash, Error> {
+  return borrow(client, request)
+    .andThen(sendWith(user))
+    .andThen(client.waitForTransaction);
+}
+
+export function withdrawFromReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  request: WithdrawRequest,
+): ResultAsync<TxHash, Error> {
+  return withdraw(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
 }

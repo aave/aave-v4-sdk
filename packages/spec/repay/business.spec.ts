@@ -277,8 +277,7 @@ describe('Repaying Loans on Aave V4', () => {
           assertOk(borrowBefore);
           const positionBefore = borrowBefore.value.find((position) => {
             return (
-              position.reserve.asset.underlying.address ===
-              ETHEREUM_TOKENS.USDS
+              position.reserve.asset.underlying.address === ETHEREUM_TOKENS.USDS
             );
           });
           invariant(positionBefore, 'No position found');
@@ -335,8 +334,7 @@ describe('Repaying Loans on Aave V4', () => {
           assertOk(repayResult);
           const positionAfter = repayResult.value.find((position) => {
             return (
-              position.reserve.asset.underlying.address ===
-              ETHEREUM_TOKENS.USDC
+              position.reserve.asset.underlying.address === ETHEREUM_TOKENS.USDC
             );
           });
           invariant(positionAfter, 'No position found');

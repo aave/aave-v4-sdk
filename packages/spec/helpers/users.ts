@@ -4,15 +4,18 @@ import {
   bigDecimal,
   evmAddress,
 } from '@aave/client-next';
-import { withdraw } from '@aave/client-next/actions';
 import {
   ETHEREUM_SPOKES,
   ETHEREUM_TOKENS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { supplyToRandomERC20Reserve } from '../borrow/helper';
+import {
+  borrowFromReserve,
+  supplyToReserve,
+  withdrawFromReserve,
+} from '../helpers/borrowSupply';
 import {
   findReservesToBorrow,
   findReservesToSupply,
@@ -28,46 +31,14 @@ export const recreateUserActivities = async (
     asCollateral: true,
     spoke: ETHEREUM_SPOKES.ISO_STABLE_SPOKE,
   });
-  const borrowReserves = await findReservesToBorrow(client, user, {
-    spoke: ETHEREUM_SPOKES.ISO_STABLE_SPOKE,
-  });
+  assertOk(supplyReserves);
 
-  const setup = await fundErc20Address(evmAddress(user.account.address), {
-    address: ETHEREUM_TOKENS.WETH,
-    amount: bigDecimal('0.5'),
-  })
-    .andThen(() =>
-      fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_TOKENS.wstETH,
-        amount: bigDecimal('0.5'),
-      }),
-    )
-    .andThen(() =>
-      fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_TOKENS.GHO,
-        amount: bigDecimal('1000'),
-      }),
-    )
-    .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
-        token: ETHEREUM_TOKENS.GHO,
-        amount: bigDecimal('100'),
-      }),
-    )
-    .andThen(() =>
-      fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_TOKENS.USDC,
-        amount: bigDecimal('1000'),
-      }),
-    )
-    .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
-        token: ETHEREUM_TOKENS.USDC,
-        amount: bigDecimal('100'),
-      }),
-    )
-    .andThen((reserve) =>
-      withdraw(client, {
+  for (const reserve of supplyReserves.value) {
+    const result = await fundErc20Address(evmAddress(user.account.address), {
+      address: reserve.asset.underlying.address,
+      amount: bigDecimal('2'),
+    }).andThen(() =>
+      supplyToReserve(client, user, {
         reserve: {
           reserveId: reserve.id,
           chainId: reserve.chain.chainId,
@@ -75,22 +46,52 @@ export const recreateUserActivities = async (
         },
         amount: {
           erc20: {
-            exact: bigDecimal('50'),
+            value: bigDecimal('1.5'),
           },
         },
         sender: evmAddress(user.account.address),
-      }),
-    )
-    .andThen(sendWith(user))
-    .andThen(client.waitForTransaction)
-    .andThen(() =>
-      supplyAndBorrow(client, user, {
-        tokenToSupply: ETHEREUM_TOKENS.USDS,
-        tokenToBorrow: ETHEREUM_TOKENS.WETH,
-      }),
-    )
-    .andThen(() => supplyWSTETHAndBorrowETH(client, user));
-  assertOk(setup);
+      }).andThen(() =>
+        withdrawFromReserve(client, user, {
+          reserve: {
+            reserveId: reserve.id,
+            chainId: reserve.chain.chainId,
+            spoke: reserve.spoke.address,
+          },
+          amount: {
+            erc20: {
+              exact: bigDecimal('0.1'),
+            },
+          },
+          sender: evmAddress(user.account.address),
+        }),
+      ),
+    );
+    assertOk(result);
+  }
+
+  const borrowReserves = await findReservesToBorrow(client, user, {
+    spoke: ETHEREUM_SPOKES.ISO_STABLE_SPOKE,
+  });
+  assertOk(borrowReserves);
+
+  for (const reserve of borrowReserves.value) {
+    const result = await borrowFromReserve(client, user, {
+      sender: evmAddress(user.account.address),
+      reserve: {
+        reserveId: reserve.id,
+        chainId: reserve.chain.chainId,
+        spoke: reserve.spoke.address,
+      },
+      amount: {
+        erc20: {
+          value: bigDecimal(
+            Number(reserve.userState!.borrowable.amount.value) * 0.1,
+          ),
+        },
+      },
+    });
+    assertOk(result);
+  }
 };
 
 export const recreateUserSummary = async (
