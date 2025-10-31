@@ -19,13 +19,14 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
+
+import { supplyToReserve } from '../helpers/borrowSupply';
 import {
   findReservesToBorrow,
   findReservesToSupply,
 } from '../helpers/reserves';
 import { sleep } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
-import { supplyToReserve } from './helper';
 
 const user = await createNewWallet();
 
