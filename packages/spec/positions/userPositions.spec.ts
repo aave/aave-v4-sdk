@@ -6,31 +6,31 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet(
-  '0x619fd37ca0d128348949b8fb9e93d22176bea39251b73e7a3a9697c7462dd313',
+  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
 );
 
 describe('Aave V4 Positions Scenario', () => {
   describe('Given a user with more than one supply/borrow positions', () => {
-    beforeAll(async () => {
-      // NOTE: Enable when you want to recreate the user positions
-      // const setup = await fundErc20Address(evmAddress(user.account.address), {
-      //   address: ETHEREUM_WETH_ADDRESS,
-      //   amount: bigDecimal('0.5'),
-      // })
-      //   .andThen(() =>
-      //     fundErc20Address(evmAddress(user.account.address), {
-      //       address: ETHEREUM_WSTETH_ADDRESS,
-      //       amount: bigDecimal('0.5'),
-      //     }),
-      //   )
-      //   .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
-      //   .andThen(() => supplyWSTETHAndBorrowETH(client, user));
-      // assertOk(setup);
-    });
+    // NOTE: Enable when you want to recreate the user positions
+    // beforeAll(async () => {
+    // const setup = await fundErc20Address(evmAddress(user.account.address), {
+    //   address: ETHEREUM_WETH_ADDRESS,
+    //   amount: bigDecimal('0.5'),
+    // })
+    //   .andThen(() =>
+    //     fundErc20Address(evmAddress(user.account.address), {
+    //       address: ETHEREUM_WSTETH_ADDRESS,
+    //       amount: bigDecimal('0.5'),
+    //     }),
+    //   )
+    //   .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
+    //   .andThen(() => supplyWSTETHAndBorrowETH(client, user));
+    // assertOk(setup);
+    // });
 
     describe('When fetching a specific position', () => {
       it('Then it should return the position details', async () => {
@@ -72,7 +72,7 @@ describe('Aave V4 Positions Scenario', () => {
           user: evmAddress(user.account.address),
           filter: {
             tokens: [
-              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_TOKENS.USDS },
+              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_TOKENS.USDC },
             ],
           },
         });

@@ -15,13 +15,14 @@ import {
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-
-import { supplyAndBorrow } from '../helpers/borrowSupply';
+import {
+  supplyAndBorrow,
+  supplyWSTETHAndBorrowETH,
+} from '../helpers/borrowSupply';
 import {
   findReservesToBorrow,
   findReservesToSupply,
 } from '../helpers/reserves';
-import { supplyWSTETHAndBorrowETH } from './helper';
 
 const user = await createNewWallet();
 

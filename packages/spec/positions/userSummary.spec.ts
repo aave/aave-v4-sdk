@@ -9,7 +9,7 @@ import {
 import { beforeAll, describe, expect, it } from 'vitest';
 
 const user = await createNewWallet(
-  '0x78cb95218f49e3bf57fc7862de83c079da46c2055c433901e902dcd4a7d39ff0',
+  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
 );
 
 describe('Querying User Summary on Aave V4', () => {
