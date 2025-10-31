@@ -4,7 +4,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKES,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -65,7 +65,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -76,7 +76,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         expect(supplyPositions.value.length).toBe(3);
         supplyPositions.value.forEach((position) => {
           expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_CORE_ADDRESS,
+            ETHEREUM_SPOKES.CORE_SPOKE,
           );
         });
       });
@@ -103,7 +103,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -115,7 +115,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         expect(supplyPositions.value.length).toBeGreaterThan(3);
         supplyPositions.value.forEach((position) => {
           expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_CORE_ADDRESS,
+            ETHEREUM_SPOKES.CORE_SPOKE,
           );
         });
       });
@@ -161,7 +161,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -179,7 +179,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -201,7 +201,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -219,7 +219,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -242,7 +242,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -260,7 +260,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),

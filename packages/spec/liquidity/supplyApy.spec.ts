@@ -3,8 +3,8 @@ import { reserves, supplyApyHistory } from '@aave/client-next/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_SPOKES,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import { describe, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
@@ -21,8 +21,8 @@ describe('Supply APY History on Aave V4', () => {
           const usdcReserve = await reserves(client, {
             query: {
               spokeToken: {
-                token: ETHEREUM_USDC_ADDRESS,
-                spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+                token: ETHEREUM_TOKENS.USDC,
+                spoke: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
             },

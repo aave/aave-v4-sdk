@@ -4,10 +4,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_SPOKES,
+  ETHEREUM_TOKENS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
@@ -22,12 +20,12 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
+          address: ETHEREUM_TOKENS.USDC,
           amount: bigDecimal('200'),
           decimals: 6,
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
+            token: ETHEREUM_TOKENS.USDC,
             amount: bigDecimal('100'),
           }),
         );
@@ -38,7 +36,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
       it('Then the user has two active borrow positions with correct amounts', async () => {
         await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const firstBorrow = await findReserveToBorrow(client, user, {
-          token: ETHEREUM_WETH_ADDRESS,
+          token: ETHEREUM_TOKENS.WETH,
         }).andThen((reserve) =>
           borrow(client, {
             sender: evmAddress(user.account.address),
@@ -62,7 +60,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         assertOk(firstBorrow);
 
         const secondBorrow = await findReserveToBorrow(client, user, {
-          token: ETHEREUM_USDS_ADDRESS,
+          token: ETHEREUM_TOKENS.USDS,
         }).andThen((reserve) =>
           borrow(client, {
             sender: evmAddress(user.account.address),
@@ -91,7 +89,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -105,7 +103,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         // Verify first borrow position (USDC)
         const usdcPosition = borrowPositions.value.find(
           (position) =>
-            position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
+            position.reserve.asset.underlying.address === ETHEREUM_TOKENS.USDC,
         );
         expect(usdcPosition).toBeDefined();
         expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
@@ -116,7 +114,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         // Verify second borrow position (USDS)
         const usdsPosition = borrowPositions.value.find(
           (position) =>
-            position.reserve.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+            position.reserve.asset.underlying.address === ETHEREUM_TOKENS.USDS,
         );
         expect(usdsPosition).toBeDefined();
         expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(

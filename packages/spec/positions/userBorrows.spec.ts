@@ -4,8 +4,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_SPOKES,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
@@ -55,7 +55,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -88,7 +88,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKES.CORE_SPOKE,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -100,7 +100,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         expect(borrowPositions.value.length).toBeGreaterThanOrEqual(1);
         borrowPositions.value.forEach((position) => {
           expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_CORE_ADDRESS,
+            ETHEREUM_SPOKES.CORE_SPOKE,
           );
         });
       });
@@ -129,7 +129,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         const positions = await userPositions(client, {
           filter: {
             tokens: [
-              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_USDC_ADDRESS },
+              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_TOKENS.USDC },
             ],
           },
           user: evmAddress(user.account.address),

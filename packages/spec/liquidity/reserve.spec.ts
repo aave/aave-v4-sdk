@@ -9,10 +9,9 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_HUB_CORE_ADDRESS,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_HUBS,
+  ETHEREUM_SPOKES,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import { describe, expect, it } from 'vitest';
 import { assertNonEmptyArray, isOrderedNumerically } from '../test-utils';
@@ -26,8 +25,8 @@ describe('Aave V4 Reserve Scenario', () => {
         const listReserves = await reserves(client, {
           query: {
             hubToken: {
-              token: ETHEREUM_USDC_ADDRESS,
-              hub: ETHEREUM_HUB_CORE_ADDRESS,
+              token: ETHEREUM_TOKENS.USDC,
+              hub: ETHEREUM_HUBS.CORE_HUB,
               chainId: ETHEREUM_FORK_ID,
             },
           },
@@ -36,8 +35,8 @@ describe('Aave V4 Reserve Scenario', () => {
         assertNonEmptyArray(listReserves.value);
 
         listReserves.value.forEach((elem) => {
-          expect(elem.asset.hub.address).toEqual(ETHEREUM_HUB_CORE_ADDRESS);
-          expect(elem.asset.underlying.address).toEqual(ETHEREUM_USDC_ADDRESS);
+          expect(elem.asset.hub.address).toEqual(ETHEREUM_HUBS.CORE_HUB);
+          expect(elem.asset.underlying.address).toEqual(ETHEREUM_TOKENS.USDC);
         });
       });
     });
@@ -47,8 +46,8 @@ describe('Aave V4 Reserve Scenario', () => {
         const listReserves = await reserves(client, {
           query: {
             spokeToken: {
-              token: ETHEREUM_USDC_ADDRESS,
-              spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+              token: ETHEREUM_TOKENS.USDC,
+              spoke: ETHEREUM_SPOKES.CORE_SPOKE,
               chainId: ETHEREUM_FORK_ID,
             },
           },
@@ -57,8 +56,8 @@ describe('Aave V4 Reserve Scenario', () => {
         assertNonEmptyArray(listReserves.value);
 
         listReserves.value.forEach((elem) => {
-          expect(elem.spoke.address).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
-          expect(elem.asset.underlying.address).toEqual(ETHEREUM_USDC_ADDRESS);
+          expect(elem.spoke.address).toEqual(ETHEREUM_SPOKES.CORE_SPOKE);
+          expect(elem.asset.underlying.address).toEqual(ETHEREUM_TOKENS.USDC);
         });
       });
     });
@@ -69,7 +68,7 @@ describe('Aave V4 Reserve Scenario', () => {
           query: {
             spoke: {
               chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+              address: ETHEREUM_SPOKES.CORE_SPOKE,
             },
           },
         });
@@ -77,14 +76,14 @@ describe('Aave V4 Reserve Scenario', () => {
         assertNonEmptyArray(listReserves.value);
 
         listReserves.value.forEach((elem) => {
-          expect(elem.spoke.address).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+          expect(elem.spoke.address).toEqual(ETHEREUM_SPOKES.CORE_SPOKE);
         });
       });
     });
 
     describe('When fetching reserves for a specific tokens', () => {
       it('Then it should return the reserves for the specific tokens', async () => {
-        const tokens = [ETHEREUM_USDC_ADDRESS, ETHEREUM_WETH_ADDRESS];
+        const tokens = [ETHEREUM_TOKENS.USDC, ETHEREUM_TOKENS.WETH];
         const listReserves = await reserves(client, {
           query: {
             tokens: tokens.map((token) => ({
@@ -124,7 +123,7 @@ describe('Aave V4 Reserve Scenario', () => {
           query: {
             hub: {
               chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_HUB_CORE_ADDRESS,
+              address: ETHEREUM_HUBS.CORE_HUB,
             },
           },
         });
@@ -132,7 +131,7 @@ describe('Aave V4 Reserve Scenario', () => {
         assertNonEmptyArray(listReserves.value);
 
         listReserves.value.forEach((elem) => {
-          expect(elem.asset.hub.address).toEqual(ETHEREUM_HUB_CORE_ADDRESS);
+          expect(elem.asset.hub.address).toEqual(ETHEREUM_HUBS.CORE_HUB);
         });
       });
     });

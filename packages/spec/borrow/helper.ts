@@ -11,8 +11,8 @@ import {
 import { reserves, supply } from '@aave/client-next/actions';
 import {
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_SPOKES,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
@@ -23,6 +23,7 @@ export function supplyToReserve(
   request: SupplyRequest,
 ): ResultAsync<TxHash, Error> {
   return supply(client, request)
+    .andTee((response) => console.log('response', response))
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
 }
@@ -37,7 +38,7 @@ export function findReserveToBorrow(
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: params.token,
-        spoke: params.spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
+        spoke: params.spoke ?? ETHEREUM_SPOKES.ISO_GOV_SPOKE,
       },
     },
     user: evmAddress(user.account.address),
@@ -68,7 +69,7 @@ export function findReserveToSupply(
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
         token: params.token,
-        spoke: params.spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
+        spoke: params.spoke ?? ETHEREUM_SPOKES.ISO_GOV_SPOKE,
       },
     },
     user: evmAddress(user.account.address),
@@ -101,8 +102,8 @@ export function findReserveNativeSupply(
     query: {
       spokeToken: {
         chainId: ETHEREUM_FORK_ID,
-        token: ETHEREUM_WETH_ADDRESS,
-        spoke: spoke ?? ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
+        token: ETHEREUM_TOKENS.WETH,
+        spoke: spoke ?? ETHEREUM_SPOKES.ISO_GOV_SPOKE,
       },
     },
     user: evmAddress(user.account.address),
@@ -110,7 +111,7 @@ export function findReserveNativeSupply(
   }).map((listReserves) => {
     invariant(
       listReserves.length > 0,
-      `No reserves found for the token ${ETHEREUM_WETH_ADDRESS}`,
+      `No reserves found for the token ${ETHEREUM_TOKENS.WETH}`,
     );
     const reserveToSupply = listReserves.find(
       (reserve) =>
@@ -120,7 +121,7 @@ export function findReserveNativeSupply(
     );
     invariant(
       reserveToSupply,
-      `No reserve found to supply to for the token ${ETHEREUM_WETH_ADDRESS}`,
+      `No reserve found to supply to for the token ${ETHEREUM_TOKENS.WETH}`,
     );
     return reserveToSupply;
   });

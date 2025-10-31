@@ -15,8 +15,7 @@ import {
 import {
   client,
   createNewWallet,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_TOKENS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
@@ -39,7 +38,7 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user supplies tokens to the reserve', () => {
       beforeAll(async () => {
         const usdcReserve = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
+          (ele) => ele.asset.underlying.address === ETHEREUM_TOKENS.USDC,
         )!;
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: usdcReserve.asset.underlying.address,
@@ -51,7 +50,7 @@ describe('Supplying Assets on Aave V4', () => {
 
       it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
         const usdcReserve = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
+          (ele) => ele.asset.underlying.address === ETHEREUM_TOKENS.USDC,
         )!;
         const amountToSupply = bigDecimal('9');
         const result = await supply(client, {
@@ -105,7 +104,7 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user wants to preview the supply action before performing it', () => {
       it('Then the user can review the supply details before proceeding', async () => {
         const reserveToSupply = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+          (ele) => ele.asset.underlying.address === ETHEREUM_TOKENS.USDS,
         )!;
         const previewResult = await preview(
           client,
@@ -134,6 +133,7 @@ describe('Supplying Assets on Aave V4', () => {
           netBalance: expect.any(Object),
           netCollateral: expect.any(Object),
           netApy: expect.any(Object),
+          riskPremium: expect.any(Object),
         });
       });
     });
@@ -141,7 +141,7 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user supplies tokens with collateral disabled', () => {
       beforeAll(async () => {
         const usdsReserve = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+          (ele) => ele.asset.underlying.address === ETHEREUM_TOKENS.USDS,
         )!;
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: usdsReserve.asset.underlying.address,
@@ -153,7 +153,7 @@ describe('Supplying Assets on Aave V4', () => {
 
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const usdsReserve = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+          (ele) => ele.asset.underlying.address === ETHEREUM_TOKENS.USDS,
         )!;
         const result = await supplyToReserve(client, user, {
           reserve: {
@@ -292,7 +292,7 @@ describe('Supplying Assets on Aave V4', () => {
     });
     describe('When the user wants to preview the supply action before performing it', () => {
       it('Then the user can review the supply details before proceeding', async () => {
-        const amountToSupply = bigDecimal('0.01');
+        const amountToSupply = bigDecimal('0.1');
         const reservePreview = await preview(
           client,
           {

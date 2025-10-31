@@ -3,8 +3,7 @@ import { hub, hubAssets, hubs } from '@aave/client-next/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import { describe, expect, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
@@ -26,7 +25,7 @@ describe('Aave V4 Hub Scenarios', () => {
     });
 
     describe('When fetching hubs by tokens)', () => {
-      const tokens = [ETHEREUM_USDC_ADDRESS, ETHEREUM_WETH_ADDRESS];
+      const tokens = [ETHEREUM_TOKENS.USDC, ETHEREUM_TOKENS.WETH];
 
       it('Then the list of hubs should contains assets from the query', async () => {
         const listHubs = await hubs(client, {

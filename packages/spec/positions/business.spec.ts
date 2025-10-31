@@ -15,28 +15,58 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDS_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToRandomERC20Reserve, supplyToReserve } from '../borrow/helper';
-import { supplyAndBorrow } from '../repay/helper';
+import { supplyAndBorrow, supplyToReserve } from '../helpers/borrowSupply';
+import {
+  findReservesToBorrow,
+  findReservesToSupply,
+} from '../helpers/reserves';
 
 const user = await createNewWallet();
 
 describe('Aave V4 Health Factor Positions Scenarios', () => {
+  let usedReserves: { borrowReserve: Reserve; supplyReserve: Reserve };
+
+  beforeAll(async () => {
+    const supplyReserve = await findReservesToSupply(client, user, {
+      asCollateral: true,
+    });
+    assertOk(supplyReserve);
+
+    // NOTE: The borrow reserve must be the same spoke as the supply reserve
+    const borrowReserve = await findReservesToBorrow(client, user, {
+      spoke: supplyReserve.value[0]!.spoke.address,
+    });
+    assertOk(borrowReserve);
+    usedReserves = {
+      borrowReserve: borrowReserve.value[1]!,
+      supplyReserve: supplyReserve.value[0]!,
+    };
+  });
+
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.5'),
+          address: usedReserves.supplyReserve.asset.underlying.address,
+          amount: bigDecimal('10'),
+          decimals: usedReserves.supplyReserve.asset.underlying.info.decimals,
         }).andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('0.3'),
+          supplyToReserve(client, user, {
+            reserve: {
+              reserveId: usedReserves.supplyReserve.id,
+              chainId: usedReserves.supplyReserve.chain.chainId,
+              spoke: usedReserves.supplyReserve.spoke.address,
+            },
+            amount: {
+              erc20: {
+                value: bigDecimal('10'),
+              },
+            },
+            sender: evmAddress(user.account.address),
           }),
         );
 
@@ -56,28 +86,20 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
     });
 
     describe('And the user has a one borrow position', () => {
-      let usedReserves: { borrowReserve: Reserve; supplyReserve: Reserve };
-
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.5'),
-        })
-          .andThen(() =>
-            fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_USDS_ADDRESS,
-              amount: bigDecimal('500'),
-            }),
-          )
-          .andThen(() =>
-            supplyAndBorrow(client, user, {
-              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
-              tokenToBorrow: ETHEREUM_USDS_ADDRESS,
-            }),
-          );
+          address: usedReserves.supplyReserve.asset.underlying.address,
+          amount: bigDecimal('10'),
+          decimals: usedReserves.supplyReserve.asset.underlying.info.decimals,
+        }).andThen(() =>
+          supplyAndBorrow(client, user, {
+            supplyReserve: usedReserves.supplyReserve,
+            borrowReserve: usedReserves.borrowReserve,
+            amountToSupply: bigDecimal('9'),
+          }),
+        );
 
         assertOk(setup);
-        usedReserves = setup.value;
       }, 60_000);
 
       describe('When the user checks the health factor', () => {
@@ -250,7 +272,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {
-                exact: bigDecimal('0.02'),
+                exact: bigDecimal('1'),
               },
             },
           })

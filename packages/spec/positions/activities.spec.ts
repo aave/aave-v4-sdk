@@ -9,21 +9,22 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKES,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
+import { recreateUserActivities } from './helper';
 
 const user = await createNewWallet(
-  '0x8970d4cd97cbd4d0c589d6347be12ac2ae36e008d12b5ec991001b415c3b4b1b',
+  '0xc36ff2e234b630e453a7c876607b10d24ff08aef2ab49a73b9c2bb6c1d564a8e',
 );
 
 describe('Query User Activities on Aave V4', () => {
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
       // NOTE: Enable when you want to recreate the user activities
-      // await recreateUserActivities(client, user);
+      await recreateUserActivities(client, user);
     }, 160_000);
 
     describe('When fetching the user activities by activity type filter', () => {
@@ -95,7 +96,7 @@ describe('Query User Activities on Aave V4', () => {
           user: evmAddress(user.account.address),
           query: {
             spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+              address: ETHEREUM_SPOKES.CORE_SPOKE,
               chainId: ETHEREUM_FORK_ID,
             },
           },

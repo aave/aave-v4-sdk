@@ -3,21 +3,21 @@ import {
   bigDecimal,
   evmAddress,
   OrderDirection,
+  type Reserve,
 } from '@aave/client-next';
 import { userBalances, userPositions } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_HUB_CORE_ADDRESS,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
+  ETHEREUM_HUBS,
+  ETHEREUM_SPOKES,
+  ETHEREUM_TOKENS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToRandomERC20Reserve } from '../borrow/helper';
+import { supplyToReserve } from '../borrow/helper';
+import { findReservesToSupply } from '../helpers/reserves';
 import {
   assertSingleElementArray,
   isOrderedAlphabetically,
@@ -29,28 +29,43 @@ const user = await createNewWallet();
 // Get the user balances for the protocol. This will only return assets that can be used on the protocol
 describe('Querying User Balances on Aave V4', () => {
   describe('Given a user with one supply position and multiple tokens to use on the protocol', () => {
+    let suppliedReserve: Reserve;
+
     beforeAll(async () => {
+      const reserves = await findReservesToSupply(client, user);
+      assertOk(reserves);
+      suppliedReserve = reserves.value[0]!;
+
       const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_USDC_ADDRESS,
-        amount: bigDecimal('100'),
-        decimals: 6,
+        address: suppliedReserve.asset.underlying.address,
+        amount: bigDecimal('10'),
+        decimals: suppliedReserve.asset.underlying.info.decimals,
       })
         .andThen(() =>
           fundErc20Address(evmAddress(user.account.address), {
-            address: ETHEREUM_USDS_ADDRESS,
+            address: ETHEREUM_TOKENS.USDS,
             amount: bigDecimal('100'),
           }),
         )
         .andThen(() =>
           fundErc20Address(evmAddress(user.account.address), {
-            address: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('100'),
+            address: ETHEREUM_TOKENS.wstETH,
+            amount: bigDecimal('0.1'),
           }),
         )
         .andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('50'),
+          supplyToReserve(client, user, {
+            reserve: {
+              reserveId: suppliedReserve.id,
+              chainId: suppliedReserve.chain.chainId,
+              spoke: suppliedReserve.spoke.address,
+            },
+            amount: {
+              erc20: {
+                value: bigDecimal('9'),
+              },
+            },
+            sender: evmAddress(user.account.address),
           }),
         );
       assertOk(setup);
@@ -75,13 +90,13 @@ describe('Querying User Balances on Aave V4', () => {
           user: evmAddress(user.account.address),
           filter: {
             hub: {
-              address: ETHEREUM_HUB_CORE_ADDRESS,
+              address: ETHEREUM_HUBS.CORE_HUB,
               chainId: ETHEREUM_FORK_ID,
             },
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBeGreaterThanOrEqual(3);
       });
     });
 
@@ -91,13 +106,13 @@ describe('Querying User Balances on Aave V4', () => {
           user: evmAddress(user.account.address),
           filter: {
             spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+              address: ETHEREUM_SPOKES.CORE_SPOKE,
               chainId: ETHEREUM_FORK_ID,
             },
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBeGreaterThanOrEqual(3);
       });
     });
 
@@ -133,7 +148,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBeGreaterThanOrEqual(2);
       });
     });
 

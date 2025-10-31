@@ -7,11 +7,7 @@ import {
   type ResultAsync,
 } from '@aave/client-next';
 import { borrow } from '@aave/client-next/actions';
-import {
-  ETHEREUM_SPOKE_EMODE_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
-} from '@aave/client-next/test-utils';
+import { ETHEREUM_SPOKES, ETHEREUM_TOKENS } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import {
@@ -86,8 +82,8 @@ export function supplyWSTETHAndBorrowETH(
   user: WalletClient<Transport, Chain, Account>,
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
   return findReserveToSupply(client, user, {
-    token: ETHEREUM_WSTETH_ADDRESS,
-    spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+    token: ETHEREUM_TOKENS.wstETH,
+    spoke: ETHEREUM_SPOKES.E_MODE_SPOKE,
   }).andThen((reserveToSupply) =>
     supplyToReserve(client, user, {
       reserve: {
@@ -102,8 +98,8 @@ export function supplyWSTETHAndBorrowETH(
       .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
       .andThen(() =>
         findReserveToBorrow(client, user, {
-          token: ETHEREUM_WETH_ADDRESS,
-          spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+          token: ETHEREUM_TOKENS.WETH,
+          spoke: ETHEREUM_SPOKES.E_MODE_SPOKE,
         }),
       )
       .andThen((reserveToBorrow) =>

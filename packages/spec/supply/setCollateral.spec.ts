@@ -8,7 +8,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_TOKENS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
@@ -22,13 +22,13 @@ describe('Setting Supply as Collateral in Aave V4', () => {
   describe('Given a user with a supply position disabled as collateral', () => {
     beforeAll(async () => {
       const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_USDC_ADDRESS,
+        address: ETHEREUM_TOKENS.USDC,
         amount: bigDecimal('100'),
         decimals: 6,
       })
         .andThen(() =>
           findReserveToSupply(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
+            token: ETHEREUM_TOKENS.USDC,
           }),
         )
         .andThen((reserve) =>

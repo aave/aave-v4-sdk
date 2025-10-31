@@ -4,7 +4,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertSingleElementArray } from '../test-utils';
@@ -72,7 +72,7 @@ describe('Aave V4 Positions Scenario', () => {
           user: evmAddress(user.account.address),
           filter: {
             tokens: [
-              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_USDS_ADDRESS },
+              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_TOKENS.USDS },
             ],
           },
         });

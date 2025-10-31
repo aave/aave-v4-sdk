@@ -14,7 +14,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKES,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -30,7 +30,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
       const managers = await spokePositionManagers(client, {
         spoke: {
           chainId: ETHEREUM_FORK_ID,
-          address: ETHEREUM_SPOKE_CORE_ADDRESS,
+          address: ETHEREUM_SPOKES.CORE_SPOKE,
         },
         pageSize: PageSize.Ten,
       });
@@ -48,7 +48,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
         const userManagers = await spokeUserPositionManagers(client, {
           spoke: {
             chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            address: ETHEREUM_SPOKES.CORE_SPOKE,
           },
           user: evmAddress(user.account.address),
           pageSize: PageSize.Ten,
@@ -63,7 +63,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
       it("Then the position manager is enabled and appears in the user's authorized managers list", async () => {
         const authResult = await setSpokeUserPositionManager(client, {
           spoke: {
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            address: ETHEREUM_SPOKES.CORE_SPOKE,
             chainId: ETHEREUM_FORK_ID,
           },
           manager: managerAddress[0]!,
@@ -77,7 +77,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
         const userManagers = await spokeUserPositionManagers(client, {
           spoke: {
             chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            address: ETHEREUM_SPOKES.CORE_SPOKE,
           },
           user: evmAddress(user.account.address),
           pageSize: PageSize.Ten,
@@ -106,7 +106,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
         const userManagers = await spokeUserPositionManagers(client, {
           spoke: {
             chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            address: ETHEREUM_SPOKES.CORE_SPOKE,
           },
           user: evmAddress(user.account.address),
           pageSize: PageSize.Ten,
@@ -116,7 +116,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
         if (userManagers.value.items.length === 0) {
           const setup = await setSpokeUserPositionManager(client, {
             spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+              address: ETHEREUM_SPOKES.CORE_SPOKE,
               chainId: ETHEREUM_FORK_ID,
             },
             manager: userManagers.value.items[0]!.address,
@@ -134,7 +134,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
         const allUserManagers = await spokeUserPositionManagers(client, {
           spoke: {
             chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            address: ETHEREUM_SPOKES.CORE_SPOKE,
           },
           user: evmAddress(user.account.address),
           pageSize: PageSize.Ten,
@@ -150,7 +150,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
 
         const revokeResult = await setSpokeUserPositionManager(client, {
           spoke: {
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            address: ETHEREUM_SPOKES.CORE_SPOKE,
             chainId: ETHEREUM_FORK_ID,
           },
           manager: managerToUnauthorize,
@@ -165,7 +165,7 @@ describe('Authorizing Position Managers on Aave V4', () => {
         const revokedUserManagers = await spokeUserPositionManagers(client, {
           spoke: {
             chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            address: ETHEREUM_SPOKES.CORE_SPOKE,
           },
           user: evmAddress(user.account.address),
           pageSize: PageSize.Ten,

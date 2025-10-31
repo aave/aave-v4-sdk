@@ -3,8 +3,7 @@ import { exchangeRate } from '@aave/client-next/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_TOKENS,
 } from '@aave/client-next/test-utils';
 import { describe, expect, it } from 'vitest';
 
@@ -16,7 +15,7 @@ describe('Exchange Rate on Aave V4', () => {
           from: {
             erc20: {
               chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_USDC_ADDRESS,
+              address: ETHEREUM_TOKENS.USDC,
             },
           },
           to: Currency.Usd,
@@ -55,7 +54,7 @@ describe('Exchange Rate on Aave V4', () => {
             from: {
               erc20: {
                 chainId: ETHEREUM_FORK_ID,
-                address: ETHEREUM_WETH_ADDRESS,
+                address: ETHEREUM_TOKENS.WETH,
               },
             },
             to: currency,
