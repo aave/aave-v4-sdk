@@ -172,6 +172,7 @@ type Chain {
   nativeWrappedToken: EvmAddress!
   nativeInfo: TokenInfo!
   nativeGateway: EvmAddress!
+  signatureGateway: EvmAddress!
 }
 
 """A supported blockchain chain ID"""
@@ -584,6 +585,9 @@ input LiquidatePositionRequest {
 
   """The user to liquidate"""
   user: EvmAddress!
+
+  """If you would like to receive shares over the asset"""
+  receiveShares: Boolean! = false
 }
 
 type LiquidatedActivity {

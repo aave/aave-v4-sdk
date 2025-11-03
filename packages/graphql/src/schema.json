@@ -682,6 +682,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "signatureGateway",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
