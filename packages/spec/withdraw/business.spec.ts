@@ -3,6 +3,7 @@ import { preview, userSupplies, withdraw } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
+  ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
@@ -12,11 +13,8 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeEach, describe, expect, it } from 'vitest';
-import {
-  findReserveToSupply,
-  supplyToNativeReserve,
-  supplyToReserve,
-} from '../borrow/helper';
+import { supplyToNativeReserve, supplyToReserve } from '../borrow/helper';
+import { findReservesToSupply } from '../helpers/reserves';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -32,14 +30,15 @@ describe('Withdrawing Assets on Aave V4', () => {
         amount: bigDecimal('100'),
         decimals: 6,
       }).andThen(() =>
-        findReserveToSupply(client, user, {
+        findReservesToSupply(client, user, {
           token: ETHEREUM_USDC_ADDRESS,
+          spoke: ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
         }).andThen((reserve) =>
           supplyToReserve(client, user, {
             reserve: {
-              reserveId: reserve.id,
-              chainId: reserve.chain.chainId,
-              spoke: reserve.spoke.address,
+              reserveId: reserve[0].id,
+              chainId: reserve[0].chain.chainId,
+              spoke: reserve[0].spoke.address,
             },
             amount: {
               erc20: {
@@ -52,7 +51,7 @@ describe('Withdrawing Assets on Aave V4', () => {
       );
 
       assertOk(setup);
-      reserve = setup.value;
+      reserve = setup.value[0];
     });
 
     describe('When the user withdraws part of their supplied tokens', () => {

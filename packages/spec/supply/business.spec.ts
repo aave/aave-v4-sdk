@@ -28,15 +28,15 @@ import { sleep } from '../helpers/tools';
 const user = await createNewWallet();
 
 describe('Supplying Assets on Aave V4', () => {
-  let listReserves: Reserve[];
-
-  beforeAll(async () => {
-    const result = await findReservesToSupply(client, user);
-    assertOk(result);
-    listReserves = result.value;
-  });
   describe('Given a user and a reserve', () => {
-    describe('When the user supplies tokens to the reserve', () => {
+    let listReserves: Reserve[];
+
+    beforeAll(async () => {
+      const result = await findReservesToSupply(client, user);
+      assertOk(result);
+      listReserves = result.value;
+    });
+    describe('When the user supplies tokens to a reserve', () => {
       beforeAll(async () => {
         const usdcReserve = listReserves.find(
           (ele) => ele.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
@@ -145,13 +145,14 @@ describe('Supplying Assets on Aave V4', () => {
         )!;
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: usdsReserve.asset.underlying.address,
-          amount: bigDecimal('1'),
+          amount: bigDecimal('10'),
           decimals: usdsReserve.asset.underlying.info.decimals,
         });
         assertOk(setup);
       });
 
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
+        const amountToSupply = bigDecimal('9');
         const usdsReserve = listReserves.find(
           (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
         )!;
@@ -163,7 +164,7 @@ describe('Supplying Assets on Aave V4', () => {
           },
           amount: {
             erc20: {
-              value: bigDecimal('1'),
+              value: amountToSupply,
             },
           },
           sender: evmAddress(user.account.address),
@@ -194,7 +195,7 @@ describe('Supplying Assets on Aave V4', () => {
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toEqual(false);
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
-          bigDecimal('1'),
+          amountToSupply,
           3,
         );
       });
@@ -202,6 +203,7 @@ describe('Supplying Assets on Aave V4', () => {
 
     describe('When the user supplies tokens using a valid permit signature', () => {
       let reserveWithPermit: Reserve;
+
       beforeAll(async () => {
         reserveWithPermit = listReserves.find(
           (ele) => ele.asset.underlying.permitSupported === true,
@@ -209,6 +211,7 @@ describe('Supplying Assets on Aave V4', () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: reserveWithPermit.asset.underlying.address,
           amount: bigDecimal('1'),
+          decimals: reserveWithPermit.asset.underlying.info.decimals,
         });
 
         assertOk(setup);
@@ -285,9 +288,11 @@ describe('Supplying Assets on Aave V4', () => {
     let nativeReserveToSupply: Reserve;
 
     beforeAll(async () => {
-      nativeReserveToSupply = listReserves.find(
-        (ele) => ele.asset.underlying.isWrappedNativeToken === true,
-      )!;
+      const setup = await findReservesToSupply(client, user, {
+        native: true,
+      });
+      assertOk(setup);
+      nativeReserveToSupply = setup.value[0];
       // NOTE: No need to fund native as by default the use has a balance of native tokens
     });
     describe('When the user wants to preview the supply action before performing it', () => {
