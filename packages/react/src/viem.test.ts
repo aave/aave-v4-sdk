@@ -49,6 +49,10 @@ describe('Given the viem adapters are used', () => {
         explorerUrl: 'https://etherscan.io',
         isTestnet: false,
         nativeWrappedToken: ETHEREUM_WETH_ADDRESS,
+        nativeGateway: evmAddress('0x0000000000000000000000000000000000000001'),
+        signatureGateway: evmAddress(
+          '0x0000000000000000000000000000000000000002',
+        ),
         nativeInfo: {
           __typename: 'TokenInfo',
           name: 'Ethereum',
