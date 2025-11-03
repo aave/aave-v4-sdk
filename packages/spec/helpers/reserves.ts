@@ -56,3 +56,41 @@ export function findReservesToSupply(
     return reservesToSupply;
   });
 }
+
+export function findReservesToBorrow(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  params: {
+    spoke?: EvmAddress;
+    token?: EvmAddress;
+  } = {},
+): ResultAsync<NonEmptyTuple<Reserve>, Error> {
+  return reserves(client, {
+    query:
+      params.spoke && params.token
+        ? {
+            spokeToken: {
+              chainId: ETHEREUM_FORK_ID,
+              token: params.token,
+              spoke: params.spoke,
+            },
+          }
+        : params.spoke
+          ? {
+              spoke: {
+                chainId: ETHEREUM_FORK_ID,
+                address: params.spoke,
+              },
+            }
+          : { chainIds: [ETHEREUM_FORK_ID] },
+    user: evmAddress(user.account.address),
+    filter: ReservesRequestFilter.Borrow,
+  }).map((listReserves) => {
+    assertNonEmptyArray(listReserves);
+    const reservesToBorrow = listReserves.filter(
+      (reserve) => reserve.canBorrow === true,
+    );
+    assertNonEmptyArray(reservesToBorrow);
+    return reservesToBorrow;
+  });
+}
