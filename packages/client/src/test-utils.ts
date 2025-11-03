@@ -14,7 +14,6 @@ import {
   type Chain,
   createPublicClient,
   createWalletClient,
-  defineChain,
   http,
   parseEther,
   parseUnits,
@@ -24,6 +23,7 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AaveClient } from './AaveClient';
 import { local, staging } from './environments';
+import { ethereumForkChain } from './viem';
 
 export const environment =
   import.meta.env.ENVIRONMENT === 'local' ? local : staging;
@@ -79,24 +79,6 @@ export const ETHEREUM_FORK_RPC_URL = import.meta.env
 
 export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
   .ETHEREUM_TENDERLY_ADMIN_RPC;
-
-export const ethereumForkChain: Chain = defineChain({
-  id: ETHEREUM_FORK_ID,
-  name: 'Ethereum Fork',
-  network: 'ethereum-fork',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: [ETHEREUM_FORK_RPC_URL],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Ethereum Fork Explorer',
-      url: import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
-    },
-  },
-});
 
 export const client = AaveClient.create({
   environment,
