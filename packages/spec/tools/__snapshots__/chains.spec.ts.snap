@@ -4,11 +4,12 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to list available chai
 [
   {
     "__typename": "Chain",
-    "chainId": 1,
+    "chainId": 123456789,
     "explorerUrl": "https://etherscan.io",
     "icon": "https://statics.aave.com/ethereum.svg",
-    "isTestnet": false,
-    "name": "Ethereum",
+    "isTestnet": true,
+    "name": "ForkedEthereum",
+    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
     "nativeInfo": {
       "__typename": "TokenInfo",
       "decimals": 18,
@@ -17,19 +18,23 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to list available chai
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
 ]
 `;
 
-exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter MAINNET_ONLY 1`] = `
+exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter MAINNET_ONLY 1`] = `[]`;
+
+exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter TESTNET_ONLY 1`] = `
 [
   {
     "__typename": "Chain",
-    "chainId": 1,
+    "chainId": 123456789,
     "explorerUrl": "https://etherscan.io",
     "icon": "https://statics.aave.com/ethereum.svg",
-    "isTestnet": false,
-    "name": "Ethereum",
+    "isTestnet": true,
+    "name": "ForkedEthereum",
+    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
     "nativeInfo": {
       "__typename": "TokenInfo",
       "decimals": 18,
@@ -38,8 +43,7 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to list available chai
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
 ]
 `;
-
-exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter TESTNET_ONLY 1`] = `[]`;
