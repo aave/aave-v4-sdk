@@ -59,7 +59,7 @@ export function findReserveToBorrow(
   });
 }
 
-export function supplyToNativeReserve(
+export function supplyNativeTokenToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   amount: BigDecimal,
