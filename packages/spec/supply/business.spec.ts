@@ -20,7 +20,9 @@ import {
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
+import type { NonEmptyTuple } from 'type-fest';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { supplyToReserve } from '../borrow/helper';
 import { findReservesToSupply } from '../helpers/reserves';
 import { sleep } from '../helpers/tools';
@@ -29,7 +31,7 @@ const user = await createNewWallet();
 
 describe('Supplying Assets on Aave V4', () => {
   describe('Given a user and a reserve', () => {
-    let listReserves: Reserve[];
+    let listReserves: NonEmptyTuple<Reserve>;
 
     beforeAll(async () => {
       const result = await findReservesToSupply(client, user);
