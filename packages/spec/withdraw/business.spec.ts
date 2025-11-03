@@ -174,7 +174,7 @@ describe('Withdrawing Assets on Aave V4', () => {
   });
 
   describe('Given a user and a reserve that supports withdrawals in native tokens', () => {
-    let nativeReserve: Reserve;
+    let reserveSupportingNative: Reserve;
     const amountToSupply = 0.05;
 
     beforeEach(async () => {
@@ -185,7 +185,7 @@ describe('Withdrawing Assets on Aave V4', () => {
       );
 
       assertOk(setup);
-      nativeReserve = setup.value;
+      reserveSupportingNative = setup.value;
     }, 50_000);
 
     describe('When the user withdraws part of their supplied native tokens', () => {
@@ -196,9 +196,9 @@ describe('Withdrawing Assets on Aave V4', () => {
         );
         const withdrawResult = await withdraw(client, {
           reserve: {
-            spoke: nativeReserve.spoke.address,
-            reserveId: nativeReserve.id,
-            chainId: nativeReserve.chain.chainId,
+            spoke: reserveSupportingNative.spoke.address,
+            reserveId: reserveSupportingNative.id,
+            chainId: reserveSupportingNative.chain.chainId,
           },
           sender: evmAddress(user.account.address),
           amount: {
@@ -212,8 +212,8 @@ describe('Withdrawing Assets on Aave V4', () => {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: nativeReserve.spoke.address,
-                    chainId: nativeReserve.chain.chainId,
+                    address: reserveSupportingNative.spoke.address,
+                    chainId: reserveSupportingNative.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
@@ -236,9 +236,9 @@ describe('Withdrawing Assets on Aave V4', () => {
         );
         const withdrawResult = await withdraw(client, {
           reserve: {
-            spoke: nativeReserve.spoke.address,
-            reserveId: nativeReserve.id,
-            chainId: nativeReserve.chain.chainId,
+            spoke: reserveSupportingNative.spoke.address,
+            reserveId: reserveSupportingNative.id,
+            chainId: reserveSupportingNative.chain.chainId,
           },
           sender: evmAddress(user.account.address),
           amount: {
@@ -252,8 +252,8 @@ describe('Withdrawing Assets on Aave V4', () => {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: nativeReserve.spoke.address,
-                    chainId: nativeReserve.chain.chainId,
+                    address: reserveSupportingNative.spoke.address,
+                    chainId: reserveSupportingNative.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
@@ -262,11 +262,11 @@ describe('Withdrawing Assets on Aave V4', () => {
           );
         assertOk(withdrawResult);
         if (withdrawResult.value.length > 0) {
-          // check exactly position nativeReserve is closed, in case other tests failed
+          // check position is closed, in case other tests failed
           assertSingleElementArray(withdrawResult.value);
           expect(
             withdrawResult.value[0].reserve.asset.underlying.address,
-          ).not.toBe(nativeReserve.asset.underlying.address);
+          ).not.toBe(reserveSupportingNative.asset.underlying.address);
         }
 
         const balanceAfter = await getNativeBalance(
