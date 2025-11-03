@@ -2,15 +2,15 @@ import {
   type AaveClient,
   type EvmAddress,
   evmAddress,
-  invariant,
-  ok,
   type Reserve,
   ReservesRequestFilter,
   type ResultAsync,
 } from '@aave/client-next';
 import { reserves } from '@aave/client-next/actions';
 import { ETHEREUM_FORK_ID } from '@aave/client-next/test-utils';
+import type { NonEmptyTuple } from 'type-fest';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
+import { assertNonEmptyArray } from '../test-utils';
 
 export function findReservesToSupply(
   client: AaveClient,
@@ -21,7 +21,7 @@ export function findReservesToSupply(
     asCollateral?: boolean;
     native?: boolean;
   } = {},
-): ResultAsync<[Reserve, ...Reserve[]], Error> {
+): ResultAsync<NonEmptyTuple<Reserve>, Error> {
   return reserves(client, {
     query:
       params.token && params.spoke
@@ -42,9 +42,8 @@ export function findReservesToSupply(
           : { chainIds: [ETHEREUM_FORK_ID] },
     user: evmAddress(user.account.address),
     filter: ReservesRequestFilter.Supply,
-  }).andThen((listReserves) => {
-    invariant(listReserves.length > 0, 'No reserves found');
-
+  }).map((listReserves) => {
+    assertNonEmptyArray(listReserves);
     const reservesToSupply = listReserves.filter(
       (reserve) =>
         reserve.canSupply &&
@@ -53,10 +52,7 @@ export function findReservesToSupply(
           ? reserve.asset.underlying.isWrappedNativeToken === true
           : true),
     );
-    invariant(
-      reservesToSupply.length > 0,
-      'No reserves found with the given parameters',
-    );
-    return ok(reservesToSupply as [Reserve, ...Reserve[]]);
+    assertNonEmptyArray(reservesToSupply);
+    return reservesToSupply;
   });
 }

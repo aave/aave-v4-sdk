@@ -23,8 +23,8 @@ describe('Withdrawing Assets on Aave V4', () => {
 
     beforeEach(async () => {
       const setup = await findReservesToSupply(client, user).andThen(
-        (listReserves) => {
-          return fundErc20Address(evmAddress(user.account!.address), {
+        (listReserves) =>
+          fundErc20Address(evmAddress(user.account!.address), {
             address: listReserves[0].asset.underlying.address,
             amount: bigDecimal('1'),
             decimals: listReserves[0].asset.underlying.info.decimals,
@@ -42,12 +42,11 @@ describe('Withdrawing Assets on Aave V4', () => {
               },
               sender: evmAddress(user.account.address),
             }).map(() => listReserves[0]),
-          );
-        },
+          ),
       );
       assertOk(setup);
       reserve = setup.value;
-    }, 60_000);
+    }, 40_000);
 
     describe('When the user withdraws part of their supplied tokens', () => {
       it("Then the user's supply position is updated to reflect the partial withdrawal", async () => {
