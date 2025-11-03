@@ -67,6 +67,8 @@ export const ChainFragment = graphql(
     explorerUrl
     isTestnet
     nativeWrappedToken
+    nativeGateway
+    signatureGateway
     nativeInfo {
       ...TokenInfo
     }

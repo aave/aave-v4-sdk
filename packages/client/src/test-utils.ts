@@ -14,7 +14,6 @@ import {
   type Chain,
   createPublicClient,
   createWalletClient,
-  defineChain,
   http,
   parseEther,
   parseUnits,
@@ -24,6 +23,7 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AaveClient } from './AaveClient';
 import { local, staging } from './environments';
+import { ethereumForkChain } from './viem';
 
 export const environment =
   import.meta.env.ENVIRONMENT === 'local' ? local : staging;
@@ -32,58 +32,44 @@ export const ETHEREUM_FORK_ID = chainId(
   Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
 );
 
-export const ETHEREUM_TOKENS = {
-  AAVE: evmAddress('0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'),
-  GHO: evmAddress('0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f'),
-  MKR: evmAddress('0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'),
-  UNI: evmAddress('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'),
-  USDC: evmAddress('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'),
-  USDS: evmAddress('0xdC035D45d973E3EC169d2276DDab16f1e407384F'),
-  WBTC: evmAddress('0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'),
-  WETH: evmAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
-  cbBTC: evmAddress('0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf'),
-  sUSDE: evmAddress('0x9D39A5DE30e57443BfF2A8307A4256c8797A3497'),
-  wstETH: evmAddress('0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0'),
-};
+// Token addresses
+export const ETHEREUM_GHO_ADDRESS = evmAddress(
+  '0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f',
+);
+export const ETHEREUM_WETH_ADDRESS = evmAddress(
+  '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+);
+export const ETHEREUM_USDC_ADDRESS = evmAddress(
+  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+);
+export const ETHEREUM_USDS_ADDRESS = evmAddress(
+  '0xdC035D45d973E3EC169d2276DDab16f1e407384F',
+);
+export const ETHEREUM_WSTETH_ADDRESS = evmAddress(
+  '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+);
 
-export const ETHEREUM_HUBS = {
-  CORE_HUB: evmAddress('0x2559E4E04F2cA7180e5f20C2872d22EC89601b56'),
-  ISO_GOV_HUB: evmAddress('0x37fd54685Db43a4947e5AE0a80F51cf1D2FE0F57'),
-  ISO_STABLE_HUB: evmAddress('0xD14B5Fe920B11d99B583501efe524A8e94390205'),
-};
+// Spoke addresses
+export const ETHEREUM_SPOKE_CORE_ADDRESS = evmAddress(
+  '0x43d8A7613632f4F04ae8918Adaf6A2cd9Db8C3Aa',
+);
+export const ETHEREUM_SPOKE_ISO_GOV_ADDRESS = evmAddress(
+  '0x271168dE14E5050cB1d3571BC71A8C8bd439251D',
+);
+export const ETHEREUM_SPOKE_EMODE_ADDRESS = evmAddress(
+  '0x5738d9cB82d6a1617973C257D05A387bF5568F47',
+);
 
-export const ETHEREUM_SPOKES = {
-  CORE_SPOKE: evmAddress('0x43d8A7613632f4F04ae8918Adaf6A2cd9Db8C3Aa'),
-  E_MODE_SPOKE: evmAddress('0x5738d9cB82d6a1617973C257D05A387bF5568F47'),
-  ISO_GOV_SPOKE: evmAddress('0x271168dE14E5050cB1d3571BC71A8C8bd439251D'),
-  ISO_STABLE_SPOKE: evmAddress('0x4D4a7b3Ce709b4362D7095a4A0105bDFDb5dA2a7'),
-};
-
-export const ETHEREUM_MARKET_ETH_CORRELATED_EMODE_CATEGORY = 1;
+// Hub addresses
+export const ETHEREUM_HUB_CORE_ADDRESS = evmAddress(
+  '0x2559E4E04F2cA7180e5f20C2872d22EC89601b56',
+);
 
 export const ETHEREUM_FORK_RPC_URL = import.meta.env
   .ETHEREUM_TENDERLY_PUBLIC_RPC;
 
 export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
   .ETHEREUM_TENDERLY_ADMIN_RPC;
-
-export const ethereumForkChain: Chain = defineChain({
-  id: ETHEREUM_FORK_ID,
-  name: 'Ethereum Fork',
-  network: 'ethereum-fork',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: [ETHEREUM_FORK_RPC_URL],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Ethereum Fork Explorer',
-      url: import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
-    },
-  },
-});
 
 export const client = AaveClient.create({
   environment,

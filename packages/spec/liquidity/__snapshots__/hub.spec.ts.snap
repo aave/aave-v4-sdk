@@ -29,6 +29,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
       "name": "ForkedEthereum",
+      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
         "decimals": 18,
@@ -37,6 +38,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
         "symbol": "ETH",
       },
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
     "info": {
       "__typename": "TokenInfo",
@@ -81,6 +83,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
       "name": "ForkedEthereum",
+      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
         "decimals": 18,
@@ -89,6 +92,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
         "symbol": "ETH",
       },
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
     "info": {
       "__typename": "TokenInfo",
@@ -133,6 +137,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
       "name": "ForkedEthereum",
+      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
         "decimals": 18,
@@ -141,6 +146,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
         "symbol": "ETH",
       },
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
     "info": {
       "__typename": "TokenInfo",
@@ -185,6 +191,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
       "name": "ForkedEthereum",
+      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
         "decimals": 18,
@@ -193,6 +200,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
         "symbol": "ETH",
       },
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
     "info": {
       "__typename": "TokenInfo",
@@ -237,6 +245,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
       "name": "ForkedEthereum",
+      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
         "decimals": 18,
@@ -245,6 +254,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
         "symbol": "ETH",
       },
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
     "info": {
       "__typename": "TokenInfo",
@@ -289,6 +299,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
       "name": "ForkedEthereum",
+      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
         "decimals": 18,
@@ -297,6 +308,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
         "symbol": "ETH",
       },
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
     "info": {
       "__typename": "TokenInfo",
@@ -341,6 +353,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
       "name": "ForkedEthereum",
+      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
         "decimals": 18,
@@ -349,6 +362,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
         "symbol": "ETH",
       },
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
     "info": {
       "__typename": "TokenInfo",
@@ -375,6 +389,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
     "icon": "https://statics.aave.com/ethereum.svg",
     "isTestnet": true,
     "name": "ForkedEthereum",
+    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
     "nativeInfo": {
       "__typename": "TokenInfo",
       "decimals": 18,
@@ -383,6 +398,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
   "name": "Core",
   "summary": Any<Object>,
@@ -400,6 +416,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
     "icon": "https://statics.aave.com/ethereum.svg",
     "isTestnet": true,
     "name": "ForkedEthereum",
+    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
     "nativeInfo": {
       "__typename": "TokenInfo",
       "decimals": 18,
@@ -408,6 +425,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
   "name": "ISO Gov",
   "summary": Any<Object>,
@@ -425,6 +443,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
     "icon": "https://statics.aave.com/ethereum.svg",
     "isTestnet": true,
     "name": "ForkedEthereum",
+    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
     "nativeInfo": {
       "__typename": "TokenInfo",
       "decimals": 18,
@@ -433,6 +452,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
   "name": "ISO Stable",
   "summary": Any<Object>,

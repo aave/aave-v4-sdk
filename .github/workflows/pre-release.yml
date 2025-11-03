@@ -23,6 +23,10 @@ jobs:
   publish:
     name: Publish Snapshot
     runs-on: ubuntu-latest
+    env:
+      ETHEREUM_TENDERLY_FORK_ID: ${{ vars.ETHEREUM_TENDERLY_FORK_ID }}
+      ETHEREUM_TENDERLY_PUBLIC_RPC: ${{ vars.ETHEREUM_TENDERLY_PUBLIC_RPC }}
+      ETHEREUM_TENDERLY_BLOCKEXPLORER: ${{ vars.ETHEREUM_TENDERLY_BLOCKEXPLORER }}
     needs: verify
     permissions:
       id-token: write

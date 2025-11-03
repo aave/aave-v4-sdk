@@ -1,5 +1,10 @@
 /* eslint-disable import/no-default-export */
+
+import { pnpmWorkspaceRootSync } from '@node-kit/pnpm-workspace-root';
+import dotenv from 'dotenv';
 import { defineConfig } from 'tsup';
+
+dotenv.config({ path: `${pnpmWorkspaceRootSync()}/.env` });
 
 export default defineConfig(() => ({
   entry: [
@@ -22,4 +27,15 @@ export default defineConfig(() => ({
   dts: true,
   platform: 'neutral',
   format: ['esm', 'cjs'],
+  define: {
+    'import.meta.env.ETHEREUM_TENDERLY_FORK_ID': JSON.stringify(
+      process.env.ETHEREUM_TENDERLY_FORK_ID,
+    ),
+    'import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC': JSON.stringify(
+      process.env.ETHEREUM_TENDERLY_PUBLIC_RPC,
+    ),
+    'import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER': JSON.stringify(
+      process.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
+    ),
+  },
 }));

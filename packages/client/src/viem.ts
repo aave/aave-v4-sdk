@@ -26,7 +26,7 @@ import {
 import {
   type Account,
   type Chain,
-  type defineChain,
+  defineChain,
   type ProviderRpcError,
   type RpcError,
   SwitchChainError,
@@ -42,7 +42,7 @@ import {
   signTypedData,
   waitForTransactionReceipt,
 } from 'viem/actions';
-import { mainnet } from 'viem/chains';
+import { mainnet, sepolia } from 'viem/chains';
 import type {
   ExecutionPlanHandler,
   PermitHandler,
@@ -68,11 +68,32 @@ function isProviderRpcError(
 /**
  * @internal
  */
+export const ethereumForkChain: Chain = defineChain({
+  id: Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
+  name: 'Ethereum Fork',
+  network: 'ethereum-fork',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: [import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Ethereum Fork Explorer',
+      url: import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
+    },
+  },
+});
+
+/**
+ * @internal
+ */
 export const supportedChains: Record<
   ChainId,
   ReturnType<typeof defineChain>
 > = {
   [chainId(mainnet.id)]: mainnet,
+  [chainId(sepolia.id)]: sepolia,
+  [chainId(ethereumForkChain.id)]: ethereumForkChain,
 };
 
 function ensureChain(
