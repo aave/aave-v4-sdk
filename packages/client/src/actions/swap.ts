@@ -98,7 +98,7 @@ export function swappableTokens(
  * }).andThen(plan => {
  *   switch (plan.__typename) {
  *     case 'SwapByIntent':
- *       return signSwapByIntentWith(plan.data)
+ *       return signSwapTypedDataWith(plan.data)
  *         .andThen((signature) => swap({ intent: { quoteId: quote.quoteId, signature } }))
  *         .andThen((plan) => {
  *           // …
@@ -107,7 +107,7 @@ export function swappableTokens(
  *
  *     case 'SwapByIntentWithApprovalRequired':
  *       return sendTransaction(plan.transaction)
- *         .andThen(signSwapByIntentWith(plan.data))
+ *         .andThen(signSwapTypedDataWith(plan.data))
  *         .andThen((signature) => swap({ intent: { quoteId: quote.quoteId, signature } }))
  *         .andThen((plan) => {
  *         // …
