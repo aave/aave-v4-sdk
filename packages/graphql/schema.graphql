@@ -6,7 +6,7 @@ type APYSample {
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, SWAP, LIQUIDATED]
+  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -26,7 +26,6 @@ enum ActivityType {
   WITHDRAW
   REPAY
   LIQUIDATED
-  SWAP
 }
 
 scalar AlwaysTrue
@@ -1135,14 +1134,6 @@ type Spoke {
 
   """The spoke chain"""
   chain: Chain!
-
-  """The spoke config"""
-  config: SpokeConfig!
-}
-
-type SpokeConfig {
-  nativeGateway: EvmAddress!
-  signatureGateway: EvmAddress!
 }
 
 input SpokeInput {

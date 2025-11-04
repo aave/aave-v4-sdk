@@ -1,4 +1,5 @@
 import {
+  ETHEREUM_FORK_ID,
   ETHEREUM_FORK_RPC_URL,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
@@ -19,7 +20,7 @@ import { useNetworkFee } from './viem';
 // TODO replace this temp hack with correct fork ID once the new tenderly fork is available
 vi.mock('@aave/client-next/viem', () => ({
   supportedChains: {
-    [chainId(1)]: defineChain({
+    [ETHEREUM_FORK_ID]: defineChain({
       ...mainnet,
       rpcUrls: {
         default: {

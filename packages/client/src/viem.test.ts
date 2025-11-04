@@ -4,7 +4,6 @@ import {
   assertErr,
   assertOk,
   type BlockchainData,
-  chainId,
   evmAddress,
 } from '@aave/types-next';
 import { HttpResponse } from 'msw';
@@ -15,7 +14,7 @@ import {
 } from 'viem';
 import { describe, expect, it } from 'vitest';
 import { setupRpcInterceptor } from './rpc.helpers';
-import { createNewWallet } from './test-utils';
+import { createNewWallet, ETHEREUM_FORK_ID } from './test-utils';
 import { sendWith } from './viem';
 
 const walletClient = await createNewWallet();
@@ -28,7 +27,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       from: evmAddress(walletClient.account.address),
       data: '0x' as BlockchainData,
       value: 0n,
-      chainId: chainId(1),
+      chainId: ETHEREUM_FORK_ID,
       operations: [],
     };
 
