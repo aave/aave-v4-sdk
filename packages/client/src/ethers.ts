@@ -6,6 +6,7 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
+  ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -20,8 +21,8 @@ import {
 } from '@aave/types-next';
 import type { Signer, TransactionResponse } from 'ethers';
 import type {
+  ERC20PermitHandler,
   ExecutionPlanHandler,
-  PermitHandler,
   SwapSignatureHandler,
   TransactionResult,
 } from './types';
@@ -83,31 +84,49 @@ function sendTransactionAndWait(
   );
 }
 
+function executePlan(
+  signer: Signer,
+  result: ExecutionPlan,
+): ReturnType<ExecutionPlanHandler> {
+  switch (result.__typename) {
+    case 'TransactionRequest':
+      return sendTransactionAndWait(signer, result);
+
+    case 'Erc20ApprovalRequired':
+    case 'PreContractActionRequired':
+      return sendTransactionAndWait(signer, result.transaction).andThen(() =>
+        sendTransactionAndWait(signer, result.originalTransaction),
+      );
+
+    case 'InsufficientBalanceError':
+      return errAsync(ValidationError.fromGqlNode(result));
+  }
+}
+
 /**
  * Creates an execution plan handler that sends transactions using the provided ethers signer.
  */
-export function sendWith(signer: Signer): ExecutionPlanHandler {
-  return (result) => {
-    switch (result.__typename) {
-      case 'TransactionRequest':
-        return sendTransactionAndWait(signer, result);
-
-      case 'Erc20ApprovalRequired':
-      case 'PreContractActionRequired':
-        return sendTransactionAndWait(signer, result.transaction).andThen(() =>
-          sendTransactionAndWait(signer, result.originalTransaction),
-        );
-
-      case 'InsufficientBalanceError':
-        return errAsync(ValidationError.fromGqlNode(result));
-    }
-  };
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  signer: Signer,
+): ExecutionPlanHandler<T>;
+/**
+ * Sends execution plan transactions using the provided ethers signer.
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  signer: Signer,
+  result: T,
+): ReturnType<ExecutionPlanHandler<T>>;
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  signer: Signer,
+  result?: T,
+): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
+  return result ? executePlan(signer, result) : executePlan.bind(null, signer);
 }
 
 /**
  * Signs an ERC20 permit using the provided ethers signer.
  */
-export function signERC20PermitWith(signer: Signer): PermitHandler {
+export function signERC20PermitWith(signer: Signer): ERC20PermitHandler {
   return (result: PermitTypedDataResponse) => {
     return ResultAsync.fromPromise(
       signer.signTypedData(result.domain, result.types, result.message),

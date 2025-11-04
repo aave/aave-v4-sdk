@@ -7,6 +7,7 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
+  ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -44,8 +45,8 @@ import {
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
 import type {
+  ERC20PermitHandler,
   ExecutionPlanHandler,
-  PermitHandler,
   SwapSignatureHandler,
   TransactionResult,
 } from './types';
@@ -254,32 +255,51 @@ function sendTransactionAndWait(
   );
 }
 
+function executePlan(
+  walletClient: WalletClient,
+  result: ExecutionPlan,
+): ReturnType<ExecutionPlanHandler> {
+  switch (result.__typename) {
+    case 'TransactionRequest':
+      return sendTransactionAndWait(walletClient, result);
+
+    case 'Erc20ApprovalRequired':
+    case 'PreContractActionRequired':
+      return sendTransactionAndWait(walletClient, result.transaction).andThen(
+        () => sendTransactionAndWait(walletClient, result.originalTransaction),
+      );
+
+    case 'InsufficientBalanceError':
+      return errAsync(ValidationError.fromGqlNode(result));
+  }
+}
+
 /**
  * Creates an execution plan handler that sends transactions using the provided wallet client.
  */
-export function sendWith(walletClient: WalletClient): ExecutionPlanHandler {
-  return (result) => {
-    switch (result.__typename) {
-      case 'TransactionRequest':
-        return sendTransactionAndWait(walletClient, result);
-
-      case 'Erc20ApprovalRequired':
-      case 'PreContractActionRequired':
-        return sendTransactionAndWait(walletClient, result.transaction).andThen(
-          () =>
-            sendTransactionAndWait(walletClient, result.originalTransaction),
-        );
-
-      case 'InsufficientBalanceError':
-        return errAsync(ValidationError.fromGqlNode(result));
-    }
-  };
+export function sendWith(walletClient: WalletClient): ExecutionPlanHandler;
+/**
+ * Sends execution plan transactions using the provided wallet client.
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  walletClient: WalletClient,
+  result: T,
+): ReturnType<ExecutionPlanHandler<T>>;
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  walletClient: WalletClient,
+  result?: T,
+): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
+  return result
+    ? executePlan(walletClient, result)
+    : executePlan.bind(null, walletClient);
 }
 
 /**
  * Signs an ERC20 permit using the provided wallet client.
  */
-export function signERC20PermitWith(walletClient: WalletClient): PermitHandler {
+export function signERC20PermitWith(
+  walletClient: WalletClient,
+): ERC20PermitHandler {
   return (result: PermitTypedDataResponse) => {
     invariant(walletClient.account, 'Wallet account is required');
 

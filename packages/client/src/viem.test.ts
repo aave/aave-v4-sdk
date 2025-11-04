@@ -55,7 +55,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should switch the chain and continue', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertOk(result);
       });
@@ -95,7 +95,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should add the chain to the wallet and continue', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertOk(result);
       });
@@ -135,7 +135,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should fail with a SigningError', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertErr(result);
         expect(result.error).toBeInstanceOf(SigningError);
@@ -176,7 +176,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should fail with a CancelError', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertErr(result);
         expect(result.error).toBeInstanceOf(CancelError);
@@ -207,7 +207,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should fail with a SigningError', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertErr(result);
         expect(result.error).toBeInstanceOf(SigningError);
