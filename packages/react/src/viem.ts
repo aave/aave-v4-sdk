@@ -30,6 +30,7 @@ import {
   createPublicClient,
   http,
   type TransactionReceipt,
+  type Chain as ViemChain,
   type WalletClient,
 } from 'viem';
 import {
@@ -313,15 +314,14 @@ export const useNetworkFee: UseNetworkFee = (({
 /**
  * The list of supported chains typically used with wagmi config.
  */
-export const supportedChains: [Chain, ...Chain[]] = Object.values(
+export const supportedChains: [ViemChain, ...ViemChain[]] = Object.values(
   supportedChainsMap,
-) as [Chain, ...Chain[]];
-
+) as [ViemChain, ...ViemChain[]];
 /**
  * A hook that provides a way to get the list of supported chains using viem.
  *
  * @returns The list of supported chains using viem.
  */
-export function useSupportedChains(): Chain[] {
+export function useSupportedChains(): [ViemChain, ...ViemChain[]] {
   return supportedChains;
 }
