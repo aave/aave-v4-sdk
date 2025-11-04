@@ -3,7 +3,7 @@ import {
   sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
-  supportedChains,
+  supportedChains as supportedChainsMap,
   waitForTransactionResult,
 } from '@aave/client-next/viem';
 import {
@@ -192,7 +192,8 @@ function useTransactionReceipt(): UseAsyncTask<
 > {
   return useAsyncTask(({ chainId, txHash }: TxHashInput) => {
     const publicClient = createPublicClient({
-      chain: supportedChains[chainId] ?? never(`Unsupported chain ${chainId}`),
+      chain:
+        supportedChainsMap[chainId] ?? never(`Unsupported chain ${chainId}`),
       transport: http(),
     });
 
@@ -308,3 +309,17 @@ export const useNetworkFee: UseNetworkFee = (({
     createNetworkFeeAmount(receipt.data, chain, rate.data),
   );
 }) as UseNetworkFee;
+
+/**
+ * The list of supported chains typically used with wagmi config.
+ */
+export const supportedChains = Object.values(supportedChainsMap);
+
+/**
+ * A hook that provides a way to get the list of supported chains using viem.
+ *
+ * @returns The list of supported chains using viem.
+ */
+export function useSupportedChains(): Chain[] {
+  return supportedChains;
+}
