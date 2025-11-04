@@ -294,52 +294,75 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
     : executePlan.bind(null, walletClient);
 }
 
+function signERC20Permit(
+  walletClient: WalletClient,
+  result: PermitTypedDataResponse,
+): ReturnType<ERC20PermitHandler> {
+  invariant(walletClient.account, 'Wallet account is required');
+
+  return ResultAsync.fromPromise(
+    signTypedData(walletClient, {
+      account: walletClient.account,
+      domain: result.domain as TypedDataDomain,
+      types: result.types as TypedData,
+      primaryType: result.primaryType as keyof typeof result.types,
+      message: result.message,
+    }),
+    (err) => SigningError.from(err),
+  ).map((hex) => ({
+    deadline: result.message.deadline,
+    value: signatureFrom(hex),
+  }));
+}
+
 /**
- * Signs an ERC20 permit using the provided wallet client.
+ * Creates an ERC20 permit handler that signs ERC20 permits using the provided wallet client.
  */
 export function signERC20PermitWith(
   walletClient: WalletClient,
 ): ERC20PermitHandler {
-  return (result: PermitTypedDataResponse) => {
-    invariant(walletClient.account, 'Wallet account is required');
-
-    return ResultAsync.fromPromise(
-      signTypedData(walletClient, {
-        account: walletClient.account,
-        domain: result.domain as TypedDataDomain,
-        types: result.types as TypedData,
-        primaryType: result.primaryType as keyof typeof result.types,
-        message: result.message,
-      }),
-      (err) => SigningError.from(err),
-    ).map((hex) => ({
-      deadline: result.message.deadline,
-      value: signatureFrom(hex),
-    }));
-  };
+  return signERC20Permit.bind(null, walletClient);
 }
 
+function signSwapTypedData(
+  walletClient: WalletClient,
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler> {
+  invariant(walletClient.account, 'Wallet account is required');
+
+  return ResultAsync.fromPromise(
+    signTypedData(walletClient, {
+      account: walletClient.account,
+      domain: result.domain as TypedDataDomain,
+      types: result.types as TypedData,
+      primaryType: result.primaryType,
+      message: JSON.parse(result.message),
+    }),
+    (err) => SigningError.from(err),
+  ).map((hex) => ({
+    deadline: JSON.parse(result.message).deadline,
+    value: signatureFrom(hex),
+  }));
+}
+
+/**
+ * Creates a swap signature handler that signs swap typed data using the provided wallet client.
+ */
+export function signSwapTypedDataWith(
+  walletClient: WalletClient,
+): SwapSignatureHandler;
 /**
  * Signs swap typed data using the provided wallet client.
  */
 export function signSwapTypedDataWith(
   walletClient: WalletClient,
-): SwapSignatureHandler {
-  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
-    invariant(walletClient.account, 'Wallet account is required');
-
-    return ResultAsync.fromPromise(
-      signTypedData(walletClient, {
-        account: walletClient.account,
-        domain: result.domain as TypedDataDomain,
-        types: result.types as TypedData,
-        primaryType: result.primaryType,
-        message: JSON.parse(result.message),
-      }),
-      (err) => SigningError.from(err),
-    ).map((hex) => ({
-      deadline: JSON.parse(result.message).deadline,
-      value: signatureFrom(hex),
-    }));
-  };
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler>;
+export function signSwapTypedDataWith(
+  walletClient: WalletClient,
+  result?: SwapByIntentTypedData | CancelSwapTypedData,
+): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
+  return result
+    ? signSwapTypedData(walletClient, result)
+    : signSwapTypedData.bind(null, walletClient);
 }
