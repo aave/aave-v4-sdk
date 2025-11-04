@@ -13,7 +13,6 @@ import {
   PercentNumberVariationFragment,
   ReserveInfoFragment,
   SpokeFragment,
-  TokenAmountFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './fragments';
@@ -372,36 +371,6 @@ export const LiquidatedActivityFragment = graphql(
 );
 export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
 
-export const SwapActivityFragment = graphql(
-  `fragment SwapActivity on SwapActivity {
-    __typename
-    id
-    user
-    timestamp
-    txHash
-    desiredSell {
-      ...TokenAmount
-    }
-    desiredBuy {
-      ...TokenAmount
-    }
-    sold {
-      ...TokenAmount
-    }
-    bought {
-      ...TokenAmount
-    }
-    createdAt
-    fulfilledAt
-    explorerLink
-    chain {
-      ...Chain
-    }
-  }`,
-  [TokenAmountFragment, ChainFragment],
-);
-export type SwapActivity = FragmentOf<typeof SwapActivityFragment>;
-
 export const ActivityItemFragment = graphql(
   `fragment ActivityItem on ActivityItem {
     __typename
@@ -420,9 +389,6 @@ export const ActivityItemFragment = graphql(
     ... on LiquidatedActivity {
       ...LiquidatedActivity
     }
-    ... on SwapActivity {
-      ...SwapActivity
-    }
   }`,
   [
     BorrowActivityFragment,
@@ -430,7 +396,6 @@ export const ActivityItemFragment = graphql(
     WithdrawActivityFragment,
     RepayActivityFragment,
     LiquidatedActivityFragment,
-    SwapActivityFragment,
   ],
 );
 export type ActivityItem = FragmentOf<typeof ActivityItemFragment>;

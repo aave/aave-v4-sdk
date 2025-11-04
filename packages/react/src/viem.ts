@@ -175,9 +175,12 @@ export function useSignSwapTypedDataWith(
 function extractTransactionDetails(
   query: UseNetworkFeeRequestQuery | null | undefined,
 ): [Chain, TxHash, Date] | [undefined, undefined, undefined] {
-  return query?.activity.chain &&
-    query.activity.txHash &&
-    query.activity.timestamp
+  if (!query) {
+    return [undefined, undefined, undefined];
+  }
+  return 'chain' in query.activity &&
+    'txHash' in query.activity &&
+    'timestamp' in query.activity
     ? [query.activity.chain, query.activity.txHash, query.activity.timestamp]
     : [undefined, undefined, undefined];
 }
