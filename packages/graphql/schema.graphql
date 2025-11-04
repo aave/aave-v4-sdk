@@ -18,7 +18,7 @@ input ActivitiesRequestQuery @oneOf {
   txHash: TxHashInput
 }
 
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | SwapActivity
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity
 
 enum ActivityType {
   BORROW
@@ -1249,21 +1249,6 @@ input SupplyRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-}
-
-type SwapActivity {
-  id: ID!
-  user: EvmAddress!
-  timestamp: DateTime!
-  txHash: TxHash!
-  desiredSell: TokenAmount!
-  desiredBuy: TokenAmount!
-  sold: TokenAmount!
-  bought: TokenAmount!
-  createdAt: DateTime!
-  fulfilledAt: DateTime!
-  explorerLink: String!
-  chain: Chain!
 }
 
 type SwapApprovalRequired {
