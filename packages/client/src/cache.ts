@@ -14,7 +14,6 @@ import {
   type ReserveInfo,
   type Spoke,
   type SupplyActivity,
-  type SwapActivity,
   type SwapByIntent,
   type SwapByIntentWithApprovalRequired,
   type SwapByTransaction,
@@ -269,7 +268,6 @@ export const exchange = cacheExchange({
     BorrowActivity: (data: BorrowActivity) => data.id,
     LiquidatedActivity: (data: LiquidatedActivity) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
-    SwapActivity: (data: SwapActivity) => data.id,
     SwapByIntent: (data: SwapByIntent) => data.quote.quoteId,
     SwapByIntentWithApprovalRequired: (
       data: SwapByIntentWithApprovalRequired,
