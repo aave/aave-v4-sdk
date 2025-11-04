@@ -136,11 +136,6 @@ export const exchange = cacheExchange({
     SpokeUserPositionManager: {
       approvedOn: transformToDate,
     },
-    SwapActivity: {
-      timestamp: transformToDate,
-      createdAt: transformToDate,
-      fulfilledAt: transformToDate,
-    },
     SwapCancelled: {
       createdAt: transformToDate,
       cancelledAt: transformToNullableDate,
