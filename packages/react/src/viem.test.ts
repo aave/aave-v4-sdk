@@ -10,7 +10,7 @@ import {
   type ReserveInfo,
   type Spoke,
 } from '@aave/graphql-next';
-import { chainId, evmAddress, type ID, txHash } from '@aave/types-next';
+import { evmAddress, type ID, txHash } from '@aave/types-next';
 import { defineChain } from 'viem';
 import { mainnet } from 'viem/chains';
 import { describe, expect, it, vi } from 'vitest';
@@ -44,7 +44,7 @@ describe('Given the viem adapters are used', () => {
       user: evmAddress('0x1234567890123456789012345678901234567890'),
       chain: {
         __typename: 'Chain',
-        chainId: chainId(1),
+        chainId: ETHEREUM_FORK_ID,
         name: 'Ethereum',
         icon: 'https://example.com/eth-icon.png',
         explorerUrl: 'https://etherscan.io',
