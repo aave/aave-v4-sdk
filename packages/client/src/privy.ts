@@ -136,55 +136,82 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
     : executePlan.bind(null, privy, walletId);
 }
 
+function signERC20Permit(
+  privy: PrivyClient,
+  walletId: string,
+  result: PermitTypedDataResponse,
+): ReturnType<ERC20PermitHandler> {
+  return ResultAsync.fromPromise(
+    privy.walletApi.ethereum.signTypedData({
+      walletId,
+      typedData: {
+        domain: result.domain,
+        types: result.types,
+        message: result.message,
+        primaryType: result.primaryType,
+      },
+    }),
+    (err) => SigningError.from(err),
+  ).map((response) => ({
+    deadline: result.message.deadline,
+    value: signatureFrom(response.signature),
+  }));
+}
+
 /**
- * Signs an ERC20 permit using the provided Privy client.
+ * Creates an ERC20 permit handler that signs ERC20 permits using the specified Privy wallet.
  */
 export function signERC20PermitWith(
   privy: PrivyClient,
   walletId: string,
 ): ERC20PermitHandler {
-  return (result: PermitTypedDataResponse) => {
-    return ResultAsync.fromPromise(
-      privy.walletApi.ethereum.signTypedData({
-        walletId,
-        typedData: {
-          domain: result.domain,
-          types: result.types,
-          message: result.message,
-          primaryType: result.primaryType,
-        },
-      }),
-      (err) => SigningError.from(err),
-    ).map((response) => ({
-      deadline: result.message.deadline,
-      value: signatureFrom(response.signature),
-    }));
-  };
+  return signERC20Permit.bind(null, privy, walletId);
+}
+
+function signSwapTypedData(
+  privy: PrivyClient,
+  walletId: string,
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler> {
+  const message = JSON.parse(result.message);
+  return ResultAsync.fromPromise(
+    privy.walletApi.ethereum.signTypedData({
+      walletId,
+      typedData: {
+        domain: result.domain,
+        types: result.types,
+        message,
+        primaryType: result.primaryType,
+      },
+    }),
+    (err) => SigningError.from(err),
+  ).map((response) => ({
+    deadline: message.deadline,
+    value: signatureFrom(response.signature),
+  }));
 }
 
 /**
- * Signs swap typed data using the provided Privy client.
+ * Creates a swap signature handler that signs swap typed data using the specified Privy wallet.
  */
 export function signSwapTypedDataWith(
   privy: PrivyClient,
   walletId: string,
-): SwapSignatureHandler {
-  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
-    const message = JSON.parse(result.message);
-    return ResultAsync.fromPromise(
-      privy.walletApi.ethereum.signTypedData({
-        walletId,
-        typedData: {
-          domain: result.domain,
-          types: result.types,
-          message,
-          primaryType: result.primaryType,
-        },
-      }),
-      (err) => SigningError.from(err),
-    ).map((response) => ({
-      deadline: message.deadline,
-      value: signatureFrom(response.signature),
-    }));
-  };
+): SwapSignatureHandler;
+/**
+ * Signs swap typed data using the specified Privy wallet.
+ */
+export function signSwapTypedDataWith(
+  privy: PrivyClient,
+  walletId: string,
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler>;
+export function signSwapTypedDataWith(
+  privy: PrivyClient,
+  walletId: string,
+  result?: SwapByIntentTypedData | CancelSwapTypedData,
+): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
+  return result
+    ? signSwapTypedData(privy, walletId, result)
+    : signSwapTypedData.bind(null, privy, walletId);
 }
