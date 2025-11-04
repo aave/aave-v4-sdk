@@ -8,9 +8,11 @@ import {
   cancelSwap,
   prepareSwap,
   prepareSwapCancel,
+  type SwapOutcome,
   swap,
   swapQuote,
   swapStatus,
+  waitForSwapOutcome,
 } from '@aave/client-next/actions';
 import type {
   CancelError,
@@ -53,7 +55,7 @@ import {
   type ResultAsync,
   ResultAwareError,
 } from '@aave/types-next';
-import { useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useAaveClient } from './context';
 import {
   type CancelOperation,
@@ -70,7 +72,11 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from './helpers';
-import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
+import {
+  type AsyncTaskState,
+  type UseAsyncTask,
+  useAsyncTask,
+} from './helpers/tasks';
 
 export type UseSwapQuoteArgs = Prettify<
   SwapQuoteRequest & CurrencyQueryOptions
@@ -420,12 +426,12 @@ function isERC20PermitSignature(
  *
  * ```tsx
  * const [sendTransaction, sending] = useSendTransaction(wallet);
- * const [signSwapByIntentWith, signing] = useSignSwapByIntentWith(wallet);
+ * const [signSwapTypedData, signing] = useSignSwapTypedDataWith(wallet);
  *
  * const [swap, swapping] = useSwapTokens((plan) => {
  *   switch (plan.__typename) {
  *     case 'SwapByIntentTypedData':
- *       return signSwapByIntentWith(plan);
+ *       return signSwapTypedData(plan);
  *
  *     case 'SwapApprovalRequired':
  *     case 'SwapByIntentWithApprovalRequired':
@@ -664,4 +670,107 @@ export function useCancelSwap(
       }),
     [client, handler],
   );
+}
+
+export type WaitForSwapOutcomesState = Omit<
+  AsyncTaskState<SwapOutcome[], TimeoutError | UnexpectedError>,
+  'data'
+> & {
+  data: SwapOutcome[];
+};
+
+/**
+ * Wait for multiple swaps to reach their final outcomes (cancelled, expired, or fulfilled).
+ *
+ * This hook accumulates all swap outcomes in an array and supports concurrent executions.
+ * Multiple swaps can be tracked simultaneously without blocking. For tracking only the
+ * most recent outcome, use `useWaitForSwapOutcome` instead.
+ *
+ * ```tsx
+ * const [waitForOutcome, { loading, error, data }] = useWaitForSwapOutcomes();
+ *
+ * // data: SwapOutcome[]
+ *
+ * // Can execute multiple swaps concurrently
+ * const result1 = waitForOutcome(swapReceipt1); // doesn't block
+ * const result2 = waitForOutcome(swapReceipt2); // executes in parallel
+ *
+ * const result = await result1;
+ * if (result.isOk()) {
+ *   const outcome = result.value;
+ *   // outcome is added to the data array
+ *   switch (outcome.__typename) {
+ *     case 'SwapFulfilled':
+ *       console.log('Swap completed successfully:', outcome.txHash);
+ *       break;
+ *     case 'SwapCancelled':
+ *       console.log('Swap was cancelled:', outcome.cancelledAt);
+ *       break;
+ *     case 'SwapExpired':
+ *       console.log('Swap expired:', outcome.expiredAt);
+ *       break;
+ *   }
+ * }
+ *
+ * // Access all outcomes
+ * console.log('Total outcomes:', data.length);
+ * ```
+ */
+export function useWaitForSwapOutcomes(): [
+  (
+    receipt: SwapReceipt,
+  ) => ResultAsync<SwapOutcome, TimeoutError | UnexpectedError>,
+  WaitForSwapOutcomesState,
+] {
+  const client = useAaveClient();
+
+  const [state, setState] = useState<WaitForSwapOutcomesState>({
+    called: false,
+    loading: false,
+    data: [],
+    error: undefined,
+  });
+
+  const pendingCountRef = useRef(0);
+
+  const execute = useCallback(
+    (receipt: SwapReceipt) => {
+      pendingCountRef.current += 1;
+
+      setState((prev) => ({
+        called: true,
+        loading: true,
+        data: prev.data,
+        error: undefined,
+      }));
+
+      const result = waitForSwapOutcome(client)(receipt);
+
+      result.match(
+        (outcome) => {
+          pendingCountRef.current -= 1;
+          setState((prev) => ({
+            called: true,
+            loading: pendingCountRef.current > 0,
+            data: [...prev.data, outcome],
+            error: undefined,
+          }));
+        },
+        (error) => {
+          pendingCountRef.current -= 1;
+          setState((prev) => ({
+            called: true,
+            loading: pendingCountRef.current > 0,
+            data: prev.data,
+            error,
+          }));
+        },
+      );
+
+      return result;
+    },
+    [client],
+  );
+
+  return [execute, state];
 }
