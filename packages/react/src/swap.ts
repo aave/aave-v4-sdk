@@ -683,22 +683,17 @@ export type WaitForSwapOutcomesState = Omit<
  * Wait for multiple swaps to reach their final outcomes (cancelled, expired, or fulfilled).
  *
  * This hook accumulates all swap outcomes in an array and supports concurrent executions.
- * Multiple swaps can be tracked simultaneously without blocking. For tracking only the
- * most recent outcome, use `useWaitForSwapOutcome` instead.
+ * Multiple swaps can be tracked simultaneously without blocking.
  *
  * ```tsx
  * const [waitForOutcome, { loading, error, data }] = useWaitForSwapOutcomes();
  *
- * // data: SwapOutcome[]
- *
- * // Can execute multiple swaps concurrently
- * const result1 = waitForOutcome(swapReceipt1); // doesn't block
- * const result2 = waitForOutcome(swapReceipt2); // executes in parallel
+ * const result1 = waitForOutcome(swapReceipt1);
+ * const result2 = waitForOutcome(swapReceipt2);
  *
  * const result = await result1;
  * if (result.isOk()) {
  *   const outcome = result.value;
- *   // outcome is added to the data array
  *   switch (outcome.__typename) {
  *     case 'SwapFulfilled':
  *       console.log('Swap completed successfully:', outcome.txHash);
@@ -711,9 +706,6 @@ export type WaitForSwapOutcomesState = Omit<
  *       break;
  *   }
  * }
- *
- * // Access all outcomes
- * console.log('Total outcomes:', data.length);
  * ```
  */
 export function useWaitForSwapOutcomes(): [
