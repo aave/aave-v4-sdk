@@ -43,7 +43,6 @@ import {
   signTypedData,
   waitForTransactionReceipt,
 } from 'viem/actions';
-import { mainnet, sepolia } from 'viem/chains';
 import type {
   ERC20PermitHandler,
   ExecutionPlanHandler,
@@ -92,8 +91,9 @@ export const supportedChains: Record<
   ChainId,
   ReturnType<typeof defineChain>
 > = {
-  [chainId(mainnet.id)]: mainnet,
-  [chainId(sepolia.id)]: sepolia,
+  // TODO add them back when deployed on these chains
+  // [chainId(mainnet.id)]: mainnet,
+  // [chainId(sepolia.id)]: sepolia,
   [chainId(ethereumForkChain.id)]: ethereumForkChain,
 };
 
