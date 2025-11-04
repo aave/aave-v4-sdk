@@ -59,6 +59,9 @@ export const ETHEREUM_SPOKE_ISO_GOV_ADDRESS = evmAddress(
 export const ETHEREUM_SPOKE_EMODE_ADDRESS = evmAddress(
   '0x5738d9cB82d6a1617973C257D05A387bF5568F47',
 );
+export const ETHEREUM_SPOKE_ISO_STABLE_ADDRESS = evmAddress(
+  '0x4D4a7b3Ce709b4362D7095a4A0105bDFDb5dA2a7',
+);
 
 // Hub addresses
 export const ETHEREUM_HUB_CORE_ADDRESS = evmAddress(
