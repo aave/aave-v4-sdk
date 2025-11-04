@@ -5,6 +5,7 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
+  ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -21,8 +22,8 @@ import type { PrivyClient } from '@privy-io/server-auth';
 import { createPublicClient, http } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
 import type {
+  ERC20PermitHandler,
   ExecutionPlanHandler,
-  PermitHandler,
   SwapSignatureHandler,
   TransactionResult,
 } from './types';
@@ -86,32 +87,53 @@ function sendTransactionAndWait(
     });
 }
 
-/**
- * Creates an execution plan handler that sends transactions using the provided Privy client.
- */
-export function sendWith(
+function executePlan(
   privy: PrivyClient,
   walletId: string,
-): ExecutionPlanHandler {
-  return (result) => {
-    switch (result.__typename) {
-      case 'TransactionRequest':
-        return sendTransactionAndWait(privy, result, walletId);
+  result: ExecutionPlan,
+): ReturnType<ExecutionPlanHandler> {
+  switch (result.__typename) {
+    case 'TransactionRequest':
+      return sendTransactionAndWait(privy, result, walletId);
 
-      case 'Erc20ApprovalRequired':
-      case 'PreContractActionRequired':
-        return sendTransactionAndWait(
-          privy,
-          result.transaction,
-          walletId,
-        ).andThen(() =>
-          sendTransactionAndWait(privy, result.originalTransaction, walletId),
-        );
+    case 'Erc20ApprovalRequired':
+    case 'PreContractActionRequired':
+      return sendTransactionAndWait(
+        privy,
+        result.transaction,
+        walletId,
+      ).andThen(() =>
+        sendTransactionAndWait(privy, result.originalTransaction, walletId),
+      );
 
-      case 'InsufficientBalanceError':
-        return errAsync(ValidationError.fromGqlNode(result));
-    }
-  };
+    case 'InsufficientBalanceError':
+      return errAsync(ValidationError.fromGqlNode(result));
+  }
+}
+
+/**
+ * Creates an execution plan handler that sends transactions using the specified Privy wallet.
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  privy: PrivyClient,
+  walletId: string,
+): ExecutionPlanHandler<T>;
+/**
+ * Sends execution plan transactions using the specified Privy wallet.
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  privy: PrivyClient,
+  walletId: string,
+  result: T,
+): ReturnType<ExecutionPlanHandler<T>>;
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  privy: PrivyClient,
+  walletId: string,
+  result?: T,
+): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
+  return result
+    ? executePlan(privy, walletId, result)
+    : executePlan.bind(null, privy, walletId);
 }
 
 /**
@@ -120,7 +142,7 @@ export function sendWith(
 export function signERC20PermitWith(
   privy: PrivyClient,
   walletId: string,
-): PermitHandler {
+): ERC20PermitHandler {
   return (result: PermitTypedDataResponse) => {
     return ResultAsync.fromPromise(
       privy.walletApi.ethereum.signTypedData({
