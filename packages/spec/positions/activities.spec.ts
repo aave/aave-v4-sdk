@@ -9,14 +9,14 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet(
-  '0x8970d4cd97cbd4d0c589d6347be12ac2ae36e008d12b5ec991001b415c3b4b1b',
+  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
 );
 
 describe('Query User Activities on Aave V4', () => {
@@ -95,7 +95,7 @@ describe('Query User Activities on Aave V4', () => {
           user: evmAddress(user.account.address),
           query: {
             spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+              address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
               chainId: ETHEREUM_FORK_ID,
             },
           },

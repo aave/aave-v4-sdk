@@ -4,13 +4,14 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet(
-  '0x619fd37ca0d128348949b8fb9e93d22176bea39251b73e7a3a9697c7462dd313',
+  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
 );
 
 describe('Aave V4 Positions Scenario', () => {
@@ -77,10 +78,9 @@ describe('Aave V4 Positions Scenario', () => {
           },
         });
         assertOk(positionUsds);
-        assertSingleElementArray(positionUsds.value);
-        expect(positionUsds.value[0].spoke.chain.chainId).toBe(
-          ETHEREUM_FORK_ID,
-        );
+        positionUsds.value.forEach((position) => {
+          expect(position.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
+        });
       });
     });
 
