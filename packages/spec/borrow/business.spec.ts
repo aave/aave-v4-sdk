@@ -30,6 +30,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           token: ETHEREUM_WSTETH_ADDRESS,
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
           amount: bigDecimal('0.1'),
+          asCollateral: true,
         }),
       );
 
@@ -134,6 +135,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
             token: ETHEREUM_WSTETH_ADDRESS,
             amount: bigDecimal('0.1'),
             spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+            asCollateral: true,
           }),
         );
 

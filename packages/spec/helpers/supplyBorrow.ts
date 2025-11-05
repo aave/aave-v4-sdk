@@ -71,16 +71,18 @@ export function supplyToRandomERC20Reserve(
     token,
     amount,
     spoke,
+    asCollateral,
   }: {
     token: EvmAddress;
     amount: BigDecimal;
     spoke?: EvmAddress;
+    asCollateral?: boolean;
   },
 ): ResultAsync<Reserve, Error> {
   return findReservesToSupply(client, user, {
     token: token,
     spoke: spoke,
-    asCollateral: true,
+    asCollateral: asCollateral,
   }).andThen((reserves) =>
     supplyToReserve(client, user, {
       reserve: {

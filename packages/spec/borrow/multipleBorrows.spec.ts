@@ -28,6 +28,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             amount: bigDecimal('0.1'),
+            asCollateral: true,
           }),
         );
 

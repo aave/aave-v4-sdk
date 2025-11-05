@@ -22,9 +22,8 @@ import {
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import type { NonEmptyTuple } from 'type-fest';
 import { beforeAll, describe, expect, it } from 'vitest';
-
-import { supplyToReserve } from '../borrow/helper';
 import { findReservesToSupply } from '../helpers/reserves';
+import { supplyToReserve } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
