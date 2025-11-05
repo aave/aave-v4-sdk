@@ -298,7 +298,7 @@ export function useHubAssets({
  *
  * const result = await execute({
  *   query: {
- *     chainIds: [chainId(1), chainId(137)]
+ *     chainIds: [chainId(1)]
  *   }
  * });
  *

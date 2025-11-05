@@ -49,7 +49,6 @@ describe('Query User Activities on Aave V4', () => {
               WithdrawActivity: ActivityType.Withdraw,
               RepayActivity: ActivityType.Repay,
               LiquidatedActivity: ActivityType.Liquidated,
-              SwapActivity: ActivityType.Swap,
             };
 
             const itemActivityType = typenameToActivityType[item.__typename];
