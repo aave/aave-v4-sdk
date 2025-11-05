@@ -1,4 +1,5 @@
 import {
+  type ActivityItem,
   ActivityType,
   assertOk,
   evmAddress,
@@ -29,7 +30,10 @@ describe('Query User Activities on Aave V4', () => {
     describe('When fetching the user activities by activity type filter', () => {
       const activityTypes = Object.values(ActivityType);
 
-      const typenameToActivityType: Record<string, ActivityType> = {
+      const typenameToActivityType: Record<
+        ActivityItem['__typename'],
+        ActivityType
+      > = {
         BorrowActivity: ActivityType.Borrow,
         SupplyActivity: ActivityType.Supply,
         WithdrawActivity: ActivityType.Withdraw,
@@ -52,15 +56,16 @@ describe('Query User Activities on Aave V4', () => {
           if (
             [ActivityType.Liquidated, ActivityType.Repay].includes(activityType)
           ) {
-            // TODO: create repay activity for testing user (liquidated is not easy to create)
+            // TODO: refactor recreateUserActivities to create repay
             return;
           }
           assertNonEmptyArray(result.value.items);
-
-          result.value.items.forEach((item) => {
-            const itemActivityType = typenameToActivityType[item.__typename];
-            expect(itemActivityType).toEqual(activityType);
-          });
+          const listActivityTypes = result.value.items.map(
+            (item) => typenameToActivityType[item.__typename],
+          );
+          expect(listActivityTypes).toSatisfyAll(
+            (activity) => activity === activityType,
+          );
         },
       );
     });
