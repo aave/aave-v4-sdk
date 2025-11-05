@@ -172,7 +172,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let listOrderAmount = supplyPositions.value.map(
           (elem) => elem.withdrawable.amount.value,
         );
-        expect(listOrderAmount).toBeOrderedNumerically('desc');
+        expect(listOrderAmount).toBeSortedNumerically('desc');
 
         supplyPositions = await userSupplies(client, {
           query: {
@@ -190,7 +190,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         listOrderAmount = supplyPositions.value.map(
           (elem) => elem.withdrawable.amount.value,
         );
-        expect(listOrderAmount).toBeOrderedNumerically('asc');
+        expect(listOrderAmount).toBeSortedNumerically('asc');
       });
     });
 
@@ -212,7 +212,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let listOrderApy = supplyPositions.value.map(
           (elem) => elem.reserve.summary.supplyApy.value,
         );
-        expect(listOrderApy).toBeOrderedNumerically('desc');
+        expect(listOrderApy).toBeSortedNumerically('desc');
 
         supplyPositions = await userSupplies(client, {
           query: {
@@ -231,7 +231,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         listOrderApy = supplyPositions.value.map(
           (elem) => elem.reserve.summary.supplyApy.value,
         );
-        expect(listOrderApy).toBeOrderedNumerically('asc');
+        expect(listOrderApy).toBeSortedNumerically('asc');
       });
     });
 
@@ -253,7 +253,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let listOrderAssetName = supplyPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeOrderedAlphabetically('desc');
+        expect(listOrderAssetName).toBeSortedAlphabetically('desc');
 
         supplyPositions = await userSupplies(client, {
           query: {
@@ -271,7 +271,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         listOrderAssetName = supplyPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeOrderedAlphabetically('asc');
+        expect(listOrderAssetName).toBeSortedAlphabetically('asc');
       });
     });
   });

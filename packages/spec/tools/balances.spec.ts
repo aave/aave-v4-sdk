@@ -144,7 +144,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         let listOrderName = balances.value.map((elem) => elem.info.name);
-        expect(listOrderName).toBeOrderedAlphabetically('desc');
+        expect(listOrderName).toBeSortedAlphabetically('desc');
 
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
@@ -155,7 +155,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         listOrderName = balances.value.map((elem) => elem.info.name);
-        expect(listOrderName).toBeOrderedAlphabetically('asc');
+        expect(listOrderName).toBeSortedAlphabetically('asc');
       });
     });
 
@@ -172,7 +172,7 @@ describe('Querying User Balances on Aave V4', () => {
         let listOrderBalance = balances.value.map(
           (elem) => elem.totalAmount.value,
         );
-        expect(listOrderBalance).toBeOrderedNumerically('desc');
+        expect(listOrderBalance).toBeSortedNumerically('desc');
 
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
@@ -183,7 +183,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         listOrderBalance = balances.value.map((elem) => elem.totalAmount.value);
-        expect(listOrderBalance).toBeOrderedNumerically('asc');
+        expect(listOrderBalance).toBeSortedNumerically('asc');
       });
     });
   });

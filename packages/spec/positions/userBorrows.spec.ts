@@ -164,7 +164,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         let listOrderAmount = borrowPositions.value.map(
           (elem) => elem.debt.amount.value,
         );
-        expect(listOrderAmount).toBeOrderedNumerically('desc');
+        expect(listOrderAmount).toBeSortedNumerically('desc');
 
         borrowPositions = await userBorrows(client, {
           query: {
@@ -180,7 +180,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         listOrderAmount = borrowPositions.value.map(
           (elem) => elem.debt.amount.value,
         );
-        expect(listOrderAmount).toBeOrderedNumerically('asc');
+        expect(listOrderAmount).toBeSortedNumerically('asc');
       });
     });
 
@@ -200,7 +200,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         let listOrderApy = borrowPositions.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
-        expect(listOrderApy).toBeOrderedNumerically('desc');
+        expect(listOrderApy).toBeSortedNumerically('desc');
 
         borrowPositions = await userBorrows(client, {
           query: {
@@ -217,7 +217,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         listOrderApy = borrowPositions.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
-        expect(listOrderApy).toBeOrderedNumerically('asc');
+        expect(listOrderApy).toBeSortedNumerically('asc');
       });
     });
 
@@ -237,7 +237,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         let listOrderAssetName = borrowPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeOrderedAlphabetically('desc');
+        expect(listOrderAssetName).toBeSortedAlphabetically('desc');
 
         borrowPositions = await userBorrows(client, {
           query: {
@@ -253,7 +253,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         listOrderAssetName = borrowPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeOrderedAlphabetically('asc');
+        expect(listOrderAssetName).toBeSortedAlphabetically('asc');
       });
     });
   });

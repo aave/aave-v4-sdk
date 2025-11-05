@@ -86,7 +86,7 @@ expect.extend({
     };
   },
 
-  toBeOrderedNumerically(received: BigDecimal[], order: 'asc' | 'desc') {
+  toBeSortedNumerically(received: BigDecimal[], order: 'asc' | 'desc') {
     let pass = true;
     for (let i = 0; i < received.length - 1; i++) {
       const current = received[i];
@@ -113,7 +113,7 @@ expect.extend({
     };
   },
 
-  toBeOrderedAlphabetically(received: string[], order: 'asc' | 'desc') {
+  toBeSortedAlphabetically(received: string[], order: 'asc' | 'desc') {
     let pass = true;
     for (let i = 0; i < received.length - 1; i++) {
       const current = received[i];
