@@ -75,7 +75,6 @@ export enum ActivityType {
   Withdraw = 'WITHDRAW',
   Repay = 'REPAY',
   Liquidated = 'LIQUIDATED',
-  Swap = 'SWAP',
 }
 
 /**

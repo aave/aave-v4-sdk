@@ -3,7 +3,6 @@ import {
   assertOk,
   BigDecimal,
   bigDecimal,
-  chainId,
   evmAddress,
   never,
   nonNullable,
@@ -32,7 +31,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
     it('Then it should return a BigDecimal instance in its place', async () => {
       const result = await exchangeRate(client, {
         from: {
-          native: chainId(1),
+          native: ETHEREUM_FORK_ID,
         },
         to: Currency.Usd,
       });
@@ -45,7 +44,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
     it('Then it should return a Date instance in its place', async () => {
       const result = await activities(client, {
         query: {
-          chainIds: [chainId(1)],
+          chainIds: [ETHEREUM_FORK_ID],
         },
       });
       assertOk(result);
@@ -57,7 +56,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
     it('Then it should leverage cached data whenever possible', async () => {
       const primed = await hubs(client, {
         query: {
-          chainIds: [chainId(1)],
+          chainIds: [ETHEREUM_FORK_ID],
         },
       });
       assertOk(primed);
