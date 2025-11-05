@@ -50,7 +50,7 @@ export function hub(
  * ```ts
  * const result = await hubs(client, {
  *   query: {
- *     chainIds: [chainId(1), chainId(137)]
+ *     chainIds: [chainId(1)]
  *   }
  * });
  * ```

@@ -6,6 +6,7 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
+  ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -20,8 +21,8 @@ import {
 } from '@aave/types-next';
 import type { Signer, TransactionResponse } from 'ethers';
 import type {
+  ERC20PermitHandler,
   ExecutionPlanHandler,
-  PermitHandler,
   SwapSignatureHandler,
   TransactionResult,
 } from './types';
@@ -83,54 +84,95 @@ function sendTransactionAndWait(
   );
 }
 
+function executePlan(
+  signer: Signer,
+  result: ExecutionPlan,
+): ReturnType<ExecutionPlanHandler> {
+  switch (result.__typename) {
+    case 'TransactionRequest':
+      return sendTransactionAndWait(signer, result);
+
+    case 'Erc20ApprovalRequired':
+    case 'PreContractActionRequired':
+      return sendTransactionAndWait(signer, result.transaction).andThen(() =>
+        sendTransactionAndWait(signer, result.originalTransaction),
+      );
+
+    case 'InsufficientBalanceError':
+      return errAsync(ValidationError.fromGqlNode(result));
+  }
+}
+
 /**
  * Creates an execution plan handler that sends transactions using the provided ethers signer.
  */
-export function sendWith(signer: Signer): ExecutionPlanHandler {
-  return (result) => {
-    switch (result.__typename) {
-      case 'TransactionRequest':
-        return sendTransactionAndWait(signer, result);
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  signer: Signer,
+): ExecutionPlanHandler<T>;
+/**
+ * Sends execution plan transactions using the provided ethers signer.
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  signer: Signer,
+  result: T,
+): ReturnType<ExecutionPlanHandler<T>>;
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  signer: Signer,
+  result?: T,
+): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
+  return result ? executePlan(signer, result) : executePlan.bind(null, signer);
+}
 
-      case 'Erc20ApprovalRequired':
-      case 'PreContractActionRequired':
-        return sendTransactionAndWait(signer, result.transaction).andThen(() =>
-          sendTransactionAndWait(signer, result.originalTransaction),
-        );
-
-      case 'InsufficientBalanceError':
-        return errAsync(ValidationError.fromGqlNode(result));
-    }
-  };
+function signERC20Permit(
+  signer: Signer,
+  result: PermitTypedDataResponse,
+): ReturnType<ERC20PermitHandler> {
+  return ResultAsync.fromPromise(
+    signer.signTypedData(result.domain, result.types, result.message),
+    (err) => SigningError.from(err),
+  ).map((signature) => ({
+    deadline: result.message.deadline,
+    value: signatureFrom(signature),
+  }));
 }
 
 /**
- * Signs an ERC20 permit using the provided ethers signer.
+ * Creates an ERC20 permit handler that signs ERC20 permits using the provided ethers signer.
  */
-export function signERC20PermitWith(signer: Signer): PermitHandler {
-  return (result: PermitTypedDataResponse) => {
-    return ResultAsync.fromPromise(
-      signer.signTypedData(result.domain, result.types, result.message),
-      (err) => SigningError.from(err),
-    ).map((signature) => ({
-      deadline: result.message.deadline,
-      value: signatureFrom(signature),
-    }));
-  };
+export function signERC20PermitWith(signer: Signer): ERC20PermitHandler {
+  return signERC20Permit.bind(null, signer);
 }
 
+function signSwapTypedData(
+  signer: Signer,
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler> {
+  const message = JSON.parse(result.message);
+  return ResultAsync.fromPromise(
+    signer.signTypedData(result.domain, result.types, message),
+    (err) => SigningError.from(err),
+  ).map((signature) => ({
+    deadline: message.deadline,
+    value: signatureFrom(signature),
+  }));
+}
+
+/**
+ * Creates a swap signature handler that signs swap typed data using the provided ethers signer.
+ */
+export function signSwapTypedDataWith(signer: Signer): SwapSignatureHandler;
 /**
  * Signs swap typed data using the provided ethers signer.
  */
-export function signSwapTypedDataWith(signer: Signer): SwapSignatureHandler {
-  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
-    const message = JSON.parse(result.message);
-    return ResultAsync.fromPromise(
-      signer.signTypedData(result.domain, result.types, message),
-      (err) => SigningError.from(err),
-    ).map((signature) => ({
-      deadline: message.deadline,
-      value: signatureFrom(signature),
-    }));
-  };
+export function signSwapTypedDataWith(
+  signer: Signer,
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler>;
+export function signSwapTypedDataWith(
+  signer: Signer,
+  result?: SwapByIntentTypedData | CancelSwapTypedData,
+): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
+  return result
+    ? signSwapTypedData(signer, result)
+    : signSwapTypedData.bind(null, signer);
 }

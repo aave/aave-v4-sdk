@@ -14,7 +14,6 @@ import {
   type ReserveInfo,
   type Spoke,
   type SupplyActivity,
-  type SwapActivity,
   type SwapByIntent,
   type SwapByIntentWithApprovalRequired,
   type SwapByTransaction,
@@ -136,11 +135,6 @@ export const exchange = cacheExchange({
     },
     SpokeUserPositionManager: {
       approvedOn: transformToDate,
-    },
-    SwapActivity: {
-      timestamp: transformToDate,
-      createdAt: transformToDate,
-      fulfilledAt: transformToDate,
     },
     SwapCancelled: {
       createdAt: transformToDate,
@@ -269,7 +263,6 @@ export const exchange = cacheExchange({
     BorrowActivity: (data: BorrowActivity) => data.id,
     LiquidatedActivity: (data: LiquidatedActivity) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
-    SwapActivity: (data: SwapActivity) => data.id,
     SwapByIntent: (data: SwapByIntent) => data.quote.quoteId,
     SwapByIntentWithApprovalRequired: (
       data: SwapByIntentWithApprovalRequired,
@@ -292,7 +285,6 @@ export const exchange = cacheExchange({
     PaginatedSpokePositionManagerResult: () => null,
     PaginatedSpokeUserPositionManagerResult: () => null,
     PaginatedUserSwapsResult: () => null,
-    SpokeConfig: () => null,
     SpokePositionManger: () => null,
     SpokeUserPositionManager: () => null,
     SwapReceipt: () => null,

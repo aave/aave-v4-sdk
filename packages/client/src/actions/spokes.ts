@@ -45,7 +45,7 @@ export function spoke(
  *
  * ```ts
  * const result = await spokes(client, {
- *     chainIds: [chainId(1), chainId(137)]
+ *     chainIds: [chainId(1)]
  * });
  * ```
  *

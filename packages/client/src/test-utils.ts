@@ -83,7 +83,6 @@ export async function createNewWallet(
 ): Promise<WalletClient<Transport, Chain, Account>> {
   if (!privateKey) {
     const privateKey = generatePrivateKey();
-    console.log('privateKey', privateKey);
     const wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
       chain: ethereumForkChain,
