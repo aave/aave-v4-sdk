@@ -1,4 +1,4 @@
-import { type BigDecimal, InvariantError } from '@aave/client-next';
+import { InvariantError } from '@aave/client-next';
 import type { NonEmptyTuple } from 'type-fest';
 
 export function assertNonEmptyArray<T>(
