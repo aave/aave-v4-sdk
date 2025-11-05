@@ -37,42 +37,50 @@ describe('Repaying Loans on Aave V4', () => {
       const supplySetup = await findReservesToSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
         asCollateral: true,
-      }).andThen((reserves) =>
+      }).andThen((supplyReserves) =>
         fundErc20Address(evmAddress(user.account.address), {
-          address: reserves[0].asset.underlying.address,
-          amount: bigDecimal('1.0'),
-          decimals: reserves[0].asset.underlying.info.decimals,
+          address: supplyReserves[0].asset.underlying.address,
+          amount: bigDecimal('0.02'),
+          decimals: supplyReserves[0].asset.underlying.info.decimals,
         }).andThen(() =>
           supplyToReserve(client, user, {
             reserve: {
-              reserveId: reserves[0].id,
-              chainId: reserves[0].chain.chainId,
-              spoke: reserves[0].spoke.address,
+              reserveId: supplyReserves[0].id,
+              chainId: supplyReserves[0].chain.chainId,
+              spoke: supplyReserves[0].spoke.address,
             },
-            amount: { erc20: { value: bigDecimal(0.5) } },
+            amount: { erc20: { value: bigDecimal(0.01) } },
             sender: evmAddress(user.account.address),
+            enableCollateral: true,
           }),
         ),
       );
       assertOk(supplySetup);
-      await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
+      await sleep(2000); // TODO: Remove after fixed bug with delays of propagation
       const borrowSetup = await findReservesToBorrow(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-      }).andThen((reserves) =>
-        borrowFromReserve(client, user, {
-          sender: evmAddress(user.account.address),
-          reserve: {
-            spoke: reserves[0].spoke.address,
-            reserveId: reserves[0].id,
-            chainId: reserves[0].chain.chainId,
-          },
-          amount: {
-            erc20: {
-              value: reserves[0].userState!.borrowable.amount.value.times(0.1),
+      })
+        .andTee((borrowReserves) =>
+          console.log('borrowReserves', borrowReserves),
+        )
+        .andThen((borrowReserves) =>
+          borrowFromReserve(client, user, {
+            sender: evmAddress(user.account.address),
+            reserve: {
+              spoke: borrowReserves[0].spoke.address,
+              reserveId: borrowReserves[0].id,
+              chainId: borrowReserves[0].chain.chainId,
             },
-          },
-        }).map(() => reserves[0]),
-      );
+            amount: {
+              erc20: {
+                value:
+                  borrowReserves[0].userState!.borrowable.amount.value.times(
+                    0.01,
+                  ),
+              },
+            },
+          }).map(() => borrowReserves[0]),
+        );
       assertOk(borrowSetup);
       reserve = borrowSetup.value;
     }, 60_000);

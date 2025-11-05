@@ -138,24 +138,25 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
             asCollateral: true,
           }),
         );
-
+        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         assertOk(setup);
       });
       it(`Then the user's borrow position is updated to reflect the native asset loan`, async () => {
-        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const reservesToBorrow = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
           token: ETHEREUM_WETH_ADDRESS,
         });
         assertOk(reservesToBorrow);
         const amountToBorrow =
-          reservesToBorrow.value[0].userState!.borrowable.amount.value;
+          reservesToBorrow.value[0].userState!.borrowable.amount.value.times(
+            0.4,
+          );
+        expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
 
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );
 
-        expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
         const result = await borrow(client, {
           sender: evmAddress(user.account.address),
           reserve: {
@@ -189,7 +190,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           evmAddress(user.account.address),
         );
         expect(balanceAfter).toBeBigDecimalCloseTo(
-          balanceBefore.plus(amountToBorrow),
+          balanceBefore.add(amountToBorrow),
           4,
         );
 
