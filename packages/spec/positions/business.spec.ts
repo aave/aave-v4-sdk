@@ -15,17 +15,21 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
+  findReservesToBorrow,
+  findReservesToSupply,
+} from '../helpers/reserves';
+import {
+  supplyAndBorrow,
   supplyToRandomERC20Reserve,
   supplyToReserve,
 } from '../helpers/supplyBorrow';
-import { supplyAndBorrow } from '../repay/helper';
 
 const user = await createNewWallet();
 
@@ -39,6 +43,8 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            asCollateral: true,
             amount: bigDecimal('0.3'),
           }),
         );
@@ -62,25 +68,35 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
       let usedReserves: { borrowReserve: Reserve; supplyReserve: Reserve };
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.5'),
-        })
-          .andThen(() =>
-            fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_USDS_ADDRESS,
-              amount: bigDecimal('500'),
-            }),
-          )
-          .andThen(() =>
-            supplyAndBorrow(client, user, {
-              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
-              tokenToBorrow: ETHEREUM_USDS_ADDRESS,
-            }),
-          );
+        const reservesToBorrow = await findReservesToBorrow(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        });
+        assertOk(reservesToBorrow);
 
+        const setup = await findReservesToSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          asCollateral: true,
+        }).andThen((reservesToSupply) =>
+          fundErc20Address(evmAddress(user.account.address), {
+            address: reservesToSupply[0].asset.underlying.address,
+            amount: bigDecimal('0.2'),
+            decimals: reservesToSupply[0].asset.underlying.info.decimals,
+          })
+            .andThen(() =>
+              supplyAndBorrow(client, user, {
+                reserveToSupply: reservesToSupply[0],
+                amountToSupply: bigDecimal('0.1'),
+                reserveToBorrow: reservesToBorrow.value[0],
+                percentToBorrow: 0.1,
+              }),
+            )
+            .map(() => ({
+              borrowReserve: reservesToBorrow.value[0],
+              supplyReserve: reservesToSupply[0],
+            })),
+        );
         assertOk(setup);
-        usedReserves = setup.value;
+        usedReserves = setup!.value;
       }, 60_000);
 
       describe('When the user checks the health factor', () => {

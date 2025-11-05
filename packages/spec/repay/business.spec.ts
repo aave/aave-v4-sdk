@@ -10,7 +10,6 @@ import {
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
@@ -19,13 +18,17 @@ import {
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+
 import {
   findReservesToBorrow,
   findReservesToSupply,
 } from '../helpers/reserves';
-import { borrowFromReserve, supplyToReserve } from '../helpers/supplyBorrow';
+import {
+  borrowFromReserve,
+  supplyToReserve,
+  supplyWSTETHAndBorrowETH,
+} from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
-import { supplyAndBorrow, supplyWSTETHAndBorrowETH } from './helper';
 
 const user = await createNewWallet();
 
@@ -40,7 +43,7 @@ describe('Repaying Loans on Aave V4', () => {
       }).andThen((supplyReserves) =>
         fundErc20Address(evmAddress(user.account.address), {
           address: supplyReserves[0].asset.underlying.address,
-          amount: bigDecimal('0.02'),
+          amount: bigDecimal('0.2'),
           decimals: supplyReserves[0].asset.underlying.info.decimals,
         }).andThen(() =>
           supplyToReserve(client, user, {
@@ -59,28 +62,28 @@ describe('Repaying Loans on Aave V4', () => {
       await sleep(2000); // TODO: Remove after fixed bug with delays of propagation
       const borrowSetup = await findReservesToBorrow(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-      })
-        .andTee((borrowReserves) =>
-          console.log('borrowReserves', borrowReserves),
-        )
-        .andThen((borrowReserves) =>
-          borrowFromReserve(client, user, {
-            sender: evmAddress(user.account.address),
-            reserve: {
-              spoke: borrowReserves[0].spoke.address,
-              reserveId: borrowReserves[0].id,
-              chainId: borrowReserves[0].chain.chainId,
-            },
-            amount: {
-              erc20: {
-                value:
-                  borrowReserves[0].userState!.borrowable.amount.value.times(
-                    0.01,
-                  ),
-              },
-            },
-          }).map(() => borrowReserves[0]),
+      }).andThen((borrowReserves) => {
+        const reserveWithPermit = borrowReserves.find(
+          (reserve) => reserve.asset.underlying.permitSupported,
         );
+        if (!reserveWithPermit) {
+          throw new Error('No reserve with permit support found');
+        }
+        return borrowFromReserve(client, user, {
+          sender: evmAddress(user.account.address),
+          reserve: {
+            spoke: reserveWithPermit.spoke.address,
+            reserveId: reserveWithPermit.id,
+            chainId: reserveWithPermit.chain.chainId,
+          },
+          amount: {
+            erc20: {
+              value:
+                reserveWithPermit.userState!.borrowable.amount.value.times(0.1),
+            },
+          },
+        }).map(() => reserveWithPermit);
+      });
       assertOk(borrowSetup);
       reserve = borrowSetup.value;
     }, 60_000);
@@ -242,137 +245,10 @@ describe('Repaying Loans on Aave V4', () => {
           4,
         );
       });
-
-      describe('When the user repays a partial amount of the loan using a valid permit signature', () => {
-        let reserve: Reserve;
-
-        beforeAll(async () => {
-          const setup = await fundErc20Address(
-            evmAddress(user.account.address),
-            {
-              address: ETHEREUM_USDS_ADDRESS,
-              amount: bigDecimal('300'),
-              decimals: 6,
-            },
-          )
-            .andThen(() =>
-              fundErc20Address(evmAddress(user.account.address), {
-                address: ETHEREUM_WSTETH_ADDRESS,
-                amount: bigDecimal('1.0'),
-              }),
-            )
-            .andThen(() =>
-              supplyAndBorrow(client, user, {
-                tokenToSupply: ETHEREUM_USDS_ADDRESS,
-                tokenToBorrow: ETHEREUM_WSTETH_ADDRESS,
-              }),
-            );
-
-          assertOk(setup);
-          reserve = setup.value.borrowReserve;
-        }, 60_000);
-
-        it('Then the repayment is processed without requiring prior ERC20 approval', async () => {
-          const borrowBefore = await userBorrows(client, {
-            query: {
-              userSpoke: {
-                spoke: {
-                  address: reserve.spoke.address,
-                  chainId: reserve.chain.chainId,
-                },
-                user: evmAddress(user.account.address),
-              },
-            },
-          });
-          assertOk(borrowBefore);
-          const positionBefore = borrowBefore.value.find((position) => {
-            return (
-              position.reserve.asset.underlying.address ===
-              ETHEREUM_USDS_ADDRESS
-            );
-          });
-          invariant(positionBefore, 'No position found');
-          const amountToRepay = positionBefore.debt.amount.value.times(0.5);
-
-          const signature = await permitTypedData(client, {
-            repay: {
-              amount: {
-                exact: amountToRepay,
-              },
-              reserve: {
-                reserveId: reserve.id,
-                chainId: reserve.chain.chainId,
-                spoke: reserve.spoke.address,
-              },
-              sender: evmAddress(user.account.address),
-            },
-          }).andThen(signERC20PermitWith(user));
-          assertOk(signature);
-
-          const repayResult = await repay(client, {
-            reserve: {
-              spoke: reserve.spoke.address,
-              reserveId: reserve.id,
-              chainId: reserve.chain.chainId,
-            },
-            sender: evmAddress(user.account.address),
-            amount: {
-              erc20: {
-                permitSig: signature.value,
-                value: {
-                  exact: amountToRepay,
-                },
-              },
-            },
-          })
-            .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction)
-            .andThen(() =>
-              userBorrows(client, {
-                query: {
-                  userSpoke: {
-                    spoke: {
-                      address: reserve.spoke.address,
-                      chainId: reserve.chain.chainId,
-                    },
-                    user: evmAddress(user.account.address),
-                  },
-                },
-              }),
-            );
-          assertOk(repayResult);
-          const positionAfter = repayResult.value.find((position) => {
-            return (
-              position.reserve.asset.underlying.address ===
-              ETHEREUM_USDC_ADDRESS
-            );
-          });
-          invariant(positionAfter, 'No position found');
-          expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
-            amountToRepay,
-            2,
-          );
-        });
-      });
     });
-  });
 
-  describe('Given a user and a reserve that supports repayments in native tokens', () => {
-    let reserve: Reserve;
-
-    beforeAll(async () => {
-      const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_WSTETH_ADDRESS,
-        amount: bigDecimal('0.5'),
-      }).andThen(() => supplyWSTETHAndBorrowETH(client, user));
-
-      assertOk(setup);
-      reserve = setup.value.borrowReserve;
-    }, 60_000);
-
-    describe('When the user repays a partial amount of the loan in native tokens', () => {
-      it('Then the borrow position is updated to reflect the reduced outstanding balance', async () => {
+    describe('When the user repays a partial amount of the loan using a valid permit signature', () => {
+      it('Then the repayment is processed without requiring prior ERC20 approval', async () => {
         const borrowBefore = await userBorrows(client, {
           query: {
             userSpoke: {
@@ -387,7 +263,106 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(borrowBefore);
         const positionBefore = borrowBefore.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
+            position.reserve.asset.underlying.address ===
+            reserve.asset.underlying.address
+          );
+        });
+        invariant(positionBefore, 'No position found');
+        const amountToRepay = positionBefore.debt.amount.value.times(0.5);
+
+        const signature = await permitTypedData(client, {
+          repay: {
+            amount: {
+              exact: amountToRepay,
+            },
+            reserve: {
+              reserveId: reserve.id,
+              chainId: reserve.chain.chainId,
+              spoke: reserve.spoke.address,
+            },
+            sender: evmAddress(user.account.address),
+          },
+        }).andThen(signERC20PermitWith(user));
+        assertOk(signature);
+
+        const repayResult = await repay(client, {
+          reserve: {
+            spoke: reserve.spoke.address,
+            reserveId: reserve.id,
+            chainId: reserve.chain.chainId,
+          },
+          sender: evmAddress(user.account.address),
+          amount: {
+            erc20: {
+              permitSig: signature.value,
+              value: {
+                exact: amountToRepay,
+              },
+            },
+          },
+        })
+          .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction)
+          .andThen(() =>
+            userBorrows(client, {
+              query: {
+                userSpoke: {
+                  spoke: {
+                    address: reserve.spoke.address,
+                    chainId: reserve.chain.chainId,
+                  },
+                  user: evmAddress(user.account.address),
+                },
+              },
+            }),
+          );
+        assertOk(repayResult);
+        const positionAfter = repayResult.value.find((position) => {
+          return (
+            position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS
+          );
+        });
+        invariant(positionAfter, 'No position found');
+        expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
+          amountToRepay,
+          2,
+        );
+      });
+    });
+  });
+
+  describe('Given a user and a reserve that supports repayments in native tokens', () => {
+    let reserveSupportingNative: Reserve;
+
+    beforeAll(async () => {
+      const setup = await fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_WSTETH_ADDRESS,
+        amount: bigDecimal('0.5'),
+      }).andThen(() => supplyWSTETHAndBorrowETH(client, user));
+
+      assertOk(setup);
+      reserveSupportingNative = setup.value.borrowReserve;
+    }, 60_000);
+
+    describe('When the user repays a partial amount of the loan in native tokens', () => {
+      it('Then the borrow position is updated to reflect the reduced outstanding balance', async () => {
+        const borrowBefore = await userBorrows(client, {
+          query: {
+            userSpoke: {
+              spoke: {
+                address: reserveSupportingNative.spoke.address,
+                chainId: reserveSupportingNative.chain.chainId,
+              },
+              user: evmAddress(user.account.address),
+            },
+          },
+        });
+        assertOk(borrowBefore);
+        const positionBefore = borrowBefore.value.find((position) => {
+          return (
+            position.reserve.asset.underlying.address ===
+            reserveSupportingNative.asset.underlying.address
           );
         });
         invariant(positionBefore, 'No position found');
@@ -399,9 +374,9 @@ describe('Repaying Loans on Aave V4', () => {
 
         const repayResult = await repay(client, {
           reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
+            spoke: reserveSupportingNative.spoke.address,
+            reserveId: reserveSupportingNative.id,
+            chainId: reserveSupportingNative.chain.chainId,
           },
           sender: evmAddress(user.account.address),
           amount: {
@@ -417,8 +392,8 @@ describe('Repaying Loans on Aave V4', () => {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
+                    address: reserveSupportingNative.spoke.address,
+                    chainId: reserveSupportingNative.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
@@ -455,9 +430,9 @@ describe('Repaying Loans on Aave V4', () => {
 
         const repayResult = await repay(client, {
           reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
+            spoke: reserveSupportingNative.spoke.address,
+            reserveId: reserveSupportingNative.id,
+            chainId: reserveSupportingNative.chain.chainId,
           },
           sender: evmAddress(user.account.address),
           amount: {
@@ -473,8 +448,8 @@ describe('Repaying Loans on Aave V4', () => {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
+                    address: reserveSupportingNative.spoke.address,
+                    chainId: reserveSupportingNative.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
