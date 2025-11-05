@@ -128,25 +128,21 @@ expect.extend({
         continue;
       }
 
-      const comparison = current.localeCompare(next);
-
       if (
-        (order === 'desc' && comparison < 0) ||
-        (order === 'asc' && comparison > 0)
+        (order === 'desc' && current.localeCompare(next) < 0) ||
+        (order === 'asc' && current.localeCompare(next) > 0)
       ) {
         pass = false;
         break;
       }
     }
 
-    const arrayString = `[${received.map((v) => `"${v}"`).join(', ')}]`;
-
     return {
       pass,
       message: () =>
         pass
-          ? `expected array not to be ordered alphabetically ${order}ending, but got: ${arrayString}`
-          : `expected array to be ordered alphabetically ${order}ending, but got: ${arrayString}`,
+          ? `expected array not to be ordered alphabetically ${order}ending, but got: ${received}`
+          : `expected array to be ordered alphabetically ${order}ending, but got: ${received}`,
     };
   },
 });
