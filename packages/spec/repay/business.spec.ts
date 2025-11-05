@@ -238,8 +238,8 @@ describe('Repaying Loans on Aave V4', () => {
         });
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
-          amountToRepay,
-          2,
+          positionBefore.debt.amount.value.minus(amountToRepay),
+          4,
         );
       });
 
