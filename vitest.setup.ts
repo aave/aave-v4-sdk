@@ -1,3 +1,4 @@
+import type { BigDecimal } from '@aave/types-next';
 import * as matchers from 'jest-extended';
 import { expect } from 'vitest';
 
@@ -85,13 +86,7 @@ expect.extend({
     };
   },
 
-  toBeOrderedNumerically(
-    received: Array<{
-      lt: (other: unknown) => boolean;
-      gt: (other: unknown) => boolean;
-    }>,
-    order: 'asc' | 'desc',
-  ) {
+  toBeOrderedNumerically(received: BigDecimal[], order: 'asc' | 'desc') {
     let pass = true;
     for (let i = 0; i < received.length - 1; i++) {
       const current = received[i];
@@ -102,8 +97,8 @@ expect.extend({
       }
 
       if (
-        (order === 'desc' && current.lt(next)) ||
-        (order === 'asc' && current.gt(next))
+        (order === 'desc' && current.lte(next)) ||
+        (order === 'asc' && current.gte(next))
       ) {
         pass = false;
         break;
