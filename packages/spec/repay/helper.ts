@@ -15,11 +15,11 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import { supplyToReserve } from '../borrow/helper';
 import {
   findReservesToBorrow,
   findReservesToSupply,
 } from '../helpers/reserves';
+import { supplyToReserve } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
 
 export function supplyAndBorrow(

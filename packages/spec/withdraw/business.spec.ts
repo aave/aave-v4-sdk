@@ -10,8 +10,11 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { supplyNativeTokenToReserve, supplyToReserve } from '../borrow/helper';
 import { findReservesToSupply } from '../helpers/reserves';
+import {
+  supplyNativeTokenToReserve,
+  supplyToReserve,
+} from '../helpers/supplyBorrow';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -19,7 +22,7 @@ const user = await createNewWallet();
 describe('Withdrawing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position', () => {
     let reserve: Reserve;
-    const amountToSupply = 0.1;
+    const amountToSupply = bigDecimal(0.1);
 
     beforeEach(async () => {
       const setup = await findReservesToSupply(client, user).andThen(
@@ -37,7 +40,7 @@ describe('Withdrawing Assets on Aave V4', () => {
               },
               amount: {
                 erc20: {
-                  value: bigDecimal(amountToSupply.toString()),
+                  value: amountToSupply,
                 },
               },
               sender: evmAddress(user.account.address),
@@ -50,7 +53,7 @@ describe('Withdrawing Assets on Aave V4', () => {
 
     describe('When the user withdraws part of their supplied tokens', () => {
       it("Then the user's supply position is updated to reflect the partial withdrawal", async () => {
-        const amountToWithdraw = amountToSupply / 2;
+        const amountToWithdraw = amountToSupply.times(0.5);
         const balanceBefore = await getBalance(
           evmAddress(user.account.address),
           reserve.asset.underlying.address,
@@ -63,7 +66,7 @@ describe('Withdrawing Assets on Aave V4', () => {
             chainId: reserve.chain.chainId,
           },
           amount: {
-            erc20: { exact: bigDecimal(amountToWithdraw) },
+            erc20: { exact: amountToWithdraw },
           },
           sender: evmAddress(user.account.address),
         })
@@ -86,19 +89,22 @@ describe('Withdrawing Assets on Aave V4', () => {
         assertSingleElementArray(withdrawResult.value);
         expect(
           withdrawResult.value[0].withdrawable.amount.value,
-        ).toBeBigDecimalCloseTo(amountToSupply - amountToWithdraw, 2);
+        ).toBeBigDecimalCloseTo(amountToSupply.minus(amountToWithdraw), 2);
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),
           reserve.asset.underlying.address,
         );
-        expect(balanceBefore + amountToWithdraw).toBeCloseTo(balanceAfter, 4);
+        expect(balanceBefore + amountToWithdraw.toNumber()).toBeCloseTo(
+          balanceAfter,
+          4,
+        );
       });
     });
 
     describe('When the user wants to preview the withdrawal action before performing it', () => {
       it('Then the user can review the withdrawal details before proceeding', async () => {
-        const amountToWithdraw = amountToSupply / 3;
+        const amountToWithdraw = amountToSupply.div(3);
 
         const previewResult = await preview(client, {
           action: {
@@ -175,13 +181,13 @@ describe('Withdrawing Assets on Aave V4', () => {
 
   describe('Given a user and a reserve that supports withdrawals in native tokens', () => {
     let reserveSupportingNative: Reserve;
-    const amountToSupply = 0.05;
+    const amountToSupply = bigDecimal(0.05);
 
     beforeEach(async () => {
       const setup = await supplyNativeTokenToReserve(
         client,
         user,
-        bigDecimal(amountToSupply),
+        amountToSupply,
       );
 
       assertOk(setup);
@@ -190,7 +196,7 @@ describe('Withdrawing Assets on Aave V4', () => {
 
     describe('When the user withdraws part of their supplied native tokens', () => {
       it('Then the user receives the partial amount in native tokens and their supply position is updated', async () => {
-        const amountToWithdraw = amountToSupply / 2;
+        const amountToWithdraw = amountToSupply.times(0.5);
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );
@@ -202,7 +208,7 @@ describe('Withdrawing Assets on Aave V4', () => {
           },
           sender: evmAddress(user.account.address),
           amount: {
-            native: { exact: bigDecimal(amountToWithdraw) },
+            native: { exact: amountToWithdraw },
           },
         })
           .andThen(sendWith(user))
@@ -225,7 +231,10 @@ describe('Withdrawing Assets on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeCloseTo(balanceBefore + amountToWithdraw, 4);
+        expect(balanceAfter).toBeCloseTo(
+          balanceBefore + amountToWithdraw.toNumber(),
+          4,
+        );
       });
     });
 

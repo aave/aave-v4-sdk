@@ -13,9 +13,9 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
+import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
-import { supplyToRandomERC20Reserve } from './helper';
 
 const user = await createNewWallet();
 
