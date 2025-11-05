@@ -69,10 +69,10 @@ export function supplyAndBorrow(
           },
           amount: {
             erc20: {
-              value: bigDecimal(
-                Number(reservesToBorrow[0].userState!.borrowable.amount.value) *
-                  (params.percentToBorrow ?? 0.25),
-              ),
+              value:
+                reservesToBorrow[0].userState!.borrowable.amount.value.times(
+                  params.percentToBorrow ?? 0.25,
+                ),
             },
           },
         })

@@ -190,8 +190,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionBefore, 'No position found');
-        const amountBorrowed = Number(positionBefore.debt.amount.value);
-        const amountToRepay = amountBorrowed / 2;
+        const amountToRepay = positionBefore.debt.amount.value.times(0.5);
 
         const repayResult = await repay(client, {
           reserve: {
@@ -203,7 +202,7 @@ describe('Repaying Loans on Aave V4', () => {
           amount: {
             erc20: {
               value: {
-                exact: bigDecimal(amountToRepay),
+                exact: amountToRepay,
               },
             },
           },
@@ -285,13 +284,12 @@ describe('Repaying Loans on Aave V4', () => {
             );
           });
           invariant(positionBefore, 'No position found');
-          const amountBorrowed = Number(positionBefore.debt.amount.value);
-          const amountToRepay = amountBorrowed / 2;
+          const amountToRepay = positionBefore.debt.amount.value.times(0.5);
 
           const signature = await permitTypedData(client, {
             repay: {
               amount: {
-                exact: bigDecimal(amountToRepay),
+                exact: amountToRepay,
               },
               reserve: {
                 reserveId: reserve.id,
@@ -314,7 +312,7 @@ describe('Repaying Loans on Aave V4', () => {
               erc20: {
                 permitSig: signature.value,
                 value: {
-                  exact: bigDecimal(amountToRepay),
+                  exact: amountToRepay,
                 },
               },
             },
@@ -385,8 +383,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionBefore, 'No position found');
-        const amountBorrowed = Number(positionBefore.debt.amount.value);
-        const amountToRepay = amountBorrowed / 2;
+        const amountToRepay = positionBefore.debt.amount.value.times(0.5);
 
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
@@ -401,7 +398,7 @@ describe('Repaying Loans on Aave V4', () => {
           sender: evmAddress(user.account.address),
           amount: {
             native: {
-              exact: bigDecimal(amountToRepay),
+              exact: amountToRepay,
             },
           },
         })
@@ -435,7 +432,10 @@ describe('Repaying Loans on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeCloseTo(balanceBefore - amountToRepay, 4);
+        expect(balanceAfter).toBeCloseTo(
+          balanceBefore - amountToRepay.toNumber(),
+          4,
+        );
       });
     });
 

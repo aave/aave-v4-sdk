@@ -52,9 +52,8 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             },
             amount: {
               erc20: {
-                value: bigDecimal(
-                  Number(reserves[0].userState!.borrowable.amount.value) * 0.1,
-                ),
+                value:
+                  reserves[0].userState!.borrowable.amount.value.times(0.1),
               },
             },
           })
@@ -77,9 +76,8 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             },
             amount: {
               erc20: {
-                value: bigDecimal(
-                  Number(reserves[0].userState!.borrowable.amount.value) * 0.1,
-                ),
+                value:
+                  reserves[0].userState!.borrowable.amount.value.times(0.1),
               },
             },
           })
@@ -113,7 +111,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         );
         expect(usdcPosition).toBeDefined();
         expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
-          Number(firstBorrow.value.userState!.borrowable.amount.value) * 0.1,
+          firstBorrow.value.userState!.borrowable.amount.value.times(0.1),
           2,
         );
 
@@ -124,7 +122,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         );
         expect(usdsPosition).toBeDefined();
         expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(
-          Number(secondBorrow.value.userState!.borrowable.amount.value) * 0.1,
+          secondBorrow.value.userState!.borrowable.amount.value.times(0.1),
           2,
         );
       });

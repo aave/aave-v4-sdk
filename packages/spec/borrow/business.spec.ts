@@ -52,10 +52,8 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
                 },
                 amount: {
                   erc20: {
-                    value: bigDecimal(
-                      Number(reserves[0].userState!.borrowable.amount.value) *
-                        0.2,
-                    ),
+                    value:
+                      reserves[0].userState!.borrowable.amount.value.times(0.2),
                   },
                 },
                 sender: evmAddress(user.account.address),
@@ -78,10 +76,10 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
         });
         assertOk(reservesToBorrow);
-        const amountToBorrow = bigDecimal(
-          Number(reservesToBorrow.value[0].userState!.borrowable.amount.value) *
+        const amountToBorrow =
+          reservesToBorrow.value[0].userState!.borrowable.amount.value.times(
             0.1,
-        );
+          );
         expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
 
         const result = await borrow(client, {
@@ -189,7 +187,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           evmAddress(user.account.address),
         );
         expect(balanceAfter).toBeCloseTo(
-          balanceBefore + Number(amountToBorrow),
+          balanceBefore + amountToBorrow.toNumber(),
           4,
         );
 
