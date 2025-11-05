@@ -264,7 +264,7 @@ export async function getBalance(
     }),
   ]);
 
-  return bigDecimal((Number(balance) / 10 ** decimals).toFixed(decimals));
+  return bigDecimal(balance).rescale(-decimals);
 }
 
 // Function to get native token (ETH) balance
@@ -281,6 +281,5 @@ export async function getNativeBalance(
   });
 
   // Convert from wei to ETH (18 decimals)
-  const decimals = 18;
-  return bigDecimal((Number(balance) / 10 ** decimals).toFixed(decimals));
+  return bigDecimal(balance).rescale(-18);
 }
