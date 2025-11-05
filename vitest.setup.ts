@@ -1,3 +1,4 @@
+import type { BigDecimal } from '@aave/types-next';
 import * as matchers from 'jest-extended';
 import { expect } from 'vitest';
 
@@ -82,6 +83,61 @@ expect.extend({
     return {
       pass: /^0x[a-fA-F0-9]+$/.test(received),
       message: () => `expected ${received} to be an hex string (0x…)`,
+    };
+  },
+
+  toBeSortedNumerically(received: BigDecimal[], order: 'asc' | 'desc') {
+    let pass = true;
+    for (let i = 0; i < received.length - 1; i++) {
+      const current = received[i];
+      const next = received[i + 1];
+
+      if (!current || !next) {
+        continue;
+      }
+
+      if (
+        (order === 'desc' && current.lte(next)) ||
+        (order === 'asc' && current.gte(next))
+      ) {
+        pass = false;
+        break;
+      }
+    }
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected array not to be ordered ${order}ending, but got: ${received}`
+          : `expected array to be ordered ${order}ending, but got: ${received}`,
+    };
+  },
+
+  toBeSortedAlphabetically(received: string[], order: 'asc' | 'desc') {
+    let pass = true;
+    for (let i = 0; i < received.length - 1; i++) {
+      const current = received[i];
+      const next = received[i + 1];
+
+      if (!current || !next) {
+        continue;
+      }
+
+      if (
+        (order === 'desc' && current.localeCompare(next) < 0) ||
+        (order === 'asc' && current.localeCompare(next) > 0)
+      ) {
+        pass = false;
+        break;
+      }
+    }
+
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected array not to be ordered alphabetically ${order}ending, but got: ${received}`
+          : `expected array to be ordered alphabetically ${order}ending, but got: ${received}`,
     };
   },
 });

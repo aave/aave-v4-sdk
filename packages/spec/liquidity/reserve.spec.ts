@@ -15,7 +15,7 @@ import {
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { describe, expect, it } from 'vitest';
-import { assertNonEmptyArray, isOrderedNumerically } from '../test-utils';
+import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet();
 
@@ -179,7 +179,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listBorrowApyAsc = listReserves.value.map(
           (elem) => elem.summary.borrowApy.value,
         );
-        expect(isOrderedNumerically(listBorrowApyAsc, 'asc')).toBe(true);
+        expect(listBorrowApyAsc).toBeSortedNumerically('asc');
 
         listReserves = await reserves(client, {
           query: {
@@ -192,7 +192,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listBorrowApyDesc = listReserves.value.map(
           (elem) => elem.summary.borrowApy.value,
         );
-        expect(isOrderedNumerically(listBorrowApyDesc, 'desc')).toBe(true);
+        expect(listBorrowApyDesc).toBeSortedNumerically('desc');
       });
 
       it('Then it should return reserves ordered by supplyApy', async () => {
@@ -207,7 +207,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listSupplyApyAsc = listReserves.value.map(
           (elem) => elem.summary.supplyApy.value,
         );
-        expect(isOrderedNumerically(listSupplyApyAsc, 'asc')).toBe(true);
+        expect(listSupplyApyAsc).toBeSortedNumerically('asc');
 
         listReserves = await reserves(client, {
           query: {
@@ -220,7 +220,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listSupplyApyDesc = listReserves.value.map(
           (elem) => elem.summary.supplyApy.value,
         );
-        expect(isOrderedNumerically(listSupplyApyDesc, 'desc')).toBe(true);
+        expect(listSupplyApyDesc).toBeSortedNumerically('desc');
       });
 
       it('Then it should return reserves ordered by collateralFactor', async () => {
@@ -235,7 +235,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listCollateralFactorAsc = listReserves.value.map(
           (elem) => elem.settings.collateralFactor.value,
         );
-        expect(isOrderedNumerically(listCollateralFactorAsc, 'asc')).toBe(true);
+        expect(listCollateralFactorAsc).toBeSortedNumerically('asc');
         listReserves = await reserves(client, {
           query: {
             chainIds: [ETHEREUM_FORK_ID],
@@ -247,9 +247,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listCollateralFactorDesc = listReserves.value.map(
           (elem) => elem.settings.collateralFactor.value,
         );
-        expect(isOrderedNumerically(listCollateralFactorDesc, 'desc')).toBe(
-          true,
-        );
+        expect(listCollateralFactorDesc).toBeSortedNumerically('desc');
       });
 
       it('Then it should return reserves ordered by userBalance', async () => {
@@ -265,7 +263,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listUserBalanceAsc = listReserves.value.map(
           (elem) => elem.userState!.balance.amount.value,
         );
-        expect(isOrderedNumerically(listUserBalanceAsc, 'asc')).toBe(true);
+        expect(listUserBalanceAsc).toBeSortedNumerically('asc');
         listReserves = await reserves(client, {
           query: {
             chainIds: [ETHEREUM_FORK_ID],
@@ -278,7 +276,7 @@ describe('Aave V4 Reserve Scenario', () => {
         const listUserBalanceDesc = listReserves.value.map(
           (elem) => elem.userState!.balance.amount.value,
         );
-        expect(isOrderedNumerically(listUserBalanceDesc, 'desc')).toBe(true);
+        expect(listUserBalanceDesc).toBeSortedNumerically('desc');
       });
     });
 

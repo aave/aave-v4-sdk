@@ -7,11 +7,7 @@ import {
   ETHEREUM_SPOKE_CORE_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import {
-  assertNonEmptyArray,
-  isOrderedAlphabetically,
-  isOrderedNumerically,
-} from '../test-utils';
+import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet(
   '0x91e5f8c7bb59132f3b053615bec1d82e647bdcc49bc691fc602cdcb1b890416a',
@@ -176,7 +172,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let listOrderAmount = supplyPositions.value.map(
           (elem) => elem.withdrawable.amount.value,
         );
-        expect(isOrderedNumerically(listOrderAmount, 'desc')).toBe(true);
+        expect(listOrderAmount).toBeSortedNumerically('desc');
 
         supplyPositions = await userSupplies(client, {
           query: {
@@ -194,7 +190,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         listOrderAmount = supplyPositions.value.map(
           (elem) => elem.withdrawable.amount.value,
         );
-        expect(isOrderedNumerically(listOrderAmount, 'asc')).toBe(true);
+        expect(listOrderAmount).toBeSortedNumerically('asc');
       });
     });
 
@@ -216,7 +212,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let listOrderApy = supplyPositions.value.map(
           (elem) => elem.reserve.summary.supplyApy.value,
         );
-        expect(isOrderedNumerically(listOrderApy, 'desc')).toBe(true);
+        expect(listOrderApy).toBeSortedNumerically('desc');
 
         supplyPositions = await userSupplies(client, {
           query: {
@@ -235,7 +231,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         listOrderApy = supplyPositions.value.map(
           (elem) => elem.reserve.summary.supplyApy.value,
         );
-        expect(isOrderedNumerically(listOrderApy, 'asc')).toBe(true);
+        expect(listOrderApy).toBeSortedNumerically('asc');
       });
     });
 
@@ -257,7 +253,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let listOrderAssetName = supplyPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(isOrderedAlphabetically(listOrderAssetName, 'desc')).toBe(true);
+        expect(listOrderAssetName).toBeSortedAlphabetically('desc');
 
         supplyPositions = await userSupplies(client, {
           query: {
@@ -275,7 +271,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         listOrderAssetName = supplyPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(isOrderedAlphabetically(listOrderAssetName, 'asc')).toBe(true);
+        expect(listOrderAssetName).toBeSortedAlphabetically('asc');
       });
     });
   });

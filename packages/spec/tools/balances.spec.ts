@@ -18,11 +18,7 @@ import {
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
-import {
-  assertSingleElementArray,
-  isOrderedAlphabetically,
-  isOrderedNumerically,
-} from '../test-utils';
+import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
@@ -149,7 +145,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         let listOrderName = balances.value.map((elem) => elem.info.name);
-        expect(isOrderedAlphabetically(listOrderName, 'desc')).toBe(true);
+        expect(listOrderName).toBeSortedAlphabetically('desc');
 
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
@@ -160,7 +156,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         listOrderName = balances.value.map((elem) => elem.info.name);
-        expect(isOrderedAlphabetically(listOrderName, 'asc')).toBe(true);
+        expect(listOrderName).toBeSortedAlphabetically('asc');
       });
     });
 
@@ -177,7 +173,7 @@ describe('Querying User Balances on Aave V4', () => {
         let listOrderBalance = balances.value.map(
           (elem) => elem.totalAmount.value,
         );
-        expect(isOrderedNumerically(listOrderBalance, 'desc')).toBe(true);
+        expect(listOrderBalance).toBeSortedNumerically('desc');
 
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
@@ -188,7 +184,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         listOrderBalance = balances.value.map((elem) => elem.totalAmount.value);
-        expect(isOrderedNumerically(listOrderBalance, 'asc')).toBe(true);
+        expect(listOrderBalance).toBeSortedNumerically('asc');
       });
     });
   });
