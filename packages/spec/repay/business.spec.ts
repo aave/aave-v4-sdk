@@ -432,8 +432,8 @@ describe('Repaying Loans on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeCloseTo(
-          balanceBefore - amountToRepay.toNumber(),
+        expect(balanceAfter).toBeBigDecimalCloseTo(
+          balanceBefore.minus(amountToRepay),
           4,
         );
       });
@@ -479,7 +479,7 @@ describe('Repaying Loans on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeLessThan(balanceBefore);
+        expect(balanceAfter.lt(balanceBefore)).toBe(true);
       });
     });
   });

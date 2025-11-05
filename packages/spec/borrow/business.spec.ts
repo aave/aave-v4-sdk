@@ -188,8 +188,8 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeCloseTo(
-          balanceBefore + amountToBorrow.toNumber(),
+        expect(balanceAfter).toBeBigDecimalCloseTo(
+          balanceBefore.plus(amountToBorrow),
           4,
         );
 

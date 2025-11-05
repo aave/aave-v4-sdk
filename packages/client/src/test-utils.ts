@@ -226,7 +226,7 @@ export function wait(ms: number) {
 export async function getBalance(
   address: EvmAddress,
   tokenAddress: EvmAddress,
-): Promise<number> {
+): Promise<BigDecimal> {
   const publicClient = createPublicClient({
     chain: ethereumForkChain,
     transport: http(ETHEREUM_FORK_RPC_URL),
@@ -264,13 +264,13 @@ export async function getBalance(
     }),
   ]);
 
-  return Number.parseFloat(
-    (Number(balance) / 10 ** Number(decimals)).toFixed(decimals),
-  );
+  return bigDecimal((Number(balance) / 10 ** decimals).toFixed(decimals));
 }
 
 // Function to get native token (ETH) balance
-export async function getNativeBalance(address: EvmAddress): Promise<number> {
+export async function getNativeBalance(
+  address: EvmAddress,
+): Promise<BigDecimal> {
   const publicClient = createPublicClient({
     chain: ethereumForkChain,
     transport: http(ETHEREUM_FORK_RPC_URL),
@@ -282,7 +282,5 @@ export async function getNativeBalance(address: EvmAddress): Promise<number> {
 
   // Convert from wei to ETH (18 decimals)
   const decimals = 18;
-  return Number.parseFloat(
-    (Number(balance) / 10 ** decimals).toFixed(decimals),
-  );
+  return bigDecimal((Number(balance) / 10 ** decimals).toFixed(decimals));
 }

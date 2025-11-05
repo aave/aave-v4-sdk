@@ -95,7 +95,7 @@ describe('Withdrawing Assets on Aave V4', () => {
           evmAddress(user.account.address),
           reserve.asset.underlying.address,
         );
-        expect(balanceBefore + amountToWithdraw.toNumber()).toBeCloseTo(
+        expect(balanceBefore.plus(amountToWithdraw)).toBeBigDecimalCloseTo(
           balanceAfter,
           4,
         );
@@ -174,7 +174,7 @@ describe('Withdrawing Assets on Aave V4', () => {
           evmAddress(user.account.address),
           reserve.asset.underlying.address,
         );
-        expect(balanceAfter).toBeGreaterThan(balanceBefore);
+        expect(balanceAfter.gt(balanceBefore)).toBe(true);
       });
     });
   });
@@ -231,8 +231,8 @@ describe('Withdrawing Assets on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeCloseTo(
-          balanceBefore + amountToWithdraw.toNumber(),
+        expect(balanceAfter).toBeBigDecimalCloseTo(
+          balanceBefore.plus(amountToWithdraw),
           4,
         );
       });
@@ -281,7 +281,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeGreaterThan(balanceBefore);
+        expect(balanceAfter.gt(balanceBefore)).toBe(true);
       });
     });
   });
