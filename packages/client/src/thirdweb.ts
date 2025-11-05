@@ -5,6 +5,7 @@ import {
 } from '@aave/core-next';
 import type {
   CancelSwapTypedData,
+  ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
@@ -25,8 +26,8 @@ import {
   waitForReceipt,
 } from 'thirdweb';
 import type {
+  ERC20PermitHandler,
   ExecutionPlanHandler,
-  PermitHandler,
   SwapSignatureHandler,
   TransactionResult,
 } from './types';
@@ -85,25 +86,43 @@ function sendTransactionAndWait(
     });
 }
 
+function executePlan(
+  client: ThirdwebClient,
+  result: ExecutionPlan,
+): ReturnType<ExecutionPlanHandler> {
+  switch (result.__typename) {
+    case 'TransactionRequest':
+      return sendTransactionAndWait(client, result);
+
+    case 'Erc20ApprovalRequired':
+    case 'PreContractActionRequired':
+      return sendTransactionAndWait(client, result.transaction).andThen(() =>
+        sendTransactionAndWait(client, result.originalTransaction),
+      );
+
+    case 'InsufficientBalanceError':
+      return errAsync(ValidationError.fromGqlNode(result));
+  }
+}
+
 /**
  * Creates an execution plan handler that sends transactions using the provided Thirdweb client and account.
  */
-export function sendWith(client: ThirdwebClient): ExecutionPlanHandler {
-  return (result) => {
-    switch (result.__typename) {
-      case 'TransactionRequest':
-        return sendTransactionAndWait(client, result);
-
-      case 'Erc20ApprovalRequired':
-      case 'PreContractActionRequired':
-        return sendTransactionAndWait(client, result.transaction).andThen(() =>
-          sendTransactionAndWait(client, result.originalTransaction),
-        );
-
-      case 'InsufficientBalanceError':
-        return errAsync(ValidationError.fromGqlNode(result));
-    }
-  };
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  client: ThirdwebClient,
+): ExecutionPlanHandler<T>;
+/**
+ * Sends execution plan transactions using the provided Thirdweb client.
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  client: ThirdwebClient,
+  result: T,
+): ReturnType<ExecutionPlanHandler<T>>;
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  client: ThirdwebClient,
+  result?: T,
+): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
+  return result ? executePlan(client, result) : executePlan.bind(null, client);
 }
 
 async function signTypedData(
@@ -127,52 +146,77 @@ async function signTypedData(
   return signatureFrom(signature);
 }
 
-/**
- * Signs an ERC20 permit using the provided Thirdweb client and account.
- */
-export function signERC20PermitWith(client: ThirdwebClient): PermitHandler {
-  return (result: PermitTypedDataResponse) => {
-    return ResultAsync.fromPromise(signTypedData(client, result), (err) =>
-      SigningError.from(err),
-    ).map((value) => ({
-      deadline: result.message.deadline,
-      value,
-    }));
-  };
+function signERC20Permit(
+  client: ThirdwebClient,
+  result: PermitTypedDataResponse,
+): ReturnType<ERC20PermitHandler> {
+  return ResultAsync.fromPromise(signTypedData(client, result), (err) =>
+    SigningError.from(err),
+  ).map((value) => ({
+    deadline: result.message.deadline,
+    value,
+  }));
 }
 
+/**
+ * Creates an ERC20 permit handler that signs ERC20 permits using the provided Thirdweb client and account.
+ */
+export function signERC20PermitWith(
+  client: ThirdwebClient,
+): ERC20PermitHandler {
+  return signERC20Permit.bind(null, client);
+}
+
+function signSwapTypedData(
+  client: ThirdwebClient,
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler> {
+  const message = JSON.parse(result.message);
+
+  const signTypedDataPromise = async (): Promise<Signature> => {
+    const wallet = Engine.serverWallet({
+      client,
+      chain: defineChain({ id: result.domain.chainId }),
+      address: message.user,
+    });
+
+    const signature = await wallet.signTypedData({
+      // silence the rest of the type inference
+      types: result.types as Record<string, unknown>,
+      domain: result.domain,
+      primaryType: result.primaryType,
+      message,
+    });
+
+    return signatureFrom(signature);
+  };
+
+  return ResultAsync.fromPromise(signTypedDataPromise(), (err) =>
+    SigningError.from(err),
+  ).map((value) => ({
+    deadline: message.deadline,
+    value,
+  }));
+}
+
+/**
+ * Creates a swap signature handler that signs swap typed data using the provided Thirdweb client.
+ */
+export function signSwapTypedDataWith(
+  client: ThirdwebClient,
+): SwapSignatureHandler;
 /**
  * Signs swap typed data using the provided Thirdweb client.
  */
 export function signSwapTypedDataWith(
   client: ThirdwebClient,
-): SwapSignatureHandler {
-  return (result: SwapByIntentTypedData | CancelSwapTypedData) => {
-    const message = JSON.parse(result.message);
-
-    const signTypedDataPromise = async (): Promise<Signature> => {
-      const wallet = Engine.serverWallet({
-        client,
-        chain: defineChain({ id: result.domain.chainId }),
-        address: message.user,
-      });
-
-      const signature = await wallet.signTypedData({
-        // silence the rest of the type inference
-        types: result.types as Record<string, unknown>,
-        domain: result.domain,
-        primaryType: result.primaryType,
-        message,
-      });
-
-      return signatureFrom(signature);
-    };
-
-    return ResultAsync.fromPromise(signTypedDataPromise(), (err) =>
-      SigningError.from(err),
-    ).map((value) => ({
-      deadline: message.deadline,
-      value,
-    }));
-  };
+  result: SwapByIntentTypedData | CancelSwapTypedData,
+): ReturnType<SwapSignatureHandler>;
+export function signSwapTypedDataWith(
+  client: ThirdwebClient,
+  result?: SwapByIntentTypedData | CancelSwapTypedData,
+): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
+  return result
+    ? signSwapTypedData(client, result)
+    : signSwapTypedData.bind(null, client);
 }

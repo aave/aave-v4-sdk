@@ -4,7 +4,6 @@ import {
   assertErr,
   assertOk,
   type BlockchainData,
-  chainId,
   evmAddress,
 } from '@aave/types-next';
 import { HttpResponse } from 'msw';
@@ -15,7 +14,7 @@ import {
 } from 'viem';
 import { describe, expect, it } from 'vitest';
 import { setupRpcInterceptor } from './rpc.helpers';
-import { createNewWallet } from './test-utils';
+import { createNewWallet, ETHEREUM_FORK_ID } from './test-utils';
 import { sendWith } from './viem';
 
 const walletClient = await createNewWallet();
@@ -28,7 +27,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       from: evmAddress(walletClient.account.address),
       data: '0x' as BlockchainData,
       value: 0n,
-      chainId: chainId(1),
+      chainId: ETHEREUM_FORK_ID,
       operations: [],
     };
 
@@ -56,7 +55,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should switch the chain and continue', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertOk(result);
       });
@@ -96,7 +95,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should add the chain to the wallet and continue', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertOk(result);
       });
@@ -136,7 +135,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should fail with a SigningError', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertErr(result);
         expect(result.error).toBeInstanceOf(SigningError);
@@ -177,7 +176,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should fail with a CancelError', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertErr(result);
         expect(result.error).toBeInstanceOf(CancelError);
@@ -208,7 +207,7 @@ describe(`Given a viem's WalletClient instance`, () => {
       });
 
       it('Then it should fail with a SigningError', async () => {
-        const result = await sendWith(walletClient)(request);
+        const result = await sendWith(walletClient, request);
 
         assertErr(result);
         expect(result.error).toBeInstanceOf(SigningError);

@@ -8,12 +8,14 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { findReserveToSupply, supplyToReserve } from '../borrow/helper';
+import { supplyToReserve } from '../borrow/helper';
+import { findReservesToSupply } from '../helpers/reserves';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -27,16 +29,17 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         decimals: 6,
       })
         .andThen(() =>
-          findReserveToSupply(client, user, {
+          findReservesToSupply(client, user, {
             token: ETHEREUM_USDC_ADDRESS,
+            spoke: ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
           }),
         )
-        .andThen((reserve) =>
+        .andThen((listReserves) =>
           supplyToReserve(client, user, {
             reserve: {
-              chainId: reserve.chain.chainId,
-              reserveId: reserve.id,
-              spoke: reserve.spoke.address,
+              chainId: listReserves[0].chain.chainId,
+              reserveId: listReserves[0].id,
+              spoke: listReserves[0].spoke.address,
             },
             amount: {
               erc20: {

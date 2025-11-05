@@ -4,7 +4,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -16,7 +16,7 @@ import {
 } from '../test-utils';
 
 const user = await createNewWallet(
-  '0xd2ebf029889a4956c5e110834ef3e9252fefa4279b93a712839a5cb2b76833a1',
+  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
 );
 
 // TODO: Improve the tests(with multiple borrows in same spoke) when bug AAVE-2151 is fixed
@@ -55,7 +55,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -63,7 +63,12 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
         });
         assertOk(borrowPositions);
-        assertSingleElementArray(borrowPositions.value);
+        borrowPositions.value.forEach((position) => {
+          expect(position.reserve.spoke.address).toBe(
+            ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+          );
+          expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
+        });
       });
     });
 
@@ -88,7 +93,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -100,7 +105,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         expect(borrowPositions.value.length).toBeGreaterThanOrEqual(1);
         borrowPositions.value.forEach((position) => {
           expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_CORE_ADDRESS,
+            ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
           );
         });
       });

@@ -9,16 +9,14 @@ import {
 import { borrow } from '@aave/client-next/actions';
 import {
   ETHEREUM_SPOKE_EMODE_ADDRESS,
+  ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import {
-  findReserveToBorrow,
-  findReserveToSupply,
-  supplyToReserve,
-} from '../borrow/helper';
+import { findReserveToBorrow, supplyToReserve } from '../borrow/helper';
+import { findReservesToSupply } from '../helpers/reserves';
 import { sleep } from '../helpers/tools';
 
 export function supplyAndBorrow(
@@ -36,15 +34,16 @@ export function supplyAndBorrow(
       'Percent to borrow must be between 0 and 1',
     );
   }
-  return findReserveToSupply(client, user, {
+  return findReservesToSupply(client, user, {
     token: params.tokenToSupply,
+    spoke: ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
     asCollateral: true,
-  }).andThen((reserveToSupply) =>
+  }).andThen((listSupplyReserves) =>
     supplyToReserve(client, user, {
       reserve: {
-        reserveId: reserveToSupply.id,
-        chainId: reserveToSupply.chain.chainId,
-        spoke: reserveToSupply.spoke.address,
+        reserveId: listSupplyReserves[0].id,
+        chainId: listSupplyReserves[0].chain.chainId,
+        spoke: listSupplyReserves[0].spoke.address,
       },
       amount: { erc20: { value: bigDecimal(0.1) } },
       sender: evmAddress(user.account.address),
@@ -75,7 +74,7 @@ export function supplyAndBorrow(
           .andThen(client.waitForTransaction)
           .map(() => ({
             borrowReserve: reserveToBorrow,
-            supplyReserve: reserveToSupply,
+            supplyReserve: listSupplyReserves[0],
           })),
       ),
   );
@@ -85,15 +84,15 @@ export function supplyWSTETHAndBorrowETH(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
-  return findReserveToSupply(client, user, {
+  return findReservesToSupply(client, user, {
     token: ETHEREUM_WSTETH_ADDRESS,
     spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
-  }).andThen((reserveToSupply) =>
+  }).andThen((listSupplyReserves) =>
     supplyToReserve(client, user, {
       reserve: {
-        reserveId: reserveToSupply.id,
-        chainId: reserveToSupply.chain.chainId,
-        spoke: reserveToSupply.spoke.address,
+        reserveId: listSupplyReserves[0].id,
+        chainId: listSupplyReserves[0].chain.chainId,
+        spoke: listSupplyReserves[0].spoke.address,
       },
       amount: { erc20: { value: bigDecimal(0.2) } },
       sender: evmAddress(user.account.address),
@@ -122,7 +121,7 @@ export function supplyWSTETHAndBorrowETH(
           .andThen(client.waitForTransaction)
           .map(() => ({
             borrowReserve: reserveToBorrow,
-            supplyReserve: reserveToSupply,
+            supplyReserve: listSupplyReserves[0],
           })),
       ),
   );

@@ -45,7 +45,7 @@ export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
   result: T,
 ) => ResultAsync<TransactionResult, SendWithError>;
 
-export type PermitHandler = (
+export type ERC20PermitHandler = (
   result: PermitTypedDataResponse,
 ) => ResultAsync<ERC20PermitSignature, SigningError>;
 

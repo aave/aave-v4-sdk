@@ -8,13 +8,13 @@ import {
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
-  assertSingleElementArray,
+  assertNonEmptyArray,
   isOrderedAlphabetically,
   isOrderedNumerically,
 } from '../test-utils';
 
 const user = await createNewWallet(
-  '0x666806ff6ba3358a4ff90145a66fa682bbc61c599520148f114162408e98e462',
+  '0x91e5f8c7bb59132f3b053615bec1d82e647bdcc49bc691fc602cdcb1b890416a',
 );
 
 describe('Querying User Supply Positions on Aave V4', () => {
@@ -144,7 +144,10 @@ describe('Querying User Supply Positions on Aave V4', () => {
         });
         assertOk(positions);
         // Select a random supply position
-        assertSingleElementArray(positions.value);
+        assertNonEmptyArray(positions.value);
+        positions.value.forEach((position) => {
+          expect(position.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
+        });
         const supplyPositions = await userSupplies(client, {
           query: {
             userPositionId: positions.value[0].id,

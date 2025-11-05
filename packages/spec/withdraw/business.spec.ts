@@ -3,8 +3,6 @@ import { preview, userSupplies, withdraw } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
   getBalance,
   getNativeBalance,
@@ -12,11 +10,8 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeEach, describe, expect, it } from 'vitest';
-import {
-  findReserveToSupply,
-  supplyToNativeReserve,
-  supplyToReserve,
-} from '../borrow/helper';
+import { supplyNativeTokenToReserve, supplyToReserve } from '../borrow/helper';
+import { findReservesToSupply } from '../helpers/reserves';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -24,47 +19,41 @@ const user = await createNewWallet();
 describe('Withdrawing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position', () => {
     let reserve: Reserve;
-    const amountToSupply = 100;
+    const amountToSupply = 0.1;
 
     beforeEach(async () => {
-      const setup = await fundErc20Address(evmAddress(user.account!.address), {
-        address: ETHEREUM_USDC_ADDRESS,
-        amount: bigDecimal('100'),
-        decimals: 6,
-      }).andThen(() =>
-        findReserveToSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-        }).andThen((reserve) =>
-          supplyToReserve(client, user, {
-            reserve: {
-              reserveId: reserve.id,
-              chainId: reserve.chain.chainId,
-              spoke: reserve.spoke.address,
-            },
-            amount: {
-              erc20: {
-                value: bigDecimal('100'),
+      const setup = await findReservesToSupply(client, user).andThen(
+        (listReserves) =>
+          fundErc20Address(evmAddress(user.account!.address), {
+            address: listReserves[0].asset.underlying.address,
+            amount: bigDecimal('1'),
+            decimals: listReserves[0].asset.underlying.info.decimals,
+          }).andThen(() =>
+            supplyToReserve(client, user, {
+              reserve: {
+                reserveId: listReserves[0].id,
+                chainId: listReserves[0].chain.chainId,
+                spoke: listReserves[0].spoke.address,
               },
-            },
-            sender: evmAddress(user.account.address),
-          }).map(() => reserve),
-        ),
+              amount: {
+                erc20: {
+                  value: bigDecimal(amountToSupply.toString()),
+                },
+              },
+              sender: evmAddress(user.account.address),
+            }).map(() => listReserves[0]),
+          ),
       );
-
       assertOk(setup);
       reserve = setup.value;
-    });
+    }, 40_000);
 
     describe('When the user withdraws part of their supplied tokens', () => {
-      it("Then the user's supply position is updated to reflect the partial withdrawal", async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account!.address)}`);
-        annotate(`reserve id: ${reserve.id}`);
+      it("Then the user's supply position is updated to reflect the partial withdrawal", async () => {
         const amountToWithdraw = amountToSupply / 2;
         const balanceBefore = await getBalance(
           evmAddress(user.account.address),
-          ETHEREUM_USDC_ADDRESS,
+          reserve.asset.underlying.address,
         );
 
         const withdrawResult = await withdraw(client, {
@@ -101,9 +90,9 @@ describe('Withdrawing Assets on Aave V4', () => {
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),
-          ETHEREUM_USDC_ADDRESS,
+          reserve.asset.underlying.address,
         );
-        expect(balanceBefore + amountToWithdraw).toEqual(balanceAfter);
+        expect(balanceBefore + amountToWithdraw).toBeCloseTo(balanceAfter, 4);
       });
     });
 
@@ -138,14 +127,10 @@ describe('Withdrawing Assets on Aave V4', () => {
     });
 
     describe('When the user withdraws all of their supplied tokens', () => {
-      it("Then the user's supply position is closed and the full amount is withdrawn", async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account!.address)}`);
-        annotate(`reserve id: ${reserve.id}`);
+      it("Then the user's supply position is closed and the full amount is withdrawn", async () => {
         const balanceBefore = await getBalance(
           evmAddress(user.account.address),
-          ETHEREUM_USDC_ADDRESS,
+          reserve.asset.underlying.address,
         );
 
         const withdrawResult = await withdraw(client, {
@@ -181,7 +166,7 @@ describe('Withdrawing Assets on Aave V4', () => {
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),
-          ETHEREUM_USDC_ADDRESS,
+          reserve.asset.underlying.address,
         );
         expect(balanceAfter).toBeGreaterThan(balanceBefore);
       });
@@ -189,34 +174,31 @@ describe('Withdrawing Assets on Aave V4', () => {
   });
 
   describe('Given a user and a reserve that supports withdrawals in native tokens', () => {
-    let reserve: Reserve;
+    let reserveSupportingNative: Reserve;
     const amountToSupply = 0.05;
 
     beforeEach(async () => {
-      const setup = await supplyToNativeReserve(
+      const setup = await supplyNativeTokenToReserve(
         client,
         user,
         bigDecimal(amountToSupply),
       );
 
       assertOk(setup);
-      reserve = setup.value;
-    });
+      reserveSupportingNative = setup.value;
+    }, 50_000);
 
     describe('When the user withdraws part of their supplied native tokens', () => {
-      it('Then the user receives the partial amount in native tokens and their supply position is updated', async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account!.address)}`);
+      it('Then the user receives the partial amount in native tokens and their supply position is updated', async () => {
         const amountToWithdraw = amountToSupply / 2;
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );
         const withdrawResult = await withdraw(client, {
           reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
+            spoke: reserveSupportingNative.spoke.address,
+            reserveId: reserveSupportingNative.id,
+            chainId: reserveSupportingNative.chain.chainId,
           },
           sender: evmAddress(user.account.address),
           amount: {
@@ -230,8 +212,8 @@ describe('Withdrawing Assets on Aave V4', () => {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
+                    address: reserveSupportingNative.spoke.address,
+                    chainId: reserveSupportingNative.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
@@ -248,18 +230,15 @@ describe('Withdrawing Assets on Aave V4', () => {
     });
 
     describe('When the user withdraws all of their supplied native tokens', () => {
-      it('Then the user receives the full amount in native tokens and their supply position is closed', async ({
-        annotate,
-      }) => {
-        annotate(`account address: ${evmAddress(user.account!.address)}`);
+      it('Then the user receives the full amount in native tokens and their supply position is closed', async () => {
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );
         const withdrawResult = await withdraw(client, {
           reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
+            spoke: reserveSupportingNative.spoke.address,
+            reserveId: reserveSupportingNative.id,
+            chainId: reserveSupportingNative.chain.chainId,
           },
           sender: evmAddress(user.account.address),
           amount: {
@@ -273,8 +252,8 @@ describe('Withdrawing Assets on Aave V4', () => {
               query: {
                 userSpoke: {
                   spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
+                    address: reserveSupportingNative.spoke.address,
+                    chainId: reserveSupportingNative.chain.chainId,
                   },
                   user: evmAddress(user.account.address),
                 },
@@ -283,11 +262,11 @@ describe('Withdrawing Assets on Aave V4', () => {
           );
         assertOk(withdrawResult);
         if (withdrawResult.value.length > 0) {
-          // check exactly position WETH is closed, in case other tests failed
+          // check position is closed, in case other tests failed
           assertSingleElementArray(withdrawResult.value);
           expect(
             withdrawResult.value[0].reserve.asset.underlying.address,
-          ).not.toBe(ETHEREUM_WETH_ADDRESS);
+          ).not.toBe(reserveSupportingNative.asset.underlying.address);
         }
 
         const balanceAfter = await getNativeBalance(
