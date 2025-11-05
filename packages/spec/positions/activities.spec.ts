@@ -1,4 +1,5 @@
 import {
+  type ActivityItem,
   ActivityType,
   assertOk,
   evmAddress,
@@ -29,6 +30,17 @@ describe('Query User Activities on Aave V4', () => {
     describe('When fetching the user activities by activity type filter', () => {
       const activityTypes = Object.values(ActivityType);
 
+      const typenameToActivityType: Record<
+        ActivityItem['__typename'],
+        ActivityType
+      > = {
+        BorrowActivity: ActivityType.Borrow,
+        SupplyActivity: ActivityType.Supply,
+        WithdrawActivity: ActivityType.Withdraw,
+        RepayActivity: ActivityType.Repay,
+        LiquidatedActivity: ActivityType.Liquidated,
+      };
+
       it.each(activityTypes)(
         'Then it should be possible to filter them by %s activity',
         async (activityType) => {
@@ -41,19 +53,19 @@ describe('Query User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-
-          result.value.items.forEach((item) => {
-            const typenameToActivityType: Record<string, ActivityType> = {
-              BorrowActivity: ActivityType.Borrow,
-              SupplyActivity: ActivityType.Supply,
-              WithdrawActivity: ActivityType.Withdraw,
-              RepayActivity: ActivityType.Repay,
-              LiquidatedActivity: ActivityType.Liquidated,
-            };
-
-            const itemActivityType = typenameToActivityType[item.__typename];
-            expect(itemActivityType).toBe(activityType);
-          });
+          if (
+            [ActivityType.Liquidated, ActivityType.Repay].includes(activityType)
+          ) {
+            // TODO: refactor recreateUserActivities to create repay
+            return;
+          }
+          assertNonEmptyArray(result.value.items);
+          const listActivityTypes = result.value.items.map(
+            (item) => typenameToActivityType[item.__typename],
+          );
+          expect(listActivityTypes).toSatisfyAll(
+            (activity) => activity === activityType,
+          );
         },
       );
     });

@@ -15,8 +15,11 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import { findReserveToBorrow, supplyToReserve } from '../borrow/helper';
-import { findReservesToSupply } from '../helpers/reserves';
+import { supplyToReserve } from '../borrow/helper';
+import {
+  findReservesToBorrow,
+  findReservesToSupply,
+} from '../helpers/reserves';
 import { sleep } from '../helpers/tools';
 
 export function supplyAndBorrow(
@@ -51,29 +54,32 @@ export function supplyAndBorrow(
     })
       .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
       .andThen(() =>
-        findReserveToBorrow(client, user, { token: params.tokenToBorrow }),
+        findReservesToBorrow(client, user, {
+          token: params.tokenToBorrow,
+          spoke: ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
+        }),
       )
-      .andThen((reserveToBorrow) =>
+      .andThen((reservesToBorrow) =>
         borrow(client, {
           sender: evmAddress(user.account.address),
           reserve: {
-            spoke: reserveToBorrow.spoke.address,
-            reserveId: reserveToBorrow.id,
-            chainId: reserveToBorrow.chain.chainId,
+            spoke: reservesToBorrow[0].spoke.address,
+            reserveId: reservesToBorrow[0].id,
+            chainId: reservesToBorrow[0].chain.chainId,
           },
           amount: {
             erc20: {
-              value: bigDecimal(
-                Number(reserveToBorrow.userState!.borrowable.amount.value) *
-                  (params.percentToBorrow ?? 0.25),
-              ),
+              value:
+                reservesToBorrow[0].userState!.borrowable.amount.value.times(
+                  params.percentToBorrow ?? 0.25,
+                ),
             },
           },
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
           .map(() => ({
-            borrowReserve: reserveToBorrow,
+            borrowReserve: reservesToBorrow[0],
             supplyReserve: listSupplyReserves[0],
           })),
       ),
@@ -100,27 +106,27 @@ export function supplyWSTETHAndBorrowETH(
     })
       .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
       .andThen(() =>
-        findReserveToBorrow(client, user, {
+        findReservesToBorrow(client, user, {
           token: ETHEREUM_WETH_ADDRESS,
           spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
         }),
       )
-      .andThen((reserveToBorrow) =>
+      .andThen((reservesToBorrow) =>
         borrow(client, {
           sender: evmAddress(user.account.address),
           reserve: {
-            spoke: reserveToBorrow.spoke.address,
-            reserveId: reserveToBorrow.id,
-            chainId: reserveToBorrow.chain.chainId,
+            spoke: reservesToBorrow[0].spoke.address,
+            reserveId: reservesToBorrow[0].id,
+            chainId: reservesToBorrow[0].chain.chainId,
           },
           amount: {
-            native: reserveToBorrow.userState!.borrowable.amount.value,
+            native: reservesToBorrow[0].userState!.borrowable.amount.value,
           },
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
           .map(() => ({
-            borrowReserve: reserveToBorrow,
+            borrowReserve: reservesToBorrow[0],
             supplyReserve: listSupplyReserves[0],
           })),
       ),
