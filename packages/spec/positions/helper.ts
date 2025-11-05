@@ -15,7 +15,7 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import { supplyToRandomERC20Reserve } from '../borrow/helper';
+import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
 import { supplyAndBorrow, supplyWSTETHAndBorrowETH } from '../repay/helper';
 
 // TODO: missing following actions to add: repay, liquidated and swap

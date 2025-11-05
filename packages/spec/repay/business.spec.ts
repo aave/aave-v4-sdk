@@ -8,6 +8,7 @@ import {
 import {
   client,
   createNewWallet,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
@@ -17,40 +18,85 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import {
+  findReservesToBorrow,
+  findReservesToSupply,
+} from '../helpers/reserves';
+import { borrowFromReserve, supplyToReserve } from '../helpers/supplyBorrow';
+import { sleep } from '../helpers/tools';
 import { supplyAndBorrow, supplyWSTETHAndBorrowETH } from './helper';
 
 const user = await createNewWallet();
 
 describe('Repaying Loans on Aave V4', () => {
   describe('Given a user and a reserve with an active borrow position', () => {
+    let reserve: Reserve;
+
+    beforeEach(async () => {
+      const supplySetup = await findReservesToSupply(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        asCollateral: true,
+      }).andThen((supplyReserves) =>
+        fundErc20Address(evmAddress(user.account.address), {
+          address: supplyReserves[0].asset.underlying.address,
+          amount: bigDecimal('0.02'),
+          decimals: supplyReserves[0].asset.underlying.info.decimals,
+        }).andThen(() =>
+          supplyToReserve(client, user, {
+            reserve: {
+              reserveId: supplyReserves[0].id,
+              chainId: supplyReserves[0].chain.chainId,
+              spoke: supplyReserves[0].spoke.address,
+            },
+            amount: { erc20: { value: bigDecimal(0.01) } },
+            sender: evmAddress(user.account.address),
+            enableCollateral: true,
+          }),
+        ),
+      );
+      assertOk(supplySetup);
+      await sleep(2000); // TODO: Remove after fixed bug with delays of propagation
+      const borrowSetup = await findReservesToBorrow(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+      })
+        .andTee((borrowReserves) =>
+          console.log('borrowReserves', borrowReserves),
+        )
+        .andThen((borrowReserves) =>
+          borrowFromReserve(client, user, {
+            sender: evmAddress(user.account.address),
+            reserve: {
+              spoke: borrowReserves[0].spoke.address,
+              reserveId: borrowReserves[0].id,
+              chainId: borrowReserves[0].chain.chainId,
+            },
+            amount: {
+              erc20: {
+                value:
+                  borrowReserves[0].userState!.borrowable.amount.value.times(
+                    0.01,
+                  ),
+              },
+            },
+          }).map(() => borrowReserves[0]),
+        );
+      assertOk(borrowSetup);
+      reserve = borrowSetup.value;
+    }, 60_000);
+
     describe('When the user repays the full loan amount', () => {
-      let reserve: Reserve;
-
-      beforeAll(async () => {
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('1.0'),
-        })
-          .andThen(() =>
-            fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_USDC_ADDRESS,
-              amount: bigDecimal('300'),
-              decimals: 6,
-            }),
-          )
-          .andThen(() =>
-            supplyAndBorrow(client, user, {
-              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
-              tokenToBorrow: ETHEREUM_USDC_ADDRESS,
-            }),
-          );
-
-        assertOk(setup);
-        reserve = setup.value.borrowReserve;
-      }, 60_000);
-
       it("Then the borrow position is closed and the repayment is reflected in the user's positions", async () => {
+        const fundWallet = await fundErc20Address(
+          evmAddress(user.account.address),
+          {
+            address: reserve.asset.underlying.address,
+            amount: reserve.userState!.borrowable.amount.value.times(2),
+            decimals: reserve.asset.underlying.info.decimals,
+          },
+        );
+        assertOk(fundWallet);
+
         const repayResult = await repay(client, {
           reserve: {
             spoke: reserve.spoke.address,
@@ -87,31 +133,6 @@ describe('Repaying Loans on Aave V4', () => {
     });
 
     describe('When the user wants to preview the repayment action before performing it', () => {
-      let reserve: Reserve;
-
-      beforeAll(async () => {
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('1.0'),
-        })
-          .andThen(() =>
-            fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_USDC_ADDRESS,
-              amount: bigDecimal('300'),
-              decimals: 6,
-            }),
-          )
-          .andThen(() =>
-            supplyAndBorrow(client, user, {
-              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
-              tokenToBorrow: ETHEREUM_USDC_ADDRESS,
-            }),
-          );
-
-        assertOk(setup);
-        reserve = setup.value.borrowReserve;
-      }, 60_000);
-
       it('Then the user can review the repayment details before proceeding', async () => {
         const previewResult = await preview(client, {
           action: {
@@ -125,7 +146,8 @@ describe('Repaying Loans on Aave V4', () => {
               amount: {
                 erc20: {
                   value: {
-                    exact: bigDecimal(50),
+                    exact:
+                      reserve.userState!.borrowable.amount.value.times(0.1),
                   },
                 },
               },
@@ -146,31 +168,6 @@ describe('Repaying Loans on Aave V4', () => {
     });
 
     describe('When the user repays a partial amount of the loan', () => {
-      let reserve: Reserve;
-
-      beforeAll(async () => {
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDS_ADDRESS,
-          amount: bigDecimal('300'),
-          decimals: 6,
-        })
-          .andThen(() =>
-            fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_WSTETH_ADDRESS,
-              amount: bigDecimal('1.0'),
-            }),
-          )
-          .andThen(() =>
-            supplyAndBorrow(client, user, {
-              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
-              tokenToBorrow: ETHEREUM_USDS_ADDRESS,
-            }),
-          );
-
-        assertOk(setup);
-        reserve = setup.value.borrowReserve;
-      }, 60_000);
-
       it('Then the borrow position is updated to reflect the reduced outstanding balance', async () => {
         const borrowBefore = await userBorrows(client, {
           query: {
@@ -186,11 +183,21 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(borrowBefore);
         const positionBefore = borrowBefore.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_USDS_ADDRESS
+            position.reserve.asset.underlying.address ===
+            reserve.asset.underlying.address
           );
         });
         invariant(positionBefore, 'No position found');
-        const amountToRepay = positionBefore.debt.amount.value.times(0.5);
+        const fundWallet = await fundErc20Address(
+          evmAddress(user.account.address),
+          {
+            address: reserve.asset.underlying.address,
+            amount: positionBefore.debt.amount.value.times(2),
+            decimals: reserve.asset.underlying.info.decimals,
+          },
+        );
+        assertOk(fundWallet);
+        const amountToRepay = positionBefore.debt.amount.value.times(0.1);
 
         const repayResult = await repay(client, {
           reserve: {
@@ -225,13 +232,14 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(repayResult);
         const positionAfter = repayResult.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_USDS_ADDRESS
+            position.reserve.asset.underlying.address ===
+            reserve.asset.underlying.address
           );
         });
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
-          amountToRepay,
-          2,
+          positionBefore.debt.amount.value.minus(amountToRepay),
+          4,
         );
       });
 
@@ -432,8 +440,8 @@ describe('Repaying Loans on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeCloseTo(
-          balanceBefore - amountToRepay.toNumber(),
+        expect(balanceAfter).toBeBigDecimalCloseTo(
+          balanceBefore.minus(amountToRepay),
           4,
         );
       });
@@ -479,7 +487,7 @@ describe('Repaying Loans on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeLessThan(balanceBefore);
+        expect(balanceAfter.lt(balanceBefore)).toBe(true);
       });
     });
   });

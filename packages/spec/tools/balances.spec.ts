@@ -17,7 +17,7 @@ import {
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToRandomERC20Reserve } from '../borrow/helper';
+import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -40,13 +40,14 @@ describe('Querying User Balances on Aave V4', () => {
         .andThen(() =>
           fundErc20Address(evmAddress(user.account.address), {
             address: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('100'),
+            amount: bigDecimal('0.1'),
           }),
         )
         .andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('50'),
+            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            amount: bigDecimal('0.05'),
           }),
         );
       assertOk(setup);

@@ -1,4 +1,9 @@
-import type { AaveClient, Reserve, SupplyRequest } from '@aave/client-next';
+import type {
+  AaveClient,
+  BorrowRequest,
+  Reserve,
+  SupplyRequest,
+} from '@aave/client-next';
 import {
   type BigDecimal,
   type EvmAddress,
@@ -7,7 +12,7 @@ import {
   type TxHash,
 } from '@aave/client-next';
 
-import { supply } from '@aave/client-next/actions';
+import { borrow, supply } from '@aave/client-next/actions';
 
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
@@ -20,6 +25,16 @@ export function supplyToReserve(
   request: SupplyRequest,
 ): ResultAsync<TxHash, Error> {
   return supply(client, request)
+    .andThen(sendWith(user))
+    .andThen(client.waitForTransaction);
+}
+
+export function borrowFromReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  request: BorrowRequest,
+): ResultAsync<TxHash, Error> {
+  return borrow(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
 }
@@ -44,7 +59,7 @@ export function supplyNativeTokenToReserve(
         native: amount,
       },
       sender: evmAddress(user.account.address),
-      enableCollateral: false, // TODO: set to true when contracts are deployed
+      enableCollateral: true,
     }).map(() => reserves[0]),
   );
 }
@@ -56,16 +71,18 @@ export function supplyToRandomERC20Reserve(
     token,
     amount,
     spoke,
+    asCollateral,
   }: {
     token: EvmAddress;
     amount: BigDecimal;
     spoke?: EvmAddress;
+    asCollateral?: boolean;
   },
 ): ResultAsync<Reserve, Error> {
   return findReservesToSupply(client, user, {
     token: token,
     spoke: spoke,
-    asCollateral: true,
+    asCollateral: asCollateral,
   }).andThen((reserves) =>
     supplyToReserve(client, user, {
       reserve: {

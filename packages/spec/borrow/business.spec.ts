@@ -13,9 +13,9 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
+import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
-import { supplyToRandomERC20Reserve } from './helper';
 
 const user = await createNewWallet();
 
@@ -30,6 +30,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           token: ETHEREUM_WSTETH_ADDRESS,
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
           amount: bigDecimal('0.1'),
+          asCollateral: true,
         }),
       );
 
@@ -134,26 +135,28 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
             token: ETHEREUM_WSTETH_ADDRESS,
             amount: bigDecimal('0.1'),
             spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+            asCollateral: true,
           }),
         );
-
+        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         assertOk(setup);
       });
       it(`Then the user's borrow position is updated to reflect the native asset loan`, async () => {
-        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const reservesToBorrow = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
           token: ETHEREUM_WETH_ADDRESS,
         });
         assertOk(reservesToBorrow);
         const amountToBorrow =
-          reservesToBorrow.value[0].userState!.borrowable.amount.value;
+          reservesToBorrow.value[0].userState!.borrowable.amount.value.times(
+            0.4,
+          );
+        expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
 
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );
 
-        expect(amountToBorrow).toBeBigDecimalGreaterThan(0);
         const result = await borrow(client, {
           sender: evmAddress(user.account.address),
           reserve: {
@@ -186,8 +189,8 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
-        expect(balanceAfter).toBeCloseTo(
-          balanceBefore + amountToBorrow.toNumber(),
+        expect(balanceAfter).toBeBigDecimalCloseTo(
+          balanceBefore.add(amountToBorrow),
           4,
         );
 

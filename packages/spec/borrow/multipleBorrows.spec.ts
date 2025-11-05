@@ -5,16 +5,14 @@ import {
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
+import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
-import { supplyToRandomERC20Reserve } from './helper';
 
 const user = await createNewWallet();
 
@@ -23,14 +21,14 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDS_ADDRESS,
-          amount: bigDecimal('200'),
-          decimals: 6,
+          address: ETHEREUM_WSTETH_ADDRESS,
+          amount: bigDecimal('0.2'),
         }).andThen(() =>
           supplyToRandomERC20Reserve(client, user, {
-            token: ETHEREUM_USDS_ADDRESS,
-            // spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-            amount: bigDecimal('100'),
+            token: ETHEREUM_WSTETH_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            amount: bigDecimal('0.1'),
+            asCollateral: true,
           }),
         );
 
@@ -39,53 +37,50 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
 
       it('Then the user has two active borrow positions with correct amounts', async () => {
         await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
-        const firstBorrow = await findReservesToBorrow(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
+        const reservesToBorrow = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-        }).andThen((reserves) =>
-          borrow(client, {
-            sender: evmAddress(user.account.address),
-            reserve: {
-              spoke: reserves[0].spoke.address,
-              reserveId: reserves[0].id,
-              chainId: reserves[0].chain.chainId,
+        });
+        assertOk(reservesToBorrow);
+        expect(reservesToBorrow.value.length).toBeGreaterThanOrEqual(2);
+
+        const firstBorrow = await borrow(client, {
+          sender: evmAddress(user.account.address),
+          reserve: {
+            spoke: reservesToBorrow.value[0].spoke.address,
+            reserveId: reservesToBorrow.value[0].id,
+            chainId: reservesToBorrow.value[0].chain.chainId,
+          },
+          amount: {
+            erc20: {
+              value:
+                reservesToBorrow.value[0].userState!.borrowable.amount.value.times(
+                  0.1,
+                ),
             },
-            amount: {
-              erc20: {
-                value:
-                  reserves[0].userState!.borrowable.amount.value.times(0.1),
-              },
-            },
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction)
-            .map(() => reserves[0]),
-        );
+          },
+        })
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction);
         assertOk(firstBorrow);
 
-        const secondBorrow = await findReservesToBorrow(client, user, {
-          token: ETHEREUM_WETH_ADDRESS,
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-        }).andThen((reserves) =>
-          borrow(client, {
-            sender: evmAddress(user.account.address),
-            reserve: {
-              spoke: reserves[0].spoke.address,
-              reserveId: reserves[0].id,
-              chainId: reserves[0].chain.chainId,
+        const secondBorrow = await borrow(client, {
+          sender: evmAddress(user.account.address),
+          reserve: {
+            spoke: reservesToBorrow.value[1]!.spoke.address,
+            reserveId: reservesToBorrow.value[1]!.id,
+            chainId: reservesToBorrow.value[1]!.chain.chainId,
+          },
+          amount: {
+            erc20: {
+              value:
+                reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
+                  0.1,
+                ),
             },
-            amount: {
-              erc20: {
-                value:
-                  reserves[0].userState!.borrowable.amount.value.times(0.1),
-              },
-            },
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction)
-            .map(() => reserves[0]),
-        );
-
+          },
+        })
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction);
         assertOk(secondBorrow);
 
         // Verify user has two borrow positions
@@ -107,22 +102,28 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         // Verify first borrow position (USDC)
         const usdcPosition = borrowPositions.value.find(
           (position) =>
-            position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
+            position.reserve.asset.underlying.address ===
+            reservesToBorrow.value[0]!.asset.underlying.address,
         );
         expect(usdcPosition).toBeDefined();
         expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
-          firstBorrow.value.userState!.borrowable.amount.value.times(0.1),
+          reservesToBorrow.value[0]!.userState!.borrowable.amount.value.times(
+            0.1,
+          ),
           2,
         );
 
         // Verify second borrow position (USDS)
         const usdsPosition = borrowPositions.value.find(
           (position) =>
-            position.reserve.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+            position.reserve.asset.underlying.address ===
+            reservesToBorrow.value[1]!.asset.underlying.address,
         );
         expect(usdsPosition).toBeDefined();
         expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(
-          secondBorrow.value.userState!.borrowable.amount.value.times(0.1),
+          reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
+            0.1,
+          ),
           2,
         );
       });
