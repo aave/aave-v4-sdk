@@ -29,6 +29,14 @@ describe('Query User Activities on Aave V4', () => {
     describe('When fetching the user activities by activity type filter', () => {
       const activityTypes = Object.values(ActivityType);
 
+      const typenameToActivityType: Record<string, ActivityType> = {
+        BorrowActivity: ActivityType.Borrow,
+        SupplyActivity: ActivityType.Supply,
+        WithdrawActivity: ActivityType.Withdraw,
+        RepayActivity: ActivityType.Repay,
+        LiquidatedActivity: ActivityType.Liquidated,
+      };
+
       it.each(activityTypes)(
         'Then it should be possible to filter them by %s activity',
         async (activityType) => {
@@ -41,18 +49,17 @@ describe('Query User Activities on Aave V4', () => {
           });
 
           assertOk(result);
+          if (
+            [ActivityType.Liquidated, ActivityType.Repay].includes(activityType)
+          ) {
+            // TODO: create repay activity for testing user (liquidated is not easy to create)
+            return;
+          }
+          assertNonEmptyArray(result.value.items);
 
           result.value.items.forEach((item) => {
-            const typenameToActivityType: Record<string, ActivityType> = {
-              BorrowActivity: ActivityType.Borrow,
-              SupplyActivity: ActivityType.Supply,
-              WithdrawActivity: ActivityType.Withdraw,
-              RepayActivity: ActivityType.Repay,
-              LiquidatedActivity: ActivityType.Liquidated,
-            };
-
             const itemActivityType = typenameToActivityType[item.__typename];
-            expect(itemActivityType).toBe(activityType);
+            expect(itemActivityType).toEqual(activityType);
           });
         },
       );
