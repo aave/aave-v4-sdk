@@ -347,14 +347,13 @@ export type UseNetworkFeeArgs = Prettify<
  */
 export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
   /**
-   * Fetches the network fee for a transaction.
+   * Fetches the network fee for a past ActivityItem.
    *
    * This signature supports React Suspense:
    *
    * ```tsx
    * const { data } = useNetworkFee({
-   *   chainId: chainId(1),
-   *   txHash: txHash('0x123...'),
+   *   query: { activity },
    *   suspense: true,
    * });
    *
@@ -363,14 +362,13 @@ export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
    */
   ((args: UseNetworkFeeArgs & Suspendable) => SuspenseResult<T>) &
     /**
-     * Fetches the network fee for a transaction.
+     * Fetches the network fee for a past ActivityItem.
      *
      * Pausable suspense mode.
      *
      * ```tsx
      * const { data, paused } = useNetworkFee({
-     *   chainId: chainId(1),
-     *   txHash: txHash('0x123...'),
+     *   query: { activity },
      *   suspense: true,
      *   pause: true,
      * });
@@ -383,25 +381,23 @@ export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
         Suspendable,
     ) => PausableSuspenseResult<T>) &
     /**
-     * Fetches the network fee for a transaction.
+     * Fetches the network fee for a past ActivityItem.
      *
      * ```tsx
      * const { data, error, loading } = useNetworkFee({
-     *   chainId: chainId(1),
-     *   txHash: txHash('0x123...'),
+     *   query: { activity },
      * });
      * ```
      */
     ((args: UseNetworkFeeArgs) => ReadResult<T>) &
     /**
-     * Fetches the network fee for a transaction.
+     * Fetches the network fee for a past ActivityItem.
      *
      * Pausable loading state mode.
      *
      * ```tsx
      * const { data, error, loading, paused } = useNetworkFee({
-     *   chainId: chainId(1),
-     *   txHash: txHash('0x123...'),
+     *   query: { activity },
      *   pause: true,
      * });
      *
