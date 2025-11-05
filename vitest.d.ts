@@ -8,5 +8,7 @@ declare module 'vitest' {
     toBeBigDecimalLessThan: (expected: number | string) => R;
     toBeBetweenDates: (start: Date, end: Date) => R;
     toBeHexString: () => R;
+    toBeOrderedNumerically: (order: 'asc' | 'desc') => R;
+    toBeOrderedAlphabetically: (order: 'asc' | 'desc') => R;
   }
 }

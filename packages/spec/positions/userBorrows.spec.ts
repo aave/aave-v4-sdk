@@ -9,11 +9,7 @@ import {
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import {
-  assertSingleElementArray,
-  isOrderedAlphabetically,
-  isOrderedNumerically,
-} from '../test-utils';
+import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet(
   '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
@@ -168,7 +164,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         let listOrderAmount = borrowPositions.value.map(
           (elem) => elem.debt.amount.value,
         );
-        expect(isOrderedNumerically(listOrderAmount, 'desc')).toBe(true);
+        expect(listOrderAmount).toBeOrderedNumerically('desc');
 
         borrowPositions = await userBorrows(client, {
           query: {
@@ -184,7 +180,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         listOrderAmount = borrowPositions.value.map(
           (elem) => elem.debt.amount.value,
         );
-        expect(isOrderedNumerically(listOrderAmount, 'asc')).toBe(true);
+        expect(listOrderAmount).toBeOrderedNumerically('asc');
       });
     });
 
@@ -204,7 +200,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         let listOrderApy = borrowPositions.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
-        expect(isOrderedNumerically(listOrderApy, 'desc')).toBe(true);
+        expect(listOrderApy).toBeOrderedNumerically('desc');
 
         borrowPositions = await userBorrows(client, {
           query: {
@@ -221,7 +217,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         listOrderApy = borrowPositions.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
-        expect(isOrderedNumerically(listOrderApy, 'asc')).toBe(true);
+        expect(listOrderApy).toBeOrderedNumerically('asc');
       });
     });
 
@@ -241,7 +237,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         let listOrderAssetName = borrowPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(isOrderedAlphabetically(listOrderAssetName, 'desc')).toBe(true);
+        expect(listOrderAssetName).toBeOrderedAlphabetically('desc');
 
         borrowPositions = await userBorrows(client, {
           query: {
@@ -257,7 +253,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         listOrderAssetName = borrowPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(isOrderedAlphabetically(listOrderAssetName, 'asc')).toBe(true);
+        expect(listOrderAssetName).toBeOrderedAlphabetically('asc');
       });
     });
   });

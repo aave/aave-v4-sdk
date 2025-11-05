@@ -84,4 +84,69 @@ expect.extend({
       message: () => `expected ${received} to be an hex string (0x…)`,
     };
   },
+
+  toBeOrderedNumerically(
+    received: Array<{
+      lt: (other: unknown) => boolean;
+      gt: (other: unknown) => boolean;
+    }>,
+    order: 'asc' | 'desc',
+  ) {
+    let pass = true;
+    for (let i = 0; i < received.length - 1; i++) {
+      const current = received[i];
+      const next = received[i + 1];
+
+      if (!current || !next) {
+        continue;
+      }
+
+      if (
+        (order === 'desc' && current.lt(next)) ||
+        (order === 'asc' && current.gt(next))
+      ) {
+        pass = false;
+        break;
+      }
+    }
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected array not to be ordered ${order}ending, but got: ${received}`
+          : `expected array to be ordered ${order}ending, but got: ${received}`,
+    };
+  },
+
+  toBeOrderedAlphabetically(received: string[], order: 'asc' | 'desc') {
+    let pass = true;
+    for (let i = 0; i < received.length - 1; i++) {
+      const current = received[i];
+      const next = received[i + 1];
+
+      if (!current || !next) {
+        continue;
+      }
+
+      const comparison = current.localeCompare(next);
+
+      if (
+        (order === 'desc' && comparison < 0) ||
+        (order === 'asc' && comparison > 0)
+      ) {
+        pass = false;
+        break;
+      }
+    }
+
+    const arrayString = `[${received.map((v) => `"${v}"`).join(', ')}]`;
+
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected array not to be ordered alphabetically ${order}ending, but got: ${arrayString}`
+          : `expected array to be ordered alphabetically ${order}ending, but got: ${arrayString}`,
+    };
+  },
 });
