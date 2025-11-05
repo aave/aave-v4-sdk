@@ -4,11 +4,9 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet(
   '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
