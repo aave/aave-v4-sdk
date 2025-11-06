@@ -10,22 +10,23 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
+import { recreateUserActivities } from './helper';
 
 const user = await createNewWallet(
-  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
+  '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',
 );
 
 describe('Query User Activities on Aave V4', () => {
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
-      // NOTE: Enable when you want to recreate the user activities
-      // await recreateUserActivities(client, user);
-    }, 160_000);
+      // NOTE: Recreate user activities if needed
+      await recreateUserActivities(client, user);
+    }, 180_000);
 
     describe('When fetching the user activities by activity type filter', () => {
       const activityTypes = Object.values(ActivityType);
@@ -53,10 +54,8 @@ describe('Query User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if (
-            [ActivityType.Liquidated, ActivityType.Repay].includes(activityType)
-          ) {
-            // TODO: refactor recreateUserActivities to create repay
+          if ([ActivityType.Liquidated].includes(activityType)) {
+            // Liquidated activities are not easily reproducible, so we skip them
             return;
           }
           assertNonEmptyArray(result.value.items);
@@ -106,7 +105,7 @@ describe('Query User Activities on Aave V4', () => {
           user: evmAddress(user.account.address),
           query: {
             spoke: {
-              address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+              address: ETHEREUM_SPOKE_CORE_ADDRESS,
               chainId: ETHEREUM_FORK_ID,
             },
           },
@@ -132,7 +131,6 @@ describe('Query User Activities on Aave V4', () => {
       });
 
       it('Then it should support pagination with cursor', async () => {
-        // First page
         const firstPage = await activities(client, {
           user: evmAddress(user.account.address),
           query: {
