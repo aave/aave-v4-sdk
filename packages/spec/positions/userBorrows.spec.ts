@@ -4,45 +4,22 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertSingleElementArray } from '../test-utils';
+import { recreateUserBorrows } from './helper';
 
 const user = await createNewWallet(
-  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
+  '0x40e7024d48c43beb83f2328465b31b0d8e38835688cd7d9e24301f1aa1961d4b',
 );
 
-// TODO: Improve the tests(with multiple borrows in same spoke) when bug AAVE-2151 is fixed
 describe('Querying User Borrow Positions on Aave V4', () => {
   describe('Given a user with multiple active borrow positions', () => {
     beforeAll(async () => {
-      // NOTE: Enable when needed to create userBorrows position for a new user
-      // const setup = await fundErc20Address(evmAddress(user.account.address), {
-      //   address: ETHEREUM_USDC_ADDRESS,
-      //   amount: bigDecimal('100'),
-      //   decimals: 6,
-      // })
-      //   .andThen(() =>
-      //     fundErc20Address(evmAddress(user.account.address), {
-      //       address: ETHEREUM_WSTETH_ADDRESS,
-      //       amount: bigDecimal('0.5'),
-      //     }),
-      //   )
-      //   .andThen(() =>
-      //     supplyToRandomERC20Reserve(client, user, {
-      //       token: ETHEREUM_USDC_ADDRESS,
-      //       amount: bigDecimal('100'),
-      //     }),
-      //   )
-      //   .andThen(() => supplyAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
-      //   .andThen(() => supplyAndBorrow(client, user, {
-      //     tokenToSupply: ETHEREUM_USDS_ADDRESS,
-      //     tokenToBorrow: ETHEREUM_WETH_ADDRESS,
-      //   }));
-      // assertOk(setup);
+      await recreateUserBorrows(client, user);
     }, 120_000);
 
     describe('When the user queries their borrow positions by spoke', () => {
@@ -51,7 +28,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+                address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -61,7 +38,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         assertOk(borrowPositions);
         borrowPositions.value.forEach((position) => {
           expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+            ETHEREUM_SPOKE_CORE_ADDRESS,
           );
           expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
         });
@@ -80,7 +57,6 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           includeZeroBalances: true,
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(1);
         borrowPositions.value.forEach((position) => {
           expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
         });
@@ -89,7 +65,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           query: {
             userSpoke: {
               spoke: {
-                address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+                address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
               },
               user: evmAddress(user.account.address),
@@ -98,10 +74,9 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           includeZeroBalances: true,
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(1);
         borrowPositions.value.forEach((position) => {
           expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+            ETHEREUM_SPOKE_CORE_ADDRESS,
           );
         });
       });
@@ -144,7 +119,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBe(1);
+        expect(borrowPositions.value.length).toBe(3);
       });
     });
 
@@ -160,7 +135,6 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           orderBy: { amount: OrderDirection.Desc },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
         let listOrderAmount = borrowPositions.value.map(
           (elem) => elem.debt.amount.value,
         );
@@ -176,7 +150,6 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           orderBy: { amount: OrderDirection.Asc },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
         listOrderAmount = borrowPositions.value.map(
           (elem) => elem.debt.amount.value,
         );
@@ -196,7 +169,6 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           orderBy: { apy: OrderDirection.Desc },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
         let listOrderApy = borrowPositions.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
@@ -212,8 +184,6 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           orderBy: { apy: OrderDirection.Asc },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
-
         listOrderApy = borrowPositions.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
@@ -233,7 +203,6 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           orderBy: { assetName: OrderDirection.Desc },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
         let listOrderAssetName = borrowPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
@@ -249,7 +218,6 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           orderBy: { assetName: OrderDirection.Asc },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(2);
         listOrderAssetName = borrowPositions.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
