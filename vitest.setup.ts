@@ -97,8 +97,8 @@ expect.extend({
       }
 
       if (
-        (order === 'desc' && current.lte(next)) ||
-        (order === 'asc' && current.gte(next))
+        (order === 'desc' && current.lt(next)) ||
+        (order === 'asc' && current.gt(next))
       ) {
         pass = false;
         break;

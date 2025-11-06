@@ -112,13 +112,13 @@ export function supplyAndBorrow(
     reserveToSupply: Reserve;
     amountToSupply: BigDecimal;
     reserveToBorrow: Reserve;
-    percentToBorrow?: number;
+    ratioToBorrow?: number;
   },
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
-  if (params.percentToBorrow) {
+  if (params.ratioToBorrow) {
     invariant(
-      params.percentToBorrow >= 0 && params.percentToBorrow <= 1,
-      'Percent to borrow must be between 0 and 1',
+      params.ratioToBorrow >= 0 && params.ratioToBorrow <= 1,
+      'Ratio to borrow must be between 0 and 1',
     );
   }
   return supplyToReserve(client, user, {
@@ -131,7 +131,7 @@ export function supplyAndBorrow(
     sender: evmAddress(user.account.address),
     enableCollateral: true,
   })
-    .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
+    .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
     .andThen(() =>
       reserve(client, {
         user: evmAddress(user.account.address),
@@ -153,7 +153,7 @@ export function supplyAndBorrow(
           amount: {
             erc20: {
               value: reserve!.userState!.borrowable.amount.value.times(
-                params.percentToBorrow ?? 0.25,
+                params.ratioToBorrow ?? 0.25,
               ),
             },
           },

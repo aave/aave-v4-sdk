@@ -33,7 +33,9 @@ describe('Supplying Assets on Aave V4', () => {
     let listReserves: NonEmptyTuple<Reserve>;
 
     beforeAll(async () => {
-      const result = await findReservesToSupply(client, user);
+      const result = await findReservesToSupply(client, user, {
+        asCollateral: true,
+      });
       assertOk(result);
       listReserves = result.value;
     });

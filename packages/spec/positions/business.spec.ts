@@ -87,7 +87,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
                 reserveToSupply: reservesToSupply[0],
                 amountToSupply: bigDecimal('0.1'),
                 reserveToBorrow: reservesToBorrow.value[0],
-                percentToBorrow: 0.1,
+                ratioToBorrow: 0.1,
               }),
             )
             .map(() => ({
