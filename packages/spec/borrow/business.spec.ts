@@ -13,7 +13,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
-import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
+import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
 
@@ -26,7 +26,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         address: ETHEREUM_WSTETH_ADDRESS,
         amount: bigDecimal('0.2'),
       }).andThen(() =>
-        supplyToRandomERC20Reserve(client, user, {
+        findReserveAndSupply(client, user, {
           token: ETHEREUM_WSTETH_ADDRESS,
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
           amount: bigDecimal('0.1'),
@@ -131,7 +131,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           address: ETHEREUM_WSTETH_ADDRESS,
           amount: bigDecimal('0.2'),
         }).andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
+          findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             amount: bigDecimal('0.1'),
             spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
