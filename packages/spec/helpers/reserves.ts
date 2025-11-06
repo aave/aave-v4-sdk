@@ -39,7 +39,11 @@ export function findReservesToSupply(
                 address: params.spoke,
               },
             }
-          : { chainIds: [ETHEREUM_FORK_ID] },
+          : params.token
+            ? {
+                tokens: [{ chainId: ETHEREUM_FORK_ID, address: params.token }],
+              }
+            : { chainIds: [ETHEREUM_FORK_ID] },
     user: evmAddress(user.account.address),
     filter: ReservesRequestFilter.Supply,
   }).map((listReserves) => {

@@ -73,7 +73,7 @@ export function supplyNativeTokenToReserve(
   );
 }
 
-export function supplyToRandomERC20Reserve(
+export function findReserveAndSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   {
