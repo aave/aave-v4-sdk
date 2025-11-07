@@ -111,8 +111,8 @@ export function decodeHubId(value: HubId): HubIdParts {
   const decoded = decodeBase64(value);
   const [a, b] = decoded.split(COMPOSITE_ID_SEPARATOR) as [string, string];
   return {
-    address: evmAddress(a),
-    chainId: chainId(Number.parseInt(b, 10)),
+    chainId: chainId(Number.parseInt(a, 10)),
+    address: evmAddress(b),
   };
 }
 
@@ -149,7 +149,7 @@ export type OnChainHubAssetId = Tagged<number, 'OnChainHubAssetId'>;
 /**
  * The on-chain ID of a Reserve. This is scoped to the specific Spoke.
  */
-export type OnChainReserveId = Tagged<number, 'OnChainReserveId'>;
+export type OnChainReserveId = Tagged<string, 'OnChainReserveId'>;
 
 /**
  * A reserve identifier.
@@ -189,8 +189,19 @@ export function decodeReserveId(value: ReserveId): ReserveIdParts {
   return {
     chainId: chainId(Number.parseInt(a, 10)),
     spoke: evmAddress(b),
-    onChainId: Number.parseInt(c, 10) as OnChainReserveId,
+    onChainId: c as OnChainReserveId,
   };
+}
+
+/**
+ * @internal
+ */
+export function encodeReserveId(reserve: ReserveIdParts): ReserveId {
+  return reserveId(
+    encodeBase64(
+      `${reserve.chainId}${COMPOSITE_ID_SEPARATOR}${reserve.spoke}${COMPOSITE_ID_SEPARATOR}${reserve.onChainId}`,
+    ),
+  );
 }
 
 /**
