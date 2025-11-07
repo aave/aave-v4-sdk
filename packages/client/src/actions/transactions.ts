@@ -47,11 +47,7 @@ import {
  *       value: bigDecimal('1000'),
  *     },
  *   },
- *   reserve: {
- *     spoke: evmAddress('0x87870bca…'),
- *     reserveId: reserveId(1),
- *     chainId: chainId(1),
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   sender: evmAddress('0x9abc…'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
@@ -125,11 +121,7 @@ export function supply(
  *     },
  *   },
  *   sender: evmAddress('0x9abc…'),
- *   reserve: {
- *     spoke: evmAddress('0x87870bca…'),
- *     reserveId: reserveId(1),
- *     chainId: chainId(1),
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -156,11 +148,7 @@ export function repay(
  *
  * ```ts
  * const result = await withdraw(client, {
- *   reserve: {
- *     chainId: chainId(1),
- *     spoke: evmAddress('0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2'),
- *     reserveId: reserveId('0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e'),
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   amount: {
  *     erc20: {
  *       exact: bigDecimal('750.5'),
@@ -316,12 +304,8 @@ export function updateUserRiskPremium(
  *
  * ```ts
  * const result = await liquidatePosition(client, {
- *   spoke: {
- *     address: evmAddress('0x87870bca…'),
- *     chainId: chainId(1),
- *   },
- *   collateral: reserveId(1),
- *   debt: reserveId(2),
+ *   collateral: reserveId('SGVsbG8h'),
+ *   debt: reserveId('Q2lhbyE= '),
  *   amount: {
  *     exact: bigDecimal('1000'),
  *   },
@@ -403,11 +387,7 @@ export function setSpokeUserPositionManager(
  * const result = await preview(client, {
  *   action: {
  *     supply: {
- *       reserve: {
- *         spoke: evmAddress('0x87870bca…'),
- *         reserveId: reserveId(1),
- *         chainId: chainId(1),
- *       },
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           value: '1000',
@@ -437,11 +417,7 @@ export function preview(
  *
  * ```ts
  * const result = await setUserSupplyAsCollateral(client, {
- *   reserve: {
- *     chainId: chainId(1),
- *     spoke: evmAddress('0x123...'),
- *     reserveId: reserveId(1)
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   sender: evmAddress('0x456...'),
  *   enableCollateral: true
  * });

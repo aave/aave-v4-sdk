@@ -736,11 +736,7 @@ export function useUpdateUserDynamicConfig(
  * });
  *
  * const result = await setUserSupplyAsCollateral({
- *   reserve: {
- *     chainId: chainId(1),
- *     spoke: evmAddress('0x123...'),
- *     reserveId: reserveId(1)
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   sender: evmAddress('0x456...'),
  *   enableCollateral: true,
  * });
@@ -879,12 +875,8 @@ export function useSetUserSupplyAsCollateral(
  * // …
  *
  * const result = await liquidatePosition({
- *   spoke: {
- *     address: evmAddress('0x87870bca…'),
- *     chainId: chainId(1),
- *   },
- *   collateral: reserveId(1),
- *   debt: reserveId(2),
+ *   collateral: reserveId('SGVsbG8h'),
+ *   debt: reserveId('Q2lhbyE= '),
  *   amount: amount,
  *   liquidator: liquidator,
  *   borrower: borrower,
@@ -1066,11 +1058,7 @@ export function useSetSpokeUserPositionManager(
  * const result = await getPreview({
  *   action: {
  *     supply: {
- *       reserve: {
- *         spoke: evmAddress('0x87870bca…'),
- *         reserveId: reserveId(1),
- *         chainId: chainId(1),
- *       },
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           value: '1000',
@@ -1112,11 +1100,7 @@ export type UsePreviewArgs = Prettify<PreviewRequest & CurrencyQueryOptions>;
  * const { data } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),
@@ -1142,11 +1126,7 @@ export function usePreview(
  * const { data } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),
@@ -1171,11 +1151,7 @@ export function usePreview(
  * const { data, error, loading } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),
@@ -1200,11 +1176,7 @@ export function usePreview(
  * const { data, error, loading, paused } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),
