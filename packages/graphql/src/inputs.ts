@@ -6,7 +6,9 @@ export type HubInput = ReturnType<typeof graphql.scalar<'HubInput'>>;
 /**
  * @internal
  */
-export function isHubInputVariant<T>(input: T): input is T & { hub: HubInput } {
+export function isHubInputVariant<T>(
+  input: T,
+): input is T & { hubInput: HubInput } {
   return isObject(input) && 'hub' in input && input.hub != null;
 }
 

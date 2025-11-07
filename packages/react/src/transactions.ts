@@ -24,10 +24,13 @@ import { ValidationError } from '@aave/core-next';
 import {
   ActivitiesQuery,
   type BorrowRequest,
+  decodeHubId,
+  decodeReserveId,
   HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
   isChainIdsVariant,
+  isHubInputVariant,
   isSpokeInputVariant,
   type LiquidatePositionRequest,
   PreviewQuery,
@@ -77,6 +80,7 @@ function refreshQueriesForReserveChange(
   client: AaveClient,
   request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
 ) {
+  const { chainId, spoke } = decodeReserveId(request.reserve);
   return async () =>
     Promise.all([
       // update user positions
@@ -86,15 +90,15 @@ function refreshQueriesForReserveChange(
           variables.request.user === request.sender &&
           data.some(
             (position) =>
-              position.spoke.chain.chainId === request.reserve.chainId &&
-              position.spoke.address === request.reserve.spoke,
+              position.spoke.chain.chainId === chainId &&
+              position.spoke.address === spoke,
           ),
       ),
       await client.refreshQueryWhere(
         UserPositionQuery,
         (_, data) =>
-          data?.spoke.chain.chainId === request.reserve.chainId &&
-          data?.spoke.address === request.reserve.spoke &&
+          data?.spoke.chain.chainId === chainId &&
+          data?.spoke.address === spoke &&
           data.user === request.sender,
       ),
 
@@ -102,27 +106,22 @@ function refreshQueriesForReserveChange(
       await client.refreshQueryWhere(UserSummaryQuery, (variables) =>
         variables.request.user === request.sender &&
         isSpokeInputVariant(variables.request.filter)
-          ? variables.request.filter.spoke.chainId ===
-              request.reserve.chainId &&
-            variables.request.filter.spoke.address === request.reserve.spoke
+          ? variables.request.filter.spoke.chainId === chainId &&
+            variables.request.filter.spoke.address === spoke
           : isChainIdsVariant(variables.request.filter)
-            ? variables.request.filter.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
-              )
+            ? variables.request.filter.chainIds.some((id) => id === chainId)
             : false,
       ),
 
       // update reserves
       await client.refreshQueryWhere(ReservesQuery, (_, data) =>
-        data.some((reserve) => reserve.id === request.reserve.reserveId),
+        data.some((reserve) => reserve.id === request.reserve),
       ),
 
       // update spokes
       await client.refreshQueryWhere(SpokesQuery, (_, data) =>
         data.some(
-          (spoke) =>
-            spoke.chain.chainId === request.reserve.chainId &&
-            spoke.address === request.reserve.spoke,
+          (item) => item.chain.chainId === chainId && item.address === spoke,
         ),
       ),
 
@@ -138,9 +137,7 @@ function refreshQueriesForReserveChange(
         HubsQuery,
         (variables) =>
           isChainIdsVariant(variables.request) &&
-          variables.request.chainIds.some(
-            (chainId) => chainId === request.reserve.chainId,
-          ),
+          variables.request.chainIds.some((id) => id === chainId),
       ),
     ]);
 }
@@ -781,8 +778,9 @@ export function useSetUserSupplyAsCollateral(
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: SetUserSupplyAsCollateralRequest) =>
-      setUserSupplyAsCollateral(client, request)
+    (request: SetUserSupplyAsCollateralRequest) => {
+      const { chainId, spoke } = decodeReserveId(request.reserve);
+      return setUserSupplyAsCollateral(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pendingTransaction) => pendingTransaction.wait())
         .andThen(client.waitForTransaction)
@@ -795,15 +793,15 @@ export function useSetUserSupplyAsCollateral(
                 variables.request.user === request.sender &&
                 data.some(
                   (position) =>
-                    position.spoke.chain.chainId === request.reserve.chainId &&
-                    position.spoke.address === request.reserve.spoke,
+                    position.spoke.chain.chainId === chainId &&
+                    position.spoke.address === spoke,
                 ),
             ),
             client.refreshQueryWhere(
               UserPositionQuery,
               (_, data) =>
-                data?.spoke.chain.chainId === request.reserve.chainId &&
-                data?.spoke.address === request.reserve.spoke &&
+                data?.spoke.chain.chainId === chainId &&
+                data?.spoke.address === spoke &&
                 data.user === request.sender,
             ),
 
@@ -811,48 +809,45 @@ export function useSetUserSupplyAsCollateral(
             client.refreshQueryWhere(UserSummaryQuery, (variables) =>
               variables.request.user === request.sender &&
               isSpokeInputVariant(variables.request.filter)
-                ? variables.request.filter.spoke.chainId ===
-                    request.reserve.chainId &&
-                  variables.request.filter.spoke.address ===
-                    request.reserve.spoke
+                ? variables.request.filter.spoke.chainId === chainId &&
+                  variables.request.filter.spoke.address === spoke
                 : isChainIdsVariant(variables.request.filter)
                   ? variables.request.filter.chainIds.some(
-                      (chainId) => chainId === request.reserve.chainId,
+                      (id) => id === chainId,
                     )
                   : false,
             ),
 
             // update reserves
             client.refreshQueryWhere(ReservesQuery, (_, data) =>
-              data.some((reserve) => reserve.id === request.reserve.reserveId),
+              data.some((reserve) => reserve.id === request.reserve),
             ),
 
             // update spokes
             client.refreshQueryWhere(SpokesQuery, (_, data) =>
               data.some(
-                (spoke) =>
-                  spoke.chain.chainId === request.reserve.chainId &&
-                  spoke.address === request.reserve.spoke,
+                (item) =>
+                  item.chain.chainId === chainId && item.address === spoke,
               ),
             ),
 
             // update hubs
             client.refreshQueryWhere(HubsQuery, (variables) =>
               isChainIdsVariant(variables.request.query)
-                ? variables.request.query.chainIds.some(
-                    (chainId) => chainId === request.reserve.chainId,
-                  )
+                ? variables.request.query.chainIds.some((id) => id === chainId)
                 : variables.request.query.tokens.some(
-                    (token) => token.chainId === request.reserve.chainId,
+                    (token) => token.chainId === chainId,
                   ),
             ),
-            client.refreshQueryWhere(
-              HubQuery,
-              (variables) =>
-                variables.request.chainId === request.reserve.chainId,
+            client.refreshQueryWhere(HubQuery, (variables) =>
+              isHubInputVariant(variables.request.query)
+                ? variables.request.query.hubInput.chainId === chainId
+                : decodeHubId(variables.request.query.hubId).chainId ===
+                  chainId,
             ),
           ]),
-        ),
+        );
+    },
     [client, handler],
   );
 }

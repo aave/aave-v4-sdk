@@ -1,4 +1,11 @@
-import { invariant, isValidHexString } from '@aave/types-next';
+import {
+  type ChainId,
+  chainId,
+  type EvmAddress,
+  evmAddress,
+  invariant,
+  isValidHexString,
+} from '@aave/types-next';
 import type { Tagged } from 'type-fest';
 
 /**
@@ -7,9 +14,33 @@ import type { Tagged } from 'type-fest';
 export type ID = Tagged<string, 'ID'>;
 
 /**
+ * A base64 encoded composite identifier.
+ *
+ * @internal
+ */
+export type Base64EncodedCompositeId = Tagged<
+  string,
+  'Base64EncodedCompositeId'
+>;
+
+function decodeBase64(value: Base64EncodedCompositeId): string {
+  return new TextDecoder().decode(
+    Uint8Array.from(atob(value), (c) => c.charCodeAt(0)),
+  );
+}
+
+function encodeBase64(value: string): Base64EncodedCompositeId {
+  return btoa(
+    String.fromCharCode(...new TextEncoder().encode(value)),
+  ) as Base64EncodedCompositeId;
+}
+
+const COMPOSITE_ID_SEPARATOR = '::';
+
+/**
  * An asset identifier.
  */
-export type AssetId = Tagged<string, 'AssetId'>;
+export type AssetId = Tagged<Base64EncodedCompositeId, 'AssetId'>;
 
 /**
  * Creates an asset identifier from a given base64 value.
@@ -34,7 +65,7 @@ export function assetId(value: string): AssetId {
 /**
  * A hub identifier.
  */
-export type HubId = Tagged<string, 'HubId'>;
+export type HubId = Tagged<Base64EncodedCompositeId, 'HubId'>;
 
 /**
  * Creates a hub identifier from a given base64 value.
@@ -57,9 +88,41 @@ export function hubId(value: string): HubId {
 }
 
 /**
+ * @internal
+ */
+export function encodeHubId(hub: {
+  address: EvmAddress;
+  chainId: ChainId;
+}): HubId {
+  return hubId(
+    encodeBase64(`${hub.address}${COMPOSITE_ID_SEPARATOR}${hub.chainId}`),
+  );
+}
+
+/**
+ * @internal
+ */
+export type HubIdParts = {
+  address: EvmAddress;
+  chainId: ChainId;
+};
+
+/**
+ * @internal
+ */
+export function decodeHubId(value: HubId): HubIdParts {
+  const decoded = decodeBase64(value);
+  const [a, b] = decoded.split(COMPOSITE_ID_SEPARATOR) as [string, string];
+  return {
+    address: evmAddress(a),
+    chainId: chainId(Number.parseInt(b, 10)),
+  };
+}
+
+/**
  * A hub asset identifier.
  */
-export type HubAssetId = Tagged<string, 'HubAssetId'>;
+export type HubAssetId = Tagged<Base64EncodedCompositeId, 'HubAssetId'>;
 
 /**
  * Creates a hub asset identifier from a given base64 value.
@@ -94,7 +157,7 @@ export type OnChainReserveId = Tagged<number, 'OnChainReserveId'>;
 /**
  * A reserve identifier.
  */
-export type ReserveId = Tagged<number, 'ReserveId'>;
+export type ReserveId = Tagged<Base64EncodedCompositeId, 'ReserveId'>;
 
 /**
  * Creates a reserve identifier from a given value.
@@ -103,12 +166,34 @@ export type ReserveId = Tagged<number, 'ReserveId'>;
  * This is meant to be used in tests and POC context. In normal ciscumstances
  * use the `Reserve.id` from data retrieved from the API.
  */
-export function reserveId(value: number): ReserveId {
-  invariant(
-    Number.isInteger(value) && value >= 0,
-    `Invalid ReserveId: ${value}`,
-  );
+export function reserveId(value: string): ReserveId {
   return value as ReserveId;
+}
+
+/**
+ * @internal
+ */
+export type ReserveIdParts = {
+  chainId: ChainId;
+  spoke: EvmAddress;
+  id: OnChainReserveId;
+};
+
+/**
+ * @internal
+ */
+export function decodeReserveId(value: ReserveId): ReserveIdParts {
+  const decoded = decodeBase64(value);
+  const [a, b, c] = decoded.split(COMPOSITE_ID_SEPARATOR) as [
+    string,
+    string,
+    string,
+  ];
+  return {
+    chainId: chainId(Number.parseInt(a, 10)),
+    spoke: evmAddress(b),
+    id: Number.parseInt(c, 10) as OnChainReserveId,
+  };
 }
 
 /**
