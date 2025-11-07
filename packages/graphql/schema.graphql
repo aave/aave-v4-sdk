@@ -13,6 +13,7 @@ input ActivitiesRequest {
 
 input ActivitiesRequestQuery @oneOf {
   hub: HubInput
+  hubId: HubId
   spoke: SpokeInput
   chainIds: [ChainId!]
   txHash: TxHashInput
@@ -480,7 +481,7 @@ type HubAssetUserState {
 }
 
 input HubAssetsRequest {
-  hub: HubInput!
+  query: HubAssetsRequestQuery!
   user: EvmAddress
   orderBy: HubAssetsRequestOrderBy! = {assetName: ASC}
 }
@@ -490,6 +491,11 @@ input HubAssetsRequestOrderBy @oneOf {
   availableLiquidity: OrderDirection
   supplyApy: OrderDirection
   borrowApy: OrderDirection
+}
+
+input HubAssetsRequestQuery @oneOf {
+  hubInput: HubInput
+  hubId: HubId
 }
 
 scalar HubId
