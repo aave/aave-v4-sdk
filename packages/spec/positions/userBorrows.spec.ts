@@ -7,6 +7,7 @@ import {
   ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client-next/test-utils';
+import { encodeSpokeId } from '@aave/graphql-next';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertSingleElementArray } from '../test-utils';
@@ -50,10 +51,10 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
               user: evmAddress(user.account.address),
             },
           },
@@ -88,10 +89,10 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
               user: evmAddress(user.account.address),
             },
           },

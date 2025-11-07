@@ -266,7 +266,24 @@ export function swapQuoteId(value: string): SwapQuoteId {
 /**
  * A spoke identifier.
  */
-export type SpokeId = Tagged<string, 'SpokeId'>;
+export type SpokeId = Tagged<Base64EncodedCompositeId, 'SpokeId'>;
+
+/**
+ * @internal
+ */
+export type SpokeIdParts = {
+  address: EvmAddress;
+  chainId: ChainId;
+};
+
+/**
+ * @internal
+ */
+export function encodeSpokeId(spoke: SpokeIdParts): string {
+  return encodeBase64(
+    `${spoke.chainId}${COMPOSITE_ID_SEPARATOR}${spoke.address}`,
+  );
+}
 
 /**
  * Creates a spoke identifier from a given base64 value.

@@ -31,10 +31,6 @@ describe('Supply APY History on Aave V4', () => {
           assertNonEmptyArray(usdcReserve.value);
 
           const result = await supplyApyHistory(client, {
-            spoke: {
-              address: usdcReserve.value[0].spoke.address,
-              chainId: usdcReserve.value[0].spoke.chain.chainId,
-            },
             reserve: usdcReserve.value[0].id,
             window: window,
           });

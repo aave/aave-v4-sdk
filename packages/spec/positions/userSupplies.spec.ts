@@ -6,6 +6,7 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
 } from '@aave/client-next/test-utils';
+import { encodeSpokeId } from '@aave/graphql-next';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
 
@@ -60,10 +61,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         const supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
@@ -98,10 +100,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
@@ -159,10 +162,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
@@ -177,10 +181,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
@@ -199,10 +204,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
@@ -217,10 +223,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
@@ -240,10 +247,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         let supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
@@ -258,10 +266,11 @@ describe('Querying User Supply Positions on Aave V4', () => {
         supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: {
+              spoke: encodeSpokeId({
                 address: ETHEREUM_SPOKE_CORE_ADDRESS,
                 chainId: ETHEREUM_FORK_ID,
-              },
+              }),
+
               user: evmAddress(user.account.address),
             },
           },
