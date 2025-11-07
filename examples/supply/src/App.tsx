@@ -5,6 +5,7 @@ import {
   type Reserve,
   type Spoke,
 } from '@aave/react-next';
+import { supportedChains } from '@aave/react-next/viem';
 import { useState } from 'react';
 import { HubSelector } from './HubSelector';
 import { AllUserPositions, SingleUserPosition } from './positions';
@@ -13,7 +14,7 @@ import { StrategySelector } from './StrategySelector';
 import { SupplyForm } from './SupplyForm';
 import { address, walletClient } from './wallet';
 
-const ethereum = chainId(1);
+const ethereum = chainId(supportedChains[0].id);
 
 export function App() {
   const [hub, setHub] = useState<Hub | null>(null);

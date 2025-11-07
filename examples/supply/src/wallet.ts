@@ -1,9 +1,9 @@
 import 'viem/window';
 
+import { supportedChains } from '@aave/react-next/viem';
 import { type Address, createWalletClient, custom } from 'viem';
-import { mainnet } from 'viem/chains';
 
-const chain = mainnet;
+const chain = supportedChains[0];
 
 const [address]: [Address] = await window.ethereum!.request({
   method: 'eth_requestAccounts',
