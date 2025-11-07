@@ -68,6 +68,17 @@
         "name": "Asset",
         "fields": [
           {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "token",
             "type": {
               "kind": "NON_NULL",
@@ -1319,6 +1330,17 @@
         "name": "Hub",
         "fields": [
           {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "name",
             "type": {
               "kind": "NON_NULL",
@@ -1383,7 +1405,18 @@
         "name": "HubAsset",
         "fields": [
           {
-            "name": "assetId",
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "onchainAssetId",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3877,6 +3910,17 @@
             "args": []
           },
           {
+            "name": "onChainId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "borrowCap",
             "type": {
               "kind": "NON_NULL",
@@ -4026,30 +4070,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "spoke",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Spoke",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "chain",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Chain",
-                "ofType": null
               }
             },
             "args": []
@@ -4299,6 +4319,17 @@
         "kind": "OBJECT",
         "name": "Spoke",
         "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "name",
             "type": {
@@ -5505,6 +5536,17 @@
         "name": "UserBalance",
         "fields": [
           {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "info",
             "type": {
               "kind": "NON_NULL",
@@ -5622,6 +5664,17 @@
         "kind": "OBJECT",
         "name": "UserBorrowItem",
         "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "reserve",
             "type": {
@@ -6193,6 +6246,17 @@
         "kind": "OBJECT",
         "name": "UserSupplyItem",
         "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "reserve",
             "type": {

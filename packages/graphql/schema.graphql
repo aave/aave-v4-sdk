@@ -45,6 +45,7 @@ enum ApyMetric {
 }
 
 type Asset {
+  id: AssetId!
   token: Erc20Token!
   summary: AssetSummary!
   price(currency: Currency! = USD): FiatAmountWithChange!
@@ -74,7 +75,12 @@ type AssetPriceSample {
 }
 
 input AssetRequest {
-  token: Erc20Input!
+  query: AssetRequestQuery!
+}
+
+input AssetRequestQuery @oneOf {
+  token: Erc20Input
+  assetId: AssetId
 }
 
 type AssetSummary {
@@ -111,7 +117,6 @@ scalar BigInt
 scalar BlockchainData
 
 input BorrowAPYHistoryRequest {
-  spoke: SpokeInput!
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
 }
@@ -128,8 +133,8 @@ type BorrowActivity {
 }
 
 input BorrowRequest {
-  """The reserve"""
-  reserve: ReserveInput!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """The amount supplying"""
   amount: ReserveAmountInput!
@@ -393,6 +398,9 @@ type HealthFactorWithChange {
 }
 
 type Hub {
+  """The id for the hub"""
+  id: HubId!
+
   """The hub name"""
   name: String!
 
@@ -407,8 +415,11 @@ type Hub {
 }
 
 type HubAsset {
-  """The asset id"""
-  assetId: AssetId!
+  """The id for the hub asset"""
+  id: HubAssetId!
+
+  """The onchain asset id"""
+  onchainAssetId: OnChainHubAssetId!
 
   """The hub"""
   hub: Hub!
@@ -423,6 +434,8 @@ type HubAsset {
   settings: HubAssetSettings!
   userState: HubAssetUserState
 }
+
+scalar HubAssetId
 
 type HubAssetSettings {
   """The fee receiver"""
@@ -467,10 +480,9 @@ type HubAssetUserState {
 }
 
 input HubAssetsRequest {
-  hub: EvmAddress!
+  hub: HubInput!
   user: EvmAddress
   orderBy: HubAssetsRequestOrderBy! = {assetName: ASC}
-  chainId: ChainId!
 }
 
 input HubAssetsRequestOrderBy @oneOf {
@@ -479,6 +491,8 @@ input HubAssetsRequestOrderBy @oneOf {
   supplyApy: OrderDirection
   borrowApy: OrderDirection
 }
+
+scalar HubId
 
 input HubInput {
   """The hub address"""
@@ -489,8 +503,12 @@ input HubInput {
 }
 
 input HubRequest {
-  hub: EvmAddress!
-  chainId: ChainId!
+  query: HubRequestQuery!
+}
+
+input HubRequestQuery @oneOf {
+  hubInput: HubInput
+  hubId: HubId
 }
 
 type HubSummary {
@@ -567,9 +585,6 @@ input LiquidatePositionDebtAmount @oneOf {
 union LiquidatePositionExecutionPlan = TransactionRequest | Erc20ApprovalRequired | InsufficientBalanceError
 
 input LiquidatePositionRequest {
-  """The spoke"""
-  spoke: SpokeInput!
-
   """The collateral reserve id"""
   collateral: ReserveId!
 
@@ -621,6 +636,10 @@ type NativeToken {
   info: TokenInfo!
   chain: Chain!
 }
+
+scalar OnChainHubAssetId
+
+scalar OnChainReserveId
 
 enum OperationType {
   SPOKE_BORROW
@@ -904,8 +923,8 @@ input RepayErc20AmountInputWithPermit {
 }
 
 input RepayPermitRequest {
-  """The reserve"""
-  reserve: ReserveInput!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """The amount repaying"""
   amount: AmountInput!
@@ -915,8 +934,8 @@ input RepayPermitRequest {
 }
 
 input RepayRequest {
-  """The reserve"""
-  reserve: ReserveInput!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """The amount repaying"""
   amount: RepayAmountInputWithPermit!
@@ -927,6 +946,7 @@ input RepayRequest {
 
 type Reserve {
   id: ReserveId!
+  onChainId: OnChainReserveId!
   borrowCap: BigDecimal!
   supplyCap: BigDecimal!
   chain: Chain!
@@ -980,35 +1000,17 @@ scalar ReserveId
 
 type ReserveInfo {
   id: ReserveId!
-  spoke: Spoke!
-  chain: Chain!
   asset: HubAsset!
 }
 
-input ReserveInput {
-  """The chain id"""
-  chainId: ChainId!
-
-  """The spoke address"""
-  spoke: EvmAddress!
-
-  """The reserve id"""
-  reserveId: ReserveId!
-}
-
 input ReserveRequest {
-  """The reserve request query"""
-  query: ReserveRequestQuery!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """
   The user who is doing the query (this injects user state into some of the return objects)
   """
   user: EvmAddress
-}
-
-input ReserveRequestQuery {
-  """Reserve lookup parameters"""
-  reserve: ReserveInput!
 }
 
 type ReserveSettings {
@@ -1113,8 +1115,8 @@ input SetSpokeUserPositionManagerRequest {
 }
 
 input SetUserSupplyAsCollateralRequest {
-  """The reserve input"""
-  reserve: ReserveInput!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
@@ -1126,6 +1128,9 @@ input SetUserSupplyAsCollateralRequest {
 scalar Signature
 
 type Spoke {
+  """The id for the spoke"""
+  id: SpokeId!
+
   """The spoke name (offchain)"""
   name: String!
 
@@ -1135,6 +1140,8 @@ type Spoke {
   """The spoke chain"""
   chain: Chain!
 }
+
+scalar SpokeId
 
 input SpokeInput {
   """The address of the spoke"""
@@ -1192,7 +1199,11 @@ input SpokeUserPositionManagersRequest {
   cursor: Cursor
 }
 
-input SpokesRequest @oneOf {
+input SpokesRequest {
+  query: SpokesRequestQuery!
+}
+
+input SpokesRequestQuery @oneOf {
   """
   The hub address and chain id
   Get all the spokes which hubs are linked to a spoke reserve
@@ -1207,7 +1218,6 @@ input SpokesRequest @oneOf {
 }
 
 input SupplyAPYHistoryRequest {
-  spoke: SpokeInput!
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
 }
@@ -1224,8 +1234,8 @@ type SupplyActivity {
 }
 
 input SupplyPermitRequest {
-  """The reserve"""
-  reserve: ReserveInput!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """The amount supplying"""
   amount: ReserveErc20AmountInput!
@@ -1238,8 +1248,8 @@ input SupplyPermitRequest {
 }
 
 input SupplyRequest {
-  """The reserve"""
-  reserve: ReserveInput!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """The amount supplying"""
   amount: ReserveAmountInputWithPermit!
@@ -1506,6 +1516,9 @@ input UpdateUserRiskPremiumRequest {
 }
 
 type UserBalance {
+  """The user balance id"""
+  id: UserBalanceId!
+
   """The token info"""
   info: TokenInfo!
 
@@ -1525,6 +1538,54 @@ type UserBalance {
   borrowApy(metric: ApyMetric! = HIGHEST): PercentNumber!
 }
 
+scalar UserBalanceId
+
+input UserBalancesByChains {
+  """List of chains"""
+  chainIds: [ChainId!]!
+
+  """
+  The type of reserve to use when determine the tokens to retrieve balances for
+  """
+  byReservesType: ReservesRequestFilter! = ALL
+}
+
+input UserBalancesByHub {
+  """The hub address"""
+  address: EvmAddress!
+
+  """The hub chain id"""
+  chainId: ChainId!
+
+  """
+  The type of reserve to use when determine the tokens to retrieve balances for
+  """
+  byReservesType: ReservesRequestFilter! = ALL
+}
+
+input UserBalancesBySpoke {
+  """The spoke address"""
+  address: EvmAddress!
+
+  """The chain id the spoke is deployed to"""
+  chainId: ChainId!
+
+  """
+  The type of reserve to use when determine the tokens to retrieve balances for
+  """
+  byReservesType: ReservesRequestFilter! = ALL
+}
+
+input UserBalancesByUserPosition {
+  """The user position id"""
+  userPositionId: UserPositionId!
+
+  """
+  The type of reserve to use when determine the tokens to retrieve balances for
+  """
+  byReservesType: ReservesRequestFilter! = ALL
+}
+
 input UserBalancesRequest {
   """The user to get the balance for"""
   user: EvmAddress!
@@ -1540,20 +1601,22 @@ input UserBalancesRequest {
 }
 
 input UserBalancesRequestFilter @oneOf {
-  """List of chains"""
-  chainIds: [ChainId!]
+  """The balances for the tokens on the specified chains"""
+  chains: UserBalancesByChains
 
-  """The balances for the underlyings attached to a hub"""
-  hub: HubInput
+  """The balances for the tokens of hub assets on a given hub"""
+  hub: UserBalancesByHub
 
-  """The balances for the underlying attached to a spoke"""
-  spoke: SpokeInput
+  """The balances for the tokens of reserves attached to a spoke"""
+  spoke: UserBalancesBySpoke
 
   """The balances for the swappable tokens"""
   swappable: SwappableTokensRequestQuery
 
-  """The balances for the user position id"""
-  userPositionId: UserPositionId
+  """
+  The balances for the tokens of the spoke associated with the given user position
+  """
+  userPosition: UserBalancesByUserPosition
 }
 
 input UserBalancesRequestOrderBy @oneOf {
@@ -1565,6 +1628,9 @@ input UserBalancesRequestOrderBy @oneOf {
 }
 
 type UserBorrowItem {
+  """The user borrow item id"""
+  id: UserBorrowItemId!
+
   """The reserve borrowed from"""
   reserve: Reserve!
 
@@ -1585,6 +1651,8 @@ type UserBorrowItem {
   """
   createdAt: DateTime
 }
+
+scalar UserBorrowItemId
 
 input UserBorrowsQueryRequest @oneOf {
   userSpoke: UserSpokeInput
@@ -1762,6 +1830,9 @@ input UserSuppliesRequestOrderBy @oneOf {
 }
 
 type UserSupplyItem {
+  """The user supply item id"""
+  id: UserSupplyItemId!
+
   """The reserve supplied to"""
   reserve: Reserve!
 
@@ -1785,6 +1856,8 @@ type UserSupplyItem {
   """
   createdAt: DateTime
 }
+
+scalar UserSupplyItemId
 
 input UserSwapsRequest {
   chainId: ChainId!
@@ -1811,8 +1884,8 @@ type WithdrawActivity {
 }
 
 input WithdrawRequest {
-  """The reserve"""
-  reserve: ReserveInput!
+  """The reserve id"""
+  reserve: ReserveId!
 
   """The amount withdrawing"""
   amount: WithdrawReserveAmountInput!
