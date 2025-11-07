@@ -113,6 +113,10 @@ export const AssetQuery = graphql(
 );
 export type AssetRequest = RequestOf<typeof AssetQuery>;
 
+export type AssetRequestQuery = ReturnType<
+  typeof graphql.scalar<'AssetRequestQuery'>
+>;
+
 /**
  * @internal
  */

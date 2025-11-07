@@ -63,7 +63,8 @@ export type HubAssetUserState = FragmentOf<typeof HubAssetUserStateFragment>;
 export const HubAssetFragment = graphql(
   `fragment HubAsset on HubAsset {
       __typename
-      assetId
+      id
+      onchainAssetId
       hub {
         ...Hub
       }
