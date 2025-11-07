@@ -8,7 +8,7 @@ export default defineConfig(() => ({
     'src/ethers.ts',
     'src/privy.ts',
     'src/thirdweb.ts',
-    'src/viem.ts',
+    'src/viem/index.ts',
   ],
   outDir: 'dist',
   sourcemap: true,

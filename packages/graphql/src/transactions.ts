@@ -212,6 +212,7 @@ export const PreviewQuery = graphql(
   }`,
   [PreviewUserPositionFragment],
 );
+export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
 /**
@@ -232,7 +233,6 @@ export type UpdateUserDynamicConfigRequest = RequestOf<
 export type LiquidatePositionDebtAmount = ReturnType<
   typeof graphql.scalar<'LiquidatePositionDebtAmount'>
 >;
-export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type RepayAmountInputWithPermit = ReturnType<
   typeof graphql.scalar<'RepayAmountInputWithPermit'>
 >;
