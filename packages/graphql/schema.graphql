@@ -15,11 +15,12 @@ input ActivitiesRequestQuery @oneOf {
   hub: HubInput
   hubId: HubId
   spoke: SpokeInput
+  spokeId: SpokeId
   chainIds: [ChainId!]
   txHash: TxHashInput
 }
 
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity
 
 enum ActivityType {
   BORROW
@@ -887,8 +888,8 @@ type Query {
 }
 
 input RenounceSpokeUserPositionManagerRequest {
-  """The spoke"""
-  spoke: SpokeInput!
+  """The spoke id"""
+  spoke: SpokeId!
 
   """The address to remove as a position manager"""
   manager: EvmAddress!
@@ -1084,6 +1085,9 @@ input ReservesRequestQuery @oneOf {
   """Get all the reserves for a spoke"""
   spoke: SpokeInput
 
+  """Get all the reserves for a spoke"""
+  spokeId: SpokeId
+
   """Get all the reserves with underlying tokens"""
   tokens: [Erc20Input!]
 
@@ -1104,8 +1108,8 @@ input ReservesRequestQuery @oneOf {
 }
 
 input SetSpokeUserPositionManagerRequest {
-  """The spoke"""
-  spoke: SpokeInput!
+  """The spoke id"""
+  spoke: SpokeId!
 
   """The address to become the position manager"""
   manager: EvmAddress!
@@ -1158,7 +1162,7 @@ input SpokeInput {
 }
 
 input SpokePositionManagersRequest {
-  spoke: SpokeInput!
+  spoke: SpokeId!
   includeInactive: Boolean
   pageSize: PageSize!
   cursor: Cursor
@@ -1175,9 +1179,9 @@ input SpokeRequest {
   query: SpokeRequestQuery!
 }
 
-input SpokeRequestQuery {
-  """Spoke lookup parameters"""
-  spoke: SpokeInput!
+input SpokeRequestQuery @oneOf {
+  spoke: SpokeInput
+  spokeId: SpokeId
 }
 
 input SpokeTokenInput {
@@ -1199,7 +1203,7 @@ type SpokeUserPositionManager {
 }
 
 input SpokeUserPositionManagersRequest {
-  spoke: SpokeInput!
+  spoke: SpokeId!
   user: EvmAddress!
   pageSize: PageSize!
   cursor: Cursor
@@ -1500,8 +1504,8 @@ type TypeField {
 }
 
 input UpdateUserDynamicConfigRequest {
-  """The spoke"""
-  spoke: SpokeInput!
+  """The spoke id"""
+  spoke: SpokeId!
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
@@ -1511,8 +1515,8 @@ input UpdateUserDynamicConfigRequest {
 }
 
 input UpdateUserRiskPremiumRequest {
-  """The spoke"""
-  spoke: SpokeInput!
+  """The spoke id"""
+  spoke: SpokeId!
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
@@ -1688,12 +1692,12 @@ input UserChains {
 }
 
 type UserPosition {
+  """The user position ID"""
+  id: UserPositionId!
+
   """The user holding this position"""
   user: EvmAddress!
   createdAt: DateTime!
-
-  """The user position ID"""
-  id: UserPositionId!
   totalSupplied(currency: Currency! = USD): FiatAmountWithChange!
 
   """
@@ -1752,7 +1756,7 @@ input UserPositionsRequestOrderBy @oneOf {
 }
 
 input UserSpokeInput {
-  spoke: SpokeInput!
+  spoke: SpokeId!
   user: EvmAddress!
 }
 
@@ -1785,7 +1789,9 @@ type UserSummary {
 
 input UserSummaryFilter @oneOf {
   spoke: SpokeInput
+  spokeId: SpokeId
   chainIds: [ChainId!]
+  userPositionId: UserPositionId
 }
 
 type UserSummaryHistoryItem {
@@ -1876,6 +1882,17 @@ input UserSwapsRequest {
 input UserToken {
   user: EvmAddress!
   token: Erc20Input!
+}
+
+type UsingAsCollateralActivity {
+  id: ID!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  reserve: ReserveInfo!
+  enabledAsCollateral: Boolean!
+  chain: Chain!
 }
 
 type WithdrawActivity {

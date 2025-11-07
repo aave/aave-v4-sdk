@@ -16,16 +16,11 @@ import type { ResultAsync } from '@aave/types-next';
 import type { AaveClient } from '../AaveClient';
 
 /**
- * Fetches a specific spoke by address and chain ID.
+ * Fetches a specific spoke.
  *
  * ```ts
  * const result = await spoke(client, {
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   }
+ *   query: { spokeId: spokeId('SGVsbG8h') }
  * });
  * ```
  *
@@ -65,10 +60,7 @@ export function spokes(
  *
  * ```ts
  * const result = await spokePositionManagers(client, {
- *   spoke: {
- *     chainId: chainId(1),
- *     address: evmAddress('0x878...'),
- *   },
+ *   spoke: spokeId('SGVsbG8h'),
  * });
  * ```
  *
@@ -88,10 +80,7 @@ export function spokePositionManagers(
  *
  * ```ts
  * const result = await spokeUserPositionManagers(client, {
- *   spoke: {
- *     chainId: chainId(1),
- *     address: evmAddress('0x878...'),
- *   },
+ *   spoke: spokeId('SGVsbG8h'),
  *   user: evmAddress('0x123...'),
  * });
  * ```

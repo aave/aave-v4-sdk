@@ -566,9 +566,7 @@ export function useRenounceSpokeUserPositionManager(
         .andTee(() =>
           client.refreshQueryWhere(
             SpokePositionManagersQuery,
-            (variables) =>
-              variables.request.spoke.chainId === request.spoke.chainId &&
-              variables.request.spoke.address === request.spoke.address,
+            (variables) => variables.request.spoke === request.spoke,
           ),
         ),
     [client, handler],
@@ -640,17 +638,12 @@ export function useUpdateUserRiskPremium(
               UserPositionsQuery,
               (variables, data) =>
                 variables.request.user === request.sender &&
-                data.some(
-                  (position) =>
-                    position.spoke.chain.chainId === request.spoke.chainId &&
-                    position.spoke.address === request.spoke.address,
-                ),
+                data.some((position) => position.spoke.id === request.spoke),
             ),
             client.refreshQueryWhere(
               UserPositionQuery,
               (_, data) =>
-                data?.spoke.chain.chainId === request.spoke.chainId &&
-                data?.spoke.address === request.spoke.address &&
+                data?.spoke.id === request.spoke &&
                 data.user === request.sender,
             ),
           ]),
@@ -969,10 +962,7 @@ export function useLiquidatePosition(
  * });
  *
  * const result = await setSpokeUserPositionManager({
- *   spoke: {
- *     address: evmAddress('0x87870bca…'),
- *     chainId: chainId(1),
- *   },
+ *   spoke: spokeId('SGVsbG8h'),
  *   manager: evmAddress('0x9abc…'), // Address that will become the position manager
  *   approve: true, // true to approve, false to remove the manager
  *   user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
@@ -1030,9 +1020,7 @@ export function useSetSpokeUserPositionManager(
         .andTee(() =>
           client.refreshQueryWhere(
             SpokePositionManagersQuery,
-            (variables) =>
-              variables.request.spoke.chainId === request.spoke.chainId &&
-              variables.request.spoke.address === request.spoke.address,
+            (variables) => variables.request.spoke === request.spoke,
           ),
         ),
     [client, handler],

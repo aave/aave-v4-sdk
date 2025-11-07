@@ -208,10 +208,7 @@ export function withdraw(
  * const result = await renounceSpokeUserPositionManager(client, {
  *   manager: evmAddress('0x9abc…'),
  *   managing: evmAddress('0xdef0…'),
- *   spoke: {
- *     chainId: chainId(1),
- *     address: evmAddress('0x878…'),
- *   }
+ *   spoke: spokeId('SGVsbG8h'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -240,10 +237,7 @@ export function renounceSpokeUserPositionManager(
  * ```ts
  * const result = await updateUserDynamicConfig(client, {
  *   sender: evmAddress('0x9abc…'),
- *   spoke: {
- *     chainId: chainId(1),
- *     address: evmAddress('0x878…'),
- *   }
+ *   spoke: spokeId('SGVsbG8h'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -273,10 +267,7 @@ export function updateUserDynamicConfig(
  * ```ts
  * const result = await updateUserRiskPremium(client, {
  *   sender: evmAddress('0x9abc…'),
- *   spoke: {
- *     chainId: chainId(1),
- *     address: evmAddress('0x878…'),
- *   }
+ *   spoke: spokeId('SGVsbG8h'),
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -348,10 +339,7 @@ export function liquidatePosition(
  *
  * ```ts
  * const result = await setSpokeUserPositionManager(client, {
- *   spoke: {
- *     address: evmAddress('0x87870bca…'),
- *     chainId: chainId(1),
- *   },
+ *   spoke: spokeId('SGVsbG8h'),
  *   manager: evmAddress('0x9abc…'), // Address that will become the position manager
  *   approve: true, // true to approve, false to remove the manager
  *   user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
