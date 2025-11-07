@@ -90,22 +90,19 @@ export function hubId(value: string): HubId {
 /**
  * @internal
  */
-export function encodeHubId(hub: {
-  address: EvmAddress;
-  chainId: ChainId;
-}): HubId {
-  return hubId(
-    encodeBase64(`${hub.address}${COMPOSITE_ID_SEPARATOR}${hub.chainId}`),
-  );
-}
-
-/**
- * @internal
- */
 export type HubIdParts = {
   address: EvmAddress;
   chainId: ChainId;
 };
+
+/**
+ * @internal
+ */
+export function encodeHubId(hub: HubIdParts): HubId {
+  return hubId(
+    encodeBase64(`${hub.chainId}${COMPOSITE_ID_SEPARATOR}${hub.address}`),
+  );
+}
 
 /**
  * @internal
@@ -176,7 +173,7 @@ export function reserveId(value: string): ReserveId {
 export type ReserveIdParts = {
   chainId: ChainId;
   spoke: EvmAddress;
-  id: OnChainReserveId;
+  onChainId: OnChainReserveId;
 };
 
 /**
@@ -192,7 +189,7 @@ export function decodeReserveId(value: ReserveId): ReserveIdParts {
   return {
     chainId: chainId(Number.parseInt(a, 10)),
     spoke: evmAddress(b),
-    id: Number.parseInt(c, 10) as OnChainReserveId,
+    onChainId: Number.parseInt(c, 10) as OnChainReserveId,
   };
 }
 
