@@ -1,6 +1,7 @@
 import {
   type ChainId,
   type EvmAddress,
+  type SpokeId,
   type UserPosition,
   useUserPosition,
   useUserPositions,
@@ -17,26 +18,27 @@ function PositionDetails({ position }: { position: UserPosition }) {
         <p>
           <strong>Total Supplied</strong>&nbsp;
           <span>
-            {position.totalSupplied.amount.value}{' '}
+            {position.totalSupplied.current.value.toDisplayString(2)}{' '}
             {position.totalSupplied.amount.symbol}
           </span>
         </p>
         <p>
           <strong>Total Collateral</strong>&nbsp;
           <span>
-            {position.totalCollateral.amount.value}{' '}
+            {position.totalCollateral.current.value.toDisplayString(2)}{' '}
             {position.totalCollateral.amount.symbol}
           </span>
         </p>
         <p>
           <strong>Total Debt</strong>&nbsp;
           <span>
-            {position.totalDebt.amount.value} {position.totalDebt.amount.symbol}
+            {position.totalDebt.current.value.toDisplayString(2)}{' '}
+            {position.totalDebt.current.symbol}
           </span>
         </p>
         <p>
           <strong>Net APY</strong>&nbsp;
-          <span>{position.netApy.value}%</span>
+          <span>{position.netApy.normalized.toDisplayString(2)}%</span>
         </p>
         {position.healthFactor && (
           <p>
@@ -50,22 +52,14 @@ function PositionDetails({ position }: { position: UserPosition }) {
 }
 
 export type SingleUserPositionProps = {
-  chainId: ChainId;
-  spoke: EvmAddress;
+  spokeId: SpokeId;
   user: EvmAddress;
 };
 
-export function SingleUserPosition({
-  chainId,
-  spoke,
-  user,
-}: SingleUserPositionProps) {
+export function SingleUserPosition({ spokeId, user }: SingleUserPositionProps) {
   const { data } = useUserPosition({
     userSpoke: {
-      spoke: {
-        address: spoke,
-        chainId,
-      },
+      spoke: spokeId,
       user,
     },
   });
