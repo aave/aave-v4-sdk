@@ -132,8 +132,8 @@ export type UseSpokesArgs = SpokesRequest;
  *
  * ```tsx
  * const { data } = useSpokes({
- *     chainIds: [chainId(1)],
- *     suspense: true,
+ *   query: { chainIds: [chainId(1)] },
+ *   suspense: true,
  * });
  * ```
  */
@@ -147,9 +147,9 @@ export function useSpokes(
  *
  * ```tsx
  * const { data } = useSpokes({
- *     chainIds: [chainId(1)],
- *     suspense: true,
- *     pause: true,
+ *   query: { chainIds: [chainId(1)] },
+ *   suspense: true,
+ *   pause: true,
  * });
  * ```
  */
@@ -161,8 +161,7 @@ export function useSpokes(
  *
  * ```tsx
  * const { data, error, loading } = useSpokes({
- *     chainIds: [chainId(1)],
- *   },
+ *   query: { chainIds: [chainId(1)] },
  * });
  * ```
  */
@@ -174,8 +173,8 @@ export function useSpokes(args: UseSpokesArgs): ReadResult<Spoke[]>;
  *
  * ```tsx
  * const { data, error, loading, paused } = useSpokes({
- *     chainIds: [chainId(1)],
- *     pause: true,
+ *   query: { chainIds: [chainId(1)] },
+ *   pause: true,
  * });
  * ```
  */
