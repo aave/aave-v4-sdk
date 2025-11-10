@@ -241,6 +241,7 @@ describe('Query User Activities on Aave V4', () => {
         WithdrawActivity: ActivityType.Withdraw,
         RepayActivity: ActivityType.Repay,
         LiquidatedActivity: ActivityType.Liquidated,
+        UsingAsCollateralActivity: ActivityType.SetAsCollateral,
       };
 
       it.each(activityTypes)(
@@ -254,7 +255,11 @@ describe('Query User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if ([ActivityType.Liquidated].includes(activityType)) {
+          if (
+            [ActivityType.Liquidated, ActivityType.SetAsCollateral].includes(
+              activityType,
+            )
+          ) {
             // Liquidated activities are not easily reproducible, so we skip them
             return;
           }
