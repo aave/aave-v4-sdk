@@ -4,15 +4,16 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+  ETHEREUM_SPOKE_ISO_STABLE_ID,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client-next/test-utils';
+
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet(
-  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
+  '0x40e7024d48c43beb83f2328465b31b0d8e38835688cd7d9e24301f1aa1961d4b',
 );
 
 // TODO: Improve the tests(with multiple borrows in same spoke) when bug AAVE-2151 is fixed
@@ -50,20 +51,14 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
-              },
+              spoke: ETHEREUM_SPOKE_ISO_STABLE_ID,
               user: evmAddress(user.account.address),
             },
           },
         });
         assertOk(borrowPositions);
         borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
-          );
-          expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
+          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_ISO_STABLE_ID);
         });
       });
     });
@@ -88,10 +83,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
-              },
+              spoke: ETHEREUM_SPOKE_ISO_STABLE_ID,
               user: evmAddress(user.account.address),
             },
           },
@@ -100,9 +92,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         assertOk(borrowPositions);
         expect(borrowPositions.value.length).toBeGreaterThanOrEqual(1);
         borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
-          );
+          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_ISO_STABLE_ID);
         });
       });
     });

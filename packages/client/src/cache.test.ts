@@ -5,8 +5,9 @@ import {
   bigDecimal,
   evmAddress,
   never,
-  nonNullable,
+  ResultAsync,
 } from '@aave/types-next';
+import { Result } from 'ethers';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   activities,
@@ -64,8 +65,9 @@ describe('Given the Aave SDK normalized graph cache', () => {
       const result = await hub(
         client,
         {
-          hub: nonNullable(primed.value[0]).address,
-          chainId: nonNullable(primed.value[0]).chain.chainId,
+          query: {
+            hubId: primed.value[0]!.id,
+          },
         },
         {
           requestPolicy: 'cache-only',
@@ -96,38 +98,29 @@ describe('Given the Aave SDK normalized graph cache', () => {
             never('No reserve found to supply to for the token'),
         )
         .andThen((reserve) =>
-          // supply activity 1
-          supply(client, {
-            sender: evmAddress(user.account.address),
-            reserve: {
-              chainId: reserve.chain.chainId,
-              reserveId: reserve.id,
-              spoke: reserve.spoke.address,
-            },
-            amount: {
-              native: bigDecimal('0.1'),
-            },
-            enableCollateral: false, // workaround temporary contracts limitations
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction)
-            .andThen(() =>
-              // supply activity 2
-              supply(client, {
-                sender: evmAddress(user.account.address),
-                reserve: {
-                  chainId: reserve.chain.chainId,
-                  reserveId: reserve.id,
-                  spoke: reserve.spoke.address,
-                },
-                amount: {
-                  native: bigDecimal('0.1'),
-                },
-                enableCollateral: false, // workaround temporary contracts limitations
-              })
-                .andThen(sendWith(user))
-                .andThen(client.waitForTransaction),
-            ),
+          ResultAsync.combine([
+            // supply activity 1
+            supply(client, {
+              sender: evmAddress(user.account.address),
+              reserve: reserve.id,
+              amount: {
+                native: bigDecimal('0.1'),
+              },
+            }),
+            // supply activity 2
+            supply(client, {
+              sender: evmAddress(user.account.address),
+              reserve: reserve.id,
+              amount: {
+                native: bigDecimal('0.1'),
+              },
+            }),
+          ]).andThen(([plan1, plan2]) =>
+            ResultAsync.combine([
+              sendWith(user, plan1).andThen(client.waitForTransaction),
+              sendWith(user, plan2).andThen(client.waitForTransaction),
+            ]),
+          ),
         );
 
       assertOk(setup);

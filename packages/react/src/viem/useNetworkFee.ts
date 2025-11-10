@@ -5,9 +5,11 @@ import {
   type Chain,
   Currency,
   type DecimalNumber,
+  decodeReserveId,
   type FiatAmount,
   type NativeAmount,
   type PreviewAction,
+  type ReserveId,
 } from '@aave/graphql-next';
 import {
   bigDecimal,
@@ -49,31 +51,39 @@ function inferGasEstimate(action: PreviewAction): bigint {
   return gasEstimates[key] ?? never(`Expected gas estimate for action ${key}`);
 }
 
+function extractReserveId(action: PreviewAction): ReserveId {
+  if ('supply' in action) {
+    return action.supply.reserve;
+  }
+
+  if ('borrow' in action) {
+    return action.borrow.reserve;
+  }
+
+  if ('withdraw' in action) {
+    return action.withdraw.reserve;
+  }
+
+  if ('repay' in action) {
+    return action.repay.reserve;
+  }
+
+  if ('setUserSupplyAsCollateral' in action) {
+    return action.setUserSupplyAsCollateral.reserve;
+  }
+
+  return never('Expected reserve id');
+}
+
 function inferChainId(query: UseNetworkFeeRequestQuery): ChainId | undefined {
   if ('activity' in query && query.activity) {
     return query.activity.chain.chainId;
   }
 
   if ('estimate' in query && query.estimate) {
-    if ('supply' in query.estimate) {
-      return query.estimate.supply.reserve.chainId;
-    }
+    const reserveId = extractReserveId(query.estimate);
 
-    if ('borrow' in query.estimate) {
-      return query.estimate.borrow.reserve.chainId;
-    }
-
-    if ('withdraw' in query.estimate) {
-      return query.estimate.withdraw.reserve.chainId;
-    }
-
-    if ('repay' in query.estimate) {
-      return query.estimate.repay.reserve.chainId;
-    }
-
-    if ('setUserSupplyAsCollateral' in query.estimate) {
-      return query.estimate.setUserSupplyAsCollateral.reserve.chainId;
-    }
+    return decodeReserveId(reserveId).chainId;
   }
 
   return undefined;

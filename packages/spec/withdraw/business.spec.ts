@@ -33,11 +33,7 @@ describe('Withdrawing Assets on Aave V4', () => {
             decimals: listReserves[0].asset.underlying.info.decimals,
           }).andThen(() =>
             supplyToReserve(client, user, {
-              reserve: {
-                reserveId: listReserves[0].id,
-                chainId: listReserves[0].chain.chainId,
-                spoke: listReserves[0].spoke.address,
-              },
+              reserve: listReserves[0].id,
               amount: {
                 erc20: {
                   value: amountToSupply,
@@ -60,11 +56,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         );
 
         const withdrawResult = await withdraw(client, {
-          reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
-          },
+          reserve: reserve.id,
           amount: {
             erc20: { exact: amountToWithdraw },
           },
@@ -76,10 +68,7 @@ describe('Withdrawing Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
-                  },
+                  spoke: reserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -109,11 +98,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         const previewResult = await preview(client, {
           action: {
             withdraw: {
-              reserve: {
-                reserveId: reserve.id,
-                chainId: reserve.chain.chainId,
-                spoke: reserve.spoke.address,
-              },
+              reserve: reserve.id,
               sender: evmAddress(user.account.address),
               amount: {
                 erc20: {
@@ -140,11 +125,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         );
 
         const withdrawResult = await withdraw(client, {
-          reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
-          },
+          reserve: reserve.id,
           sender: evmAddress(user.account.address),
           amount: {
             erc20: {
@@ -158,10 +139,7 @@ describe('Withdrawing Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
-                  },
+                  spoke: reserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -201,11 +179,7 @@ describe('Withdrawing Assets on Aave V4', () => {
           evmAddress(user.account.address),
         );
         const withdrawResult = await withdraw(client, {
-          reserve: {
-            spoke: reserveSupportingNative.spoke.address,
-            reserveId: reserveSupportingNative.id,
-            chainId: reserveSupportingNative.chain.chainId,
-          },
+          reserve: reserveSupportingNative.id,
           sender: evmAddress(user.account.address),
           amount: {
             native: { exact: amountToWithdraw },
@@ -217,10 +191,7 @@ describe('Withdrawing Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserveSupportingNative.spoke.address,
-                    chainId: reserveSupportingNative.chain.chainId,
-                  },
+                  spoke: reserveSupportingNative.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -244,11 +215,7 @@ describe('Withdrawing Assets on Aave V4', () => {
           evmAddress(user.account.address),
         );
         const withdrawResult = await withdraw(client, {
-          reserve: {
-            spoke: reserveSupportingNative.spoke.address,
-            reserveId: reserveSupportingNative.id,
-            chainId: reserveSupportingNative.chain.chainId,
-          },
+          reserve: reserveSupportingNative.id,
           sender: evmAddress(user.account.address),
           amount: {
             native: { max: true },
@@ -260,10 +227,7 @@ describe('Withdrawing Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserveSupportingNative.spoke.address,
-                    chainId: reserveSupportingNative.chain.chainId,
-                  },
+                  spoke: reserveSupportingNative.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
