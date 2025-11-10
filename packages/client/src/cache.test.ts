@@ -7,7 +7,6 @@ import {
   never,
   ResultAsync,
 } from '@aave/types-next';
-import { Result } from 'ethers';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   activities,
