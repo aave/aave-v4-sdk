@@ -6,7 +6,7 @@ type APYSample {
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [UserActivityFeedType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL]
+  types: [ActivityFeedType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -18,6 +18,15 @@ input ActivitiesRequestQuery @oneOf {
   spokeId: SpokeId
   chainIds: [ChainId!]
   txHash: TxHashInput
+}
+
+enum ActivityFeedType {
+  SUPPLY
+  BORROW
+  REPAY
+  WITHDRAW
+  LIQUIDATED
+  SET_AS_COLLATERAL
 }
 
 union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity
@@ -617,6 +626,11 @@ type LiquidatedActivity {
   chain: Chain!
 }
 
+type Mutation {
+  """Top up a balance for a user or yourself on the fork"""
+  forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
+}
+
 type NativeAmount {
   """The native token"""
   token: NativeToken!
@@ -874,9 +888,6 @@ type Query {
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
   cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
-
-  """Top up a balance for a user or yourself on the fork"""
-  forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
 }
 
 input RenounceSpokeUserPositionManagerRequest {
@@ -1177,14 +1188,11 @@ input SpokeRequestQuery @oneOf {
 }
 
 input SpokeTokenInput {
-  """The spoke address"""
-  spoke: EvmAddress!
+  """The spoke id"""
+  spoke: SpokeId!
 
   """The token"""
   token: EvmAddress!
-
-  """The chain id"""
-  chainId: ChainId!
 }
 
 type SpokeUserPositionManager {
@@ -1206,6 +1214,12 @@ input SpokesRequest {
 }
 
 input SpokesRequestQuery @oneOf {
+  """
+  The hub id
+  Get all the spokes which hubs are linked to a spoke reserve
+  """
+  hubId: HubId
+
   """
   The hub address and chain id
   Get all the spokes which hubs are linked to a spoke reserve
@@ -1515,15 +1529,6 @@ input UpdateUserRiskPremiumRequest {
 
   """If not supplied, this will use `sender` which is the normal route"""
   onBehalfOf: EvmAddress
-}
-
-enum UserActivityFeedType {
-  SUPPLY
-  BORROW
-  REPAY
-  WITHDRAW
-  LIQUIDATED
-  SET_AS_COLLATERAL
 }
 
 type UserBalance {

@@ -18,6 +18,7 @@ import {
   type TadaDocumentNode,
 } from 'gql.tada';
 import type {
+  ActivityType,
   ApyMetric,
   ChainsFilter,
   Currency,
@@ -30,7 +31,6 @@ import type {
   SwapKind,
   SwapStatusFilter,
   TimeWindow,
-  UserActivityFeedType,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -56,6 +56,7 @@ export const graphql = initGraphQLTada<{
   disableMasking: true;
   introspection: introspection;
   scalars: {
+    ActivityType: ActivityType;
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
     AssetId: AssetId;
@@ -93,7 +94,6 @@ export const graphql = initGraphQLTada<{
     TimeWindow: TimeWindow;
     JSON: JSONString;
     TxHash: TxHash;
-    UserActivityFeedType: UserActivityFeedType;
     UserBalanceId: UserBalanceId;
     UserBorrowItemId: UserBorrowItemId;
     UserPositionId: UserPositionId;
