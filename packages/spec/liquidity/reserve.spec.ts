@@ -11,6 +11,7 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
@@ -48,8 +49,7 @@ describe('Aave V4 Reserve Scenario', () => {
           query: {
             spokeToken: {
               token: ETHEREUM_USDC_ADDRESS,
-              spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-              chainId: ETHEREUM_FORK_ID,
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
           },
         });
@@ -57,7 +57,7 @@ describe('Aave V4 Reserve Scenario', () => {
         assertNonEmptyArray(listReserves.value);
 
         listReserves.value.forEach((elem) => {
-          expect(elem.spoke.address).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+          expect(elem.spoke.id).toEqual(ETHEREUM_SPOKE_CORE_ID);
           expect(elem.asset.underlying.address).toEqual(ETHEREUM_USDC_ADDRESS);
         });
       });

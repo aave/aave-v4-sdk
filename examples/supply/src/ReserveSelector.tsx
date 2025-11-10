@@ -15,10 +15,7 @@ interface ReserveSelectorProps {
 export function ReserveSelector({ onChange, spoke }: ReserveSelectorProps) {
   const { data: reserves, loading } = useReserves({
     query: {
-      spoke: {
-        chainId: spoke.chain.chainId,
-        address: spoke.address,
-      },
+      spokeId: spoke.id,
     },
     filter: ReservesRequestFilter.Supply,
   });
@@ -50,7 +47,7 @@ export function ReserveSelector({ onChange, spoke }: ReserveSelectorProps) {
         {reserves?.map((reserve) => (
           <option key={reserve.id} value={reserve.id}>
             {reserve.asset.underlying.info.name} - APY:{' '}
-            {reserve.summary.supplyApy.formatted}%
+            {reserve.summary.supplyApy.normalized.toDisplayString(2)}%
           </option>
         ))}
       </select>

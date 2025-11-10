@@ -1,6 +1,7 @@
 /// <reference path="../../../vite-env.d.ts" />
 
 import { GraphQLErrorCode, UnexpectedError } from '@aave/core-next';
+import { encodeHubId, encodeSpokeId } from '@aave/graphql-next';
 import {
   type BigDecimal,
   bigDecimal,
@@ -49,24 +50,39 @@ export const ETHEREUM_WSTETH_ADDRESS = evmAddress(
   '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
 );
 
-// Spoke addresses
+// Spoke addresses and ids
 export const ETHEREUM_SPOKE_CORE_ADDRESS = evmAddress(
   '0x43d8A7613632f4F04ae8918Adaf6A2cd9Db8C3Aa',
 );
+export const ETHEREUM_SPOKE_CORE_ID = encodeSpokeId({
+  chainId: ETHEREUM_FORK_ID,
+  address: ETHEREUM_SPOKE_CORE_ADDRESS,
+});
+
 export const ETHEREUM_SPOKE_ISO_GOV_ADDRESS = evmAddress(
   '0x271168dE14E5050cB1d3571BC71A8C8bd439251D',
 );
+
 export const ETHEREUM_SPOKE_EMODE_ADDRESS = evmAddress(
   '0x5738d9cB82d6a1617973C257D05A387bF5568F47',
 );
+
 export const ETHEREUM_SPOKE_ISO_STABLE_ADDRESS = evmAddress(
   '0x4D4a7b3Ce709b4362D7095a4A0105bDFDb5dA2a7',
 );
+export const ETHEREUM_SPOKE_ISO_STABLE_ID = encodeSpokeId({
+  chainId: ETHEREUM_FORK_ID,
+  address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
+});
 
 // Hub addresses
 export const ETHEREUM_HUB_CORE_ADDRESS = evmAddress(
   '0x2559E4E04F2cA7180e5f20C2872d22EC89601b56',
 );
+export const ETHEREUM_HUB_CORE_ID = encodeHubId({
+  chainId: ETHEREUM_FORK_ID,
+  address: ETHEREUM_HUB_CORE_ADDRESS,
+});
 
 export const ETHEREUM_FORK_RPC_URL = import.meta.env
   .ETHEREUM_TENDERLY_PUBLIC_RPC;
@@ -86,6 +102,7 @@ export async function createNewWallet(
 ): Promise<WalletClient<Transport, Chain, Account>> {
   if (!privateKey) {
     const privateKey = generatePrivateKey();
+    console.log('Generated private key:', privateKey);
     const wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
       chain: ethereumForkChain,

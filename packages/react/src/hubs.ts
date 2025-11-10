@@ -32,14 +32,13 @@ import {
 export type UseHubArgs = Prettify<HubRequest & CurrencyQueryOptions>;
 
 /**
- * Fetch a specific hub by address and chain ID.
+ * Fetch a specific hub by ID or by address and chain ID.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
  * const { data } = useHub({
- *   hub: evmAddress('0x123...'),
- *   chainId: chainId(1),
+ *   query: { hubId: hubId('SGVsbG8h') },
  *   suspense: true,
  * });
  * // data will be Hub | null
@@ -49,14 +48,13 @@ export function useHub(
   args: UseHubArgs & Suspendable,
 ): SuspenseResult<Hub | null>;
 /**
- * Fetch a specific hub by address and chain ID.
+ * Fetch a specific hub by ID or by address and chain ID.
  *
  * Pausable suspense mode.
  *
  * ```tsx
  * const { data } = useHub({
- *   hub: evmAddress('0x123...'),
- *   chainId: chainId(1),
+ *   query: { hubId: hubId('SGVsbG8h') },
  *   suspense: true,
  *   pause: true,
  * });
@@ -66,26 +64,24 @@ export function useHub(
   args: Pausable<UseHubArgs> & Suspendable,
 ): PausableSuspenseResult<Hub | null>;
 /**
- * Fetch a specific hub by address and chain ID.
+ * Fetch a specific hub by ID or by address and chain ID.
  *
  * ```tsx
  * const { data, error, loading } = useHub({
- *   hub: evmAddress('0x123...'),
- *   chainId: chainId(1),
+ *   query: { hubId: hubId('SGVsbG8h') },
  * });
  * // data will be Hub | null
  * ```
  */
 export function useHub(args: UseHubArgs): ReadResult<Hub | null>;
 /**
- * Fetch a specific hub by address and chain ID.
+ * Fetch a specific hub by ID or by address and chain ID.
  *
  * Pausable loading state mode.
  *
  * ```tsx
  * const { data, error, loading, paused } = useHub({
- *   hub: evmAddress('0x123...'),
- *   chainId: chainId(1),
+ *   query: { hubId: hubId('SGVsbG8h') },
  *   pause: true,
  * });
  * ```
@@ -194,17 +190,14 @@ export type UseHubAssetsArgs = Prettify<
 >;
 
 /**
- * Fetch hub assets for a specific chain and optional hub/user filtering.
+ * Fetch hub assets for a specific hub by ID or by address and chain ID.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
  * const { data } = useHubAssets({
- *   chainId: chainId(1),
- *   hub: evmAddress('0x123...'), // optional
+ *   query: { hubId: hubId('SGVsbG8h') },
  *   user: evmAddress('0x456...'), // optional
- *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
- *   orderBy: HubAssetsRequestOrderBy.Name, // optional
  *   suspense: true,
  * });
  * ```
@@ -213,14 +206,13 @@ export function useHubAssets(
   args: UseHubAssetsArgs & Suspendable,
 ): SuspenseResult<HubAsset[]>;
 /**
- * Fetch hub assets for a specific chain and optional hub/user filtering.
+ * Fetch hub assets for a specific hub by ID or by address and chain ID.
  *
  * Pausable suspense mode.
  *
  * ```tsx
  * const { data } = useHubAssets({
- *   chainId: chainId(1),
- *   hub: evmAddress('0x123...'), // optional
+ *   query: { hubId: hubId('SGVsbG8h') },
  *   user: evmAddress('0x456...'), // optional
  *   suspense: true,
  *   pause: true,
@@ -231,28 +223,24 @@ export function useHubAssets(
   args: Pausable<UseHubAssetsArgs> & Suspendable,
 ): PausableSuspenseResult<HubAsset[]>;
 /**
- * Fetch hub assets for a specific chain and optional hub/user filtering.
+ * Fetch hub assets for a specific hub by ID or by address and chain ID.
  *
  * ```tsx
  * const { data, error, loading } = useHubAssets({
- *   chainId: chainId(1),
- *   hub: evmAddress('0x123...'), // optional
+ *   query: { hubId: hubId('SGVsbG8h') },
  *   user: evmAddress('0x456...'), // optional
- *   include: [HubAssetStatusType.Active, HubAssetStatusType.Frozen], // optional
- *   orderBy: HubAssetsRequestOrderBy.Name, // optional
  * });
  * ```
  */
 export function useHubAssets(args: UseHubAssetsArgs): ReadResult<HubAsset[]>;
 /**
- * Fetch hub assets for a specific chain and optional hub/user filtering.
+ * Fetch hub assets for a specific hub by ID or by address and chain ID.
  *
  * Pausable loading state mode.
  *
  * ```tsx
  * const { data, error, loading, paused } = useHubAssets({
- *   chainId: chainId(1),
- *   hub: evmAddress('0x123...'), // optional
+ *   query: { hubId: hubId('SGVsbG8h') },
  *   user: evmAddress('0x456...'), // optional
  *   pause: true,
  * });

@@ -47,11 +47,7 @@ describe('Repaying Loans on Aave V4', () => {
           decimals: supplyReserves[0].asset.underlying.info.decimals,
         }).andThen(() =>
           supplyToReserve(client, user, {
-            reserve: {
-              reserveId: supplyReserves[0].id,
-              chainId: supplyReserves[0].chain.chainId,
-              spoke: supplyReserves[0].spoke.address,
-            },
+            reserve: supplyReserves[0].id,
             amount: { erc20: { value: bigDecimal(0.01) } },
             sender: evmAddress(user.account.address),
             enableCollateral: true,
@@ -71,11 +67,7 @@ describe('Repaying Loans on Aave V4', () => {
         }
         return borrowFromReserve(client, user, {
           sender: evmAddress(user.account.address),
-          reserve: {
-            spoke: reserveWithPermit.spoke.address,
-            reserveId: reserveWithPermit.id,
-            chainId: reserveWithPermit.chain.chainId,
-          },
+          reserve: reserveWithPermit.id,
           amount: {
             erc20: {
               value:
@@ -101,11 +93,7 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(fundWallet);
 
         const repayResult = await repay(client, {
-          reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
-          },
+          reserve: reserve.id,
           sender: evmAddress(user.account.address),
           amount: {
             erc20: {
@@ -121,10 +109,7 @@ describe('Repaying Loans on Aave V4', () => {
             userBorrows(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
-                  },
+                  spoke: reserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -140,11 +125,7 @@ describe('Repaying Loans on Aave V4', () => {
         const previewResult = await preview(client, {
           action: {
             repay: {
-              reserve: {
-                reserveId: reserve.id,
-                chainId: reserve.chain.chainId,
-                spoke: reserve.spoke.address,
-              },
+              reserve: reserve.id,
               sender: evmAddress(user.account.address),
               amount: {
                 erc20: {
@@ -175,10 +156,7 @@ describe('Repaying Loans on Aave V4', () => {
         const borrowBefore = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: reserve.spoke.address,
-                chainId: reserve.chain.chainId,
-              },
+              spoke: reserve.spoke.id,
               user: evmAddress(user.account.address),
             },
           },
@@ -203,11 +181,7 @@ describe('Repaying Loans on Aave V4', () => {
         const amountToRepay = positionBefore.debt.amount.value.times(0.1);
 
         const repayResult = await repay(client, {
-          reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
-          },
+          reserve: reserve.id,
           sender: evmAddress(user.account.address),
           amount: {
             erc20: {
@@ -223,10 +197,7 @@ describe('Repaying Loans on Aave V4', () => {
             userBorrows(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
-                  },
+                  spoke: reserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -252,10 +223,7 @@ describe('Repaying Loans on Aave V4', () => {
         const borrowBefore = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: reserve.spoke.address,
-                chainId: reserve.chain.chainId,
-              },
+              spoke: reserve.spoke.id,
               user: evmAddress(user.account.address),
             },
           },
@@ -275,22 +243,14 @@ describe('Repaying Loans on Aave V4', () => {
             amount: {
               exact: amountToRepay,
             },
-            reserve: {
-              reserveId: reserve.id,
-              chainId: reserve.chain.chainId,
-              spoke: reserve.spoke.address,
-            },
+            reserve: reserve.id,
             sender: evmAddress(user.account.address),
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
 
         const repayResult = await repay(client, {
-          reserve: {
-            spoke: reserve.spoke.address,
-            reserveId: reserve.id,
-            chainId: reserve.chain.chainId,
-          },
+          reserve: reserve.id,
           sender: evmAddress(user.account.address),
           amount: {
             erc20: {
@@ -308,10 +268,7 @@ describe('Repaying Loans on Aave V4', () => {
             userBorrows(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserve.spoke.address,
-                    chainId: reserve.chain.chainId,
-                  },
+                  spoke: reserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -350,10 +307,7 @@ describe('Repaying Loans on Aave V4', () => {
         const borrowBefore = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: reserveSupportingNative.spoke.address,
-                chainId: reserveSupportingNative.chain.chainId,
-              },
+              spoke: reserveSupportingNative.spoke.id,
               user: evmAddress(user.account.address),
             },
           },
@@ -373,11 +327,7 @@ describe('Repaying Loans on Aave V4', () => {
         );
 
         const repayResult = await repay(client, {
-          reserve: {
-            spoke: reserveSupportingNative.spoke.address,
-            reserveId: reserveSupportingNative.id,
-            chainId: reserveSupportingNative.chain.chainId,
-          },
+          reserve: reserveSupportingNative.id,
           sender: evmAddress(user.account.address),
           amount: {
             native: {
@@ -391,10 +341,7 @@ describe('Repaying Loans on Aave V4', () => {
             userBorrows(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserveSupportingNative.spoke.address,
-                    chainId: reserveSupportingNative.chain.chainId,
-                  },
+                  spoke: reserveSupportingNative.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -429,11 +376,7 @@ describe('Repaying Loans on Aave V4', () => {
         );
 
         const repayResult = await repay(client, {
-          reserve: {
-            spoke: reserveSupportingNative.spoke.address,
-            reserveId: reserveSupportingNative.id,
-            chainId: reserveSupportingNative.chain.chainId,
-          },
+          reserve: reserveSupportingNative.id,
           sender: evmAddress(user.account.address),
           amount: {
             native: {
@@ -447,10 +390,7 @@ describe('Repaying Loans on Aave V4', () => {
             userBorrows(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserveSupportingNative.spoke.address,
-                    chainId: reserveSupportingNative.chain.chainId,
-                  },
+                  spoke: reserveSupportingNative.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },

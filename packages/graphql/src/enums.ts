@@ -75,6 +75,7 @@ export enum ActivityType {
   Withdraw = 'WITHDRAW',
   Repay = 'REPAY',
   Liquidated = 'LIQUIDATED',
+  SetAsCollateral = 'SET_AS_COLLATERAL',
 }
 
 /**

@@ -4,6 +4,5 @@ export * from './errors';
 export * from './graphql';
 export * from './helpers';
 export * from './hex';
-export * from './id';
 export * from './misc';
 export * from './number';

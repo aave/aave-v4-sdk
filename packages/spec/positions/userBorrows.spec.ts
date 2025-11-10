@@ -4,9 +4,10 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_ISO_STABLE_ID,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client-next/test-utils';
+
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertSingleElementArray } from '../test-utils';
@@ -27,20 +28,14 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
-              },
+              spoke: ETHEREUM_SPOKE_ISO_STABLE_ID,
               user: evmAddress(user.account.address),
             },
           },
         });
         assertOk(borrowPositions);
         borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_CORE_ADDRESS,
-          );
-          expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
+          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_ISO_STABLE_ID);
         });
       });
     });
@@ -64,10 +59,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
-              },
+              spoke: ETHEREUM_SPOKE_ISO_STABLE_ID,
               user: evmAddress(user.account.address),
             },
           },
@@ -75,9 +67,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         });
         assertOk(borrowPositions);
         borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.address).toBe(
-            ETHEREUM_SPOKE_CORE_ADDRESS,
-          );
+          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_ISO_STABLE_ID);
         });
       });
     });

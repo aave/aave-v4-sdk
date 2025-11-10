@@ -6,9 +6,9 @@ import {
 } from '@aave/client-next';
 import { userBorrows, withdraw } from '@aave/client-next/actions';
 import {
-  ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
@@ -66,11 +66,7 @@ export const recreateUserActivities = async (
     )
     .andThen((reserve) =>
       withdraw(client, {
-        reserve: {
-          reserveId: reserve.id,
-          chainId: reserve.chain.chainId,
-          spoke: reserve.spoke.address,
-        },
+        reserve: reserve.id,
         amount: {
           erc20: {
             exact: bigDecimal('50'),
@@ -135,10 +131,7 @@ export const recreateUserBorrows = async (
   const borrowPositions = await userBorrows(client, {
     query: {
       userSpoke: {
-        spoke: {
-          address: ETHEREUM_SPOKE_CORE_ADDRESS,
-          chainId: ETHEREUM_FORK_ID,
-        },
+        spoke: ETHEREUM_SPOKE_CORE_ID,
         user: evmAddress(user.account.address),
       },
     },
@@ -170,11 +163,7 @@ export const recreateUserBorrows = async (
     for (let i = borrowPositions.value.length; i < 3; i++) {
       const borrowResult = await borrowFromReserve(client, user, {
         sender: evmAddress(user.account.address),
-        reserve: {
-          reserveId: listReservesToBorrow.value[i]!.id,
-          chainId: listReservesToBorrow.value[i]!.chain.chainId,
-          spoke: listReservesToBorrow.value[i]!.spoke.address,
-        },
+        reserve: listReservesToBorrow.value[i]!.id,
         amount: {
           erc20: {
             value:
