@@ -17,31 +17,32 @@ function PositionDetails({ position }: { position: UserPosition }) {
         <p>
           <strong>Total Supplied</strong>&nbsp;
           <span>
-            {position.totalSupplied.amount.value}{' '}
-            {position.totalSupplied.amount.symbol}
+            {position.totalSupplied.current.value.toDisplayString(2)}{' '}
+            {position.totalSupplied.current.symbol}
           </span>
         </p>
         <p>
           <strong>Total Collateral</strong>&nbsp;
           <span>
-            {position.totalCollateral.amount.value}{' '}
-            {position.totalCollateral.amount.symbol}
+            {position.totalCollateral.current.value.toDisplayString(2)}{' '}
+            {position.totalCollateral.current.symbol}
           </span>
         </p>
         <p>
           <strong>Total Debt</strong>&nbsp;
           <span>
-            {position.totalDebt.amount.value} {position.totalDebt.amount.symbol}
+            {position.totalDebt.current.value.toDisplayString(2)}{' '}
+            {position.totalDebt.current.symbol}
           </span>
         </p>
         <p>
           <strong>Net APY</strong>&nbsp;
-          <span>{position.netApy.value}%</span>
+          <span>{position.netApy.normalized.toDisplayString(2)}%</span>
         </p>
         {position.healthFactor && (
           <p>
             <strong>Health Factor</strong>&nbsp;
-            <span>{position.healthFactor.value}</span>
+            <span>{position.healthFactor.current?.toDisplayString(2)}</span>
           </p>
         )}
       </small>
