@@ -39,6 +39,7 @@ describe('Query User Activities on Aave V4', () => {
         WithdrawActivity: ActivityType.Withdraw,
         RepayActivity: ActivityType.Repay,
         LiquidatedActivity: ActivityType.Liquidated,
+        UsingAsCollateralActivity: ActivityType.SetAsCollateral,
       };
 
       it.each(activityTypes)(

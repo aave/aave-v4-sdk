@@ -6,7 +6,7 @@ type APYSample {
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED]
+  types: [UserActivityFeedType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -21,14 +21,6 @@ input ActivitiesRequestQuery @oneOf {
 }
 
 union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity
-
-enum ActivityType {
-  BORROW
-  SUPPLY
-  WITHDRAW
-  REPAY
-  LIQUIDATED
-}
 
 scalar AlwaysTrue
 
@@ -1523,6 +1515,15 @@ input UpdateUserRiskPremiumRequest {
 
   """If not supplied, this will use `sender` which is the normal route"""
   onBehalfOf: EvmAddress
+}
+
+enum UserActivityFeedType {
+  SUPPLY
+  BORROW
+  REPAY
+  WITHDRAW
+  LIQUIDATED
+  SET_AS_COLLATERAL
 }
 
 type UserBalance {

@@ -31,6 +31,7 @@ import type {
   SwapKind,
   SwapStatusFilter,
   TimeWindow,
+  UserActivityFeedType,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -94,6 +95,7 @@ export const graphql = initGraphQLTada<{
     TimeWindow: TimeWindow;
     JSON: JSONString;
     TxHash: TxHash;
+    UserActivityFeedType: UserActivityFeedType;
     UserBalanceId: UserBalanceId;
     UserBorrowItemId: UserBorrowItemId;
     UserPositionId: UserPositionId;
