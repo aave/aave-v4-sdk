@@ -18,7 +18,6 @@ import {
   type TadaDocumentNode,
 } from 'gql.tada';
 import type {
-  ActivityType,
   ApyMetric,
   ChainsFilter,
   Currency,
@@ -57,7 +56,6 @@ export const graphql = initGraphQLTada<{
   disableMasking: true;
   introspection: introspection;
   scalars: {
-    ActivityType: ActivityType;
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
     AssetId: AssetId;
