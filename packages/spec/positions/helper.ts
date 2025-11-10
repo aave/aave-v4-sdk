@@ -54,6 +54,9 @@ export const recreateUserActivities = async (
   const repayActivities = listActivities.value.items.filter(
     (item) => item.__typename === 'RepayActivity',
   );
+  // const setCollateralActivities = listActivities.value.items.filter(
+  //   (item) => item.__typename === 'UsingAsCollateralActivity',
+  // );
 
   // Supply/Withdraw activities: minimum 3 supply activities
   const listReservesToSupply = await findReservesToSupply(client, user, {
@@ -67,11 +70,15 @@ export const recreateUserActivities = async (
       i < 3;
       i++
     ) {
-      const result = await fundErc20Address(evmAddress(user.account.address), {
-        address: listReservesToSupply.value[i]!.asset.underlying.address,
-        amount: bigDecimal('0.2'),
-        decimals: listReservesToSupply.value[i]!.asset.underlying.info.decimals,
-      }).andThen(() =>
+      const result: any = await fundErc20Address(
+        evmAddress(user.account.address),
+        {
+          address: listReservesToSupply.value[i]!.asset.underlying.address,
+          amount: bigDecimal('0.2'),
+          decimals:
+            listReservesToSupply.value[i]!.asset.underlying.info.decimals,
+        },
+      ).andThen(() =>
         supplyToReserve(client, user, {
           reserve: listReservesToSupply.value[i]!.id,
           amount: { erc20: { value: bigDecimal('0.2') } },
@@ -87,6 +94,40 @@ export const recreateUserActivities = async (
       assertOk(result);
     }
   }
+
+  // TODO: Enable when fixed AAVE-2555
+  // SetCollateral activity: at least 1 set collateral activity
+  // if (setCollateralActivities.length < 1) {
+  //   const supplyPositions = await userSupplies(client, {
+  //     query: {
+  //       userChains: {
+  //         chainIds: [ETHEREUM_FORK_ID],
+  //         user: evmAddress(user.account.address),
+  //       },
+  //     },
+  //   });
+  //   assertOk(supplyPositions);
+  //   assertNonEmptyArray(supplyPositions.value);
+  //   const supplyPosition = supplyPositions.value[0]!;
+  //   const result = await setUserSupplyAsCollateral(client, {
+  //     reserve: supplyPosition.reserve.id,
+  //     sender: evmAddress(user.account.address),
+  //     enableCollateral: !supplyPosition.isCollateral,
+  //   })
+  //     .andThen(sendWith(user))
+  //     .andThen(client.waitForTransaction)
+  //     .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
+  //     .andThen(() =>
+  //       setUserSupplyAsCollateral(client, {
+  //         reserve: supplyPosition.reserve.id,
+  //         sender: evmAddress(user.account.address),
+  //         enableCollateral: supplyPosition.isCollateral,
+  //       }),
+  //     )
+  //     .andThen(sendWith(user))
+  //     .andThen(client.waitForTransaction);
+  //   assertOk(result);
+  // }
 
   // Borrow and repay activities: minimum 3 borrow and repay activities
   const listReservesToBorrow = await findReservesToBorrow(client, user, {

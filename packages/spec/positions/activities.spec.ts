@@ -57,13 +57,12 @@ describe('Query User Activities on Aave V4', () => {
 
           assertOk(result);
           if (
-            [
-              ActivityType.Liquidated,
-              ActivityType.Repay,
-              ActivityType.SetAsCollateral,
-            ].includes(activityType)
+            [ActivityType.Liquidated, ActivityType.SetAsCollateral].includes(
+              activityType,
+            )
           ) {
-            // TODO: refactor recreateUserActivities to create repay
+            // Liquidated activities are not easily reproducible, so we skip them
+            // TODO: Enable when fixed AAVE-2555 setAsCollateral activities
             return;
           }
           assertNonEmptyArray(result.value.items);
@@ -261,6 +260,7 @@ describe('Query User Activities on Aave V4', () => {
             )
           ) {
             // Liquidated activities are not easily reproducible, so we skip them
+            // TODO: Enable when fixed AAVE-2555 setAsCollateral activities
             return;
           }
           assertNonEmptyArray(result.value.items);
