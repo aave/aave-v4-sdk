@@ -43,7 +43,7 @@ function PositionDetails({ position }: { position: UserPosition }) {
         {position.healthFactor && (
           <p>
             <strong>Health Factor</strong>&nbsp;
-            <span>{position.healthFactor.value}</span>
+            <span>{position.healthFactor.current?.toDisplayString(2)}</span>
           </p>
         )}
       </small>

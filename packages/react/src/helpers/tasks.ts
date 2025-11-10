@@ -160,14 +160,16 @@ export function useAsyncTask<
 
       const result = handle(input);
 
-      result
-        .andTee(() => {
+      result.match(
+        (value) => {
           loadingRef.current = false;
-        })
-        .match(
-          (value) => setState(AsyncTaskState.Success(value)),
-          (error) => setState(AsyncTaskState.Failed(error)),
-        );
+          setState(AsyncTaskState.Success(value));
+        },
+        (error) => {
+          loadingRef.current = false;
+          setState(AsyncTaskState.Failed(error));
+        },
+      );
 
       return result;
     },
