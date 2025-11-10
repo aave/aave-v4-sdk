@@ -26,8 +26,8 @@ import {
   findReservesToSupply,
 } from '../helpers/reserves';
 import {
+  findReserveAndSupply,
   supplyAndBorrow,
-  supplyToRandomERC20Reserve,
   supplyToReserve,
 } from '../helpers/supplyBorrow';
 
@@ -41,7 +41,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           address: ETHEREUM_WSTETH_ADDRESS,
           amount: bigDecimal('0.5'),
         }).andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
+          findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             asCollateral: true,

@@ -81,7 +81,7 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
     });
   });
 
-  describe.only('When the hook is used to estimate network fees for preview actions', () => {
+  describe('When the hook is used to estimate network fees for preview actions', () => {
     it.each<{
       requestType: string;
       estimate: PreviewAction;

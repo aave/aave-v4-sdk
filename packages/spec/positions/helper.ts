@@ -15,7 +15,7 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import {
-  supplyToRandomERC20Reserve,
+  findReserveAndSupply,
   supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
 
@@ -41,7 +41,7 @@ export const recreateUserActivities = async (
       }),
     )
     .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
+      findReserveAndSupply(client, user, {
         token: ETHEREUM_GHO_ADDRESS,
         amount: bigDecimal('100'),
       }),
@@ -53,7 +53,7 @@ export const recreateUserActivities = async (
       }),
     )
     .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
+      findReserveAndSupply(client, user, {
         token: ETHEREUM_USDC_ADDRESS,
         amount: bigDecimal('100'),
       }),
@@ -102,7 +102,7 @@ export const recreateUserSummary = async (
       }),
     )
     .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
+      findReserveAndSupply(client, user, {
         token: ETHEREUM_GHO_ADDRESS,
         amount: bigDecimal('100'),
       }),
