@@ -150,6 +150,35 @@ describe(`Given the '${useAsyncTask.name}' hook`, () => {
     });
   });
 
+  describe('And the hook is executed once with an error', () => {
+    describe('When the hook is executed again', () => {
+      it('Then it should return the state in line with type of `AsyncTaskLoading`', async () => {
+        const { result } = renderHook(() =>
+          useAsyncTask((input: string) => {
+            if (result.current[1].called) return okAsync(input);
+            return errAsync(new Error('test error'));
+          }, []),
+        );
+
+        await act(async () => {
+          await result.current[0]('one');
+        });
+
+        act(() => {
+          void result.current[0]('two');
+        });
+
+        const expectation: AsyncTaskLoading<string> = {
+          called: true,
+          loading: true,
+          data: undefined,
+          error: undefined,
+        };
+        expect(result.current[1]).toMatchObject(expectation);
+      });
+    });
+  });
+
   describe('And the hook is executed again', () => {
     describe('When the task is in progress', () => {
       it('Then it should return the state in line with type of `AsyncTaskLoading`', async () => {
