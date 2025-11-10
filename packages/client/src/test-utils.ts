@@ -1,7 +1,7 @@
 /// <reference path="../../../vite-env.d.ts" />
 
 import { GraphQLErrorCode, UnexpectedError } from '@aave/core-next';
-import { encodeSpokeId } from '@aave/graphql-next';
+import { encodeHubId, encodeSpokeId } from '@aave/graphql-next';
 import {
   type BigDecimal,
   bigDecimal,
@@ -79,6 +79,10 @@ export const ETHEREUM_SPOKE_ISO_STABLE_ID = encodeSpokeId({
 export const ETHEREUM_HUB_CORE_ADDRESS = evmAddress(
   '0x2559E4E04F2cA7180e5f20C2872d22EC89601b56',
 );
+export const ETHEREUM_HUB_CORE_ID = encodeHubId({
+  chainId: ETHEREUM_FORK_ID,
+  address: ETHEREUM_HUB_CORE_ADDRESS,
+});
 
 export const ETHEREUM_FORK_RPC_URL = import.meta.env
   .ETHEREUM_TENDERLY_PUBLIC_RPC;

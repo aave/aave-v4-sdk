@@ -1,9 +1,9 @@
 import {
   type ActivityItem,
+  ActivityType,
   assertOk,
   evmAddress,
   PageSize,
-  UserActivityFeedType,
 } from '@aave/client-next';
 import { activities } from '@aave/client-next/actions';
 import {
@@ -28,18 +28,18 @@ describe('Query User Activities on Aave V4', () => {
     }, 160_000);
 
     describe('When fetching the user activities by activity type filter', () => {
-      const activityTypes = Object.values(UserActivityFeedType);
+      const activityTypes = Object.values(ActivityType);
 
       const typenameToActivityType: Record<
         ActivityItem['__typename'],
-        UserActivityFeedType
+        ActivityType
       > = {
-        BorrowActivity: UserActivityFeedType.Borrow,
-        SupplyActivity: UserActivityFeedType.Supply,
-        WithdrawActivity: UserActivityFeedType.Withdraw,
-        RepayActivity: UserActivityFeedType.Repay,
-        LiquidatedActivity: UserActivityFeedType.Liquidated,
-        UsingAsCollateralActivity: UserActivityFeedType.SetAsCollateral,
+        BorrowActivity: ActivityType.Borrow,
+        SupplyActivity: ActivityType.Supply,
+        WithdrawActivity: ActivityType.Withdraw,
+        RepayActivity: ActivityType.Repay,
+        LiquidatedActivity: ActivityType.Liquidated,
+        UsingAsCollateralActivity: ActivityType.SetAsCollateral,
       };
 
       it.each(activityTypes)(
@@ -56,8 +56,9 @@ describe('Query User Activities on Aave V4', () => {
           assertOk(result);
           if (
             [
-              UserActivityFeedType.Liquidated,
-              UserActivityFeedType.Repay,
+              ActivityType.Liquidated,
+              ActivityType.Repay,
+              ActivityType.SetAsCollateral,
             ].includes(activityType)
           ) {
             // TODO: refactor recreateUserActivities to create repay
@@ -78,7 +79,7 @@ describe('Query User Activities on Aave V4', () => {
       it('Then it should return history for all specified activity types', async () => {
         const result = await activities(client, {
           user: evmAddress(user.account.address),
-          types: [UserActivityFeedType.Supply, UserActivityFeedType.Borrow],
+          types: [ActivityType.Supply, ActivityType.Borrow],
           query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
