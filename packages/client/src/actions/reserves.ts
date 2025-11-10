@@ -20,16 +20,8 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
  *
  * ```ts
  * const result = await reserve(client, {
- *   query: {
- *     reserve: {
- *       spoke: {
- *         address: evmAddress('0x123...'),
- *         chainId: chainId(1)
- *       },
- *       reserveId: reserveId(1)
- *     }
- *   },
- *   user: evmAddress('0xabc...')
+ *   reserve: reserveId('SGVsbG8h'),
+ *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
  *
@@ -80,11 +72,7 @@ export function reserves(
  *
  * ```ts
  * const result = await borrowApyHistory(client, {
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek
  * });
  * ```
@@ -105,11 +93,7 @@ export function borrowApyHistory(
  *
  * ```ts
  * const result = await supplyApyHistory(client, {
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek
  * });
  * ```

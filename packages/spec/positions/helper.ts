@@ -60,11 +60,7 @@ export const recreateUserActivities = async (
     )
     .andThen((reserve) =>
       withdraw(client, {
-        reserve: {
-          reserveId: reserve.id,
-          chainId: reserve.chain.chainId,
-          spoke: reserve.spoke.address,
-        },
+        reserve: reserve.id,
         amount: {
           erc20: {
             exact: bigDecimal('50'),

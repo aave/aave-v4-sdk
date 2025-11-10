@@ -17,6 +17,7 @@ import { SpokeFragment } from './spoke';
 export const UserSupplyItemFragment = graphql(
   `fragment UserSupplyItem on UserSupplyItem {
     __typename
+    id
     reserve {
       ...Reserve
     }
@@ -39,6 +40,7 @@ export type UserSupplyItem = FragmentOf<typeof UserSupplyItemFragment>;
 export const UserBorrowItemFragment = graphql(
   `fragment UserBorrowItem on UserBorrowItem {
     __typename
+    id
     principal {
       ...Erc20Amount
     }
@@ -147,6 +149,7 @@ export type UserPosition = FragmentOf<typeof UserPositionFragment>;
 export const UserBalanceFragment = graphql(
   `fragment UserBalance on UserBalance {
     __typename
+    id
     info {
       ...TokenInfo
     }

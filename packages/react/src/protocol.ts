@@ -35,13 +35,13 @@ export type UseAssetArgs = Prettify<
 >;
 
 /**
- * Fetch information about a specific asset (ERC20 token) in the protocol.
+ * Fetch information about a specific asset (ERC20 token) in the protocol by ID or by token.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
  * const { data } = useAsset({
- *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   query: { assetId: assetId('SGVsbG8h') },
  *   suspense: true,
  * });
  * // data will be Asset | null
@@ -51,13 +51,13 @@ export function useAsset(
   args: UseAssetArgs & Suspendable,
 ): SuspenseResult<Asset | null>;
 /**
- * Fetch information about a specific asset (ERC20 token) in the protocol.
+ * Fetch information about a specific asset (ERC20 token) in the protocol by ID or by token.
  *
  * Pausable suspense mode.
  *
  * ```tsx
  * const { data } = useAsset({
- *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   query: { assetId: assetId('SGVsbG8h') },
  *   suspense: true,
  *   pause: true,
  * });
@@ -67,24 +67,24 @@ export function useAsset(
   args: Pausable<UseAssetArgs> & Suspendable,
 ): PausableSuspenseResult<Asset | null>;
 /**
- * Fetch information about a specific asset (ERC20 token) in the protocol.
+ * Fetch information about a specific asset (ERC20 token) in the protocol by ID or by token.
  *
  * ```tsx
  * const { data, error, loading } = useAsset({
- *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   query: { assetId: assetId('SGVsbG8h') },
  * });
  * // data will be Asset | null
  * ```
  */
 export function useAsset(args: UseAssetArgs): ReadResult<Asset | null>;
 /**
- * Fetch information about a specific asset (ERC20 token) in the protocol.
+ * Fetch information about a specific asset (ERC20 token) in the protocol by ID or by token.
  *
  * Pausable loading state mode.
  *
  * ```tsx
  * const { data, error, loading, paused } = useAsset({
- *   token: { chainId: chainId(1), address: evmAddress('0x123...') },
+ *   query: { assetId: assetId('SGVsbG8h') },
  *   pause: true,
  * });
  * ```

@@ -158,7 +158,7 @@ export function userPositions(
  *
  * ```ts
  * const result = await userPosition(client, {
- *   id: userPositionId('dGVzdEJhc2U2NA=='),
+ *   id: userPositionId('SGVsbG8h'),
  * });
  * ```
  *

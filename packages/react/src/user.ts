@@ -600,7 +600,7 @@ export type UseUserPositionArgs = Prettify<
  *
  * ```tsx
  * const { data } = useUserPosition({
- *   id: userPositionId('dGVzdEJhc2U2NA=='),
+ *   id: userPositionId('SGVsbG8h'),
  *   user: evmAddress('0x742d35cc…'),
  *   suspense: true,
  * });
@@ -616,7 +616,7 @@ export function useUserPosition(
  *
  * ```tsx
  * const { data } = useUserPosition({
- *   id: userPositionId('dGVzdEJhc2U2NA=='),
+ *   id: userPositionId('SGVsbG8h'),
  *   user: evmAddress('0x742d35cc…'),
  *   suspense: true,
  *   pause: true,
@@ -631,7 +631,7 @@ export function useUserPosition(
  *
  * ```tsx
  * const { data, error, loading } = useUserPosition({
- *   id: userPositionId('dGVzdEJhc2U2NA=='),
+ *   id: userPositionId('SGVsbG8h'),
  *   user: evmAddress('0x742d35cc…'),
  * });
  * ```
@@ -646,7 +646,7 @@ export function useUserPosition(
  *
  * ```tsx
  * const { data, error, loading, paused } = useUserPosition({
- *   id: userPositionId('dGVzdEJhc2U2NA=='),
+ *   id: userPositionId('SGVsbG8h'),
  *   user: evmAddress('0x742d35cc…'),
  *   pause: true,
  * });

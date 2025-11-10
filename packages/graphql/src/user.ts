@@ -84,11 +84,23 @@ export const UserBalancesQuery = graphql(
   }`,
   [UserBalanceFragment],
 );
+export type UserBalancesRequest = RequestOf<typeof UserBalancesQuery>;
+
 export type UserBalancesRequestFilter = ReturnType<
   typeof graphql.scalar<'UserBalancesRequestFilter'>
 >;
-
-export type UserBalancesRequest = RequestOf<typeof UserBalancesQuery>;
+export type UserBalancesByChains = ReturnType<
+  typeof graphql.scalar<'UserBalancesByChains'>
+>;
+export type UserBalancesByHub = ReturnType<
+  typeof graphql.scalar<'UserBalancesByHub'>
+>;
+export type UserBalancesBySpoke = ReturnType<
+  typeof graphql.scalar<'UserBalancesBySpoke'>
+>;
+export type UserBalancesByUserPosition = ReturnType<
+  typeof graphql.scalar<'UserBalancesByUserPosition'>
+>;
 
 /**
  * @internal
