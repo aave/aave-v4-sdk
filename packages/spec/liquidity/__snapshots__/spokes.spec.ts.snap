@@ -23,6 +23,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDI3MTE2OGRFMTRFNTA1MGNCMWQzNTcxQkM3MUE4QzhiZDQzOTI1MUQ=",
     "name": "ISO Gov",
   },
   {
@@ -46,6 +47,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDQzZDhBNzYxMzYzMmY0RjA0YWU4OTE4QWRhZjZBMmNkOURiOEMzQWE=",
     "name": "Core",
   },
   {
@@ -69,6 +71,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDRENGE3YjNDZTcwOWI0MzYyRDcwOTVhNEEwMTA1YkRGRGI1ZEEyYTc=",
     "name": "ISO Stable",
   },
   {
@@ -92,6 +95,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDU3MzhkOWNCODJkNmExNjE3OTczQzI1N0QwNUEzODdiRjU1NjhGNDc=",
     "name": "EMode",
   },
 ]
@@ -120,6 +124,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDQzZDhBNzYxMzYzMmY0RjA0YWU4OTE4QWRhZjZBMmNkOURiOEMzQWE=",
     "name": "Core",
   },
   {
@@ -143,6 +148,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDU3MzhkOWNCODJkNmExNjE3OTczQzI1N0QwNUEzODdiRjU1NjhGNDc=",
     "name": "EMode",
   },
   {
@@ -166,6 +172,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDI3MTE2OGRFMTRFNTA1MGNCMWQzNTcxQkM3MUE4QzhiZDQzOTI1MUQ=",
     "name": "ISO Gov",
   },
   {
@@ -189,6 +196,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
     },
+    "id": "MTIzNDU2Nzg5OjoweDRENGE3YjNDZTcwOWI0MzYyRDcwOTVhNEEwMTA1YkRGRGI1ZEEyYTc=",
     "name": "ISO Stable",
   },
 ]
