@@ -371,6 +371,30 @@ export const LiquidatedActivityFragment = graphql(
 );
 export type LiquidatedActivity = FragmentOf<typeof LiquidatedActivityFragment>;
 
+export const UsingAsCollateralActivityFragment = graphql(
+  `fragment UsingAsCollateralActivity on UsingAsCollateralActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    enabledAsCollateral
+    chain {
+      ...Chain
+    }
+  }`,
+  [SpokeFragment, ReserveInfoFragment, ChainFragment],
+);
+export type UsingAsCollateralActivity = FragmentOf<
+  typeof UsingAsCollateralActivityFragment
+>;
+
 export const ActivityItemFragment = graphql(
   `fragment ActivityItem on ActivityItem {
     __typename
@@ -389,6 +413,9 @@ export const ActivityItemFragment = graphql(
     ... on LiquidatedActivity {
       ...LiquidatedActivity
     }
+    ... on UsingAsCollateralActivity {
+      ...UsingAsCollateralActivity
+    }
   }`,
   [
     BorrowActivityFragment,
@@ -396,6 +423,7 @@ export const ActivityItemFragment = graphql(
     WithdrawActivityFragment,
     RepayActivityFragment,
     LiquidatedActivityFragment,
+    UsingAsCollateralActivityFragment,
   ],
 );
 export type ActivityItem = FragmentOf<typeof ActivityItemFragment>;

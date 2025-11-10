@@ -1,6 +1,7 @@
 import {
   type ChainId,
   type EvmAddress,
+  type SpokeId,
   type UserPosition,
   useUserPosition,
   useUserPositions,
@@ -18,14 +19,14 @@ function PositionDetails({ position }: { position: UserPosition }) {
           <strong>Total Supplied</strong>&nbsp;
           <span>
             {position.totalSupplied.current.value.toDisplayString(2)}{' '}
-            {position.totalSupplied.current.symbol}
+            {position.totalSupplied.amount.symbol}
           </span>
         </p>
         <p>
           <strong>Total Collateral</strong>&nbsp;
           <span>
             {position.totalCollateral.current.value.toDisplayString(2)}{' '}
-            {position.totalCollateral.current.symbol}
+            {position.totalCollateral.amount.symbol}
           </span>
         </p>
         <p>
@@ -51,22 +52,14 @@ function PositionDetails({ position }: { position: UserPosition }) {
 }
 
 export type SingleUserPositionProps = {
-  chainId: ChainId;
-  spoke: EvmAddress;
+  spokeId: SpokeId;
   user: EvmAddress;
 };
 
-export function SingleUserPosition({
-  chainId,
-  spoke,
-  user,
-}: SingleUserPositionProps) {
+export function SingleUserPosition({ spokeId, user }: SingleUserPositionProps) {
   const { data } = useUserPosition({
     userSpoke: {
-      spoke: {
-        address: spoke,
-        chainId,
-      },
+      spoke: spokeId,
       user,
     },
   });

@@ -3,15 +3,15 @@ import { borrow, userBorrows } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
-import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
+import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
@@ -24,7 +24,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           address: ETHEREUM_WSTETH_ADDRESS,
           amount: bigDecimal('0.2'),
         }).andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
+          findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             amount: bigDecimal('0.1'),
@@ -45,11 +45,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
 
         const firstBorrow = await borrow(client, {
           sender: evmAddress(user.account.address),
-          reserve: {
-            spoke: reservesToBorrow.value[0].spoke.address,
-            reserveId: reservesToBorrow.value[0].id,
-            chainId: reservesToBorrow.value[0].chain.chainId,
-          },
+          reserve: reservesToBorrow.value[0].id,
           amount: {
             erc20: {
               value:
@@ -65,11 +61,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
 
         const secondBorrow = await borrow(client, {
           sender: evmAddress(user.account.address),
-          reserve: {
-            spoke: reservesToBorrow.value[1]!.spoke.address,
-            reserveId: reservesToBorrow.value[1]!.id,
-            chainId: reservesToBorrow.value[1]!.chain.chainId,
-          },
+          reserve: reservesToBorrow.value[1]!.id,
           amount: {
             erc20: {
               value:
@@ -87,10 +79,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
-              },
+              spoke: ETHEREUM_SPOKE_CORE_ID,
               user: evmAddress(user.account.address),
             },
           },

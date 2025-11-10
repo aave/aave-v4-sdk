@@ -59,11 +59,7 @@ export function supplyNativeTokenToReserve(
     native: true,
   }).andThen((reserves) =>
     supplyToReserve(client, user, {
-      reserve: {
-        reserveId: reserves[0].id,
-        chainId: reserves[0].chain.chainId,
-        spoke: reserves[0].spoke.address,
-      },
+      reserve: reserves[0].id,
       amount: {
         native: amount,
       },
@@ -73,7 +69,7 @@ export function supplyNativeTokenToReserve(
   );
 }
 
-export function supplyToRandomERC20Reserve(
+export function findReserveAndSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   {
@@ -94,11 +90,7 @@ export function supplyToRandomERC20Reserve(
     asCollateral: asCollateral,
   }).andThen((reserves) =>
     supplyToReserve(client, user, {
-      reserve: {
-        reserveId: reserves[0].id,
-        chainId: reserves[0].chain.chainId,
-        spoke: reserves[0].spoke.address,
-      },
+      reserve: reserves[0].id,
       amount: { erc20: { value: amount } },
       sender: evmAddress(user.account.address),
     }).map(() => reserves[0]),
@@ -122,11 +114,7 @@ export function supplyAndBorrow(
     );
   }
   return supplyToReserve(client, user, {
-    reserve: {
-      reserveId: params.reserveToSupply.id,
-      chainId: params.reserveToSupply.chain.chainId,
-      spoke: params.reserveToSupply.spoke.address,
-    },
+    reserve: params.reserveToSupply.id,
     amount: { erc20: { value: params.amountToSupply } },
     sender: evmAddress(user.account.address),
     enableCollateral: true,
@@ -135,21 +123,11 @@ export function supplyAndBorrow(
     .andThen(() =>
       reserve(client, {
         user: evmAddress(user.account.address),
-        query: {
-          reserve: {
-            reserveId: params.reserveToBorrow.id,
-            chainId: params.reserveToBorrow.chain.chainId,
-            spoke: params.reserveToBorrow.spoke.address,
-          },
-        },
+        reserve: params.reserveToBorrow.id,
       }).andThen((reserve) =>
         borrow(client, {
           sender: evmAddress(user.account.address),
-          reserve: {
-            reserveId: reserve!.id,
-            chainId: reserve!.chain.chainId,
-            spoke: reserve!.spoke.address,
-          },
+          reserve: reserve!.id,
           amount: {
             erc20: {
               value: reserve!.userState!.borrowable.amount.value.times(
@@ -177,11 +155,7 @@ export function supplyWSTETHAndBorrowETH(
     spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
   }).andThen((listSupplyReserves) =>
     supplyToReserve(client, user, {
-      reserve: {
-        reserveId: listSupplyReserves[0].id,
-        chainId: listSupplyReserves[0].chain.chainId,
-        spoke: listSupplyReserves[0].spoke.address,
-      },
+      reserve: listSupplyReserves[0].id,
       amount: { erc20: { value: bigDecimal(0.2) } },
       sender: evmAddress(user.account.address),
       enableCollateral: true,
@@ -196,11 +170,7 @@ export function supplyWSTETHAndBorrowETH(
       .andThen((reservesToBorrow) =>
         borrow(client, {
           sender: evmAddress(user.account.address),
-          reserve: {
-            spoke: reservesToBorrow[0].spoke.address,
-            reserveId: reservesToBorrow[0].id,
-            chainId: reservesToBorrow[0].chain.chainId,
-          },
+          reserve: reservesToBorrow[0].id,
           amount: {
             native: reservesToBorrow[0].userState!.borrowable.amount.value,
           },

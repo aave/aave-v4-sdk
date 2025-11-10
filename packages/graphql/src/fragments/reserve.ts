@@ -82,6 +82,7 @@ export const ReserveFragment = graphql(
   `fragment Reserve on Reserve {
     __typename
     id
+    onChainId
     spoke {
       ...Spoke
     }
@@ -125,16 +126,10 @@ export const ReserveInfoFragment = graphql(
   `fragment ReserveInfo on ReserveInfo {
     __typename
     id
-    spoke {
-      ...Spoke
-    }
     asset {
       ...HubAsset
     }
-    chain {
-      ...Chain
-    }
   }`,
-  [SpokeFragment, HubAssetFragment, ChainFragment],
+  [HubAssetFragment],
 );
 export type ReserveInfo = FragmentOf<typeof ReserveInfoFragment>;

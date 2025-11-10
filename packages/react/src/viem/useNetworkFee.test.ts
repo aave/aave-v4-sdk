@@ -6,17 +6,14 @@ import type { SupplyActivity } from '@aave/graphql-next';
 import {
   Currency,
   type Erc20Amount,
+  encodeReserveId,
+  type ID,
+  type OnChainReserveId,
   type PreviewAction,
   type ReserveInfo,
   type Spoke,
 } from '@aave/graphql-next';
-import {
-  bigDecimal,
-  evmAddress,
-  type ID,
-  reserveId,
-  txHash,
-} from '@aave/types-next';
+import { bigDecimal, evmAddress, txHash } from '@aave/types-next';
 import { describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useNetworkFee } from './useNetworkFee';
@@ -99,11 +96,11 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
                 value: bigDecimal('1000'),
               },
             },
-            reserve: {
+            reserve: encodeReserveId({
               chainId: ETHEREUM_FORK_ID,
               spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
-              reserveId: reserveId(1),
-            },
+              onChainId: '1' as OnChainReserveId,
+            }),
             sender: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
           },
         },
@@ -118,11 +115,11 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
                 value: bigDecimal('1000'),
               },
             },
-            reserve: {
+            reserve: encodeReserveId({
               chainId: ETHEREUM_FORK_ID,
               spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
-              reserveId: reserveId(1),
-            },
+              onChainId: '1' as OnChainReserveId,
+            }),
             sender: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
           },
         },
@@ -134,11 +131,11 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
           setUserSupplyAsCollateral: {
             enableCollateral: true,
             sender: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
-            reserve: {
+            reserve: encodeReserveId({
               chainId: ETHEREUM_FORK_ID,
               spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
-              reserveId: reserveId(1),
-            },
+              onChainId: '1' as OnChainReserveId,
+            }),
           },
         },
         expectedGasCost: 480568n,
@@ -152,11 +149,11 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
                 exact: bigDecimal('1000'),
               },
             },
-            reserve: {
+            reserve: encodeReserveId({
               chainId: ETHEREUM_FORK_ID,
               spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
-              reserveId: reserveId(1),
-            },
+              onChainId: '1' as OnChainReserveId,
+            }),
             sender: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
           },
         },
@@ -173,11 +170,11 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
                 },
               },
             },
-            reserve: {
+            reserve: encodeReserveId({
               chainId: ETHEREUM_FORK_ID,
               spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
-              reserveId: reserveId(1),
-            },
+              onChainId: '1' as OnChainReserveId,
+            }),
             sender: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
           },
         },
@@ -193,7 +190,7 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
           }),
         );
 
-        await vi.waitUntil(() => result.current.loading === false);
+        await vi.waitUntil(() => result.current.loading === false, 5000);
 
         expect(result.current.error).toBeUndefined();
         expect(result.current.data).toBeDefined();

@@ -26,6 +26,7 @@ export type HubSummary = FragmentOf<typeof HubSummaryFragment>;
 export const HubFragment = graphql(
   `fragment Hub on Hub {
       __typename
+      id
       name
       address
       chain {

@@ -6,15 +6,10 @@ import type {
   ChainId,
   Cursor,
   EvmAddress,
-  ID,
   JSONString,
-  ReserveId,
   Signature,
-  SwapId,
-  SwapQuoteId,
   TxHash,
   TypedSelectionSet,
-  UserPositionId,
   Void,
 } from '@aave/types-next';
 import {
@@ -38,6 +33,22 @@ import type {
   TimeWindow,
 } from './enums';
 import type { introspection } from './graphql-env';
+import type {
+  AssetId,
+  HubAssetId,
+  HubId,
+  ID,
+  OnChainHubAssetId,
+  OnChainReserveId,
+  ReserveId,
+  SpokeId,
+  SwapId,
+  SwapQuoteId,
+  UserBalanceId,
+  UserBorrowItemId,
+  UserPositionId,
+  UserSupplyItemId,
+} from './id';
 
 export type { FragmentOf, ResultOf, VariablesOf } from 'gql.tada';
 
@@ -48,7 +59,7 @@ export const graphql = initGraphQLTada<{
     ActivityType: ActivityType;
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
-    AssetId: ID;
+    AssetId: AssetId;
     BigDecimal: BigDecimal;
     BigInt: bigint;
     BlockchainData: BlockchainData;
@@ -60,16 +71,21 @@ export const graphql = initGraphQLTada<{
     DateTime: Date;
     EvmAddress: EvmAddress;
     Float: number;
+    HubAssetId: HubAssetId;
     HubAssetStatusType: HubAssetStatusType;
     HubAssetsRequestOrderBy: HubAssetsRequestOrderBy;
+    HubId: HubId;
     ID: ID;
     Int: number;
+    OnChainHubAssetId: OnChainHubAssetId;
+    OnChainReserveId: OnChainReserveId;
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
     ReserveId: ReserveId;
     ReservesRequestFilter: ReservesRequestFilter;
     Signature: Signature;
+    SpokeId: SpokeId;
     String: string;
     SwapId: SwapId;
     SwapKind: SwapKind;
@@ -78,7 +94,10 @@ export const graphql = initGraphQLTada<{
     TimeWindow: TimeWindow;
     JSON: JSONString;
     TxHash: TxHash;
+    UserBalanceId: UserBalanceId;
+    UserBorrowItemId: UserBorrowItemId;
     UserPositionId: UserPositionId;
+    UserSupplyItemId: UserSupplyItemId;
     Void: Void;
   };
 }>();

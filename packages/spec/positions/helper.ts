@@ -20,9 +20,7 @@ import {
   findReservesToSupply,
 } from '../helpers/reserves';
 import {
-  borrowFromReserve,
-  supplyToRandomERC20Reserve,
-  supplyToReserve,
+  findReserveAndSupply,
   supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
 import {
@@ -33,54 +31,47 @@ import {
 export const recreateUserActivities = async (
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-): Promise<void> => {
-  // First: check activities
-  const listActivities = await activities(client, {
-    user: evmAddress(user.account.address),
-    query: {
-      chainIds: [ETHEREUM_FORK_ID],
-    },
-  });
-  assertOk(listActivities);
-  const supplyActivities = listActivities.value.items.filter(
-    (item) => item.__typename === 'SupplyActivity',
-  );
-  const borrowActivities = listActivities.value.items.filter(
-    (item) => item.__typename === 'BorrowActivity',
-  );
-  const withdrawActivities = listActivities.value.items.filter(
-    (item) => item.__typename === 'WithdrawActivity',
-  );
-  const repayActivities = listActivities.value.items.filter(
-    (item) => item.__typename === 'RepayActivity',
-  );
-
-  // Supply/Withdraw activities: minimum 3 supply activities
-  const listReservesToSupply = await findReservesToSupply(client, user, {
-    asCollateral: true,
-    spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-  });
-  if (supplyActivities.length < 3 || withdrawActivities.length < 3) {
-    assertOk(listReservesToSupply);
-    for (
-      let i = Math.max(supplyActivities.length, withdrawActivities.length);
-      i < 3;
-      i++
-    ) {
-      const result: any = await fundErc20Address(
-        evmAddress(user.account.address),
-        {
-          address: listReservesToSupply.value[i]!.asset.underlying.address,
-          amount: bigDecimal('0.2'),
-          decimals:
-            listReservesToSupply.value[i]!.asset.underlying.info.decimals,
-        },
-      ).andThen(() =>
-        supplyToReserve(client, user, {
-          reserve: {
-            reserveId: listReservesToSupply.value[i]!.id,
-            chainId: listReservesToSupply.value[i]!.chain.chainId,
-            spoke: listReservesToSupply.value[i]!.spoke.address,
+) => {
+  const setup = await fundErc20Address(evmAddress(user.account.address), {
+    address: ETHEREUM_WETH_ADDRESS,
+    amount: bigDecimal('0.5'),
+  })
+    .andThen(() =>
+      fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_WSTETH_ADDRESS,
+        amount: bigDecimal('0.5'),
+      }),
+    )
+    .andThen(() =>
+      fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_GHO_ADDRESS,
+        amount: bigDecimal('1000'),
+      }),
+    )
+    .andThen(() =>
+      findReserveAndSupply(client, user, {
+        token: ETHEREUM_GHO_ADDRESS,
+        amount: bigDecimal('100'),
+      }),
+    )
+    .andThen(() =>
+      fundErc20Address(evmAddress(user.account.address), {
+        address: ETHEREUM_USDC_ADDRESS,
+        amount: bigDecimal('1000'),
+      }),
+    )
+    .andThen(() =>
+      findReserveAndSupply(client, user, {
+        token: ETHEREUM_USDC_ADDRESS,
+        amount: bigDecimal('100'),
+      }),
+    )
+    .andThen((reserve) =>
+      withdraw(client, {
+        reserve: reserve.id,
+        amount: {
+          erc20: {
+            exact: bigDecimal('50'),
           },
           amount: { erc20: { value: bigDecimal('0.2') } },
           sender: evmAddress(user.account.address),
@@ -180,7 +171,7 @@ export const recreateUserSummary = async (
       }),
     )
     .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
+      findReserveAndSupply(client, user, {
         token: ETHEREUM_GHO_ADDRESS,
         amount: bigDecimal('100'),
       }),

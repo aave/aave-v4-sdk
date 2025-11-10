@@ -3,9 +3,11 @@ import {
   type BorrowActivity,
   type Chain,
   type Erc20Token,
+  encodeHubId,
   type Hub,
   type HubAsset,
   type HubQuery,
+  isHubInputVariant,
   isTxHashInputVariant,
   type LiquidatedActivity,
   type NativeToken,
@@ -167,14 +169,15 @@ export const exchange = cacheExchange({
 
     Query: {
       hub: (_, { request }: VariablesOf<typeof HubQuery>) => {
+        if (isHubInputVariant(request.query)) {
+          return {
+            __typename: 'Hub',
+            id: encodeHubId(request.query.hubInput),
+          };
+        }
         return {
           __typename: 'Hub',
-          address: request.hub,
-          chain: {
-            __typename: 'Chain',
-            chainId: request.chainId,
-          },
-          assets: [],
+          id: request.query.hubId,
         };
       },
 
@@ -249,15 +252,11 @@ export const exchange = cacheExchange({
   },
   keys: {
     // Entitied with composite key
-    Hub: (data: Hub) => `address=${data.address},chain=${data.chain.chainId}`,
-    HubAsset: (data: HubAsset) =>
-      `assetId=${data.assetId},hub=${data.hub.address},chain=${data.hub.chain.chainId}`,
-    Reserve: (data: Reserve) =>
-      `reserveId=${data.id},spoke=${data.spoke.address},chain=${data.chain.chainId}`,
-    ReserveInfo: (data: ReserveInfo) =>
-      `reserveId=${data.id},spoke=${data.spoke.address},chain=${data.chain.chainId}`,
-    Spoke: (data: Spoke) =>
-      `address=${data.address},chain=${data.chain.chainId}`,
+    Hub: (data: Hub) => data.id,
+    HubAsset: (data: HubAsset) => data.id,
+    Reserve: (data: Reserve) => data.id,
+    ReserveInfo: (data: ReserveInfo) => data.id,
+    Spoke: (data: Spoke) => data.id,
 
     // Entities with id field as key
     BorrowActivity: (data: BorrowActivity) => data.id,

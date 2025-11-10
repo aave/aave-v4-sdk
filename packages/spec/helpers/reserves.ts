@@ -1,6 +1,7 @@
 import {
   type AaveClient,
   type EvmAddress,
+  encodeSpokeId,
   evmAddress,
   type Reserve,
   ReservesRequestFilter,
@@ -27,9 +28,12 @@ export function findReservesToSupply(
       params.token && params.spoke
         ? {
             spokeToken: {
-              chainId: ETHEREUM_FORK_ID,
               token: params.token,
-              spoke: params.spoke,
+              // TODO: refactor function to only
+              spoke: encodeSpokeId({
+                chainId: ETHEREUM_FORK_ID,
+                address: params.spoke,
+              }),
             },
           }
         : params.spoke
@@ -39,7 +43,11 @@ export function findReservesToSupply(
                 address: params.spoke,
               },
             }
-          : { chainIds: [ETHEREUM_FORK_ID] },
+          : params.token
+            ? {
+                tokens: [{ chainId: ETHEREUM_FORK_ID, address: params.token }],
+              }
+            : { chainIds: [ETHEREUM_FORK_ID] },
     user: evmAddress(user.account.address),
     filter: ReservesRequestFilter.Supply,
   }).map((listReserves) => {
@@ -70,9 +78,11 @@ export function findReservesToBorrow(
       params.spoke && params.token
         ? {
             spokeToken: {
-              chainId: ETHEREUM_FORK_ID,
               token: params.token,
-              spoke: params.spoke,
+              spoke: encodeSpokeId({
+                chainId: ETHEREUM_FORK_ID,
+                address: params.spoke,
+              }),
             },
           }
         : params.spoke

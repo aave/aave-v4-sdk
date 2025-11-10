@@ -36,11 +36,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         )
         .andThen((listReserves) =>
           supplyToReserve(client, user, {
-            reserve: {
-              chainId: listReserves[0].chain.chainId,
-              reserveId: listReserves[0].id,
-              spoke: listReserves[0].spoke.address,
-            },
+            reserve: listReserves[0].id,
             amount: {
               erc20: {
                 value: bigDecimal('100'),
@@ -70,11 +66,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
 
         const result = await setUserSupplyAsCollateral(client, {
           enableCollateral: true,
-          reserve: {
-            reserveId: positions.value[0].reserve.id,
-            spoke: positions.value[0].reserve.spoke.address,
-            chainId: positions.value[0].reserve.chain.chainId,
-          },
+          reserve: positions.value[0].reserve.id,
           sender: evmAddress(user.account.address),
         })
           .andThen(sendWith(user))
@@ -112,11 +104,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         const previewResult = await preview(client, {
           action: {
             setUserSupplyAsCollateral: {
-              reserve: {
-                reserveId: positions.value[0].reserve.id,
-                spoke: positions.value[0].reserve.spoke.address,
-                chainId: positions.value[0].reserve.chain.chainId,
-              },
+              reserve: positions.value[0].reserve.id,
               enableCollateral: !positions.value[0].isCollateral,
               sender: evmAddress(user.account.address),
             },

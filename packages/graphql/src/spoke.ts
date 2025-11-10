@@ -35,6 +35,10 @@ export const SpokesQuery = graphql(
 );
 export type SpokesRequest = RequestOf<typeof SpokesQuery>;
 
+export type SpokesRequestQuery = ReturnType<
+  typeof graphql.scalar<'SpokesRequestQuery'>
+>;
+
 /**
  * @internal
  */

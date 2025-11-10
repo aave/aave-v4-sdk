@@ -17,7 +17,7 @@ import {
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
+import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -44,7 +44,7 @@ describe('Querying User Balances on Aave V4', () => {
           }),
         )
         .andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
+          findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             amount: bigDecimal('0.05'),
@@ -58,7 +58,9 @@ describe('Querying User Balances on Aave V4', () => {
         const balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
         });
         assertOk(balances);
@@ -126,7 +128,9 @@ describe('Querying User Balances on Aave V4', () => {
         const balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            userPositionId: positions.value[0].id,
+            userPosition: {
+              userPositionId: positions.value[0].id,
+            },
           },
         });
         assertOk(balances);
@@ -139,7 +143,9 @@ describe('Querying User Balances on Aave V4', () => {
         let balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { name: OrderDirection.Desc },
         });
@@ -150,7 +156,9 @@ describe('Querying User Balances on Aave V4', () => {
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { name: OrderDirection.Asc },
         });
@@ -165,7 +173,9 @@ describe('Querying User Balances on Aave V4', () => {
         let balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { balance: OrderDirection.Desc },
         });
@@ -181,7 +191,9 @@ describe('Querying User Balances on Aave V4', () => {
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { balance: OrderDirection.Asc },
         });

@@ -26,8 +26,8 @@ import {
   findReservesToSupply,
 } from '../helpers/reserves';
 import {
+  findReserveAndSupply,
   supplyAndBorrow,
-  supplyToRandomERC20Reserve,
   supplyToReserve,
 } from '../helpers/supplyBorrow';
 
@@ -41,7 +41,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           address: ETHEREUM_WSTETH_ADDRESS,
           amount: bigDecimal('0.5'),
         }).andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
+          findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             asCollateral: true,
@@ -127,11 +127,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
           const setup = await supplyToReserve(client, user, {
             amount: { erc20: { value: bigDecimal('0.1') } },
-            reserve: {
-              spoke: usedReserves.supplyReserve.spoke.address,
-              reserveId: usedReserves.supplyReserve.id,
-              chainId: usedReserves.supplyReserve.chain.chainId,
-            },
+            reserve: usedReserves.supplyReserve.id,
             enableCollateral: true,
             sender: evmAddress(user.account.address),
           });
@@ -167,11 +163,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           HFBeforeRepay = summary.value.lowestHealthFactor!;
 
           const setup = await repay(client, {
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
-            },
+            reserve: usedReserves.borrowReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {
@@ -216,11 +208,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
           const setup = await borrow(client, {
             sender: evmAddress(user.account.address),
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
-            },
+            reserve: usedReserves.borrowReserve.id,
             amount: {
               erc20: {
                 value: bigDecimal('50'),
@@ -261,11 +249,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           HFBeforeWithdraw = summary.value.lowestHealthFactor!;
 
           const setup = await withdraw(client, {
-            reserve: {
-              spoke: usedReserves.supplyReserve.spoke.address,
-              reserveId: usedReserves.supplyReserve.id,
-              chainId: usedReserves.supplyReserve.chain.chainId,
-            },
+            reserve: usedReserves.supplyReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {
@@ -296,11 +280,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
       describe('When the user repays completely the borrow position', () => {
         beforeAll(async () => {
           const setup = await repay(client, {
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
-            },
+            reserve: usedReserves.borrowReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {

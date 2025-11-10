@@ -1,10 +1,6 @@
 import { assertOk, PageSize } from '@aave/client-next';
 import { spokePositionManagers } from '@aave/client-next/actions';
-import {
-  client,
-  ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-} from '@aave/client-next/test-utils';
+import { client, ETHEREUM_SPOKE_CORE_ID } from '@aave/client-next/test-utils';
 import { describe, expect, it } from 'vitest';
 
 describe('Available Position Managers in a Spoke on Aave V4', () => {
@@ -12,10 +8,7 @@ describe('Available Position Managers in a Spoke on Aave V4', () => {
     describe('When fetching position managers with default settings', () => {
       it('Then it should return active position managers', async () => {
         const result = await spokePositionManagers(client, {
-          spoke: {
-            chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
-          },
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           pageSize: PageSize.Ten,
         });
 
@@ -27,10 +20,7 @@ describe('Available Position Managers in a Spoke on Aave V4', () => {
     describe('When fetching position managers including inactive ones', () => {
       it('Then it should return both active and inactive position managers', async () => {
         const resultWithInactive = await spokePositionManagers(client, {
-          spoke: {
-            chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
-          },
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           pageSize: PageSize.Ten,
           includeInactive: true,
         });
@@ -45,10 +35,7 @@ describe('Available Position Managers in a Spoke on Aave V4', () => {
       it('Then it should support pagination with cursor when there are more results', async () => {
         // First page
         const firstPage = await spokePositionManagers(client, {
-          spoke: {
-            chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
-          },
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           pageSize: PageSize.Ten,
         });
 
@@ -56,10 +43,7 @@ describe('Available Position Managers in a Spoke on Aave V4', () => {
         expect(firstPage.value.items.length).toEqual(10);
 
         const secondPage = await spokePositionManagers(client, {
-          spoke: {
-            chainId: ETHEREUM_FORK_ID,
-            address: ETHEREUM_SPOKE_CORE_ADDRESS,
-          },
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           pageSize: PageSize.Ten,
           cursor: firstPage.value.pageInfo.next,
         });

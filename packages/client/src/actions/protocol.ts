@@ -23,11 +23,11 @@ import {
 } from '../options';
 
 /**
- * Fetches information about a specific asset (ERC20 token) in the protocol.
+ * Fetches information about a specific asset (ERC20 token) in the protocol by ID or by token.
  *
  * ```ts
  * const result = await asset(client, {
- *   token: { chainId: chainId(1), address: evmAddress('0x123…') }
+ *   query: { assetId: assetId('SGVsbG8h') }
  * });
  * ```
  *
