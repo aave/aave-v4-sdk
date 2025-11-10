@@ -90,6 +90,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userBorrows(client, {
               query: {
@@ -155,6 +156,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userBorrows(client, {
               query: {
