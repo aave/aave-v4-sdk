@@ -279,9 +279,9 @@ export type SpokeIdParts = {
 /**
  * @internal
  */
-export function encodeSpokeId(spoke: SpokeIdParts): string {
-  return encodeBase64(
-    `${spoke.chainId}${COMPOSITE_ID_SEPARATOR}${spoke.address}`,
+export function encodeSpokeId(spoke: SpokeIdParts): SpokeId {
+  return spokeId(
+    encodeBase64(`${spoke.chainId}${COMPOSITE_ID_SEPARATOR}${spoke.address}`),
   );
 }
 

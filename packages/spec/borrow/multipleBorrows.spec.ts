@@ -3,13 +3,12 @@ import { borrow, userBorrows } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
-import { encodeSpokeId } from '@aave/graphql-next';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
 import { supplyToRandomERC20Reserve } from '../helpers/supplyBorrow';
@@ -80,10 +79,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: encodeSpokeId({
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
-              }),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
               user: evmAddress(user.account.address),
             },
           },
