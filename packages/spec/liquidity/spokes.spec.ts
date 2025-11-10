@@ -4,6 +4,7 @@ import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
+  ETHEREUM_HUB_CORE_ID,
 } from '@aave/client-next/test-utils';
 import { describe, expect, it } from 'vitest';
 
@@ -28,6 +29,18 @@ describe('Aave V4 Spokes Scenario', () => {
             chainId: ETHEREUM_FORK_ID,
             address: ETHEREUM_HUB_CORE_ADDRESS,
           },
+        },
+      });
+      assertOk(spokesResult);
+      expect(spokesResult.value).toMatchSnapshot();
+    });
+  });
+
+  describe('Given a user who wants to fetch spokes by hub id', () => {
+    it('Then it should return the spokes', async () => {
+      const spokesResult = await spokes(client, {
+        query: {
+          hubId: ETHEREUM_HUB_CORE_ID,
         },
       });
       assertOk(spokesResult);

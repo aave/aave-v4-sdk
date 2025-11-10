@@ -2,8 +2,7 @@ import { assertOk, TimeWindow } from '@aave/client-next';
 import { reserves, supplyApyHistory } from '@aave/client-next/actions';
 import {
   client,
-  ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { describe, it } from 'vitest';
@@ -22,8 +21,7 @@ describe('Supply APY History on Aave V4', () => {
             query: {
               spokeToken: {
                 token: ETHEREUM_USDC_ADDRESS,
-                spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
+                spoke: ETHEREUM_SPOKE_CORE_ID,
               },
             },
           });
