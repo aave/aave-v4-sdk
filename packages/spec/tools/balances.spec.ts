@@ -17,12 +17,8 @@ import {
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToRandomERC20Reserve } from '../borrow/helper';
-import {
-  assertSingleElementArray,
-  isOrderedAlphabetically,
-  isOrderedNumerically,
-} from '../test-utils';
+import { findReserveAndSupply } from '../helpers/supplyBorrow';
+import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
@@ -44,13 +40,14 @@ describe('Querying User Balances on Aave V4', () => {
         .andThen(() =>
           fundErc20Address(evmAddress(user.account.address), {
             address: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('100'),
+            amount: bigDecimal('0.1'),
           }),
         )
         .andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
+          findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('50'),
+            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            amount: bigDecimal('0.05'),
           }),
         );
       assertOk(setup);
@@ -61,7 +58,9 @@ describe('Querying User Balances on Aave V4', () => {
         const balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
         });
         assertOk(balances);
@@ -129,7 +128,9 @@ describe('Querying User Balances on Aave V4', () => {
         const balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            userPositionId: positions.value[0].id,
+            userPosition: {
+              userPositionId: positions.value[0].id,
+            },
           },
         });
         assertOk(balances);
@@ -142,24 +143,28 @@ describe('Querying User Balances on Aave V4', () => {
         let balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { name: OrderDirection.Desc },
         });
         assertOk(balances);
         let listOrderName = balances.value.map((elem) => elem.info.name);
-        expect(isOrderedAlphabetically(listOrderName, 'desc')).toBe(true);
+        expect(listOrderName).toBeSortedAlphabetically('desc');
 
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { name: OrderDirection.Asc },
         });
         assertOk(balances);
         listOrderName = balances.value.map((elem) => elem.info.name);
-        expect(isOrderedAlphabetically(listOrderName, 'asc')).toBe(true);
+        expect(listOrderName).toBeSortedAlphabetically('asc');
       });
     });
 
@@ -168,7 +173,9 @@ describe('Querying User Balances on Aave V4', () => {
         let balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { balance: OrderDirection.Desc },
         });
@@ -176,18 +183,20 @@ describe('Querying User Balances on Aave V4', () => {
         let listOrderBalance = balances.value.map(
           (elem) => elem.totalAmount.value,
         );
-        expect(isOrderedNumerically(listOrderBalance, 'desc')).toBe(true);
+        expect(listOrderBalance).toBeSortedNumerically('desc');
 
         balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+            chains: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
           },
           orderBy: { balance: OrderDirection.Asc },
         });
         assertOk(balances);
         listOrderBalance = balances.value.map((elem) => elem.totalAmount.value);
-        expect(isOrderedNumerically(listOrderBalance, 'asc')).toBe(true);
+        expect(listOrderBalance).toBeSortedNumerically('asc');
       });
     });
   });

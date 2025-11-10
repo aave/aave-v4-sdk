@@ -18,7 +18,7 @@ export function App() {
       <div>
         {data?.map((balance) => (
           <div key={balance.info.name}>
-            {balance.totalAmount.formatted} {balance.info.symbol}
+            {balance.totalAmount.value.toDisplayString(2)} {balance.info.symbol}
           </div>
         ))}
       </div>

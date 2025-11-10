@@ -5,6 +5,7 @@ import { ChainFragment, PaginatedResultInfoFragment } from './common';
 export const SpokeFragment = graphql(
   `fragment Spoke on Spoke {
     __typename
+    id
     name
     address
     chain {

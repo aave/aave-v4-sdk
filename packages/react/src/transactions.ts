@@ -24,10 +24,13 @@ import { ValidationError } from '@aave/core-next';
 import {
   ActivitiesQuery,
   type BorrowRequest,
+  decodeHubId,
+  decodeReserveId,
   HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
   isChainIdsVariant,
+  isHubInputVariant,
   isSpokeInputVariant,
   type LiquidatePositionRequest,
   PreviewQuery,
@@ -77,6 +80,7 @@ function refreshQueriesForReserveChange(
   client: AaveClient,
   request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
 ) {
+  const { chainId, spoke } = decodeReserveId(request.reserve);
   return async () =>
     Promise.all([
       // update user positions
@@ -86,15 +90,15 @@ function refreshQueriesForReserveChange(
           variables.request.user === request.sender &&
           data.some(
             (position) =>
-              position.spoke.chain.chainId === request.reserve.chainId &&
-              position.spoke.address === request.reserve.spoke,
+              position.spoke.chain.chainId === chainId &&
+              position.spoke.address === spoke,
           ),
       ),
       await client.refreshQueryWhere(
         UserPositionQuery,
         (_, data) =>
-          data?.spoke.chain.chainId === request.reserve.chainId &&
-          data?.spoke.address === request.reserve.spoke &&
+          data?.spoke.chain.chainId === chainId &&
+          data?.spoke.address === spoke &&
           data.user === request.sender,
       ),
 
@@ -102,27 +106,22 @@ function refreshQueriesForReserveChange(
       await client.refreshQueryWhere(UserSummaryQuery, (variables) =>
         variables.request.user === request.sender &&
         isSpokeInputVariant(variables.request.filter)
-          ? variables.request.filter.spoke.chainId ===
-              request.reserve.chainId &&
-            variables.request.filter.spoke.address === request.reserve.spoke
+          ? variables.request.filter.spoke.chainId === chainId &&
+            variables.request.filter.spoke.address === spoke
           : isChainIdsVariant(variables.request.filter)
-            ? variables.request.filter.chainIds.some(
-                (chainId) => chainId === request.reserve.chainId,
-              )
+            ? variables.request.filter.chainIds.some((id) => id === chainId)
             : false,
       ),
 
       // update reserves
       await client.refreshQueryWhere(ReservesQuery, (_, data) =>
-        data.some((reserve) => reserve.id === request.reserve.reserveId),
+        data.some((reserve) => reserve.id === request.reserve),
       ),
 
       // update spokes
       await client.refreshQueryWhere(SpokesQuery, (_, data) =>
         data.some(
-          (spoke) =>
-            spoke.chain.chainId === request.reserve.chainId &&
-            spoke.address === request.reserve.spoke,
+          (item) => item.chain.chainId === chainId && item.address === spoke,
         ),
       ),
 
@@ -138,9 +137,7 @@ function refreshQueriesForReserveChange(
         HubsQuery,
         (variables) =>
           isChainIdsVariant(variables.request) &&
-          variables.request.chainIds.some(
-            (chainId) => chainId === request.reserve.chainId,
-          ),
+          variables.request.chainIds.some((id) => id === chainId),
       ),
     ]);
 }
@@ -569,9 +566,7 @@ export function useRenounceSpokeUserPositionManager(
         .andTee(() =>
           client.refreshQueryWhere(
             SpokePositionManagersQuery,
-            (variables) =>
-              variables.request.spoke.chainId === request.spoke.chainId &&
-              variables.request.spoke.address === request.spoke.address,
+            (variables) => variables.request.spoke === request.spoke,
           ),
         ),
     [client, handler],
@@ -643,17 +638,12 @@ export function useUpdateUserRiskPremium(
               UserPositionsQuery,
               (variables, data) =>
                 variables.request.user === request.sender &&
-                data.some(
-                  (position) =>
-                    position.spoke.chain.chainId === request.spoke.chainId &&
-                    position.spoke.address === request.spoke.address,
-                ),
+                data.some((position) => position.spoke.id === request.spoke),
             ),
             client.refreshQueryWhere(
               UserPositionQuery,
               (_, data) =>
-                data?.spoke.chain.chainId === request.spoke.chainId &&
-                data?.spoke.address === request.spoke.address &&
+                data?.spoke.id === request.spoke &&
                 data.user === request.sender,
             ),
           ]),
@@ -736,11 +726,7 @@ export function useUpdateUserDynamicConfig(
  * });
  *
  * const result = await setUserSupplyAsCollateral({
- *   reserve: {
- *     chainId: chainId(1),
- *     spoke: evmAddress('0x123...'),
- *     reserveId: reserveId(1)
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   sender: evmAddress('0x456...'),
  *   enableCollateral: true,
  * });
@@ -785,8 +771,9 @@ export function useSetUserSupplyAsCollateral(
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: SetUserSupplyAsCollateralRequest) =>
-      setUserSupplyAsCollateral(client, request)
+    (request: SetUserSupplyAsCollateralRequest) => {
+      const { chainId, spoke } = decodeReserveId(request.reserve);
+      return setUserSupplyAsCollateral(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pendingTransaction) => pendingTransaction.wait())
         .andThen(client.waitForTransaction)
@@ -799,15 +786,15 @@ export function useSetUserSupplyAsCollateral(
                 variables.request.user === request.sender &&
                 data.some(
                   (position) =>
-                    position.spoke.chain.chainId === request.reserve.chainId &&
-                    position.spoke.address === request.reserve.spoke,
+                    position.spoke.chain.chainId === chainId &&
+                    position.spoke.address === spoke,
                 ),
             ),
             client.refreshQueryWhere(
               UserPositionQuery,
               (_, data) =>
-                data?.spoke.chain.chainId === request.reserve.chainId &&
-                data?.spoke.address === request.reserve.spoke &&
+                data?.spoke.chain.chainId === chainId &&
+                data?.spoke.address === spoke &&
                 data.user === request.sender,
             ),
 
@@ -815,48 +802,45 @@ export function useSetUserSupplyAsCollateral(
             client.refreshQueryWhere(UserSummaryQuery, (variables) =>
               variables.request.user === request.sender &&
               isSpokeInputVariant(variables.request.filter)
-                ? variables.request.filter.spoke.chainId ===
-                    request.reserve.chainId &&
-                  variables.request.filter.spoke.address ===
-                    request.reserve.spoke
+                ? variables.request.filter.spoke.chainId === chainId &&
+                  variables.request.filter.spoke.address === spoke
                 : isChainIdsVariant(variables.request.filter)
                   ? variables.request.filter.chainIds.some(
-                      (chainId) => chainId === request.reserve.chainId,
+                      (id) => id === chainId,
                     )
                   : false,
             ),
 
             // update reserves
             client.refreshQueryWhere(ReservesQuery, (_, data) =>
-              data.some((reserve) => reserve.id === request.reserve.reserveId),
+              data.some((reserve) => reserve.id === request.reserve),
             ),
 
             // update spokes
             client.refreshQueryWhere(SpokesQuery, (_, data) =>
               data.some(
-                (spoke) =>
-                  spoke.chain.chainId === request.reserve.chainId &&
-                  spoke.address === request.reserve.spoke,
+                (item) =>
+                  item.chain.chainId === chainId && item.address === spoke,
               ),
             ),
 
             // update hubs
             client.refreshQueryWhere(HubsQuery, (variables) =>
               isChainIdsVariant(variables.request.query)
-                ? variables.request.query.chainIds.some(
-                    (chainId) => chainId === request.reserve.chainId,
-                  )
+                ? variables.request.query.chainIds.some((id) => id === chainId)
                 : variables.request.query.tokens.some(
-                    (token) => token.chainId === request.reserve.chainId,
+                    (token) => token.chainId === chainId,
                   ),
             ),
-            client.refreshQueryWhere(
-              HubQuery,
-              (variables) =>
-                variables.request.chainId === request.reserve.chainId,
+            client.refreshQueryWhere(HubQuery, (variables) =>
+              isHubInputVariant(variables.request.query)
+                ? variables.request.query.hubInput.chainId === chainId
+                : decodeHubId(variables.request.query.hubId).chainId ===
+                  chainId,
             ),
           ]),
-        ),
+        );
+    },
     [client, handler],
   );
 }
@@ -879,12 +863,8 @@ export function useSetUserSupplyAsCollateral(
  * // …
  *
  * const result = await liquidatePosition({
- *   spoke: {
- *     address: evmAddress('0x87870bca…'),
- *     chainId: chainId(1),
- *   },
- *   collateral: reserveId(1),
- *   debt: reserveId(2),
+ *   collateral: reserveId('SGVsbG8h'),
+ *   debt: reserveId('Q2lhbyE= '),
  *   amount: amount,
  *   liquidator: liquidator,
  *   borrower: borrower,
@@ -982,10 +962,7 @@ export function useLiquidatePosition(
  * });
  *
  * const result = await setSpokeUserPositionManager({
- *   spoke: {
- *     address: evmAddress('0x87870bca…'),
- *     chainId: chainId(1),
- *   },
+ *   spoke: spokeId('SGVsbG8h'),
  *   manager: evmAddress('0x9abc…'), // Address that will become the position manager
  *   approve: true, // true to approve, false to remove the manager
  *   user: evmAddress('0xdef0…'), // User granting the permission (must sign the signature)
@@ -1043,9 +1020,7 @@ export function useSetSpokeUserPositionManager(
         .andTee(() =>
           client.refreshQueryWhere(
             SpokePositionManagersQuery,
-            (variables) =>
-              variables.request.spoke.chainId === request.spoke.chainId &&
-              variables.request.spoke.address === request.spoke.address,
+            (variables) => variables.request.spoke === request.spoke,
           ),
         ),
     [client, handler],
@@ -1066,11 +1041,7 @@ export function useSetSpokeUserPositionManager(
  * const result = await getPreview({
  *   action: {
  *     supply: {
- *       reserve: {
- *         spoke: evmAddress('0x87870bca…'),
- *         reserveId: reserveId(1),
- *         chainId: chainId(1),
- *       },
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           value: '1000',
@@ -1112,11 +1083,7 @@ export type UsePreviewArgs = Prettify<PreviewRequest & CurrencyQueryOptions>;
  * const { data } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),
@@ -1142,11 +1109,7 @@ export function usePreview(
  * const { data } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),
@@ -1171,11 +1134,7 @@ export function usePreview(
  * const { data, error, loading } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),
@@ -1200,11 +1159,7 @@ export function usePreview(
  * const { data, error, loading, paused } = usePreview({
  *   action: {
  *     supply: {
- *       spoke: {
- *         address: evmAddress('0x87870bca…'),
- *         chainId: chainId(1),
- *       },
- *       reserve: reserveId(1),
+ *       reserve: reserveId('SGVsbG8h'),
  *       amount: {
  *         erc20: {
  *           currency: evmAddress('0x5678…'),

@@ -3,8 +3,9 @@
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 1`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "1",
   "hub": Any<Object>,
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjE=",
+  "onchainAssetId": "1",
   "settings": {
     "__typename": "HubAssetSettings",
     "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
@@ -57,8 +58,9 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 2`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "5",
   "hub": Any<Object>,
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjU=",
+  "onchainAssetId": "5",
   "settings": {
     "__typename": "HubAssetSettings",
     "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
@@ -111,8 +113,9 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 3`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "4",
   "hub": Any<Object>,
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjQ=",
+  "onchainAssetId": "4",
   "settings": {
     "__typename": "HubAssetSettings",
     "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
@@ -165,8 +168,9 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 4`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "3",
   "hub": Any<Object>,
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjM=",
+  "onchainAssetId": "3",
   "settings": {
     "__typename": "HubAssetSettings",
     "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
@@ -219,8 +223,9 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 5`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "2",
   "hub": Any<Object>,
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjI=",
+  "onchainAssetId": "2",
   "settings": {
     "__typename": "HubAssetSettings",
     "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
@@ -273,8 +278,9 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 6`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "0",
   "hub": Any<Object>,
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjA=",
+  "onchainAssetId": "0",
   "settings": {
     "__typename": "HubAssetSettings",
     "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
@@ -327,8 +333,9 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub 
 exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 7`] = `
 {
   "__typename": "HubAsset",
-  "assetId": "6",
   "hub": Any<Object>,
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjY=",
+  "onchainAssetId": "6",
   "settings": {
     "__typename": "HubAssetSettings",
     "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
@@ -400,6 +407,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
+  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY=",
   "name": "Core",
   "summary": Any<Object>,
 }
@@ -427,6 +435,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
+  "id": "MTIzNDU2Nzg5OjoweDM3ZmQ1NDY4NURiNDNhNDk0N2U1QUUwYTgwRjUxY2YxRDJGRTBGNTc=",
   "name": "ISO Gov",
   "summary": Any<Object>,
 }
@@ -454,6 +463,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
   },
+  "id": "MTIzNDU2Nzg5OjoweEQxNEI1RmU5MjBCMTFkOTlCNTgzNTAxZWZlNTI0QThlOTQzOTAyMDU=",
   "name": "ISO Stable",
   "summary": Any<Object>,
 }

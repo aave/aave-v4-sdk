@@ -15,14 +15,21 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { supplyToRandomERC20Reserve, supplyToReserve } from '../borrow/helper';
-import { supplyAndBorrow } from '../repay/helper';
+import {
+  findReservesToBorrow,
+  findReservesToSupply,
+} from '../helpers/reserves';
+import {
+  findReserveAndSupply,
+  supplyAndBorrow,
+  supplyToReserve,
+} from '../helpers/supplyBorrow';
 
 const user = await createNewWallet();
 
@@ -34,8 +41,10 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           address: ETHEREUM_WSTETH_ADDRESS,
           amount: bigDecimal('0.5'),
         }).andThen(() =>
-          supplyToRandomERC20Reserve(client, user, {
+          findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            asCollateral: true,
             amount: bigDecimal('0.3'),
           }),
         );
@@ -59,25 +68,35 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
       let usedReserves: { borrowReserve: Reserve; supplyReserve: Reserve };
 
       beforeAll(async () => {
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.5'),
-        })
-          .andThen(() =>
-            fundErc20Address(evmAddress(user.account.address), {
-              address: ETHEREUM_USDS_ADDRESS,
-              amount: bigDecimal('500'),
-            }),
-          )
-          .andThen(() =>
-            supplyAndBorrow(client, user, {
-              tokenToSupply: ETHEREUM_WSTETH_ADDRESS,
-              tokenToBorrow: ETHEREUM_USDS_ADDRESS,
-            }),
-          );
+        const reservesToBorrow = await findReservesToBorrow(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        });
+        assertOk(reservesToBorrow);
 
+        const setup = await findReservesToSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          asCollateral: true,
+        }).andThen((reservesToSupply) =>
+          fundErc20Address(evmAddress(user.account.address), {
+            address: reservesToSupply[0].asset.underlying.address,
+            amount: bigDecimal('0.2'),
+            decimals: reservesToSupply[0].asset.underlying.info.decimals,
+          })
+            .andThen(() =>
+              supplyAndBorrow(client, user, {
+                reserveToSupply: reservesToSupply[0],
+                amountToSupply: bigDecimal('0.1'),
+                reserveToBorrow: reservesToBorrow.value[0],
+                ratioToBorrow: 0.1,
+              }),
+            )
+            .map(() => ({
+              borrowReserve: reservesToBorrow.value[0],
+              supplyReserve: reservesToSupply[0],
+            })),
+        );
         assertOk(setup);
-        usedReserves = setup.value;
+        usedReserves = setup!.value;
       }, 60_000);
 
       describe('When the user checks the health factor', () => {
@@ -108,11 +127,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
           const setup = await supplyToReserve(client, user, {
             amount: { erc20: { value: bigDecimal('0.1') } },
-            reserve: {
-              spoke: usedReserves.supplyReserve.spoke.address,
-              reserveId: usedReserves.supplyReserve.id,
-              chainId: usedReserves.supplyReserve.chain.chainId,
-            },
+            reserve: usedReserves.supplyReserve.id,
             enableCollateral: true,
             sender: evmAddress(user.account.address),
           });
@@ -148,11 +163,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           HFBeforeRepay = summary.value.lowestHealthFactor!;
 
           const setup = await repay(client, {
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
-            },
+            reserve: usedReserves.borrowReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {
@@ -197,11 +208,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
           const setup = await borrow(client, {
             sender: evmAddress(user.account.address),
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
-            },
+            reserve: usedReserves.borrowReserve.id,
             amount: {
               erc20: {
                 value: bigDecimal('50'),
@@ -242,11 +249,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           HFBeforeWithdraw = summary.value.lowestHealthFactor!;
 
           const setup = await withdraw(client, {
-            reserve: {
-              spoke: usedReserves.supplyReserve.spoke.address,
-              reserveId: usedReserves.supplyReserve.id,
-              chainId: usedReserves.supplyReserve.chain.chainId,
-            },
+            reserve: usedReserves.supplyReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {
@@ -277,11 +280,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
       describe('When the user repays completely the borrow position', () => {
         beforeAll(async () => {
           const setup = await repay(client, {
-            reserve: {
-              spoke: usedReserves.borrowReserve.spoke.address,
-              reserveId: usedReserves.borrowReserve.id,
-              chainId: usedReserves.borrowReserve.chain.chainId,
-            },
+            reserve: usedReserves.borrowReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {

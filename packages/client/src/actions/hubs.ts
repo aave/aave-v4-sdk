@@ -18,12 +18,11 @@ import {
 } from '../options';
 
 /**
- * Fetches a specific hub by address and chain ID.
+ * Fetches a specific hub by ID or by address and chain ID.
  *
  * ```ts
  * const result = await hub(client, {
- *   hub: evmAddress('0x123…'),
- *   chainId: chainId(1),
+ *   query: { hubId: hubId('SGVsbG8h') }
  * });
  * ```
  *
@@ -69,12 +68,11 @@ export function hubs(
 }
 
 /**
- * Fetches hub assets for a specific chain and optional hub/user filtering.
+ * Fetches hub assets for a specific hub by ID or by address and chain ID.
  *
  * ```ts
  * const result = await hubAssets(client, {
- *   chainId: chainId(1),
- *   hub: evmAddress('0x123…'),
+ *   query: { hubId: hubId('SGVsbG8h') },
  * });
  * ```
  *

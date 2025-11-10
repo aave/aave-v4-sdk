@@ -33,8 +33,8 @@
       "require": "./dist/thirdweb.cjs"
     },
     "./viem": {
-      "import": "./dist/viem.js",
-      "require": "./dist/viem.cjs"
+      "import": "./dist/viem/index.js",
+      "require": "./dist/viem/index.cjs"
     }
   },
   "typesVersions": {
@@ -52,7 +52,7 @@
         "./dist/thirdweb.d.ts"
       ],
       "viem": [
-        "./dist/viem.d.ts"
+        "./dist/viem/index.d.ts"
       ]
     }
   },

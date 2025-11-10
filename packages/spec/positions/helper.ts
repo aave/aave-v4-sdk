@@ -8,15 +8,16 @@ import { withdraw } from '@aave/client-next/actions';
 import {
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import { supplyToRandomERC20Reserve } from '../borrow/helper';
-import { supplyAndBorrow, supplyWSTETHAndBorrowETH } from '../repay/helper';
+import {
+  findReserveAndSupply,
+  supplyWSTETHAndBorrowETH,
+} from '../helpers/supplyBorrow';
 
 // TODO: missing following actions to add: repay, liquidated and swap
 export const recreateUserActivities = async (
@@ -40,7 +41,7 @@ export const recreateUserActivities = async (
       }),
     )
     .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
+      findReserveAndSupply(client, user, {
         token: ETHEREUM_GHO_ADDRESS,
         amount: bigDecimal('100'),
       }),
@@ -52,18 +53,14 @@ export const recreateUserActivities = async (
       }),
     )
     .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
+      findReserveAndSupply(client, user, {
         token: ETHEREUM_USDC_ADDRESS,
         amount: bigDecimal('100'),
       }),
     )
     .andThen((reserve) =>
       withdraw(client, {
-        reserve: {
-          reserveId: reserve.id,
-          chainId: reserve.chain.chainId,
-          spoke: reserve.spoke.address,
-        },
+        reserve: reserve.id,
         amount: {
           erc20: {
             exact: bigDecimal('50'),
@@ -74,12 +71,12 @@ export const recreateUserActivities = async (
     )
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction)
-    .andThen(() =>
-      supplyAndBorrow(client, user, {
-        tokenToSupply: ETHEREUM_USDS_ADDRESS,
-        tokenToBorrow: ETHEREUM_WETH_ADDRESS,
-      }),
-    )
+    // .andThen(() =>
+    //   supplyAndBorrow(client, user, {
+    //     tokenToSupply: ETHEREUM_USDS_ADDRESS,
+    //     tokenToBorrow: ETHEREUM_WETH_ADDRESS,
+    //   }),
+    // )
     .andThen(() => supplyWSTETHAndBorrowETH(client, user));
   assertOk(setup);
 };
@@ -105,17 +102,17 @@ export const recreateUserSummary = async (
       }),
     )
     .andThen(() =>
-      supplyToRandomERC20Reserve(client, user, {
+      findReserveAndSupply(client, user, {
         token: ETHEREUM_GHO_ADDRESS,
         amount: bigDecimal('100'),
       }),
     )
-    .andThen(() =>
-      supplyAndBorrow(client, user, {
-        tokenToSupply: ETHEREUM_USDS_ADDRESS,
-        tokenToBorrow: ETHEREUM_WETH_ADDRESS,
-      }),
-    )
+    // .andThen(() =>
+    //   supplyAndBorrow(client, user, {
+    //     tokenToSupply: ETHEREUM_USDS_ADDRESS,
+    //     tokenToBorrow: ETHEREUM_WETH_ADDRESS,
+    //   }),
+    // )
     .andThen(() => supplyWSTETHAndBorrowETH(client, user));
   assertOk(setup);
 };

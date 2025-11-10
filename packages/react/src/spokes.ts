@@ -27,18 +27,13 @@ import {
 export type UseSpokeArgs = SpokeRequest;
 
 /**
- * Fetch a specific spoke by address and chain ID.
+ * Fetch a specific spoke.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
  * const { data } = useSpoke({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
+ *   query: { spokeId: spokeId('SGVsbG8h') },
  *   suspense: true,
  * });
  * // data will be Spoke | null
@@ -48,18 +43,13 @@ export function useSpoke(
   args: UseSpokeArgs & Suspendable,
 ): SuspenseResult<Spoke | null>;
 /**
- * Fetch a specific spoke by address and chain ID.
+ * Fetch a specific spoke.
  *
  * Pausable suspense mode.
  *
  * ```tsx
  * const { data } = useSpoke({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
+ *   query: { spokeId: spokeId('SGVsbG8h') },
  *   suspense: true,
  *   pause: true,
  * });
@@ -69,34 +59,24 @@ export function useSpoke(
   args: Pausable<UseSpokeArgs> & Suspendable,
 ): PausableSuspenseResult<Spoke | null>;
 /**
- * Fetch a specific spoke by address and chain ID.
+ * Fetch a specific spoke.
  *
  * ```tsx
  * const { data, error, loading } = useSpoke({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
+ *   query: { spokeId: spokeId('SGVsbG8h') },
  * });
  * // data will be Spoke | null
  * ```
  */
 export function useSpoke(args: UseSpokeArgs): ReadResult<Spoke | null>;
 /**
- * Fetch a specific spoke by address and chain ID.
+ * Fetch a specific spoke.
  *
  * Pausable loading state mode.
  *
  * ```tsx
  * const { data, error, loading, paused } = useSpoke({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
+ *   query: { spokeId: spokeId('SGVsbG8h') },
  *   pause: true,
  * });
  * ```
@@ -132,8 +112,8 @@ export type UseSpokesArgs = SpokesRequest;
  *
  * ```tsx
  * const { data } = useSpokes({
- *     chainIds: [chainId(1)],
- *     suspense: true,
+ *   query: { chainIds: [chainId(1)] },
+ *   suspense: true,
  * });
  * ```
  */
@@ -147,9 +127,9 @@ export function useSpokes(
  *
  * ```tsx
  * const { data } = useSpokes({
- *     chainIds: [chainId(1)],
- *     suspense: true,
- *     pause: true,
+ *   query: { chainIds: [chainId(1)] },
+ *   suspense: true,
+ *   pause: true,
  * });
  * ```
  */
@@ -161,8 +141,7 @@ export function useSpokes(
  *
  * ```tsx
  * const { data, error, loading } = useSpokes({
- *     chainIds: [chainId(1)],
- *   },
+ *   query: { chainIds: [chainId(1)] },
  * });
  * ```
  */
@@ -174,8 +153,8 @@ export function useSpokes(args: UseSpokesArgs): ReadResult<Spoke[]>;
  *
  * ```tsx
  * const { data, error, loading, paused } = useSpokes({
- *     chainIds: [chainId(1)],
- *     pause: true,
+ *   query: { chainIds: [chainId(1)] },
+ *   pause: true,
  * });
  * ```
  */
@@ -210,11 +189,8 @@ export type UseSpokePositionManagersArgs = SpokePositionManagersRequest;
  *
  * ```tsx
  * const { data } = useSpokePositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *     suspense: true,
+ *   spoke: spokeId('SGVsbG8h'),
+ *   suspense: true,
  * });
  * ```
  */
@@ -228,12 +204,9 @@ export function useSpokePositionManagers(
  *
  * ```tsx
  * const { data } = useSpokePositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *     suspense: true,
- *     pause: true,
+ *   spoke: spokeId('SGVsbG8h'),
+ *   suspense: true,
+ *   pause: true,
  * });
  * ```
  */
@@ -245,11 +218,7 @@ export function useSpokePositionManagers(
  *
  * ```tsx
  * const { data, error, loading } = useSpokePositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *   },
+ *   spoke: spokeId('SGVsbG8h'),
  * });
  * ```
  */
@@ -263,11 +232,8 @@ export function useSpokePositionManagers(
  *
  * ```tsx
  * const { data, error, loading, paused } = useSpokePositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *     pause: true,
+ *   spoke: spokeId('SGVsbG8h'),
+ *   pause: true,
  * });
  * ```
  */
@@ -302,12 +268,9 @@ export type UseSpokeUserPositionManagersArgs = SpokeUserPositionManagersRequest;
  *
  * ```tsx
  * const { data } = useSpokeUserPositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *     user: evmAddress('0x123...'),
- *     suspense: true,
+ *   spoke: spokeId('SGVsbG8h'),
+ *   user: evmAddress('0x123...'),
+ *   suspense: true,
  * });
  * ```
  */
@@ -321,13 +284,10 @@ export function useSpokeUserPositionManagers(
  *
  * ```tsx
  * const { data } = useSpokeUserPositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *     user: evmAddress('0x123...'),
- *     suspense: true,
- *     pause: true,
+ *   spoke: spokeId('SGVsbG8h'),
+ *   user: evmAddress('0x123...'),
+ *   suspense: true,
+ *   pause: true,
  * });
  * ```
  */
@@ -339,12 +299,8 @@ export function useSpokeUserPositionManagers(
  *
  * ```tsx
  * const { data, error, loading } = useSpokeUserPositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *     user: evmAddress('0x123...'),
- *   },
+ *   spoke: spokeId('SGVsbG8h'),
+ *   user: evmAddress('0x123...'),
  * });
  * ```
  */
@@ -358,12 +314,9 @@ export function useSpokeUserPositionManagers(
  *
  * ```tsx
  * const { data, error, loading, paused } = useSpokeUserPositionManagers({
- *     spoke: {
- *       chainId: chainId(1),
- *       address: evmAddress('0x878...'),
- *     },
- *     user: evmAddress('0x123...'),
- *     pause: true,
+ *   spoke: spokeId('SGVsbG8h'),
+ *   user: evmAddress('0x123...'),
+ *   pause: true,
  * });
  * ```
  */

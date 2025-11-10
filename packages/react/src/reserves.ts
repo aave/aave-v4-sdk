@@ -41,15 +41,7 @@ export type UseReserveArgs = Prettify<ReserveRequest & CurrencyQueryOptions>;
  *
  * ```tsx
  * const { data } = useReserve({
- *   query: {
- *     reserve: {
- *       spoke: {
- *         address: evmAddress('0x123...'),
- *         chainId: chainId(1)
- *       },
- *       reserveId: reserveId(1)
- *     }
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   user: evmAddress('0xabc...'),
  *   suspense: true,
  * });
@@ -66,15 +58,7 @@ export function useReserve(
  *
  * ```tsx
  * const { data } = useReserve({
- *   query: {
- *     reserve: {
- *       spoke: {
- *         address: evmAddress('0x123...'),
- *         chainId: chainId(1)
- *       },
- *       reserveId: reserveId(1)
- *     }
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   suspense: true,
  *   pause: true,
  * });
@@ -88,15 +72,7 @@ export function useReserve(
  *
  * ```tsx
  * const { data, error, loading } = useReserve({
- *   query: {
- *     reserve: {
- *       spoke: {
- *         address: evmAddress('0x123...'),
- *         chainId: chainId(1)
- *       },
- *       reserveId: reserveId(1)
- *     }
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   user: evmAddress('0xabc...'),
  * });
  * // data will be Reserve | null
@@ -110,15 +86,7 @@ export function useReserve(args: UseReserveArgs): ReadResult<Reserve | null>;
  *
  * ```tsx
  * const { data, error, loading, paused } = useReserve({
- *   query: {
- *     reserve: {
- *       spoke: {
- *         address: evmAddress('0x123...'),
- *         chainId: chainId(1)
- *       },
- *       reserveId: reserveId(1)
- *     }
- *   },
+ *   reserve: reserveId('SGVsbG8h'),
  *   pause: true,
  * });
  * ```
@@ -162,15 +130,7 @@ export function useReserve({
  * // …
  *
  * const result = await execute({
- *   query: {
- *     reserve: {
- *       spoke: {
- *         address: evmAddress('0x1234…'),
- *         chainId: chainId(1)
- *       },
- *       reserveId: reserveId(1)
- *     }
- *   }
+ *   reserve: reserveId('SGVsbG8h'),
  * });
  *
  * if (result.isOk()) {
@@ -447,11 +407,7 @@ export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
  *
  * ```tsx
  * const { data } = useBorrowApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  * });
@@ -467,11 +423,7 @@ export function useBorrowApyHistory(
  *
  * ```tsx
  * const { data } = useBorrowApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  *   pause: true,
@@ -486,11 +438,7 @@ export function useBorrowApyHistory(
  *
  * ```tsx
  * const { data, error, loading } = useBorrowApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  * });
  * ```
@@ -505,11 +453,7 @@ export function useBorrowApyHistory(
  *
  * ```tsx
  * const { data, error, loading, paused } = useBorrowApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  *   pause: true,
  * });
@@ -546,11 +490,7 @@ export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
  *
  * ```tsx
  * const { data } = useSupplyApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  * });
@@ -566,11 +506,7 @@ export function useSupplyApyHistory(
  *
  * ```tsx
  * const { data } = useSupplyApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  *   suspense: true,
  *   pause: true,
@@ -585,11 +521,7 @@ export function useSupplyApyHistory(
  *
  * ```tsx
  * const { data, error, loading } = useSupplyApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  * });
  * ```
@@ -604,11 +536,7 @@ export function useSupplyApyHistory(
  *
  * ```tsx
  * const { data, error, loading, paused } = useSupplyApyHistory({
- *   spoke: {
- *     address: evmAddress('0x123...'),
- *     chainId: chainId(1)
- *   },
- *   reserve: reserveId(1),
+ *   reserve: reserveId('SGVsbG8h'),
  *   window: TimeWindow.LastWeek,
  *   pause: true,
  * });

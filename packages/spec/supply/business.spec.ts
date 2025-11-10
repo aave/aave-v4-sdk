@@ -22,9 +22,8 @@ import {
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import type { NonEmptyTuple } from 'type-fest';
 import { beforeAll, describe, expect, it } from 'vitest';
-
-import { supplyToReserve } from '../borrow/helper';
 import { findReservesToSupply } from '../helpers/reserves';
+import { supplyToReserve } from '../helpers/supplyBorrow';
 import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
@@ -34,7 +33,9 @@ describe('Supplying Assets on Aave V4', () => {
     let listReserves: NonEmptyTuple<Reserve>;
 
     beforeAll(async () => {
-      const result = await findReservesToSupply(client, user);
+      const result = await findReservesToSupply(client, user, {
+        asCollateral: true,
+      });
       assertOk(result);
       listReserves = result.value;
     });
@@ -57,11 +58,7 @@ describe('Supplying Assets on Aave V4', () => {
         )!;
         const amountToSupply = bigDecimal('9');
         const result = await supply(client, {
-          reserve: {
-            reserveId: usdcReserve.id,
-            chainId: usdcReserve.chain.chainId,
-            spoke: usdcReserve.spoke.address,
-          },
+          reserve: usdcReserve.id,
           amount: {
             erc20: {
               value: amountToSupply,
@@ -76,10 +73,7 @@ describe('Supplying Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: usdcReserve.spoke.address,
-                    chainId: usdcReserve.chain.chainId,
-                  },
+                  spoke: usdcReserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -114,11 +108,7 @@ describe('Supplying Assets on Aave V4', () => {
           {
             action: {
               supply: {
-                reserve: {
-                  reserveId: reserveToSupply.id,
-                  chainId: reserveToSupply.chain.chainId,
-                  spoke: reserveToSupply.spoke.address,
-                },
+                reserve: reserveToSupply.id,
                 amount: {
                   erc20: {
                     value: bigDecimal('10'),
@@ -159,11 +149,7 @@ describe('Supplying Assets on Aave V4', () => {
           (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
         )!;
         const result = await supplyToReserve(client, user, {
-          reserve: {
-            spoke: usdsReserve.spoke.address,
-            reserveId: usdsReserve.id,
-            chainId: usdsReserve.chain.chainId,
-          },
+          reserve: usdsReserve.id,
           amount: {
             erc20: {
               value: amountToSupply,
@@ -177,10 +163,7 @@ describe('Supplying Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: usdsReserve.spoke.address,
-                    chainId: usdsReserve.chain.chainId,
-                  },
+                  spoke: usdsReserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -226,22 +209,14 @@ describe('Supplying Assets on Aave V4', () => {
             amount: {
               value: amountToSupply,
             },
-            reserve: {
-              reserveId: reserveWithPermit.id,
-              chainId: reserveWithPermit.chain.chainId,
-              spoke: reserveWithPermit.spoke.address,
-            },
+            reserve: reserveWithPermit.id,
             sender: evmAddress(user.account.address),
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
 
         const result = await supply(client, {
-          reserve: {
-            reserveId: reserveWithPermit.id,
-            chainId: reserveWithPermit.chain.chainId,
-            spoke: reserveWithPermit.spoke.address,
-          },
+          reserve: reserveWithPermit.id,
           amount: {
             erc20: {
               value: amountToSupply,
@@ -257,10 +232,7 @@ describe('Supplying Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: {
-                    address: reserveWithPermit.spoke.address,
-                    chainId: reserveWithPermit.chain.chainId,
-                  },
+                  spoke: reserveWithPermit.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -305,11 +277,7 @@ describe('Supplying Assets on Aave V4', () => {
           {
             action: {
               supply: {
-                reserve: {
-                  reserveId: nativeReserveToSupply.id,
-                  chainId: nativeReserveToSupply.chain.chainId,
-                  spoke: nativeReserveToSupply.spoke.address,
-                },
+                reserve: nativeReserveToSupply.id,
                 amount: {
                   native: amountToSupply,
                 },
@@ -334,11 +302,7 @@ describe('Supplying Assets on Aave V4', () => {
       // TODO: enable when contracts are deployed
       it.skip('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
         const result = await supplyToReserve(client, user, {
-          reserve: {
-            reserveId: nativeReserveToSupply.id,
-            chainId: nativeReserveToSupply.chain.chainId,
-            spoke: nativeReserveToSupply.spoke.address,
-          },
+          reserve: nativeReserveToSupply.id,
           amount: {
             native: bigDecimal('0.01'),
           },
@@ -348,10 +312,7 @@ describe('Supplying Assets on Aave V4', () => {
           userSupplies(client, {
             query: {
               userSpoke: {
-                spoke: {
-                  address: nativeReserveToSupply.spoke.address,
-                  chainId: nativeReserveToSupply.chain.chainId,
-                },
+                spoke: nativeReserveToSupply.spoke.id,
                 user: evmAddress(user.account.address),
               },
             },
@@ -372,11 +333,7 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user supplies native tokens with collateral disabled', () => {
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const result = await supplyToReserve(client, user, {
-          reserve: {
-            reserveId: nativeReserveToSupply.id,
-            chainId: nativeReserveToSupply.chain.chainId,
-            spoke: nativeReserveToSupply.spoke.address,
-          },
+          reserve: nativeReserveToSupply.id,
           amount: {
             native: bigDecimal('0.01'),
           },
@@ -386,10 +343,7 @@ describe('Supplying Assets on Aave V4', () => {
           userSupplies(client, {
             query: {
               userSpoke: {
-                spoke: {
-                  address: nativeReserveToSupply.spoke.address,
-                  chainId: nativeReserveToSupply.chain.chainId,
-                },
+                spoke: nativeReserveToSupply.spoke.id,
                 user: evmAddress(user.account.address),
               },
             },
