@@ -14,6 +14,7 @@ import {
   ChainsQuery,
   ExchangeRateQuery,
   type NativeAmount,
+  type PreviewAction,
 } from '@aave/graphql-next';
 import type { NullishDeep, Prettify } from '@aave/types-next';
 import { useAaveClient } from './context';
@@ -330,13 +331,23 @@ export function useExchangeRate({
   });
 }
 
-export type UseNetworkFeeRequestQuery = {
-  activity: ActivityItem;
-};
+export type UseNetworkFeeRequestQuery =
+  | {
+      activity: ActivityItem;
+    }
+  | {
+      estimate: PreviewAction;
+    };
 
 export type UseNetworkFeeArgs = Prettify<
   {
     query: UseNetworkFeeRequestQuery;
+  } & CurrencyQueryOptions
+>;
+
+type PausableUseNetworkFeeArgs = Partial<
+  {
+    query: Partial<UseNetworkFeeRequestQuery>;
   } & CurrencyQueryOptions
 >;
 
@@ -377,7 +388,7 @@ export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
      * ```
      */
     ((
-      args: Pausable<UseNetworkFeeArgs, Partial<UseNetworkFeeArgs>> &
+      args: Pausable<UseNetworkFeeArgs, PausableUseNetworkFeeArgs> &
         Suspendable,
     ) => PausableSuspenseResult<T>) &
     /**
@@ -405,5 +416,5 @@ export type UseNetworkFee<T extends NativeAmount = NativeAmount> =
      * ```
      */
     ((
-      args: Pausable<UseNetworkFeeArgs, Partial<UseNetworkFeeArgs>>,
+      args: Pausable<UseNetworkFeeArgs, PausableUseNetworkFeeArgs>,
     ) => PausableReadResult<T>);

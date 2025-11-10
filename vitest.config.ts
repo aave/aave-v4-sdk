@@ -42,7 +42,7 @@ export default defineConfig({
           typecheck: {
             enabled: true,
             include: ['packages/react/**/*.test-d.ts'],
-            tsconfig: 'packages/react/tsconfig.json',
+            tsconfig: 'packages/react/tsconfig.build.json',
           },
         },
       },
