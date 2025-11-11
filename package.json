@@ -23,7 +23,7 @@
     "publish:results": "tsx scripts/publishResults.ts",
     "release": "pnpm changeset publish",
     "spec": "vitest --project spec",
-    "test:aave-2151": "vitest --run --project spec packages/spec/borrow/multipleBorrows.spec.ts",
+    "test:aave-2556": "vitest --run --project spec packages/spec/tools/propagation.spec.ts",
     "test:client": "vitest --project client",
     "test:react": "vitest --project react",
     "test:react:viem": "vitest --project react packages/react/src/viem/*.test.ts",
