@@ -129,11 +129,11 @@ describe('Checking Propagation of Supply/Borrow/Repay/Withdraw on Aave V4', () =
         ),
     );
     assertOk(repayResult);
-    expect(repayResult.value.length).toBe(0);
+    expect(repayResult.value.length).toBe(1); // (you still have your supply)
 
     // Withdraw
     const withdrawResult = await withdraw(client, {
-      reserve: usdReserve.value[0].id,
+      reserve: usdReserve.value!.id,
       sender: evmAddress(user.account.address),
       amount: {
         erc20: {
@@ -147,7 +147,7 @@ describe('Checking Propagation of Supply/Borrow/Repay/Withdraw on Aave V4', () =
         userSupplies(client, {
           query: {
             userSpoke: {
-              spoke: usdReserve.value[0].spoke.id,
+              spoke: usdReserve.value!.spoke.id,
               user: evmAddress(user.account.address),
             },
           },
