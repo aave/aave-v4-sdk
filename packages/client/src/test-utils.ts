@@ -98,11 +98,9 @@ export const client = AaveClient.create({
 });
 
 export async function createNewWallet(
-  privateKey?: `0x${string}`,
+  privateKey: `0x${string}` = generatePrivateKey(),
 ): Promise<WalletClient<Transport, Chain, Account>> {
   if (!privateKey) {
-    const privateKey = generatePrivateKey();
-    console.log('Generated private key:', privateKey);
     const wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
       chain: ethereumForkChain,
