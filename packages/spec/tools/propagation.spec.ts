@@ -100,7 +100,7 @@ describe('Checking Propagation of Supply/Borrow/Repay/Withdraw on Aave V4', () =
       {
         address: listReservesToBorrow.value[0].asset.underlying.address,
         amount:
-          listReservesToBorrow.value[0].userState!.borrowable.amount.value,
+          listReservesToBorrow.value[0].userState!.borrowable.amount.value.times(2), // interest can happen on blocks easily
         decimals: listReservesToBorrow.value[0].asset.underlying.info.decimals,
       },
     ).andThen(() =>
