@@ -7,7 +7,6 @@ import {
   never,
   ResultAsync,
 } from '@aave/types-next';
-import { Result } from 'ethers';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   activities,
@@ -116,10 +115,11 @@ describe('Given the Aave SDK normalized graph cache', () => {
               },
             }),
           ]).andThen(([plan1, plan2]) =>
-            ResultAsync.combine([
-              sendWith(user, plan1).andThen(client.waitForTransaction),
-              sendWith(user, plan2).andThen(client.waitForTransaction),
-            ]),
+            sendWith(user, plan1)
+              .andThen(client.waitForTransaction)
+              .andThen(() =>
+                sendWith(user, plan2).andThen(client.waitForTransaction),
+              ),
           ),
         );
 
