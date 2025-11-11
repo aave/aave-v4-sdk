@@ -86,6 +86,7 @@ export type AssetSummary = FragmentOf<typeof AssetSummaryFragment>;
 export const AssetFragment = graphql(
   `fragment Asset on Asset {
       __typename
+      id
       token {
         ...Erc20Token
       }
