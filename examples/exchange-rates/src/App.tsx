@@ -5,11 +5,12 @@ import {
   useExchangeRate,
   useExchangeRateAction,
 } from '@aave/react-next';
+import { supportedChains } from '@aave/react-next/viem';
 import { useState } from 'react';
 
 export function App() {
   const { data, loading } = useExchangeRate({
-    from: { native: chainId(1) },
+    from: { native: chainId(supportedChains[0].id) },
     to: Currency.Usd,
   });
 
@@ -19,7 +20,7 @@ export function App() {
   const handleGetRate = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await getExchangeRate({
-      from: { native: chainId(1) },
+      from: { native: chainId(supportedChains[0].id) },
       to: Currency.Usd,
     });
     if (result.isOk()) {

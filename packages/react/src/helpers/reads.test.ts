@@ -1,7 +1,8 @@
 import { UnexpectedError } from '@aave/client-next';
-import { HealthQuery } from '@aave/graphql-next';
+import { act } from '@testing-library/react';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { gql } from 'urql';
 import {
   afterAll,
   afterEach,
@@ -14,11 +15,19 @@ import {
 import { renderHookWithinContext } from '../test-utils';
 import { useSuspendableQuery } from './reads';
 
+export const AnyQuery = gql`
+  query AnyQuery {
+    value: health
+  }
+`;
+
+let counter = 0;
+
 const server = setupServer(
-  graphql.query(HealthQuery, () => {
+  graphql.query(AnyQuery, () => {
     return HttpResponse.json({
       data: {
-        value: true,
+        value: counter++,
       },
     });
   }),
@@ -41,7 +50,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
     it('Then it should return data after a loading state', async () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
-          document: HealthQuery,
+          document: AnyQuery,
           suspense: false,
         }),
       );
@@ -49,13 +58,13 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       await vi.waitUntil(() => !result.current.loading);
 
       expect(result.current.loading).toBe(false);
-      expect(result.current.data).toBe(true);
+      expect(result.current.data).toEqual(expect.any(Number));
       expect(result.current.error).toBeUndefined();
     });
 
     it('Then it should return any error as component state', async () => {
       server.use(
-        graphql.query(HealthQuery, () => {
+        graphql.query(AnyQuery, () => {
           return HttpResponse.json({
             errors: [
               { message: 'Test error', extensions: { code: 'TEST_ERROR' } },
@@ -66,7 +75,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
 
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
-          document: HealthQuery,
+          document: AnyQuery,
           suspense: false,
         }),
       );
@@ -83,7 +92,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
     it('Then it should return the bespoke paused state', async () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
-          document: HealthQuery,
+          document: AnyQuery,
           suspense: false,
           pause: true,
         }),
@@ -99,19 +108,19 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
     it('Then it should suspend and render once the query is resolved', async () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
-          document: HealthQuery,
+          document: AnyQuery,
           suspense: true,
         }),
       );
 
       await vi.waitUntil(() => result.current);
 
-      expect(result.current.data).toBe(true);
+      expect(result.current.data).toEqual(expect.any(Number));
     });
 
     it('Then it should throw any error so that can be captured via an Error Boundary', async () => {
       server.use(
-        graphql.query(HealthQuery, () => {
+        graphql.query(AnyQuery, () => {
           return HttpResponse.json({
             errors: [
               { message: 'Test error', extensions: { code: 'TEST_ERROR' } },
@@ -124,7 +133,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       renderHookWithinContext(
         () =>
           useSuspendableQuery({
-            document: HealthQuery,
+            document: AnyQuery,
             suspense: true,
           }),
         // biome-ignore lint/suspicious/noExplicitAny: not worth the effort
@@ -145,13 +154,46 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
     it('Then it should return the bespoke paused state', async () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
-          document: HealthQuery,
+          document: AnyQuery,
           suspense: true,
           pause: true,
         }),
       );
 
       expect(result.current.data).toBeUndefined();
+    });
+  });
+
+  describe('When rendering with a non-zero pollInterval', () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('Then it should execute the query again after the pollInterval', async () => {
+      const { result } = renderHookWithinContext(() =>
+        useSuspendableQuery({
+          document: AnyQuery,
+          suspense: false,
+          pollInterval: 1,
+        }),
+      );
+
+      expect(result.current.loading).toBe(true);
+      await vi.waitUntil(() => !result.current.loading);
+      const firstResult = result.current.data as number;
+
+      await act(() => vi.advanceTimersToNextTimerAsync());
+      expect(result.current.data).toEqual(firstResult + 1);
+
+      await act(() => vi.advanceTimersToNextTimerAsync());
+      expect(result.current.data).toEqual(firstResult + 2);
+
+      await act(() => vi.advanceTimersToNextTimerAsync());
+      expect(result.current.data).toEqual(firstResult + 3);
     });
   });
 });
