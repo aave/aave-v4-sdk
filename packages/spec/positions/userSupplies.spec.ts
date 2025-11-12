@@ -125,7 +125,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         });
         assertOk(supplyPositions);
         let listOrderAmount = supplyPositions.value.map(
-          (elem) => elem.withdrawable.amount.value,
+          (elem) => elem.principal.amount.value,
         );
         expect(listOrderAmount).toBeSortedNumerically('desc');
 
@@ -140,7 +140,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
         });
         assertOk(supplyPositions);
         listOrderAmount = supplyPositions.value.map(
-          (elem) => elem.withdrawable.amount.value,
+          (elem) => elem.principal.amount.value,
         );
         expect(listOrderAmount).toBeSortedNumerically('asc');
       });

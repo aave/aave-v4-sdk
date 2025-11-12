@@ -123,7 +123,9 @@ export function supplyAndBorrow(
     .andThen(() =>
       reserve(client, {
         user: evmAddress(user.account.address),
-        reserve: params.reserveToBorrow.id,
+        query: {
+          reserveId: params.reserveToBorrow.id,
+        },
       }).andThen((reserve) =>
         borrow(client, {
           sender: evmAddress(user.account.address),

@@ -51,6 +51,33 @@ expect.extend({
     };
   },
 
+  toBeSortedByDate(received: string[], order: 'asc' | 'desc') {
+    let pass = true;
+    for (let i = 0; i < received.length - 1; i++) {
+      const current = received[i];
+      const next = received[i + 1];
+
+      if (!current || !next) {
+        continue;
+      }
+
+      if (
+        (order === 'desc' &&
+          new Date(current).getTime() < new Date(next).getTime()) ||
+        (order === 'asc' &&
+          new Date(current).getTime() > new Date(next).getTime())
+      ) {
+        pass = false;
+        break;
+      }
+    }
+    return {
+      pass,
+      message: () =>
+        `expected array not to be sorted by date ${order}ending, but got: ${received}`,
+    };
+  },
+
   toBeBigDecimalLessThan(received: string, expected: number | string) {
     const numValue = Number(received);
     const pass = !Number.isNaN(numValue) && numValue < Number(expected);
