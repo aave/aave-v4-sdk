@@ -26,7 +26,6 @@ import {
   findReservesToBorrow,
   findReservesToSupply,
 } from '../helpers/reserves';
-import { sleep } from './tools';
 
 export function supplyToReserve(
   client: AaveClient,
@@ -118,34 +117,32 @@ export function supplyAndBorrow(
     amount: { erc20: { value: params.amountToSupply } },
     sender: evmAddress(user.account.address),
     enableCollateral: true,
-  })
-    .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
-    .andThen(() =>
-      reserve(client, {
-        user: evmAddress(user.account.address),
-        query: {
-          reserveId: params.reserveToBorrow.id,
-        },
-      }).andThen((reserve) =>
-        borrow(client, {
-          sender: evmAddress(user.account.address),
-          reserve: reserve!.id,
-          amount: {
-            erc20: {
-              value: reserve!.userState!.borrowable.amount.value.times(
-                params.ratioToBorrow ?? 0.25,
-              ),
-            },
+  }).andThen(() =>
+    reserve(client, {
+      user: evmAddress(user.account.address),
+      query: {
+        reserveId: params.reserveToBorrow.id,
+      },
+    }).andThen((reserve) =>
+      borrow(client, {
+        sender: evmAddress(user.account.address),
+        reserve: reserve!.id,
+        amount: {
+          erc20: {
+            value: reserve!.userState!.borrowable.amount.value.times(
+              params.ratioToBorrow ?? 0.25,
+            ),
           },
-        })
-          .andThen(sendWith(user))
-          .andThen(client.waitForTransaction)
-          .map(() => ({
-            borrowReserve: params.reserveToBorrow,
-            supplyReserve: params.reserveToSupply,
-          })),
-      ),
-    );
+        },
+      })
+        .andThen(sendWith(user))
+        .andThen(client.waitForTransaction)
+        .map(() => ({
+          borrowReserve: params.reserveToBorrow,
+          supplyReserve: params.reserveToSupply,
+        })),
+    ),
+  );
 }
 
 export function supplyWSTETHAndBorrowETH(
@@ -162,7 +159,6 @@ export function supplyWSTETHAndBorrowETH(
       sender: evmAddress(user.account.address),
       enableCollateral: true,
     })
-      .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
       .andThen(() =>
         findReservesToBorrow(client, user, {
           token: ETHEREUM_WETH_ADDRESS,

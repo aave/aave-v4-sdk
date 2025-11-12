@@ -20,6 +20,7 @@ import {
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
+
 import {
   findReservesToBorrow,
   findReservesToSupply,
@@ -30,7 +31,6 @@ import {
   supplyToReserve,
   supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
-import { sleep } from '../helpers/tools';
 import {
   repayFromReserve,
   withdrawFromReserve,
@@ -122,7 +122,6 @@ export const recreateUserActivities = async (
   //   })
   //     .andThen(sendWith(user))
   //     .andThen(client.waitForTransaction)
-  //     .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
   //     .andThen(() =>
   //       setUserSupplyAsCollateral(client, {
   //         reserve: supplyPosition.reserve.id,
@@ -253,7 +252,6 @@ export const recreateUserBorrows = async (
     );
     assertOk(supplyResult);
 
-    await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
     const listReservesToBorrow = await findReservesToBorrow(client, user, {
       spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
     });
@@ -317,7 +315,6 @@ export const recreateUserPositions = async (
         amount: { erc20: { value: bigDecimal('0.2') } },
         sender: evmAddress(user.account.address),
       })
-        .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
         .andThen(() =>
           findReservesToBorrow(client, user, {
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
@@ -367,7 +364,6 @@ export const recreateUserPositions = async (
         amount: { erc20: { value: bigDecimal('0.2') } },
         sender: evmAddress(user.account.address),
       })
-        .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
         .andThen(() =>
           findReservesToBorrow(client, user, {
             spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
