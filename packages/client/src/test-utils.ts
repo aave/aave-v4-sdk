@@ -24,7 +24,7 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AaveClient } from './AaveClient';
 import { local, staging } from './environments';
-import { ethereumForkChain } from './viem';
+import { devnetChain } from './viem';
 
 export const environment =
   import.meta.env.ENVIRONMENT === 'local' ? local : staging;
@@ -104,7 +104,7 @@ export async function createNewWallet(
     const privateKey = generatePrivateKey();
     const wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
-      chain: ethereumForkChain,
+      chain: devnetChain,
       transport: http(),
     });
 
@@ -114,7 +114,7 @@ export async function createNewWallet(
   }
   return createWalletClient({
     account: privateKeyToAccount(privateKey),
-    chain: ethereumForkChain,
+    chain: devnetChain,
     transport: http(),
   });
 }
@@ -244,7 +244,7 @@ export async function getBalance(
   tokenAddress: EvmAddress,
 ): Promise<BigDecimal> {
   const publicClient = createPublicClient({
-    chain: ethereumForkChain,
+    chain: devnetChain,
     transport: http(ETHEREUM_FORK_RPC_URL),
   });
 
@@ -288,7 +288,7 @@ export async function getNativeBalance(
   address: EvmAddress,
 ): Promise<BigDecimal> {
   const publicClient = createPublicClient({
-    chain: ethereumForkChain,
+    chain: devnetChain,
     transport: http(ETHEREUM_FORK_RPC_URL),
   });
 
