@@ -8,31 +8,18 @@ import {
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
+import { recreateUserActivities } from './helper';
+
 const user = await createNewWallet(
-  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
+  '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',
 );
 
 describe('Querying User Summary on Aave V4', () => {
   describe('Given a user with multiple active positions', () => {
     beforeAll(async () => {
-      // NOTE: Enable when needed to create positions for a new user
-      // const setup = await fundErc20Address(evmAddress(user.account.address), {
-      //   address: ETHEREUM_WETH_ADDRESS,
-      //   amount: bigDecimal('0.5'),
-      // })
-      //   .andThen(() =>
-      //     fundErc20Address(evmAddress(user.account.address), {
-      //       address: ETHEREUM_WSTETH_ADDRESS,
-      //       amount: bigDecimal('0.5'),
-      //     }),
-      //   )
-      //   .andThen(() => supplyAndBorrow(client, user, {
-      //     tokenToSupply: ETHEREUM_USDS_ADDRESS,
-      //     tokenToBorrow: ETHEREUM_WETH_ADDRESS,
-      //   })
-      //   .andThen(() => supplyWSTETHAndBorrowETH(client, user));
-      // assertOk(setup);
-    }, 120_000);
+      // NOTE: Recreate user activities if needed
+      await recreateUserActivities(client, user);
+    }, 180_000);
 
     describe('When the user queries their summary without filters', () => {
       it('Then the summary with aggregated financial data is returned', async () => {
@@ -40,7 +27,7 @@ describe('Querying User Summary on Aave V4', () => {
           user: evmAddress(user.account.address),
         });
         assertOk(summary);
-        expect(summary.value.totalPositions).toBe(4);
+        expect(summary.value.totalPositions).toBe(1);
       });
     });
 
@@ -69,7 +56,7 @@ describe('Querying User Summary on Aave V4', () => {
           },
         });
         assertOk(summary);
-        expect(summary.value.totalPositions).toBe(4);
+        expect(summary.value.totalPositions).toBe(1);
       });
     });
 
