@@ -180,8 +180,11 @@ describe('Querying User Balances on Aave V4', () => {
           orderBy: { balance: OrderDirection.Desc },
         });
         assertOk(balances);
-        let listOrderBalance = balances.value.map(
-          (elem) => elem.totalAmount.value,
+        let listOrderBalance = balances.value.map((elem) =>
+          elem.balances.reduce(
+            (sum, balance) => sum.plus(balance.fiatAmount.value),
+            bigDecimal('0'),
+          ),
         );
         expect(listOrderBalance).toBeSortedNumerically('desc');
 
@@ -195,7 +198,12 @@ describe('Querying User Balances on Aave V4', () => {
           orderBy: { balance: OrderDirection.Asc },
         });
         assertOk(balances);
-        listOrderBalance = balances.value.map((elem) => elem.totalAmount.value);
+        listOrderBalance = balances.value.map((elem) =>
+          elem.balances.reduce(
+            (sum, balance) => sum.plus(balance.fiatAmount.value),
+            bigDecimal('0'),
+          ),
+        );
         expect(listOrderBalance).toBeSortedNumerically('asc');
       });
     });
