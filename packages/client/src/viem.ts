@@ -68,9 +68,9 @@ function isProviderRpcError(
 /**
  * @internal
  */
-export const ethereumForkChain: Chain = defineChain({
+export const devnetChain: Chain = defineChain({
   id: Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
-  name: 'Ethereum Fork',
+  name: 'Devnet',
   network: 'ethereum-fork',
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
@@ -78,7 +78,7 @@ export const ethereumForkChain: Chain = defineChain({
   },
   blockExplorers: {
     default: {
-      name: 'Ethereum Fork Explorer',
+      name: 'Devnet Explorer',
       url: import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
     },
   },
@@ -94,7 +94,7 @@ export const supportedChains: Record<
   // TODO add them back when deployed on these chains
   // [chainId(mainnet.id)]: mainnet,
   // [chainId(sepolia.id)]: sepolia,
-  [chainId(ethereumForkChain.id)]: ethereumForkChain,
+  [chainId(devnetChain.id)]: devnetChain,
 };
 
 function ensureChain(

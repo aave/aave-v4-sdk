@@ -55,8 +55,13 @@ type Asset {
 }
 
 input AssetBorrowHistoryRequest {
-  token: Erc20Input!
+  query: AssetBorrowHistoryRequestQuery!
   window: TimeWindow! = LAST_DAY
+}
+
+input AssetBorrowHistoryRequestQuery @oneOf {
+  token: Erc20Input
+  assetId: AssetId
 }
 
 type AssetBorrowSample {
@@ -67,9 +72,14 @@ type AssetBorrowSample {
 scalar AssetId
 
 input AssetPriceHistoryRequest {
-  token: Erc20Input!
+  query: AssetPriceHistoryRequestQuery!
   currency: Currency! = USD
   window: TimeWindow! = LAST_DAY
+}
+
+input AssetPriceHistoryRequestQuery @oneOf {
+  token: Erc20Input
+  assetId: AssetId
 }
 
 type AssetPriceSample {
@@ -104,8 +114,13 @@ type AssetSummary {
 }
 
 input AssetSupplyHistoryRequest {
-  token: Erc20Input!
+  query: AssetSupplyHistoryRequestQuery!
   window: TimeWindow! = LAST_DAY
+}
+
+input AssetSupplyHistoryRequestQuery @oneOf {
+  token: Erc20Input
+  assetId: AssetId
 }
 
 type AssetSupplySample {
@@ -1013,14 +1028,24 @@ type ReserveInfo {
   asset: HubAsset!
 }
 
+input ReserveInput {
+  chainId: ChainId!
+  spoke: EvmAddress!
+  onChainId: OnChainReserveId!
+}
+
 input ReserveRequest {
-  """The reserve id"""
-  reserve: ReserveId!
+  query: ReserveRequestQuery!
 
   """
   The user who is doing the query (this injects user state into some of the return objects)
   """
   user: EvmAddress
+}
+
+input ReserveRequestQuery @oneOf {
+  reserveId: ReserveId
+  reserveInput: ReserveInput
 }
 
 type ReserveSettings {

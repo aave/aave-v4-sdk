@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@aave/types-next": "workspace:*",
-    "@urql/core": "^5.2.0",
+    "@urql/core": "^6.0.1",
     "graphql": "^16.11.0",
     "wonka": "^6.3.5"
   },

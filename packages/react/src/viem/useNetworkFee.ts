@@ -226,7 +226,7 @@ export const useNetworkFee: UseNetworkFee = (({
     ...(suspense ? { suspense } : {}),
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted since query must be provided when not paused
+  // biome-ignore lint/correctness/useExhaustiveDependencies: query omitted since it's usually a literal object that changes at every render
   useEffect(() => {
     if (pause || details.called || !query) return;
 
