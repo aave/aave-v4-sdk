@@ -10,11 +10,13 @@ import {
 import { sendWith } from '@aave/client-next/viem';
 import type { Reserve } from '@aave/graphql-next';
 import { beforeEach, describe, expect, it } from 'vitest';
+
 import { findReservesToSupply } from '../helpers/reserves';
 import {
   supplyNativeTokenToReserve,
   supplyToReserve,
 } from '../helpers/supplyBorrow';
+import { sleep } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -64,6 +66,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
@@ -135,6 +138,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
@@ -187,6 +191,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
@@ -223,6 +228,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {

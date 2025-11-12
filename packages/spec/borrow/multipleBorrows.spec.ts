@@ -76,6 +76,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
         assertOk(secondBorrow);
 
         // Verify user has two borrow positions
+        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
