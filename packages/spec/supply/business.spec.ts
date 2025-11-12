@@ -15,8 +15,8 @@ import {
 import {
   client,
   createNewWallet,
+  ETHEREUM_MKR_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
@@ -68,7 +68,7 @@ describe('Supplying Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
-          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
+          .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
@@ -101,14 +101,14 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user wants to preview the supply action before performing it', () => {
       it('Then the user can review the supply details before proceeding', async () => {
         const reserveToSupply = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+          (ele) => ele.asset.underlying.address === ETHEREUM_USDC_ADDRESS,
         )!;
         const previewResult = await preview(
           client,
           {
             action: {
               supply: {
-                reserve: reserveToSupply.id,
+                reserve: reserveToSupply!.id,
                 amount: {
                   erc20: {
                     value: bigDecimal('10'),
@@ -132,24 +132,24 @@ describe('Supplying Assets on Aave V4', () => {
 
     describe('When the user supplies tokens with collateral disabled', () => {
       beforeAll(async () => {
-        const usdsReserve = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+        const mkrReserve = listReserves.find(
+          (ele) => ele.asset.underlying.address === ETHEREUM_MKR_ADDRESS,
         )!;
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: usdsReserve.asset.underlying.address,
+          address: mkrReserve.asset.underlying.address,
           amount: bigDecimal('10'),
-          decimals: usdsReserve.asset.underlying.info.decimals,
+          decimals: mkrReserve.asset.underlying.info.decimals,
         });
         assertOk(setup);
       });
 
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const amountToSupply = bigDecimal('9');
-        const usdsReserve = listReserves.find(
-          (ele) => ele.asset.underlying.address === ETHEREUM_USDS_ADDRESS,
+        const mkrReserve = listReserves.find(
+          (ele) => ele.asset.underlying.address === ETHEREUM_MKR_ADDRESS,
         )!;
         const result = await supplyToReserve(client, user, {
-          reserve: usdsReserve.id,
+          reserve: mkrReserve.id,
           amount: {
             erc20: {
               value: amountToSupply,
@@ -163,7 +163,7 @@ describe('Supplying Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: usdsReserve.spoke.id,
+                  spoke: mkrReserve.spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -174,7 +174,7 @@ describe('Supplying Assets on Aave V4', () => {
         const supplyPosition = result.value.find((position) => {
           return (
             position.reserve.asset.underlying.address ===
-            usdsReserve.asset.underlying.address
+            mkrReserve.asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');
@@ -228,6 +228,7 @@ describe('Supplying Assets on Aave V4', () => {
           .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
@@ -299,8 +300,7 @@ describe('Supplying Assets on Aave V4', () => {
     });
 
     describe('When the user supplies native tokens', () => {
-      // TODO: enable when contracts are deployed
-      it.skip('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
+      it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
         const result = await supplyToReserve(client, user, {
           reserve: nativeReserveToSupply.id,
           amount: {
@@ -308,16 +308,19 @@ describe('Supplying Assets on Aave V4', () => {
           },
           sender: evmAddress(user.account.address),
           enableCollateral: true,
-        }).andThen(() =>
-          userSupplies(client, {
-            query: {
-              userSpoke: {
-                spoke: nativeReserveToSupply.spoke.id,
-                user: evmAddress(user.account.address),
+        })
+          .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
+          .andThen(() =>
+            userSupplies(client, {
+              query: {
+                userSpoke: {
+                  spoke: nativeReserveToSupply.spoke.id,
+                  user: evmAddress(user.account.address),
+                },
               },
-            },
-          }),
-        );
+            }),
+          );
+
         assertOk(result);
 
         const supplyPosition = result.value.find((position) => {
@@ -339,16 +342,18 @@ describe('Supplying Assets on Aave V4', () => {
           },
           sender: evmAddress(user.account.address),
           enableCollateral: false,
-        }).andThen(() =>
-          userSupplies(client, {
-            query: {
-              userSpoke: {
-                spoke: nativeReserveToSupply.spoke.id,
-                user: evmAddress(user.account.address),
+        })
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
+          .andThen(() =>
+            userSupplies(client, {
+              query: {
+                userSpoke: {
+                  spoke: nativeReserveToSupply.spoke.id,
+                  user: evmAddress(user.account.address),
+                },
               },
-            },
-          }),
-        );
+            }),
+          );
         assertOk(result);
 
         const supplyPosition = result.value.find((position) => {

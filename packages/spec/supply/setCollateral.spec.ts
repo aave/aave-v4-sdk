@@ -14,8 +14,10 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { findReservesToSupply } from '../helpers/reserves';
 import { supplyToReserve } from '../helpers/supplyBorrow';
+import { sleep } from '../helpers/tools';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -52,6 +54,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
 
     describe('When the user sets the position as collateral', () => {
       it('Then the position should be enabled as collateral', async () => {
+        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const positions = await userSupplies(client, {
           query: {
             userChains: {
@@ -71,6 +74,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
+          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
