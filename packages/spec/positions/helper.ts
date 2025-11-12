@@ -4,17 +4,17 @@ import {
   bigDecimal,
   evmAddress,
 } from '@aave/client-next';
-import { activities } from '@aave/client-next/actions';
+import { activities, userBorrows } from '@aave/client-next/actions';
 import {
   ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-
 import {
   findReservesToBorrow,
   findReservesToSupply,
@@ -25,6 +25,7 @@ import {
   supplyToReserve,
   supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
+import { sleep } from '../helpers/tools';
 import {
   repayFromReserve,
   withdrawFromReserve,
@@ -214,4 +215,59 @@ export const recreateUserSummary = async (
     // )
     .andThen(() => supplyWSTETHAndBorrowETH(client, user));
   assertOk(setup);
+};
+
+export const recreateUserBorrows = async (
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+) => {
+  // First: check borrow positions
+  const borrowPositions = await userBorrows(client, {
+    query: {
+      userSpoke: {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+        user: evmAddress(user.account.address),
+      },
+    },
+  });
+  assertOk(borrowPositions);
+  if (borrowPositions.value.length < 3) {
+    const supplyResult = await fundErc20Address(
+      evmAddress(user.account.address),
+      {
+        address: ETHEREUM_WETH_ADDRESS,
+        amount: bigDecimal('0.1'),
+      },
+    ).andThen(() =>
+      findReserveAndSupply(client, user, {
+        token: ETHEREUM_WETH_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        amount: bigDecimal('0.05'),
+        asCollateral: true,
+      }),
+    );
+    assertOk(supplyResult);
+
+    await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
+    const listReservesToBorrow = await findReservesToBorrow(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+    });
+    assertOk(listReservesToBorrow);
+
+    for (let i = borrowPositions.value.length; i < 3; i++) {
+      const borrowResult = await borrowFromReserve(client, user, {
+        sender: evmAddress(user.account.address),
+        reserve: listReservesToBorrow.value[i]!.id,
+        amount: {
+          erc20: {
+            value:
+              listReservesToBorrow.value[
+                i
+              ]!.userState!.borrowable.amount.value.times(0.1),
+          },
+        },
+      });
+      assertOk(borrowResult);
+    }
+  }
 };
