@@ -9,8 +9,6 @@ import {
   client,
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
@@ -28,7 +26,6 @@ import {
   supplyToReserve,
   supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
-import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
 
@@ -55,7 +52,6 @@ describe('Repaying Loans on Aave V4', () => {
         ),
       );
       assertOk(supplySetup);
-      await sleep(2000); // TODO: Remove after fixed bug with delays of propagation
       const borrowSetup = await findReservesToBorrow(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
       }).andThen((borrowReserves) => {
@@ -277,7 +273,8 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(repayResult);
         const positionAfter = repayResult.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_USDC_ADDRESS
+            position.reserve.asset.underlying.address ===
+            borrowBefore.value[0]!.reserve.asset.underlying.address
           );
         });
         invariant(positionAfter, 'No position found');
@@ -350,7 +347,8 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(repayResult);
         const positionAfter = repayResult.value.find((position) => {
           return (
-            position.reserve.asset.underlying.address === ETHEREUM_WETH_ADDRESS
+            position.reserve.asset.underlying.address ===
+            borrowBefore.value[0]!.reserve.asset.underlying.address
           );
         });
         invariant(positionAfter, 'No position found');

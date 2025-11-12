@@ -4,17 +4,23 @@ import {
   bigDecimal,
   evmAddress,
 } from '@aave/client-next';
-import { activities, userBorrows } from '@aave/client-next/actions';
+import {
+  activities,
+  userBorrows,
+  userPositions,
+} from '@aave/client-next/actions';
 import {
   ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_SPOKE_EMODE_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
+
 import {
   findReservesToBorrow,
   findReservesToSupply,
@@ -25,7 +31,6 @@ import {
   supplyToReserve,
   supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
-import { sleep } from '../helpers/tools';
 import {
   repayFromReserve,
   withdrawFromReserve,
@@ -117,7 +122,6 @@ export const recreateUserActivities = async (
   //   })
   //     .andThen(sendWith(user))
   //     .andThen(client.waitForTransaction)
-  //     .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
   //     .andThen(() =>
   //       setUserSupplyAsCollateral(client, {
   //         reserve: supplyPosition.reserve.id,
@@ -248,7 +252,6 @@ export const recreateUserBorrows = async (
     );
     assertOk(supplyResult);
 
-    await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
     const listReservesToBorrow = await findReservesToBorrow(client, user, {
       spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
     });
@@ -269,5 +272,118 @@ export const recreateUserBorrows = async (
       });
       assertOk(borrowResult);
     }
+  }
+};
+
+export const recreateUserPositions = async (
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+) => {
+  // Check if at least 2 positions are already created
+  const userGlobalPositions = await userPositions(client, {
+    user: evmAddress(user.account.address),
+    filter: {
+      chainIds: [ETHEREUM_FORK_ID],
+    },
+  });
+  assertOk(userGlobalPositions);
+  if (userGlobalPositions.value.length < 2) {
+    // One position is a supply/borrow in a specific spoke
+    const listReservesToSupplyCoreSpoke = await findReservesToSupply(
+      client,
+      user,
+      {
+        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        asCollateral: true,
+      },
+    );
+    assertOk(listReservesToSupplyCoreSpoke);
+
+    const resultCoreSpoke = await fundErc20Address(
+      evmAddress(user.account.address),
+      {
+        address:
+          listReservesToSupplyCoreSpoke.value[0]!.asset.underlying.address,
+        amount: bigDecimal('1'),
+        decimals:
+          listReservesToSupplyCoreSpoke.value[0]!.asset.underlying.info
+            .decimals,
+      },
+    ).andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: listReservesToSupplyCoreSpoke.value[0]!.id,
+        amount: { erc20: { value: bigDecimal('0.2') } },
+        sender: evmAddress(user.account.address),
+      })
+        .andThen(() =>
+          findReservesToBorrow(client, user, {
+            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          }),
+        )
+        .andThen((listReservesToBorrowCoreSpoke) =>
+          borrowFromReserve(client, user, {
+            reserve: listReservesToBorrowCoreSpoke[0].id,
+            amount: {
+              erc20: {
+                value:
+                  listReservesToBorrowCoreSpoke[0].userState!.borrowable.amount.value.times(
+                    0.1,
+                  ),
+              },
+            },
+            sender: evmAddress(user.account.address),
+          }),
+        ),
+    );
+    assertOk(resultCoreSpoke);
+
+    // Second position is a supply/borrow in a specific spoke
+    const listReservesToSupplyEmodeSpoke = await findReservesToSupply(
+      client,
+      user,
+      {
+        spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+        asCollateral: true,
+      },
+    );
+    assertOk(listReservesToSupplyEmodeSpoke);
+
+    const resultEmodeSpoke = await fundErc20Address(
+      evmAddress(user.account.address),
+      {
+        address:
+          listReservesToSupplyEmodeSpoke.value[0]!.asset.underlying.address,
+        amount: bigDecimal('1'),
+        decimals:
+          listReservesToSupplyEmodeSpoke.value[0]!.asset.underlying.info
+            .decimals,
+      },
+    ).andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: listReservesToSupplyEmodeSpoke.value[0]!.id,
+        amount: { erc20: { value: bigDecimal('0.2') } },
+        sender: evmAddress(user.account.address),
+      })
+        .andThen(() =>
+          findReservesToBorrow(client, user, {
+            spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+          }),
+        )
+        .andThen((listReservesToBorrowEmodeSpoke) =>
+          borrowFromReserve(client, user, {
+            reserve: listReservesToBorrowEmodeSpoke[0].id,
+            amount: {
+              erc20: {
+                value:
+                  listReservesToBorrowEmodeSpoke[0].userState!.borrowable.amount.value.times(
+                    0.1,
+                  ),
+              },
+            },
+            sender: evmAddress(user.account.address),
+          }),
+        ),
+    );
+    assertOk(resultEmodeSpoke);
   }
 };
