@@ -12,9 +12,9 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { findReservesToBorrow } from '../helpers/reserves';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { sleep } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -39,7 +39,6 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
 
     describe('When the user wants to preview the borrow action before performing it', () => {
       it('Then the user can review the borrow details before proceeding', async () => {
-        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const borrowPreviewResult = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
         }).andThen((reserves) =>
@@ -68,7 +67,6 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
 
     describe('When the user borrows an ERC20 asset', () => {
       it(`Then the user's borrow position is updated to reflect the ERC20 loan`, async () => {
-        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const reservesToBorrow = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
         });
@@ -90,7 +88,6 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
-          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userBorrows(client, {
               query: {
@@ -132,7 +129,6 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         assertOk(setup);
       });
       it(`Then the user's borrow position is updated to reflect the native asset loan`, async () => {
-        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const reservesToBorrow = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
           token: ETHEREUM_WETH_ADDRESS,
@@ -157,7 +153,6 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
-          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userBorrows(client, {
               query: {
@@ -179,13 +174,10 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           4,
         );
 
-        // BUG: The amount is slightly different from the total borrow amount
         expect(result.value[0].debt.amount.value).toBeBigDecimalCloseTo(
           amountToBorrow,
           4,
         );
-        // BUG: It should be wrapped native
-        // expect(result.value[0].amount.isWrappedNative).toBe(true);
       });
     });
   });
