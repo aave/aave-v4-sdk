@@ -7,6 +7,7 @@ import {
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client-next/test-utils';
 import { describe, expect, it } from 'vitest';
+
 import { assertNonEmptyArray } from '../test-utils';
 
 describe('Aave V4 Hub Scenarios', () => {

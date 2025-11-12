@@ -11,7 +11,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -35,7 +35,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -59,7 +59,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -83,7 +83,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by cha
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -112,7 +112,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by hub
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -136,7 +136,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by hub
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -160,7 +160,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by hub
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -184,7 +184,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes by hub
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -213,7 +213,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -237,7 +237,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -261,7 +261,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
@@ -285,7 +285,7 @@ exports[`Aave V4 Spokes Scenario > Given a user who wants to fetch spokes in a h
       "explorerUrl": "https://etherscan.io",
       "icon": "https://statics.aave.com/ethereum.svg",
       "isTestnet": true,
-      "name": "ForkedEthereum",
+      "name": "Devnet",
       "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
       "nativeInfo": {
         "__typename": "TokenInfo",
