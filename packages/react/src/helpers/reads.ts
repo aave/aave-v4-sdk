@@ -6,7 +6,7 @@ import {
   type NullishDeep,
   type Prettify,
 } from '@aave/types-next';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
 import {
   type PausableReadResult,
@@ -127,6 +127,7 @@ export function useSuspendableQuery<
   boolean,
   boolean
 >): SuspendableResult<Output, UnexpectedError> {
+  const [loading, setLoading] = useState(true);
   const [{ fetching, data, error }, executeQuery] = useQuery({
     query: document,
     variables: variables as Variables,
@@ -138,6 +139,14 @@ export function useSuspendableQuery<
       [suspense],
     ),
   });
+
+  useEffect(() => {
+    if (pause) return;
+
+    if (!fetching) {
+      setLoading(false);
+    }
+  }, [fetching, pause]);
 
   useEffect(() => {
     if (pollInterval <= 0 || fetching || pause) return undefined;
@@ -158,7 +167,7 @@ export function useSuspendableQuery<
     );
   }
 
-  if (fetching) {
+  if (!suspense && loading) {
     return ReadResult.Loading();
   }
 

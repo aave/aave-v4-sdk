@@ -86,6 +86,7 @@ export type AssetSummary = FragmentOf<typeof AssetSummaryFragment>;
 export const AssetFragment = graphql(
   `fragment Asset on Asset {
       __typename
+      id
       token {
         ...Erc20Token
       }
@@ -129,6 +130,9 @@ export const AssetPriceHistoryQuery = graphql(
   [AssetPriceSampleFragment],
 );
 export type AssetPriceHistoryRequest = RequestOf<typeof AssetPriceHistoryQuery>;
+export type AssetPriceHistoryRequestQuery = ReturnType<
+  typeof graphql.scalar<'AssetPriceHistoryRequestQuery'>
+>;
 
 /**
  * @internal
@@ -144,6 +148,9 @@ export const AssetSupplyHistoryQuery = graphql(
 export type AssetSupplyHistoryRequest = RequestOf<
   typeof AssetSupplyHistoryQuery
 >;
+export type AssetSupplyHistoryRequestQuery = ReturnType<
+  typeof graphql.scalar<'AssetSupplyHistoryRequestQuery'>
+>;
 
 /**
  * @internal
@@ -158,4 +165,7 @@ export const AssetBorrowHistoryQuery = graphql(
 );
 export type AssetBorrowHistoryRequest = RequestOf<
   typeof AssetBorrowHistoryQuery
+>;
+export type AssetBorrowHistoryRequestQuery = ReturnType<
+  typeof graphql.scalar<'AssetBorrowHistoryRequestQuery'>
 >;
