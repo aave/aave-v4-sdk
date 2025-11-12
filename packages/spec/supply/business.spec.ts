@@ -22,9 +22,9 @@ import {
 import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
 import type { NonEmptyTuple } from 'type-fest';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { findReservesToSupply } from '../helpers/reserves';
 import { supplyToReserve } from '../helpers/supplyBorrow';
-import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
 
@@ -68,7 +68,6 @@ describe('Supplying Assets on Aave V4', () => {
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
-          .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
@@ -157,18 +156,16 @@ describe('Supplying Assets on Aave V4', () => {
           },
           sender: evmAddress(user.account.address),
           enableCollateral: false,
-        })
-          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
-          .andThen(() =>
-            userSupplies(client, {
-              query: {
-                userSpoke: {
-                  spoke: mkrReserve.spoke.id,
-                  user: evmAddress(user.account.address),
-                },
+        }).andThen(() =>
+          userSupplies(client, {
+            query: {
+              userSpoke: {
+                spoke: mkrReserve.spoke.id,
+                user: evmAddress(user.account.address),
               },
-            }),
-          );
+            },
+          }),
+        );
         assertOk(result);
         invariant(result.value, 'No supply positions found');
         const supplyPosition = result.value.find((position) => {
@@ -228,7 +225,6 @@ describe('Supplying Assets on Aave V4', () => {
           .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
-          .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
           .andThen(() =>
             userSupplies(client, {
               query: {
@@ -295,41 +291,8 @@ describe('Supplying Assets on Aave V4', () => {
           netBalance: expect.any(Object),
           netCollateral: expect.any(Object),
           netApy: expect.any(Object),
+          riskPremium: expect.any(Object),
         });
-      });
-    });
-
-    describe('When the user supplies native tokens', () => {
-      it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
-        const result = await supplyToReserve(client, user, {
-          reserve: nativeReserveToSupply.id,
-          amount: {
-            native: bigDecimal('0.01'),
-          },
-          sender: evmAddress(user.account.address),
-          enableCollateral: true,
-        })
-          .andTee(() => sleep(2000)) // TODO: Remove after fixed bug with delays of propagation
-          .andThen(() =>
-            userSupplies(client, {
-              query: {
-                userSpoke: {
-                  spoke: nativeReserveToSupply.spoke.id,
-                  user: evmAddress(user.account.address),
-                },
-              },
-            }),
-          );
-
-        assertOk(result);
-
-        const supplyPosition = result.value.find((position) => {
-          return (
-            position.reserve.asset.underlying.address ===
-            nativeReserveToSupply.asset.underlying.address
-          );
-        });
-        invariant(supplyPosition, 'No supply position found');
       });
     });
 
@@ -342,18 +305,16 @@ describe('Supplying Assets on Aave V4', () => {
           },
           sender: evmAddress(user.account.address),
           enableCollateral: false,
-        })
-          .andTee(() => sleep(1000)) // TODO: Remove after fixed bug with delays of propagation
-          .andThen(() =>
-            userSupplies(client, {
-              query: {
-                userSpoke: {
-                  spoke: nativeReserveToSupply.spoke.id,
-                  user: evmAddress(user.account.address),
-                },
+        }).andThen(() =>
+          userSupplies(client, {
+            query: {
+              userSpoke: {
+                spoke: nativeReserveToSupply.spoke.id,
+                user: evmAddress(user.account.address),
               },
-            }),
-          );
+            },
+          }),
+        );
         assertOk(result);
 
         const supplyPosition = result.value.find((position) => {
@@ -364,6 +325,37 @@ describe('Supplying Assets on Aave V4', () => {
         });
         invariant(supplyPosition, 'No supply position found');
         expect(supplyPosition.isCollateral).toEqual(false);
+      });
+    });
+
+    describe('When the user supplies native tokens', () => {
+      it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
+        const result = await supplyToReserve(client, user, {
+          reserve: nativeReserveToSupply.id,
+          amount: {
+            native: bigDecimal('0.01'),
+          },
+          sender: evmAddress(user.account.address),
+        }).andThen(() =>
+          userSupplies(client, {
+            query: {
+              userSpoke: {
+                spoke: nativeReserveToSupply.spoke.id,
+                user: evmAddress(user.account.address),
+              },
+            },
+          }),
+        );
+
+        assertOk(result);
+
+        const supplyPosition = result.value.find((position) => {
+          return (
+            position.reserve.asset.underlying.address ===
+            nativeReserveToSupply.asset.underlying.address
+          );
+        });
+        invariant(supplyPosition, 'No supply position found');
       });
     });
   });
