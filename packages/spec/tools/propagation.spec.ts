@@ -13,6 +13,7 @@ import {
   findReservesToSupply,
 } from '../helpers/reserves';
 import { supplyToReserve } from '../helpers/supplyBorrow';
+import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
 
@@ -42,16 +43,19 @@ describe('Checking Propagation of Supply/Borrow/Repay/Withdraw on Aave V4', () =
         amount: { erc20: { value: amountToSupply } },
         sender: evmAddress(user.account.address),
         enableCollateral: true,
-      }).andThen(() =>
-        userSupplies(client, {
-          query: {
-            userSpoke: {
-              spoke: usdReserve.value!.spoke.id,
-              user: evmAddress(user.account.address),
+      })
+        // Enable to make the test pass
+        // .andTee(() => sleep(2000))
+        .andThen(() =>
+          userSupplies(client, {
+            query: {
+              userSpoke: {
+                spoke: usdReserve.value!.spoke.id,
+                user: evmAddress(user.account.address),
+              },
             },
-          },
-        }),
-      ),
+          }),
+        ),
     );
     assertOk(supplyResult);
     expect(supplyResult.value.length).toBe(1);
