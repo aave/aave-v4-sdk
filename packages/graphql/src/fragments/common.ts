@@ -123,7 +123,6 @@ export const Erc20AmountFragment = graphql(
     fiatRate(currency: $currency){
       ...DecimalNumber
     }
-    isWrappedNative
   }`,
   [Erc20TokenFragment, DecimalNumberFragment, FiatAmountFragment],
 );
