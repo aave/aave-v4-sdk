@@ -162,17 +162,34 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeRepay = summary.value.lowestHealthFactor!;
 
-          const setup = await repay(client, {
-            reserve: usedReserves.borrowReserve.id,
-            sender: evmAddress(user.account.address),
-            amount: {
-              erc20: {
-                value: {
-                  exact: bigDecimal('100'),
-                },
-              },
+          const setup = await fundErc20Address(
+            evmAddress(user.account.address),
+            {
+              address: usedReserves.borrowReserve.asset.underlying.address,
+              amount:
+                usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+                  2,
+                ),
+              decimals:
+                usedReserves.borrowReserve.asset.underlying.info.decimals,
             },
-          })
+          )
+            .andThen(() =>
+              repay(client, {
+                reserve: usedReserves.borrowReserve.id,
+                sender: evmAddress(user.account.address),
+                amount: {
+                  erc20: {
+                    value: {
+                      exact:
+                        usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+                          0.5,
+                        ),
+                    },
+                  },
+                },
+              }),
+            )
             .andThen(sendWith(user))
             .andThen(client.waitForTransaction);
 
@@ -279,17 +296,31 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
       describe('When the user repays completely the borrow position', () => {
         beforeAll(async () => {
-          const setup = await repay(client, {
-            reserve: usedReserves.borrowReserve.id,
-            sender: evmAddress(user.account.address),
-            amount: {
-              erc20: {
-                value: {
-                  max: true,
-                },
-              },
+          const setup = await fundErc20Address(
+            evmAddress(user.account.address),
+            {
+              address: usedReserves.borrowReserve.asset.underlying.address,
+              amount:
+                usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+                  2,
+                ),
+              decimals:
+                usedReserves.borrowReserve.asset.underlying.info.decimals,
             },
-          })
+          )
+            .andThen(() =>
+              repay(client, {
+                reserve: usedReserves.borrowReserve.id,
+                sender: evmAddress(user.account.address),
+                amount: {
+                  erc20: {
+                    value: {
+                      max: true,
+                    },
+                  },
+                },
+              }),
+            )
             .andThen(sendWith(user))
             .andThen(client.waitForTransaction);
 

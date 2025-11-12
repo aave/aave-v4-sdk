@@ -8,28 +8,18 @@ import {
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
+import { recreateUserPositions } from './helper';
+
 const user = await createNewWallet(
-  '0x95914dd71f13f28b7f4bac9b2fb3741a53eb784cdab666acb9f40ebe6ec479aa',
+  '0x3bbb745c15f3b0daf1be54fb7b8281cc8eaac0249a28a4442052ebb0061e660d',
 );
 
-describe('Aave V4 Positions Scenario', () => {
-  describe('Given a user with more than one supply/borrow positions', () => {
+describe('Querying User Positions on Aave V4', () => {
+  describe('Given a user with more than one position', () => {
     beforeAll(async () => {
-      // NOTE: Enable when you want to recreate the user positions
-      // const setup = await fundErc20Address(evmAddress(user.account.address), {
-      //   address: ETHEREUM_WETH_ADDRESS,
-      //   amount: bigDecimal('0.5'),
-      // })
-      //   .andThen(() =>
-      //     fundErc20Address(evmAddress(user.account.address), {
-      //       address: ETHEREUM_WSTETH_ADDRESS,
-      //       amount: bigDecimal('0.5'),
-      //     }),
-      //   )
-      //   .andThen(() => supplyWETHAndBorrow(client, user, ETHEREUM_USDS_ADDRESS))
-      //   .andThen(() => supplyWSTETHAndBorrowETH(client, user));
-      // assertOk(setup);
-    });
+      // NOTE: Recreate user activities if needed
+      await recreateUserPositions(client, user);
+    }, 180_000);
 
     describe('When fetching a specific position', () => {
       it('Then it should return the position details', async () => {
@@ -82,8 +72,7 @@ describe('Aave V4 Positions Scenario', () => {
       });
     });
 
-    // TODO: order is still not implemented in the backend
-    describe.skip('When fetching positions ordered by', () => {
+    describe('When fetching positions ordered by', () => {
       it('Then it should return the positions ordered by balance', async () => {
         let positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -93,9 +82,10 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { balance: OrderDirection.Desc },
         });
         assertOk(positions);
-        expect(
-          positions.value[0]?.netBalance.current.value,
-        ).toBeBigDecimalLessThan(positions.value[1]?.netBalance.current.value);
+        let listOrderBalance = positions.value.map(
+          (elem) => elem.netBalance.current.value,
+        );
+        expect(listOrderBalance).toBeSortedNumerically('desc');
 
         positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -105,11 +95,10 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { balance: OrderDirection.Asc },
         });
         assertOk(positions);
-        expect(
-          positions.value[0]?.netBalance.current.value,
-        ).toBeBigDecimalGreaterThan(
-          positions.value[1]?.netBalance.current.value,
+        listOrderBalance = positions.value.map(
+          (elem) => elem.netBalance.current.value,
         );
+        expect(listOrderBalance).toBeSortedNumerically('asc');
       });
 
       it('Then it should return the positions ordered by apy', async () => {
@@ -121,9 +110,8 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { netApy: OrderDirection.Desc },
         });
         assertOk(positions);
-        expect(positions.value[0]?.netApy.value).toBeBigDecimalGreaterThan(
-          positions.value[1]?.netApy.value,
-        );
+        let listOrderApy = positions.value.map((elem) => elem.netApy.value);
+        expect(listOrderApy).toBeSortedNumerically('desc');
 
         positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -133,9 +121,8 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { netApy: OrderDirection.Asc },
         });
         assertOk(positions);
-        expect(positions.value[0]?.netApy.value).toBeBigDecimalLessThan(
-          positions.value[1]?.netApy.value,
-        );
+        listOrderApy = positions.value.map((elem) => elem.netApy.value);
+        expect(listOrderApy).toBeSortedNumerically('asc');
       });
 
       it('Then it should return the positions ordered by healthFactor', async () => {
@@ -147,9 +134,10 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { healthFactor: OrderDirection.Desc },
         });
         assertOk(positions);
-        expect(
-          positions.value[0]?.healthFactor.current,
-        ).toBeBigDecimalGreaterThan(positions.value[1]?.healthFactor.current);
+        let listOrderHealthFactor = positions.value.map(
+          (elem) => elem.healthFactor.current,
+        );
+        expect(listOrderHealthFactor).toBeSortedNumerically('desc');
 
         positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -159,9 +147,10 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { healthFactor: OrderDirection.Asc },
         });
         assertOk(positions);
-        expect(positions.value[0]?.healthFactor.current).toBeBigDecimalLessThan(
-          positions.value[1]?.healthFactor.current,
+        listOrderHealthFactor = positions.value.map(
+          (elem) => elem.healthFactor.current,
         );
+        expect(listOrderHealthFactor).toBeSortedNumerically('asc');
       });
 
       it('Then it should return the positions ordered by created', async () => {
@@ -173,7 +162,8 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { created: OrderDirection.Desc },
         });
         assertOk(positions);
-        expect(positions.value.length).toBeGreaterThan(0);
+        let listOrderCreated = positions.value.map((elem) => elem.createdAt);
+        expect(listOrderCreated).toBeSortedByDate('desc');
 
         positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -183,7 +173,8 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { created: OrderDirection.Asc },
         });
         assertOk(positions);
-        expect(positions.value.length).toBeGreaterThan(0);
+        listOrderCreated = positions.value.map((elem) => elem.createdAt);
+        expect(listOrderCreated).toBeSortedByDate('asc');
       });
 
       it('Then it should return the positions ordered by netCollateral', async () => {
@@ -195,11 +186,10 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { netCollateral: OrderDirection.Desc },
         });
         assertOk(positions);
-        expect(
-          positions.value[0]?.netCollateral.current.value,
-        ).toBeBigDecimalGreaterThan(
-          positions.value[1]?.netCollateral.current.value,
+        let listOrderNetCollateral = positions.value.map(
+          (elem) => elem.netCollateral.current.value,
         );
+        expect(listOrderNetCollateral).toBeSortedNumerically('desc');
 
         positions = await userPositions(client, {
           user: evmAddress(user.account.address),
@@ -209,11 +199,10 @@ describe('Aave V4 Positions Scenario', () => {
           orderBy: { netCollateral: OrderDirection.Asc },
         });
         assertOk(positions);
-        expect(
-          positions.value[0]?.netCollateral.current.value,
-        ).toBeBigDecimalLessThan(
-          positions.value[1]?.netCollateral.current.value,
+        listOrderNetCollateral = positions.value.map(
+          (elem) => elem.netCollateral.current.value,
         );
+        expect(listOrderNetCollateral).toBeSortedNumerically('asc');
       });
     });
   });

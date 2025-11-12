@@ -320,14 +320,15 @@ export function useExchangeRate({
   pause?: boolean;
 }): SuspendableResult<FiatAmount, UnexpectedError> {
   const client = useAaveClient();
-  const pollInterval = client.context.environment.exchangeRateInterval;
 
   return useSuspendableQuery({
     document: ExchangeRateQuery,
     variables: { request },
     suspense,
     pause,
-    pollInterval,
+    pollInterval: request.at
+      ? 0
+      : client.context.environment.exchangeRateInterval,
   });
 }
 

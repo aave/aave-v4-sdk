@@ -10,9 +10,9 @@ import {
 } from '@aave/client-next/test-utils';
 import { sendWith } from '@aave/client-next/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { findReservesToBorrow } from '../helpers/reserves';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { sleep } from '../helpers/tools';
 
 const user = await createNewWallet();
 
@@ -36,7 +36,6 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
       }, 120_000);
 
       it('Then the user has two active borrow positions with correct amounts', async () => {
-        await sleep(1000); // TODO: Remove after fixed bug with delays of propagation
         const reservesToBorrow = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
         });

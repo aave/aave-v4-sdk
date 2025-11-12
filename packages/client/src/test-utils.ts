@@ -24,7 +24,7 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AaveClient } from './AaveClient';
 import { local, staging } from './environments';
-import { ethereumForkChain } from './viem';
+import { devnetChain } from './viem';
 
 export const environment =
   import.meta.env.ENVIRONMENT === 'local' ? local : staging;
@@ -48,6 +48,9 @@ export const ETHEREUM_USDS_ADDRESS = evmAddress(
 );
 export const ETHEREUM_WSTETH_ADDRESS = evmAddress(
   '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+);
+export const ETHEREUM_MKR_ADDRESS = evmAddress(
+  '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2',
 );
 
 // Spoke addresses and ids
@@ -102,10 +105,9 @@ export async function createNewWallet(
 ): Promise<WalletClient<Transport, Chain, Account>> {
   if (!privateKey) {
     const privateKey = generatePrivateKey();
-    console.log('Generated private key:', privateKey);
     const wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
-      chain: ethereumForkChain,
+      chain: devnetChain,
       transport: http(),
     });
 
@@ -115,7 +117,7 @@ export async function createNewWallet(
   }
   return createWalletClient({
     account: privateKeyToAccount(privateKey),
-    chain: ethereumForkChain,
+    chain: devnetChain,
     transport: http(),
   });
 }
@@ -245,7 +247,7 @@ export async function getBalance(
   tokenAddress: EvmAddress,
 ): Promise<BigDecimal> {
   const publicClient = createPublicClient({
-    chain: ethereumForkChain,
+    chain: devnetChain,
     transport: http(ETHEREUM_FORK_RPC_URL),
   });
 
@@ -289,7 +291,7 @@ export async function getNativeBalance(
   address: EvmAddress,
 ): Promise<BigDecimal> {
   const publicClient = createPublicClient({
-    chain: ethereumForkChain,
+    chain: devnetChain,
     transport: http(ETHEREUM_FORK_RPC_URL),
   });
 
