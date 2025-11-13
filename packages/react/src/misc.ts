@@ -109,6 +109,42 @@ export function useChain({
   });
 }
 
+/**
+ * @deprecated Use `UseChainArgs` instead.
+ */
+export type UseAaveChainArgs = UseChainArgs;
+
+/**
+ * @deprecated Use `useChain` instead.
+ */
+export function useAaveChain(
+  args: UseAaveChainArgs & Suspendable,
+): SuspenseResult<Chain | null>;
+/**
+ * @deprecated Use `useChain` instead.
+ */
+export function useAaveChain(
+  args: Pausable<UseAaveChainArgs> & Suspendable,
+): PausableSuspenseResult<Chain | null>;
+/**
+ * @deprecated Use `useChain` instead.
+ */
+export function useAaveChain(args: UseAaveChainArgs): ReadResult<Chain | null>;
+/**
+ * @deprecated Use `useChain` instead.
+ */
+export function useAaveChain(
+  args: Pausable<UseAaveChainArgs>,
+): PausableReadResult<Chain | null>;
+export function useAaveChain(
+  args: NullishDeep<UseAaveChainArgs> & {
+    suspense?: boolean;
+    pause?: boolean;
+  },
+): SuspendableResult<Chain | null, UnexpectedError> {
+  return useChain(args as Parameters<typeof useChain>[0]);
+}
+
 export type UseChainsArgs = {
   filter: ChainsFilter;
 };
@@ -185,6 +221,42 @@ export function useChains(
     suspense,
     pause,
   });
+}
+
+/**
+ * @deprecated Use `UseChainsArgs` instead.
+ */
+export type UseAaveChainsArgs = UseChainsArgs;
+
+/**
+ * @deprecated Use `useChains` instead.
+ */
+export function useAaveChains(
+  args: UseAaveChainsArgs & Suspendable,
+): SuspenseResult<Chain[]>;
+/**
+ * @deprecated Use `useChains` instead.
+ */
+export function useAaveChains(
+  args: Pausable<UseAaveChainsArgs> & Suspendable,
+): PausableSuspenseResult<Chain[]>;
+/**
+ * @deprecated Use `useChains` instead.
+ */
+export function useAaveChains(args?: UseAaveChainsArgs): ReadResult<Chain[]>;
+/**
+ * @deprecated Use `useChains` instead.
+ */
+export function useAaveChains(
+  args?: Pausable<UseAaveChainsArgs>,
+): PausableReadResult<Chain[]>;
+export function useAaveChains(
+  args?: NullishDeep<UseAaveChainsArgs> & {
+    suspense?: boolean;
+    pause?: boolean;
+  },
+): SuspendableResult<Chain[], UnexpectedError> {
+  return useChains(args as Parameters<typeof useChains>[0]);
 }
 
 /**
