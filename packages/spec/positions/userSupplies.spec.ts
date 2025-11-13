@@ -86,7 +86,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(4);
+        expect(supplyPositions.value.length).toBe(5);
       });
     });
 

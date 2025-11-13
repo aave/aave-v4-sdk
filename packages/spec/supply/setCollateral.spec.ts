@@ -115,10 +115,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         // netBalance should be the same
         expect(
           previewResult.value.netBalance.after.value,
-        ).toBeBigDecimalCloseTo(
-          previewResult.value.netBalance.current.value,
-          1,
-        );
+        ).toBeBigDecimalCloseTo(previewResult.value.netBalance.current.value);
         if (!positions.value[0].isCollateral) {
           expect(
             previewResult.value.netCollateral.after.value,

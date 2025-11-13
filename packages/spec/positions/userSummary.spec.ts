@@ -12,7 +12,7 @@ import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserPositions } from './helper';
 
 const user = await createNewWallet(
-  '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',
+  '0x3bbb745c15f3b0daf1be54fb7b8281cc8eaac0249a28a4442052ebb0061e660d',
 );
 
 describe('Querying User Summary on Aave V4', () => {
@@ -78,11 +78,9 @@ describe('Querying User Summary on Aave V4', () => {
         expect(summary.value.totalPositions).toBe(1);
         expect(summary.value.totalCollateral.value).toBeBigDecimalCloseTo(
           positions.value[0].totalCollateral.current.value,
-          1,
         );
         expect(summary.value.totalSupplied.value).toBeBigDecimalCloseTo(
           positions.value[0].totalSupplied.current.value,
-          1,
         );
       });
     });

@@ -6,48 +6,30 @@ expect.extend(matchers);
 
 expect.extend({
   toBeBigDecimalCloseTo(
-    received: string,
-    expected: number | string,
+    received: BigDecimal,
+    expected: BigDecimal,
     precision = 2,
   ) {
-    const numValue = Number(received);
-    const pass =
-      !Number.isNaN(numValue) &&
-      Math.abs(numValue - Number(expected)) < 10 ** -precision;
+    const pass = received.round(precision).eq(expected.round(precision));
 
     return {
       pass,
       message: () =>
         pass
           ? `expected "${received}" not to be close to ${expected}`
-          : `expected "${received}" to be close to ${expected}, but got difference of ${Math.abs(numValue - Number(expected))}`,
+          : `expected "${received}" to be close to ${expected}, but got difference of ${received.minus(expected)}`,
     };
   },
 
-  toBeBigDecimalWithin(received: string, start: number, end: number) {
-    const numValue = Number(received);
+  toBeBigDecimalGreaterThan(received: BigDecimal, expected: number | string) {
+    const pass = received.gt(expected);
 
-    const pass =
-      !Number.isNaN(numValue) && numValue >= start && numValue <= end;
-
-    return {
-      pass,
-      message: () =>
-        pass
-          ? `expected "${received}" not to be within range [${start}, ${end}]`
-          : `expected "${received}" to be within range [${start}, ${end}], but got ${numValue}`,
-    };
-  },
-
-  toBeBigDecimalGreaterThan(received: string, expected: number | string) {
-    const numValue = Number(received);
-    const pass = !Number.isNaN(numValue) && numValue > Number(expected);
     return {
       pass,
       message: () =>
         pass
           ? `expected "${received}" not to be greater than ${expected}`
-          : `expected "${received}" to be greater than ${expected}, but got ${numValue}`,
+          : `expected "${received}" to be greater than ${expected}, but got ${received.minus(expected)}`,
     };
   },
 
@@ -78,15 +60,15 @@ expect.extend({
     };
   },
 
-  toBeBigDecimalLessThan(received: string, expected: number | string) {
-    const numValue = Number(received);
-    const pass = !Number.isNaN(numValue) && numValue < Number(expected);
+  toBeBigDecimalLessThan(received: BigDecimal, expected: number | string) {
+    const pass = received.lt(expected);
+
     return {
       pass,
       message: () =>
         pass
           ? `expected "${received}" not to be less than ${expected}`
-          : `expected "${received}" to be less than ${expected}, but got ${numValue}`,
+          : `expected "${received}" to be less than ${expected}, but got ${received.minus(expected)}`,
     };
   },
 

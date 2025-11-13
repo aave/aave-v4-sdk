@@ -280,7 +280,6 @@ describe('Repaying Loans on Aave V4', () => {
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
           amountToRepay,
-          2,
         );
       });
     });
@@ -354,7 +353,6 @@ describe('Repaying Loans on Aave V4', () => {
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
           amountToRepay,
-          2,
         );
 
         const balanceAfter = await getNativeBalance(
