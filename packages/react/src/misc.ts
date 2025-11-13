@@ -109,6 +109,16 @@ export function useChain({
   });
 }
 
+/**
+ * @deprecated Use `UseChainArgs` instead.
+ */
+export type UseAaveChainArgs = UseChainArgs;
+
+/**
+ * @deprecated Use `useChain` instead.
+ */
+export const useAaveChain = useChain;
+
 export type UseChainsArgs = {
   filter: ChainsFilter;
 };
@@ -186,6 +196,16 @@ export function useChains(
     pause,
   });
 }
+
+/**
+ * @deprecated Use `UseChainsArgs` instead.
+ */
+export type UseAaveChainsArgs = UseChainsArgs;
+
+/**
+ * @deprecated Use `useChains` instead.
+ */
+export const useAaveChains = useChains;
 
 /**
  * Fetches exchange rates between tokens and fiat currencies.
