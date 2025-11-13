@@ -65,7 +65,7 @@ describe('Aave V4 Reserve Scenario', () => {
 
     describe('When fetching reserves for a specific spoke', () => {
       it('Then it should return the reserves for that specific spoke', async () => {
-        const listReserves = await reserves(client, {
+        let listReserves = await reserves(client, {
           query: {
             spoke: {
               chainId: ETHEREUM_FORK_ID,
@@ -75,9 +75,17 @@ describe('Aave V4 Reserve Scenario', () => {
         });
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
-
         listReserves.value.forEach((elem) => {
           expect(elem.spoke.address).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+        });
+
+        listReserves = await reserves(client, {
+          query: { spokeId: ETHEREUM_SPOKE_CORE_ID },
+        });
+        assertOk(listReserves);
+        assertNonEmptyArray(listReserves.value);
+        listReserves.value.forEach((elem) => {
+          expect(elem.spoke.id).toEqual(ETHEREUM_SPOKE_CORE_ID);
         });
       });
     });
@@ -130,7 +138,6 @@ describe('Aave V4 Reserve Scenario', () => {
         });
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
-
         listReserves.value.forEach((elem) => {
           expect(elem.asset.hub.address).toEqual(ETHEREUM_HUB_CORE_ADDRESS);
         });
