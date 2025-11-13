@@ -105,7 +105,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           amountToBorrow,
           2,
         );
-        expect(result.value[0].debt.isWrappedNative).toBe(false);
+        expect(result.value[0].debt.token.isWrappedNativeToken).toBe(false);
       });
     });
   });
