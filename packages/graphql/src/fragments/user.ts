@@ -129,9 +129,6 @@ export const UserPositionFragment = graphql(
     betterRiskPremium {
       ...PercentNumber
     }
-    netBalancePercentChange(window: $timeWindow){
-      ...PercentNumber
-    }
     averageCollateralFactor {
       ...PercentNumber
     }
