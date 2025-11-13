@@ -5,7 +5,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
   "__typename": "FiatAmount",
   "name": "USD",
   "symbol": "$",
-  "value": Any<e>,
+  "value": Any<t>,
 }
 `;
 
@@ -14,7 +14,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
   "__typename": "FiatAmount",
   "name": "EUR",
   "symbol": "€",
-  "value": Any<e>,
+  "value": Any<t>,
 }
 `;
 
@@ -23,7 +23,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
   "__typename": "FiatAmount",
   "name": "USD",
   "symbol": "$",
-  "value": Any<e>,
+  "value": Any<t>,
 }
 `;
 
@@ -32,7 +32,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
   "__typename": "FiatAmount",
   "name": "EUR",
   "symbol": "€",
-  "value": Any<e>,
+  "value": Any<t>,
 }
 `;
 
@@ -41,7 +41,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
   "__typename": "FiatAmount",
   "name": "GBP",
   "symbol": "£",
-  "value": Any<e>,
+  "value": Any<t>,
 }
 `;
 
@@ -50,6 +50,6 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
   "__typename": "FiatAmount",
   "name": "USD",
   "symbol": "$",
-  "value": Any<e>,
+  "value": Any<t>,
 }
 `;
