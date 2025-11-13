@@ -16,27 +16,18 @@ describe('Given a BigDecimal class', () => {
     });
   });
 
-  // TODO: delete once strict mode is enabled again
-  describe('When using the Number(BigDecimal) cosntructor', () => {
-    it('Then it should return the number representation of the BigDecimal', () => {
-      const number = bigDecimal('10.12345678901');
-      expect(Number(number)).toBe(10.12345678901);
-    });
-  });
-
-  // TODO: enable once strict mode is enabled again
-  describe.skip('When using the Number(BigDecimal) cosntructor', () => {
-    it('Then it should throw an InvariantError', () => {
-      const number = bigDecimal('10.12345678901');
-      expect(() => Number(number)).toThrow(InvariantError);
-    });
-  });
-
-  describe.skip('When using BigDecimal#valueOf is invoked', () => {
+  describe('When using BigDecimal#valueOf is invoked', () => {
     it('Then it should throw an InvariantError', () => {
       const number = bigDecimal('10.12345678901');
       // @ts-expect-error - we want to test the error case
       expect(() => 2 + number).toThrow(InvariantError);
+    });
+  });
+
+  describe('When using BigDecimal#toNumber is invoked', () => {
+    it('Then it should throw an InvariantError', () => {
+      const number = bigDecimal('10.12345678901');
+      expect(() => number.toNumber()).toThrow(InvariantError);
     });
   });
 
@@ -242,12 +233,6 @@ describe('Given a BigDecimal class', () => {
       const number = bigDecimal('123.456');
       expect(number.toJSON()).toBe('123.456');
       expect(typeof number.toJSON()).toBe('string');
-    });
-
-    it('Then toNumber() should return primitive number', () => {
-      const number = bigDecimal('123.456');
-      expect(number.toNumber()).toBe(123.456);
-      expect(typeof number.toNumber()).toBe('number');
     });
   });
 
