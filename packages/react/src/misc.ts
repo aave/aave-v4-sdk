@@ -30,7 +30,7 @@ import {
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
-export type UseAaveChainArgs = ChainRequest;
+export type UseChainArgs = ChainRequest;
 
 /**
  * Fetch a specific chain by chain ID.
@@ -38,15 +38,15 @@ export type UseAaveChainArgs = ChainRequest;
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useAaveChain({
+ * const { data } = useChain({
  *   chainId: chainId(1),
  *   suspense: true,
  * });
  * // data will be Chain | null
  * ```
  */
-export function useAaveChain(
-  args: UseAaveChainArgs & Suspendable,
+export function useChain(
+  args: UseChainArgs & Suspendable,
 ): SuspenseResult<Chain | null>;
 /**
  * Fetch a specific chain by chain ID.
@@ -54,48 +54,48 @@ export function useAaveChain(
  * Pausable suspense mode.
  *
  * ```tsx
- * const { data } = useAaveChain({
+ * const { data } = useChain({
  *   chainId: chainId(1),
  *   suspense: true,
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChain(
-  args: Pausable<UseAaveChainArgs> & Suspendable,
+export function useChain(
+  args: Pausable<UseChainArgs> & Suspendable,
 ): PausableSuspenseResult<Chain | null>;
 /**
  * Fetch a specific chain by chain ID.
  *
  * ```tsx
- * const { data, error, loading } = useAaveChain({
+ * const { data, error, loading } = useChain({
  *   chainId: chainId(1),
  * });
  * // data will be Chain | null
  * ```
  */
-export function useAaveChain(args: UseAaveChainArgs): ReadResult<Chain | null>;
+export function useChain(args: UseChainArgs): ReadResult<Chain | null>;
 /**
  * Fetch a specific chain by chain ID.
  *
  * Pausable loading state mode.
  *
  * ```tsx
- * const { data, error, loading, paused } = useAaveChain({
+ * const { data, error, loading, paused } = useChain({
  *   chainId: chainId(1),
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChain(
-  args: Pausable<UseAaveChainArgs>,
+export function useChain(
+  args: Pausable<UseChainArgs>,
 ): PausableReadResult<Chain | null>;
 
-export function useAaveChain({
+export function useChain({
   suspense = false,
   pause = false,
   ...request
-}: NullishDeep<UseAaveChainArgs> & {
+}: NullishDeep<UseChainArgs> & {
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<Chain | null, UnexpectedError> {
@@ -109,7 +109,7 @@ export function useAaveChain({
   });
 }
 
-export type UseAaveChainsArgs = {
+export type UseChainsArgs = {
   filter: ChainsFilter;
 };
 /**
@@ -118,14 +118,14 @@ export type UseAaveChainsArgs = {
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useAaveChains({
+ * const { data } = useChains({
  *   filter: ChainsFilter.ALL,
  *   suspense: true,
  * });
  * ```
  */
-export function useAaveChains(
-  args: UseAaveChainsArgs & Suspendable,
+export function useChains(
+  args: UseChainsArgs & Suspendable,
 ): SuspenseResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
@@ -133,48 +133,48 @@ export function useAaveChains(
  * Pausable suspense mode.
  *
  * ```tsx
- * const { data } = useAaveChains({
+ * const { data } = useChains({
  *   filter: ChainsFilter.ALL,
  *   suspense: true,
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChains(
-  args: Pausable<UseAaveChainsArgs> & Suspendable,
+export function useChains(
+  args: Pausable<UseChainsArgs> & Suspendable,
 ): PausableSuspenseResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
  *
  * ```tsx
- * const { data, error, loading } = useAaveChains({
+ * const { data, error, loading } = useChains({
  *   filter: ChainsFilter.ALL,
  * });
  * ```
  */
-export function useAaveChains(args?: UseAaveChainsArgs): ReadResult<Chain[]>;
+export function useChains(args?: UseChainsArgs): ReadResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
  *
  * Pausable loading state mode.
  *
  * ```tsx
- * const { data, error, loading, paused } = useAaveChains({
+ * const { data, error, loading, paused } = useChains({
  *   filter: ChainsFilter.ALL,
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChains(
-  args?: Pausable<UseAaveChainsArgs>,
+export function useChains(
+  args?: Pausable<UseChainsArgs>,
 ): PausableReadResult<Chain[]>;
 
-export function useAaveChains(
+export function useChains(
   {
     suspense = false,
     pause = false,
     filter,
-  }: NullishDeep<UseAaveChainsArgs> & {
+  }: NullishDeep<UseChainsArgs> & {
     suspense?: boolean;
     pause?: boolean;
   } = { filter: ChainsFilter.ALL },
