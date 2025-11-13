@@ -7,10 +7,10 @@ expect.extend(matchers);
 expect.extend({
   toBeBigDecimalCloseTo(
     received: BigDecimal,
-    expected: number | string,
+    expected: BigDecimal,
     precision = 2,
   ) {
-    const pass = received.round(precision).eq(expected);
+    const pass = received.round(precision).eq(expected.round(precision));
 
     return {
       pass,

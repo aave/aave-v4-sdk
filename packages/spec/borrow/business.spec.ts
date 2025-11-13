@@ -103,7 +103,6 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         assertSingleElementArray(result.value);
         expect(result.value[0].debt.amount.value).toBeBigDecimalCloseTo(
           amountToBorrow,
-          2,
         );
         expect(result.value[0].debt.token.isWrappedNativeToken).toBe(false);
       });
@@ -171,7 +170,6 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         );
         expect(balanceAfter).toBeBigDecimalCloseTo(
           balanceBefore.add(amountToBorrow),
-          4,
         );
 
         expect(result.value[0].debt.amount.value).toBeBigDecimalCloseTo(
