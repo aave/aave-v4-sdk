@@ -2,8 +2,7 @@ import { Big } from 'big.js';
 import type { Tagged } from 'type-fest';
 import { InvariantError, invariant } from './helpers';
 
-// TODO: renable once interface migration is complete
-Big.strict = false;
+Big.strict = true;
 
 /**
  * Valid input types for BigDecimal operations.
@@ -33,35 +32,24 @@ export enum RoundingMode {
 }
 
 /**
- * A high precision decimal number.
+ * A high precision decimal number built on top of `big.js` library.
  */
-export class BigDecimal extends Big {
+export class BigDecimal {
+  private readonly value: Big;
+
   private static readonly MAX_VAL = BigDecimal.new(Number.MAX_VALUE.toString()); // ≈ 1.7976931348623157e+308
   private static readonly MIN_VAL = BigDecimal.new(Number.MIN_VALUE.toString()); // ≈ 5e-324 (smallest positive subnormal)
 
-  private constructor(value: string | Big) {
-    super(value);
+  private constructor(value: Big.BigSource) {
+    this.value = new Big(value);
   }
 
   /**
-   * Returns a string representing the value of this BigDecimal.
-   *
-   * This method is called automatically when the BigDecimal is used in a context that expects a primitive value.
-   * To prevent accidental type coercion and loss of precision, this will throw an error in strict mode.
-   *
-   * @returns A string representation of the BigDecimal value.
-   * @throws `InvariantError` when strict mode is enabled to prevent implicit conversion.
-   *
-   * @example
-   * ```ts
-   * const x = bigDecimal('123.456');
-   * x.valueOf(); // Returns "123.456"
-   * // Note: In strict mode, operations like `2 + x` will throw an error
-   * ```
+   * Throws an error to prevent implicit conversion to a number.
    */
-  override valueOf(): string {
+  valueOf(): string {
     try {
-      return super.valueOf();
+      return this.value.valueOf();
     } catch (error) {
       throw new InvariantError('BigDecimal cannot be converted to a number', {
         cause: error,
@@ -70,10 +58,19 @@ export class BigDecimal extends Big {
   }
 
   /**
+   * Throws an error to prevent conversion to a number.
+   *
+   * If you need a JS Number, and your can afford precision loss, use `toApproximateNumber()` instead.
+   */
+  toNumber(): number {
+    throw new InvariantError('BigDecimal cannot be converted to a number');
+  }
+
+  /**
    * Returns a BigDecimal whose value is the absolute value, i.e. the magnitude, of this BigDecimal.
    */
-  override abs(): BigDecimal {
-    return new BigDecimal(super.abs());
+  abs(): BigDecimal {
+    return new BigDecimal(this.value.abs());
   }
 
   /**
@@ -81,8 +78,8 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if n is invalid.
    */
-  override add(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.add(n));
+  add(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.add(this.toBigSource(n)));
   }
 
   /**
@@ -92,8 +89,8 @@ export class BigDecimal extends Big {
    * @throws `±Infinity` on division by zero.
    * @throws `NaN` on division of zero by zero.
    */
-  override div(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.div(n));
+  div(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.div(this.toBigSource(n)));
   }
 
   /**
@@ -101,8 +98,8 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if n is invalid.
    */
-  override minus(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.minus(n));
+  minus(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.minus(this.toBigSource(n)));
   }
 
   /**
@@ -112,8 +109,8 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if n is negative or otherwise invalid.
    */
-  override mod(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.mod(n));
+  mod(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.mod(this.toBigSource(n)));
   }
 
   /**
@@ -121,15 +118,15 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if n is invalid.
    */
-  override mul(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.mul(n));
+  mul(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.mul(this.toBigSource(n)));
   }
 
   /**
    * Return a new BigDecimal whose value is the value of this BigDecimal negated.
    */
-  override neg(): BigDecimal {
-    return new BigDecimal(super.neg());
+  neg(): BigDecimal {
+    return new BigDecimal(this.value.neg());
   }
 
   /**
@@ -137,8 +134,8 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if n is invalid.
    */
-  override plus(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.plus(n));
+  plus(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.plus(this.toBigSource(n)));
   }
 
   /**
@@ -149,8 +146,8 @@ export class BigDecimal extends Big {
    *
    * Note: High value exponents may cause this method to be slow to return.
    */
-  override pow(exp: number): BigDecimal {
-    return new BigDecimal(super.pow(exp));
+  pow(exp: number): BigDecimal {
+    return new BigDecimal(this.value.pow(exp));
   }
 
   /**
@@ -162,8 +159,8 @@ export class BigDecimal extends Big {
    * @throws Error if sd is invalid.
    * @throws Error if rm is invalid.
    */
-  override prec(sd: number, rm?: RoundingMode): BigDecimal {
-    return new BigDecimal(super.prec(sd, rm));
+  prec(sd: number, rm?: RoundingMode): BigDecimal {
+    return new BigDecimal(this.value.prec(sd, rm));
   }
 
   /**
@@ -174,8 +171,8 @@ export class BigDecimal extends Big {
    * @throws Error if dp is invalid.
    * @throws Error if rm is invalid.
    */
-  override round(dp?: number, rm?: RoundingMode): BigDecimal {
-    return new BigDecimal(super.round(dp, rm));
+  round(dp?: number, rm?: RoundingMode): BigDecimal {
+    return new BigDecimal(this.value.round(dp, rm));
   }
 
   /**
@@ -183,8 +180,8 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if this BigDecimal is negative.
    */
-  override sqrt(): BigDecimal {
-    return new BigDecimal(super.sqrt());
+  sqrt(): BigDecimal {
+    return new BigDecimal(this.value.sqrt());
   }
 
   /**
@@ -192,8 +189,8 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if n is invalid.
    */
-  override sub(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.sub(n));
+  sub(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.sub(this.toBigSource(n)));
   }
 
   /**
@@ -201,8 +198,114 @@ export class BigDecimal extends Big {
    *
    * @throws `NaN` if n is invalid.
    */
-  override times(n: Big.BigSource): BigDecimal {
-    return new BigDecimal(super.times(n));
+  times(n: BigDecimalSource): BigDecimal {
+    return new BigDecimal(this.value.times(this.toBigSource(n)));
+  }
+
+  /**
+   * Compare the values.
+   *
+   * @returns 1 if this BigDecimal is greater than n, 0 if equal, -1 if less than n.
+   * @throws `NaN` if n is invalid.
+   */
+  cmp(n: BigDecimalSource): Big.Comparison {
+    return this.value.cmp(this.toBigSource(n));
+  }
+
+  /**
+   * Returns true if the value of this BigDecimal equals the value of n, otherwise returns false.
+   *
+   * @throws `NaN` if n is invalid.
+   */
+  eq(n: BigDecimalSource): boolean {
+    return this.value.eq(this.toBigSource(n));
+  }
+
+  /**
+   * Returns true if the value of this BigDecimal is greater than the value of n, otherwise returns false.
+   *
+   * @throws `NaN` if n is invalid.
+   */
+  gt(n: BigDecimalSource): boolean {
+    return this.value.gt(this.toBigSource(n));
+  }
+
+  /**
+   * Returns true if the value of this BigDecimal is greater than or equal to the value of n, otherwise returns false.
+   *
+   * @throws `NaN` if n is invalid.
+   */
+  gte(n: BigDecimalSource): boolean {
+    return this.value.gte(this.toBigSource(n));
+  }
+
+  /**
+   * Returns true if the value of this BigDecimal is less than the value of n, otherwise returns false.
+   *
+   * @throws `NaN` if n is invalid.
+   */
+  lt(n: BigDecimalSource): boolean {
+    return this.value.lt(this.toBigSource(n));
+  }
+
+  /**
+   * Returns true if the value of this BigDecimal is less than or equal to the value of n, otherwise returns false.
+   *
+   * @throws `NaN` if n is invalid.
+   */
+  lte(n: BigDecimalSource): boolean {
+    return this.value.lte(this.toBigSource(n));
+  }
+
+  /**
+   * Returns a string representing the value of this BigDecimal in exponential notation to a fixed number of decimal places dp.
+   *
+   * @param dp Decimal places, 0 to 1e+6 inclusive
+   * @param rm Rounding mode: RoundingMode.Down (0), RoundingMode.HalfUp (1), RoundingMode.HalfEven (2), or RoundingMode.Up (3).
+   * @throws Error if dp is invalid.
+   */
+  toExponential(dp?: number, rm?: RoundingMode): string {
+    return this.value.toExponential(dp, rm);
+  }
+
+  /**
+   * Returns a string representing the value of this BigDecimal in normal notation to a fixed number of decimal places dp.
+   *
+   * @param dp Decimal places, 0 to 1e+6 inclusive
+   * @param rm Rounding mode: RoundingMode.Down (0), RoundingMode.HalfUp (1), RoundingMode.HalfEven (2), or RoundingMode.Up (3).
+   * @throws Error if dp is invalid.
+   */
+  toFixed(dp?: number, rm?: RoundingMode): string {
+    return this.value.toFixed(dp, rm);
+  }
+
+  /**
+   * Returns a string representing the value of this BigDecimal to the specified number of significant digits sd.
+   *
+   * @param sd Significant digits, 1 to 1e+6 inclusive
+   * @param rm Rounding mode: RoundingMode.Down (0), RoundingMode.HalfUp (1), RoundingMode.HalfEven (2), or RoundingMode.Up (3).
+   * @throws Error if sd is invalid.
+   */
+  toPrecision(sd?: number, rm?: RoundingMode): string {
+    return this.value.toPrecision(sd, rm);
+  }
+
+  /**
+   * Returns a string representing the value of this BigDecimal.
+   *
+   * If this BigDecimal has a positive exponent that is equal to or greater than 21, or a negative exponent equal to or less than -7, then exponential notation is returned.
+   */
+  toString(): string {
+    return this.value.toString();
+  }
+
+  /**
+   * Returns a string representing the value of this BigDecimal.
+   *
+   * This method is used by JSON.stringify() to serialize BigDecimal values.
+   */
+  toJSON(): string {
+    return this.value.toJSON();
   }
 
   /**
@@ -211,7 +314,7 @@ export class BigDecimal extends Big {
    * @param decimals The number of decimal places to scale by (can be negative to scale down).
    */
   public rescale(decimals: number): BigDecimal {
-    return new BigDecimal(this.mul(10 ** decimals));
+    return this.mul(10 ** decimals);
   }
 
   /**
@@ -360,6 +463,22 @@ export class BigDecimal extends Big {
     return [second, ...others].reduce<BigDecimal>((max, current) => {
       return max.gt(current) ? max : current;
     }, first);
+  }
+
+  /**
+   * Converts BigDecimalSource to Big.BigSource for passing to super methods.
+   */
+  private toBigSource(n: BigDecimalSource): Big.BigSource {
+    switch (typeof n) {
+      case 'bigint':
+        return n.toString();
+      case 'number':
+        return n.toString();
+      case 'string':
+        return n;
+      default:
+        return n.toFixed();
+    }
   }
 
   private getIntegerDigitCount(): number {
