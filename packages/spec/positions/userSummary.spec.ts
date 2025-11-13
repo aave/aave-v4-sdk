@@ -1,14 +1,15 @@
 import { assertOk, Currency, evmAddress, TimeWindow } from '@aave/client-next';
-import { userSummary } from '@aave/client-next/actions';
+import { userPositions, userSummary } from '@aave/client-next/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client-next/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-
-import { recreateUserActivities } from './helper';
+import { assertNonEmptyArray } from '../test-utils';
+import { recreateUserPositions } from './helper';
 
 const user = await createNewWallet(
   '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',
@@ -17,8 +18,8 @@ const user = await createNewWallet(
 describe('Querying User Summary on Aave V4', () => {
   describe('Given a user with multiple active positions', () => {
     beforeAll(async () => {
-      // NOTE: Recreate user activities if needed
-      await recreateUserActivities(client, user);
+      // NOTE: Recreate user positions if needed
+      await recreateUserPositions(client, user);
     }, 180_000);
 
     describe('When the user queries their summary without filters', () => {
@@ -27,13 +28,13 @@ describe('Querying User Summary on Aave V4', () => {
           user: evmAddress(user.account.address),
         });
         assertOk(summary);
-        expect(summary.value.totalPositions).toBe(1);
+        expect(summary.value.totalPositions).toBe(2);
       });
     });
 
     describe('When the user queries their summary filtered by spoke', () => {
       it('Then the summary for that specific spoke is returned', async () => {
-        const summary = await userSummary(client, {
+        let summary = await userSummary(client, {
           user: evmAddress(user.account.address),
           filter: {
             spoke: {
@@ -44,6 +45,45 @@ describe('Querying User Summary on Aave V4', () => {
         });
         assertOk(summary);
         expect(summary.value.totalPositions).toBe(1);
+
+        summary = await userSummary(client, {
+          user: evmAddress(user.account.address),
+          filter: {
+            spokeId: ETHEREUM_SPOKE_CORE_ID,
+          },
+        });
+        assertOk(summary);
+        expect(summary.value.totalPositions).toBe(1);
+      });
+    });
+
+    describe('When the user queries their summary filtered by user position ID', () => {
+      it('Then the summary for that specific user position is returned', async () => {
+        const positions = await userPositions(client, {
+          user: evmAddress(user.account.address),
+          filter: {
+            chainIds: [ETHEREUM_FORK_ID],
+          },
+        });
+        assertOk(positions);
+        assertNonEmptyArray(positions.value);
+
+        const summary = await userSummary(client, {
+          user: evmAddress(user.account.address),
+          filter: {
+            userPositionId: positions.value[0].id,
+          },
+        });
+        assertOk(summary);
+        expect(summary.value.totalPositions).toBe(1);
+        expect(summary.value.totalCollateral.value).toBeBigDecimalCloseTo(
+          positions.value[0].totalCollateral.current.value,
+          1,
+        );
+        expect(summary.value.totalSupplied.value).toBeBigDecimalCloseTo(
+          positions.value[0].totalSupplied.current.value,
+          1,
+        );
       });
     });
 
@@ -56,7 +96,7 @@ describe('Querying User Summary on Aave V4', () => {
           },
         });
         assertOk(summary);
-        expect(summary.value.totalPositions).toBe(1);
+        expect(summary.value.totalPositions).toBe(2);
       });
     });
 
@@ -103,7 +143,6 @@ describe('Querying User Summary on Aave V4', () => {
             { timeWindow: timeWindow },
           );
           assertOk(summary);
-          // Note: think about how to make sure the summary is returned for the correct time window
         },
       );
     });
