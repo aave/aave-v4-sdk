@@ -61,7 +61,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
       });
       assertOk(primed);
 
-      const result = await hub(
+      let result = await hub(
         client,
         {
           query: {
@@ -73,6 +73,23 @@ describe('Given the Aave SDK normalized graph cache', () => {
         },
       );
 
+      assertOk(result);
+      expect(result.value).toEqual(primed.value[0]);
+
+      result = await hub(
+        client,
+        {
+          query: {
+            hubInput: {
+              address: primed.value[0]!.address,
+              chainId: ETHEREUM_FORK_ID,
+            },
+          },
+        },
+        {
+          requestPolicy: 'cache-only',
+        },
+      );
       assertOk(result);
       expect(result.value).toEqual(primed.value[0]);
     });
