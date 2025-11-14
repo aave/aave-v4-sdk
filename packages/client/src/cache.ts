@@ -20,6 +20,7 @@ import {
   type SwapByIntentWithApprovalRequired,
   type SwapByTransaction,
   type UserPosition,
+  type UsingAsCollateralActivity,
   type VariablesOf,
   type WithdrawActivity,
 } from '@aave/graphql-next';
@@ -133,6 +134,9 @@ export const exchange = cacheExchange({
       timestamp: transformToDate,
     },
     WithdrawActivity: {
+      timestamp: transformToDate,
+    },
+    UsingAsCollateralActivity: {
       timestamp: transformToDate,
     },
     SpokeUserPositionManager: {
@@ -268,6 +272,7 @@ export const exchange = cacheExchange({
     ) => data.quote.quoteId,
     SwapByTransaction: (data: SwapByTransaction) => data.quote.quoteId,
     UserPosition: (data: UserPosition) => data.id,
+    UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
     WithdrawActivity: (data: WithdrawActivity) => data.id,
     RepayActivity: (data: RepayActivity) => data.id,
 
