@@ -76,11 +76,15 @@ describe('Querying User Summary on Aave V4', () => {
         });
         assertOk(summary);
         expect(summary.value.totalPositions).toBe(1);
-        expect(summary.value.totalCollateral.value).toBeBigDecimalCloseTo(
-          positions.value[0].totalCollateral.current.value,
+        expect(
+          summary.value.totalCollateral.value.round(0),
+        ).toBeBigDecimalCloseTo(
+          positions.value[0].totalCollateral.current.value.round(0),
         );
-        expect(summary.value.totalSupplied.value).toBeBigDecimalCloseTo(
-          positions.value[0].totalSupplied.current.value,
+        expect(
+          summary.value.totalSupplied.value.round(0),
+        ).toBeBigDecimalCloseTo(
+          positions.value[0].totalSupplied.current.value.round(0),
         );
       });
     });

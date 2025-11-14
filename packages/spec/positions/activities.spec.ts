@@ -56,13 +56,8 @@ describe('Query User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if (
-            [ActivityType.Liquidated, ActivityType.SetAsCollateral].includes(
-              activityType,
-            )
-          ) {
+          if ([ActivityType.Liquidated].includes(activityType)) {
             // Liquidated activities are not easily reproducible, so we skip them
-            // TODO: Enable when fixed AAVE-2555 setAsCollateral activities
             return;
           }
           assertNonEmptyArray(result.value.items);

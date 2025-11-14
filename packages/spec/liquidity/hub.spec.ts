@@ -79,8 +79,19 @@ describe('Aave V4 Hub Scenarios', () => {
         assertOk(listHubs);
         assertNonEmptyArray(listHubs.value);
 
-        const result = await hub(client, {
+        let result = await hub(client, {
           query: { hubId: listHubs.value[0].id },
+        });
+        assertOk(result);
+        expect(result.value).toMatchObject(listHubs.value[0]);
+
+        result = await hub(client, {
+          query: {
+            hubInput: {
+              address: listHubs.value[0].address,
+              chainId: ETHEREUM_FORK_ID,
+            },
+          },
         });
         assertOk(result);
         expect(result.value).toMatchObject(listHubs.value[0]);

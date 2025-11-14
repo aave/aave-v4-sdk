@@ -4,8 +4,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_ISO_STABLE_ID,
-  ETHEREUM_USDC_ADDRESS,
 } from '@aave/client-next/test-utils';
 
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -95,7 +95,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         const positions = await userPositions(client, {
           filter: {
             tokens: [
-              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_USDC_ADDRESS },
+              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_GHO_ADDRESS },
             ],
           },
           user: evmAddress(user.account.address),

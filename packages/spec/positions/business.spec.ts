@@ -228,7 +228,10 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             reserve: usedReserves.borrowReserve.id,
             amount: {
               erc20: {
-                value: bigDecimal('50'),
+                value:
+                  usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+                    0.1,
+                  ),
               },
             },
           })

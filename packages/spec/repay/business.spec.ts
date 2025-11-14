@@ -127,7 +127,7 @@ describe('Repaying Loans on Aave V4', () => {
                 erc20: {
                   value: {
                     exact:
-                      reserve.userState!.borrowable.amount.value.times(0.1),
+                      reserve.userState!.borrowable.amount.value.times(0.09),
                   },
                 },
               },

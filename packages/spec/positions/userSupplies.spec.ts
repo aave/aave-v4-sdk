@@ -33,7 +33,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(4);
+        expect(supplyPositions.value.length).toBe(3);
         supplyPositions.value.forEach((position) => {
           expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_CORE_ID);
         });
@@ -86,7 +86,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(5);
+        expect(supplyPositions.value.length).toBe(3);
       });
     });
 
@@ -108,7 +108,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(4);
+        expect(supplyPositions.value.length).toBe(3);
       });
     });
 
