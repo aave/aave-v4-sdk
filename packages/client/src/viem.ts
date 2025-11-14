@@ -27,7 +27,9 @@ import {
 import {
   type Account,
   type Chain,
+  createPublicClient,
   defineChain,
+  http,
   type ProviderRpcError,
   type RpcError,
   SwitchChainError,
@@ -39,6 +41,7 @@ import {
   type WalletClient,
 } from 'viem';
 import {
+  estimateGas as estimateGasWithViem,
   sendTransaction as sendTransactionWithViem,
   signTypedData,
   waitForTransactionReceipt,
@@ -140,31 +143,56 @@ function ensureChain(
   });
 }
 
-function sendEip1559Transaction(
-  walletClient: WalletClient<Transport, Chain, Account>,
+function estimateGas(
+  walletClient: WalletClient,
   request: TransactionRequest,
-): ResultAsync<TxHash, CancelError | SigningError> {
+): ResultAsync<bigint, SigningError> {
+  const publicClient = createPublicClient({
+    chain: walletClient.chain,
+    transport: http(),
+  });
+
   return ResultAsync.fromPromise(
-    sendTransactionWithViem(walletClient, {
+    estimateGasWithViem(publicClient, {
       account: walletClient.account,
       data: request.data,
       to: request.to,
       value: BigInt(request.value),
-      chain: walletClient.chain,
     }),
-    (err) => {
-      if (err instanceof TransactionExecutionError) {
-        const rejected = err.walk(
-          (err) => err instanceof UserRejectedRequestError,
-        );
+    (err) => SigningError.from(err),
+  );
+}
 
-        if (rejected) {
-          return CancelError.from(rejected);
-        }
-      }
-      return SigningError.from(err);
-    },
-  ).map(txHash);
+function sendEip1559Transaction(
+  walletClient: WalletClient<Transport, Chain, Account>,
+  request: TransactionRequest,
+): ResultAsync<TxHash, CancelError | SigningError> {
+  return estimateGas(walletClient, request)
+    .andThen((gas) =>
+      ResultAsync.fromPromise(
+        sendTransactionWithViem(walletClient, {
+          account: walletClient.account,
+          data: request.data,
+          to: request.to,
+          value: BigInt(request.value),
+          chain: walletClient.chain,
+          gas: (gas * 115n) / 100n, // 15% buffer
+        }),
+        (err) => {
+          if (err instanceof TransactionExecutionError) {
+            const rejected = err.walk(
+              (err) => err instanceof UserRejectedRequestError,
+            );
+
+            if (rejected) {
+              return CancelError.from(rejected);
+            }
+          }
+          return SigningError.from(err);
+        },
+      ),
+    )
+    .map(txHash);
 }
 
 function isWalletClientWithAccount(
