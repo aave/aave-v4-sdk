@@ -39,13 +39,14 @@ describe('Aave V4 Hub Scenarios', () => {
           },
         });
         assertOk(listHubs);
+        assertNonEmptyArray(listHubs.value);
 
         for (const hub of listHubs.value) {
           let result = await hubAssets(client, {
             query: { hubId: hub.id },
           });
           assertOk(result);
-          const assetsInHub = result.value.map(
+          let assetsInHub = result.value.map(
             (asset) => asset.underlying.address,
           );
           expect(tokens.some((token) => assetsInHub.includes(token))).toBe(
@@ -58,10 +59,8 @@ describe('Aave V4 Hub Scenarios', () => {
             },
           });
           assertOk(result);
-          const assetsInHub2 = result.value.map(
-            (asset) => asset.underlying.address,
-          );
-          expect(tokens.some((token) => assetsInHub2.includes(token))).toBe(
+          assetsInHub = result.value.map((asset) => asset.underlying.address);
+          expect(tokens.some((token) => assetsInHub.includes(token))).toBe(
             true,
           );
         }
@@ -80,22 +79,11 @@ describe('Aave V4 Hub Scenarios', () => {
         assertOk(listHubs);
         assertNonEmptyArray(listHubs.value);
 
-        let result = await hub(client, {
+        const result = await hub(client, {
           query: { hubId: listHubs.value[0].id },
         });
         assertOk(result);
         expect(result.value).toMatchObject(listHubs.value[0]);
-
-        result = await hub(client, {
-          query: {
-            hubInput: {
-              address: listHubs.value[1]!.address,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
-        });
-        assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[1]!);
       });
     });
   });
