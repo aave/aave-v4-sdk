@@ -95,6 +95,17 @@ describe('Aave V4 Hub Scenarios', () => {
         });
         assertOk(result);
         expect(result.value).toMatchObject(listHubs.value[0]);
+
+        result = await hub(client, {
+          query: {
+            hubInput: {
+              address: listHubs.value[0].address,
+              chainId: ETHEREUM_FORK_ID,
+            },
+          },
+        });
+        assertOk(result);
+        expect(result.value).toMatchObject(listHubs.value[0]);
       });
     });
   });
