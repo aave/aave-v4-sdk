@@ -52,7 +52,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
     });
   });
 
-  describe(`When fetching a single 'Hub'`, () => {
+  describe(`When fetching a single 'Hub' by hubId`, () => {
     it('Then it should leverage cached data whenever possible', async () => {
       const primed = await hubs(client, {
         query: {
@@ -73,6 +73,33 @@ describe('Given the Aave SDK normalized graph cache', () => {
         },
       );
 
+      assertOk(result);
+      expect(result.value).toEqual(primed.value[0]);
+    });
+  });
+
+  describe(`When fetching a single 'Hub' by hubInput`, () => {
+    it('Then it should leverage cached data whenever possible', async () => {
+      const primed = await hubs(client, {
+        query: {
+          chainIds: [ETHEREUM_FORK_ID],
+        },
+      });
+      assertOk(primed);
+      const result = await hub(
+        client,
+        {
+          query: {
+            hubInput: {
+              address: primed.value[0]!.address,
+              chainId: ETHEREUM_FORK_ID,
+            },
+          },
+        },
+        {
+          requestPolicy: 'cache-only',
+        },
+      );
       assertOk(result);
       expect(result.value).toEqual(primed.value[0]);
     });
