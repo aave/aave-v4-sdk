@@ -15,7 +15,7 @@ import {
 import {
   client,
   createNewWallet,
-  ETHEREUM_MKR_ADDRESS,
+  ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
@@ -125,7 +125,7 @@ describe('Supplying Assets on Aave V4', () => {
     describe('When the user supplies tokens to a reserve disabling the collateral', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_MKR_ADDRESS,
+          address: ETHEREUM_1INCH_ADDRESS,
           amount: bigDecimal('10'),
           decimals: 18,
         });
@@ -134,13 +134,13 @@ describe('Supplying Assets on Aave V4', () => {
 
       it('Then the supply position is updated and the tokens are disabled as collateral', async () => {
         const amountToSupply = bigDecimal('9');
-        const mkrReserve = await findReservesToSupply(client, user, {
-          token: ETHEREUM_MKR_ADDRESS,
+        const inchReserve = await findReservesToSupply(client, user, {
+          token: ETHEREUM_1INCH_ADDRESS,
         });
-        assertOk(mkrReserve);
-        assertNonEmptyArray(mkrReserve.value);
+        assertOk(inchReserve);
+        assertNonEmptyArray(inchReserve.value);
         const result = await supplyToReserve(client, user, {
-          reserve: mkrReserve.value[0].id,
+          reserve: inchReserve.value[0].id,
           amount: {
             erc20: {
               value: amountToSupply,
@@ -152,7 +152,7 @@ describe('Supplying Assets on Aave V4', () => {
           userSupplies(client, {
             query: {
               userSpoke: {
-                spoke: mkrReserve.value[0].spoke.id,
+                spoke: inchReserve.value[0].spoke.id,
                 user: evmAddress(user.account.address),
               },
             },
@@ -163,7 +163,7 @@ describe('Supplying Assets on Aave V4', () => {
         const supplyPosition = result.value.find((position) => {
           return (
             position.reserve.asset.underlying.address ===
-            mkrReserve.value[0].asset.underlying.address
+            inchReserve.value[0].asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');
