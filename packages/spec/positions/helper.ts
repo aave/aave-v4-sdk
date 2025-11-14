@@ -6,21 +6,23 @@ import {
 } from '@aave/client-next';
 import {
   activities,
+  setUserSupplyAsCollateral,
   userBorrows,
   userPositions,
+  userSupplies,
 } from '@aave/client-next/actions';
 import {
   ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_SPOKE_EMODE_ADDRESS,
+  ETHEREUM_SPOKE_ETHENA_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client-next/test-utils';
+import { sendWith } from '@aave/client-next/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-
 import {
   findReservesToBorrow,
   findReservesToSupply,
@@ -35,6 +37,7 @@ import {
   repayFromReserve,
   withdrawFromReserve,
 } from '../helpers/withdrawRepay';
+import { assertNonEmptyArray } from '../test-utils';
 
 export const recreateUserActivities = async (
   client: AaveClient,
@@ -60,9 +63,9 @@ export const recreateUserActivities = async (
   const repayActivities = listActivities.value.items.filter(
     (item) => item.__typename === 'RepayActivity',
   );
-  // const setCollateralActivities = listActivities.value.items.filter(
-  //   (item) => item.__typename === 'UsingAsCollateralActivity',
-  // );
+  const setCollateralActivities = listActivities.value.items.filter(
+    (item) => item.__typename === 'UsingAsCollateralActivity',
+  );
 
   // Supply/Withdraw activities: minimum 3 supply activities
   const listReservesToSupply = await findReservesToSupply(client, user, {
@@ -101,38 +104,37 @@ export const recreateUserActivities = async (
     }
   }
 
-  // TODO: Enable when fixed AAVE-2555
   // SetCollateral activity: at least 1 set collateral activity
-  // if (setCollateralActivities.length < 1) {
-  //   const supplyPositions = await userSupplies(client, {
-  //     query: {
-  //       userChains: {
-  //         chainIds: [ETHEREUM_FORK_ID],
-  //         user: evmAddress(user.account.address),
-  //       },
-  //     },
-  //   });
-  //   assertOk(supplyPositions);
-  //   assertNonEmptyArray(supplyPositions.value);
-  //   const supplyPosition = supplyPositions.value[0]!;
-  //   const result = await setUserSupplyAsCollateral(client, {
-  //     reserve: supplyPosition.reserve.id,
-  //     sender: evmAddress(user.account.address),
-  //     enableCollateral: !supplyPosition.isCollateral,
-  //   })
-  //     .andThen(sendWith(user))
-  //     .andThen(client.waitForTransaction)
-  //     .andThen(() =>
-  //       setUserSupplyAsCollateral(client, {
-  //         reserve: supplyPosition.reserve.id,
-  //         sender: evmAddress(user.account.address),
-  //         enableCollateral: supplyPosition.isCollateral,
-  //       }),
-  //     )
-  //     .andThen(sendWith(user))
-  //     .andThen(client.waitForTransaction);
-  //   assertOk(result);
-  // }
+  if (setCollateralActivities.length < 1) {
+    const supplyPositions = await userSupplies(client, {
+      query: {
+        userChains: {
+          chainIds: [ETHEREUM_FORK_ID],
+          user: evmAddress(user.account.address),
+        },
+      },
+    });
+    assertOk(supplyPositions);
+    assertNonEmptyArray(supplyPositions.value);
+    const supplyPosition = supplyPositions.value[0]!;
+    const result = await setUserSupplyAsCollateral(client, {
+      reserve: supplyPosition.reserve.id,
+      sender: evmAddress(user.account.address),
+      enableCollateral: !supplyPosition.isCollateral,
+    })
+      .andThen(sendWith(user))
+      .andThen(client.waitForTransaction)
+      .andThen(() =>
+        setUserSupplyAsCollateral(client, {
+          reserve: supplyPosition.reserve.id,
+          sender: evmAddress(user.account.address),
+          enableCollateral: supplyPosition.isCollateral,
+        }),
+      )
+      .andThen(sendWith(user))
+      .andThen(client.waitForTransaction);
+    assertOk(result);
+  }
 
   // Borrow and repay activities: minimum 3 borrow and repay activities
   const listReservesToBorrow = await findReservesToBorrow(client, user, {
@@ -342,7 +344,7 @@ export const recreateUserPositions = async (
       client,
       user,
       {
-        spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+        spoke: ETHEREUM_SPOKE_ETHENA_ADDRESS,
         asCollateral: true,
       },
     );
@@ -366,7 +368,7 @@ export const recreateUserPositions = async (
       })
         .andThen(() =>
           findReservesToBorrow(client, user, {
-            spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+            spoke: ETHEREUM_SPOKE_ETHENA_ADDRESS,
           }),
         )
         .andThen((listReservesToBorrowEmodeSpoke) =>

@@ -5,13 +5,13 @@ exports[`Available Position Managers in a Spoke on Aave V4 > Given a user who wa
   {
     "__typename": "SpokePositionManger",
     "active": true,
-    "address": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
+    "address": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "name": "Aave Native Gateway",
   },
   {
     "__typename": "SpokePositionManger",
     "active": true,
-    "address": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
+    "address": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
     "name": "Aave Signature Gateway",
   },
 ]

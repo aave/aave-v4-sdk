@@ -64,7 +64,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBe(3);
       });
     });
 
@@ -80,7 +80,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBe(3);
       });
     });
 
@@ -96,7 +96,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBe(3);
       });
     });
 
@@ -134,7 +134,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBe(3);
       });
     });
 
