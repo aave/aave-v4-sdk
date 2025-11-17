@@ -148,6 +148,10 @@ export function supplyAndBorrow(
 export function supplyWSTETHAndBorrowETH(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
+  params: {
+    amountToSupply: BigDecimal;
+    ratioToBorrow?: number;
+  },
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
   return findReservesToSupply(client, user, {
     token: ETHEREUM_WSTETH_ADDRESS,
@@ -155,7 +159,7 @@ export function supplyWSTETHAndBorrowETH(
   }).andThen((listSupplyReserves) =>
     supplyToReserve(client, user, {
       reserve: listSupplyReserves[0].id,
-      amount: { erc20: { value: bigDecimal(0.2) } },
+      amount: { erc20: { value: params.amountToSupply } },
       sender: evmAddress(user.account.address),
       enableCollateral: true,
     })
@@ -170,7 +174,10 @@ export function supplyWSTETHAndBorrowETH(
           sender: evmAddress(user.account.address),
           reserve: reservesToBorrow[0].id,
           amount: {
-            native: reservesToBorrow[0].userState!.borrowable.amount.value,
+            native:
+              reservesToBorrow[0].userState!.borrowable.amount.value.times(
+                params.ratioToBorrow ?? 0.2,
+              ),
           },
         })
           .andThen(sendWith(user))

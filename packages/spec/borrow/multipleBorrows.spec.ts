@@ -20,14 +20,16 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
   describe('Given a user with collateral supplied to a reserve', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
+        const amountToSupply = bigDecimal('0.05');
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.2'),
+          amount: amountToSupply,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-            amount: bigDecimal('0.1'),
+            amount: amountToSupply,
             asCollateral: true,
           }),
         );

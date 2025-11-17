@@ -21,14 +21,16 @@ const user = await createNewWallet();
 describe('Feature: Borrowing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     beforeAll(async () => {
+      const amountToSupply = bigDecimal('0.05');
+
       const setup = await fundErc20Address(evmAddress(user.account.address), {
         address: ETHEREUM_WSTETH_ADDRESS,
-        amount: bigDecimal('0.2'),
+        amount: amountToSupply,
       }).andThen(() =>
         findReserveAndSupply(client, user, {
           token: ETHEREUM_WSTETH_ADDRESS,
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-          amount: bigDecimal('0.1'),
+          amount: amountToSupply,
           asCollateral: true,
         }),
       );
@@ -110,15 +112,16 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
 
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     describe('When the user borrows a native asset from the reserve', () => {
-      // NOTE: Need to use Emode Spoke to borrow native assets
       beforeAll(async () => {
+        const amountToSupply = bigDecimal('0.05');
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.2'),
+          amount: amountToSupply,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('0.1'),
+            amount: amountToSupply,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             asCollateral: true,
           }),

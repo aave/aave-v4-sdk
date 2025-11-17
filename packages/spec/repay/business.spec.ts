@@ -35,6 +35,7 @@ describe('Repaying Loans on Aave V4', () => {
 
     beforeEach(async () => {
       const supplySetup = await findReservesToSupply(client, user, {
+        token: ETHEREUM_WSTETH_ADDRESS,
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
         asCollateral: true,
       }).andThen((supplyReserves) => {
@@ -49,11 +50,7 @@ describe('Repaying Loans on Aave V4', () => {
         }).andThen(() =>
           supplyToReserve(client, user, {
             reserve: supplyReserves[0].id,
-            amount: {
-              erc20: {
-                value: amountToSupply,
-              },
-            },
+            amount: { erc20: { value: amountToSupply } },
             sender: evmAddress(user.account.address),
             enableCollateral: true,
           }),
@@ -297,7 +294,7 @@ describe('Repaying Loans on Aave V4', () => {
         });
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
-          amountToRepay,
+          positionBefore.debt.amount.value.minus(amountToRepay),
         );
       });
     });
@@ -307,10 +304,17 @@ describe('Repaying Loans on Aave V4', () => {
     let reserveSupportingNative: Reserve;
 
     beforeAll(async () => {
+      const amountToSupply = bigDecimal('0.05');
+
       const setup = await fundErc20Address(evmAddress(user.account.address), {
         address: ETHEREUM_WSTETH_ADDRESS,
-        amount: bigDecimal('0.5'),
-      }).andThen(() => supplyWSTETHAndBorrowETH(client, user));
+        amount: amountToSupply,
+      }).andThen(() =>
+        supplyWSTETHAndBorrowETH(client, user, {
+          amountToSupply: amountToSupply,
+          ratioToBorrow: 0.4,
+        }),
+      );
 
       assertOk(setup);
       reserveSupportingNative = setup.value.borrowReserve;
