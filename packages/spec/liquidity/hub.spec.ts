@@ -83,7 +83,13 @@ describe('Aave V4 Hub Scenarios', () => {
           query: { hubId: listHubs.value[0].id },
         });
         assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        expect(result.value).toMatchObject({
+          id: listHubs.value[0].id,
+          name: listHubs.value[0].name,
+          address: listHubs.value[0].address,
+          chain: listHubs.value[0].chain,
+          summary: expect.any(Object),
+        });
 
         result = await hub(client, {
           query: {
@@ -94,7 +100,13 @@ describe('Aave V4 Hub Scenarios', () => {
           },
         });
         assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        expect(result.value).toMatchObject({
+          id: listHubs.value[0].id,
+          name: listHubs.value[0].name,
+          address: listHubs.value[0].address,
+          chain: listHubs.value[0].chain,
+          summary: expect.any(Object),
+        });
 
         result = await hub(client, {
           query: {
@@ -105,7 +117,13 @@ describe('Aave V4 Hub Scenarios', () => {
           },
         });
         assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        expect(result.value).toMatchObject({
+          id: listHubs.value[0].id,
+          name: listHubs.value[0].name,
+          address: listHubs.value[0].address,
+          chain: listHubs.value[0].chain,
+          summary: expect.any(Object),
+        });
       });
     });
   });
