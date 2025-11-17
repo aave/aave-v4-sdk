@@ -37,20 +37,28 @@ describe('Repaying Loans on Aave V4', () => {
       const supplySetup = await findReservesToSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
         asCollateral: true,
-      }).andThen((supplyReserves) =>
-        fundErc20Address(evmAddress(user.account.address), {
+      }).andThen((supplyReserves) => {
+        const amountToSupply = supplyReserves[0].supplyCap
+          .minus(supplyReserves[0].summary.supplied.amount.value)
+          .div(100);
+
+        return fundErc20Address(evmAddress(user.account.address), {
           address: supplyReserves[0].asset.underlying.address,
-          amount: bigDecimal('0.2'),
+          amount: amountToSupply,
           decimals: supplyReserves[0].asset.underlying.info.decimals,
         }).andThen(() =>
           supplyToReserve(client, user, {
             reserve: supplyReserves[0].id,
-            amount: { erc20: { value: bigDecimal(0.01) } },
+            amount: {
+              erc20: {
+                value: amountToSupply,
+              },
+            },
             sender: evmAddress(user.account.address),
             enableCollateral: true,
           }),
-        ),
-      );
+        );
+      });
       assertOk(supplySetup);
       const borrowSetup = await findReservesToBorrow(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
@@ -67,7 +75,7 @@ describe('Repaying Loans on Aave V4', () => {
           amount: {
             erc20: {
               value:
-                reserveWithPermit.userState!.borrowable.amount.value.times(0.1),
+                reserveWithPermit.userState!.borrowable.amount.value.div(10),
             },
           },
         }).map(() => reserveWithPermit);
@@ -82,7 +90,8 @@ describe('Repaying Loans on Aave V4', () => {
           evmAddress(user.account.address),
           {
             address: reserve.asset.underlying.address,
-            amount: reserve.userState!.borrowable.amount.value.times(2),
+            // We fund with more than borrowed amount because of interest accumulation
+            amount: reserve.userState!.borrowable.amount.value.times(1.5),
             decimals: reserve.asset.underlying.info.decimals,
           },
         );
@@ -126,8 +135,7 @@ describe('Repaying Loans on Aave V4', () => {
               amount: {
                 erc20: {
                   value: {
-                    exact:
-                      reserve.userState!.borrowable.amount.value.times(0.09),
+                    exact: reserve.userState!.borrowable.amount.value.div(20),
                   },
                 },
               },
@@ -169,7 +177,7 @@ describe('Repaying Loans on Aave V4', () => {
           evmAddress(user.account.address),
           {
             address: reserve.asset.underlying.address,
-            amount: positionBefore.debt.amount.value.times(2),
+            amount: positionBefore.debt.amount.value,
             decimals: reserve.asset.underlying.info.decimals,
           },
         );
@@ -232,7 +240,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionBefore, 'No position found');
-        const amountToRepay = positionBefore.debt.amount.value.times(0.5);
+        const amountToRepay = positionBefore.debt.amount.value.div(2);
 
         const signature = await permitTypedData(client, {
           repay: {
@@ -245,18 +253,28 @@ describe('Repaying Loans on Aave V4', () => {
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
 
-        const repayResult = await repay(client, {
-          reserve: reserve.id,
-          sender: evmAddress(user.account.address),
-          amount: {
-            erc20: {
-              permitSig: signature.value,
-              value: {
-                exact: amountToRepay,
-              },
-            },
+        const repayResult = await fundErc20Address(
+          evmAddress(user.account.address),
+          {
+            address: reserve.asset.underlying.address,
+            amount: amountToRepay,
+            decimals: reserve.asset.underlying.info.decimals,
           },
-        })
+        )
+          .andThen(() =>
+            repay(client, {
+              reserve: reserve.id,
+              sender: evmAddress(user.account.address),
+              amount: {
+                erc20: {
+                  permitSig: signature.value,
+                  value: {
+                    exact: amountToRepay,
+                  },
+                },
+              },
+            }),
+          )
           .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
