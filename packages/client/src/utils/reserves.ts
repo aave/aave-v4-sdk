@@ -15,7 +15,7 @@ export function pickHighestSupplyApyReserve(
   }
 
   return reserves.reduce((max, reserve) => {
-    return reserve.summary.supplyApy.value > max.summary.supplyApy.value
+    return reserve.summary.supplyApy.value.gt(max.summary.supplyApy.value)
       ? reserve
       : max;
   }, reserves[0]);
@@ -35,7 +35,7 @@ export function pickLowestBorrowApyReserve(
   }
 
   return reserves.reduce((min, reserve) => {
-    return reserve.summary.borrowApy.value < min.summary.borrowApy.value
+    return reserve.summary.borrowApy.value.lt(min.summary.borrowApy.value)
       ? reserve
       : min;
   }, reserves[0]);
