@@ -9,6 +9,7 @@ import {
   borrow,
   repay,
   userSummary,
+  userSupplies,
   withdraw,
 } from '@aave/client-next/actions';
 import {
@@ -39,13 +40,13 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.5'),
+          amount: bigDecimal('0.1'),
         }).andThen(() =>
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             asCollateral: true,
-            amount: bigDecimal('0.3'),
+            amount: bigDecimal('0.1'),
           }),
         );
 
@@ -76,16 +77,20 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
         const setup = await findReservesToSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
           asCollateral: true,
-        }).andThen((reservesToSupply) =>
-          fundErc20Address(evmAddress(user.account.address), {
+        }).andThen((reservesToSupply) => {
+          const amountToSupply = reservesToSupply[0].supplyCap
+            .minus(reservesToSupply[0].summary.supplied.amount.value)
+            .div(100);
+
+          return fundErc20Address(evmAddress(user.account.address), {
             address: reservesToSupply[0].asset.underlying.address,
-            amount: bigDecimal('0.2'),
+            amount: amountToSupply,
             decimals: reservesToSupply[0].asset.underlying.info.decimals,
           })
             .andThen(() =>
               supplyAndBorrow(client, user, {
                 reserveToSupply: reservesToSupply[0],
-                amountToSupply: bigDecimal('0.1'),
+                amountToSupply: amountToSupply,
                 reserveToBorrow: reservesToBorrow.value[0],
                 ratioToBorrow: 0.1,
               }),
@@ -93,8 +98,8 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             .map(() => ({
               borrowReserve: reservesToBorrow.value[0],
               supplyReserve: reservesToSupply[0],
-            })),
-        );
+            }));
+        });
         assertOk(setup);
         usedReserves = setup!.value;
       }, 60_000);
@@ -125,8 +130,12 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeSupply = summary.value.lowestHealthFactor!;
 
+          const amountToSupply = usedReserves.supplyReserve.supplyCap
+            .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
+            .div(100);
+
           const setup = await supplyToReserve(client, user, {
-            amount: { erc20: { value: bigDecimal('0.1') } },
+            amount: { erc20: { value: amountToSupply } },
             reserve: usedReserves.supplyReserve.id,
             enableCollateral: true,
             sender: evmAddress(user.account.address),
@@ -168,7 +177,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
               address: usedReserves.borrowReserve.asset.underlying.address,
               amount:
                 usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
-                  2,
+                  1.5,
                 ),
               decimals:
                 usedReserves.borrowReserve.asset.underlying.info.decimals,
@@ -182,8 +191,8 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
                   erc20: {
                     value: {
                       exact:
-                        usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
-                          0.5,
+                        usedReserves.borrowReserve.userState!.borrowable.amount.value.div(
+                          20,
                         ),
                     },
                   },
@@ -268,12 +277,27 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeWithdraw = summary.value.lowestHealthFactor!;
 
+          const supplies = await userSupplies(client, {
+            query: {
+              userSpoke: {
+                spoke: usedReserves.supplyReserve.spoke.id,
+                user: evmAddress(user.account.address),
+              },
+            },
+          });
+          assertOk(supplies);
+          const amountToWithdraw = supplies.value
+            .find(
+              (supply) => supply.reserve.id === usedReserves.supplyReserve.id,
+            )!
+            .withdrawable.amount.value.div(2);
+
           const setup = await withdraw(client, {
             reserve: usedReserves.supplyReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {
-                exact: bigDecimal('0.02'),
+                exact: amountToWithdraw,
               },
             },
           })
@@ -281,7 +305,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             .andThen(client.waitForTransaction);
 
           assertOk(setup);
-        });
+        }, 60_000);
 
         it('Then the health factor should be less than before withdrawing collateral', async () => {
           const summary = await userSummary(client, {
