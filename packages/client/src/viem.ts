@@ -26,13 +26,9 @@ import {
 } from '@aave/types-next';
 import {
   type Account,
-  BaseError,
   type Chain,
-  createPublicClient,
   defineChain,
-  http,
   type ProviderRpcError,
-  type PublicClient,
   type RpcError,
   SwitchChainError,
   TransactionExecutionError,
@@ -44,7 +40,6 @@ import {
 } from 'viem';
 import {
   estimateGas as estimateGasWithViem,
-  getBlock,
   sendTransaction as sendTransactionWithViem,
   signTypedData,
   waitForTransactionReceipt,
@@ -146,45 +141,19 @@ function ensureChain(
   });
 }
 
-function getBlockGasLimit(
-  publicClient: PublicClient,
-): ResultAsync<bigint, SigningError> {
-  return ResultAsync.fromPromise(
-    getBlock(publicClient, {
-      blockTag: 'latest',
-    }),
-    (err) => SigningError.from(err),
-  ).map((block) => block.gasLimit);
-}
-
 function estimateGas(
   walletClient: WalletClient,
   request: TransactionRequest,
 ): ResultAsync<bigint, SigningError> {
-  const publicClient = createPublicClient({
-    chain: walletClient.chain,
-    transport: http(),
-  });
-
   return ResultAsync.fromPromise(
-    estimateGasWithViem(publicClient, {
+    estimateGasWithViem(walletClient, {
       account: walletClient.account,
       data: request.data,
       to: request.to,
       value: BigInt(request.value),
     }),
     (err) => SigningError.from(err),
-  )
-    .map((gas) => (gas * 115n) / 100n) // 15% buffer
-    .orElse((err) => {
-      if (
-        err instanceof BaseError &&
-        err.shortMessage.includes('exceeds allowance')
-      ) {
-        return getBlockGasLimit(publicClient);
-      }
-      return err.asResultAsync();
-    });
+  ).map((gas) => (gas * 115n) / 100n); // 15% buffer
 }
 
 function sendEip1559Transaction(
