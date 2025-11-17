@@ -14,7 +14,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { assertSingleElementArray } from '../test-utils';
+import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
@@ -163,7 +163,15 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           );
 
         assertOk(result);
-        assertSingleElementArray(result.value);
+        assertNonEmptyArray(result.value);
+        const position = result.value.find((position) => {
+          return (
+            position.reserve.asset.underlying.address ===
+            reservesToBorrow.value[0].asset.underlying.address
+          );
+        });
+        expect(position).toBeDefined();
+
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
@@ -171,7 +179,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           balanceBefore.add(amountToBorrow),
         );
 
-        expect(result.value[0].debt.amount.value).toBeBigDecimalCloseTo(
+        expect(position?.debt.amount.value).toBeBigDecimalCloseTo(
           amountToBorrow,
           4,
         );

@@ -208,6 +208,22 @@ describe('Supplying Assets on Aave V4', () => {
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
+        const supplyPositonBefore = await userSupplies(client, {
+          query: {
+            userSpoke: {
+              spoke: reserveWithPermit.spoke.id,
+              user: evmAddress(user.account.address),
+            },
+          },
+        }).map((positions) => {
+          return positions.find((position) => {
+            return (
+              position.reserve.asset.underlying.address ===
+              reserveWithPermit.asset.underlying.address
+            );
+          });
+        });
+        assertOk(supplyPositonBefore);
 
         const result = await supply(client, {
           reserve: reserveWithPermit.id,
@@ -245,7 +261,9 @@ describe('Supplying Assets on Aave V4', () => {
           reserveWithPermit.canUseAsCollateral,
         );
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
-          amountToSupply,
+          supplyPositonBefore.value?.withdrawable.amount.value.plus(
+            amountToSupply,
+          ),
         );
       });
     });

@@ -92,7 +92,7 @@ Handle loading state manually in your component:
 
 ```tsx
 function ChainsList() {
-  const { data, loading, error } = useAaveChains();
+  const { data, loading, error } = useChains();
 
   if (loading) return <div>Loading…</div>;
 
@@ -115,7 +115,7 @@ Let React handle loading states automatically through a [Suspense boundary](http
 ```tsx
 // Component - no loading states needed
 function ChainsList() {
-  const { data: chains } = useAaveChains({
+  const { data: chains } = useChains({
     suspense: true, // Enable suspense mode
   });
 
@@ -266,7 +266,6 @@ const result = await execute({ ... });
 #### Handle the Result <!-- omit in toc -->
 
 Finally, handle the result of the operation.
-
 
 **Imperative Fashion**
 

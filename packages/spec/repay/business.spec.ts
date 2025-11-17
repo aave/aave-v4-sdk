@@ -393,7 +393,16 @@ describe('Repaying Loans on Aave V4', () => {
             }),
           );
         assertOk(repayResult);
-        expect(repayResult.value.length).toBe(0);
+        if (repayResult.value.length > 0) {
+          // check position is closed, in case other tests failed
+          const position = repayResult.value.find((position) => {
+            return (
+              position.reserve.asset.underlying.address ===
+              reserveSupportingNative.asset.underlying.address
+            );
+          });
+          expect(position).toBeUndefined();
+        }
 
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
