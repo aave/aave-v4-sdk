@@ -155,32 +155,37 @@ export const recreateUserActivities = async (
         listReservesToBorrow.value[i]!.userState!.borrowable.amount.value.div(
           100,
         );
-      const result = await fundErc20Address(evmAddress(user.account.address), {
-        address: listReservesToBorrow.value[i]!.asset.underlying.address,
-        amount: borrowableAmount.times(100),
-        decimals: listReservesToBorrow.value[i]!.asset.underlying.info.decimals,
-      }).andThen(() =>
-        borrowFromReserve(client, user, {
-          reserve: listReservesToBorrow.value[i]!.id,
-          amount: {
-            erc20: {
-              value: borrowableAmount,
-            },
-          },
-          sender: evmAddress(user.account.address),
-        }).andThen(() =>
-          repayFromReserve(client, user, {
+      const result: Result<TxHash, Error> = await fundErc20Address(
+        evmAddress(user.account.address),
+        {
+          address: listReservesToBorrow.value[i]!.asset.underlying.address,
+          amount: borrowableAmount.times(100),
+          decimals:
+            listReservesToBorrow.value[i]!.asset.underlying.info.decimals,
+        },
+      ).andThen(
+        (): ResultAsync<TxHash, Error> =>
+          borrowFromReserve(client, user, {
             reserve: listReservesToBorrow.value[i]!.id,
             amount: {
               erc20: {
-                value: {
-                  exact: borrowableAmount.times(0.5),
-                },
+                value: borrowableAmount,
               },
             },
             sender: evmAddress(user.account.address),
-          }),
-        ),
+          }).andThen(() =>
+            repayFromReserve(client, user, {
+              reserve: listReservesToBorrow.value[i]!.id,
+              amount: {
+                erc20: {
+                  value: {
+                    exact: borrowableAmount.times(0.5),
+                  },
+                },
+              },
+              sender: evmAddress(user.account.address),
+            }),
+          ),
       );
       assertOk(result);
     }
