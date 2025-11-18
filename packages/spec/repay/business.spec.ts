@@ -41,7 +41,7 @@ describe('Repaying Loans on Aave V4', () => {
       }).andThen((supplyReserves) => {
         const amountToSupply = supplyReserves[0].supplyCap
           .minus(supplyReserves[0].summary.supplied.amount.value)
-          .div(100);
+          .div(1000);
 
         return fundErc20Address(evmAddress(user.account.address), {
           address: supplyReserves[0].asset.underlying.address,

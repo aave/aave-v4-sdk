@@ -134,11 +134,13 @@ describe('Supplying Assets on Aave V4', () => {
 
       it('Then the supply position is updated and the tokens are disabled as collateral', async () => {
         const amountToSupply = bigDecimal('9');
+
         const inchReserve = await findReservesToSupply(client, user, {
           token: ETHEREUM_1INCH_ADDRESS,
         });
         assertOk(inchReserve);
         assertNonEmptyArray(inchReserve.value);
+
         const result = await supplyToReserve(client, user, {
           reserve: inchReserve.value[0].id,
           amount: {
@@ -187,6 +189,7 @@ describe('Supplying Assets on Aave V4', () => {
         reserveWithPermit = result.value.find(
           (reserve) => reserve.asset.underlying.permitSupported === true,
         )!;
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: reserveWithPermit.asset.underlying.address,
           amount: bigDecimal('1'),
@@ -198,6 +201,7 @@ describe('Supplying Assets on Aave V4', () => {
 
       it('Then the supply is processed without requiring prior ERC20 approval', async () => {
         const amountToSupply = bigDecimal('0.9');
+
         const signature = await permitTypedData(client, {
           supply: {
             amount: {
@@ -208,7 +212,8 @@ describe('Supplying Assets on Aave V4', () => {
           },
         }).andThen(signERC20PermitWith(user));
         assertOk(signature);
-        const supplyPositonBefore = await userSupplies(client, {
+
+        const supplyPositionBefore = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: reserveWithPermit.spoke.id,
@@ -216,14 +221,13 @@ describe('Supplying Assets on Aave V4', () => {
             },
           },
         }).map((positions) => {
-          return positions.find((position) => {
-            return (
+          return positions.find(
+            (position) =>
               position.reserve.asset.underlying.address ===
-              reserveWithPermit.asset.underlying.address
-            );
-          });
+              reserveWithPermit.asset.underlying.address,
+          );
         });
-        assertOk(supplyPositonBefore);
+        assertOk(supplyPositionBefore);
 
         const result = await supply(client, {
           reserve: reserveWithPermit.id,
@@ -261,7 +265,7 @@ describe('Supplying Assets on Aave V4', () => {
           reserveWithPermit.canUseAsCollateral,
         );
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
-          supplyPositonBefore.value?.withdrawable.amount.value.plus(
+          supplyPositionBefore.value?.withdrawable.amount.value.plus(
             amountToSupply,
           ),
         );
@@ -367,15 +371,13 @@ describe('Supplying Assets on Aave V4', () => {
             },
           }),
         );
-
         assertOk(result);
 
-        const supplyPosition = result.value.find((position) => {
-          return (
+        const supplyPosition = result.value.find(
+          (position) =>
             position.reserve.asset.underlying.address ===
-            nativeReserve.value[0].asset.underlying.address
-          );
-        });
+            nativeReserve.value[0].asset.underlying.address,
+        );
         invariant(supplyPosition, 'No supply position found');
       });
     });
