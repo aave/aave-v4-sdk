@@ -1,11 +1,11 @@
-import { assertOk, OrderDirection } from '@aave/client-next';
-import { hub, hubAssets, hubs } from '@aave/client-next/actions';
+import { assertOk, OrderDirection } from '@aave/client';
+import { hub, hubAssets, hubs } from '@aave/client/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';

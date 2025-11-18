@@ -11,7 +11,7 @@ import type {
   TxHash,
   TypedSelectionSet,
   Void,
-} from '@aave/types-next';
+} from '@aave/types';
 import {
   type DocumentDecoration,
   initGraphQLTada,

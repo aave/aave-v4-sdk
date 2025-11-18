@@ -6,14 +6,14 @@ import {
   type Result,
   type ResultAsync,
   type TxHash,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   activities,
   setUserSupplyAsCollateral,
   userBorrows,
   userPositions,
   userSupplies,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
@@ -23,8 +23,8 @@ import {
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/test-utils';
+import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import {
   findReservesToBorrow,

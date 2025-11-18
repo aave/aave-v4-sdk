@@ -1,5 +1,5 @@
-import type { Reserve } from '@aave/graphql-next';
-import { isNonEmptyArray } from '@aave/types-next';
+import type { Reserve } from '@aave/graphql';
+import { isNonEmptyArray } from '@aave/types';
 
 /**
  * Picks the highest supply APY reserve from the given reserves.

@@ -2,8 +2,8 @@ import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
   type UnexpectedError,
-} from '@aave/client-next';
-import { reserve, reserves } from '@aave/client-next/actions';
+} from '@aave/client';
+import { reserve, reserves } from '@aave/client/actions';
 import {
   type APYSample,
   type BorrowAPYHistoryRequest,
@@ -15,8 +15,8 @@ import {
   type ReservesRequest,
   type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
-} from '@aave/graphql-next';
-import type { NullishDeep, Prettify } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep, Prettify } from '@aave/types';
 import { useAaveClient } from './context';
 import {
   type Pausable,

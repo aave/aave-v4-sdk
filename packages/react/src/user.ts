@@ -3,14 +3,14 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type TimeWindowQueryOptions,
   type UnexpectedError,
-} from '@aave/client-next';
-import type { UserPositionQueryOptions } from '@aave/client-next/actions';
+} from '@aave/client';
+import type { UserPositionQueryOptions } from '@aave/client/actions';
 import {
   userBalances,
   userBorrows,
   userPositions,
   userSupplies,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   type UserBalance,
   UserBalancesQuery,
@@ -32,8 +32,8 @@ import {
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql-next';
-import type { NullishDeep, Prettify } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep, Prettify } from '@aave/types';
 import { useAaveClient } from './context';
 import {
   type Pausable,

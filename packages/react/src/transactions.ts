@@ -4,8 +4,8 @@ import type {
   CurrencyQueryOptions,
   PaginatedActivitiesResult,
   UnexpectedError,
-} from '@aave/client-next';
-import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
+} from '@aave/client';
+import { DEFAULT_QUERY_OPTIONS } from '@aave/client';
 import {
   activities,
   borrow,
@@ -19,8 +19,8 @@ import {
   updateUserDynamicConfig,
   updateUserRiskPremium,
   withdraw,
-} from '@aave/client-next/actions';
-import { ValidationError } from '@aave/core-next';
+} from '@aave/client/actions';
+import { ValidationError } from '@aave/core';
 import {
   ActivitiesQuery,
   type BorrowRequest,
@@ -51,13 +51,13 @@ import {
   UserPositionsQuery,
   UserSummaryQuery,
   type WithdrawRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   errAsync,
   type NullishDeep,
   type Prettify,
   type TxHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import { useAaveClient } from './context';
 import {
   cancel,

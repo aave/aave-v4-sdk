@@ -1,4 +1,4 @@
-import { chainId, evmAddress, useUserBalances } from '@aave/react-next';
+import { chainId, evmAddress, useUserBalances } from '@aave/react';
 
 export function App() {
   const { data, loading } = useUserBalances({

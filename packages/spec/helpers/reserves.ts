@@ -6,9 +6,9 @@ import {
   type Reserve,
   ReservesRequestFilter,
   type ResultAsync,
-} from '@aave/client-next';
-import { reserves } from '@aave/client-next/actions';
-import { ETHEREUM_FORK_ID } from '@aave/client-next/test-utils';
+} from '@aave/client';
+import { reserves } from '@aave/client/actions';
+import { ETHEREUM_FORK_ID } from '@aave/client/test-utils';
 import type { NonEmptyTuple } from 'type-fest';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { assertNonEmptyArray } from '../test-utils';

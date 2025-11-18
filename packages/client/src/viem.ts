@@ -4,14 +4,14 @@ import {
   TransactionError,
   UnexpectedError,
   ValidationError,
-} from '@aave/core-next';
+} from '@aave/core';
 import type {
   CancelSwapTypedData,
   ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   type ChainId,
   chainId,
@@ -23,7 +23,7 @@ import {
   signatureFrom,
   type TxHash,
   txHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import {
   type Account,
   type Chain,

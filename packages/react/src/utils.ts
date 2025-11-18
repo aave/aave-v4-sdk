@@ -1,1 +1,1 @@
-export * from '@aave/client-next/utils';
+export * from '@aave/client/utils';

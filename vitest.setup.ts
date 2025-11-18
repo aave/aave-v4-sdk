@@ -1,4 +1,4 @@
-import type { BigDecimal } from '@aave/types-next';
+import type { BigDecimal } from '@aave/types';
 import * as matchers from 'jest-extended';
 import { expect } from 'vitest';
 

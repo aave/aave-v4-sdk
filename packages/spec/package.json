@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@aave/client-next": "workspace:*",
+    "@aave/client": "workspace:*",
     "type-fest": "^5.1.0"
   },
   "devDependencies": {

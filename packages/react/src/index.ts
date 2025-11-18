@@ -1,4 +1,4 @@
-export * from '@aave/client-next';
+export * from '@aave/client';
 
 export * from './AaveProvider';
 export { useAaveClient } from './context';

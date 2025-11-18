@@ -4,15 +4,15 @@ import {
   assertOk,
   evmAddress,
   PageSize,
-} from '@aave/client-next';
-import { activities } from '@aave/client-next/actions';
+} from '@aave/client';
+import { activities } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';

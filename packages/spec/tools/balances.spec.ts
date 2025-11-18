@@ -1,10 +1,5 @@
-import {
-  assertOk,
-  bigDecimal,
-  evmAddress,
-  OrderDirection,
-} from '@aave/client-next';
-import { userBalances, userPositions } from '@aave/client-next/actions';
+import { assertOk, bigDecimal, evmAddress, OrderDirection } from '@aave/client';
+import { userBalances, userPositions } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -15,7 +10,7 @@ import {
   ETHEREUM_USDS_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { assertSingleElementArray } from '../test-utils';

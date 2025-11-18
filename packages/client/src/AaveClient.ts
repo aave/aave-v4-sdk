@@ -4,14 +4,14 @@ import {
   type StandardData,
   TimeoutError,
   UnexpectedError,
-} from '@aave/core-next';
-import type { HasProcessedKnownTransactionRequest } from '@aave/graphql-next';
+} from '@aave/core';
+import type { HasProcessedKnownTransactionRequest } from '@aave/graphql';
 import {
   type AnyVariables,
   invariant,
   ResultAsync,
   type TxHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import type { TypedDocumentNode } from '@urql/core';
 import { hasProcessedKnownTransaction } from './actions';
 import { type ClientConfig, configureContext } from './config';

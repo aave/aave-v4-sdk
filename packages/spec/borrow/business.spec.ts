@@ -1,5 +1,5 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { borrow, preview, userBorrows } from '@aave/client-next/actions';
+import { assertOk, bigDecimal, evmAddress } from '@aave/client';
+import { borrow, preview, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -8,8 +8,8 @@ import {
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/test-utils';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';

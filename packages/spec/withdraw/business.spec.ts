@@ -1,14 +1,14 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { preview, userSupplies, withdraw } from '@aave/client-next/actions';
+import { assertOk, bigDecimal, evmAddress } from '@aave/client';
+import { preview, userSupplies, withdraw } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   fundErc20Address,
   getBalance,
   getNativeBalance,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
-import type { Reserve } from '@aave/graphql-next';
+} from '@aave/client/test-utils';
+import { sendWith } from '@aave/client/viem';
+import type { Reserve } from '@aave/graphql';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { findReservesToSupply } from '../helpers/reserves';

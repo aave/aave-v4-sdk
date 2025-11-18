@@ -4,8 +4,8 @@ import {
   type Hub,
   type Reserve,
   type Spoke,
-} from '@aave/react-next';
-import { supportedChains } from '@aave/react-next/viem';
+} from '@aave/react';
+import { supportedChains } from '@aave/react/viem';
 import { useState } from 'react';
 import { HubSelector } from './HubSelector';
 import { AllUserPositions, SingleUserPosition } from './positions';

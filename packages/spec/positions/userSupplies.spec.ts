@@ -1,11 +1,11 @@
-import { assertOk, evmAddress, OrderDirection } from '@aave/client-next';
-import { userPositions, userSupplies } from '@aave/client-next/actions';
+import { assertOk, evmAddress, OrderDirection } from '@aave/client';
+import { userPositions, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ID,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';

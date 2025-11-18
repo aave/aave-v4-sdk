@@ -1,10 +1,10 @@
-import type { UnexpectedError } from '@aave/core-next';
+import type { UnexpectedError } from '@aave/core';
 import {
   type PermitRequest,
   PermitTypedDataQuery,
   type PermitTypedDataResponse,
-} from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+} from '@aave/graphql';
+import type { ResultAsync } from '@aave/types';
 
 import type { AaveClient } from '../AaveClient';
 

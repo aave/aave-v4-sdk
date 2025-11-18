@@ -4,7 +4,7 @@ import type {
   TransactionError,
   UnexpectedError,
   ValidationError,
-} from '@aave/core-next';
+} from '@aave/core';
 import type {
   CancelSwapTypedData,
   ERC20PermitSignature,
@@ -14,8 +14,8 @@ import type {
   OperationType,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
-} from '@aave/graphql-next';
-import type { ResultAsync, TxHash } from '@aave/types-next';
+} from '@aave/graphql';
+import type { ResultAsync, TxHash } from '@aave/types';
 
 /**
  * @internal

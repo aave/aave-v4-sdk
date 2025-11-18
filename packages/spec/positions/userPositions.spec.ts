@@ -1,11 +1,11 @@
-import { assertOk, evmAddress, OrderDirection } from '@aave/client-next';
-import { userPosition, userPositions } from '@aave/client-next/actions';
+import { assertOk, evmAddress, OrderDirection } from '@aave/client';
+import { userPosition, userPositions } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_USDS_ADDRESS,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { recreateUserPositions } from './helper';

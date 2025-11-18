@@ -1,4 +1,4 @@
-import { type ChainId, isObject } from '@aave/types-next';
+import { type ChainId, isObject } from '@aave/types';
 import type { graphql } from './graphql';
 
 export type HubInput = ReturnType<typeof graphql.scalar<'HubInput'>>;

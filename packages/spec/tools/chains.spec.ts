@@ -1,6 +1,6 @@
-import { assertOk, ChainsFilter } from '@aave/client-next';
-import { chains } from '@aave/client-next/actions';
-import { client } from '@aave/client-next/test-utils';
+import { assertOk, ChainsFilter } from '@aave/client';
+import { chains } from '@aave/client/actions';
+import { client } from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
 describe('Aave V4 Chains Scenario', () => {

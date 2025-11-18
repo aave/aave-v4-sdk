@@ -1,4 +1,4 @@
-import { supportedChains as supportedChainsMap } from '@aave/client-next/viem';
+import { supportedChains as supportedChainsMap } from '@aave/client/viem';
 import type { Chain } from 'viem';
 
 export * from './adapters';

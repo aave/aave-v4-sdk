@@ -1,4 +1,4 @@
-import { Currency, TimeWindow } from '@aave/graphql-next';
+import { Currency, TimeWindow } from '@aave/graphql';
 import type { RequestPolicy } from '@urql/core';
 
 export type CurrencyQueryOptions = {

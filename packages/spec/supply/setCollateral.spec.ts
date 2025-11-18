@@ -1,9 +1,9 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
+import { assertOk, bigDecimal, evmAddress } from '@aave/client';
 import {
   preview,
   setUserSupplyAsCollateral,
   userSupplies,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -11,8 +11,8 @@ import {
   ETHEREUM_SPOKE_ETHENA_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/test-utils';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToSupply } from '../helpers/reserves';

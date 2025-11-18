@@ -4,7 +4,7 @@ import {
   invariant,
   never,
   ResultAsync,
-} from '@aave/types-next';
+} from '@aave/types';
 import type { TypedDocumentNode } from '@urql/core';
 import {
   type DocumentNode,

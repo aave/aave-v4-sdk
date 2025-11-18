@@ -1,9 +1,6 @@
-import type { UnexpectedError } from '@aave/client-next';
-import { permitTypedData } from '@aave/client-next/actions';
-import type {
-  PermitRequest,
-  PermitTypedDataResponse,
-} from '@aave/graphql-next';
+import type { UnexpectedError } from '@aave/client';
+import { permitTypedData } from '@aave/client/actions';
+import type { PermitRequest, PermitTypedDataResponse } from '@aave/graphql';
 import { useAaveClient } from './context';
 import { type UseAsyncTask, useAsyncTask } from './helpers';
 

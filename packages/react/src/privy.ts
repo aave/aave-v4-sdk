@@ -1,17 +1,17 @@
-import { SigningError, UnexpectedError } from '@aave/client-next';
+import { SigningError, UnexpectedError } from '@aave/client';
 import {
   sendTransaction,
   supportedChains,
   waitForTransactionResult,
-} from '@aave/client-next/viem';
+} from '@aave/client/viem';
 import type {
   CancelSwapTypedData,
   ERC20PermitSignature,
   PermitRequest,
   SwapByIntentTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
-import { invariant, ResultAsync, signatureFrom } from '@aave/types-next';
+} from '@aave/graphql';
+import { invariant, ResultAsync, signatureFrom } from '@aave/types';
 import { useSignTypedData, useWallets } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import {

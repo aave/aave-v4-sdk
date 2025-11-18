@@ -1,5 +1,5 @@
 {
-  "name": "@aave/client-next",
+  "name": "@aave/client",
   "version": "4.0.0-next.0",
   "description": "The official TypeScript client for the AaveKit API",
   "keywords": [
@@ -88,9 +88,9 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/core-next": "workspace:*",
-    "@aave/graphql-next": "workspace:*",
-    "@aave/types-next": "workspace:*",
+    "@aave/core": "workspace:*",
+    "@aave/graphql": "workspace:*",
+    "@aave/types": "workspace:*",
     "@urql/core": "^6.0.1",
     "@urql/exchange-graphcache": "^8.1.0",
     "graphql": "^16.11.0"

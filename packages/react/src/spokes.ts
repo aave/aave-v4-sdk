@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/client-next';
+import type { UnexpectedError } from '@aave/client';
 import {
   type PaginatedSpokePositionManagerResult,
   type PaginatedSpokeUserPositionManagerResult,
@@ -11,8 +11,8 @@ import {
   type SpokesRequest,
   SpokeUserPositionManagersQuery,
   type SpokeUserPositionManagersRequest,
-} from '@aave/graphql-next';
-import type { NullishDeep } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep } from '@aave/types';
 import {
   type Pausable,
   type PausableReadResult,

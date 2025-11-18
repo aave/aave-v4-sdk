@@ -1,7 +1,7 @@
 /// <reference path="../../../vite-env.d.ts" />
 
-import { GraphQLErrorCode, UnexpectedError } from '@aave/core-next';
-import { encodeHubId, encodeSpokeId } from '@aave/graphql-next';
+import { GraphQLErrorCode, UnexpectedError } from '@aave/core';
+import { encodeHubId, encodeSpokeId } from '@aave/graphql';
 import {
   type BigDecimal,
   bigDecimal,
@@ -9,7 +9,7 @@ import {
   type EvmAddress,
   evmAddress,
   ResultAsync,
-} from '@aave/types-next';
+} from '@aave/types';
 import {
   type Account,
   type Chain,

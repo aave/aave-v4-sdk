@@ -2,12 +2,12 @@
   "mode": "pre",
   "tag": "next",
   "initialVersions": {
-    "@aave/client-next": "3.0.0",
-    "@aave/core-next": "0.0.0",
-    "@aave/graphql-next": "0.6.1",
-    "@aave/react-next": "3.0.0",
+    "@aave/client": "3.0.0",
+    "@aave/core": "0.0.0",
+    "@aave/graphql": "0.6.1",
+    "@aave/react": "3.0.0",
     "@aave/spec": "0.0.0",
-    "@aave/types-next": "0.1.1"
+    "@aave/types": "0.1.1"
   },
   "changesets": [
     "easy-guests-invent"

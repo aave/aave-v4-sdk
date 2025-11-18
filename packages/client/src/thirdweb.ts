@@ -1,15 +1,11 @@
-import {
-  SigningError,
-  TransactionError,
-  ValidationError,
-} from '@aave/core-next';
+import { SigningError, TransactionError, ValidationError } from '@aave/core';
 import type {
   CancelSwapTypedData,
   ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   errAsync,
   okAsync,
@@ -18,7 +14,7 @@ import {
   signatureFrom,
   type TxHash,
   txHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import {
   defineChain,
   Engine,

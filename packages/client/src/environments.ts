@@ -1,4 +1,4 @@
-import type { EnvironmentConfig } from '@aave/core-next';
+import type { EnvironmentConfig } from '@aave/core';
 
 /**
  * The production environment configuration.

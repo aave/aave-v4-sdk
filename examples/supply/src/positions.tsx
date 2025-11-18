@@ -5,7 +5,7 @@ import {
   type UserPosition,
   useUserPosition,
   useUserPositions,
-} from '@aave/react-next';
+} from '@aave/react';
 
 function PositionDetails({ position }: { position: UserPosition }) {
   return (

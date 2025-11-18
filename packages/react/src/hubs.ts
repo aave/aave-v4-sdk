@@ -2,8 +2,8 @@ import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
   type UnexpectedError,
-} from '@aave/client-next';
-import { hubs } from '@aave/client-next/actions';
+} from '@aave/client';
+import { hubs } from '@aave/client/actions';
 import {
   type Hub,
   type HubAsset,
@@ -13,8 +13,8 @@ import {
   type HubRequest,
   HubsQuery,
   type HubsRequest,
-} from '@aave/graphql-next';
-import type { NullishDeep, Prettify } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep, Prettify } from '@aave/types';
 import { useAaveClient } from './context';
 import {
   type Pausable,

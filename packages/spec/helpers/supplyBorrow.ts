@@ -3,7 +3,7 @@ import type {
   BorrowRequest,
   Reserve,
   SupplyRequest,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   type BigDecimal,
   bigDecimal,
@@ -12,15 +12,15 @@ import {
   invariant,
   type ResultAsync,
   type TxHash,
-} from '@aave/client-next';
+} from '@aave/client';
 
-import { borrow, reserve, supply } from '@aave/client-next/actions';
+import { borrow, reserve, supply } from '@aave/client/actions';
 import {
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/test-utils';
+import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import {
   findReservesToBorrow,
