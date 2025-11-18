@@ -2,10 +2,20 @@
   "name": "@aave/react-next",
   "version": "3.0.0",
   "description": "The official React bindings for the Aave Protocol",
+  "keywords": [
+    "aave",
+    "aave-sdk",
+    "aave-kit",
+    "aave-protocol",
+    "react",
+    "hooks",
+    "defi",
+    "de-fi"
+  ],
   "repository": {
     "directory": "packages/react",
     "type": "git",
-    "url": "git://github.com/aave/aave-sdk.git"
+    "url": "git://github.com/aave/aave-v4-sdk.git"
   },
   "type": "module",
   "main": "dist/index.cjs",

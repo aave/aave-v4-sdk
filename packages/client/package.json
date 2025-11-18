@@ -1,11 +1,21 @@
 {
   "name": "@aave/client-next",
   "version": "3.0.0",
-  "description": "The official JavaScript client for the Aave API",
+  "description": "The official TypeScript client for the AaveKit API",
+  "keywords": [
+    "aave",
+    "aave-sdk",
+    "aave-kit",
+    "aave-protocol",
+    "typescript",
+    "ts",
+    "defi",
+    "de-fi"
+  ],
   "repository": {
     "directory": "packages/client",
     "type": "git",
-    "url": "git://github.com/aave/aave-sdk.git"
+    "url": "git://github.com/aave/aave-v4-sdk.git"
   },
   "type": "module",
   "main": "dist/index.cjs",
