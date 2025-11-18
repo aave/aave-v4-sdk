@@ -14,11 +14,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release:
-    name: Release
+
+  verify:
+    name: Verify
+    uses: ./.github/workflows/verify.yml
+    secrets: inherit
+
+  changesets:
+    name: Changesets
     runs-on: ubuntu-latest
-    outputs:
-      pullRequestNumber: ${{ steps.changesets.outputs.pullRequestNumber }}
+    needs: verify
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -27,7 +32,6 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run Changesets
-        id: changesets
         uses: changesets/action@v1
         with:
           title: '[Release] Candidate'
@@ -36,10 +40,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  verify:
-    needs: release
-    if: ${{ needs.release.outputs.pullRequestNumber != '' }}
-    uses: ./.github/workflows/verify.yml
-    secrets: inherit
-    with:
-      run-acceptance: true
