@@ -1,6 +1,6 @@
 # `@aave/core`
 
-The shared core across Aave SDKs.
+The shared core for the Aave SDK.
 
 ---
 

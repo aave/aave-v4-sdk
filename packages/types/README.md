@@ -1,6 +1,6 @@
 # `@aave/types`
 
-Core types for the Aave SDK
+Core types for the Aave SDK.
 
 ---
 
