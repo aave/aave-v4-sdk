@@ -351,28 +351,21 @@ export class BigDecimal {
       trimTrailingZeros = false,
     } = opts ?? {};
 
-    // Zero shortcut
     if (this.eq(0)) {
       return minFractionDigits > 0 ? `0.${'0'.repeat(minFractionDigits)}` : '0';
     }
 
-    const rounded = this.applyAdaptivePrecision(precision, rounding);
-    let str = rounded.toFixed();
+    const rounded = this.applyPrecisionWithMinFractionDigits(
+      precision,
+      minFractionDigits,
+      rounding,
+    );
 
-    // Ensure minimum fraction digits
-    if (minFractionDigits > 0) {
-      const [intPart, fracPart = ''] = str.split('.');
-      if (fracPart.length < minFractionDigits) {
-        str = `${intPart}.${fracPart.padEnd(minFractionDigits, '0')}`;
-      }
-    }
-
-    // Optionally trim trailing zeros
-    if (trimTrailingZeros && str.includes('.')) {
-      str = str.replace(/\.?0+$/, '');
-    }
-
-    return str;
+    return this.formatDecimalString(
+      rounded,
+      minFractionDigits,
+      trimTrailingZeros,
+    );
   }
 
   /**
@@ -485,6 +478,50 @@ export class BigDecimal {
     const absStr = this.abs().toFixed();
     const [integerPart] = absStr.split('.');
     return integerPart?.length ?? absStr.length;
+  }
+
+  private applyPrecisionWithMinFractionDigits(
+    precision: number,
+    minFractionDigits: number,
+    rounding: RoundingMode,
+  ): BigDecimal {
+    const shouldRespectMinFraction = this.gte(1) && minFractionDigits > 0;
+
+    if (shouldRespectMinFraction) {
+      const integerDigits = this.getIntegerDigitCount();
+      const requiredPrecision = integerDigits + minFractionDigits;
+      const effectivePrecision = Math.max(precision, requiredPrecision);
+      const decimalPlaces = effectivePrecision - integerDigits;
+      return this.round(decimalPlaces, rounding);
+    }
+
+    return this.applyAdaptivePrecision(precision, rounding);
+  }
+
+  private formatDecimalString(
+    value: BigDecimal,
+    minFractionDigits: number,
+    trimTrailingZeros: boolean,
+  ): string {
+    let result = value.toFixed();
+
+    if (minFractionDigits > 0) {
+      result = this.ensureMinFractionDigits(result, minFractionDigits);
+    }
+
+    if (trimTrailingZeros && result.includes('.')) {
+      result = result.replace(/\.?0+$/, '');
+    }
+
+    return result;
+  }
+
+  private ensureMinFractionDigits(str: string, minDigits: number): string {
+    const [intPart, fracPart = ''] = str.split('.');
+    if (fracPart.length < minDigits) {
+      return `${intPart}.${fracPart.padEnd(minDigits, '0')}`;
+    }
+    return str;
   }
 
   private applyAdaptivePrecision(
