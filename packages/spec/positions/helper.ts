@@ -3,6 +3,9 @@ import {
   assertOk,
   bigDecimal,
   evmAddress,
+  type Result,
+  type ResultAsync,
+  type TxHash,
 } from '@aave/client-next';
 import {
   activities,
@@ -79,22 +82,27 @@ export const recreateUserActivities = async (
       i < 3;
       i++
     ) {
-      const result = await fundErc20Address(evmAddress(user.account.address), {
-        address: listReservesToSupply.value[i]!.asset.underlying.address,
-        amount: bigDecimal('0.2'),
-        decimals: listReservesToSupply.value[i]!.asset.underlying.info.decimals,
-      }).andThen(() =>
-        supplyToReserve(client, user, {
-          reserve: listReservesToSupply.value[i]!.id,
-          amount: { erc20: { value: bigDecimal('0.2') } },
-          sender: evmAddress(user.account.address),
-        }).andThen(() =>
-          withdrawFromReserve(client, user, {
+      const result: Result<TxHash, Error> = await fundErc20Address(
+        evmAddress(user.account.address),
+        {
+          address: listReservesToSupply.value[i]!.asset.underlying.address,
+          amount: bigDecimal('0.2'),
+          decimals:
+            listReservesToSupply.value[i]!.asset.underlying.info.decimals,
+        },
+      ).andThen(
+        (): ResultAsync<TxHash, Error> =>
+          supplyToReserve(client, user, {
             reserve: listReservesToSupply.value[i]!.id,
-            amount: { erc20: { exact: bigDecimal('0.1') } },
+            amount: { erc20: { value: bigDecimal('0.2') } },
             sender: evmAddress(user.account.address),
-          }),
-        ),
+          }).andThen(() =>
+            withdrawFromReserve(client, user, {
+              reserve: listReservesToSupply.value[i]!.id,
+              amount: { erc20: { exact: bigDecimal('0.1') } },
+              sender: evmAddress(user.account.address),
+            }),
+          ),
       );
       assertOk(result);
     }
