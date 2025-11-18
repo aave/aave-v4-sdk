@@ -367,12 +367,14 @@ function signSwapTypedData(
 }
 
 /**
+ * @internal
  * Creates a swap signature handler that signs swap typed data using the provided wallet client.
  */
 export function signSwapTypedDataWith(
   walletClient: WalletClient,
 ): SwapSignatureHandler;
 /**
+ * @internal
  * Signs swap typed data using the provided wallet client.
  */
 export function signSwapTypedDataWith(

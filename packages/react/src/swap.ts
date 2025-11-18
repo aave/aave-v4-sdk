@@ -77,6 +77,7 @@ export type UseSwapQuoteArgs = Prettify<
 >;
 
 /**
+ * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * This signature supports React Suspense:
@@ -96,6 +97,7 @@ export function useSwapQuote(
   args: UseSwapQuoteArgs & Suspendable,
 ): SuspenseResult<SwapQuote>;
 /**
+ * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * Pausable suspense mode.
@@ -117,6 +119,7 @@ export function useSwapQuote(
   args: Pausable<UseSwapQuoteArgs> & Suspendable,
 ): PausableSuspenseResult<SwapQuote>;
 /**
+ * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * ```tsx
@@ -131,6 +134,7 @@ export function useSwapQuote(
  */
 export function useSwapQuote(args: UseSwapQuoteArgs): ReadResult<SwapQuote>;
 /**
+ * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * Pausable loading state mode.
@@ -151,6 +155,9 @@ export function useSwapQuote(
   args: Pausable<UseSwapQuoteArgs>,
 ): PausableReadResult<SwapQuote>;
 
+/**
+ * @internal
+ */
 export function useSwapQuote({
   suspense = false,
   pause = false,
@@ -172,6 +179,7 @@ export function useSwapQuote({
 }
 
 /**
+ * @internal
  * Low-level hook to execute a swap quote action directly.
  *
  * @experimental This hook is experimental and may be subject to breaking changes.
@@ -215,6 +223,7 @@ export function useSwapQuoteAction(
 export type UseSwappableTokensArgs = SwappableTokensRequest;
 
 /**
+ * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * This signature supports React Suspense:
@@ -230,6 +239,7 @@ export function useSwappableTokens(
   args: UseSwappableTokensArgs & Suspendable,
 ): SuspenseResult<Token[]>;
 /**
+ * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * Pausable suspense mode.
@@ -246,6 +256,7 @@ export function useSwappableTokens(
   args: Pausable<UseSwappableTokensArgs> & Suspendable,
 ): PausableSuspenseResult<Token[]>;
 /**
+ * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * ```tsx
@@ -258,6 +269,7 @@ export function useSwappableTokens(
   args: UseSwappableTokensArgs,
 ): ReadResult<Token[]>;
 /**
+ * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * Pausable loading state mode.
@@ -273,6 +285,9 @@ export function useSwappableTokens(
   args: Pausable<UseSwappableTokensArgs>,
 ): PausableReadResult<Token[]>;
 
+/**
+ * @internal
+ */
 export function useSwappableTokens({
   suspense = false,
   pause = false,
@@ -296,6 +311,7 @@ export type UseUserSwapsArgs = Prettify<
 >;
 
 /**
+ * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * This signature supports React Suspense:
@@ -313,6 +329,7 @@ export function useUserSwaps(
   args: UseUserSwapsArgs & Suspendable,
 ): SuspenseResult<PaginatedUserSwapsResult>;
 /**
+ * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * Pausable suspense mode.
@@ -331,6 +348,7 @@ export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs> & Suspendable,
 ): PausableSuspenseResult<PaginatedUserSwapsResult>;
 /**
+ * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * ```tsx
@@ -345,6 +363,7 @@ export function useUserSwaps(
   args: UseUserSwapsArgs,
 ): ReadResult<PaginatedUserSwapsResult>;
 /**
+ * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * Pausable loading state mode.
@@ -362,6 +381,9 @@ export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs>,
 ): PausableReadResult<PaginatedUserSwapsResult>;
 
+/**
+ * @internal
+ */
 export function useUserSwaps({
   suspense = false,
   pause = false,
@@ -416,6 +438,7 @@ function isERC20PermitSignature(
 }
 
 /**
+ * @internal
  * Orchestrate the swap execution plan.
  *
  * ```tsx
@@ -579,6 +602,7 @@ export type CancelSwapError =
   | UnexpectedError;
 
 /**
+ * @internal
  * Executes the complete swap cancellation workflow combining preparation and execution.
  *
  * ```tsx
