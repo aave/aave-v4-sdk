@@ -1,6 +1,6 @@
 {
   "name": "@aave/client-next",
-  "version": "0.6.1",
+  "version": "3.0.0",
   "description": "The official JavaScript client for the Aave API",
   "repository": {
     "directory": "packages/client",
