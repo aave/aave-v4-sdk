@@ -11,7 +11,6 @@ import {
   evmAddress,
   invariant,
   type ResultAsync,
-  type TxHash,
 } from '@aave/client-next';
 
 import { borrow, reserve, supply } from '@aave/client-next/actions';
@@ -31,7 +30,7 @@ export function supplyToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   request: SupplyRequest,
-): ResultAsync<TxHash, Error> {
+) {
   return supply(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
@@ -41,7 +40,7 @@ export function borrowFromReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   request: BorrowRequest,
-): ResultAsync<TxHash, Error> {
+) {
   return borrow(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
