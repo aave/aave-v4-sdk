@@ -176,6 +176,7 @@ export function useERC20Permit(): UseAsyncTask<
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
+ * @internal
  * A hook that provides a way to sign swap typed data using a Thirdweb wallet.
  *
  * ```ts

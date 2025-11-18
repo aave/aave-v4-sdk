@@ -178,7 +178,7 @@ export function fundErc20Address(
     amount: BigDecimal;
     decimals?: number;
   },
-): ResultAsync<string, UnexpectedError> {
+): ResultAsync<string, Error> {
   const publicClient = createPublicClient({
     chain: {
       id: ETHEREUM_FORK_ID,

@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@aave/client-next": "3.0.0",
+    "@aave/core-next": "0.0.0",
+    "@aave/graphql-next": "0.6.1",
+    "@aave/react-next": "3.0.0",
+    "@aave/spec": "0.0.0",
+    "@aave/types-next": "0.1.1"
+  },
+  "changesets": []
+}

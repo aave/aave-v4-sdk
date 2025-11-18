@@ -3,6 +3,9 @@ import {
   assertOk,
   bigDecimal,
   evmAddress,
+  type Result,
+  type ResultAsync,
+  type TxHash,
 } from '@aave/client-next';
 import {
   activities,
@@ -79,7 +82,7 @@ export const recreateUserActivities = async (
       i < 3;
       i++
     ) {
-      const result: any = await fundErc20Address(
+      const result: Result<TxHash, Error> = await fundErc20Address(
         evmAddress(user.account.address),
         {
           address: listReservesToSupply.value[i]!.asset.underlying.address,
@@ -87,18 +90,19 @@ export const recreateUserActivities = async (
           decimals:
             listReservesToSupply.value[i]!.asset.underlying.info.decimals,
         },
-      ).andThen(() =>
-        supplyToReserve(client, user, {
-          reserve: listReservesToSupply.value[i]!.id,
-          amount: { erc20: { value: bigDecimal('0.2') } },
-          sender: evmAddress(user.account.address),
-        }).andThen(() =>
-          withdrawFromReserve(client, user, {
+      ).andThen(
+        (): ResultAsync<TxHash, Error> =>
+          supplyToReserve(client, user, {
             reserve: listReservesToSupply.value[i]!.id,
-            amount: { erc20: { exact: bigDecimal('0.1') } },
+            amount: { erc20: { value: bigDecimal('0.2') } },
             sender: evmAddress(user.account.address),
-          }),
-        ),
+          }).andThen(() =>
+            withdrawFromReserve(client, user, {
+              reserve: listReservesToSupply.value[i]!.id,
+              amount: { erc20: { exact: bigDecimal('0.1') } },
+              sender: evmAddress(user.account.address),
+            }),
+          ),
       );
       assertOk(result);
     }
@@ -151,7 +155,7 @@ export const recreateUserActivities = async (
         listReservesToBorrow.value[i]!.userState!.borrowable.amount.value.div(
           100,
         );
-      const result: any = await fundErc20Address(
+      const result: Result<TxHash, Error> = await fundErc20Address(
         evmAddress(user.account.address),
         {
           address: listReservesToBorrow.value[i]!.asset.underlying.address,
@@ -159,28 +163,29 @@ export const recreateUserActivities = async (
           decimals:
             listReservesToBorrow.value[i]!.asset.underlying.info.decimals,
         },
-      ).andThen(() =>
-        borrowFromReserve(client, user, {
-          reserve: listReservesToBorrow.value[i]!.id,
-          amount: {
-            erc20: {
-              value: borrowableAmount,
-            },
-          },
-          sender: evmAddress(user.account.address),
-        }).andThen(() =>
-          repayFromReserve(client, user, {
+      ).andThen(
+        (): ResultAsync<TxHash, Error> =>
+          borrowFromReserve(client, user, {
             reserve: listReservesToBorrow.value[i]!.id,
             amount: {
               erc20: {
-                value: {
-                  exact: borrowableAmount.times(0.5),
-                },
+                value: borrowableAmount,
               },
             },
             sender: evmAddress(user.account.address),
-          }),
-        ),
+          }).andThen(() =>
+            repayFromReserve(client, user, {
+              reserve: listReservesToBorrow.value[i]!.id,
+              amount: {
+                erc20: {
+                  value: {
+                    exact: borrowableAmount.times(0.5),
+                  },
+                },
+              },
+              sender: evmAddress(user.account.address),
+            }),
+          ),
       );
       assertOk(result);
     }

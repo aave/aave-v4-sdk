@@ -192,6 +192,7 @@ function signSwapTypedData(
 }
 
 /**
+ * @internal
  * Creates a swap signature handler that signs swap typed data using the specified Privy wallet.
  */
 export function signSwapTypedDataWith(
@@ -199,6 +200,7 @@ export function signSwapTypedDataWith(
   walletId: string,
 ): SwapSignatureHandler;
 /**
+ * @internal
  * Signs swap typed data using the specified Privy wallet.
  */
 export function signSwapTypedDataWith(

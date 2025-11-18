@@ -200,12 +200,14 @@ function signSwapTypedData(
 }
 
 /**
+ * @internal
  * Creates a swap signature handler that signs swap typed data using the provided Thirdweb client.
  */
 export function signSwapTypedDataWith(
   client: ThirdwebClient,
 ): SwapSignatureHandler;
 /**
+ * @internal
  * Signs swap typed data using the provided Thirdweb client.
  */
 export function signSwapTypedDataWith(
