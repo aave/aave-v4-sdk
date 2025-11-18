@@ -109,6 +109,7 @@ export function useERC20Permit(
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
+ * @internal
  * A hook that provides a way to sign swap typed data using a viem WalletClient instance.
  *
  * ```ts

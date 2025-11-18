@@ -36,6 +36,7 @@ import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
+ * @internal
  * Fetches a swap quote for the specified trade parameters.
  *
  * ```ts
@@ -63,6 +64,7 @@ export function swapQuote(
 }
 
 /**
+ * @internal
  * Fetches the list of tokens available for swapping on a specific chain.
  *
  * ```ts
@@ -83,6 +85,7 @@ export function swappableTokens(
 }
 
 /**
+ * @internal
  * Prepares a swap for the specified trade parameters.
  *
  * ```ts
@@ -141,6 +144,7 @@ export function prepareSwap(
 }
 
 /**
+ * @internal
  * Fetches the status of a specific swap.
  *
  * ```ts
@@ -165,6 +169,7 @@ export function swapStatus(
 export type SwapOutcome = SwapCancelled | SwapExpired | SwapFulfilled;
 
 /**
+ * @internal
  * Waits for a swap to reach a final outcome (cancelled, expired, or fulfilled).
  *
  * ```ts
@@ -241,6 +246,7 @@ export function waitForSwapOutcome(
 }
 
 /**
+ * @internal
  * Executes a swap for the specified request parameters.
  *
  * ```ts
@@ -291,6 +297,7 @@ export function swap(
 }
 
 /**
+ * @internal
  * Prepares a swap cancellation for the specified swap ID.
  *
  * ```ts
@@ -311,6 +318,7 @@ export function prepareSwapCancel(
 }
 
 /**
+ * @internal
  * Executes a swap cancellation for the specified request parameters.
  *
  * ```ts
@@ -346,6 +354,7 @@ export function cancelSwap(
 }
 
 /**
+ * @internal
  * Fetches the user's swap history for a specific chain.
  *
  * ```ts
