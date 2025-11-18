@@ -1,6 +1,6 @@
 {
   "name": "@aave/react-next",
-  "version": "3.0.0",
+  "version": "4.0.0-next.0",
   "description": "The official React bindings for the Aave Protocol",
   "keywords": [
     "aave",

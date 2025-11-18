@@ -9,5 +9,7 @@
     "@aave/spec": "0.0.0",
     "@aave/types-next": "0.1.1"
   },
-  "changesets": []
+  "changesets": [
+    "easy-guests-invent"
+  ]
 }

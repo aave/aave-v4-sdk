@@ -1,0 +1,7 @@
+# @aave/types-next
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- 7789c8e: **feat:** new AaveKit v4.

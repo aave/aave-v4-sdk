@@ -49,7 +49,7 @@
   "overrides": [
     {
       "includes": [
-        "./changeset/*.json",
+        ".changeset/*.json",
         "**/package.json",
         "packages/graphql/src/schema.json"
       ],
