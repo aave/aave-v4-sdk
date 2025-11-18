@@ -79,7 +79,7 @@ export const recreateUserActivities = async (
       i < 3;
       i++
     ) {
-      await fundErc20Address(evmAddress(user.account.address), {
+      const result = await fundErc20Address(evmAddress(user.account.address), {
         address: listReservesToSupply.value[i]!.asset.underlying.address,
         amount: bigDecimal('0.2'),
         decimals: listReservesToSupply.value[i]!.asset.underlying.info.decimals,
@@ -96,6 +96,7 @@ export const recreateUserActivities = async (
           }),
         ),
       );
+      assertOk(result);
     }
   }
 
@@ -146,7 +147,7 @@ export const recreateUserActivities = async (
         listReservesToBorrow.value[i]!.userState!.borrowable.amount.value.div(
           100,
         );
-      await fundErc20Address(evmAddress(user.account.address), {
+      const result = await fundErc20Address(evmAddress(user.account.address), {
         address: listReservesToBorrow.value[i]!.asset.underlying.address,
         amount: borrowableAmount.times(100),
         decimals: listReservesToBorrow.value[i]!.asset.underlying.info.decimals,
@@ -173,6 +174,7 @@ export const recreateUserActivities = async (
           }),
         ),
       );
+      assertOk(result);
     }
   }
 };
