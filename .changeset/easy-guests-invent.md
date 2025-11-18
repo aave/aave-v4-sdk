@@ -6,4 +6,4 @@
 "@aave/core-next": major
 ---
 
-**feat:** new Aave v4 SDK
+**feat:** new AaveKit v4.
