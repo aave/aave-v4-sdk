@@ -38,15 +38,17 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
       beforeAll(async () => {
+        const amountToSupply = bigDecimal('0.1');
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.1'),
+          amount: amountToSupply,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
             asCollateral: true,
-            amount: bigDecimal('0.1'),
+            amount: amountToSupply,
           }),
         );
 

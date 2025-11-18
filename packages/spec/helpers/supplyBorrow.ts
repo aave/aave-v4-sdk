@@ -6,7 +6,6 @@ import type {
 } from '@aave/client-next';
 import {
   type BigDecimal,
-  bigDecimal,
   type EvmAddress,
   evmAddress,
   invariant,

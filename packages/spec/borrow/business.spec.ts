@@ -173,7 +173,14 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
             reservesToBorrow.value[0].asset.underlying.address
           );
         });
-        expect(position).toBeDefined();
+        expect(position!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
 
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),

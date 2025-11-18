@@ -95,7 +95,14 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address ===
             reservesToBorrow.value[0]!.asset.underlying.address,
         );
-        expect(usdcPosition).toBeDefined();
+        expect(usdcPosition!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
         expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[0]!.userState!.borrowable.amount.value.times(
             0.1,
@@ -108,7 +115,14 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address ===
             reservesToBorrow.value[1]!.asset.underlying.address,
         );
-        expect(usdsPosition).toBeDefined();
+        expect(usdsPosition!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
         expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
             0.1,
