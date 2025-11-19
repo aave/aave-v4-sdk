@@ -10,6 +10,7 @@
     "@aave/types": "0.1.1"
   },
   "changesets": [
+    "clever-symbols-search",
     "easy-guests-invent"
   ]
 }
