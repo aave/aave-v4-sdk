@@ -5,7 +5,13 @@ import {
   evmAddress,
   type Reserve,
 } from '@aave/client';
-import { borrow, repay, userSummary, withdraw } from '@aave/client/actions';
+import {
+  borrow,
+  repay,
+  userSummary,
+  userSupplies,
+  withdraw,
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -130,12 +136,22 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
             .div(1000);
 
-          const setup = await supplyToReserve(client, user, {
-            amount: { erc20: { value: amountToSupply } },
-            reserve: usedReserves.supplyReserve.id,
-            enableCollateral: true,
-            sender: evmAddress(user.account.address),
-          });
+          const setup = await fundErc20Address(
+            evmAddress(user.account.address),
+            {
+              address: usedReserves.supplyReserve.asset.underlying.address,
+              amount: amountToSupply,
+              decimals:
+                usedReserves.supplyReserve.asset.underlying.info.decimals,
+            },
+          ).andThen(() =>
+            supplyToReserve(client, user, {
+              amount: { erc20: { value: amountToSupply } },
+              reserve: usedReserves.supplyReserve.id,
+              enableCollateral: true,
+              sender: evmAddress(user.account.address),
+            }),
+          );
 
           assertOk(setup);
         });
