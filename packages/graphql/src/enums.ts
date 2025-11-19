@@ -38,6 +38,7 @@ export enum OperationType {
   SpokeSetUserUsingAsCollateral = 'SPOKE_SET_USER_USING_AS_COLLATERAL',
   SpokeSetUserPositionManager = 'SPOKE_SET_USER_POSITION_MANAGER',
   RenounceSpokeUserPositionManager = 'RENOUNCE_SPOKE_USER_POSITION_MANAGER',
+  Liquidation = 'LIQUIDATION',
 }
 
 /**

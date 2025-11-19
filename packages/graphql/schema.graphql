@@ -236,7 +236,7 @@ type DecimalNumber {
 
 type DecimalNumberWithChange {
   current: DecimalNumber!
-  change(window: TimeWindow! = LAST_DAY): DecimalNumber!
+  change(window: TimeWindow! = LAST_DAY): PercentNumber!
 }
 
 type DomainData {
@@ -678,6 +678,7 @@ enum OperationType {
   SPOKE_SET_USER_USING_AS_COLLATERAL
   SPOKE_SET_USER_POSITION_MANAGER
   RENOUNCE_SPOKE_USER_POSITION_MANAGER
+  LIQUIDATION
 }
 
 enum OrderDirection {
