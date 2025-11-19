@@ -4,6 +4,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -36,6 +37,28 @@ describe('Querying User Supply Positions on Aave V4', () => {
         expect(supplyPositions.value.length).toBe(3);
         supplyPositions.value.forEach((position) => {
           expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_CORE_ID);
+        });
+      });
+    });
+
+    describe('When the user queries their supply positions by token', () => {
+      it('Then the matching supply positions are returned', async () => {
+        const supplyPositions = await userSupplies(client, {
+          query: {
+            userToken: {
+              token: {
+                chainId: ETHEREUM_FORK_ID,
+                address: ETHEREUM_GHO_ADDRESS,
+              },
+              user: evmAddress(user.account.address),
+            },
+          },
+        });
+        assertOk(supplyPositions);
+        supplyPositions.value.forEach((position) => {
+          expect(position.reserve.asset.underlying.address).toBe(
+            ETHEREUM_GHO_ADDRESS,
+          );
         });
       });
     });

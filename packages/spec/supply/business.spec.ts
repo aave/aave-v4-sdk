@@ -41,16 +41,16 @@ describe('Supplying Assets on Aave V4', () => {
       });
 
       it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
-        const usdcReserve = await findReservesToSupply(client, user, {
+        const usdcReservesBefore = await findReservesToSupply(client, user, {
           asCollateral: true,
           token: ETHEREUM_USDC_ADDRESS,
         });
-        assertOk(usdcReserve);
-        assertNonEmptyArray(usdcReserve.value);
+        assertOk(usdcReservesBefore);
+        assertNonEmptyArray(usdcReservesBefore.value);
 
         const amountToSupply = bigDecimal('9');
         const result = await supply(client, {
-          reserve: usdcReserve.value[0].id,
+          reserve: usdcReservesBefore.value[0].id,
           amount: {
             erc20: {
               value: amountToSupply,
@@ -64,7 +64,7 @@ describe('Supplying Assets on Aave V4', () => {
             userSupplies(client, {
               query: {
                 userSpoke: {
-                  spoke: usdcReserve.value[0].spoke.id,
+                  spoke: usdcReservesBefore.value[0].spoke.id,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -75,7 +75,7 @@ describe('Supplying Assets on Aave V4', () => {
         const supplyPosition = result.value.find((position) => {
           return (
             position.reserve.asset.underlying.address ===
-            usdcReserve.value[0].asset.underlying.address
+            usdcReservesBefore.value[0].asset.underlying.address
           );
         });
         invariant(supplyPosition, 'No supply position found');
@@ -83,6 +83,30 @@ describe('Supplying Assets on Aave V4', () => {
         expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
         );
+
+        // Check the other reserves were not affected
+        const usdcReservesAfter = await findReservesToSupply(client, user, {
+          asCollateral: true,
+          token: ETHEREUM_USDC_ADDRESS,
+        });
+        assertOk(usdcReservesAfter);
+        assertNonEmptyArray(usdcReservesAfter.value);
+        for (const reserve of usdcReservesAfter.value) {
+          if (reserve.id === usdcReservesBefore.value[0].id) {
+            expect(reserve.summary.supplied.amount.value).toBeBigDecimalCloseTo(
+              usdcReservesBefore.value[0].summary.supplied.amount.value.plus(
+                amountToSupply,
+              ),
+              3,
+            );
+          } else {
+            expect(reserve.summary.supplied.amount.value).toBeBigDecimalCloseTo(
+              usdcReservesBefore.value.find((r) => r.id === reserve.id)!.summary
+                .supplied.amount.value,
+              3,
+            );
+          }
+        }
       });
     });
 
