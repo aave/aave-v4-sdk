@@ -10,22 +10,6 @@ export const DecimalNumberFragment =
   }`);
 export type DecimalNumber = FragmentOf<typeof DecimalNumberFragment>;
 
-export const DecimalNumberWithChangeFragment = graphql(
-  `fragment DecimalNumberWithChange on DecimalNumberWithChange {
-    __typename
-    current {
-      ...DecimalNumber
-    }
-    change(window: $timeWindow) {
-      ...DecimalNumber
-    }
-  }`,
-  [DecimalNumberFragment],
-);
-export type DecimalNumberWithChange = FragmentOf<
-  typeof DecimalNumberWithChangeFragment
->;
-
 export const PercentNumberFragment = graphql(
   `fragment PercentNumber on PercentNumber {
     __typename
@@ -36,6 +20,22 @@ export const PercentNumberFragment = graphql(
   }`,
 );
 export type PercentNumber = FragmentOf<typeof PercentNumberFragment>;
+
+export const DecimalNumberWithChangeFragment = graphql(
+  `fragment DecimalNumberWithChange on DecimalNumberWithChange {
+    __typename
+    current {
+      ...DecimalNumber
+    }
+    change(window: $timeWindow) {
+      ...PercentNumber
+    }
+  }`,
+  [DecimalNumberFragment, PercentNumberFragment],
+);
+export type DecimalNumberWithChange = FragmentOf<
+  typeof DecimalNumberWithChangeFragment
+>;
 
 export const FiatAmountFragment = graphql(
   `fragment FiatAmount on FiatAmount {

@@ -773,7 +773,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumber",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
