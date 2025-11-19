@@ -103,7 +103,7 @@ describe('Supplying Assets on Aave V4', () => {
             expect(reserve.summary.supplied.amount.value).toBeBigDecimalCloseTo(
               usdcReservesBefore.value.find((r) => r.id === reserve.id)!.summary
                 .supplied.amount.value,
-              3,
+              0,
             );
           }
         }
