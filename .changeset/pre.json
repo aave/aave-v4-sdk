@@ -11,6 +11,7 @@
   },
   "changesets": [
     "clever-symbols-search",
-    "easy-guests-invent"
+    "easy-guests-invent",
+    "small-terms-open"
   ]
 }

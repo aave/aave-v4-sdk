@@ -1,5 +1,16 @@
 # @aave/react
 
+## 4.0.0-next.2
+
+### Patch Changes
+
+- 7ed8ac6: **fix:** rebuild from local
+- Updated dependencies [7ed8ac6]
+  - @aave/client@4.0.0-next.2
+  - @aave/core@1.0.0-next.1
+  - @aave/graphql@1.0.0-next.2
+  - @aave/types@1.0.0-next.1
+
 ## 4.0.0-next.1
 
 ### Patch Changes
