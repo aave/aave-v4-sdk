@@ -45,6 +45,6 @@
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }
