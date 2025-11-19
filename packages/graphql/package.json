@@ -1,6 +1,6 @@
 {
   "name": "@aave/graphql",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "GraphQL bindings for the Aave API",
   "repository": {
     "directory": "packages/graphql",

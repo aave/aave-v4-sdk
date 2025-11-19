@@ -1,5 +1,13 @@
 # @aave/client
 
+## 4.0.0-next.1
+
+### Patch Changes
+
+- 9aa3438: **fix:** updates `DecimalNumeberWithChange#change` to be `PercentNumber` and not `DecimalNumber`
+- Updated dependencies [9aa3438]
+  - @aave/graphql@1.0.0-next.1
+
 ## 4.0.0-next.0
 
 ### Major Changes
