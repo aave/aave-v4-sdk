@@ -1,12 +1,12 @@
-import { assertOk, Currency, evmAddress, TimeWindow } from '@aave/client-next';
-import { userPositions, userSummary } from '@aave/client-next/actions';
+import { assertOk, Currency, evmAddress, TimeWindow } from '@aave/client';
+import { userPositions, userSummary } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserPositions } from './helper';

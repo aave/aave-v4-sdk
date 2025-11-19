@@ -1,11 +1,11 @@
-import { assertOk } from '@aave/client-next';
-import { spokes } from '@aave/client-next/actions';
+import { assertOk } from '@aave/client';
+import { spokes } from '@aave/client/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_HUB_CORE_ID,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
 describe('Aave V4 Spokes Scenario', () => {

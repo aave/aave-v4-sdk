@@ -3,7 +3,7 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type TimeWindowQueryOptions,
   type UnexpectedError,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   type Asset,
   AssetBorrowHistoryQuery,
@@ -17,8 +17,8 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
-} from '@aave/graphql-next';
-import type { NullishDeep, Prettify } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep, Prettify } from '@aave/types';
 import {
   type Pausable,
   type PausableReadResult,

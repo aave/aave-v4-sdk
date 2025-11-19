@@ -1,10 +1,10 @@
-import { assertOk, bigDecimal, evmAddress, invariant } from '@aave/client-next';
+import { assertOk, bigDecimal, evmAddress, invariant } from '@aave/client';
 import {
   permitTypedData,
   preview,
   repay,
   userBorrows,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -12,9 +12,9 @@ import {
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
-} from '@aave/client-next/test-utils';
-import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
-import type { Reserve } from '@aave/graphql-next';
+} from '@aave/client/test-utils';
+import { sendWith, signERC20PermitWith } from '@aave/client/viem';
+import type { Reserve } from '@aave/graphql';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import {

@@ -1,18 +1,18 @@
-import type { TransactionResult } from '@aave/client-next';
+import type { TransactionResult } from '@aave/client';
 import {
   CancelError,
   type SigningError,
   type TimeoutError,
   type TransactionError,
   type UnexpectedError,
-} from '@aave/core-next';
+} from '@aave/core';
 import type {
   Erc20ApprovalRequired,
   PreContractActionRequired,
   TransactionRequest,
-} from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
-import { invariant } from '@aave/types-next';
+} from '@aave/graphql';
+import type { ResultAsync } from '@aave/types';
+import { invariant } from '@aave/types';
 import type { UseAsyncTask } from './tasks';
 
 /**

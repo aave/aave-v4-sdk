@@ -3,7 +3,7 @@ import {
   DEFAULT_QUERY_OPTIONS,
   errAsync,
   ValidationError,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   cancelSwap,
   prepareSwap,
@@ -11,14 +11,14 @@ import {
   swap,
   swapQuote,
   swapStatus,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import type {
   CancelError,
   SigningError,
   TimeoutError,
   TransactionError,
   UnexpectedError,
-} from '@aave/core-next';
+} from '@aave/core';
 import type {
   InsufficientBalanceError,
   PaginatedUserSwapsResult,
@@ -32,7 +32,7 @@ import type {
   SwapReceipt,
   SwapTransactionRequest,
   UserSwapsRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   type CancelSwapTypedData,
   type ERC20PermitSignature,
@@ -44,7 +44,7 @@ import {
   type Token,
   type TransactionRequest,
   UserSwapsQuery,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   invariant,
   type NullishDeep,
@@ -52,7 +52,7 @@ import {
   type Prettify,
   type ResultAsync,
   ResultAwareError,
-} from '@aave/types-next';
+} from '@aave/types';
 import { useCallback } from 'react';
 import { useAaveClient } from './context';
 import {

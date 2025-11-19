@@ -1,5 +1,5 @@
 {
-  "name": "@aave/core-next",
+  "name": "@aave/core",
   "version": "1.0.0-next.0",
   "description": "The shared core across Aave SDKs.",
   "repository": {
@@ -34,7 +34,7 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/types-next": "workspace:*",
+    "@aave/types": "workspace:*",
     "@urql/core": "^6.0.1",
     "graphql": "^16.11.0",
     "wonka": "^6.3.5"

@@ -1,4 +1,4 @@
-import { type HexString, invariant, isObject } from '@aave/types-next';
+import { type HexString, invariant, isObject } from '@aave/types';
 import { type HttpResponse, http, type PathParams, passthrough } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, beforeAll } from 'vitest';

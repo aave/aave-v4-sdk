@@ -1,4 +1,4 @@
-# @aave/types-next
+# @aave/types
 
 ## 1.0.0-next.0
 

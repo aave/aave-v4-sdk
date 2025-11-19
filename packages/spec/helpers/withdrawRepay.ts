@@ -4,9 +4,9 @@ import type {
   ResultAsync,
   TxHash,
   WithdrawRequest,
-} from '@aave/client-next';
-import { repay, withdraw } from '@aave/client-next/actions';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client';
+import { repay, withdraw } from '@aave/client/actions';
+import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 
 export function withdrawFromReserve(

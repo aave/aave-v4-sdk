@@ -3,14 +3,14 @@ import {
   TransactionError,
   UnexpectedError,
   ValidationError,
-} from '@aave/core-next';
+} from '@aave/core';
 import type {
   CancelSwapTypedData,
   ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   errAsync,
   nonNullable,
@@ -18,7 +18,7 @@ import {
   ResultAsync,
   signatureFrom,
   txHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import type { Signer, TransactionResponse } from 'ethers';
 import type {
   ERC20PermitHandler,

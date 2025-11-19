@@ -1,4 +1,4 @@
-import { delay, TimeoutError, UnexpectedError } from '@aave/core-next';
+import { delay, TimeoutError, UnexpectedError } from '@aave/core';
 import type {
   CancelSwapExecutionPlan,
   CancelSwapRequest,
@@ -20,7 +20,7 @@ import type {
   SwapStatusRequest,
   Token,
   UserSwapsRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   CancelSwapQuery,
   PrepareSwapCancelQuery,
@@ -30,8 +30,8 @@ import {
   SwapQuoteQuery,
   SwapStatusQuery,
   UserSwapsQuery,
-} from '@aave/graphql-next';
-import { ResultAsync } from '@aave/types-next';
+} from '@aave/graphql';
+import { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 

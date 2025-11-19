@@ -1,11 +1,11 @@
-import { type StandardData, UnexpectedError } from '@aave/client-next';
+import { type StandardData, UnexpectedError } from '@aave/client';
 import {
   type AnyVariables,
   identity,
   invariant,
   type NullishDeep,
   type Prettify,
-} from '@aave/types-next';
+} from '@aave/types';
 import { useEffect, useMemo, useState } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
 import {

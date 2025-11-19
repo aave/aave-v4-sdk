@@ -1,4 +1,4 @@
-import { Currency, ReservesRequestFilter } from '@aave/graphql-next';
+import { Currency, ReservesRequestFilter } from '@aave/graphql';
 import {
   assertOk,
   BigDecimal,
@@ -6,7 +6,7 @@ import {
   evmAddress,
   never,
   ResultAsync,
-} from '@aave/types-next';
+} from '@aave/types';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   activities,

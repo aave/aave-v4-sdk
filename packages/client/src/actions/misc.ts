@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core-next';
+import type { UnexpectedError } from '@aave/core';
 import {
   type Chain,
   ChainQuery,
@@ -10,8 +10,8 @@ import {
   type FiatAmount,
   HasProcessedKnownTransactionQuery,
   type HasProcessedKnownTransactionRequest,
-} from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+} from '@aave/graphql';
+import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 
 /**

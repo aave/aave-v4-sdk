@@ -1,4 +1,4 @@
-import { invariant } from '@aave/types-next';
+import { invariant } from '@aave/types';
 import type { AnyVariables, Operation, OperationResult } from '@urql/core';
 import { Kind, type OperationDefinitionNode } from 'graphql';
 import type { StandardData } from './types';

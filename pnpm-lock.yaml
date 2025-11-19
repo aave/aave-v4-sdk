@@ -51,7 +51,7 @@ importers:
 
   examples/exchange-rates:
     dependencies:
-      '@aave/react-next':
+      '@aave/react':
         specifier: workspace:*
         version: link:../../packages/react
       react:
@@ -79,7 +79,7 @@ importers:
 
   examples/hubs:
     dependencies:
-      '@aave/react-next':
+      '@aave/react':
         specifier: workspace:*
         version: link:../../packages/react
       react:
@@ -113,7 +113,7 @@ importers:
 
   examples/supply:
     dependencies:
-      '@aave/react-next':
+      '@aave/react':
         specifier: workspace:*
         version: link:../../packages/react
       '@tanstack/react-query':
@@ -150,13 +150,13 @@ importers:
 
   packages/client:
     dependencies:
-      '@aave/core-next':
+      '@aave/core':
         specifier: workspace:*
         version: link:../core
-      '@aave/graphql-next':
+      '@aave/graphql':
         specifier: workspace:*
         version: link:../graphql
-      '@aave/types-next':
+      '@aave/types':
         specifier: workspace:*
         version: link:../types
       '@urql/core':
@@ -202,7 +202,7 @@ importers:
 
   packages/core:
     dependencies:
-      '@aave/types-next':
+      '@aave/types':
         specifier: workspace:*
         version: link:../types
       '@urql/core':
@@ -224,7 +224,7 @@ importers:
 
   packages/graphql:
     dependencies:
-      '@aave/types-next':
+      '@aave/types':
         specifier: workspace:*
         version: link:../types
       gql.tada:
@@ -252,16 +252,16 @@ importers:
 
   packages/react:
     dependencies:
-      '@aave/client-next':
+      '@aave/client':
         specifier: workspace:*
         version: link:../client
-      '@aave/core-next':
+      '@aave/core':
         specifier: workspace:*
         version: link:../core
-      '@aave/graphql-next':
+      '@aave/graphql':
         specifier: workspace:*
         version: link:../graphql
-      '@aave/types-next':
+      '@aave/types':
         specifier: workspace:*
         version: link:../types
       urql:
@@ -310,7 +310,7 @@ importers:
 
   packages/spec:
     dependencies:
-      '@aave/client-next':
+      '@aave/client':
         specifier: workspace:*
         version: link:../client
       type-fest:

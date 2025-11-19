@@ -1,17 +1,17 @@
-import type { SigningError, UnexpectedError } from '@aave/client-next';
+import type { SigningError, UnexpectedError } from '@aave/client';
 import {
   sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
   waitForTransactionResult,
-} from '@aave/client-next/viem';
+} from '@aave/client/viem';
 import type {
   ERC20PermitSignature,
   PermitRequest,
   SwapByIntentTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
-import { invariant } from '@aave/types-next';
+} from '@aave/graphql';
+import { invariant } from '@aave/types';
 import type { WalletClient } from 'viem';
 
 import {

@@ -1,19 +1,19 @@
-import type { SigningError, UnexpectedError } from '@aave/client-next';
+import type { SigningError, UnexpectedError } from '@aave/client';
 import {
   sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
   waitForTransactionResult,
-} from '@aave/client-next/ethers';
+} from '@aave/client/ethers';
 import type {
   CancelSwapTypedData,
   ERC20PermitSignature,
   PermitRequest,
   SwapByIntentTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 
-import { invariant } from '@aave/types-next';
+import { invariant } from '@aave/types';
 import type { Signer } from 'ethers';
 import {
   PendingTransaction,

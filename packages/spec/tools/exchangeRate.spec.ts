@@ -1,11 +1,11 @@
-import { assertOk, BigDecimal, Currency } from '@aave/client-next';
-import { exchangeRate } from '@aave/client-next/actions';
+import { assertOk, BigDecimal, Currency } from '@aave/client';
+import { exchangeRate } from '@aave/client/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
 describe('Exchange Rate on Aave V4', () => {

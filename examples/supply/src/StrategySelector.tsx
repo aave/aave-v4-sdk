@@ -1,4 +1,4 @@
-import { type Hub, type Spoke, useSpokes } from '@aave/react-next';
+import { type Hub, type Spoke, useSpokes } from '@aave/react';
 import { useEffect } from 'react';
 
 interface StrategySelectorProps {

@@ -1,4 +1,4 @@
-import { invariant, type ResultAsync } from '@aave/types-next';
+import { invariant, type ResultAsync } from '@aave/types';
 import { type DependencyList, useCallback, useRef, useState } from 'react';
 
 /**

@@ -3,8 +3,8 @@ import {
   evmAddress,
   OrderDirection,
   ReservesRequestFilter,
-} from '@aave/client-next';
-import { reserves } from '@aave/client-next/actions';
+} from '@aave/client';
+import { reserves } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -14,7 +14,7 @@ import {
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
 

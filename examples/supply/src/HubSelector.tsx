@@ -1,4 +1,4 @@
-import { type ChainId, type Hub, useHubs } from '@aave/react-next';
+import { type ChainId, type Hub, useHubs } from '@aave/react';
 
 interface HubSelectorProps {
   chainId: ChainId;

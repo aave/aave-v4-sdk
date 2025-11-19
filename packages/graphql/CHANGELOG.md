@@ -1,4 +1,4 @@
-# @aave/graphql-next
+# @aave/graphql
 
 ## 1.0.0-next.0
 
@@ -9,4 +9,4 @@
 ### Patch Changes
 
 - Updated dependencies [7789c8e]
-  - @aave/types-next@1.0.0-next.0
+  - @aave/types@1.0.0-next.0

@@ -1,4 +1,4 @@
-import { UnexpectedError } from '@aave/client-next';
+import { UnexpectedError } from '@aave/client';
 import { act } from '@testing-library/react';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';

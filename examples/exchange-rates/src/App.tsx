@@ -4,8 +4,8 @@ import {
   type FiatAmount,
   useExchangeRate,
   useExchangeRateAction,
-} from '@aave/react-next';
-import { supportedChains } from '@aave/react-next/viem';
+} from '@aave/react';
+import { supportedChains } from '@aave/react/viem';
 import { useState } from 'react';
 
 export function App() {

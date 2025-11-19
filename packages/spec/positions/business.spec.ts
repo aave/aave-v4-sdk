@@ -4,14 +4,8 @@ import {
   bigDecimal,
   evmAddress,
   type Reserve,
-} from '@aave/client-next';
-import {
-  borrow,
-  repay,
-  userSummary,
-  userSupplies,
-  withdraw,
-} from '@aave/client-next/actions';
+} from '@aave/client';
+import { borrow, repay, userSummary, withdraw } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -19,8 +13,8 @@ import {
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/test-utils';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   findReservesToBorrow,

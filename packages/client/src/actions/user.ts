@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core-next';
+import type { UnexpectedError } from '@aave/core';
 import {
   type UserBalance,
   UserBalancesQuery,
@@ -20,8 +20,8 @@ import {
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql-next';
-import type { Prettify, ResultAsync } from '@aave/types-next';
+} from '@aave/graphql';
+import type { Prettify, ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,

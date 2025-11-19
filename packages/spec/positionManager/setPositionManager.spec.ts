@@ -4,18 +4,18 @@ import {
   evmAddress,
   invariant,
   PageSize,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   setSpokeUserPositionManager,
   spokePositionManagers,
   spokeUserPositionManagers,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ID,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/test-utils';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 const user = await createNewWallet();

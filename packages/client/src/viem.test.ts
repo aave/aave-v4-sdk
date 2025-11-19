@@ -1,11 +1,11 @@
-import { CancelError, SigningError } from '@aave/core-next';
-import type { TransactionRequest } from '@aave/graphql-next';
+import { CancelError, SigningError } from '@aave/core';
+import type { TransactionRequest } from '@aave/graphql';
 import {
   assertErr,
   assertOk,
   type BlockchainData,
   evmAddress,
-} from '@aave/types-next';
+} from '@aave/types';
 import { HttpResponse } from 'msw';
 import {
   MethodNotSupportedRpcError,

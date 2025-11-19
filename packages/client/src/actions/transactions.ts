@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core-next';
+import type { UnexpectedError } from '@aave/core';
 import {
   ActivitiesQuery,
   type ActivitiesRequest,
@@ -28,8 +28,8 @@ import {
   type UpdateUserRiskPremiumRequest,
   WithdrawQuery,
   type WithdrawRequest,
-} from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+} from '@aave/graphql';
+import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,

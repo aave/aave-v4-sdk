@@ -4,7 +4,7 @@ import {
   invariant,
   okAsync,
   ResultAsync,
-} from '@aave/types-next';
+} from '@aave/types';
 import {
   createClient,
   type Exchange,

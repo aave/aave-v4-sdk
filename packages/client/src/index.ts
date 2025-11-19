@@ -1,6 +1,6 @@
-export * from '@aave/core-next';
-export * from '@aave/graphql-next';
-export * from '@aave/types-next';
+export * from '@aave/core';
+export * from '@aave/graphql';
+export * from '@aave/types';
 export * from './AaveClient';
 export type { ClientConfig } from './config';
 export * from './environments';

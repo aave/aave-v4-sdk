@@ -1,6 +1,6 @@
-import { UnexpectedError } from '@aave/client-next';
-import { chain as fetchChain } from '@aave/client-next/actions';
-import { supportedChains } from '@aave/client-next/viem';
+import { UnexpectedError } from '@aave/client';
+import { chain as fetchChain } from '@aave/client/actions';
+import { supportedChains } from '@aave/client/viem';
 import {
   type Chain,
   Currency,
@@ -10,7 +10,7 @@ import {
   type NativeAmount,
   type PreviewAction,
   type ReserveId,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   bigDecimal,
   type ChainId,
@@ -20,7 +20,7 @@ import {
   okAsync,
   ResultAsync,
   RoundingMode,
-} from '@aave/types-next';
+} from '@aave/types';
 import { useEffect } from 'react';
 import { createPublicClient, http } from 'viem';
 import { useAaveClient } from '../context';

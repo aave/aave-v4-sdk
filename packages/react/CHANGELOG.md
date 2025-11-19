@@ -1,4 +1,4 @@
-# @aave/react-next
+# @aave/react
 
 ## 4.0.0-next.0
 
@@ -9,7 +9,7 @@
 ### Patch Changes
 
 - Updated dependencies [7789c8e]
-  - @aave/graphql-next@1.0.0-next.0
-  - @aave/client-next@4.0.0-next.0
-  - @aave/types-next@1.0.0-next.0
-  - @aave/core-next@1.0.0-next.0
+  - @aave/graphql@1.0.0-next.0
+  - @aave/client@4.0.0-next.0
+  - @aave/types@1.0.0-next.0
+  - @aave/core@1.0.0-next.0

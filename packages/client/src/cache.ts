@@ -24,9 +24,9 @@ import {
   type UsingAsCollateralActivity,
   type VariablesOf,
   type WithdrawActivity,
-} from '@aave/graphql-next';
-import introspectedSchema from '@aave/graphql-next/schema';
-import { BigDecimal, type TxHash } from '@aave/types-next';
+} from '@aave/graphql';
+import introspectedSchema from '@aave/graphql/schema';
+import { BigDecimal, type TxHash } from '@aave/types';
 import {
   cacheExchange,
   type Resolver,

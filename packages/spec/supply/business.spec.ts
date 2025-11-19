@@ -5,21 +5,21 @@ import {
   evmAddress,
   invariant,
   type Reserve,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   permitTypedData,
   preview,
   supply,
   userSupplies,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
-import { sendWith, signERC20PermitWith } from '@aave/client-next/viem';
+} from '@aave/client/test-utils';
+import { sendWith, signERC20PermitWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToSupply } from '../helpers/reserves';

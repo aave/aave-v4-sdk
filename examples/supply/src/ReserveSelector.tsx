@@ -4,7 +4,7 @@ import {
   ReservesRequestFilter,
   type Spoke,
   useReserves,
-} from '@aave/react-next';
+} from '@aave/react';
 import { useEffect } from 'react';
 
 interface ReserveSelectorProps {

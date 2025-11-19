@@ -1,11 +1,7 @@
-import type { CurrencyQueryOptions } from '@aave/client-next';
-import { exchangeRate } from '@aave/client-next/actions';
-import type { UnexpectedError } from '@aave/core-next';
-import type {
-  Chain,
-  ExchangeRateRequest,
-  FiatAmount,
-} from '@aave/graphql-next';
+import type { CurrencyQueryOptions } from '@aave/client';
+import { exchangeRate } from '@aave/client/actions';
+import type { UnexpectedError } from '@aave/core';
+import type { Chain, ExchangeRateRequest, FiatAmount } from '@aave/graphql';
 import {
   type ActivityItem,
   ChainQuery,
@@ -15,8 +11,8 @@ import {
   ExchangeRateQuery,
   type NativeAmount,
   type PreviewAction,
-} from '@aave/graphql-next';
-import type { NullishDeep, Prettify } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep, Prettify } from '@aave/types';
 import { useAaveClient } from './context';
 import {
   type Pausable,

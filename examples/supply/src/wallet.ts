@@ -1,6 +1,6 @@
 import 'viem/window';
 
-import { supportedChains } from '@aave/react-next/viem';
+import { supportedChains } from '@aave/react/viem';
 import { type Address, createWalletClient, custom } from 'viem';
 
 const chain = supportedChains[0];

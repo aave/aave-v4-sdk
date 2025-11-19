@@ -1,4 +1,4 @@
-import { chainId, useHubs } from '@aave/react-next';
+import { chainId, useHubs } from '@aave/react';
 
 export function App() {
   const { data, loading } = useHubs({

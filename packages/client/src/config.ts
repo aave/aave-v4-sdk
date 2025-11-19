@@ -1,4 +1,4 @@
-import type { Context } from '@aave/core-next';
+import type { Context } from '@aave/core';
 import type { TypedDocumentNode } from '@urql/core';
 import type { EnvironmentConfig } from '../../core/src/types';
 import { exchange } from './cache';

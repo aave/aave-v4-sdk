@@ -1,8 +1,8 @@
 import {
   ETHEREUM_FORK_ID,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client-next/test-utils';
-import type { SupplyActivity } from '@aave/graphql-next';
+} from '@aave/client/test-utils';
+import type { SupplyActivity } from '@aave/graphql';
 import {
   Currency,
   type Erc20Amount,
@@ -12,8 +12,8 @@ import {
   type PreviewAction,
   type ReserveInfo,
   type Spoke,
-} from '@aave/graphql-next';
-import { bigDecimal, evmAddress, txHash } from '@aave/types-next';
+} from '@aave/graphql';
+import { bigDecimal, evmAddress, txHash } from '@aave/types';
 import { describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useNetworkFee } from './useNetworkFee';

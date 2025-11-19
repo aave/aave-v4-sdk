@@ -5,7 +5,7 @@ import {
   evmAddress,
   invariant,
   isValidHexString,
-} from '@aave/types-next';
+} from '@aave/types';
 import type { Tagged } from 'type-fest';
 
 /**

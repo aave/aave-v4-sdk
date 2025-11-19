@@ -1,10 +1,10 @@
-import { assertOk, TimeWindow } from '@aave/client-next';
-import { reserves, supplyApyHistory } from '@aave/client-next/actions';
+import { assertOk, TimeWindow } from '@aave/client';
+import { reserves, supplyApyHistory } from '@aave/client/actions';
 import {
   client,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/test-utils';
 import { describe, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
 
