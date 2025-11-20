@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from ERC20 token to fiat currency > Then it should return the exchange rate in the requested currency 1`] = `
+exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from ERC20 token to fiat currency > Then it should return the exchange rate in the requested currency 1`] = `
 {
   "__typename": "FiatAmount",
   "name": "USD",
@@ -9,7 +9,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
 }
 `;
 
-exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from fiat to fiat > Then it should return the cross-currency exchange rate 1`] = `
+exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from fiat to fiat > Then it should return the cross-currency exchange rate 1`] = `
 {
   "__typename": "FiatAmount",
   "name": "EUR",
@@ -18,7 +18,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
 }
 `;
 
-exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from native token to fiat currency > Then it should return the exchange rate for native token 1`] = `
+exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from native token to fiat currency > Then it should return the exchange rate for native token 1`] = `
 {
   "__typename": "FiatAmount",
   "name": "USD",
@@ -27,7 +27,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
 }
 `;
 
-exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in EUR 1`] = `
+exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in EUR 1`] = `
 {
   "__typename": "FiatAmount",
   "name": "EUR",
@@ -36,7 +36,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
 }
 `;
 
-exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in GBP 1`] = `
+exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in GBP 1`] = `
 {
   "__typename": "FiatAmount",
   "name": "GBP",
@@ -45,7 +45,7 @@ exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates
 }
 `;
 
-exports[`Exchange Rate on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in USD 1`] = `
+exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in USD 1`] = `
 {
   "__typename": "FiatAmount",
   "name": "USD",
