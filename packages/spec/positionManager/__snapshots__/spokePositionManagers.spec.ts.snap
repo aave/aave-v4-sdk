@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Available Position Managers in a Spoke on Aave V4 > Given a user who wants to fetch position managers for a specific spoke > When fetching position managers with default settings > Then it should return active position managers 1`] = `
+exports[`Querying Position Managers on Aave V4 > Given a user who wants to fetch position managers for a specific spoke > When fetching position managers with default settings > Then it should return active position managers 1`] = `
 [
   {
     "__typename": "SpokePositionManger",

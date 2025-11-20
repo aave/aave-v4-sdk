@@ -97,7 +97,7 @@ describe('Supplying Assets on Aave V4', () => {
               usdcReservesBefore.value[0].summary.supplied.amount.value.plus(
                 amountToSupply,
               ),
-              3,
+              0,
             );
           } else {
             expect(reserve.summary.supplied.amount.value).toBeBigDecimalCloseTo(

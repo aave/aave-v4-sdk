@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Aave V4 Chains Scenario > Given a user who wants to fetch a single chain > When fetching a single chain > Then it should return the expected data for the chain 1`] = `
+exports[`Querying Chains on Aave V4 > Given a user who wants to fetch a single chain > When fetching a single chain > Then it should return the expected data for the chain 1`] = `
 {
   "__typename": "Chain",
   "chainId": 123456789,
@@ -21,7 +21,7 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to fetch a single chai
 }
 `;
 
-exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter ALL 1`] = `
+exports[`Querying Chains on Aave V4 > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter ALL 1`] = `
 [
   {
     "__typename": "Chain",
@@ -44,9 +44,9 @@ exports[`Aave V4 Chains Scenario > Given a user who wants to list available chai
 ]
 `;
 
-exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter MAINNET_ONLY 1`] = `[]`;
+exports[`Querying Chains on Aave V4 > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter MAINNET_ONLY 1`] = `[]`;
 
-exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter TESTNET_ONLY 1`] = `
+exports[`Querying Chains on Aave V4 > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter TESTNET_ONLY 1`] = `
 [
   {
     "__typename": "Chain",
