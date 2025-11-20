@@ -53,14 +53,14 @@ describe('Querying User Summary History on Aave V4', () => {
         });
         assertOk(positions);
         assertNonEmptyArray(positions.value);
-        const testSpoke = positions.value[0]!.spoke;
+        const position = positions.value[0]!.spoke;
 
         let summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
             spoke: {
-              address: testSpoke.address,
-              chainId: testSpoke.chain.chainId,
+              address: position.address,
+              chainId: position.chain.chainId,
             },
           },
         });
@@ -82,7 +82,7 @@ describe('Querying User Summary History on Aave V4', () => {
         summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
-            spokeId: testSpoke.id,
+            spokeId: position.id,
           },
         });
         assertOk(summary);
