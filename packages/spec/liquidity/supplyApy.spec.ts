@@ -35,9 +35,13 @@ describe('Supply APY History on Aave V4', () => {
           });
           assertOk(result);
           const { now, startDate } = getTimeWindowDates(window);
-          result.value.forEach((item) => {
-            expect(item.date.toISOString()).toBeBetweenDates(startDate, now);
-          });
+          expect(result.value).toIncludeAllMembers([
+            {
+              __typename: 'APYSample',
+              date: expect.toBeBetweenDates(startDate, now),
+              avgRate: expect.any(Object),
+            },
+          ]);
         },
       );
     });

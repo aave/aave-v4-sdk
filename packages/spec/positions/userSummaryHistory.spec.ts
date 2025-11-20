@@ -29,14 +29,16 @@ describe('Querying User Summary History on Aave V4', () => {
           user: evmAddress(user.account.address),
         });
         assertOk(summary);
-        summary.value.forEach((item) => {
-          expect(item).toMatchObject({
+        expect(summary.value).toIncludeAllMembers([
+          {
+            __typename: 'UserSummaryHistoryItem',
+            healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          });
-        });
+          },
+        ]);
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -54,14 +56,16 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
-        summary.value.forEach((item) => {
-          expect(item).toMatchObject({
+        expect(summary.value).toIncludeAllMembers([
+          {
+            __typename: 'UserSummaryHistoryItem',
+            healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          });
-        });
+          },
+        ]);
         let listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
 
@@ -72,14 +76,16 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
-        summary.value.forEach((item) => {
-          expect(item).toMatchObject({
+        expect(summary.value).toIncludeAllMembers([
+          {
+            __typename: 'UserSummaryHistoryItem',
+            healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          });
-        });
+          },
+        ]);
         listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -103,14 +109,16 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
-        summary.value.forEach((item) => {
-          expect(item).toMatchObject({
+        expect(summary.value).toIncludeAllMembers([
+          {
+            __typename: 'UserSummaryHistoryItem',
+            healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          });
-        });
+          },
+        ]);
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -125,14 +133,16 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
-        summary.value.forEach((item) => {
-          expect(item).toMatchObject({
+        expect(summary.value).toIncludeAllMembers([
+          {
+            __typename: 'UserSummaryHistoryItem',
+            healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          });
-        });
+          },
+        ]);
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -180,9 +190,16 @@ describe('Querying User Summary History on Aave V4', () => {
           });
           assertOk(summary);
           const { now, startDate } = getTimeWindowDates(timeWindow);
-          summary.value.forEach((item) => {
-            expect(item.date.toISOString()).toBeBetweenDates(startDate, now);
-          });
+          expect(summary.value).toIncludeAllMembers([
+            {
+              __typename: 'UserSummaryHistoryItem',
+              healthFactor: expect.any(Object),
+              date: expect.toBeBetweenDates(startDate, now),
+              netBalance: expect.any(Object),
+              borrows: expect.any(Object),
+              supplies: expect.any(Object),
+            },
+          ]);
         },
       );
     });
