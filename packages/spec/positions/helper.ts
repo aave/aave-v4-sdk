@@ -218,13 +218,12 @@ export const recreateUserSummary = async (
         amount: bigDecimal('100'),
       }),
     )
-    // .andThen(() =>
-    //   supplyAndBorrow(client, user, {
-    //     tokenToSupply: ETHEREUM_USDS_ADDRESS,
-    //     tokenToBorrow: ETHEREUM_WETH_ADDRESS,
-    //   }),
-    // )
-    .andThen(() => supplyWSTETHAndBorrowETH(client, user));
+    .andThen(() =>
+      supplyWSTETHAndBorrowETH(client, user, {
+        amountToSupply: bigDecimal('0.05'),
+        ratioToBorrow: 0.4,
+      }),
+    );
   assertOk(setup);
 };
 

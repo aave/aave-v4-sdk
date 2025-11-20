@@ -4,6 +4,15 @@ on:
   repository_dispatch:
     types: [on-demand-test]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run tests against'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - prod
 
 concurrency:
   group: ${{ github.workflow }}-tests-on-demand
@@ -14,7 +23,7 @@ jobs:
     name: All Tests
     runs-on: ubuntu-latest
     env:
-      ENVIRONMENT: staging
+      ENVIRONMENT: ${{ github.event.inputs.environment || github.event.client_payload.environment || 'staging' }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       ETHEREUM_TENDERLY_FORK_ID: ${{ vars.ETHEREUM_TENDERLY_FORK_ID }}
       ETHEREUM_TENDERLY_PUBLIC_RPC: ${{ vars.ETHEREUM_TENDERLY_PUBLIC_RPC }}
