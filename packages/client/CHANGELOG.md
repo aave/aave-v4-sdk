@@ -1,5 +1,15 @@
 # @aave/client
 
+## 4.0.0-next.3
+
+### Patch Changes
+
+- 39649f8: **fix:** `BigDecimal#toDisplayString(n)` behaviour with `minFractionDigits` (see test).
+- Updated dependencies [39649f8]
+  - @aave/types@1.0.0-next.2
+  - @aave/core@1.0.0-next.2
+  - @aave/graphql@1.0.0-next.3
+
 ## 4.0.0-next.2
 
 ### Patch Changes
