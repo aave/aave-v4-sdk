@@ -1,5 +1,11 @@
 # @aave/types
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- 39649f8: **fix:** `BigDecimal#toDisplayString(n)` behaviour with `minFractionDigits` (see test).
+
 ## 1.0.0-next.1
 
 ### Patch Changes
