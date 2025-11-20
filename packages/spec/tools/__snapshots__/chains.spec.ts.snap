@@ -1,5 +1,26 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Aave V4 Chains Scenario > Given a user who wants to fetch a single chain > When fetching a single chain > Then it should return the expected data for the chain 1`] = `
+{
+  "__typename": "Chain",
+  "chainId": 123456789,
+  "explorerUrl": "https://etherscan.io",
+  "icon": "https://statics.aave.com/ethereum.svg",
+  "isTestnet": true,
+  "name": "Devnet",
+  "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
+  "nativeInfo": {
+    "__typename": "TokenInfo",
+    "decimals": 18,
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "name": "Ether",
+    "symbol": "ETH",
+  },
+  "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
+}
+`;
+
 exports[`Aave V4 Chains Scenario > Given a user who wants to list available chains > When listing supported chains with a filter > Then it should return the expected list chains with filter ALL 1`] = `
 [
   {
