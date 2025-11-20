@@ -379,6 +379,7 @@ describe('Given a BigDecimal class', () => {
       it.each([
         ['123.4', 4, 3, '123.4'],
         ['123', 3, 2, '123'],
+        ['1000.57123', 2, 2, '1000.57'],
       ])(
         'Then it should apply combined options for %s with %i sigDigits, minFractionDigits=%i, and trimTrailingZeros as %s',
         (value, sigDigits, minFractionDigits, expected) => {
