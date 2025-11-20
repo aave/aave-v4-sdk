@@ -34,7 +34,7 @@ import {
 
 const user = await createNewWallet();
 
-describe('Aave V4 Health Factor Positions Scenarios', () => {
+describe('Health Factor Scenarios on Aave V4', () => {
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
       beforeAll(async () => {

@@ -12,7 +12,7 @@ on:
         type: choice
         options:
           - staging
-          - prod
+          - production
 
 concurrency:
   group: ${{ github.workflow }}-tests-on-demand

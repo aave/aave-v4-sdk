@@ -58,32 +58,11 @@ That's it—you can now start using AaveKit React hooks.
 
 ```tsx
 function ChainsList() {
-  const { data, loading, error } = useChains();
+  const { data, error, loading } = useChains();
 
   if (loading) return <div>Loading…</div>;
 
   if (error) return <div>Error: {error.message}</div>;
-
-  return (
-    <div>
-      {data.map((chain) => (
-        <div key={chain.id}>{chain.name}</div>
-      ))}
-    </div>
-  );
-}
-```
-
-### React Suspense
-
-Let React handle loading states automatically through a [Suspense boundary](https://react.dev/reference/react/Suspense).
-
-```tsx
-// Component - no loading states needed
-function ChainsList() {
-  const { data: chains } = useChains({
-    suspense: true, // Enable suspense mode
-  });
 
   return (
     <div>

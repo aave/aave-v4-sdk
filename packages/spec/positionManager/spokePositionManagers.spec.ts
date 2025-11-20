@@ -3,7 +3,7 @@ import { spokePositionManagers } from '@aave/client/actions';
 import { client, ETHEREUM_SPOKE_CORE_ID } from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
-describe('Available Position Managers in a Spoke on Aave V4', () => {
+describe('Querying Position Managers on Aave V4', () => {
   describe('Given a user who wants to fetch position managers for a specific spoke', () => {
     describe('When fetching position managers with default settings', () => {
       it('Then it should return active position managers', async () => {

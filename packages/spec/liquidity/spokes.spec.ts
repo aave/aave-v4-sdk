@@ -8,7 +8,7 @@ import {
 } from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
-describe('Aave V4 Spokes Scenario', () => {
+describe('Querying Spokes on Aave V4', () => {
   describe('Given a user who wants to fetch spokes by chain ID', () => {
     it('Then it should return the spokes', async () => {
       const spokesResult = await spokes(client, {

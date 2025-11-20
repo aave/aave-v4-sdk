@@ -3,7 +3,7 @@ import { chain, chains } from '@aave/client/actions';
 import { client, ETHEREUM_FORK_ID } from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
-describe('Aave V4 Chains Scenario', () => {
+describe('Querying Chains on Aave V4', () => {
   describe('Given a user who wants to list available chains', () => {
     describe('When listing supported chains with a filter', () => {
       const filter = Object.values(ChainsFilter);

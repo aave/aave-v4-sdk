@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
 
-describe('Aave V4 Hub Scenarios', () => {
+describe('Querying Hubs on Aave V4', () => {
   describe('Given a user who wants to list available hubs', () => {
     describe('When fetching hubs by chain ID(s)', () => {
       it('Then it should return the expected data for each hub', async () => {

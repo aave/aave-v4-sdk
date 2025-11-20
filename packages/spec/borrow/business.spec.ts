@@ -18,7 +18,7 @@ import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Feature: Borrowing Assets on Aave V4', () => {
+describe('Borrowing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     beforeAll(async () => {
       const amountToSupply = bigDecimal('0.05');
