@@ -11,9 +11,11 @@ export function StrategySelector({
   onChange: onMarketSelect,
 }: StrategySelectorProps) {
   const { data: spokes, loading } = useSpokes({
-    hub: {
-      chainId: hub.chain.chainId,
-      address: hub.address,
+    query: {
+      hub: {
+        chainId: hub.chain.chainId,
+        address: hub.address,
+      },
     },
   });
 
