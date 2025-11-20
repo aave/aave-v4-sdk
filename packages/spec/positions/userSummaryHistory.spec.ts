@@ -4,8 +4,6 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { getTimeWindowDates } from '../helpers/tools';
@@ -47,12 +45,22 @@ describe('Querying User Summary History on Aave V4', () => {
 
     describe('When the user queries their summary history filtered by spoke', () => {
       it('Then the summary history for that specific spoke is returned', async () => {
+        const positions = await userPositions(client, {
+          user: evmAddress(user.account.address),
+          filter: {
+            chainIds: [ETHEREUM_FORK_ID],
+          },
+        });
+        assertOk(positions);
+        assertNonEmptyArray(positions.value);
+        const testSpoke = positions.value[0]!.spoke;
+
         let summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
             spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
-              chainId: ETHEREUM_FORK_ID,
+              address: testSpoke.address,
+              chainId: testSpoke.chain.chainId,
             },
           },
         });
@@ -74,7 +82,7 @@ describe('Querying User Summary History on Aave V4', () => {
         summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
-            spokeId: ETHEREUM_SPOKE_CORE_ID,
+            spokeId: testSpoke.id,
           },
         });
         assertOk(summary);
