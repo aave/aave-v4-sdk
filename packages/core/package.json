@@ -1,6 +1,6 @@
 {
   "name": "@aave/core",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "The shared core across Aave SDKs.",
   "repository": {
     "directory": "packages/core",
@@ -45,6 +45,6 @@
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

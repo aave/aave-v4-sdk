@@ -1,6 +1,6 @@
 {
   "name": "@aave/types",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "Core types for the Aave SDK",
   "repository": {
     "directory": "packages/types",
@@ -46,6 +46,6 @@
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }
