@@ -139,7 +139,7 @@ describe('Querying User Summary History on Aave V4', () => {
     });
 
     describe('When the user queries their summary history with different currency options', () => {
-      it('Then the summary values are returned in the specified currency', async () => {
+      it('Then the summary history is returned in the specified currency', async () => {
         const summaryEUR = await userSummaryHistory(
           client,
           {
