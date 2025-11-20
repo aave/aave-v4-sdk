@@ -5,7 +5,8 @@ import {
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client/test-utils';
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { getTimeWindowDates } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';
 
 describe('Supply APY History on Aave V4', () => {
@@ -32,8 +33,11 @@ describe('Supply APY History on Aave V4', () => {
             reserve: usdcReserve.value[0].id,
             window: window,
           });
-
           assertOk(result);
+          const { now, startDate } = getTimeWindowDates(window);
+          result.value.forEach((item) => {
+            expect(item.date.toISOString()).toBeBetweenDates(startDate, now);
+          });
         },
       );
     });
