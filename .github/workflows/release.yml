@@ -24,6 +24,11 @@ jobs:
     name: Changesets
     runs-on: ubuntu-latest
     needs: verify
+    env:
+      ETHEREUM_TENDERLY_FORK_ID: ${{ vars.ETHEREUM_TENDERLY_FORK_ID }}
+      ETHEREUM_TENDERLY_PUBLIC_RPC: ${{ vars.ETHEREUM_TENDERLY_PUBLIC_RPC }}
+      ETHEREUM_TENDERLY_BLOCKEXPLORER: ${{ vars.ETHEREUM_TENDERLY_BLOCKEXPLORER }}
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
