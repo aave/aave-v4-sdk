@@ -99,9 +99,6 @@ export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
 
 export const client = AaveClient.create({
   environment,
-  headers: {
-    'x-e2e-tests': import.meta.env.API_X_E2E_TESTS_HEADER,
-  },
 });
 
 export async function createNewWallet(
