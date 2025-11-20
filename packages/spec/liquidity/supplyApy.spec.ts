@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { getTimeWindowDates } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';
 
-describe('Supply APY History on Aave V4', () => {
+describe('Querying Supply APY History on Aave V4', () => {
   describe('Given a reserve with supply activity', () => {
     describe('When fetching supply APY history with different time windows', () => {
       const timeWindowOptions = Object.values(TimeWindow);

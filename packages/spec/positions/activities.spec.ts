@@ -22,7 +22,7 @@ const user = await createNewWallet(
   '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',
 );
 
-describe('Query User Activities on Aave V4', () => {
+describe('Querying User Activities on Aave V4', () => {
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed

@@ -29,6 +29,7 @@ describe('Querying User Summary History on Aave V4', () => {
           user: evmAddress(user.account.address),
         });
         assertOk(summary);
+
         expect(summary.value).toIncludeAllMembers([
           {
             __typename: 'UserSummaryHistoryItem',
@@ -56,6 +57,7 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
+
         expect(summary.value).toIncludeAllMembers([
           {
             __typename: 'UserSummaryHistoryItem',
@@ -76,6 +78,7 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
+
         expect(summary.value).toIncludeAllMembers([
           {
             __typename: 'UserSummaryHistoryItem',
@@ -109,6 +112,7 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
+
         expect(summary.value).toIncludeAllMembers([
           {
             __typename: 'UserSummaryHistoryItem',
@@ -133,6 +137,7 @@ describe('Querying User Summary History on Aave V4', () => {
           },
         });
         assertOk(summary);
+
         expect(summary.value).toIncludeAllMembers([
           {
             __typename: 'UserSummaryHistoryItem',
@@ -158,11 +163,13 @@ describe('Querying User Summary History on Aave V4', () => {
           { currency: Currency.Eur },
         );
         assertOk(summaryEUR);
+
         summaryEUR.value.forEach((item) => {
           expect(item.borrows.name).toBe('EUR');
           expect(item.supplies.name).toBe('EUR');
           expect(item.netBalance.name).toBe('EUR');
         });
+
         const summaryGBP = await userSummaryHistory(
           client,
           {
@@ -171,6 +178,7 @@ describe('Querying User Summary History on Aave V4', () => {
           { currency: Currency.Gbp },
         );
         assertOk(summaryGBP);
+
         summaryGBP.value.forEach((item) => {
           expect(item.borrows.name).toBe('GBP');
           expect(item.supplies.name).toBe('GBP');
@@ -184,12 +192,13 @@ describe('Querying User Summary History on Aave V4', () => {
       it.each(timeWindowOptions)(
         'Then the summary history is returned for the %s time window',
         async (timeWindow) => {
+          const { now, startDate } = getTimeWindowDates(timeWindow);
           const summary = await userSummaryHistory(client, {
             user: evmAddress(user.account.address),
             window: timeWindow,
           });
           assertOk(summary);
-          const { now, startDate } = getTimeWindowDates(timeWindow);
+
           expect(summary.value).toIncludeAllMembers([
             {
               __typename: 'UserSummaryHistoryItem',

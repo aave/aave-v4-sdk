@@ -8,7 +8,7 @@ import {
 } from '@aave/client/test-utils';
 import { describe, expect, it } from 'vitest';
 
-describe('Exchange Rate on Aave V4', () => {
+describe('Querying Exchange Rates on Aave V4', () => {
   describe('Given a user who wants to get exchange rates', () => {
     describe('When fetching exchange rate from ERC20 token to fiat currency', () => {
       it('Then it should return the exchange rate in the requested currency', async () => {
