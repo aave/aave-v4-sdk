@@ -132,9 +132,7 @@ describe('Querying Reserves on Aave V4', () => {
           expect.objectContaining({
             asset: expect.objectContaining({
               underlying: expect.objectContaining({
-                address: expect.toSatisfy((address) =>
-                  tokens.includes(address),
-                ),
+                address: expect.toBeOneOf(tokens),
               }),
             }),
           }),

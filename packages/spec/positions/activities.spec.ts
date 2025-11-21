@@ -93,9 +93,7 @@ describe('Querying User Activities on Aave V4', () => {
         const expectedTypes = ['SupplyActivity', 'BorrowActivity'];
         expect(result.value.items).toBeArrayWithElements(
           expect.objectContaining({
-            __typename: expect.toSatisfy((value: string) => {
-              return expectedTypes.includes(value);
-            }),
+            __typename: expect.toBeOneOf(expectedTypes),
             user: expect.toEqualCaseInsensitive(
               evmAddress(user.account.address),
             ),
@@ -332,9 +330,7 @@ describe('Querying User Activities on Aave V4', () => {
         const expectedTypes = ['SupplyActivity', 'BorrowActivity'];
         expect(result.value.items).toBeArrayWithElements(
           expect.objectContaining({
-            __typename: expect.toSatisfy((value: string) => {
-              return expectedTypes.includes(value);
-            }),
+            __typename: expect.toBeOneOf(expectedTypes),
           }),
         );
       });
