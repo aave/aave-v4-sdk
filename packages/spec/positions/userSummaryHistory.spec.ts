@@ -4,8 +4,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_SPOKE_ETHENA_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { getTimeWindowDates } from '../helpers/tools';
@@ -21,8 +21,7 @@ describe('Querying User Summary History on Aave V4', () => {
     beforeAll(async () => {
       // NOTE: Recreate user positions if needed
       await recreateUserPositions(client, user, {
-        spokeFirstPosition: ETHEREUM_SPOKE_CORE_ID,
-        spokeSecondPosition: ETHEREUM_SPOKE_ETHENA_ID,
+        spokes: [ETHEREUM_SPOKE_CORE_ID],
       });
     }, 180_000);
 
@@ -33,16 +32,16 @@ describe('Querying User Summary History on Aave V4', () => {
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -50,58 +49,48 @@ describe('Querying User Summary History on Aave V4', () => {
 
     describe('When the user queries their summary history filtered by spoke', () => {
       it('Then the summary history for that specific spoke is returned', async () => {
-        const positions = await userPositions(client, {
-          user: evmAddress(user.account.address),
-          filter: {
-            chainIds: [ETHEREUM_FORK_ID],
-          },
-        });
-        assertOk(positions);
-        assertNonEmptyArray(positions.value);
-        const position = positions.value[0]!.spoke;
-
         let summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
             spoke: {
-              address: position.address,
-              chainId: position.chain.chainId,
+              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+              chainId: ETHEREUM_FORK_ID,
             },
           },
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         let listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
 
         summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
-            spokeId: position.id,
+            spokeId: ETHEREUM_SPOKE_CORE_ID,
           },
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -126,16 +115,16 @@ describe('Querying User Summary History on Aave V4', () => {
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -151,16 +140,16 @@ describe('Querying User Summary History on Aave V4', () => {
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });

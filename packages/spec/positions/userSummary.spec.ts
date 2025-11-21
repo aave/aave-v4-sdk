@@ -19,7 +19,9 @@ describe('Querying User Summary on Aave V4', () => {
   describe('Given a user with multiple active positions', () => {
     beforeAll(async () => {
       // NOTE: Recreate user positions if needed
-      await recreateUserPositions(client, user);
+      await recreateUserPositions(client, user, {
+        spokes: [ETHEREUM_SPOKE_CORE_ID],
+      });
     }, 180_000);
 
     describe('When the user queries their summary without filters', () => {

@@ -8,8 +8,6 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_SPOKE_ETHENA_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
@@ -23,10 +21,7 @@ describe('Querying User Positions on Aave V4', () => {
   describe('Given a user with more than one position', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
-      await recreateUserPositions(client, user, {
-        spokeFirstPosition: ETHEREUM_SPOKE_CORE_ID,
-        spokeSecondPosition: ETHEREUM_SPOKE_ETHENA_ID,
-      });
+      await recreateUserPositions(client, user);
     }, 180_000);
 
     describe('When fetching a specific position', () => {
