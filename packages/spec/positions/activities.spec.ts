@@ -11,11 +11,12 @@ import {
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
+  ETHEREUM_HUB_CORE_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserActivities } from './helper';
 
 const user = await createNewWallet(
@@ -23,27 +24,28 @@ const user = await createNewWallet(
 );
 
 describe('Querying User Activities on Aave V4', () => {
+  const activityTypes = Object.values(ActivityType);
+
+  const typenameToActivityType: Record<
+    ActivityType,
+    ActivityItem['__typename']
+  > = {
+    [ActivityType.Borrow]: 'BorrowActivity',
+    [ActivityType.Supply]: 'SupplyActivity',
+    [ActivityType.Withdraw]: 'WithdrawActivity',
+    [ActivityType.Repay]: 'RepayActivity',
+    [ActivityType.Liquidated]: 'LiquidatedActivity',
+    [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
+  };
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
-      await recreateUserActivities(client, user);
+      await recreateUserActivities(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      });
     }, 180_000);
 
     describe('When fetching the user activities by an activity type', () => {
-      const activityTypes = Object.values(ActivityType);
-
-      const typenameToActivityType: Record<
-        ActivityItem['__typename'],
-        ActivityType
-      > = {
-        BorrowActivity: ActivityType.Borrow,
-        SupplyActivity: ActivityType.Supply,
-        WithdrawActivity: ActivityType.Withdraw,
-        RepayActivity: ActivityType.Repay,
-        LiquidatedActivity: ActivityType.Liquidated,
-        UsingAsCollateralActivity: ActivityType.SetAsCollateral,
-      };
-
       it.each(activityTypes)(
         'Then the returned activities are only of type %s',
         async (activityType) => {
@@ -54,21 +56,25 @@ describe('Querying User Activities on Aave V4', () => {
               chainIds: [ETHEREUM_FORK_ID],
             },
           });
-
           assertOk(result);
+
           if ([ActivityType.Liquidated].includes(activityType)) {
             // Liquidated activities are not easily reproducible, so we skip them
             return;
           }
-          assertNonEmptyArray(result.value.items);
-          result.value.items.forEach((activity) => {
-            expect(activity.user).toEqual(evmAddress(user.account.address));
-          });
-          const listActivityTypes = result.value.items.map(
-            (item) => typenameToActivityType[item.__typename],
-          );
-          expect(listActivityTypes).toSatisfyAll(
-            (activity) => activity === activityType,
+
+          expect(result.value.items).toBeArrayWithElements(
+            expect.objectContaining({
+              __typename: expect.toEqualCaseInsensitive(
+                typenameToActivityType[activityType],
+              ),
+              id: expect.any(String),
+              timestamp: expect.any(Date),
+              txHash: expect.any(String),
+              user: expect.toEqualCaseInsensitive(
+                evmAddress(user.account.address),
+              ),
+            }),
           );
         },
       );
@@ -87,11 +93,14 @@ describe('Querying User Activities on Aave V4', () => {
         assertOk(result);
 
         const expectedTypes = ['SupplyActivity', 'BorrowActivity'];
-        result.value.items.forEach((item) => {
-          expect(expectedTypes).toContain(item.__typename);
-          expect(item.user).toEqual(evmAddress(user.account.address));
-          expect(item.spoke.chain.chainId).toEqual(ETHEREUM_FORK_ID);
-        });
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            __typename: expect.toBeOneOf(expectedTypes),
+            user: expect.toEqualCaseInsensitive(
+              evmAddress(user.account.address),
+            ),
+          }),
+        );
       });
     });
 
@@ -103,18 +112,23 @@ describe('Querying User Activities on Aave V4', () => {
             chainIds: [ETHEREUM_FORK_ID],
           },
         });
-
         assertOk(result);
-        assertNonEmptyArray(result.value.items);
-        result.value.items.forEach((item) => {
-          expect(item.user).toEqual(evmAddress(user.account.address));
-          expect(item.spoke.chain.chainId).toEqual(ETHEREUM_FORK_ID);
-        });
+
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            user: expect.toEqualCaseInsensitive(
+              evmAddress(user.account.address),
+            ),
+            chain: expect.objectContaining({
+              chainId: ETHEREUM_FORK_ID,
+            }),
+          }),
+        );
       });
 
       describe('When fetching the user activities by spoke', () => {
         it('Then the returned activities are only from the specified spoke', async () => {
-          const result = await activities(client, {
+          let result = await activities(client, {
             user: evmAddress(user.account.address),
             query: {
               spoke: {
@@ -123,21 +137,43 @@ describe('Querying User Activities on Aave V4', () => {
               },
             },
           });
-
           assertOk(result);
-          assertNonEmptyArray(result.value.items);
-          result.value.items.forEach((item) => {
-            expect(item.user).toEqual(evmAddress(user.account.address));
-            expect(item.spoke.address).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
-            expect(item.spoke.chain.chainId).toEqual(ETHEREUM_FORK_ID);
+
+          expect(result.value.items).toBeArrayWithElements(
+            expect.objectContaining({
+              user: expect.toEqualCaseInsensitive(
+                evmAddress(user.account.address),
+              ),
+              spoke: expect.objectContaining({
+                address: ETHEREUM_SPOKE_CORE_ADDRESS,
+                chain: expect.objectContaining({
+                  chainId: ETHEREUM_FORK_ID,
+                }),
+              }),
+            }),
+          );
+
+          result = await activities(client, {
+            query: {
+              spokeId: ETHEREUM_SPOKE_CORE_ID,
+            },
           });
+          assertOk(result);
+
+          expect(result.value.items).toBeArrayWithElements(
+            expect.objectContaining({
+              spoke: expect.objectContaining({
+                id: ETHEREUM_SPOKE_CORE_ID,
+              }),
+            }),
+          );
         });
       });
     });
 
     describe('When fetching the user activities by hub', () => {
       it('Then the returned activities are only from the specified hub', async () => {
-        const result = await activities(client, {
+        let result = await activities(client, {
           user: evmAddress(user.account.address),
           query: {
             hub: {
@@ -147,15 +183,43 @@ describe('Querying User Activities on Aave V4', () => {
           },
         });
         assertOk(result);
-        assertNonEmptyArray(result.value.items);
-        result.value.items.forEach((item) => {
-          expect(item.user).toEqual(evmAddress(user.account.address));
-          if (item.__typename !== 'LiquidatedActivity') {
-            expect(item.reserve.asset.hub.address).toEqual(
-              ETHEREUM_HUB_CORE_ADDRESS,
-            );
-          }
+
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            user: expect.toEqualCaseInsensitive(
+              evmAddress(user.account.address),
+            ),
+            reserve: expect.objectContaining({
+              asset: expect.objectContaining({
+                hub: expect.objectContaining({
+                  address: ETHEREUM_HUB_CORE_ADDRESS,
+                }),
+              }),
+            }),
+            chain: expect.objectContaining({
+              chainId: ETHEREUM_FORK_ID,
+            }),
+          }),
+        );
+
+        result = await activities(client, {
+          query: {
+            hubId: ETHEREUM_HUB_CORE_ID,
+          },
         });
+        assertOk(result);
+
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              asset: expect.objectContaining({
+                hub: expect.objectContaining({
+                  id: ETHEREUM_HUB_CORE_ID,
+                }),
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -214,30 +278,19 @@ describe('Querying User Activities on Aave V4', () => {
           },
         });
         assertOk(result);
-        assertNonEmptyArray(result.value.items);
         // Default page size is 50
         expect(result.value.items.length).toEqual(50);
-        result.value.items.forEach((item) => {
-          expect(item.spoke.chain.chainId).toEqual(ETHEREUM_FORK_ID);
-        });
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            chain: expect.objectContaining({
+              chainId: ETHEREUM_FORK_ID,
+            }),
+          }),
+        );
       });
     });
 
     describe('When fetching all activities by an activity type', () => {
-      const activityTypes = Object.values(ActivityType);
-
-      const typenameToActivityType: Record<
-        ActivityItem['__typename'],
-        ActivityType
-      > = {
-        BorrowActivity: ActivityType.Borrow,
-        SupplyActivity: ActivityType.Supply,
-        WithdrawActivity: ActivityType.Withdraw,
-        RepayActivity: ActivityType.Repay,
-        LiquidatedActivity: ActivityType.Liquidated,
-        UsingAsCollateralActivity: ActivityType.SetAsCollateral,
-      };
-
       it.each(activityTypes)(
         'Then the returned activities are only of type %s',
         async (activityType) => {
@@ -249,21 +302,16 @@ describe('Querying User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if (
-            [ActivityType.Liquidated, ActivityType.SetAsCollateral].includes(
-              activityType,
-            )
-          ) {
+          if ([ActivityType.Liquidated].includes(activityType)) {
             // Liquidated activities are not easily reproducible, so we skip them
-            // TODO: Enable when fixed AAVE-2555 setAsCollateral activities
             return;
           }
-          assertNonEmptyArray(result.value.items);
-          const listActivityTypes = result.value.items.map(
-            (item) => typenameToActivityType[item.__typename],
-          );
-          expect(listActivityTypes).toSatisfyAll(
-            (activity) => activity === activityType,
+          expect(result.value.items).toBeArrayWithElements(
+            expect.objectContaining({
+              __typename: expect.toEqualCaseInsensitive(
+                typenameToActivityType[activityType],
+              ),
+            }),
           );
         },
       );
@@ -281,15 +329,17 @@ describe('Querying User Activities on Aave V4', () => {
         assertOk(result);
 
         const expectedTypes = ['SupplyActivity', 'BorrowActivity'];
-        result.value.items.forEach((item) => {
-          expect(expectedTypes).toContain(item.__typename);
-        });
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            __typename: expect.toBeOneOf(expectedTypes),
+          }),
+        );
       });
     });
 
     describe('When fetching all activities by a spoke', () => {
       it('Then the returned activities are only from the specified spoke', async () => {
-        const result = await activities(client, {
+        let result = await activities(client, {
           query: {
             spoke: {
               address: ETHEREUM_SPOKE_CORE_ADDRESS,
@@ -298,17 +348,36 @@ describe('Querying User Activities on Aave V4', () => {
           },
         });
         assertOk(result);
-        assertNonEmptyArray(result.value.items);
-        result.value.items.forEach((item) => {
-          expect(item.spoke.address).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
-          expect(item.spoke.chain.chainId).toEqual(ETHEREUM_FORK_ID);
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            spoke: expect.objectContaining({
+              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+              chain: expect.objectContaining({
+                chainId: ETHEREUM_FORK_ID,
+              }),
+            }),
+          }),
+        );
+
+        result = await activities(client, {
+          query: {
+            spokeId: ETHEREUM_SPOKE_CORE_ID,
+          },
         });
+        assertOk(result);
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            spoke: expect.objectContaining({
+              id: ETHEREUM_SPOKE_CORE_ID,
+            }),
+          }),
+        );
       });
     });
 
     describe('When fetching all activities by a hub', () => {
       it('Then the returned activities are only from the specified hub', async () => {
-        const result = await activities(client, {
+        let result = await activities(client, {
           query: {
             hub: {
               address: ETHEREUM_HUB_CORE_ADDRESS,
@@ -317,14 +386,35 @@ describe('Querying User Activities on Aave V4', () => {
           },
         });
         assertOk(result);
-        assertNonEmptyArray(result.value.items);
-        result.value.items.forEach((item) => {
-          if (item.__typename !== 'LiquidatedActivity') {
-            expect(item.reserve.asset.hub.address).toEqual(
-              ETHEREUM_HUB_CORE_ADDRESS,
-            );
-          }
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              asset: expect.objectContaining({
+                hub: expect.objectContaining({
+                  address: ETHEREUM_HUB_CORE_ADDRESS,
+                }),
+              }),
+            }),
+          }),
+        );
+
+        result = await activities(client, {
+          query: {
+            hubId: ETHEREUM_HUB_CORE_ID,
+          },
         });
+        assertOk(result);
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              asset: expect.objectContaining({
+                hub: expect.objectContaining({
+                  id: ETHEREUM_HUB_CORE_ID,
+                }),
+              }),
+            }),
+          }),
+        );
       });
     });
   });

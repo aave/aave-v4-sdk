@@ -1,11 +1,11 @@
 import {
   type AaveClient,
   type EvmAddress,
-  encodeSpokeId,
   evmAddress,
   type Reserve,
   ReservesRequestFilter,
   type ResultAsync,
+  type SpokeId,
 } from '@aave/client';
 import { reserves } from '@aave/client/actions';
 import { ETHEREUM_FORK_ID } from '@aave/client/test-utils';
@@ -17,7 +17,7 @@ export function findReservesToSupply(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   params: {
-    spoke?: EvmAddress;
+    spoke?: SpokeId;
     token?: EvmAddress;
     asCollateral?: boolean;
     native?: boolean;
@@ -29,19 +29,12 @@ export function findReservesToSupply(
         ? {
             spokeToken: {
               token: params.token,
-              // TODO: refactor function to only
-              spoke: encodeSpokeId({
-                chainId: ETHEREUM_FORK_ID,
-                address: params.spoke,
-              }),
+              spoke: params.spoke,
             },
           }
         : params.spoke
           ? {
-              spoke: {
-                chainId: ETHEREUM_FORK_ID,
-                address: params.spoke,
-              },
+              spokeId: params.spoke,
             }
           : params.token
             ? {
@@ -69,7 +62,7 @@ export function findReservesToBorrow(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   params: {
-    spoke?: EvmAddress;
+    spoke?: SpokeId;
     token?: EvmAddress;
   } = {},
 ): ResultAsync<NonEmptyTuple<Reserve>, Error> {
@@ -79,18 +72,12 @@ export function findReservesToBorrow(
         ? {
             spokeToken: {
               token: params.token,
-              spoke: encodeSpokeId({
-                chainId: ETHEREUM_FORK_ID,
-                address: params.spoke,
-              }),
+              spoke: params.spoke,
             },
           }
         : params.spoke
           ? {
-              spoke: {
-                chainId: ETHEREUM_FORK_ID,
-                address: params.spoke,
-              },
+              spokeId: params.spoke,
             }
           : { chainIds: [ETHEREUM_FORK_ID] },
     user: evmAddress(user.account.address),

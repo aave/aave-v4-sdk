@@ -8,7 +8,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ETHENA_ADDRESS,
+  ETHEREUM_SPOKE_ETHENA_ID,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client/test-utils';
@@ -32,7 +32,7 @@ describe('Setting Supply as Collateral on Aave V4', () => {
         .andThen(() =>
           findReservesToSupply(client, user, {
             token: ETHEREUM_USDC_ADDRESS,
-            spoke: ETHEREUM_SPOKE_ETHENA_ADDRESS,
+            spoke: ETHEREUM_SPOKE_ETHENA_ID,
           }),
         )
         .andThen((listReserves) =>

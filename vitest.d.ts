@@ -10,5 +10,6 @@ declare module 'vitest' {
     toBeSortedNumerically: (order: 'asc' | 'desc') => R;
     toBeSortedAlphabetically: (order: 'asc' | 'desc') => R;
     toBeSortedByDate: (order: 'asc' | 'desc') => R;
+    toBeArrayWithElements: (expected: unknown | AsymmetricMatcher) => R;
   }
 }

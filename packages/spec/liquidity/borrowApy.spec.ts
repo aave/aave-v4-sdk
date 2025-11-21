@@ -35,13 +35,13 @@ describe('Querying Borrow APY History on Aave V4', () => {
           });
           assertOk(result);
           const { now, startDate } = getTimeWindowDates(window);
-          expect(result.value).toIncludeAllMembers([
-            {
+          expect(result.value).toBeArrayWithElements(
+            expect.objectContaining({
               __typename: 'APYSample',
               date: expect.toBeBetweenDates(startDate, now),
               avgRate: expect.any(Object),
-            },
-          ]);
+            }),
+          );
         },
       );
     });

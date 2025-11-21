@@ -16,7 +16,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/test-utils';
@@ -46,7 +46,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
         }).andThen(() =>
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
             asCollateral: true,
             amount: amountToSupply,
           }),
@@ -72,12 +72,12 @@ describe('Health Factor Scenarios on Aave V4', () => {
 
       beforeAll(async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         });
         assertOk(reservesToBorrow);
 
         const setup = await findReservesToSupply(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           asCollateral: true,
         }).andThen((reservesToSupply) => {
           const amountToSupply = reservesToSupply[0].supplyCap

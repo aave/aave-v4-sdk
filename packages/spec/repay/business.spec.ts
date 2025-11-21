@@ -8,7 +8,7 @@ import {
 import {
   client,
   createNewWallet,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
@@ -36,7 +36,7 @@ describe('Repaying Loans on Aave V4', () => {
     beforeEach(async () => {
       const supplySetup = await findReservesToSupply(client, user, {
         token: ETHEREUM_WSTETH_ADDRESS,
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ID,
         asCollateral: true,
       }).andThen((supplyReserves) => {
         const amountToSupply = supplyReserves[0].supplyCap
@@ -58,7 +58,7 @@ describe('Repaying Loans on Aave V4', () => {
       });
       assertOk(supplySetup);
       const borrowSetup = await findReservesToBorrow(client, user, {
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ID,
       }).andThen((borrowReserves) => {
         const reserveWithPermit = borrowReserves.find(
           (reserve) => reserve.asset.underlying.permitSupported,

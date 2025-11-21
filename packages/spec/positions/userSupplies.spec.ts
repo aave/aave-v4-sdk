@@ -20,7 +20,9 @@ describe('Querying User Supply Positions on Aave V4', () => {
   describe('Given a user with multiple active supply positions', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
-      await recreateUserActivities(client, user);
+      await recreateUserActivities(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      });
     }, 180_000);
 
     describe('When the user queries their supply positions by spoke', () => {

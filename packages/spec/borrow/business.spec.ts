@@ -3,7 +3,7 @@ import { borrow, preview, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
@@ -29,7 +29,7 @@ describe('Borrowing Assets on Aave V4', () => {
       }).andThen(() =>
         findReserveAndSupply(client, user, {
           token: ETHEREUM_WSTETH_ADDRESS,
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           amount: amountToSupply,
           asCollateral: true,
         }),
@@ -41,7 +41,7 @@ describe('Borrowing Assets on Aave V4', () => {
     describe('When the user wants to preview the borrow action before performing it', () => {
       it('Then the user can review the borrow details before proceeding', async () => {
         const borrowPreviewResult = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         }).andThen((reserves) =>
           preview(client, {
             action: {
@@ -69,7 +69,7 @@ describe('Borrowing Assets on Aave V4', () => {
     describe('When the user borrows an ERC20 asset', () => {
       it(`Then the user's borrow position is updated to reflect the ERC20 loan`, async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         });
         assertOk(reservesToBorrow);
         const amountToBorrow =
@@ -122,7 +122,7 @@ describe('Borrowing Assets on Aave V4', () => {
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             amount: amountToSupply,
-            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
             asCollateral: true,
           }),
         );
@@ -131,7 +131,7 @@ describe('Borrowing Assets on Aave V4', () => {
       });
       it(`Then the user's borrow position is updated to reflect the native asset loan`, async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           token: ETHEREUM_WETH_ADDRESS,
         });
         assertOk(reservesToBorrow);

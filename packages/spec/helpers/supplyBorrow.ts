@@ -2,6 +2,7 @@ import type {
   AaveClient,
   BorrowRequest,
   Reserve,
+  SpokeId,
   SupplyRequest,
 } from '@aave/client';
 import {
@@ -15,7 +16,7 @@ import {
 
 import { borrow, reserve, supply } from '@aave/client/actions';
 import {
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
 } from '@aave/client/test-utils';
@@ -50,7 +51,7 @@ export function supplyNativeTokenToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   amount: BigDecimal,
-  spoke?: EvmAddress,
+  spoke?: SpokeId,
 ): ResultAsync<Reserve, Error> {
   return findReservesToSupply(client, user, {
     spoke: spoke,
@@ -78,7 +79,7 @@ export function findReserveAndSupply(
   }: {
     token: EvmAddress;
     amount: BigDecimal;
-    spoke?: EvmAddress;
+    spoke?: SpokeId;
     asCollateral?: boolean;
   },
 ): ResultAsync<Reserve, Error> {
@@ -154,7 +155,7 @@ export function supplyWSTETHAndBorrowETH(
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
   return findReservesToSupply(client, user, {
     token: ETHEREUM_WSTETH_ADDRESS,
-    spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+    spoke: ETHEREUM_SPOKE_CORE_ID,
   }).andThen((listSupplyReserves) =>
     supplyToReserve(client, user, {
       reserve: listSupplyReserves[0].id,
@@ -165,7 +166,7 @@ export function supplyWSTETHAndBorrowETH(
       .andThen(() =>
         findReservesToBorrow(client, user, {
           token: ETHEREUM_WETH_ADDRESS,
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         }),
       )
       .andThen((reservesToBorrow) =>
