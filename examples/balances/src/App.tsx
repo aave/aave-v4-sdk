@@ -1,9 +1,22 @@
-import { chainId, evmAddress, useUserBalances } from '@aave/react';
+import {
+  chainId,
+  evmAddress,
+  ReservesRequestFilter,
+  useUserBalances,
+} from '@aave/react';
+import { supportedChains } from '@aave/react/viem';
+
+const defaultChain = chainId(supportedChains[0].id);
 
 export function App() {
   const { data, loading } = useUserBalances({
-    chainIds: [chainId(1)],
-    user: evmAddress('0x26D595DDDBAD81BF976EF6F24686A12A800B141F'),
+    user: evmAddress('0x6e82eeef7d4aa83da6de167bed33443a40fada8d'),
+    filter: {
+      chains: {
+        chainIds: [defaultChain],
+        byReservesType: ReservesRequestFilter.All,
+      },
+    },
   });
 
   if (loading) {

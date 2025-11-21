@@ -19,14 +19,14 @@ function PositionDetails({ position }: { position: UserPosition }) {
           <strong>Total Supplied</strong>&nbsp;
           <span>
             {position.totalSupplied.current.value.toDisplayString(2)}{' '}
-            {position.totalSupplied.amount.symbol}
+            {position.totalSupplied.current.symbol}
           </span>
         </p>
         <p>
           <strong>Total Collateral</strong>&nbsp;
           <span>
             {position.totalCollateral.current.value.toDisplayString(2)}{' '}
-            {position.totalCollateral.amount.symbol}
+            {position.totalCollateral.current.symbol}
           </span>
         </p>
         <p>

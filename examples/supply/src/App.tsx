@@ -44,11 +44,7 @@ export function App() {
       {hub && <StrategySelector hub={hub} onChange={setSpoke} />}
 
       {spoke && (
-        <SingleUserPosition
-          spoke={spoke.address}
-          user={evmAddress(address)}
-          chainId={ethereum}
-        />
+        <SingleUserPosition spokeId={spoke.id} user={evmAddress(address)} />
       )}
 
       {spoke && <ReserveSelector spoke={spoke} onChange={setReserve} />}

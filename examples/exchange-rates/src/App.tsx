@@ -39,7 +39,11 @@ export function App() {
         <div>
           <strong>
             ETH to USD:{' '}
-            {loading ? 'Loading...' : data ? `$${data.value}` : 'No data'}
+            {loading
+              ? 'Loading...'
+              : data
+                ? `$${data.value.toDisplayString(2)}`
+                : 'No data'}
           </strong>
         </div>
       </div>
@@ -53,7 +57,9 @@ export function App() {
         </form>
         {exchangeRate && (
           <div>
-            <strong>Current Rate: ${exchangeRate.value}</strong>
+            <strong>
+              Current Rate: ${exchangeRate.value.toDisplayString(2)}
+            </strong>
           </div>
         )}
       </div>
