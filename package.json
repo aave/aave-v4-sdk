@@ -23,6 +23,8 @@
     "release": "pnpm run build && pnpm changeset publish",
     "spec": "vitest --project spec",
     "test:client": "vitest --project client",
+    "test:client:ethers": "vitest --project client packages/client/src/ethers.test.ts",
+    "test:client:viem": "vitest --project client packages/client/src/viem.test.ts",
     "test:react": "vitest --project react",
     "test:react:viem": "vitest --project react packages/react/src/viem/*.test.ts",
     "test:types": "vitest --project types",

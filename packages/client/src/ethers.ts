@@ -1,4 +1,5 @@
 import {
+  type CancelError,
   SigningError,
   TransactionError,
   UnexpectedError,
@@ -12,6 +13,7 @@ import type {
   TransactionRequest,
 } from '@aave/graphql';
 import {
+  chainId,
   errAsync,
   nonNullable,
   okAsync,
@@ -27,10 +29,62 @@ import type {
   TransactionResult,
 } from './types';
 
-/**
- * @internal
- */
-export function sendTransaction(
+function ensureChain(
+  signer: Signer,
+  request: TransactionRequest,
+): ResultAsync<void, CancelError | SigningError> {
+  return ResultAsync.fromPromise(signer.provider!.getNetwork(), (err) =>
+    SigningError.from(err),
+  ).andThen((network) => {
+    if (chainId(network.chainId) === request.chainId) {
+      return okAsync();
+    }
+
+    // Use injected provider (MetaMask, etc.)
+    const provider =
+      (signer.provider as any)?._getProvider?.() ??
+      (signer.provider as any)?.provider ??
+      (globalThis as any).ethereum;
+
+    return ResultAsync.fromPromise(
+      provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${request.chainId.toString(16)}` }],
+      }),
+      (err) => SigningError.from(err),
+    ).orElse((err) => {
+      const code =
+        (err as any)?.code ??
+        (err as any)?.cause?.code ??
+        (err as any)?.cause?.data?.originalError?.code;
+
+      console.log('code', code);
+      // if (
+      //   code === 4902 && // Chain not added
+      //   request.chainId in supportedChains
+      // ) {
+      //   const chain = supportedChains[request.chainId];
+
+      //   return ResultAsync.fromPromise(
+      //     provider.request({
+      //       method: 'wallet_addEthereumChain',
+      //       params: [chain],
+      //     }),
+      //     (err) => {
+      //       if (isRpcError(err) && err.code === UserRejectedRequestError.code) {
+      //         return CancelError.from(err);
+      //       }
+      //       return SigningError.from(err);
+      //     },
+      //   );
+      // }
+
+      return err.asResultAsync();
+    });
+  });
+}
+
+function sendEip1559Transaction(
   signer: Signer,
   request: TransactionRequest,
 ): ResultAsync<TransactionResponse, SigningError> {
@@ -42,6 +96,18 @@ export function sendTransaction(
       from: request.from,
     }),
     (err) => SigningError.from(err),
+  );
+}
+
+/**
+ * @internal
+ */
+export function sendTransaction(
+  signer: Signer,
+  request: TransactionRequest,
+): ResultAsync<TransactionResponse, SigningError> {
+  return ensureChain(signer, request).andThen((_) =>
+    sendEip1559Transaction(signer, request),
   );
 }
 
