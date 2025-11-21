@@ -6,6 +6,7 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
@@ -41,7 +42,7 @@ describe('Querying User Balances on Aave V4', () => {
         .andThen(() =>
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
             amount: bigDecimal('0.05'),
           }),
         );

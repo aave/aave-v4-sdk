@@ -4,6 +4,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_SPOKE_ETHENA_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { getTimeWindowDates } from '../helpers/tools';
@@ -18,7 +20,10 @@ describe('Querying User Summary History on Aave V4', () => {
   describe('Given a user with multiple active positions', () => {
     beforeAll(async () => {
       // NOTE: Recreate user positions if needed
-      await recreateUserPositions(client, user);
+      await recreateUserPositions(client, user, {
+        spokeFirstPosition: ETHEREUM_SPOKE_CORE_ID,
+        spokeSecondPosition: ETHEREUM_SPOKE_ETHENA_ID,
+      });
     }, 180_000);
 
     describe('When the user queries their summary history without filters', () => {

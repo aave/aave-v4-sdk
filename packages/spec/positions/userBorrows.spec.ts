@@ -19,24 +19,17 @@ const user = await createNewWallet(
 describe('Querying User Borrow Positions on Aave V4', () => {
   describe('Given a user with multiple active borrow positions', () => {
     beforeAll(async () => {
-      await recreateUserBorrows(client, user);
+      await recreateUserBorrows(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      });
     }, 120_000);
 
     describe('When the user queries their borrow positions by spoke', () => {
       it('Then the matching borrow positions are returned', async () => {
-        const userPositionsResult = await userPositions(client, {
-          user: evmAddress(user.account.address),
-          filter: {
-            chainIds: [ETHEREUM_FORK_ID],
-          },
-        });
-        assertOk(userPositionsResult);
-        assertNonEmptyArray(userPositionsResult.value);
-
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: userPositionsResult.value[0].spoke.id,
+              spoke: ETHEREUM_SPOKE_CORE_ID,
               user: evmAddress(user.account.address),
             },
           },
@@ -47,7 +40,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           expect.objectContaining({
             reserve: expect.objectContaining({
               spoke: expect.objectContaining({
-                id: userPositionsResult.value[0].spoke.id,
+                id: ETHEREUM_SPOKE_CORE_ID,
               }),
             }),
           }),

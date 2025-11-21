@@ -40,7 +40,9 @@ describe('Querying User Activities on Aave V4', () => {
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
-      await recreateUserActivities(client, user);
+      await recreateUserActivities(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      });
     }, 180_000);
 
     describe('When fetching the user activities by an activity type', () => {
@@ -110,7 +112,6 @@ describe('Querying User Activities on Aave V4', () => {
             chainIds: [ETHEREUM_FORK_ID],
           },
         });
-
         assertOk(result);
 
         expect(result.value.items).toBeArrayWithElements(
@@ -136,7 +137,6 @@ describe('Querying User Activities on Aave V4', () => {
               },
             },
           });
-
           assertOk(result);
 
           expect(result.value.items).toBeArrayWithElements(
@@ -159,6 +159,7 @@ describe('Querying User Activities on Aave V4', () => {
             },
           });
           assertOk(result);
+
           expect(result.value.items).toBeArrayWithElements(
             expect.objectContaining({
               spoke: expect.objectContaining({
