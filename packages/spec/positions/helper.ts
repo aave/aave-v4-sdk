@@ -18,6 +18,8 @@ import {
 import {
   ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_SPOKE_ETHENA_ID,
   ETHEREUM_WETH_ADDRESS,
   ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
@@ -288,11 +290,23 @@ export const recreateUserBorrows = async (
 export const recreateUserPositions = async (
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-  params: {
-    spokeFirstPosition: SpokeId;
-    spokeSecondPosition: SpokeId;
+  params?: {
+    spokes: SpokeId[];
   },
 ) => {
+  let [
+    firstSpoke = ETHEREUM_SPOKE_CORE_ID,
+    secondSpoke = ETHEREUM_SPOKE_ETHENA_ID,
+  ] = params?.spokes ?? [];
+
+  // If only one spoke was provided, fill in the missing one
+  if (params?.spokes.length === 1) {
+    secondSpoke =
+      firstSpoke === ETHEREUM_SPOKE_CORE_ID
+        ? ETHEREUM_SPOKE_ETHENA_ID
+        : ETHEREUM_SPOKE_CORE_ID;
+  }
+
   // Check if at least 2 positions are already created
   const userGlobalPositions = await userPositions(client, {
     user: evmAddress(user.account.address),
@@ -307,7 +321,7 @@ export const recreateUserPositions = async (
       client,
       user,
       {
-        spoke: params.spokeFirstPosition,
+        spoke: firstSpoke,
         asCollateral: true,
       },
     );
@@ -331,7 +345,7 @@ export const recreateUserPositions = async (
       })
         .andThen(() =>
           findReservesToBorrow(client, user, {
-            spoke: params.spokeFirstPosition,
+            spoke: firstSpoke,
           }),
         )
         .andThen((listReservesToBorrowCoreSpoke) =>
@@ -356,7 +370,7 @@ export const recreateUserPositions = async (
       client,
       user,
       {
-        spoke: params.spokeSecondPosition,
+        spoke: secondSpoke,
         asCollateral: true,
       },
     );
@@ -380,7 +394,7 @@ export const recreateUserPositions = async (
       })
         .andThen(() =>
           findReservesToBorrow(client, user, {
-            spoke: params.spokeSecondPosition,
+            spoke: secondSpoke,
           }),
         )
         .andThen((listReservesToBorrowEmodeSpoke) =>
