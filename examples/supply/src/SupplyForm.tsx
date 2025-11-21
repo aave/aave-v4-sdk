@@ -39,11 +39,7 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
     }
 
     const result = await supply({
-      reserve: {
-        reserveId: reserve.id,
-        chainId: reserve.chain.chainId,
-        spoke: reserve.spoke.address,
-      },
+      reserve: reserve.id,
       amount: {
         erc20: {
           value: bigDecimal(amount),

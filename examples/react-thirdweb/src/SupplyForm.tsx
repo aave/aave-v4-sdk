@@ -1,41 +1,33 @@
-import {
-  bigDecimal,
-  type ChainId,
-  type EvmAddress,
-  errAsync,
-  useAaveReserve,
-  useSupply,
-} from '@aave/react';
+import { bigDecimal, type EvmAddress, reserveId, useSupply } from '@aave/react';
 import { useSendTransaction } from '@aave/react/thirdweb';
 import { useState } from 'react';
 import { client as thirdwebClient } from './thirdwebClient';
 
+// Hardcoded ReserveId for the target reserve in Aave v4.
+const RESERVE_ID = reserveId(
+  'MTIzNDU2Nzg5OjoweEJhOTdjNUU1MmNkNUJDM0Q3OTUwQWU3MDc3OUY4RmZFOTJkNDBDZEM6OjY=',
+);
+
 interface SupplyFormProps {
-  chainId: ChainId;
-  market: EvmAddress;
-  underlyingToken: EvmAddress;
   wallet: EvmAddress;
 }
 
-export function SupplyForm({
-  chainId,
-  market,
-  underlyingToken,
-  wallet,
-}: SupplyFormProps) {
-  const { data: reserve } = useAaveReserve({
-    chainId,
-    market,
-    underlyingToken,
-    suspense: true,
-  });
+export function SupplyForm({ wallet }: SupplyFormProps) {
   const [status, setStatus] = useState<string>('');
 
-  const [supply, supplying] = useSupply();
-  const [sendTransaction, sending] = useSendTransaction(thirdwebClient);
+  const [sendTransaction] = useSendTransaction(thirdwebClient);
+  const [supply, { loading, error }] = useSupply((plan) => {
+    switch (plan.__typename) {
+      case 'TransactionRequest':
+        setStatus('Sending transaction…');
+        return sendTransaction(plan);
 
-  const loading = supplying.loading || sending.loading;
-  const error = supplying.error || sending.error;
+      case 'Erc20ApprovalRequired':
+      case 'PreContractActionRequired':
+        setStatus('Approval required. Sending approval transaction…');
+        return sendTransaction(plan.transaction);
+    }
+  });
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,41 +39,31 @@ export function SupplyForm({
     }
 
     const result = await supply({
-      chainId: reserve!.market.chain.chainId,
-      market: reserve!.market.address,
+      reserve: RESERVE_ID,
       amount: {
-        native: bigDecimal(amount),
+        erc20: {
+          value: bigDecimal(amount),
+        },
       },
       sender: wallet,
-    }).andThen((plan) => {
-      switch (plan.__typename) {
-        case 'TransactionRequest':
-          setStatus('Sending transaction...');
-          return sendTransaction(plan);
-
-        case 'Erc20ApprovalRequired':
-        case 'PreContractActionRequired':
-          setStatus('Approval required. Sending approval transaction...');
-
-          return sendTransaction(plan.transaction).andThen(() => {
-            setStatus('Approval sent. Now sending supply transaction...');
-
-            return sendTransaction(plan.originalTransaction);
-          });
-
-        case 'InsufficientBalanceError':
-          setStatus(
-            `Insufficient balance: ${plan.available.value} ${reserve!.underlyingToken.symbol}`,
-          );
-          return errAsync(
-            new Error(`Insufficient balance: ${plan.required.value}`),
-          );
-      }
     });
 
-    if (result.isOk()) {
-      setStatus('Supply successful!');
+    if (result.isErr()) {
+      if (result.error.name === 'ValidationError') {
+        setStatus('Insufficient balance for this reserve');
+        return;
+      }
+
+      if (result.error.name === 'CancelError') {
+        setStatus('Transaction cancelled');
+        return;
+      }
+
+      setStatus('Supply failed!');
+      return;
     }
+
+    setStatus('Supply successful!');
   };
 
   return (

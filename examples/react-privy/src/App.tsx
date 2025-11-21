@@ -1,6 +1,5 @@
 import { useLogin, usePrivy } from '@privy-io/react-auth';
 import { Suspense } from 'react';
-import { baseSepolia, market, usdc } from './config';
 import { SupplyForm } from './SupplyForm';
 
 export function App() {
@@ -32,15 +31,10 @@ export function App() {
     <Suspense fallback={<p>Loading...</p>}>
       <h1>Aave React SDK + Privy Wallet</h1>
       <p>
-        This example lets you deposit Base Sepolia ETH on the Aave market on
-        Base Sepolia.
+        This example lets you supply GHO on the Core Hub in Aave v4 using a
+        Privy-embedded or connected wallet.
       </p>
-      <SupplyForm
-        chainId={baseSepolia}
-        market={market}
-        underlyingToken={usdc}
-        wallet={user!.wallet!}
-      />
+      <SupplyForm wallet={user!.wallet!} />
     </Suspense>
   );
 }
