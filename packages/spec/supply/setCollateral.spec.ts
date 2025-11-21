@@ -21,7 +21,7 @@ import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Setting Supply as Collateral in Aave V4', () => {
+describe('Setting Supply as Collateral on Aave V4', () => {
   describe('Given a user with a supply position disabled as collateral', () => {
     beforeAll(async () => {
       const setup = await fundErc20Address(evmAddress(user.account.address), {

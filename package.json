@@ -1,4 +1,4 @@
-{
+  {
   "name": "aave-sdk",
   "version": "0.0.0",
   "description": "The quickest way to build on Aave Protocol",
@@ -19,9 +19,8 @@
     "lint:fix": "biome check --write",
     "lint": "biome check",
     "new:package": "NODE_OPTIONS='--import tsx' plop --plopfile=plopfile.ts",
-    "prepublishOnly": "pnpm run build",
     "publish:results": "tsx scripts/publishResults.ts",
-    "release": "pnpm changeset publish",
+    "release": "pnpm run build && pnpm changeset publish",
     "spec": "vitest --project spec",
     "test:client": "vitest --project client",
     "test:react": "vitest --project react",

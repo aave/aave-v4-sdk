@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
 {
   "__typename": "Hub",
   "address": "0xaD905aD5EA5B98cD50AE40Cfe368344686a21366",
@@ -28,7 +28,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
 }
 `;
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
 {
   "__typename": "Hub",
   "address": "0x5DDF2369cB82F9514043627731157B8d313E8295",
@@ -56,7 +56,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
 }
 `;
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
 {
   "__typename": "Hub",
   "address": "0x6ACF162ca44eB6929eff8c3296a2cdD6bFA7b8BF",
@@ -84,7 +84,7 @@ exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs >
 }
 `;
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 4`] = `
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 4`] = `
 {
   "__typename": "Hub",
   "address": "0x86F37ba3b480c5fE22A7eb1ba2B2D49c94089FBB",

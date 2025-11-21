@@ -34,5 +34,3 @@ jobs:
     name: Verify
     uses: ./.github/workflows/verify.yml
     secrets: inherit
-    with:
-      run-acceptance: false

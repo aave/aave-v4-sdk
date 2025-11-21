@@ -58,8 +58,7 @@ That's it—you can now start using AaveKit React hooks.
 
 ```tsx
 function ChainsList() {
-  const { data, error, loading } = useAaveChains();
-
+  const { data, error, loading } = useChains();
 
   if (loading) return <div>Loading…</div>;
 

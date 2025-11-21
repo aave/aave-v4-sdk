@@ -23,11 +23,15 @@ import {
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AaveClient } from './AaveClient';
-import { local, staging } from './environments';
+import { local, production, staging } from './environments';
 import { devnetChain } from './viem';
 
 export const environment =
-  import.meta.env.ENVIRONMENT === 'local' ? local : staging;
+  import.meta.env.ENVIRONMENT === 'local'
+    ? local
+    : import.meta.env.ENVIRONMENT === 'production'
+      ? production
+      : staging;
 
 export const ETHEREUM_FORK_ID = chainId(
   Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
@@ -95,9 +99,6 @@ export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
 
 export const client = AaveClient.create({
   environment,
-  headers: {
-    'x-e2e-tests': import.meta.env.API_X_E2E_TESTS_HEADER,
-  },
 });
 
 export async function createNewWallet(

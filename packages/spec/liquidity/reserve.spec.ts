@@ -20,7 +20,7 @@ import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Aave V4 Reserve Scenario', () => {
+describe('Querying Reserves on Aave V4', () => {
   describe('Given a user who wants to fetch reserves', () => {
     describe('When fetching reserves for a specific hub token', () => {
       it('Then it should return the reserves for the specific token', async () => {

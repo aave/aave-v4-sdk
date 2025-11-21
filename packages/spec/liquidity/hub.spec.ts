@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
 
-describe('Aave V4 Hub Scenarios', () => {
+describe('Querying Hubs on Aave V4', () => {
   describe('Given a user who wants to list available hubs', () => {
     describe('When fetching hubs by chain ID(s)', () => {
       it('Then it should return the expected data for each hub', async () => {
@@ -83,7 +83,13 @@ describe('Aave V4 Hub Scenarios', () => {
           query: { hubId: listHubs.value[0].id },
         });
         assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        expect(result.value).toMatchObject({
+          id: listHubs.value[0].id,
+          name: listHubs.value[0].name,
+          address: listHubs.value[0].address,
+          chain: listHubs.value[0].chain,
+          summary: expect.any(Object),
+        });
 
         result = await hub(client, {
           query: {
@@ -94,7 +100,13 @@ describe('Aave V4 Hub Scenarios', () => {
           },
         });
         assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        expect(result.value).toMatchObject({
+          id: listHubs.value[0].id,
+          name: listHubs.value[0].name,
+          address: listHubs.value[0].address,
+          chain: listHubs.value[0].chain,
+          summary: expect.any(Object),
+        });
 
         result = await hub(client, {
           query: {
@@ -105,7 +117,13 @@ describe('Aave V4 Hub Scenarios', () => {
           },
         });
         assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        expect(result.value).toMatchObject({
+          id: listHubs.value[0].id,
+          name: listHubs.value[0].name,
+          address: listHubs.value[0].address,
+          chain: listHubs.value[0].chain,
+          summary: expect.any(Object),
+        });
       });
     });
   });

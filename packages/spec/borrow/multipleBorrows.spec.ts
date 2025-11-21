@@ -20,14 +20,16 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
   describe('Given a user with collateral supplied to a reserve', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
+        const amountToSupply = bigDecimal('0.05');
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
           address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.2'),
+          amount: amountToSupply,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
             token: ETHEREUM_WSTETH_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-            amount: bigDecimal('0.1'),
+            amount: amountToSupply,
             asCollateral: true,
           }),
         );
@@ -93,7 +95,14 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address ===
             reservesToBorrow.value[0]!.asset.underlying.address,
         );
-        expect(usdcPosition).toBeDefined();
+        expect(usdcPosition!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
         expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[0]!.userState!.borrowable.amount.value.times(
             0.1,
@@ -106,7 +115,14 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address ===
             reservesToBorrow.value[1]!.asset.underlying.address,
         );
-        expect(usdsPosition).toBeDefined();
+        expect(usdsPosition!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
         expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
             0.1,
