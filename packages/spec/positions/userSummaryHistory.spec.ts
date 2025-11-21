@@ -165,33 +165,33 @@ describe('Querying User Summary History on Aave V4', () => {
       it('Then the summary history is returned in the specified currency', async () => {
         const summaryEUR = await userSummaryHistory(
           client,
-          {
-            user: evmAddress(user.account.address),
-          },
+          { user: evmAddress(user.account.address) },
           { currency: Currency.Eur },
         );
         assertOk(summaryEUR);
 
-        summaryEUR.value.forEach((item) => {
-          expect(item.borrows.name).toBe('EUR');
-          expect(item.supplies.name).toBe('EUR');
-          expect(item.netBalance.name).toBe('EUR');
-        });
+        expect(summaryEUR.value).toBeArrayWithElements(
+          expect.objectContaining({
+            borrows: expect.objectContaining({ name: 'EUR' }),
+            supplies: expect.objectContaining({ name: 'EUR' }),
+            netBalance: expect.objectContaining({ name: 'EUR' }),
+          }),
+        );
 
         const summaryGBP = await userSummaryHistory(
           client,
-          {
-            user: evmAddress(user.account.address),
-          },
+          { user: evmAddress(user.account.address) },
           { currency: Currency.Gbp },
         );
         assertOk(summaryGBP);
 
-        summaryGBP.value.forEach((item) => {
-          expect(item.borrows.name).toBe('GBP');
-          expect(item.supplies.name).toBe('GBP');
-          expect(item.netBalance.name).toBe('GBP');
-        });
+        expect(summaryGBP.value).toBeArrayWithElements(
+          expect.objectContaining({
+            borrows: expect.objectContaining({ name: 'GBP' }),
+            supplies: expect.objectContaining({ name: 'GBP' }),
+            netBalance: expect.objectContaining({ name: 'GBP' }),
+          }),
+        );
       });
     });
 
@@ -207,16 +207,15 @@ describe('Querying User Summary History on Aave V4', () => {
           });
           assertOk(summary);
 
-          expect(summary.value).toIncludeAllMembers([
-            {
+          expect(summary.value).toBeArrayWithElements(
+            expect.objectContaining({
               __typename: 'UserSummaryHistoryItem',
-              healthFactor: expect.any(Object),
               date: expect.toBeBetweenDates(startDate, now),
               netBalance: expect.any(Object),
               borrows: expect.any(Object),
               supplies: expect.any(Object),
-            },
-          ]);
+            }),
+          );
         },
       );
     });

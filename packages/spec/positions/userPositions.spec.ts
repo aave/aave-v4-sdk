@@ -1,13 +1,16 @@
 import { assertOk, evmAddress, OrderDirection } from '@aave/client';
-import { userPosition, userPositions } from '@aave/client/actions';
+import {
+  userPosition,
+  userPositions,
+  userSupplies,
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_USDS_ADDRESS,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-
+import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserPositions } from './helper';
 
 const user = await createNewWallet(
@@ -49,26 +52,54 @@ describe('Querying User Positions on Aave V4', () => {
           },
         });
         assertOk(positions);
-        positions.value.forEach((position) => {
-          expect(position.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
-        });
+        expect(positions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            spoke: expect.objectContaining({
+              chain: expect.objectContaining({
+                chainId: ETHEREUM_FORK_ID,
+              }),
+            }),
+          }),
+        );
       });
     });
 
     describe('When fetching positions filtered by token', () => {
       it('Then it should return the positions filtered by token', async () => {
-        const positionUsds = await userPositions(client, {
+        const suppliesPositions = await userSupplies(client, {
+          query: {
+            userChains: {
+              chainIds: [ETHEREUM_FORK_ID],
+              user: evmAddress(user.account.address),
+            },
+          },
+        });
+        assertOk(suppliesPositions);
+        assertNonEmptyArray(suppliesPositions.value);
+
+        const tokenPositions = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             tokens: [
-              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_USDS_ADDRESS },
+              {
+                chainId: ETHEREUM_FORK_ID,
+                address:
+                  suppliesPositions.value[0].reserve.asset.underlying.address,
+              },
             ],
           },
         });
-        assertOk(positionUsds);
-        positionUsds.value.forEach((position) => {
-          expect(position.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
-        });
+        assertOk(tokenPositions);
+
+        expect(tokenPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            spoke: expect.objectContaining({
+              chain: expect.objectContaining({
+                chainId: ETHEREUM_FORK_ID,
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -82,6 +113,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { balance: OrderDirection.Desc },
         });
         assertOk(positions);
+
         let listOrderBalance = positions.value.map(
           (elem) => elem.netBalance.current.value,
         );
@@ -95,6 +127,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { balance: OrderDirection.Asc },
         });
         assertOk(positions);
+
         listOrderBalance = positions.value.map(
           (elem) => elem.netBalance.current.value,
         );
@@ -110,6 +143,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { netApy: OrderDirection.Desc },
         });
         assertOk(positions);
+
         let listOrderApy = positions.value.map((elem) => elem.netApy.value);
         expect(listOrderApy).toBeSortedNumerically('desc');
 
@@ -121,6 +155,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { netApy: OrderDirection.Asc },
         });
         assertOk(positions);
+
         listOrderApy = positions.value.map((elem) => elem.netApy.value);
         expect(listOrderApy).toBeSortedNumerically('asc');
       });
@@ -134,6 +169,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { healthFactor: OrderDirection.Desc },
         });
         assertOk(positions);
+
         let listOrderHealthFactor = positions.value.map(
           (elem) => elem.healthFactor.current,
         );
@@ -147,6 +183,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { healthFactor: OrderDirection.Asc },
         });
         assertOk(positions);
+
         listOrderHealthFactor = positions.value.map(
           (elem) => elem.healthFactor.current,
         );
@@ -162,6 +199,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { created: OrderDirection.Desc },
         });
         assertOk(positions);
+
         let listOrderCreated = positions.value.map((elem) => elem.createdAt);
         expect(listOrderCreated).toBeSortedByDate('desc');
 
@@ -173,6 +211,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { created: OrderDirection.Asc },
         });
         assertOk(positions);
+
         listOrderCreated = positions.value.map((elem) => elem.createdAt);
         expect(listOrderCreated).toBeSortedByDate('asc');
       });
@@ -186,6 +225,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { netCollateral: OrderDirection.Desc },
         });
         assertOk(positions);
+
         let listOrderNetCollateral = positions.value.map(
           (elem) => elem.netCollateral.current.value,
         );
@@ -199,6 +239,7 @@ describe('Querying User Positions on Aave V4', () => {
           orderBy: { netCollateral: OrderDirection.Asc },
         });
         assertOk(positions);
+
         listOrderNetCollateral = positions.value.map(
           (elem) => elem.netCollateral.current.value,
         );

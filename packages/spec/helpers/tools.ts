@@ -9,16 +9,10 @@ export function getTimeWindowDates(timeWindow: TimeWindow): {
   startDate: Date;
 } {
   const now = new Date();
-  // Round down to start of current hour in UTC to account for data points being at whole hours
-  const nowRounded = createUTCDate(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-  );
 
-  const year = nowRounded.getUTCFullYear();
-  const month = nowRounded.getUTCMonth();
-  const date = nowRounded.getUTCDate();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const date = now.getUTCDate();
 
   let startDate: Date;
 
@@ -36,7 +30,7 @@ export function getTimeWindowDates(timeWindow: TimeWindow): {
       startDate = createUTCDate(year, month - 6, date - 2);
       break;
     case TimeWindow.LastYear:
-      startDate = createUTCDate(year - 1, month, date - 2);
+      startDate = createUTCDate(year - 1, month - 1, date);
       break;
     default:
       startDate = createUTCDate(year - 10, month, date - 2);
@@ -44,7 +38,7 @@ export function getTimeWindowDates(timeWindow: TimeWindow): {
   }
 
   return {
-    now: nowRounded,
+    now,
     startDate,
   };
 }

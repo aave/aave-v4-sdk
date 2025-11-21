@@ -36,10 +36,18 @@ describe('Querying Reserves on Aave V4', () => {
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
 
-        listReserves.value.forEach((elem) => {
-          expect(elem.asset.hub.address).toEqual(ETHEREUM_HUB_CORE_ADDRESS);
-          expect(elem.asset.underlying.address).toEqual(ETHEREUM_USDC_ADDRESS);
-        });
+        expect(listReserves.value).toBeArrayWithElements(
+          expect.objectContaining({
+            asset: expect.objectContaining({
+              underlying: expect.objectContaining({
+                address: ETHEREUM_USDC_ADDRESS,
+              }),
+              hub: expect.objectContaining({
+                address: ETHEREUM_HUB_CORE_ADDRESS,
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -56,10 +64,18 @@ describe('Querying Reserves on Aave V4', () => {
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
 
-        listReserves.value.forEach((elem) => {
-          expect(elem.spoke.id).toEqual(ETHEREUM_SPOKE_CORE_ID);
-          expect(elem.asset.underlying.address).toEqual(ETHEREUM_USDC_ADDRESS);
-        });
+        expect(listReserves.value).toBeArrayWithElements(
+          expect.objectContaining({
+            spoke: expect.objectContaining({
+              id: ETHEREUM_SPOKE_CORE_ID,
+            }),
+            asset: expect.objectContaining({
+              underlying: expect.objectContaining({
+                address: ETHEREUM_USDC_ADDRESS,
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -75,18 +91,26 @@ describe('Querying Reserves on Aave V4', () => {
         });
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
-        listReserves.value.forEach((elem) => {
-          expect(elem.spoke.address).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
-        });
+        expect(listReserves.value).toBeArrayWithElements(
+          expect.objectContaining({
+            spoke: expect.objectContaining({
+              address: ETHEREUM_SPOKE_CORE_ADDRESS,
+            }),
+          }),
+        );
 
         listReserves = await reserves(client, {
           query: { spokeId: ETHEREUM_SPOKE_CORE_ID },
         });
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
-        listReserves.value.forEach((elem) => {
-          expect(elem.spoke.id).toEqual(ETHEREUM_SPOKE_CORE_ID);
-        });
+        expect(listReserves.value).toBeArrayWithElements(
+          expect.objectContaining({
+            spoke: expect.objectContaining({
+              id: ETHEREUM_SPOKE_CORE_ID,
+            }),
+          }),
+        );
       });
     });
 
@@ -104,9 +128,17 @@ describe('Querying Reserves on Aave V4', () => {
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
 
-        listReserves.value.forEach((elem) => {
-          expect(tokens.includes(elem.asset.underlying.address)).toBe(true);
-        });
+        expect(listReserves.value).toBeArrayWithElements(
+          expect.objectContaining({
+            asset: expect.objectContaining({
+              underlying: expect.objectContaining({
+                address: expect.toSatisfy((address) =>
+                  tokens.includes(address),
+                ),
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -120,9 +152,13 @@ describe('Querying Reserves on Aave V4', () => {
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
 
-        listReserves.value.forEach((elem) => {
-          expect(elem.chain.chainId).toEqual(ETHEREUM_FORK_ID);
-        });
+        expect(listReserves.value).toBeArrayWithElements(
+          expect.objectContaining({
+            chain: expect.objectContaining({
+              chainId: ETHEREUM_FORK_ID,
+            }),
+          }),
+        );
       });
     });
 
@@ -138,9 +174,15 @@ describe('Querying Reserves on Aave V4', () => {
         });
         assertOk(listReserves);
         assertNonEmptyArray(listReserves.value);
-        listReserves.value.forEach((elem) => {
-          expect(elem.asset.hub.address).toEqual(ETHEREUM_HUB_CORE_ADDRESS);
-        });
+        expect(listReserves.value).toBeArrayWithElements(
+          expect.objectContaining({
+            asset: expect.objectContaining({
+              hub: expect.objectContaining({
+                address: ETHEREUM_HUB_CORE_ADDRESS,
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -301,14 +343,16 @@ describe('Querying Reserves on Aave V4', () => {
           assertOk(listReserves);
           assertNonEmptyArray(listReserves.value);
 
-          listReserves.value.forEach((elem) => {
-            if (status === ReservesRequestFilter.Borrow) {
-              expect(elem.canBorrow).toBeTrue();
-            }
-            if (status === ReservesRequestFilter.Supply) {
-              expect(elem.canSupply).toBeTrue();
-            }
-          });
+          expect(listReserves.value).toBeArrayWithElements(
+            expect.objectContaining({
+              canBorrow: expect.toSatisfy((canBorrow) =>
+                status === ReservesRequestFilter.Borrow ? canBorrow : true,
+              ),
+              canSupply: expect.toSatisfy((canSupply) =>
+                status === ReservesRequestFilter.Supply ? canSupply : true,
+              ),
+            }),
+          );
         },
       );
     });
