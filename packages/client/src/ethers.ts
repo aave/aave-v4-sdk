@@ -1,4 +1,5 @@
 import {
+  CancelError,
   SigningError,
   TransactionError,
   UnexpectedError,
@@ -12,14 +13,16 @@ import type {
   TransactionRequest,
 } from '@aave/graphql';
 import {
+  chainId,
   errAsync,
+  invariant,
   nonNullable,
   okAsync,
   ResultAsync,
   signatureFrom,
   txHash,
 } from '@aave/types';
-import type { Signer, TransactionResponse } from 'ethers';
+import { isError, type Signer, type TransactionResponse } from 'ethers';
 import type {
   ERC20PermitHandler,
   ExecutionPlanHandler,
@@ -27,13 +30,33 @@ import type {
   TransactionResult,
 } from './types';
 
-/**
- * @internal
- */
-export function sendTransaction(
+function ensureChain(
   signer: Signer,
   request: TransactionRequest,
-): ResultAsync<TransactionResponse, SigningError> {
+): ResultAsync<Signer, UnexpectedError> {
+  invariant(
+    signer.provider,
+    'Detached signer, the signer MUST have a provider',
+  );
+
+  return ResultAsync.fromPromise(signer.provider.getNetwork(), (err) =>
+    UnexpectedError.from(err),
+  ).andThen((network) => {
+    if (chainId(network.chainId) === request.chainId) {
+      return okAsync(signer);
+    }
+    return errAsync(
+      new UnexpectedError(
+        `Signer is on chain ${chainId(network.chainId)} but the request is for chain ${request.chainId}.`,
+      ),
+    );
+  });
+}
+
+function sendEip1559Transaction(
+  signer: Signer,
+  request: TransactionRequest,
+): ResultAsync<TransactionResponse, CancelError | SigningError> {
   return ResultAsync.fromPromise(
     signer.sendTransaction({
       to: request.to,
@@ -41,7 +64,27 @@ export function sendTransaction(
       value: request.value,
       from: request.from,
     }),
-    (err) => SigningError.from(err),
+    (err) => {
+      if (isError(err, 'ACTION_REJECTED')) {
+        return CancelError.from(err);
+      }
+      return SigningError.from(err);
+    },
+  );
+}
+
+/**
+ * @internal
+ */
+export function sendTransaction(
+  signer: Signer,
+  request: TransactionRequest,
+): ResultAsync<
+  TransactionResponse,
+  CancelError | SigningError | UnexpectedError
+> {
+  return ensureChain(signer, request).andThen((_) =>
+    sendEip1559Transaction(signer, request),
   );
 }
 
@@ -77,7 +120,7 @@ function sendTransactionAndWait(
   request: TransactionRequest,
 ): ResultAsync<
   TransactionResult,
-  SigningError | TransactionError | UnexpectedError
+  CancelError | SigningError | TransactionError | UnexpectedError
 > {
   return sendTransaction(signer, request).andThen((tx) =>
     waitForTransactionResult(request, tx),
