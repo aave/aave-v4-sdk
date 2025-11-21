@@ -24,6 +24,19 @@ const user = await createNewWallet(
 );
 
 describe('Querying User Activities on Aave V4', () => {
+  const activityTypes = Object.values(ActivityType);
+
+  const typenameToActivityType: Record<
+    ActivityType,
+    ActivityItem['__typename']
+  > = {
+    [ActivityType.Borrow]: 'BorrowActivity',
+    [ActivityType.Supply]: 'SupplyActivity',
+    [ActivityType.Withdraw]: 'WithdrawActivity',
+    [ActivityType.Repay]: 'RepayActivity',
+    [ActivityType.Liquidated]: 'LiquidatedActivity',
+    [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
+  };
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
@@ -31,20 +44,6 @@ describe('Querying User Activities on Aave V4', () => {
     }, 180_000);
 
     describe('When fetching the user activities by an activity type', () => {
-      const activityTypes = Object.values(ActivityType);
-
-      const typenameToActivityType: Record<
-        ActivityType,
-        ActivityItem['__typename']
-      > = {
-        [ActivityType.Borrow]: 'BorrowActivity',
-        [ActivityType.Supply]: 'SupplyActivity',
-        [ActivityType.Withdraw]: 'WithdrawActivity',
-        [ActivityType.Repay]: 'RepayActivity',
-        [ActivityType.Liquidated]: 'LiquidatedActivity',
-        [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
-      };
-
       it.each(activityTypes)(
         'Then the returned activities are only of type %s',
         async (activityType) => {
@@ -293,20 +292,6 @@ describe('Querying User Activities on Aave V4', () => {
     });
 
     describe('When fetching all activities by an activity type', () => {
-      const activityTypes = Object.values(ActivityType);
-
-      const typenameToActivityType: Record<
-        ActivityType,
-        ActivityItem['__typename']
-      > = {
-        [ActivityType.Borrow]: 'BorrowActivity',
-        [ActivityType.Supply]: 'SupplyActivity',
-        [ActivityType.Withdraw]: 'WithdrawActivity',
-        [ActivityType.Repay]: 'RepayActivity',
-        [ActivityType.Liquidated]: 'LiquidatedActivity',
-        [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
-      };
-
       it.each(activityTypes)(
         'Then the returned activities are only of type %s',
         async (activityType) => {

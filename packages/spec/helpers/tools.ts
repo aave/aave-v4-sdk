@@ -27,13 +27,13 @@ export function getTimeWindowDates(timeWindow: TimeWindow): {
       startDate = createUTCDate(year, month - 1, date - 2);
       break;
     case TimeWindow.LastSixMonths:
-      startDate = createUTCDate(year, month - 6, date - 2);
+      startDate = createUTCDate(year, month - 6, date - 8);
       break;
     case TimeWindow.LastYear:
-      startDate = createUTCDate(year - 1, month - 1, date);
+      startDate = createUTCDate(year - 1, month, date - 8);
       break;
     default:
-      startDate = createUTCDate(year - 10, month, date - 2);
+      startDate = createUTCDate(year - 10, month, date - 8);
       break;
   }
 
