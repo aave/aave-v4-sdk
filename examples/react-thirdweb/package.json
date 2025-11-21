@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@aave/react": "next",
-    "@bgd-labs/aave-address-book": "^4.25.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "thirdweb": "^5.105.25"

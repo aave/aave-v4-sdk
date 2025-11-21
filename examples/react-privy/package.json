@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "@aave/react": "next",
-    "@bgd-labs/aave-address-book": "^4.25.3",
-    "@privy-io/react-auth": "^2.20.0",
+    "@privy-io/react-auth": "^3.7.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "viem": "^2.31.6"
