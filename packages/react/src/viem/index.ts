@@ -1,6 +1,9 @@
 import { supportedChains as supportedChainsMap } from '@aave/client/viem';
 import type { Chain } from 'viem';
 
+// TODO remove me
+export { isRpcError } from '@aave/client/viem';
+
 export * from './adapters';
 export * from './useNetworkFee';
 

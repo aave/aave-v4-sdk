@@ -51,7 +51,10 @@ import type {
   TransactionResult,
 } from './types';
 
-function isRpcError(err: unknown): err is RpcError {
+/**
+ * @internal
+ */
+export function isRpcError(err: unknown): err is RpcError {
   return isObject(err) && 'code' in err && 'message' in err;
 }
 
