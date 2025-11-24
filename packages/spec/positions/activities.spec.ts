@@ -10,9 +10,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_HUB_CORE_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -128,32 +126,7 @@ describe('Querying User Activities on Aave V4', () => {
 
       describe('When fetching the user activities by spoke', () => {
         it('Then the returned activities are only from the specified spoke', async () => {
-          let result = await activities(client, {
-            user: evmAddress(user.account.address),
-            query: {
-              spoke: {
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
-                chainId: ETHEREUM_FORK_ID,
-              },
-            },
-          });
-          assertOk(result);
-
-          expect(result.value.items).toBeArrayWithElements(
-            expect.objectContaining({
-              user: expect.toEqualCaseInsensitive(
-                evmAddress(user.account.address),
-              ),
-              spoke: expect.objectContaining({
-                address: ETHEREUM_SPOKE_CORE_ADDRESS,
-                chain: expect.objectContaining({
-                  chainId: ETHEREUM_FORK_ID,
-                }),
-              }),
-            }),
-          );
-
-          result = await activities(client, {
+          const result = await activities(client, {
             query: {
               spokeId: ETHEREUM_SPOKE_CORE_ID,
             },
@@ -173,36 +146,7 @@ describe('Querying User Activities on Aave V4', () => {
 
     describe('When fetching the user activities by hub', () => {
       it('Then the returned activities are only from the specified hub', async () => {
-        let result = await activities(client, {
-          user: evmAddress(user.account.address),
-          query: {
-            hub: {
-              address: ETHEREUM_HUB_CORE_ADDRESS,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
-        });
-        assertOk(result);
-
-        expect(result.value.items).toBeArrayWithElements(
-          expect.objectContaining({
-            user: expect.toEqualCaseInsensitive(
-              evmAddress(user.account.address),
-            ),
-            reserve: expect.objectContaining({
-              asset: expect.objectContaining({
-                hub: expect.objectContaining({
-                  address: ETHEREUM_HUB_CORE_ADDRESS,
-                }),
-              }),
-            }),
-            chain: expect.objectContaining({
-              chainId: ETHEREUM_FORK_ID,
-            }),
-          }),
-        );
-
-        result = await activities(client, {
+        const result = await activities(client, {
           query: {
             hubId: ETHEREUM_HUB_CORE_ID,
           },
@@ -246,6 +190,7 @@ describe('Querying User Activities on Aave V4', () => {
           pageSize: PageSize.Ten,
         });
         assertOk(firstPage);
+
         expect(firstPage.value.items.length).toBe(10);
         expect(firstPage.value.pageInfo.next).not.toBeNull();
         const firstPageItemIds = firstPage.value.items.map((item) => item.id);
@@ -259,6 +204,7 @@ describe('Querying User Activities on Aave V4', () => {
           cursor: firstPage.value.pageInfo.next,
         });
         assertOk(secondPage);
+
         expect(secondPage.value.items.length).toBeLessThanOrEqual(10);
         const secondPageItemIds = secondPage.value.items.map((item) => item.id);
         // Elements in the second page should not be in the first page
@@ -339,27 +285,7 @@ describe('Querying User Activities on Aave V4', () => {
 
     describe('When fetching all activities by a spoke', () => {
       it('Then the returned activities are only from the specified spoke', async () => {
-        let result = await activities(client, {
-          query: {
-            spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
-        });
-        assertOk(result);
-        expect(result.value.items).toBeArrayWithElements(
-          expect.objectContaining({
-            spoke: expect.objectContaining({
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
-              chain: expect.objectContaining({
-                chainId: ETHEREUM_FORK_ID,
-              }),
-            }),
-          }),
-        );
-
-        result = await activities(client, {
+        const result = await activities(client, {
           query: {
             spokeId: ETHEREUM_SPOKE_CORE_ID,
           },
@@ -377,28 +303,7 @@ describe('Querying User Activities on Aave V4', () => {
 
     describe('When fetching all activities by a hub', () => {
       it('Then the returned activities are only from the specified hub', async () => {
-        let result = await activities(client, {
-          query: {
-            hub: {
-              address: ETHEREUM_HUB_CORE_ADDRESS,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
-        });
-        assertOk(result);
-        expect(result.value.items).toBeArrayWithElements(
-          expect.objectContaining({
-            reserve: expect.objectContaining({
-              asset: expect.objectContaining({
-                hub: expect.objectContaining({
-                  address: ETHEREUM_HUB_CORE_ADDRESS,
-                }),
-              }),
-            }),
-          }),
-        );
-
-        result = await activities(client, {
+        const result = await activities(client, {
           query: {
             hubId: ETHEREUM_HUB_CORE_ID,
           },

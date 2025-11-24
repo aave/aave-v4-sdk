@@ -4,10 +4,10 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { getTimeWindowDates } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserPositions } from './helper';
@@ -49,31 +49,7 @@ describe('Querying User Summary History on Aave V4', () => {
 
     describe('When the user queries their summary history filtered by spoke', () => {
       it('Then the summary history for that specific spoke is returned', async () => {
-        let summary = await userSummaryHistory(client, {
-          user: evmAddress(user.account.address),
-          filter: {
-            spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
-        });
-        assertOk(summary);
-
-        expect(summary.value).toBeArrayWithElements(
-          expect.objectContaining({
-            __typename: 'UserSummaryHistoryItem',
-            healthFactor: expect.any(Object),
-            date: expect.any(Date),
-            netBalance: expect.any(Object),
-            borrows: expect.any(Object),
-            supplies: expect.any(Object),
-          }),
-        );
-        let listDate = summary.value.map((item) => item.date);
-        expect(listDate).toBeSortedByDate('asc');
-
-        summary = await userSummaryHistory(client, {
+        const summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
             spokeId: ETHEREUM_SPOKE_CORE_ID,
@@ -91,7 +67,7 @@ describe('Querying User Summary History on Aave V4', () => {
             supplies: expect.any(Object),
           }),
         );
-        listDate = summary.value.map((item) => item.date);
+        const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
     });

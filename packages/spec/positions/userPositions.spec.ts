@@ -33,6 +33,7 @@ describe('Querying User Positions on Aave V4', () => {
           },
         });
         assertOk(positions);
+        assertNonEmptyArray(positions.value);
 
         for (const position of positions.value) {
           const positionDetails = await userPosition(client, {
@@ -107,145 +108,153 @@ describe('Querying User Positions on Aave V4', () => {
 
     describe('When fetching positions ordered by', () => {
       it('Then it should return the positions ordered by balance', async () => {
-        let positions = await userPositions(client, {
+        const positionsBalanceDesc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { balance: OrderDirection.Desc },
         });
-        assertOk(positions);
+        assertOk(positionsBalanceDesc);
 
-        let listOrderBalance = positions.value.map(
+        const listOrderBalanceDesc = positionsBalanceDesc.value.map(
           (elem) => elem.netBalance.current.value,
         );
-        expect(listOrderBalance).toBeSortedNumerically('desc');
+        expect(listOrderBalanceDesc).toBeSortedNumerically('desc');
 
-        positions = await userPositions(client, {
+        const positionsBalanceAsc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { balance: OrderDirection.Asc },
         });
-        assertOk(positions);
+        assertOk(positionsBalanceAsc);
 
-        listOrderBalance = positions.value.map(
+        const listOrderBalanceAsc = positionsBalanceAsc.value.map(
           (elem) => elem.netBalance.current.value,
         );
-        expect(listOrderBalance).toBeSortedNumerically('asc');
+        expect(listOrderBalanceAsc).toBeSortedNumerically('asc');
       });
 
       it('Then it should return the positions ordered by apy', async () => {
-        let positions = await userPositions(client, {
+        const positionsApyDesc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { netApy: OrderDirection.Desc },
         });
-        assertOk(positions);
+        assertOk(positionsApyDesc);
 
-        let listOrderApy = positions.value.map((elem) => elem.netApy.value);
-        expect(listOrderApy).toBeSortedNumerically('desc');
+        const listOrderApyDesc = positionsApyDesc.value.map(
+          (elem) => elem.netApy.value,
+        );
+        expect(listOrderApyDesc).toBeSortedNumerically('desc');
 
-        positions = await userPositions(client, {
+        const positionsApyAsc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { netApy: OrderDirection.Asc },
         });
-        assertOk(positions);
+        assertOk(positionsApyAsc);
 
-        listOrderApy = positions.value.map((elem) => elem.netApy.value);
-        expect(listOrderApy).toBeSortedNumerically('asc');
+        const listOrderApyAsc = positionsApyAsc.value.map(
+          (elem) => elem.netApy.value,
+        );
+        expect(listOrderApyAsc).toBeSortedNumerically('asc');
       });
 
       it('Then it should return the positions ordered by healthFactor', async () => {
-        let positions = await userPositions(client, {
+        const positionsHealthFactorDesc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { healthFactor: OrderDirection.Desc },
         });
-        assertOk(positions);
+        assertOk(positionsHealthFactorDesc);
 
-        let listOrderHealthFactor = positions.value.map(
+        const listOrderHealthFactorDesc = positionsHealthFactorDesc.value.map(
           (elem) => elem.healthFactor.current,
         );
-        expect(listOrderHealthFactor).toBeSortedNumerically('desc');
+        expect(listOrderHealthFactorDesc).toBeSortedNumerically('desc');
 
-        positions = await userPositions(client, {
+        const positionsHealthFactorAsc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { healthFactor: OrderDirection.Asc },
         });
-        assertOk(positions);
+        assertOk(positionsHealthFactorAsc);
 
-        listOrderHealthFactor = positions.value.map(
+        const listOrderHealthFactorAsc = positionsHealthFactorAsc.value.map(
           (elem) => elem.healthFactor.current,
         );
-        expect(listOrderHealthFactor).toBeSortedNumerically('asc');
+        expect(listOrderHealthFactorAsc).toBeSortedNumerically('asc');
       });
 
       it('Then it should return the positions ordered by created', async () => {
-        let positions = await userPositions(client, {
+        const positionsCreatedDesc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { created: OrderDirection.Desc },
         });
-        assertOk(positions);
+        assertOk(positionsCreatedDesc);
 
-        let listOrderCreated = positions.value.map((elem) => elem.createdAt);
-        expect(listOrderCreated).toBeSortedByDate('desc');
+        const listOrderCreatedDesc = positionsCreatedDesc.value.map(
+          (elem) => elem.createdAt,
+        );
+        expect(listOrderCreatedDesc).toBeSortedByDate('desc');
 
-        positions = await userPositions(client, {
+        const positionsCreatedAsc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { created: OrderDirection.Asc },
         });
-        assertOk(positions);
+        assertOk(positionsCreatedAsc);
 
-        listOrderCreated = positions.value.map((elem) => elem.createdAt);
-        expect(listOrderCreated).toBeSortedByDate('asc');
+        const listOrderCreatedAsc = positionsCreatedAsc.value.map(
+          (elem) => elem.createdAt,
+        );
+        expect(listOrderCreatedAsc).toBeSortedByDate('asc');
       });
 
       it('Then it should return the positions ordered by netCollateral', async () => {
-        let positions = await userPositions(client, {
+        const positionsNetCollateralDesc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { netCollateral: OrderDirection.Desc },
         });
-        assertOk(positions);
+        assertOk(positionsNetCollateralDesc);
 
-        let listOrderNetCollateral = positions.value.map(
+        const listOrderNetCollateralDesc = positionsNetCollateralDesc.value.map(
           (elem) => elem.netCollateral.current.value,
         );
-        expect(listOrderNetCollateral).toBeSortedNumerically('desc');
+        expect(listOrderNetCollateralDesc).toBeSortedNumerically('desc');
 
-        positions = await userPositions(client, {
+        const positionsNetCollateralAsc = await userPositions(client, {
           user: evmAddress(user.account.address),
           filter: {
             chainIds: [ETHEREUM_FORK_ID],
           },
           orderBy: { netCollateral: OrderDirection.Asc },
         });
-        assertOk(positions);
+        assertOk(positionsNetCollateralAsc);
 
-        listOrderNetCollateral = positions.value.map(
+        const listOrderNetCollateralAsc = positionsNetCollateralAsc.value.map(
           (elem) => elem.netCollateral.current.value,
         );
-        expect(listOrderNetCollateral).toBeSortedNumerically('asc');
+        expect(listOrderNetCollateralAsc).toBeSortedNumerically('asc');
       });
     });
   });

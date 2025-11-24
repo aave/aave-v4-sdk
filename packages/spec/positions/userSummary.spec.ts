@@ -4,7 +4,6 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -36,19 +35,7 @@ describe('Querying User Summary on Aave V4', () => {
 
     describe('When the user queries their summary filtered by spoke', () => {
       it('Then the summary for that specific spoke is returned', async () => {
-        let summary = await userSummary(client, {
-          user: evmAddress(user.account.address),
-          filter: {
-            spoke: {
-              address: ETHEREUM_SPOKE_CORE_ADDRESS,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
-        });
-        assertOk(summary);
-        expect(summary.value.totalPositions).toBe(1);
-
-        summary = await userSummary(client, {
+        const summary = await userSummary(client, {
           user: evmAddress(user.account.address),
           filter: {
             spokeId: ETHEREUM_SPOKE_CORE_ID,

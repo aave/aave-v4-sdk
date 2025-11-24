@@ -42,24 +42,13 @@ describe('Querying Hubs on Aave V4', () => {
         assertNonEmptyArray(listHubs.value);
 
         for (const hub of listHubs.value) {
-          let result = await hubAssets(client, {
+          const result = await hubAssets(client, {
             query: { hubId: hub.id },
           });
           assertOk(result);
-          let assetsInHub = result.value.map(
+          const assetsInHub = result.value.map(
             (asset) => asset.underlying.address,
           );
-          expect(tokens.some((token) => assetsInHub.includes(token))).toBe(
-            true,
-          );
-
-          result = await hubAssets(client, {
-            query: {
-              hubInput: { address: hub.address, chainId: ETHEREUM_FORK_ID },
-            },
-          });
-          assertOk(result);
-          assetsInHub = result.value.map((asset) => asset.underlying.address);
           expect(tokens.some((token) => assetsInHub.includes(token))).toBe(
             true,
           );
@@ -79,42 +68,8 @@ describe('Querying Hubs on Aave V4', () => {
         assertOk(listHubs);
         assertNonEmptyArray(listHubs.value);
 
-        let result = await hub(client, {
+        const result = await hub(client, {
           query: { hubId: listHubs.value[0].id },
-        });
-        assertOk(result);
-        expect(result.value).toMatchObject({
-          id: listHubs.value[0].id,
-          name: listHubs.value[0].name,
-          address: listHubs.value[0].address,
-          chain: listHubs.value[0].chain,
-          summary: expect.any(Object),
-        });
-
-        result = await hub(client, {
-          query: {
-            hubInput: {
-              address: listHubs.value[0].address,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
-        });
-        assertOk(result);
-        expect(result.value).toMatchObject({
-          id: listHubs.value[0].id,
-          name: listHubs.value[0].name,
-          address: listHubs.value[0].address,
-          chain: listHubs.value[0].chain,
-          summary: expect.any(Object),
-        });
-
-        result = await hub(client, {
-          query: {
-            hubInput: {
-              address: listHubs.value[0].address,
-              chainId: ETHEREUM_FORK_ID,
-            },
-          },
         });
         assertOk(result);
         expect(result.value).toMatchObject({
@@ -126,31 +81,31 @@ describe('Querying Hubs on Aave V4', () => {
         });
       });
     });
-  });
 
-  describe('Given a user who wants to list available hubs', () => {
-    describe('When fetching hubs sorted by name', () => {
-      it('Then it should return the hubs sorted by name', async () => {
-        let listHubs = await hubs(client, {
-          query: {
-            chainIds: [ETHEREUM_FORK_ID],
-          },
-          orderBy: { name: OrderDirection.Asc },
+    describe('Given a user who wants to list available hubs', () => {
+      describe('When fetching hubs sorted by name', () => {
+        it('Then it should return the hubs sorted by name', async () => {
+          const listHubsAsc = await hubs(client, {
+            query: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
+            orderBy: { name: OrderDirection.Asc },
+          });
+
+          assertOk(listHubsAsc);
+          const listHubsNameAsc = listHubsAsc.value.map((hub) => hub.name);
+          expect(listHubsNameAsc).toBeSortedAlphabetically('asc');
+
+          const listHubsDesc = await hubs(client, {
+            query: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
+            orderBy: { name: OrderDirection.Desc },
+          });
+          assertOk(listHubsDesc);
+          const listHubsNameDesc = listHubsDesc.value.map((hub) => hub.name);
+          expect(listHubsNameDesc).toBeSortedAlphabetically('desc');
         });
-
-        assertOk(listHubs);
-        let listHubsName = listHubs.value.map((hub) => hub.name);
-        expect(listHubsName).toBeSortedAlphabetically('asc');
-
-        listHubs = await hubs(client, {
-          query: {
-            chainIds: [ETHEREUM_FORK_ID],
-          },
-          orderBy: { name: OrderDirection.Desc },
-        });
-        assertOk(listHubs);
-        listHubsName = listHubs.value.map((hub) => hub.name);
-        expect(listHubsName).toBeSortedAlphabetically('desc');
       });
     });
 
