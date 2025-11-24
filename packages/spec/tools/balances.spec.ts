@@ -3,17 +3,15 @@ import { userBalances, userPositions } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
+  ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDS_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -31,21 +29,16 @@ describe('Querying User Balances on Aave V4', () => {
           fundErc20Address(evmAddress(user.account.address), {
             address: ETHEREUM_USDS_ADDRESS,
             amount: bigDecimal('100'),
+            decimals: 6,
           }),
         )
         .andThen(() =>
           fundErc20Address(evmAddress(user.account.address), {
-            address: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('0.1'),
-          }),
-        )
-        .andThen(() =>
-          findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            amount: bigDecimal('0.05'),
+            address: ETHEREUM_1INCH_ADDRESS,
+            amount: bigDecimal('100'),
           }),
         );
+
       assertOk(setup);
     }, 60_000);
 
@@ -108,7 +101,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(4);
+        expect(balances.value.length).toBe(3);
       });
     });
 
