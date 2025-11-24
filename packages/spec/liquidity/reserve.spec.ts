@@ -26,7 +26,7 @@ describe('Querying Reserves on Aave V4', () => {
         const listReserves = await reserves(client, {
           query: {
             hubToken: {
-              token: ETHEREUM_WETH_ADDRESS,
+              token: ETHEREUM_USDC_ADDRESS,
               hub: ETHEREUM_HUB_CORE_ADDRESS,
               chainId: ETHEREUM_FORK_ID,
             },

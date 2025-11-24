@@ -17,7 +17,7 @@ import {
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_WSTETH_ADDRESS,
+  ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client/test-utils';
 import { sendWith } from '@aave/client/viem';
@@ -38,14 +38,15 @@ describe('Health Factor Scenarios on Aave V4', () => {
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
       beforeAll(async () => {
-        const amountToSupply = bigDecimal('0.1');
+        const amountToSupply = bigDecimal('100');
 
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
+          address: ETHEREUM_USDC_ADDRESS,
           amount: amountToSupply,
+          decimals: 6,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
+            token: ETHEREUM_USDC_ADDRESS,
             spoke: ETHEREUM_SPOKE_CORE_ID,
             asCollateral: true,
             amount: amountToSupply,

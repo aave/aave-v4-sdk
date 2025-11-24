@@ -4,8 +4,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
 } from '@aave/client/test-utils';
@@ -21,14 +21,15 @@ const user = await createNewWallet();
 describe('Borrowing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     beforeAll(async () => {
-      const amountToSupply = bigDecimal('0.05');
+      const amountToSupply = bigDecimal('100');
 
       const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_WSTETH_ADDRESS,
+        address: ETHEREUM_USDC_ADDRESS,
         amount: amountToSupply,
+        decimals: 6,
       }).andThen(() =>
         findReserveAndSupply(client, user, {
-          token: ETHEREUM_WSTETH_ADDRESS,
+          token: ETHEREUM_USDC_ADDRESS,
           spoke: ETHEREUM_SPOKE_CORE_ID,
           amount: amountToSupply,
           asCollateral: true,
@@ -113,14 +114,15 @@ describe('Borrowing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     describe('When the user borrows a native asset from the reserve', () => {
       beforeAll(async () => {
-        const amountToSupply = bigDecimal('0.05');
+        const amountToSupply = bigDecimal('100');
 
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
+          address: ETHEREUM_USDC_ADDRESS,
           amount: amountToSupply,
+          decimals: 6,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
+            token: ETHEREUM_USDC_ADDRESS,
             amount: amountToSupply,
             spoke: ETHEREUM_SPOKE_CORE_ID,
             asCollateral: true,
