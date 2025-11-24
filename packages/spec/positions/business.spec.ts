@@ -82,7 +82,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
         }).andThen((reservesToSupply) => {
           const amountToSupply = reservesToSupply[0].supplyCap
             .minus(reservesToSupply[0].summary.supplied.amount.value)
-            .div(1000);
+            .div(10000);
 
           return fundErc20Address(evmAddress(user.account.address), {
             address: reservesToSupply[0].asset.underlying.address,
@@ -134,7 +134,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
 
           const amountToSupply = usedReserves.supplyReserve.supplyCap
             .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
-            .div(1000);
+            .div(10000);
 
           const setup = await fundErc20Address(
             evmAddress(user.account.address),
