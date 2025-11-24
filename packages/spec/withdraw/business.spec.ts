@@ -37,7 +37,7 @@ describe('Withdrawing Assets on Aave V4', () => {
       }).andThen((listReserves) => {
         amountToSupply = listReserves[0].supplyCap
           .minus(listReserves[0].summary.supplied.amount.value)
-          .div(1000);
+          .div(10000);
 
         return fundErc20Address(evmAddress(user.account!.address), {
           address: listReserves[0].asset.underlying.address,

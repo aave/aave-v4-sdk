@@ -33,8 +33,8 @@ import {
 import {
   borrowFromReserve,
   findReserveAndSupply,
+  supplyAndBorrowNativeToken,
   supplyToReserve,
-  supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
 import {
   repayFromReserve,
@@ -222,8 +222,8 @@ export const recreateUserSummary = async (
       }),
     )
     .andThen(() =>
-      supplyWSTETHAndBorrowETH(client, user, {
-        amountToSupply: bigDecimal('0.05'),
+      supplyAndBorrowNativeToken(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
         ratioToBorrow: 0.4,
       }),
     );
