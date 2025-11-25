@@ -95,6 +95,9 @@ export type UserBalancesByChains = ReturnType<
 export type UserBalancesByHub = ReturnType<
   typeof graphql.scalar<'UserBalancesByHub'>
 >;
+export type UserBalancesByHubId = ReturnType<
+  typeof graphql.scalar<'UserBalancesByHubId'>
+>;
 export type UserBalancesBySpoke = ReturnType<
   typeof graphql.scalar<'UserBalancesBySpoke'>
 >;
