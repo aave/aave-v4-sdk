@@ -149,4 +149,24 @@ expect.extend({
           : `expected array to be ordered alphabetically ${order}ending, but got: ${received}`,
     };
   },
+
+  toBeArrayWithElements(received, expected) {
+    const { printReceived, printExpected } = this.utils;
+
+    const isArray = Array.isArray(received) && received.length > 0;
+    const pass =
+      isArray && received.every((item) => this.equals(item, expected));
+
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `Expected array not to have all items matching:\n  ${printExpected(
+              expected,
+            )}\nBut it does.\n\nReceived:\n  ${printReceived(received)}`
+          : `Expected all array items to match:\n  ${printExpected(
+              expected,
+            )}\nBut received:\n  ${printReceived(received)}`,
+    };
+  },
 });

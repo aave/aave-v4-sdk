@@ -8,7 +8,7 @@ import { preview, userSupplies, withdraw } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   fundErc20Address,
   getBalance,
   getNativeBalance,
@@ -33,11 +33,11 @@ describe('Withdrawing Assets on Aave V4', () => {
 
     beforeEach(async () => {
       const setup = await findReservesToSupply(client, user, {
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ID,
       }).andThen((listReserves) => {
         amountToSupply = listReserves[0].supplyCap
           .minus(listReserves[0].summary.supplied.amount.value)
-          .div(1000);
+          .div(10000);
 
         return fundErc20Address(evmAddress(user.account!.address), {
           address: listReserves[0].asset.underlying.address,

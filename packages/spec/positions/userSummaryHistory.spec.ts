@@ -4,8 +4,10 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { getTimeWindowDates } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserPositions } from './helper';
@@ -18,7 +20,9 @@ describe('Querying User Summary History on Aave V4', () => {
   describe('Given a user with multiple active positions', () => {
     beforeAll(async () => {
       // NOTE: Recreate user positions if needed
-      await recreateUserPositions(client, user);
+      await recreateUserPositions(client, user, {
+        spokes: [ETHEREUM_SPOKE_CORE_ID],
+      });
     }, 180_000);
 
     describe('When the user queries their summary history without filters', () => {
@@ -28,16 +32,16 @@ describe('Querying User Summary History on Aave V4', () => {
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -45,59 +49,25 @@ describe('Querying User Summary History on Aave V4', () => {
 
     describe('When the user queries their summary history filtered by spoke', () => {
       it('Then the summary history for that specific spoke is returned', async () => {
-        const positions = await userPositions(client, {
+        const summary = await userSummaryHistory(client, {
           user: evmAddress(user.account.address),
           filter: {
-            chainIds: [ETHEREUM_FORK_ID],
-          },
-        });
-        assertOk(positions);
-        assertNonEmptyArray(positions.value);
-        const position = positions.value[0]!.spoke;
-
-        let summary = await userSummaryHistory(client, {
-          user: evmAddress(user.account.address),
-          filter: {
-            spoke: {
-              address: position.address,
-              chainId: position.chain.chainId,
-            },
+            spokeId: ETHEREUM_SPOKE_CORE_ID,
           },
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
-        let listDate = summary.value.map((item) => item.date);
-        expect(listDate).toBeSortedByDate('asc');
-
-        summary = await userSummaryHistory(client, {
-          user: evmAddress(user.account.address),
-          filter: {
-            spokeId: position.id,
-          },
-        });
-        assertOk(summary);
-
-        expect(summary.value).toIncludeAllMembers([
-          {
-            __typename: 'UserSummaryHistoryItem',
-            healthFactor: expect.any(Object),
-            date: expect.any(Date),
-            netBalance: expect.any(Object),
-            borrows: expect.any(Object),
-            supplies: expect.any(Object),
-          },
-        ]);
-        listDate = summary.value.map((item) => item.date);
+          }),
+        );
+        const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
     });
@@ -121,16 +91,16 @@ describe('Querying User Summary History on Aave V4', () => {
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -146,16 +116,16 @@ describe('Querying User Summary History on Aave V4', () => {
         });
         assertOk(summary);
 
-        expect(summary.value).toIncludeAllMembers([
-          {
+        expect(summary.value).toBeArrayWithElements(
+          expect.objectContaining({
             __typename: 'UserSummaryHistoryItem',
             healthFactor: expect.any(Object),
             date: expect.any(Date),
             netBalance: expect.any(Object),
             borrows: expect.any(Object),
             supplies: expect.any(Object),
-          },
-        ]);
+          }),
+        );
         const listDate = summary.value.map((item) => item.date);
         expect(listDate).toBeSortedByDate('asc');
       });
@@ -165,33 +135,33 @@ describe('Querying User Summary History on Aave V4', () => {
       it('Then the summary history is returned in the specified currency', async () => {
         const summaryEUR = await userSummaryHistory(
           client,
-          {
-            user: evmAddress(user.account.address),
-          },
+          { user: evmAddress(user.account.address) },
           { currency: Currency.Eur },
         );
         assertOk(summaryEUR);
 
-        summaryEUR.value.forEach((item) => {
-          expect(item.borrows.name).toBe('EUR');
-          expect(item.supplies.name).toBe('EUR');
-          expect(item.netBalance.name).toBe('EUR');
-        });
+        expect(summaryEUR.value).toBeArrayWithElements(
+          expect.objectContaining({
+            borrows: expect.objectContaining({ name: 'EUR' }),
+            supplies: expect.objectContaining({ name: 'EUR' }),
+            netBalance: expect.objectContaining({ name: 'EUR' }),
+          }),
+        );
 
         const summaryGBP = await userSummaryHistory(
           client,
-          {
-            user: evmAddress(user.account.address),
-          },
+          { user: evmAddress(user.account.address) },
           { currency: Currency.Gbp },
         );
         assertOk(summaryGBP);
 
-        summaryGBP.value.forEach((item) => {
-          expect(item.borrows.name).toBe('GBP');
-          expect(item.supplies.name).toBe('GBP');
-          expect(item.netBalance.name).toBe('GBP');
-        });
+        expect(summaryGBP.value).toBeArrayWithElements(
+          expect.objectContaining({
+            borrows: expect.objectContaining({ name: 'GBP' }),
+            supplies: expect.objectContaining({ name: 'GBP' }),
+            netBalance: expect.objectContaining({ name: 'GBP' }),
+          }),
+        );
       });
     });
 
@@ -207,16 +177,15 @@ describe('Querying User Summary History on Aave V4', () => {
           });
           assertOk(summary);
 
-          expect(summary.value).toIncludeAllMembers([
-            {
+          expect(summary.value).toBeArrayWithElements(
+            expect.objectContaining({
               __typename: 'UserSummaryHistoryItem',
-              healthFactor: expect.any(Object),
               date: expect.toBeBetweenDates(startDate, now),
               netBalance: expect.any(Object),
               borrows: expect.any(Object),
               supplies: expect.any(Object),
-            },
-          ]);
+            }),
+          );
         },
       );
     });

@@ -16,8 +16,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client/test-utils';
 import { sendWith } from '@aave/client/viem';
@@ -38,15 +38,16 @@ describe('Health Factor Scenarios on Aave V4', () => {
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
       beforeAll(async () => {
-        const amountToSupply = bigDecimal('0.1');
+        const amountToSupply = bigDecimal('100');
 
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
+          address: ETHEREUM_USDC_ADDRESS,
           amount: amountToSupply,
+          decimals: 6,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            token: ETHEREUM_USDC_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
             asCollateral: true,
             amount: amountToSupply,
           }),
@@ -72,17 +73,17 @@ describe('Health Factor Scenarios on Aave V4', () => {
 
       beforeAll(async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         });
         assertOk(reservesToBorrow);
 
         const setup = await findReservesToSupply(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           asCollateral: true,
         }).andThen((reservesToSupply) => {
           const amountToSupply = reservesToSupply[0].supplyCap
             .minus(reservesToSupply[0].summary.supplied.amount.value)
-            .div(1000);
+            .div(10000);
 
           return fundErc20Address(evmAddress(user.account.address), {
             address: reservesToSupply[0].asset.underlying.address,
@@ -134,7 +135,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
 
           const amountToSupply = usedReserves.supplyReserve.supplyCap
             .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
-            .div(1000);
+            .div(10000);
 
           const setup = await fundErc20Address(
             evmAddress(user.account.address),
