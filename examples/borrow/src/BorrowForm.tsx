@@ -49,12 +49,22 @@ export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
         sender: evmAddress(walletClient.account!.address),
       });
 
-      if (result.isOk()) {
-        setStatus('Borrow successful!');
-        return;
+      if (result.isErr()) {
+        switch (result.error.name) {
+          case 'ValidationError':
+            setStatus('Insufficient borrow capacity for this reserve');
+            return;
+          case 'CancelError':
+            setStatus('Transaction cancelled');
+            return;
+          default:
+            console.error(result.error);
+            setStatus(result.error.message ?? 'Borrow failed!');
+            return;
+        }
       }
-      console.error(result.error);
-      setStatus(result.error.message ?? 'Borrow failed!');
+
+      setStatus('Borrow successful!');
     } catch (err) {
       console.error(err);
       setStatus(

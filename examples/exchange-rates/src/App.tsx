@@ -30,9 +30,6 @@ export function App() {
 
   return (
     <div>
-      <header>
-        <h1>Exchange Rates</h1>
-      </header>
       <header style={{ textAlign: 'center', padding: '20px' }}>
         <h1>Exchange Rates</h1>
         <p style={{ color: '#666', marginBottom: '30px' }}>
