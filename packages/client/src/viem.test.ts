@@ -6,7 +6,6 @@ import {
   type BlockchainData,
   evmAddress,
 } from '@aave/types';
-import { HttpResponse } from 'msw';
 import {
   MethodNotSupportedRpcError,
   SwitchChainError,
@@ -38,18 +37,18 @@ describe(`Given a viem's WalletClient instance`, () => {
         switch (request.method) {
           case 'wallet_switchEthereumChain':
             walletChainId = request.params[0].chainId;
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               result: null,
-            });
+            };
 
           case 'eth_chainId':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               result: walletChainId,
-            });
+            };
         }
         return;
       });
@@ -67,29 +66,29 @@ describe(`Given a viem's WalletClient instance`, () => {
       setupRpcInterceptor((request) => {
         switch (request.method) {
           case 'wallet_switchEthereumChain':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               error: {
                 code: SwitchChainError.code,
                 message: 'Unrecognized chain ID',
               },
-            });
+            };
 
           case 'wallet_addEthereumChain':
             walletChainId = request.params[0].chainId;
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               result: null,
-            });
+            };
 
           case 'eth_chainId':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               result: walletChainId,
-            });
+            };
         }
         return;
       });
@@ -105,31 +104,31 @@ describe(`Given a viem's WalletClient instance`, () => {
       setupRpcInterceptor((request) => {
         switch (request.method) {
           case 'wallet_switchEthereumChain':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               error: {
                 code: SwitchChainError.code,
                 message: 'Unrecognized chain ID',
               },
-            });
+            };
 
           case 'wallet_addEthereumChain':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               error: {
                 code: MethodNotSupportedRpcError.code,
                 message: 'Resource not available',
               },
-            });
+            };
 
           case 'eth_chainId':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               result: `0x${(42).toString(16)}`,
-            });
+            };
         }
         return;
       });
@@ -146,31 +145,31 @@ describe(`Given a viem's WalletClient instance`, () => {
       setupRpcInterceptor((request) => {
         switch (request.method) {
           case 'wallet_switchEthereumChain':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               error: {
                 code: SwitchChainError.code,
                 message: 'Unrecognized chain ID',
               },
-            });
+            };
 
           case 'wallet_addEthereumChain':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               error: {
                 code: UserRejectedRequestError.code,
                 message: 'User rejected the request.',
               },
-            });
+            };
 
           case 'eth_chainId':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               result: `0x${(42).toString(16)}`,
-            });
+            };
         }
         return;
       });
@@ -187,21 +186,21 @@ describe(`Given a viem's WalletClient instance`, () => {
       setupRpcInterceptor((request) => {
         switch (request.method) {
           case 'wallet_switchEthereumChain':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               error: {
                 code: MethodNotSupportedRpcError.code,
                 message: 'method wallet_switchEthereumChain not supported',
               },
-            });
+            };
 
           case 'eth_chainId':
-            return HttpResponse.json({
+            return {
               jsonrpc: '2.0',
               id: request.id,
               result: `0x${(42).toString(16)}`,
-            });
+            };
         }
         return;
       });

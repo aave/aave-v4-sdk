@@ -559,7 +559,8 @@ export function bigDecimal(value: BigDecimalSource): BigDecimal {
  * An integer representation of a blockchain chain ID.
  */
 export type ChainId = Tagged<number, 'ChainId'>;
-export function chainId(value: number): ChainId {
-  invariant(Number.isInteger(value) && value >= 0, `Invalid ChainId: ${value}`);
-  return value as ChainId;
+export function chainId(value: number | bigint): ChainId {
+  const id = Number(value);
+  invariant(Number.isInteger(id) && id >= 0, `Invalid ChainId: ${value}`);
+  return id as ChainId;
 }
