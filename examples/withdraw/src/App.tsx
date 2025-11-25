@@ -1,9 +1,4 @@
-import {
-  chainId,
-  evmAddress,
-  type UserSupplyItem,
-  useUserSupplies,
-} from '@aave/react';
+import { chainId, evmAddress, useUserSupplies } from '@aave/react';
 import { supportedChains } from '@aave/react/viem';
 import { useState } from 'react';
 import { WithdrawForm } from './WithdrawForm';
