@@ -25,8 +25,14 @@ export function App() {
 
   return (
     <div>
-      <header>
+      <header style={{ textAlign: 'center', padding: '20px' }}>
         <h1>User Balances</h1>
+        <p style={{ color: '#666', marginBottom: '30px' }}>
+          <small>
+            This example demonstrates how to get the user's balances across all
+            reserves on the selected chain.
+          </small>
+        </p>
       </header>
       <div>
         {data?.map((balance) => (

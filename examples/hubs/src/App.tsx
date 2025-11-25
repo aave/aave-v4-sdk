@@ -16,8 +16,14 @@ export function App() {
 
   return (
     <div>
-      <header>
+      <header style={{ textAlign: 'center', padding: '20px' }}>
         <h1>List all Hubs</h1>
+        <p style={{ color: '#666', marginBottom: '30px' }}>
+          <small>
+            This example demonstrates how to list all hubs on the selected
+            chain.
+          </small>
+        </p>
       </header>
       <div>
         {data?.map((hub) => (
