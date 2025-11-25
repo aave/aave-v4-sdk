@@ -14,32 +14,40 @@ import {
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertSingleElementArray } from '../test-utils';
 
-const user = await createNewWallet();
+const user = await createNewWallet(
+  '0x175ed519142afcfa12443d747712983ab3203cc24f7afc3a9fb2b521e635f4ba',
+);
 
 // Get the user balances for the protocol. This will only return assets that can be used on the protocol
 describe('Querying User Balances on Aave V4', () => {
   describe('Given a user with one supply position and multiple tokens to use on the protocol', () => {
     beforeAll(async () => {
-      const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_USDC_ADDRESS,
-        amount: bigDecimal('100'),
-        decimals: 6,
-      })
-        .andThen(() =>
-          fundErc20Address(evmAddress(user.account.address), {
-            address: ETHEREUM_USDS_ADDRESS,
-            amount: bigDecimal('100'),
-            decimals: 6,
-          }),
-        )
-        .andThen(() =>
-          fundErc20Address(evmAddress(user.account.address), {
-            address: ETHEREUM_1INCH_ADDRESS,
-            amount: bigDecimal('100'),
-          }),
-        );
-
-      assertOk(setup);
+      const balances = await userBalances(client, {
+        user: evmAddress(user.account.address),
+        filter: {
+          chains: {
+            chainIds: [ETHEREUM_FORK_ID],
+          },
+        },
+      });
+      assertOk(balances);
+      if (balances.value.length < 4) {
+        for (const token of [
+          ETHEREUM_USDC_ADDRESS,
+          ETHEREUM_USDS_ADDRESS,
+          ETHEREUM_1INCH_ADDRESS,
+        ]) {
+          const result = await fundErc20Address(
+            evmAddress(user.account.address),
+            {
+              address: token,
+              amount: bigDecimal('100'),
+              decimals: token === ETHEREUM_1INCH_ADDRESS ? 18 : 6,
+            },
+          );
+          assertOk(result);
+        }
+      }
     }, 60_000);
 
     describe('When the user queries balances by chain ID', () => {
