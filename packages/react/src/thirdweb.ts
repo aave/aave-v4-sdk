@@ -1,4 +1,5 @@
 import { SigningError, TransactionError, UnexpectedError } from '@aave/client';
+import { supportedChains } from '@aave/client/thirdweb';
 import type {
   CancelSwapTypedData,
   ERC20PermitSignature,
@@ -8,13 +9,13 @@ import type {
 } from '@aave/graphql';
 import {
   invariant,
+  never,
   okAsync,
   ResultAsync,
   signatureFrom,
   txHash,
 } from '@aave/types';
 import {
-  defineChain,
   prepareTransaction,
   sendTransaction,
   type ThirdwebClient,
@@ -47,10 +48,9 @@ export function useSendTransaction(
         'No Account found. Ensure you have connected your wallet.',
       );
 
-      const chain = defineChain({
-        id: request.chainId,
-        rpc: `https://${request.chainId}.rpc.thirdweb.com/${thirdwebClient.clientId}`,
-      });
+      const chain =
+        supportedChains[request.chainId] ??
+        never(`Chain not supported: ${request.chainId}`);
 
       return ResultAsync.fromPromise(switchChain(chain), (err) =>
         UnexpectedError.from(err),
