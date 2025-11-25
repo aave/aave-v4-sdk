@@ -64,16 +64,12 @@ export type TransactionErrorArgs = {
 export class TransactionError extends ResultAwareError {
   name = 'TransactionError' as const;
 
-  protected constructor(message: string, cause: UnsignedTransactionRequest) {
-    super(message, { cause });
-  }
-
   static new(args: TransactionErrorArgs) {
     const { txHash, request, link } = args;
     const message = link
       ? `Transaction failed: ${txHash}\n→ View on explorer: ${link}`
       : `Transaction failed: ${txHash}`;
-    return new TransactionError(message, request);
+    return new TransactionError(message, { cause: request });
   }
 }
 
