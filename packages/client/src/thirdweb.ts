@@ -7,7 +7,10 @@ import type {
   TransactionRequest,
 } from '@aave/graphql';
 import {
+  type ChainId,
+  chainId,
   errAsync,
+  never,
   okAsync,
   ResultAsync,
   type Signature,
@@ -16,6 +19,7 @@ import {
   txHash,
 } from '@aave/types';
 import {
+  type Chain,
   defineChain,
   Engine,
   type ThirdwebClient,
@@ -27,6 +31,31 @@ import type {
   SwapSignatureHandler,
   TransactionResult,
 } from './types';
+
+const devnetChain: Chain = defineChain({
+  id: Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
+  name: 'Devnet',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: [import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Devnet Explorer',
+      url: import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
+    },
+  },
+});
+
+/**
+ * @internal
+ */
+export const supportedChains: Record<ChainId, Chain> = {
+  // TODO add them back when deployed on these chains
+  // [chainId(mainnet.id)]: mainnet,
+  // [chainId(sepolia.id)]: sepolia,
+  [chainId(devnetChain.id)]: devnetChain,
+};
 
 async function sendTransaction(
   wallet: Engine.ServerWallet,
@@ -57,10 +86,9 @@ function sendTransactionAndWait(
     .map(async (hash) =>
       waitForReceipt({
         client,
-        chain: {
-          id: request.chainId,
-          rpc: `https://${request.chainId}.rpc.thirdweb.com/${client.clientId}`,
-        },
+        chain:
+          supportedChains[request.chainId] ??
+          never(`Chain not supported: ${request.chainId}`),
         transactionHash: hash,
       }),
     )
@@ -127,7 +155,7 @@ async function signTypedData(
 ): Promise<Signature> {
   const wallet = Engine.serverWallet({
     client,
-    chain: defineChain({ id: result.domain.chainId }),
+    chain: supportedChains[result.domain.chainId],
     address: result.message.owner,
   });
 
@@ -172,7 +200,7 @@ function signSwapTypedData(
   const signTypedDataPromise = async (): Promise<Signature> => {
     const wallet = Engine.serverWallet({
       client,
-      chain: defineChain({ id: result.domain.chainId }),
+      chain: supportedChains[result.domain.chainId],
       address: message.user,
     });
 
