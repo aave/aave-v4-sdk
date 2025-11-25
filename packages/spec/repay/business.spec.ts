@@ -1,4 +1,4 @@
-import { assertOk, bigDecimal, evmAddress, invariant } from '@aave/client';
+import { assertOk, evmAddress, invariant } from '@aave/client';
 import {
   permitTypedData,
   preview,
@@ -8,8 +8,8 @@ import {
 import {
   client,
   createNewWallet,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
   getNativeBalance,
 } from '@aave/client/test-utils';
@@ -23,8 +23,8 @@ import {
 } from '../helpers/reserves';
 import {
   borrowFromReserve,
+  supplyAndBorrowNativeToken,
   supplyToReserve,
-  supplyWSTETHAndBorrowETH,
 } from '../helpers/supplyBorrow';
 
 const user = await createNewWallet();
@@ -35,13 +35,13 @@ describe('Repaying Loans on Aave V4', () => {
 
     beforeEach(async () => {
       const supplySetup = await findReservesToSupply(client, user, {
-        token: ETHEREUM_WSTETH_ADDRESS,
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        token: ETHEREUM_USDC_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ID,
         asCollateral: true,
       }).andThen((supplyReserves) => {
         const amountToSupply = supplyReserves[0].supplyCap
           .minus(supplyReserves[0].summary.supplied.amount.value)
-          .div(1000);
+          .div(10000);
 
         return fundErc20Address(evmAddress(user.account.address), {
           address: supplyReserves[0].asset.underlying.address,
@@ -58,7 +58,7 @@ describe('Repaying Loans on Aave V4', () => {
       });
       assertOk(supplySetup);
       const borrowSetup = await findReservesToBorrow(client, user, {
-        spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ID,
       }).andThen((borrowReserves) => {
         const reserveWithPermit = borrowReserves.find(
           (reserve) => reserve.asset.underlying.permitSupported,
@@ -304,17 +304,10 @@ describe('Repaying Loans on Aave V4', () => {
     let reserveSupportingNative: Reserve;
 
     beforeAll(async () => {
-      const amountToSupply = bigDecimal('0.05');
-
-      const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_WSTETH_ADDRESS,
-        amount: amountToSupply,
-      }).andThen(() =>
-        supplyWSTETHAndBorrowETH(client, user, {
-          amountToSupply: amountToSupply,
-          ratioToBorrow: 0.4,
-        }),
-      );
+      const setup = await supplyAndBorrowNativeToken(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+        ratioToBorrow: 0.4,
+      });
 
       assertOk(setup);
       reserveSupportingNative = setup.value.borrowReserve;

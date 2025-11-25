@@ -3,9 +3,8 @@ import { borrow, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_WSTETH_ADDRESS,
+  ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client/test-utils';
 import { sendWith } from '@aave/client/viem';
@@ -20,15 +19,16 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
   describe('Given a user with collateral supplied to a reserve', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
-        const amountToSupply = bigDecimal('0.05');
+        const amountToSupply = bigDecimal('100');
 
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
+          address: ETHEREUM_USDC_ADDRESS,
           amount: amountToSupply,
+          decimals: 6,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            token: ETHEREUM_USDC_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
             amount: amountToSupply,
             asCollateral: true,
           }),
@@ -39,7 +39,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
 
       it('Then the user has two active borrow positions with correct amounts', async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         });
         assertOk(reservesToBorrow);
         expect(reservesToBorrow.value.length).toBeGreaterThanOrEqual(2);
