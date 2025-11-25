@@ -1,22 +1,32 @@
 import { AaveProvider } from '@aave/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConnectKitProvider, getDefaultConfig } from 'connectkit';
+import { ConnectKitProvider } from 'connectkit';
 import { createRoot } from 'react-dom/client';
 import { createConfig, http, WagmiProvider } from 'wagmi';
-import { sepolia } from 'wagmi/chains';
+import { injected } from 'wagmi/connectors';
 import { App } from './App';
 import { client } from './client';
 
-const wagmiConfig = createConfig(
-  getDefaultConfig({
-    appName: 'Aave React SDK + ConnectKit',
-    walletConnectProjectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID,
-    chains: [sepolia],
-    transports: {
-      [sepolia.id]: http(),
+const chainId = 123456789;
+const rpcUrl =
+  'https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146';
+
+const wagmiConfig = createConfig({
+  chains: [
+    {
+      id: chainId,
+      name: 'Local Devnet',
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+      rpcUrls: {
+        default: { http: [rpcUrl] },
+      },
     },
-  }),
-);
+  ],
+  connectors: [injected()],
+  transports: {
+    [chainId]: http(rpcUrl),
+  },
+});
 
 const queryClient = new QueryClient();
 

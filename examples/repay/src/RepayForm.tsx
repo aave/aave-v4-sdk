@@ -42,35 +42,45 @@ export function RepayForm({ borrow, walletClient }: RepayFormProps) {
       return;
     }
 
-    const result = await repay({
-      reserve: borrow.reserve.id,
-      amount: {
-        erc20: {
-          value: useMax
-            ? { max: true }
-            : {
-                exact: bigDecimal(amount),
-              },
+    try {
+      const result = await repay({
+        reserve: borrow.reserve.id,
+        amount: {
+          erc20: {
+            value: useMax
+              ? { max: true }
+              : {
+                  exact: bigDecimal(amount),
+                },
+          },
         },
-      },
-      sender: evmAddress(walletClient.account!.address),
-    });
+        sender: evmAddress(walletClient.account!.address),
+      });
 
-    if (result.isErr()) {
-      switch (result.error.name) {
-        case 'ValidationError':
-          setStatus('Insufficient balance to repay this amount');
-          return;
-        case 'CancelError':
-          setStatus('Transaction cancelled');
-          return;
-        default:
-          setStatus('Repay failed!');
-          return;
+      if (result.isErr()) {
+        switch (result.error.name) {
+          case 'ValidationError':
+            setStatus('Insufficient balance to repay this amount');
+            return;
+          case 'CancelError':
+            setStatus('Transaction cancelled');
+            return;
+          default:
+            console.error(result.error);
+            setStatus(result.error.message ?? 'Repay failed!');
+            return;
+        }
       }
-    }
 
-    setStatus('Repay successful!');
+      setStatus('Repay successful!');
+    } catch (err) {
+      console.error(err);
+      setStatus(
+        err instanceof Error
+          ? err.message
+          : 'Repay failed due to an unexpected error',
+      );
+    }
   };
 
   const currentDebt = borrow.debt.amount.value.toDisplayString(2);
