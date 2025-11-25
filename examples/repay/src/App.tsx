@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { RepayForm } from './RepayForm';
 import { address, walletClient } from './wallet';
 
-const ethereum = chainId(supportedChains[0].id);
+const defaultChainId = chainId(supportedChains[0]!.id);
 
 export function App() {
   const {
@@ -15,7 +15,7 @@ export function App() {
     query: {
       userChains: {
         user: evmAddress(address),
-        chainIds: [ethereum],
+        chainIds: [defaultChainId],
       },
     },
   });

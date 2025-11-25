@@ -6,10 +6,10 @@ import {
 } from '@aave/react';
 import { supportedChains } from '@aave/react/viem';
 import { useState } from 'react';
-import { walletClient, address } from './wallet';
 import { WithdrawForm } from './WithdrawForm';
+import { address, walletClient } from './wallet';
 
-const ethereum = chainId(supportedChains[0].id);
+const defaultChainId = chainId(supportedChains[0]!.id);
 
 export function App() {
   const {
@@ -20,7 +20,7 @@ export function App() {
     query: {
       userChains: {
         user: evmAddress(address),
-        chainIds: [ethereum],
+        chainIds: [defaultChainId],
       },
     },
   });

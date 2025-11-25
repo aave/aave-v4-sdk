@@ -8,9 +8,11 @@ import {
 import { supportedChains } from '@aave/react/viem';
 import { useState } from 'react';
 
+const defaultChainId = chainId(supportedChains[0]!.id);
+
 export function App() {
   const { data, loading } = useExchangeRate({
-    from: { native: chainId(supportedChains[0].id) },
+    from: { native: defaultChainId },
     to: Currency.Usd,
   });
 
@@ -20,7 +22,7 @@ export function App() {
   const handleGetRate = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await getExchangeRate({
-      from: { native: chainId(supportedChains[0].id) },
+      from: { native: defaultChainId },
       to: Currency.Usd,
     });
     if (result.isOk()) {

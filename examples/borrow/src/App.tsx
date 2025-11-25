@@ -14,7 +14,7 @@ import { ReserveSelector } from './ReserveSelector';
 import { StrategySelector } from './StrategySelector';
 import { address, walletClient } from './wallet';
 
-const ethereum = chainId(supportedChains[0].id);
+const defaultChainId = chainId(supportedChains[0]!.id);
 
 export function App() {
   const [hub, setHub] = useState<Hub | null>(null);
@@ -37,9 +37,12 @@ export function App() {
         </p>
       </header>
 
-      <AllUserPositions address={evmAddress(address)} chainId={ethereum} />
+      <AllUserPositions
+        address={evmAddress(address)}
+        chainId={defaultChainId}
+      />
 
-      <HubSelector chainId={ethereum} onChange={handleHubSelect} />
+      <HubSelector chainId={defaultChainId} onChange={handleHubSelect} />
 
       {hub && <StrategySelector hub={hub} onChange={setSpoke} />}
 

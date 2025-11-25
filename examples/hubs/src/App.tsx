@@ -1,12 +1,12 @@
 import { chainId, useHubs } from '@aave/react';
 import { supportedChains } from '@aave/react/viem';
 
-const defaultChain = chainId(supportedChains[0].id);
+const defaultChainId = chainId(supportedChains[0]!.id);
 
 export function App() {
   const { data, loading } = useHubs({
     query: {
-      chainIds: [defaultChain],
+      chainIds: [defaultChainId],
     },
   });
 
