@@ -7,7 +7,6 @@ import {
   type Hub,
   type HubAsset,
   type HubQuery,
-  type ID,
   isHubInputVariant,
   isTxHashInputVariant,
   type LiquidatedActivity,
@@ -234,11 +233,6 @@ export const exchange = cacheExchange({
               }
             }
             return true;
-          })
-          .sort((a, b) => {
-            const ida = cache.resolve(a, 'id') as ID;
-            const idb = cache.resolve(b, 'id') as ID;
-            return idb <= ida ? 1 : -1;
           });
 
         if (matches.length === 0) return undefined;

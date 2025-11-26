@@ -191,12 +191,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
       );
 
       assertOk(result);
-      expect(result.value.items[0]?.txHash).toEqual(
-        primed.value.items[0]?.txHash,
-      );
-      expect(result.value.items[0]?.chain.chainId).toEqual(
-        primed.value.items[0]?.chain.chainId,
-      );
+      expect(result.value.items[0]).toEqual(primed.value.items[0]);
     });
   });
 });
