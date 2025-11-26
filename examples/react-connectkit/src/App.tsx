@@ -1,28 +1,28 @@
-import { evmAddress } from '@aave/react';
+import { ConnectKitButton } from 'connectkit';
 import { Suspense } from 'react';
-import { ConnectButton, useActiveAccount } from 'thirdweb/react';
+import { useAccount, useWalletClient } from 'wagmi';
 import { SupplyForm } from './SupplyForm';
-import { client } from './thirdwebClient';
 
 export function App() {
-  const account = useActiveAccount();
+  const { address, isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
-  if (!account) {
-    return <ConnectButton client={client} />;
+  if (!isConnected || !address || !walletClient) {
+    return <ConnectKitButton />;
   }
 
   return (
     <Suspense fallback={<p>Loading...</p>}>
       <header style={{ textAlign: 'center', padding: '20px' }}>
-        <h1>Aave React SDK + thirdweb SDK</h1>
+        <h1>Aave React SDK + ConnectKit</h1>
         <p style={{ color: '#666', marginBottom: '30px' }}>
           <small>
             This example demonstrates how to supply GHO on the Core Hub in Aave
-            v4 using a thirdweb-connected wallet.
+            v4 using a ConnectKit-connected wallet.
           </small>
         </p>
       </header>
-      <SupplyForm wallet={evmAddress(account.address)} />
+      <SupplyForm walletClient={walletClient} />
     </Suspense>
   );
 }
