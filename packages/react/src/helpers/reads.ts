@@ -157,6 +157,7 @@ export function useSuspendableQuery<
     const timerId = setTimeout(() => {
       executeQuery({
         requestPolicy: 'network-only',
+        batch: false, // never batch, run now!
       });
     }, pollInterval);
 
