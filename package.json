@@ -25,10 +25,11 @@
     "test:client": "vitest --project client",
     "test:client:ethers": "vitest --project client packages/client/src/ethers.test.ts",
     "test:client:viem": "vitest --project client packages/client/src/viem.test.ts",
+    "test:core": "vitest --project core",
     "test:react": "vitest --project react",
     "test:react:viem": "vitest --project react packages/react/src/viem/*.test.ts",
     "test:types": "vitest --project types",
-    "test": "pnpm test:types && pnpm test:client && pnpm test:react"
+    "test": "pnpm test:types && pnpm test:core && pnpm test:client && pnpm test:react"
   },
   "license": "MIT",
   "devDependencies": {

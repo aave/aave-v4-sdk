@@ -40,6 +40,7 @@
     "wonka": "^6.3.5"
   },
   "devDependencies": {
+    "msw": "^2.10.5",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
