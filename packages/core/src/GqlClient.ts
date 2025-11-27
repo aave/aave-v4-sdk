@@ -74,6 +74,7 @@ export class GqlClient {
       requestPolicy: context.cache ? 'cache-and-network' : 'network-only',
       preferGetMethod: false, // since @urql/core@6.0.1
       exchanges: this.exchanges(),
+      fetchOptions: this.getFetchOptions(),
     });
   }
 
@@ -409,14 +410,19 @@ export class GqlClient {
       batchFetchExchange({
         batchInterval: 1,
         maxBatchSize: 10,
-        fetchOptions: {
-          credentials: 'omit',
-          headers: this.context.headers,
-        },
+        url: this.context.environment.backend,
+        fetchOptions: this.getFetchOptions(),
       }),
     );
 
     return exchanges;
+  }
+
+  private getFetchOptions(): RequestInit {
+    return {
+      credentials: 'omit',
+      headers: this.context.headers,
+    };
   }
 
   private registerQuery(op: Operation): void {

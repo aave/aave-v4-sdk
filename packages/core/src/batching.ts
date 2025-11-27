@@ -30,10 +30,10 @@ import {
 } from 'wonka';
 
 class Batcher {
-  private queuesByUrl = new Map<string, Operation[]>();
+  private queue = new Map<number, Operation>();
   private flushTimer: ReturnType<typeof setTimeout> | null = null;
-  private onBatchReady: (url: string, operations: Operation[]) => void =
-    () => {};
+  private flushing = false;
+  private onBatchReady: (operations: Operation[]) => void = () => {};
 
   constructor(
     private readonly batchInterval: number,
@@ -41,41 +41,29 @@ class Batcher {
   ) {}
 
   push(operation: Operation): void {
-    const url = operation.context.url;
-    const queue = this.queuesByUrl.get(url);
+    this.queue.set(operation.key, operation);
 
-    if (queue) {
-      queue.push(operation);
-    } else {
-      this.queuesByUrl.set(url, [operation]);
-    }
-
-    if (this.shouldFlush()) {
+    if (this.shouldFlush() && !this.flushing) {
       this.cancelScheduledFlush();
       this.flushBatch();
       return;
     }
 
-    if (this.isFirstOperation()) {
+    if (!this.flushTimer && !this.flushing) {
       this.scheduleFlush();
     }
   }
 
-  onBatch(handler: (url: string, batch: Operation[]) => void): void {
+  remove(operation: Operation): void {
+    this.queue.delete(operation.key);
+  }
+
+  onBatch(handler: (operations: Operation[]) => void): void {
     this.onBatchReady = handler;
   }
 
   private shouldFlush(): boolean {
-    for (const queue of this.queuesByUrl.values()) {
-      if (queue.length >= this.maxBatchSize) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isFirstOperation(): boolean {
-    return !this.flushTimer;
+    return this.queue.size >= this.maxBatchSize;
   }
 
   private scheduleFlush(): void {
@@ -93,33 +81,27 @@ class Batcher {
   }
 
   private flushBatch(): void {
-    for (const [url, operations] of this.queuesByUrl.entries()) {
-      if (operations.length === 0) continue;
+    if (this.flushing) return;
+    this.flushing = true;
 
-      const batch = operations.slice(0, this.maxBatchSize);
-      const remaining = operations.slice(this.maxBatchSize);
-
-      if (remaining.length > 0) {
-        this.queuesByUrl.set(url, remaining);
-      } else {
-        this.queuesByUrl.delete(url);
-      }
-
-      this.onBatchReady(url, batch);
+    if (this.queue.size === 0) {
+      this.flushing = false;
+      return;
     }
 
-    if (this.hasRemainingOperations()) {
+    const batch = Array.from(this.queue.values()).slice(0, this.maxBatchSize);
+
+    this.onBatchReady(batch);
+
+    for (const op of batch) {
+      this.queue.delete(op.key);
+    }
+
+    if (this.queue.size > 0) {
       setTimeout(() => this.flushBatch(), 0);
     } else {
-      this.flushTimer = null;
+      this.flushing = false;
     }
-  }
-
-  private hasRemainingOperations(): boolean {
-    for (const queue of this.queuesByUrl.values()) {
-      if (queue.length > 0) return true;
-    }
-    return false;
   }
 }
 
@@ -145,6 +127,7 @@ function makeSingleRequestSource(
 export type BatchFetchExchangeConfig = {
   batchInterval: number;
   maxBatchSize: number;
+  url: string;
   fetchOptions?: RequestInit | (() => RequestInit);
 };
 
@@ -157,10 +140,12 @@ export type BatchFetchExchangeConfig = {
  * - Single-operation batches use standard GraphQL request format (not array)
  * - Mutations and subscriptions are never batched
  * - Queries can opt-out of batching by setting `context.batch = false`
+ * - Torn-down operations are automatically removed from pending batches
  */
 export function batchFetchExchange({
   batchInterval,
   maxBatchSize,
+  url,
   fetchOptions,
 }: BatchFetchExchangeConfig): Exchange {
   return ({ forward }) => {
@@ -203,6 +188,10 @@ export function batchFetchExchange({
           (op: Operation) => op.kind === 'query' && op.context.batch !== false,
         ),
         mergeMap((op: Operation) => {
+          invariant(
+            op.context.url === url,
+            `Operation URL mismatch: expected "${url}", got "${op.context.url}"`,
+          );
           batcher.push(op);
           return make<OperationResult>(({ next }) => {
             const sinks = resultSinks.get(op.key);
@@ -214,6 +203,8 @@ export function batchFetchExchange({
             }
 
             return () => {
+              batcher.remove(op);
+
               const remaining = resultSinks.get(op.key);
               if (!remaining) return;
 
@@ -228,7 +219,7 @@ export function batchFetchExchange({
         }),
       );
 
-      batcher.onBatch((url, operations) => {
+      batcher.onBatch((operations) => {
         invariant(
           isNonEmptyArray(operations),
           'Expected non-empty array of operations',
