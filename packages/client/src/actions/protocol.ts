@@ -50,7 +50,10 @@ export function asset(
       currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
       timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
     },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
 
@@ -78,7 +81,10 @@ export function assetPriceHistory(
   return client.query(
     AssetPriceHistoryQuery,
     { request },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
 
@@ -105,7 +111,10 @@ export function assetSupplyHistory(
   return client.query(
     AssetSupplyHistoryQuery,
     { request },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
 
@@ -132,6 +141,9 @@ export function assetBorrowHistory(
   return client.query(
     AssetBorrowHistoryQuery,
     { request },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }

@@ -77,11 +77,9 @@ export class AaveClient extends GqlClient {
   ): Promise<void> {
     await this.refreshWhere(async (op) => {
       if (op.query === document) {
-        const result = await this.query(
-          document,
-          op.variables as TVariables,
-          'cache-only',
-        );
+        const result = await this.query(document, op.variables as TVariables, {
+          requestPolicy: 'cache-only',
+        });
 
         if (result.isErr()) {
           return false;
