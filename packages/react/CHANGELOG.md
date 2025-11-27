@@ -1,5 +1,27 @@
 # @aave/react
 
+## 4.0.0-next.4
+
+### Minor Changes
+
+- be462e6: **feat:** smart baching of GQL queries.
+
+### Patch Changes
+
+- 009995d: **feat:** expose hubId filters for user balances and reserves.
+- 464b6f2: **fix:** thirdweb integration to support chains based on tenderly forks.
+- de80d52: **fix:** emit `CancelError` from Ethers.js integrations and ensures to be on correct chain before sending tx.
+- Updated dependencies [009995d]
+- Updated dependencies [be462e6]
+- Updated dependencies [de80d52]
+- Updated dependencies [79bef0a]
+- Updated dependencies [464b6f2]
+- Updated dependencies [de80d52]
+  - @aave/graphql@1.0.0-next.4
+  - @aave/client@4.0.0-next.4
+  - @aave/core@1.0.0-next.3
+  - @aave/types@1.0.0-next.3
+
 ## 4.0.0-next.3
 
 ### Patch Changes
