@@ -1,5 +1,13 @@
 # @aave/graphql
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- 009995d: **feat:** expose hubId filters for user balances and reserves.
+- Updated dependencies [de80d52]
+  - @aave/types@1.0.0-next.3
+
 ## 1.0.0-next.3
 
 ### Patch Changes
