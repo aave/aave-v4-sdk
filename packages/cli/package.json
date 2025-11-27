@@ -1,0 +1,66 @@
+{
+  "name": "@aave/cli",
+  "version": "4.0.0",
+  "description": "CLI to interact with AaveKit API",
+  "keywords": [
+    "aave",
+    "cli"
+  ],
+  "repository": {
+    "directory": "packages/cli",
+    "type": "git",
+    "url": "git://github.com/aave/aave-v4-sdk.git"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "aave": "./bin/run.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "./bin",
+    "./dist",
+    "./oclif.manifest.json"
+  ],
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "prepack": "oclif manifest && oclif readme",
+    "version": "oclif readme && git add README.md"
+  },
+  "dependencies": {
+    "@oclif/core": "^4",
+    "@oclif/plugin-help": "^6",
+    "@oclif/plugin-plugins": "^5"
+  },
+  "devDependencies": {
+    "@oclif/test": "^4",
+    "@types/node": "^24",
+    "oclif": "^4",
+    "shx": "^0.3.3",
+    "ts-node": "^10",
+    "typescript": "^5"
+  },
+  "oclif": {
+    "bin": "aave",
+    "dirname": "aave",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " ",
+    "topics": {
+      "hello": {
+        "description": "Say hello to the world and others"
+      }
+    }
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
