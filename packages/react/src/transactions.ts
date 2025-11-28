@@ -26,6 +26,7 @@ import {
   type BorrowRequest,
   decodeHubId,
   decodeReserveId,
+  type ExecutionPlan,
   HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
@@ -143,6 +144,34 @@ function refreshQueriesForReserveChange(
 }
 
 /**
+ * @internal
+ * Handles execution plan by processing different transaction types.
+ */
+function handleExecutionPlan(
+  client: AaveClient,
+  handler: TransactionHandler,
+  plan: ExecutionPlan,
+) {
+  switch (plan.__typename) {
+    case 'TransactionRequest':
+      return handler(plan, { cancel })
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(client.waitForTransaction);
+
+    case 'Erc20ApprovalRequired':
+    case 'PreContractActionRequired':
+      return handler(plan, { cancel })
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(() => handler(plan.originalTransaction, { cancel }))
+        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen(client.waitForTransaction);
+
+    case 'InsufficientBalanceError':
+      return errAsync(ValidationError.fromGqlNode(plan));
+  }
+}
+
+/**
  * A hook that provides a way to supply assets to an Aave reserve.
  *
  * ```ts
@@ -209,25 +238,7 @@ export function useSupply(
   return useAsyncTask(
     (request: SupplyRequest) =>
       supply(client, request)
-        .andThen((plan) => {
-          switch (plan.__typename) {
-            case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'Erc20ApprovalRequired':
-            case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'InsufficientBalanceError':
-              return errAsync(ValidationError.fromGqlNode(plan));
-          }
-        })
+        .andThen((plan) => handleExecutionPlan(client, handler, plan))
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -300,25 +311,7 @@ export function useBorrow(
   return useAsyncTask(
     (request: BorrowRequest) =>
       borrow(client, request)
-        .andThen((plan) => {
-          switch (plan.__typename) {
-            case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'Erc20ApprovalRequired':
-            case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'InsufficientBalanceError':
-              return errAsync(ValidationError.fromGqlNode(plan));
-          }
-        })
+        .andThen((plan) => handleExecutionPlan(client, handler, plan))
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -391,25 +384,7 @@ export function useRepay(
   return useAsyncTask(
     (request: RepayRequest) =>
       repay(client, request)
-        .andThen((plan) => {
-          switch (plan.__typename) {
-            case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'Erc20ApprovalRequired':
-            case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'InsufficientBalanceError':
-              return errAsync(ValidationError.fromGqlNode(plan));
-          }
-        })
+        .andThen((plan) => handleExecutionPlan(client, handler, plan))
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -482,25 +457,7 @@ export function useWithdraw(
   return useAsyncTask(
     (request: WithdrawRequest) =>
       withdraw(client, request)
-        .andThen((plan) => {
-          switch (plan.__typename) {
-            case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'Erc20ApprovalRequired':
-            case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
-
-            case 'InsufficientBalanceError':
-              return errAsync(ValidationError.fromGqlNode(plan));
-          }
-        })
+        .andThen((plan) => handleExecutionPlan(client, handler, plan))
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -918,25 +875,9 @@ export function useLiquidatePosition(
   return useAsyncTask(
     (request: LiquidatePositionRequest) =>
       // TODO: update the relevant read queries
-      liquidatePosition(client, request).andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
-
-          case 'Erc20ApprovalRequired':
-          case 'PreContractActionRequired':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(plan.originalTransaction, { cancel }))
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
-
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      }),
+      liquidatePosition(client, request).andThen((plan) =>
+        handleExecutionPlan(client, handler, plan),
+      ),
     [client, handler],
   );
 }
