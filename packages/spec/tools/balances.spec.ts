@@ -8,14 +8,14 @@ import {
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDS_ADDRESS,
   fundErc20Address,
 } from '@aave/client/test-utils';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { assertSingleElementArray } from '../test-utils';
+import { findReserveAndSupply } from '../helpers/supplyBorrow';
+import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet(
-  '0x175ed519142afcfa12443d747712983ab3203cc24f7afc3a9fb2b521e635f4ba',
+  '0xb648cc3d9bdad37b60bcd7177b783a9c7ddfb36b6c7699f74f8dd27d4d150503',
 );
 
 // Get the user balances for the protocol. This will only return assets that can be used on the protocol
@@ -31,12 +31,8 @@ describe('Querying User Balances on Aave V4', () => {
         },
       });
       assertOk(balances);
-      if (balances.value.length < 4) {
-        for (const token of [
-          ETHEREUM_USDC_ADDRESS,
-          ETHEREUM_USDS_ADDRESS,
-          ETHEREUM_1INCH_ADDRESS,
-        ]) {
+      if (balances.value.length < 3) {
+        for (const token of [ETHEREUM_USDC_ADDRESS, ETHEREUM_1INCH_ADDRESS]) {
           const result = await fundErc20Address(
             evmAddress(user.account.address),
             {
@@ -44,6 +40,12 @@ describe('Querying User Balances on Aave V4', () => {
               amount: bigDecimal('100'),
               decimals: token === ETHEREUM_1INCH_ADDRESS ? 18 : 6,
             },
+          ).andThen(() =>
+            findReserveAndSupply(client, user, {
+              token: token,
+              amount: bigDecimal('50'),
+              asCollateral: true,
+            }),
           );
           assertOk(result);
         }
@@ -77,7 +79,8 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(3);
+        // NOTE: One less because 1INCH is not supported on the hub
+        expect(balances.value.length).toBe(2);
       });
     });
 
@@ -93,7 +96,8 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(3);
+        // NOTE: One less because 1INCH is not supported on the spoke
+        expect(balances.value.length).toBe(2);
       });
     });
 
@@ -122,7 +126,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(positions);
-        assertSingleElementArray(positions.value);
+        assertNonEmptyArray(positions.value);
         const balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
@@ -132,7 +136,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(3);
+        expect(balances.value.length).toBe(2);
       });
     });
 
