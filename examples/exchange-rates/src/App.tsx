@@ -8,9 +8,11 @@ import {
 import { supportedChains } from '@aave/react/viem';
 import { useState } from 'react';
 
+const defaultChainId = chainId(supportedChains[0]!.id);
+
 export function App() {
   const { data, loading } = useExchangeRate({
-    from: { native: chainId(supportedChains[0].id) },
+    from: { native: defaultChainId },
     to: Currency.Usd,
   });
 
@@ -20,7 +22,7 @@ export function App() {
   const handleGetRate = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await getExchangeRate({
-      from: { native: chainId(supportedChains[0].id) },
+      from: { native: defaultChainId },
       to: Currency.Usd,
     });
     if (result.isOk()) {
@@ -30,8 +32,13 @@ export function App() {
 
   return (
     <div>
-      <header>
+      <header style={{ textAlign: 'center', padding: '20px' }}>
         <h1>Exchange Rates</h1>
+        <p style={{ color: '#666', marginBottom: '30px' }}>
+          <small>
+            This example demonstrates how to get the ETH / USD exchange rate.
+          </small>
+        </p>
       </header>
 
       <div style={{ marginBottom: '40px' }}>

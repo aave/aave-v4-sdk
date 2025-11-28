@@ -1,5 +1,16 @@
 # @aave/core
 
+## 1.0.0-next.3
+
+### Minor Changes
+
+- be462e6: **feat:** smart baching of GQL queries.
+
+### Patch Changes
+
+- Updated dependencies [de80d52]
+  - @aave/types@1.0.0-next.3
+
 ## 1.0.0-next.2
 
 ### Patch Changes

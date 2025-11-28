@@ -61,6 +61,9 @@ export function isTxHashInputVariant<T>(
 }
 
 export type HubTokenInput = ReturnType<typeof graphql.scalar<'HubTokenInput'>>;
+export type HubIdTokenInput = ReturnType<
+  typeof graphql.scalar<'HubIdTokenInput'>
+>;
 export type SpokeTokenInput = ReturnType<
   typeof graphql.scalar<'SpokeTokenInput'>
 >;

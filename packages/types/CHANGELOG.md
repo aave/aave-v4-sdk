@@ -1,5 +1,11 @@
 # @aave/types
 
+## 1.0.0-next.3
+
+### Patch Changes
+
+- de80d52: **fix:** improves `chainId` helper to support bigint values.
+
 ## 1.0.0-next.2
 
 ### Patch Changes

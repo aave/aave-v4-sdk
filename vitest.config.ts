@@ -57,6 +57,14 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: 'core',
+          include: ['packages/core/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: 'types',
           include: ['packages/types/**/*.test.ts'],
           environment: 'node',

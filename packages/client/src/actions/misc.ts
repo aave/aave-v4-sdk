@@ -66,7 +66,10 @@ export function hasProcessedKnownTransaction(
   return client.query(
     HasProcessedKnownTransactionQuery,
     { request },
-    'network-only',
+    {
+      requestPolicy: 'network-only', // alwats hit the network
+      batch: false, // never batch, always run ASAP
+    },
   );
 }
 

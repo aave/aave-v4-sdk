@@ -517,6 +517,11 @@ input HubAssetsRequestQuery @oneOf {
 
 scalar HubId
 
+input HubIdTokenInput {
+  hubId: HubId!
+  token: EvmAddress!
+}
+
 input HubInput {
   """The hub address"""
   address: EvmAddress!
@@ -1123,14 +1128,20 @@ input ReservesRequestQuery @oneOf {
   """Get all the reserves on a hub for an underlying"""
   hubToken: HubTokenInput
 
+  """Get all the reserves on a hub for an underlying by a hub id"""
+  hubIdToken: HubIdTokenInput
+
   """Get all the reserves on a list of chains"""
   chainIds: [ChainId!]
 
   """Get all the reserves for a spoke for an underlying"""
   spokeToken: SpokeTokenInput
 
-  """Get all tokens on a hub"""
+  """Get all reserves on a hub"""
   hub: HubInput
+
+  """Get all reserves with a hub id"""
+  hubId: HubId
 
   """Get all the reserves on based on user position id"""
   userPositionId: UserPositionId
@@ -1605,6 +1616,16 @@ input UserBalancesByHub {
   byReservesType: ReservesRequestFilter! = ALL
 }
 
+input UserBalancesByHubId {
+  """The hub id"""
+  hubId: HubId!
+
+  """
+  The type of reserve to use when determine the tokens to retrieve balances for
+  """
+  byReservesType: ReservesRequestFilter! = ALL
+}
+
 input UserBalancesBySpoke {
   """The spoke address"""
   address: EvmAddress!
@@ -1648,6 +1669,9 @@ input UserBalancesRequestFilter @oneOf {
 
   """The balances for the tokens of hub assets on a given hub"""
   hub: UserBalancesByHub
+
+  """The balances for the tokens of the hub assets on a given hub id"""
+  hubId: UserBalancesByHubId
 
   """The balances for the tokens of reserves attached to a spoke"""
   spoke: UserBalancesBySpoke

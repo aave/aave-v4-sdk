@@ -39,7 +39,10 @@ export function hub(
   return client.query(
     HubQuery,
     { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
 

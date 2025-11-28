@@ -893,5 +893,6 @@ export function useUserSummaryHistory({
     },
     suspense,
     pause,
+    batch: false, // Do not batch this since it's a slower than average query
   });
 }

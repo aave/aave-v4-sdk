@@ -20,7 +20,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_WETH_ADDRESS,
+  ETHEREUM_USDC_ADDRESS,
+  fundErc20Address,
 } from './test-utils';
 import { sendWith } from './viem';
 
@@ -112,7 +113,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
           tokens: [
             {
               chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_WETH_ADDRESS,
+              address: ETHEREUM_USDC_ADDRESS,
             },
           ],
         },
@@ -124,29 +125,39 @@ describe('Given the Aave SDK normalized graph cache', () => {
             never('No reserve found to supply to for the token'),
         )
         .andThen((reserve) =>
-          ResultAsync.combine([
-            // supply activity 1
-            supply(client, {
-              sender: evmAddress(user.account.address),
-              reserve: reserve.id,
-              amount: {
-                native: bigDecimal('0.1'),
-              },
-            }),
-            // supply activity 2
-            supply(client, {
-              sender: evmAddress(user.account.address),
-              reserve: reserve.id,
-              amount: {
-                native: bigDecimal('0.1'),
-              },
-            }),
-          ]).andThen(([plan1, plan2]) =>
-            sendWith(user, plan1)
-              .andThen(client.waitForTransaction)
-              .andThen(() =>
-                sendWith(user, plan2).andThen(client.waitForTransaction),
-              ),
+          fundErc20Address(evmAddress(user.account.address), {
+            address: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('1'),
+            decimals: reserve.asset.underlying.info.decimals,
+          }).andThen(() =>
+            ResultAsync.combine([
+              // supply activity 1
+              supply(client, {
+                sender: evmAddress(user.account.address),
+                reserve: reserve.id,
+                amount: {
+                  erc20: {
+                    value: bigDecimal('0.1'),
+                  },
+                },
+              }),
+              // supply activity 2
+              supply(client, {
+                sender: evmAddress(user.account.address),
+                reserve: reserve.id,
+                amount: {
+                  erc20: {
+                    value: bigDecimal('0.1'),
+                  },
+                },
+              }),
+            ]).andThen(([plan1, plan2]) =>
+              sendWith(user, plan1)
+                .andThen(client.waitForTransaction)
+                .andThen(() =>
+                  sendWith(user, plan2).andThen(client.waitForTransaction),
+                ),
+            ),
           ),
         );
 

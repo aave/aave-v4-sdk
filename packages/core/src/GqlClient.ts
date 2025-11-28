@@ -8,7 +8,6 @@ import {
 import {
   createClient,
   type Exchange,
-  fetchExchange,
   makeOperation,
   type Operation,
   type OperationResult,
@@ -19,6 +18,7 @@ import {
 } from '@urql/core';
 import { pipe, tap } from 'wonka';
 import { BatchQueryBuilder } from './batch';
+import { batchFetchExchange } from './batching';
 import type { Context } from './context';
 import { UnexpectedError } from './errors';
 import { FragmentResolver } from './fragments';
@@ -30,6 +30,20 @@ import {
   isTeardownOperation,
   takeValue,
 } from './utils';
+
+/**
+ * @internal
+ */
+export type QueryOptions = {
+  /**
+   * @default 'cache-and-network'
+   */
+  requestPolicy?: RequestPolicy;
+  /**
+   * @default true
+   */
+  batch?: boolean;
+};
 
 export class GqlClient {
   /**
@@ -43,7 +57,7 @@ export class GqlClient {
 
   private readonly resolver: FragmentResolver;
 
-  protected constructor(
+  constructor(
     /**
      * @internal
      */
@@ -59,11 +73,8 @@ export class GqlClient {
       url: context.environment.backend,
       requestPolicy: context.cache ? 'cache-and-network' : 'network-only',
       preferGetMethod: false, // since @urql/core@6.0.1
-      fetchOptions: {
-        credentials: 'omit',
-        headers: context.headers,
-      },
       exchanges: this.exchanges(),
+      fetchOptions: this.getFetchOptions(),
     });
   }
 
@@ -84,17 +95,17 @@ export class GqlClient {
   public query<TValue, TVariables extends AnyVariables>(
     document: TypedDocumentNode<StandardData<TValue>, TVariables>,
     variables: TVariables,
-    requestPolicy: RequestPolicy,
+    options: QueryOptions,
   ): ResultAsync<TValue, UnexpectedError>;
 
   public query<TValue, TVariables extends AnyVariables>(
     document: TypedDocumentNode<StandardData<TValue>, TVariables>,
     variables: TVariables,
-    requestPolicy?: RequestPolicy,
+    { requestPolicy, batch = true }: QueryOptions = {},
   ): ResultAsync<TValue, UnexpectedError> {
     const query = this.resolver.replaceFrom(document);
     return this.resultFrom(
-      this.urql.query(query, variables, { requestPolicy }),
+      this.urql.query(query, variables, { batch, requestPolicy }),
     ).map(takeValue);
   }
 
@@ -383,6 +394,7 @@ export class GqlClient {
         makeOperation(op.kind, op, {
           ...op.context,
           requestPolicy: 'network-only',
+          batch: false, // never batch, run ASAP!
         }),
       );
     }
@@ -394,9 +406,23 @@ export class GqlClient {
     if (this.context.cache) {
       exchanges.push(this.context.cache);
     }
+    exchanges.push(
+      batchFetchExchange({
+        batchInterval: 1,
+        maxBatchSize: 10,
+        url: this.context.environment.backend,
+        fetchOptions: this.getFetchOptions(),
+      }),
+    );
 
-    exchanges.push(fetchExchange);
     return exchanges;
+  }
+
+  private getFetchOptions(): RequestInit {
+    return {
+      credentials: 'omit',
+      headers: this.context.headers,
+    };
   }
 
   private registerQuery(op: Operation): void {

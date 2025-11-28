@@ -448,6 +448,9 @@ export function activities(
   return client.query(
     ActivitiesQuery,
     { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
