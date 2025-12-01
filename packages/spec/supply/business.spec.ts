@@ -297,7 +297,8 @@ describe('Supplying Assets on Aave V4', () => {
     });
   });
 
-  describe('Given a user and a reserve that supports native token deposits', () => {
+  // TODO: Enable when we have a test fork that allow us to control
+  describe.skip('Given a user and a reserve that supports native token deposits', () => {
     describe('When the user wants to preview the supply action before performing it', () => {
       it('Then the user can review the supply details before proceeding', async () => {
         const amountToSupply = bigDecimal('0.01');
