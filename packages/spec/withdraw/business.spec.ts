@@ -169,7 +169,8 @@ describe('Withdrawing Assets on Aave V4', () => {
     });
   });
 
-  describe('Given a user and a reserve that supports withdrawals in native tokens', () => {
+  // TODO: Enable when we have a test fork that allow us to control
+  describe.skip('Given a user and a reserve that supports withdrawals in native tokens', () => {
     let reserveSupportingNative: Reserve;
     const amountToSupply = bigDecimal(0.05);
 
