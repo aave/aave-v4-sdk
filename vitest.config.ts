@@ -52,6 +52,16 @@ export default defineConfig({
           name: 'cli',
           include: ['packages/cli/**/*.test.ts'],
           environment: 'node',
+          disableConsoleIntercept: true, // for oclif tests
+          setupFiles: ['tsx/esm'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'cli',
+          include: ['packages/cli/**/*.test.ts'],
+          environment: 'node',
         },
       },
       {
