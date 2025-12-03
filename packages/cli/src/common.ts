@@ -1,4 +1,5 @@
 import {
+  AaveClient,
   type ChainId,
   chainId,
   type EvmAddress,
@@ -6,7 +7,8 @@ import {
   type HubId,
   hubId,
 } from '@aave/client';
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
+import TtyTable from 'tty-table';
 
 export const chain = Flags.custom<ChainId>({
   char: 'c',
@@ -28,3 +30,16 @@ export const address = Flags.custom<EvmAddress>({
   parse: async (input) => evmAddress(input),
   helpValue: '<evm-address>',
 });
+
+export abstract class V4Command extends Command {
+  protected headers: TtyTable.Header[] = [];
+
+  public static enableJsonFlag = true;
+
+  protected client = AaveClient.create();
+
+  protected display(rows: unknown[]) {
+    const out = TtyTable(this.headers, rows).render();
+    this.log(out);
+  }
+}

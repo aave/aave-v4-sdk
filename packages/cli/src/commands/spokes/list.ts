@@ -1,18 +1,17 @@
 import {
-  AaveClient,
   InvariantError,
   invariant,
   ok,
   ResultAsync,
+  type Spoke,
   type SpokesRequest,
 } from '@aave/client';
 import { spokes } from '@aave/client/actions';
-import { Command } from '@oclif/core';
 import TtyTable from 'tty-table';
 
 import * as common from '../../common.js';
 
-export default class ListSpokes extends Command {
+export default class ListSpokes extends common.V4Command {
   static override description = 'List Aave v4 spokes';
 
   static override flags = {
@@ -50,7 +49,12 @@ export default class ListSpokes extends Command {
     }),
   };
 
-  client = AaveClient.create();
+  protected override headers = [
+    { value: 'Spoke' },
+    { value: 'Address' },
+    { value: 'Chain' },
+    { value: 'ID' },
+  ];
 
   private getSpokesRequest(): ResultAsync<SpokesRequest, InvariantError> {
     return ResultAsync.fromPromise(
@@ -81,7 +85,7 @@ export default class ListSpokes extends Command {
     });
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<Spoke[]> {
     const result = await this.getSpokesRequest().andThen((request) =>
       spokes(this.client, request),
     );
@@ -90,20 +94,15 @@ export default class ListSpokes extends Command {
       this.error(result.error);
     }
 
-    const headers = [
-      { value: 'Spoke' },
-      { value: 'Address' },
-      { value: 'Chain' },
-      { value: 'ID' },
-    ];
-    const rows = result.value.map((item) => [
-      item.name,
-      item.address,
-      `${item.chain.name} (id=${item.chain.chainId})`,
-      item.id,
-    ]);
+    this.display(
+      result.value.map((item) => [
+        item.name,
+        item.address,
+        `${item.chain.name} (id=${item.chain.chainId})`,
+        item.id,
+      ]),
+    );
 
-    const out = TtyTable(headers, rows).render();
-    this.log(out);
+    return result.value;
   }
 }

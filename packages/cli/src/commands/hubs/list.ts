@@ -1,5 +1,5 @@
 import {
-  AaveClient,
+  type Hub,
   type HubsRequest,
   InvariantError,
   ok,
@@ -7,19 +7,22 @@ import {
   type UnexpectedError,
 } from '@aave/client';
 import { chains, hubs } from '@aave/client/actions';
-import { Command } from '@oclif/core';
-import TtyTable from 'tty-table';
 
 import * as common from '../../common.js';
 
-export default class ListHubs extends Command {
+export default class ListHubs extends common.V4Command {
   static override description = 'List Aave v4 liquidity hubs';
 
   static override flags = {
     chain: common.chain(),
   };
 
-  client = AaveClient.create();
+  override headers = [
+    { value: 'Hub' },
+    { value: 'Address' },
+    { value: 'Chain' },
+    { value: 'ID' },
+  ];
 
   private getHubsRequest(): ResultAsync<
     HubsRequest,
@@ -47,7 +50,7 @@ export default class ListHubs extends Command {
     });
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<Hub[]> {
     const result = await this.getHubsRequest().andThen((request) =>
       hubs(this.client, request),
     );
@@ -56,20 +59,15 @@ export default class ListHubs extends Command {
       this.error(result.error);
     }
 
-    const headers = [
-      { value: 'Hub' },
-      { value: 'Address' },
-      { value: 'Chain' },
-      { value: 'ID' },
-    ];
-    const rows = result.value.map((item) => [
-      item.name,
-      item.address,
-      `${item.chain.name} (id=${item.chain.chainId})`,
-      `${item.id}`,
-    ]);
+    this.display(
+      result.value.map((item) => [
+        item.name,
+        item.address,
+        `${item.chain.name} (id=${item.chain.chainId})`,
+        `${item.id}`,
+      ]),
+    );
 
-    const out = TtyTable(headers, rows).render();
-    this.log(out);
+    return result.value;
   }
 }
