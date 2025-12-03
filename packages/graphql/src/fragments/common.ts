@@ -64,6 +64,7 @@ export const ChainFragment = graphql(
     name
     icon
     chainId
+    rpcUrl
     explorerUrl
     isTestnet
     nativeWrappedToken
