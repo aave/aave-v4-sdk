@@ -90,13 +90,7 @@ const devnetChain: ViemChain = defineChain({
  * @internal
  * @deprecated
  */
-export const supportedChains: Record<
-  ChainId,
-  ReturnType<typeof defineChain>
-> = {
-  // TODO add them back when deployed on these chains
-  // [chainId(mainnet.id)]: mainnet,
-  // [chainId(sepolia.id)]: sepolia,
+export const supportedChains: Record<ChainId, ViemChain> = {
   [chainId(devnetChain.id)]: devnetChain,
 };
 
