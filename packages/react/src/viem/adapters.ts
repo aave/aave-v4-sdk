@@ -1,5 +1,6 @@
 import type { SigningError, UnexpectedError } from '@aave/client';
 import {
+  ensureChain,
   sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
@@ -13,7 +14,7 @@ import type {
 } from '@aave/graphql';
 import { invariant } from '@aave/types';
 import type { WalletClient } from 'viem';
-
+import { useAaveClient } from '../context';
 import {
   PendingTransaction,
   type UseAsyncTask,
@@ -38,6 +39,8 @@ import { usePermitTypedDataAction } from '../permits';
 export function useSendTransaction(
   walletClient: WalletClient | undefined,
 ): UseSendTransactionResult {
+  const client = useAaveClient();
+
   return useAsyncTask(
     (request: TransactionRequest) => {
       invariant(
@@ -45,14 +48,16 @@ export function useSendTransaction(
         'Expected a WalletClient to handle the operation result.',
       );
 
-      return sendTransaction(walletClient, request).map(
-        (hash) =>
-          new PendingTransaction(() =>
-            waitForTransactionResult(walletClient, request, hash),
-          ),
-      );
+      return ensureChain(client, walletClient, request)
+        .andThen(() => sendTransaction(walletClient, request))
+        .map(
+          (hash) =>
+            new PendingTransaction(() =>
+              waitForTransactionResult(walletClient, request, hash),
+            ),
+        );
     },
-    [walletClient],
+    [client, walletClient],
   );
 }
 

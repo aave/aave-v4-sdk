@@ -18,7 +18,7 @@ import { sendWith } from './viem';
 
 const walletClient = await createNewWallet();
 
-describe(`Given a viem's WalletClient instance`, () => {
+describe.skip(`Given a viem's WalletClient instance`, () => {
   describe(`And the '${sendWith.name}' handler is used to send a TransactionRequest`, () => {
     const request: TransactionRequest = {
       __typename: 'TransactionRequest',

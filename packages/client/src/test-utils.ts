@@ -8,6 +8,8 @@ import {
   chainId,
   type EvmAddress,
   evmAddress,
+  never,
+  nonNullable,
   ResultAsync,
 } from '@aave/types';
 import {
@@ -23,8 +25,9 @@ import {
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AaveClient } from './AaveClient';
+import { chain } from './actions';
 import { local, production, staging } from './environments';
-import { devnetChain } from './viem';
+import { toViemChain } from './viem';
 
 export const environment =
   import.meta.env.ENVIRONMENT === 'local'
@@ -104,6 +107,14 @@ export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
 export const client = AaveClient.create({
   environment,
 });
+
+const devnetChain = await chain(client, { chainId: ETHEREUM_FORK_ID })
+  .map(nonNullable)
+  .map(toViemChain)
+  .match(
+    (c) => c,
+    () => never('No devnet chain found'),
+  );
 
 export async function createNewWallet(
   privateKey?: `0x${string}`,
