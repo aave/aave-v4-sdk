@@ -51,8 +51,7 @@
       "require": "./dist/viem.cjs"
     },
     "./test-utils": {
-      "import": "./dist/test-utils.js",
-      "require": "./dist/test-utils.cjs"
+      "default": "./dist/test-utils.js"
     }
   },
   "typesVersions": {

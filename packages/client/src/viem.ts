@@ -7,6 +7,7 @@ import {
 } from '@aave/core';
 import type {
   CancelSwapTypedData,
+  Chain,
   ExecutionPlan,
   PermitTypedDataResponse,
   SwapByIntentTypedData,
@@ -26,7 +27,6 @@ import {
 } from '@aave/types';
 import {
   type Account,
-  type Chain,
   defineChain,
   type ProviderRpcError,
   type RpcError,
@@ -36,6 +36,7 @@ import {
   type TypedData,
   type TypedDataDomain,
   UserRejectedRequestError,
+  type Chain as ViemChain,
   type WalletClient,
 } from 'viem';
 import {
@@ -44,6 +45,9 @@ import {
   signTypedData,
   waitForTransactionReceipt,
 } from 'viem/actions';
+import { mainnet, sepolia } from 'viem/chains';
+import type { AaveClient } from './AaveClient';
+import { chain as fetchChain } from './actions';
 import type {
   ERC20PermitHandler,
   ExecutionPlanHandler,
@@ -66,10 +70,7 @@ function isProviderRpcError(
     : true;
 }
 
-/**
- * @internal
- */
-export const devnetChain: Chain = defineChain({
+const devnetChain: ViemChain = defineChain({
   id: Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
   name: 'Devnet',
   network: 'ethereum-fork',
@@ -87,21 +88,59 @@ export const devnetChain: Chain = defineChain({
 
 /**
  * @internal
+ * @deprecated
  */
-export const supportedChains: Record<
-  ChainId,
-  ReturnType<typeof defineChain>
-> = {
-  // TODO add them back when deployed on these chains
-  // [chainId(mainnet.id)]: mainnet,
-  // [chainId(sepolia.id)]: sepolia,
+export const supportedChains: Record<ChainId, ViemChain> = {
   [chainId(devnetChain.id)]: devnetChain,
 };
 
-function ensureChain(
+/**
+ * @internal
+ */
+export function toViemChain(chain: Chain): ViemChain {
+  // known chains
+  switch (chain.chainId) {
+    case chainId(mainnet.id):
+      return mainnet;
+
+    case chainId(sepolia.id):
+      return sepolia;
+  }
+
+  // most likely a tenderly fork
+  return defineChain({
+    id: chain.chainId,
+    name: chain.name,
+    nativeCurrency: {
+      name: chain.nativeInfo.name,
+      symbol: chain.nativeInfo.symbol,
+      decimals: chain.nativeInfo.decimals,
+    },
+    rpcUrls: { default: { http: [chain.rpcUrl] } },
+    blockExplorers: {
+      default: {
+        name: `${chain.name} Explorer`,
+        url: chain.explorerUrl,
+      },
+    },
+  });
+}
+
+/**
+ * @internal
+ */
+export function viemChainsFrom(chains: Chain[]): ViemChain[] {
+  return chains.map(toViemChain);
+}
+
+/**
+ * @internal
+ */
+export function ensureChain(
+  aaveClient: AaveClient,
   walletClient: WalletClient,
   request: TransactionRequest,
-): ResultAsync<void, CancelError | SigningError> {
+): ResultAsync<void, CancelError | SigningError | UnexpectedError> {
   return ResultAsync.fromPromise(walletClient.getChainId(), (err) =>
     SigningError.from(err),
   ).andThen((chainId) => {
@@ -109,35 +148,41 @@ function ensureChain(
       return okAsync();
     }
 
-    return ResultAsync.fromPromise(
-      walletClient.switchChain({ id: request.chainId }),
-      (err) => SigningError.from(err),
-    ).orElse((err) => {
-      const code = isRpcError(err.cause)
-        ? err.cause.code
-        : // Unwrapping for MetaMask Mobile
-          // https://github.com/MetaMask/metamask-mobile/issues/2944#issuecomment-976988719
-          isProviderRpcError(err.cause)
-          ? err.cause.data?.originalError?.code
-          : undefined;
+    return fetchChain(aaveClient, { chainId: request.chainId }).andThen(
+      (chain) => {
+        invariant(chain, `Chain ${request.chainId} is not supported`);
 
-      if (
-        code === SwitchChainError.code &&
-        request.chainId in supportedChains
-      ) {
         return ResultAsync.fromPromise(
-          walletClient.addChain({ chain: supportedChains[request.chainId] }),
-          (err) => {
-            if (isRpcError(err) && err.code === UserRejectedRequestError.code) {
-              return CancelError.from(err);
-            }
-            return SigningError.from(err);
-          },
-        );
-      }
+          walletClient.switchChain({ id: request.chainId }),
+          (err) => SigningError.from(err),
+        ).orElse((err) => {
+          const code = isRpcError(err.cause)
+            ? err.cause.code
+            : // Unwrapping for MetaMask Mobile
+              // https://github.com/MetaMask/metamask-mobile/issues/2944#issuecomment-976988719
+              isProviderRpcError(err.cause)
+              ? err.cause.data?.originalError?.code
+              : undefined;
 
-      return err.asResultAsync();
-    });
+          if (code === SwitchChainError.code) {
+            return ResultAsync.fromPromise(
+              walletClient.addChain({ chain: toViemChain(chain) }),
+              (err) => {
+                if (
+                  isRpcError(err) &&
+                  err.code === UserRejectedRequestError.code
+                ) {
+                  return CancelError.from(err);
+                }
+                return SigningError.from(err);
+              },
+            );
+          }
+
+          return err.asResultAsync();
+        });
+      },
+    );
   });
 }
 
@@ -157,7 +202,7 @@ function estimateGas(
 }
 
 function sendEip1559Transaction(
-  walletClient: WalletClient<Transport, Chain, Account>,
+  walletClient: WalletClient<Transport, ViemChain, Account>,
   request: TransactionRequest,
 ): ResultAsync<TxHash, CancelError | SigningError> {
   return estimateGas(walletClient, request)
@@ -190,7 +235,7 @@ function sendEip1559Transaction(
 
 function isWalletClientWithAccount(
   walletClient: WalletClient,
-): walletClient is WalletClient<Transport, Chain, Account> {
+): walletClient is WalletClient<Transport, ViemChain, Account> {
   return walletClient.account !== undefined;
 }
 
@@ -206,16 +251,14 @@ export function sendTransaction(
     'Wallet client with account is required',
   );
 
-  return ensureChain(walletClient, request).andThen((_) =>
-    sendEip1559Transaction(walletClient, request),
-  );
+  return sendEip1559Transaction(walletClient, request);
 }
 
 /**
  * @internal
  */
 export function transactionError(
-  chain: Chain | undefined,
+  chain: ViemChain | undefined,
   txHash: TxHash,
   request: TransactionRequest,
 ): TransactionError {
