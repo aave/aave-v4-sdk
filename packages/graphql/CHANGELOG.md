@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.5
+
+### Minor Changes
+
+- fe65fe9: **feat:** viem integration to leverage API as source of truth about chain details.
+
 ## 1.0.0-next.4
 
 ### Patch Changes
