@@ -1,5 +1,7 @@
 # @aave/client
 
+## 4.0.0-next.6
+
 ## 4.0.0-next.5
 
 ### Minor Changes
