@@ -1,5 +1,12 @@
 # @aave/react
 
+## 4.0.0-next.6
+
+### Patch Changes
+
+- 7fbec95: **chore:** re-export viemChainsFrom helper from @aave/react/viem entrypoint.
+  - @aave/client@4.0.0-next.6
+
 ## 4.0.0-next.5
 
 ### Minor Changes
