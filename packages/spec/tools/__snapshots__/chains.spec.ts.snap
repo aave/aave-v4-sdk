@@ -17,6 +17,7 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to fetch a single c
     "symbol": "ETH",
   },
   "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
   "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
 }
 `;
@@ -39,6 +40,7 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
     "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
 ]
@@ -64,6 +66,7 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
     "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
 ]
