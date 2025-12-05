@@ -105,7 +105,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
   });
 
   describe('When rendering with suspense enabled', () => {
-    it.skip('Then it should suspend and render once the query is resolved', async () => {
+    it('Then it should suspend and render once the query is resolved', async () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
           document: AnyQuery,
@@ -113,7 +113,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
         }),
       );
 
-      await vi.waitUntil(() => result.current);
+      await vi.waitUntil(() => result.current?.data);
 
       expect(result.current.data).toEqual(expect.any(Number));
     });
