@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- e903ab5: **chore:** removes batching by aliases in favour of batching GQL-over-HTTP.
+
 ## 1.0.0-next.3
 
 ### Minor Changes

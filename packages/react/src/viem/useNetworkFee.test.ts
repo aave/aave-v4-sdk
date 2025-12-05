@@ -1,5 +1,6 @@
 import {
   ETHEREUM_FORK_ID,
+  ETHEREUM_FORK_RPC_URL,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/test-utils';
 import type { SupplyActivity } from '@aave/graphql';
@@ -34,6 +35,7 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         chainId: ETHEREUM_FORK_ID,
         name: 'Ethereum',
         icon: 'https://example.com/eth-icon.png',
+        rpcUrl: ETHEREUM_FORK_RPC_URL,
         explorerUrl: 'https://etherscan.io',
         isTestnet: false,
         nativeWrappedToken: ETHEREUM_WETH_ADDRESS,

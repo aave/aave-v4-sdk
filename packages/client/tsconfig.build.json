@@ -4,6 +4,6 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "../../vite-env.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

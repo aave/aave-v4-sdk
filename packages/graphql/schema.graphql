@@ -195,6 +195,7 @@ type Chain {
   nativeInfo: TokenInfo!
   nativeGateway: EvmAddress!
   signatureGateway: EvmAddress!
+  rpcUrl: String!
 }
 
 """A supported blockchain chain ID"""

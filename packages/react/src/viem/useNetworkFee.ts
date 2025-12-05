@@ -1,6 +1,6 @@
-import { UnexpectedError } from '@aave/client';
+import { type AaveClient, UnexpectedError } from '@aave/client';
 import { chain as fetchChain } from '@aave/client/actions';
-import { supportedChains } from '@aave/client/viem';
+import { toViemChain } from '@aave/client/viem';
 import {
   type Chain,
   Currency,
@@ -75,15 +75,18 @@ function extractReserveId(action: PreviewAction): ReserveId {
   return never('Expected reserve id');
 }
 
+function extractChainId(action: PreviewAction): ChainId {
+  const reserveId = extractReserveId(action);
+  return decodeReserveId(reserveId).chainId;
+}
+
 function inferChainId(query: UseNetworkFeeRequestQuery): ChainId | undefined {
   if ('activity' in query && query.activity) {
     return query.activity.chain.chainId;
   }
 
   if ('estimate' in query && query.estimate) {
-    const reserveId = extractReserveId(query.estimate);
-
-    return decodeReserveId(reserveId).chainId;
+    return extractChainId(query.estimate);
   }
 
   return undefined;
@@ -96,6 +99,23 @@ function inferTimestampForExchangeRateLookup(
     return query.activity.timestamp;
   }
   return undefined; // i.e., now
+}
+
+function resolveChain(
+  client: AaveClient,
+  query: UseNetworkFeeRequestQuery,
+): ResultAsync<Chain, UnexpectedError> {
+  if ('activity' in query && query.activity) {
+    return okAsync(query.activity.chain);
+  }
+
+  if ('estimate' in query && query.estimate) {
+    return fetchChain(client, {
+      chainId: extractChainId(query.estimate),
+    }).map(nonNullable);
+  }
+
+  return never('Expected chain');
 }
 
 type ExecutionDetails = {
@@ -112,49 +132,45 @@ function useExecutionDetails(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask(
-    (query) => {
-      const chainId = nonNullable(inferChainId(query));
-      const publicClient = createPublicClient({
-        chain: supportedChains[chainId]
-          ? supportedChains[chainId]
-          : never(`Expected supported chain for chainId ${chainId}`),
-        transport: http(),
-      });
-
-      if ('activity' in query) {
-        return ResultAsync.fromPromise(
-          publicClient.getTransactionReceipt({ hash: query.activity.txHash }),
-          (error) => UnexpectedError.from(error),
-        ).map((receipt) => {
-          return {
-            chain: query.activity.chain,
-            gasPrice: receipt.effectiveGasPrice,
-            gasUnits: receipt.gasUsed,
-          };
+    (query) =>
+      resolveChain(client, query).andThen((chain) => {
+        const publicClient = createPublicClient({
+          chain: toViemChain(chain),
+          transport: http(),
         });
-      }
 
-      if ('estimate' in query && query.estimate) {
-        return ResultAsync.combine([
-          ResultAsync.fromPromise(publicClient.estimateFeesPerGas(), (error) =>
-            UnexpectedError.from(error),
-          ),
-          fetchChain(client, { chainId }).map(nonNullable),
-        ]).map(([{ maxFeePerGas }, chain]) => {
-          return {
-            chain,
-            gasPrice: maxFeePerGas,
-            gasUnits: inferGasEstimate(query.estimate),
-          };
+        if ('activity' in query) {
+          return ResultAsync.fromPromise(
+            publicClient.getTransactionReceipt({ hash: query.activity.txHash }),
+            (error) => UnexpectedError.from(error),
+          ).map((receipt) => {
+            return {
+              chain: query.activity.chain,
+              gasPrice: receipt.effectiveGasPrice,
+              gasUnits: receipt.gasUsed,
+            };
+          });
+        }
+
+        if ('estimate' in query && query.estimate) {
+          return ResultAsync.fromPromise(
+            publicClient.estimateFeesPerGas(),
+            (error) => UnexpectedError.from(error),
+          ).map(({ maxFeePerGas }) => {
+            return {
+              chain,
+              gasPrice: maxFeePerGas,
+              gasUnits: inferGasEstimate(query.estimate),
+            };
+          });
+        }
+
+        return okAsync({
+          chain: never('Expected chain'),
+          gasPrice: 0n,
+          gasUnits: 0n,
         });
-      }
-
-      return okAsync({
-        chain: never('Expected chain'),
-        gasPrice: 0n,
-        gasUnits: 0n,
-      });
-    },
+      }),
     [client],
   );
 }

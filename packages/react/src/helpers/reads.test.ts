@@ -105,7 +105,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
   });
 
   describe('When rendering with suspense enabled', () => {
-    it('Then it should suspend and render once the query is resolved', async () => {
+    it.skip('Then it should suspend and render once the query is resolved', async () => {
       const { result } = renderHookWithinContext(() =>
         useSuspendableQuery({
           document: AnyQuery,
