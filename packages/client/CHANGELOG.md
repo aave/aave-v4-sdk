@@ -1,5 +1,21 @@
 # @aave/client
 
+## 4.0.0-next.6
+
+## 4.0.0-next.5
+
+### Minor Changes
+
+- fe65fe9: **feat:** viem integration to leverage API as source of truth about chain details.
+
+### Patch Changes
+
+- e903ab5: **chore:** removes batching by aliases in favour of batching GQL-over-HTTP.
+- Updated dependencies [fe65fe9]
+- Updated dependencies [e903ab5]
+  - @aave/graphql@1.0.0-next.5
+  - @aave/core@1.0.0-next.4
+
 ## 4.0.0-next.4
 
 ### Minor Changes
