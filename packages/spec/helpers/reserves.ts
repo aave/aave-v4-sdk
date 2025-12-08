@@ -8,7 +8,7 @@ import {
   type SpokeId,
 } from '@aave/client';
 import { reserves } from '@aave/client/actions';
-import { ETHEREUM_FORK_ID } from '@aave/client/test-utils';
+import { ETHEREUM_FORK_ID } from '@aave/client/testing';
 import type { NonEmptyTuple } from 'type-fest';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { assertNonEmptyArray } from '../test-utils';

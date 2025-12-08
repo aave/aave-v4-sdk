@@ -50,8 +50,8 @@
       "import": "./dist/viem.js",
       "require": "./dist/viem.cjs"
     },
-    "./test-utils": {
-      "default": "./dist/test-utils.js"
+    "./testing": {
+      "default": "./dist/testing.js"
     }
   },
   "typesVersions": {
@@ -74,8 +74,8 @@
       "viem": [
         "./dist/viem.d.ts"
       ],
-      "test-utils": [
-        "./dist/test-utils.d.ts"
+      "testing": [
+        "./dist/testing.d.ts"
       ]
     }
   },

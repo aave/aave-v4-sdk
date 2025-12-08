@@ -4,7 +4,7 @@ import {
   client,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 import { getTimeWindowDates } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';

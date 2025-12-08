@@ -12,7 +12,7 @@ import {
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
   getNativeBalance,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { sendWith, signERC20PermitWith } from '@aave/client/viem';
 import type { Reserve } from '@aave/graphql';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
