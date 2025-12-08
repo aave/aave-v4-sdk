@@ -12,7 +12,7 @@ import {
   fundErc20Address,
   getBalance,
   getNativeBalance,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import type { Reserve } from '@aave/graphql';
 import { beforeEach, describe, expect, it } from 'vitest';

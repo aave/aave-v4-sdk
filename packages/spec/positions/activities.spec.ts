@@ -12,7 +12,7 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ID,
   ETHEREUM_SPOKE_CORE_ID,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { recreateUserActivities } from './helper';

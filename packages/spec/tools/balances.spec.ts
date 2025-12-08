@@ -9,7 +9,7 @@ import {
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { assertNonEmptyArray } from '../test-utils';

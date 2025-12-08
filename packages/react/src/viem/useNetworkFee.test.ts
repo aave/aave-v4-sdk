@@ -2,7 +2,7 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_FORK_RPC_URL,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import type { SupplyActivity } from '@aave/graphql';
 import {
   Currency,

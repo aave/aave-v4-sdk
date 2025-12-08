@@ -5,8 +5,11 @@ import { BrowserProvider, type Eip1193Provider, Wallet } from 'ethers';
 import { UserRejectedRequestError } from 'viem';
 import { describe, expect, it } from 'vitest';
 import { sendWith } from './ethers';
-import { setupEip1193Interceptor } from './rpc.helpers';
-import { ETHEREUM_FORK_ID, fundNativeAddress } from './test-utils';
+import {
+  ETHEREUM_FORK_ID,
+  fundNativeAddress,
+  setupEip1193Interceptor,
+} from './testing';
 
 const wallet = Wallet.createRandom();
 

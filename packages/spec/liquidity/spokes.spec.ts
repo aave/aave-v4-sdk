@@ -4,7 +4,7 @@ import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ID,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 
 describe('Querying Spokes on Aave V4', () => {

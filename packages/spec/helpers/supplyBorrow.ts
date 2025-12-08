@@ -15,7 +15,7 @@ import {
 } from '@aave/client';
 
 import { borrow, reserve, supply } from '@aave/client/actions';
-import { fundErc20Address } from '@aave/client/test-utils';
+import { fundErc20Address } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import {

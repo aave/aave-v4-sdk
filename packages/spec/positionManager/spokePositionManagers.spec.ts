@@ -1,6 +1,6 @@
 import { assertOk, PageSize } from '@aave/client';
 import { spokePositionManagers } from '@aave/client/actions';
-import { client, ETHEREUM_SPOKE_CORE_ID } from '@aave/client/test-utils';
+import { client, ETHEREUM_SPOKE_CORE_ID } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 
 describe('Querying Position Managers on Aave V4', () => {

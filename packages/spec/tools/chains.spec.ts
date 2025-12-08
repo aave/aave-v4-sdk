@@ -1,6 +1,6 @@
 import { assertOk, ChainsFilter } from '@aave/client';
 import { chain, chains } from '@aave/client/actions';
-import { client, ETHEREUM_FORK_ID } from '@aave/client/test-utils';
+import { client, ETHEREUM_FORK_ID } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 
 describe('Querying Chains on Aave V4', () => {

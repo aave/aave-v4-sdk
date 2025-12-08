@@ -8,7 +8,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserPositions } from './helper';

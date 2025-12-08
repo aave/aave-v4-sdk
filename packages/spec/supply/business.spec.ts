@@ -18,7 +18,7 @@ import {
   ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { sendWith, signERC20PermitWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 

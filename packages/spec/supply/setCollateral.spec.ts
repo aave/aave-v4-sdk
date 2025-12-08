@@ -11,7 +11,7 @@ import {
   ETHEREUM_SPOKE_ETHENA_ID,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 

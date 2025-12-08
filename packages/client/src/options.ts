@@ -19,6 +19,9 @@ export type TimeWindowQueryOptions = {
   timeWindow?: TimeWindow;
 };
 
+/**
+ * @internal
+ */
 export type RequestPolicyOptions = {
   /**
    * The request policy to use.
@@ -29,8 +32,22 @@ export type RequestPolicyOptions = {
   requestPolicy?: RequestPolicy;
 };
 
+/**
+ * @internal
+ */
+export type BatchOptions = {
+  /**
+   * Whether to batch the query or not.
+   *
+   * @internal This is used to turn off batching for a single query.
+   * @defaultValue `true`
+   */
+  batch?: boolean;
+};
+
 export const DEFAULT_QUERY_OPTIONS = {
   currency: Currency.Usd,
   timeWindow: TimeWindow.LastDay,
   requestPolicy: 'cache-and-network',
+  batch: true,
 } as const;

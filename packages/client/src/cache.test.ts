@@ -22,7 +22,7 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from './test-utils';
+} from './testing';
 import { sendWith } from './viem';
 
 const user = await createNewWallet();
