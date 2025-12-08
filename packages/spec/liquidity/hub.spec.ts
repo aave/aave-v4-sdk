@@ -5,7 +5,7 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client/test-utils';
+} from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';

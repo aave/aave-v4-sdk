@@ -41,8 +41,9 @@ export default defineConfig(() => [
   },
   // ESM only
   {
-    entry: ['src/test-utils.ts'],
+    entry: ['src/testing.ts'],
     outDir: 'dist',
+    splitting: false,
     sourcemap: true,
     treeshake: true,
     clean: false, // Don't clean on second config to avoid deleting first build
@@ -50,7 +51,7 @@ export default defineConfig(() => [
     bundle: true,
     minify: true,
     dts: true,
-    platform: 'neutral',
+    platform: 'node',
     format: ['esm'],
     define: {
       'import.meta.env.ETHEREUM_TENDERLY_FORK_ID': JSON.stringify(

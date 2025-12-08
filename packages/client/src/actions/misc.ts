@@ -13,6 +13,7 @@ import {
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
+import { type BatchOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
  * Fetches a specific chain by chain ID.
@@ -27,11 +28,25 @@ import type { AaveClient } from '../AaveClient';
  * @param request - The chain request parameters.
  * @returns The chain data, or null if not found.
  */
+
 export function chain(
   client: AaveClient,
   request: ChainRequest,
+): ResultAsync<Chain | null, UnexpectedError>;
+/**
+ * @internal
+ */
+export function chain(
+  client: AaveClient,
+  request: ChainRequest,
+  options: BatchOptions,
+): ResultAsync<Chain | null, UnexpectedError>;
+export function chain(
+  client: AaveClient,
+  request: ChainRequest,
+  { batch }: BatchOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Chain | null, UnexpectedError> {
-  return client.query(ChainQuery, { request });
+  return client.query(ChainQuery, { request }, { batch });
 }
 
 /**
