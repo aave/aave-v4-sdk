@@ -22,6 +22,7 @@ import type {
   ApyMetric,
   ChainsFilter,
   Currency,
+  ExtendWithOpaqueVariant,
   HubAssetStatusType,
   HubAssetsRequestOrderBy,
   OperationType,
@@ -56,7 +57,7 @@ export const graphql = initGraphQLTada<{
   disableMasking: true;
   introspection: introspection;
   scalars: {
-    ActivityType: ActivityType;
+    ActivityType: ExtendWithOpaqueVariant<ActivityType>;
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
     AssetId: AssetId;

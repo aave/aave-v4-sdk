@@ -1,3 +1,16 @@
+import type { Tagged } from 'type-fest';
+
+type EnumValues<E> = E[keyof E];
+
+export type OpaqueEnumVariant = Tagged<string, 'OpaqueEnumVariant'>;
+
+/**
+ * Adds an opaque value to an enum-union.
+ *
+ * @internal
+ */
+export type ExtendWithOpaqueVariant<E> = EnumValues<E> | OpaqueEnumVariant;
+
 /**
  * The order direction for sorting results.
  */
