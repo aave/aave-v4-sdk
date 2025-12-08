@@ -1,13 +1,15 @@
+import type { Tagged } from 'type-fest';
+
 type EnumValues<E> = E[keyof E];
 
-declare const brand: unique symbol;
+export type OpaqueEnumVariant = Tagged<string, 'OpaqueEnumVariant'>;
 
 /**
- * Adds a branded opaque value to an enum-union.
+ * Adds an opaque value to an enum-union.
  *
  * @internal
  */
-export type WithOpaque<E> = EnumValues<E> | { readonly [brand]: 'opaque' };
+export type ExtendWithOpaqueVariant<E> = EnumValues<E> | OpaqueEnumVariant;
 
 /**
  * The order direction for sorting results.

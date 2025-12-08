@@ -22,6 +22,7 @@ import type {
   ApyMetric,
   ChainsFilter,
   Currency,
+  ExtendWithOpaqueVariant,
   HubAssetStatusType,
   HubAssetsRequestOrderBy,
   OperationType,
@@ -31,7 +32,6 @@ import type {
   SwapKind,
   SwapStatusFilter,
   TimeWindow,
-  WithOpaque,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -57,7 +57,7 @@ export const graphql = initGraphQLTada<{
   disableMasking: true;
   introspection: introspection;
   scalars: {
-    ActivityType: WithOpaque<ActivityType>;
+    ActivityType: ExtendWithOpaqueVariant<ActivityType>;
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
     AssetId: AssetId;

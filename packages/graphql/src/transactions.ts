@@ -1,4 +1,4 @@
-import type { WithOpaqueTypename } from '@aave/types';
+import type { ExtendWithOpaqueType, OpaqueTypename, TxHash } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import {
   ChainFragment,
@@ -18,6 +18,7 @@ import {
   TransactionRequestFragment,
 } from './fragments';
 import { type FragmentDocumentFor, graphql, type RequestOf } from './graphql';
+import type { ID } from './id';
 
 /**
  * @internal
@@ -427,8 +428,14 @@ export const ActivityItemFragment = graphql(
     UsingAsCollateralActivityFragment,
   ],
 );
-export type ActivityItem = WithOpaqueTypename<
-  FragmentOf<typeof ActivityItemFragment>
+export type ActivityItem = ExtendWithOpaqueType<
+  FragmentOf<typeof ActivityItemFragment>,
+  {
+    __typename: OpaqueTypename;
+    id: ID;
+    timestamp: Date;
+    txHash: TxHash;
+  }
 >;
 
 export const PaginatedActivitiesResultFragment = graphql(

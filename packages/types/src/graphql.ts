@@ -1,9 +1,15 @@
+import type { Tagged } from 'type-fest';
 import { InvariantError } from './helpers';
 
 /**
  * @internal
  */
 export type AnySelectionSet = object;
+
+/**
+ * @internal
+ */
+export type OpaqueTypename = Tagged<string, 'OpaqueTypename'>;
 
 /**
  * @internal
@@ -45,18 +51,13 @@ export function assertTypename<Typename extends string>(
   }
 }
 
-// brand for the opaque typename
-declare const opaqueTypenameBrand: unique symbol;
-
-type OpaqueTypename<Name extends string> = string & {
-  readonly [opaqueTypenameBrand]: Name;
-};
-
 /**
  * Given a union with a `__typename` discriminant,
  * add an extra "opaque" member so switches can't be exhaustive.
+ *
+ * @internal
  */
-export type WithOpaqueTypename<
+export type ExtendWithOpaqueType<
   T extends { __typename: string },
-  Name extends string = 'opaque',
-> = T | { __typename: OpaqueTypename<Name> };
+  OpaqueType extends TypedSelectionSet<OpaqueTypename>,
+> = T & OpaqueType;
