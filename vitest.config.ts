@@ -68,6 +68,11 @@ export default defineConfig({
           name: 'types',
           include: ['packages/types/**/*.test.ts'],
           environment: 'node',
+          typecheck: {
+            enabled: true,
+            include: ['packages/types/**/*.test-d.ts'],
+            tsconfig: 'packages/types/tsconfig.build.json',
+          },
         },
       },
     ],

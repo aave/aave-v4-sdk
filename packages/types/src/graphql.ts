@@ -1,4 +1,3 @@
-import type { Tagged } from 'type-fest';
 import { InvariantError } from './helpers';
 
 /**
@@ -6,10 +5,12 @@ import { InvariantError } from './helpers';
  */
 export type AnySelectionSet = object;
 
+declare const OpaqueTypenameSymbol: unique symbol;
+
 /**
  * @internal
  */
-export type OpaqueTypename = Tagged<string, 'OpaqueTypename'>;
+export type OpaqueTypename = { [OpaqueTypenameSymbol]: 'OpaqueTypename' };
 
 /**
  * @internal
@@ -55,9 +56,15 @@ export function assertTypename<Typename extends string>(
  * Given a union with a `__typename` discriminant,
  * add an extra "opaque" member so switches can't be exhaustive.
  *
+ * Intersects opaque properties with base union members, then adds an opaque
+ * union member with `__typename: OpaqueTypename` to prevent exhaustive checking
+ * while preserving narrowing behavior.
+ *
  * @internal
  */
 export type ExtendWithOpaqueType<
   T extends { __typename: string },
-  OpaqueType extends TypedSelectionSet<OpaqueTypename>,
-> = T & OpaqueType;
+  CommonProperties extends Record<string, unknown> = Record<string, unknown>,
+> =
+  | (T & CommonProperties)
+  | (CommonProperties & { __typename: OpaqueTypename });
