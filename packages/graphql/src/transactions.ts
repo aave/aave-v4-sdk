@@ -1,3 +1,4 @@
+import type { WithOpaqueTypename } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import {
   ChainFragment,
@@ -426,7 +427,9 @@ export const ActivityItemFragment = graphql(
     UsingAsCollateralActivityFragment,
   ],
 );
-export type ActivityItem = FragmentOf<typeof ActivityItemFragment>;
+export type ActivityItem = WithOpaqueTypename<
+  FragmentOf<typeof ActivityItemFragment>
+>;
 
 export const PaginatedActivitiesResultFragment = graphql(
   `fragment PaginatedActivitiesResult on PaginatedActivitiesResult {

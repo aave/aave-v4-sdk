@@ -1,3 +1,14 @@
+type EnumValues<E> = E[keyof E];
+
+declare const brand: unique symbol;
+
+/**
+ * Adds a branded opaque value to an enum-union.
+ *
+ * @internal
+ */
+export type WithOpaque<E> = EnumValues<E> | { readonly [brand]: 'opaque' };
+
 /**
  * The order direction for sorting results.
  */

@@ -31,6 +31,7 @@ import type {
   SwapKind,
   SwapStatusFilter,
   TimeWindow,
+  WithOpaque,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -56,7 +57,7 @@ export const graphql = initGraphQLTada<{
   disableMasking: true;
   introspection: introspection;
   scalars: {
-    ActivityType: ActivityType;
+    ActivityType: WithOpaque<ActivityType>;
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
     AssetId: AssetId;
