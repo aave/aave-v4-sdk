@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@urql/introspection": "^1.2.1",
-    "tsup": "^8.5.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   },
