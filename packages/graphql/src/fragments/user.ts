@@ -223,6 +223,12 @@ export const UserBalanceFragment = graphql(
     lowestBorrowApy: borrowApy(metric: LOWEST) {
       ...PercentNumber
     }
+    highestCollateralFactor: collateralFactor(metric: HIGHEST) {
+      ...PercentNumber
+    }
+    lowestCollateralFactor: collateralFactor(metric: LOWEST) {
+      ...PercentNumber
+    }
   }`,
   [
     TokenInfoFragment,
