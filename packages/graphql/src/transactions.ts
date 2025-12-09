@@ -219,21 +219,6 @@ export const PreviewQuery = graphql(
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
-/**
- * @internal
- */
-export const UpdateUserDynamicConfigQuery = graphql(
-  `query UpdateUserDynamicConfig($request: UpdateUserDynamicConfigRequest!) {
-    value: updateUserDynamicConfig(request: $request) {
-      ...TransactionRequest
-      }
-  }`,
-  [TransactionRequestFragment],
-);
-export type UpdateUserDynamicConfigRequest = RequestOf<
-  typeof UpdateUserDynamicConfigQuery
->;
-
 export type LiquidatePositionDebtAmount = ReturnType<
   typeof graphql.scalar<'LiquidatePositionDebtAmount'>
 >;

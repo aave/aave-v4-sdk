@@ -16,7 +16,6 @@ import {
   setSpokeUserPositionManager,
   setUserSupplyAsCollateral,
   supply,
-  updateUserDynamicConfig,
   updateUserRiskPremium,
   withdraw,
 } from '@aave/client/actions';
@@ -44,7 +43,6 @@ import {
   SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
-  type UpdateUserDynamicConfigRequest,
   type UpdateUserRiskPremiumRequest,
   UserBalancesQuery,
   UserPositionQuery,
@@ -648,70 +646,6 @@ export function useUpdateUserRiskPremium(
             ),
           ]),
         ),
-    [client, handler],
-  );
-}
-
-/**
- * A hook that provides a way to update the user dynamic configuration for a spoke.
- *
- * ```ts
- * const [sendTransaction] = useSendTransaction(wallet);
- * const [updateUserDynamicConfig, { loading, error }] = useUpdateUserDynamicConfig((transaction, { cancel }) => {
- *   return sendTransaction(transaction);
- * });
- *
- * // …
- *
- * const result = await updateUserDynamicConfig({ ... });
- *
- * if (result.isErr()) {
- *   switch (result.error.name) {
- *     case 'CancelError':
- *       // The user cancelled the operation
- *       return;
- *
- *     case 'SigningError':
- *       console.error(`Failed to sign the transaction: ${result.error.message}`);
- *       break;
- *
- *     case 'TimeoutError':
- *       console.error(`Transaction timed out: ${result.error.message}`);
- *       break;
- *
- *     case 'TransactionError':
- *       console.error(`Transaction failed: ${result.error.message}`);
- *       break;
- *
- *     case 'UnexpectedError':
- *       console.error(result.error.message);
- *       break;
- *   }
- *   return;
- * }
- *
- * console.log('Transaction sent with hash:', result.value);
- * ```
- *
- * @param handler - The handler that will be used to handle the transaction.
- */
-
-export function useUpdateUserDynamicConfig(
-  handler: TransactionHandler,
-): UseAsyncTask<
-  UpdateUserDynamicConfigRequest,
-  TxHash,
-  SendTransactionError | PendingTransactionError
-> {
-  const client = useAaveClient();
-
-  // TODO update relevant active queries once the location of dynamic config is clarified
-  return useAsyncTask(
-    (request: UpdateUserDynamicConfigRequest) =>
-      updateUserDynamicConfig(client, request)
-        .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
-        .andThen(client.waitForTransaction),
     [client, handler],
   );
 }

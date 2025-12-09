@@ -22,8 +22,6 @@ import {
   SupplyQuery,
   type SupplyRequest,
   type TransactionRequest,
-  UpdateUserDynamicConfigQuery,
-  type UpdateUserDynamicConfigRequest,
   UpdateUserRiskPremiumQuery,
   type UpdateUserRiskPremiumRequest,
   WithdrawQuery,
@@ -229,36 +227,6 @@ export function renounceSpokeUserPositionManager(
   request: RenounceSpokeUserPositionManagerRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
   return client.query(RenounceSpokeUserPositionManagerQuery, { request });
-}
-
-/**
- * Creates a transaction to update user dynamic config for a specific spoke.
- *
- * ```ts
- * const result = await updateUserDynamicConfig(client, {
- *   sender: evmAddress('0x9abc…'),
- *   spoke: spokeId('SGVsbG8h'),
- * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
- *
- * if (result.isErr()) {
- *   // Handle error
- *   return;
- * }
- *
- * // result.value: TxHash
- * ```
- *
- *
- * @param client - Aave client.
- * @param request - The update user dynamic config request parameters.
- * @returns The transaction data.
- */
-
-export function updateUserDynamicConfig(
-  client: AaveClient,
-  request: UpdateUserDynamicConfigRequest,
-): ResultAsync<TransactionRequest, UnexpectedError> {
-  return client.query(UpdateUserDynamicConfigQuery, { request });
 }
 
 /**
