@@ -3,6 +3,7 @@ import { graphql } from '../graphql';
 import {
   DecimalNumberFragment,
   Erc20AmountFragment,
+  Erc20TokenFragment,
   ExchangeAmountFragment,
   ExchangeAmountWithChangeFragment,
   HealthFactorWithChangeFragment,
@@ -91,6 +92,44 @@ export const UserSummaryFragment = graphql(
 );
 export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
 
+export const UserRiskPremiumBreakdownItemFragment = graphql(
+  `fragment UserRiskPremiumBreakdownItem on UserRiskPremiumBreakdownItem {
+    __typename
+    token {
+      ...Erc20Token
+    }
+    riskPremiumWeight {
+      ...PercentNumber
+    }
+    collateral {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type UserRiskPremiumBreakdownItem = FragmentOf<
+  typeof UserRiskPremiumBreakdownItemFragment
+>;
+
+export const UserPositionRiskPremiumFragment = graphql(
+  `fragment UserPositionRiskPremium on UserPositionRiskPremium {
+    __typename
+    current {
+      ...PercentNumber
+    }
+    better {
+      ...PercentNumber
+    }
+    breakdown {
+      ...UserRiskPremiumBreakdownItem
+    }
+  }`,
+  [PercentNumberFragment, UserRiskPremiumBreakdownItemFragment],
+);
+export type UserPositionRiskPremium = FragmentOf<
+  typeof UserPositionRiskPremiumFragment
+>;
+
 export const UserPositionFragment = graphql(
   `fragment UserPosition on UserPosition {
     __typename
@@ -128,9 +167,16 @@ export const UserPositionFragment = graphql(
       ...HealthFactorWithChange
     }
     riskPremium {
-      ...PercentNumber
+      ...UserPositionRiskPremium
     }
-    betterRiskPremium {
+    liquidationPrice(currency: $currency) {
+      ...ExchangeAmount
+    }
+    borrowingPower(currency: $currency) {
+      ...ExchangeAmount
+    }
+    isUsingLatestDynamicConfigKey
+    netBalancePercentChange(window: $timeWindow) {
       ...PercentNumber
     }
     averageCollateralFactor {
@@ -141,8 +187,10 @@ export const UserPositionFragment = graphql(
     SpokeFragment,
     PercentNumberFragment,
     ExchangeAmountWithChangeFragment,
+    ExchangeAmountFragment,
     PercentNumberWithChangeFragment,
     HealthFactorWithChangeFragment,
+    UserPositionRiskPremiumFragment,
   ],
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
