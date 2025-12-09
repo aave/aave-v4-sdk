@@ -139,3 +139,11 @@ export enum SwapStatusFilter {
   Open = 'OPEN',
   PendingSignature = 'PENDING_SIGNATURE',
 }
+
+/**
+ * The category for tokens.
+ */
+export enum TokenCategory {
+  Stablecoin = 'STABLECOIN',
+  EthCorrelated = 'ETH_CORRELATED',
+}

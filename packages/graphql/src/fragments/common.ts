@@ -52,10 +52,12 @@ export type ExchangeAmount = FragmentOf<typeof ExchangeAmountFragment>;
 export const TokenInfoFragment = graphql(
   `fragment TokenInfo on TokenInfo {
     __typename
+    id
     name
     symbol
     icon
     decimals
+    categories
   }`,
 );
 export type TokenInfo = FragmentOf<typeof TokenInfoFragment>;
