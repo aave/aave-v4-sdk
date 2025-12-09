@@ -24,8 +24,14 @@ export const AssetSupplySampleFragment = graphql(
       amount {
         ...DecimalNumber
       }
+      highestAPY {
+        ...PercentNumber
+      }
+      lowestAPY {
+        ...PercentNumber
+      }
     }`,
-  [DecimalNumberFragment],
+  [DecimalNumberFragment, PercentNumberFragment],
 );
 export type AssetSupplySample = FragmentOf<typeof AssetSupplySampleFragment>;
 
@@ -36,8 +42,14 @@ export const AssetBorrowSampleFragment = graphql(
       amount {
         ...DecimalNumber
       }
+      highestAPY {
+        ...PercentNumber
+      }
+      lowestAPY {
+        ...PercentNumber
+      }
     }`,
-  [DecimalNumberFragment],
+  [DecimalNumberFragment, PercentNumberFragment],
 );
 export type AssetBorrowSample = FragmentOf<typeof AssetBorrowSampleFragment>;
 
