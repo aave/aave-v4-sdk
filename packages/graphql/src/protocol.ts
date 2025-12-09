@@ -41,6 +41,22 @@ export const AssetBorrowSampleFragment = graphql(
 );
 export type AssetBorrowSample = FragmentOf<typeof AssetBorrowSampleFragment>;
 
+export const AssetAmountWithChangeFragment = graphql(
+  `fragment AssetAmountWithChange on AssetAmountWithChange {
+    __typename
+    amount {
+      ...DecimalNumberWithChange
+    }
+    exchange(currency: $currency) {
+      ...ExchangeAmountWithChange
+    }
+  }`,
+  [DecimalNumberWithChangeFragment, ExchangeAmountWithChangeFragment],
+);
+export type AssetAmountWithChange = FragmentOf<
+  typeof AssetAmountWithChangeFragment
+>;
+
 export const AssetSummaryFragment = graphql(
   `fragment AssetSummary on AssetSummary {
       __typename
@@ -48,25 +64,19 @@ export const AssetSummaryFragment = graphql(
         ...DecimalNumberWithChange
       }
       totalSupplied {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalSuppliable {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalBorrowCap {
         ...DecimalNumberWithChange
       }
       totalBorrowed {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalBorrowable {
-        ...DecimalNumberWithChange
-      }
-      totalSuppliedFiat(currency: $currency) {
-        ...ExchangeAmountWithChange
-      }
-      totalBorrowedFiat(currency: $currency) {
-        ...ExchangeAmountWithChange
+        ...AssetAmountWithChange
       }
       averageBorrowApy: borrowApy(metric: AVERAGE) {
         ...PercentNumber
@@ -76,8 +86,8 @@ export const AssetSummaryFragment = graphql(
       }
     }`,
   [
+    AssetAmountWithChangeFragment,
     DecimalNumberWithChangeFragment,
-    ExchangeAmountWithChangeFragment,
     PercentNumberFragment,
   ],
 );
