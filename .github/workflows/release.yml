@@ -1,13 +1,14 @@
-permissions:
-  id-token: write
-  contents: write
-  pull-requests: write
 name: Release
 
 on:
   push:
     branches:
       - main
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
