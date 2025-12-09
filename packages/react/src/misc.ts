@@ -1,7 +1,7 @@
 import type { CurrencyQueryOptions } from '@aave/client';
 import { exchangeRate } from '@aave/client/actions';
 import type { UnexpectedError } from '@aave/core';
-import type { Chain, ExchangeRateRequest, FiatAmount } from '@aave/graphql';
+import type { Chain, ExchangeAmount, ExchangeRateRequest } from '@aave/graphql';
 import {
   type ActivityItem,
   ChainQuery,
@@ -209,7 +209,7 @@ export function useChains(
  */
 export function useExchangeRateAction(): UseAsyncTask<
   ExchangeRateRequest,
-  FiatAmount,
+  ExchangeAmount,
   UnexpectedError
 > {
   const client = useAaveClient();
@@ -242,7 +242,7 @@ export type UseExchangeRateArgs = ExchangeRateRequest;
  */
 export function useExchangeRate(
   args: UseExchangeRateArgs & Suspendable,
-): SuspenseResult<FiatAmount>;
+): SuspenseResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -264,7 +264,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: Pausable<UseExchangeRateArgs> & Suspendable,
-): PausableSuspenseResult<FiatAmount>;
+): PausableSuspenseResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -284,7 +284,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: UseExchangeRateArgs,
-): ReadResult<FiatAmount>;
+): ReadResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -305,7 +305,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: Pausable<UseExchangeRateArgs>,
-): PausableReadResult<FiatAmount>;
+): PausableReadResult<ExchangeAmount>;
 
 export function useExchangeRate({
   suspense = false,
@@ -314,7 +314,7 @@ export function useExchangeRate({
 }: NullishDeep<UseExchangeRateArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<FiatAmount, UnexpectedError> {
+}): SuspendableResult<ExchangeAmount, UnexpectedError> {
   const client = useAaveClient();
 
   return useSuspendableQuery({

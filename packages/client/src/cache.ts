@@ -77,7 +77,7 @@ export const exchange = cacheExchange({
       onChainValue: transformToBigInt,
       value: transformToBigDecimal,
     },
-    FiatAmount: {
+    ExchangeAmount: {
       value: transformToBigDecimal,
     },
     AssetPriceSample: {
@@ -303,9 +303,9 @@ export const exchange = cacheExchange({
     DomainData: () => null,
     Erc20Amount: () => null,
     Erc20ApprovalRequired: () => null,
-    FiatAmount: () => null,
-    FiatAmountValueVariation: () => null,
-    FiatAmountWithChange: () => null,
+    ExchangeAmount: () => null,
+    ExchangeAmountValueVariation: () => null,
+    ExchangeAmountWithChange: () => null,
     ForkTopUpResponse: () => null,
     HealthFactorError: () => null,
     HealthFactorVariation: () => null,

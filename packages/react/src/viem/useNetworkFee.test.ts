@@ -77,8 +77,8 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
       );
 
       // Assert correct conversion
-      expect(fee.fiatAmount.value).toEqual(
-        fee.amount.value.mul(fee.fiatRate.value),
+      expect(fee.exchange.value).toEqual(
+        fee.amount.value.mul(fee.exchangeRate.value),
       );
     });
   });

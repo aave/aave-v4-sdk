@@ -3,8 +3,8 @@ import { graphql } from '../graphql';
 import {
   DecimalNumberFragment,
   Erc20AmountFragment,
-  FiatAmountFragment,
-  FiatAmountWithChangeFragment,
+  ExchangeAmountFragment,
+  ExchangeAmountWithChangeFragment,
   HealthFactorWithChangeFragment,
   PercentNumberFragment,
   PercentNumberWithChangeFragment,
@@ -64,26 +64,30 @@ export const UserSummaryFragment = graphql(
     __typename
     totalPositions
     netBalance(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalCollateral(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     totalSupplied(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     totalDebt(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     netApy {
       ...PercentNumber
     }
     netFeeEarned {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     lowestHealthFactor
   }`,
-  [FiatAmountWithChangeFragment, FiatAmountFragment, PercentNumberFragment],
+  [
+    ExchangeAmountWithChangeFragment,
+    ExchangeAmountFragment,
+    PercentNumberFragment,
+  ],
 );
 export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
 
@@ -100,19 +104,19 @@ export const UserPositionFragment = graphql(
       ...PercentNumber
     }
     netCollateral(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     netBalance(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalCollateral(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalSupplied(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalDebt(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     netSupplyApy {
       ...PercentNumberWithChange
@@ -136,7 +140,7 @@ export const UserPositionFragment = graphql(
   [
     SpokeFragment,
     PercentNumberFragment,
-    FiatAmountWithChangeFragment,
+    ExchangeAmountWithChangeFragment,
     PercentNumberWithChangeFragment,
     HealthFactorWithChangeFragment,
   ],
@@ -156,8 +160,8 @@ export const UserBalanceFragment = graphql(
     balances {
       ...TokenAmount
     }
-    fiatAmount(currency: $currency) {
-      ...FiatAmount
+    exchange(currency: $currency) {
+      ...ExchangeAmount
     }
     highestSupplyApy: supplyApy(metric: HIGHEST) {
       ...PercentNumber
@@ -176,7 +180,7 @@ export const UserBalanceFragment = graphql(
     TokenInfoFragment,
     DecimalNumberFragment,
     TokenAmountFragment,
-    FiatAmountFragment,
+    ExchangeAmountFragment,
     PercentNumberFragment,
   ],
 );
@@ -186,18 +190,18 @@ export const UserSummaryHistoryItemFragment = graphql(
   `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
     __typename
     netBalance(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     borrows(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     supplies(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     healthFactor
     date
   }`,
-  [FiatAmountFragment],
+  [ExchangeAmountFragment],
 );
 export type UserSummaryHistoryItem = FragmentOf<
   typeof UserSummaryHistoryItemFragment

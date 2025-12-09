@@ -6,8 +6,8 @@ import {
   Erc20AmountFragment,
   type Erc20ApprovalRequired,
   Erc20ApprovalRequiredFragment,
+  ExchangeAmountValueVariationFragment,
   ExecutionPlanFragment,
-  FiatAmountValueVariationFragment,
   HealthFactorResultFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
@@ -188,16 +188,16 @@ export const PreviewUserPositionFragment = graphql(
       ...PercentNumberVariation
     }
     netCollateral(currency: $currency) {
-      ...FiatAmountValueVariation
+      ...ExchangeAmountValueVariation
     }
     netBalance(currency: $currency) {
-      ...FiatAmountValueVariation
+      ...ExchangeAmountValueVariation
     }
   }`,
   [
     HealthFactorResultFragment,
     PercentNumberVariationFragment,
-    FiatAmountValueVariationFragment,
+    ExchangeAmountValueVariationFragment,
   ],
 );
 export type PreviewUserPosition = FragmentOf<

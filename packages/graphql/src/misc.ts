@@ -1,4 +1,4 @@
-import { ChainFragment, FiatAmountFragment } from './fragments';
+import { ChainFragment, ExchangeAmountFragment } from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
 /**
@@ -53,10 +53,10 @@ export const HealthQuery = graphql(
 export const ExchangeRateQuery = graphql(
   `query ExchangeRate($request: ExchangeRateRequest!) {
     value: exchangeRate(request: $request) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
   }`,
-  [FiatAmountFragment],
+  [ExchangeAmountFragment],
 );
 export type ExchangeRateRequest = RequestOf<typeof ExchangeRateQuery>;
 

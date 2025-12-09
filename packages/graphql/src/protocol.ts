@@ -3,7 +3,7 @@ import {
   DecimalNumberFragment,
   DecimalNumberWithChangeFragment,
   Erc20TokenFragment,
-  FiatAmountWithChangeFragment,
+  ExchangeAmountWithChangeFragment,
   PercentNumberFragment,
 } from './fragments';
 import { graphql, type RequestOf } from './graphql';
@@ -63,10 +63,10 @@ export const AssetSummaryFragment = graphql(
         ...DecimalNumberWithChange
       }
       totalSuppliedFiat(currency: $currency) {
-        ...FiatAmountWithChange
+        ...ExchangeAmountWithChange
       }
       totalBorrowedFiat(currency: $currency) {
-        ...FiatAmountWithChange
+        ...ExchangeAmountWithChange
       }
       averageBorrowApy: borrowApy(metric: AVERAGE) {
         ...PercentNumber
@@ -77,7 +77,7 @@ export const AssetSummaryFragment = graphql(
     }`,
   [
     DecimalNumberWithChangeFragment,
-    FiatAmountWithChangeFragment,
+    ExchangeAmountWithChangeFragment,
     PercentNumberFragment,
   ],
 );
@@ -94,10 +94,10 @@ export const AssetFragment = graphql(
         ...AssetSummary
       }
       price(currency: $currency) {
-        ...FiatAmountWithChange
+        ...ExchangeAmountWithChange
       }
     }`,
-  [Erc20TokenFragment, AssetSummaryFragment, FiatAmountWithChangeFragment],
+  [Erc20TokenFragment, AssetSummaryFragment, ExchangeAmountWithChangeFragment],
 );
 export type Asset = FragmentOf<typeof AssetFragment>;
 

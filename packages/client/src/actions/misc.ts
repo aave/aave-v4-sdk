@@ -5,9 +5,9 @@ import {
   type ChainRequest,
   ChainsFilter,
   ChainsQuery,
+  type ExchangeAmount,
   ExchangeRateQuery,
   type ExchangeRateRequest,
-  type FiatAmount,
   HasProcessedKnownTransactionQuery,
   type HasProcessedKnownTransactionRequest,
 } from '@aave/graphql';
@@ -105,6 +105,6 @@ export function hasProcessedKnownTransaction(
 export function exchangeRate(
   client: AaveClient,
   request: ExchangeRateRequest,
-): ResultAsync<FiatAmount, UnexpectedError> {
+): ResultAsync<ExchangeAmount, UnexpectedError> {
   return client.query(ExchangeRateQuery, { request });
 }

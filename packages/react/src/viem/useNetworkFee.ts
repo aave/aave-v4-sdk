@@ -6,7 +6,7 @@ import {
   Currency,
   type DecimalNumber,
   decodeReserveId,
-  type FiatAmount,
+  type ExchangeAmount,
   type NativeAmount,
   type PreviewAction,
   type ReserveId,
@@ -177,7 +177,7 @@ function useExecutionDetails(): UseAsyncTask<
 
 function createNetworkFeeAmount(
   details: ExecutionDetails,
-  rate: FiatAmount,
+  rate: ExchangeAmount,
 ): NativeAmount {
   const gasCostInWei = details.gasPrice * details.gasUnits;
   const gasCost = bigDecimal(gasCostInWei).rescale(
@@ -199,13 +199,15 @@ function createNetworkFeeAmount(
       chain: details.chain,
     },
     amount,
-    fiatAmount: {
-      __typename: 'FiatAmount',
+    exchange: {
+      __typename: 'ExchangeAmount',
       value: gasCost.mul(rate.value),
       name: rate.name,
       symbol: rate.symbol,
+      icon: rate.icon,
+      decimals: rate.decimals,
     },
-    fiatRate: {
+    exchangeRate: {
       __typename: 'DecimalNumber',
       decimals: 2,
       onChainValue: BigInt(rate.value.rescale(2).toFixed(0, RoundingMode.Down)),
