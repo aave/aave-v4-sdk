@@ -1,25 +1,36 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
-import { ChainFragment, ExchangeAmountFragment } from './common';
+import {
+  ChainFragment,
+  ExchangeAmountFragment,
+  ExchangeAmountWithChangeFragment,
+  PercentNumberFragment,
+} from './common';
 
 export const HubSummaryFragment = graphql(
   `fragment HubSummary on HubSummary {
     __typename
     totalBorrowed {
-      ...ExchangeAmount
+      ...ExchangeAmountWithChange
     }
     totalBorrowCap {
       ...ExchangeAmount
     }
     totalSupplied {
-      ...ExchangeAmount
+      ...ExchangeAmountWithChange
     }
     totalSupplyCap {
       ...ExchangeAmount
     }
-    utilizationRate
+    utilizationRate {
+      ...PercentNumber
+    }
   }`,
-  [ExchangeAmountFragment],
+  [
+    ExchangeAmountFragment,
+    ExchangeAmountWithChangeFragment,
+    PercentNumberFragment,
+  ],
 );
 export type HubSummary = FragmentOf<typeof HubSummaryFragment>;
 

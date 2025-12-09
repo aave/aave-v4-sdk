@@ -69,6 +69,7 @@ export const ChainFragment = graphql(
     rpcUrl
     explorerUrl
     isTestnet
+    isFork
     nativeWrappedToken
     nativeGateway
     signatureGateway
