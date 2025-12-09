@@ -8,6 +8,7 @@ import {
   type ChainRequest,
   ChainsFilter,
   ChainsQuery,
+  type ChainsRequest,
   ExchangeRateQuery,
   type NativeAmount,
   type PreviewAction,
@@ -105,9 +106,7 @@ export function useChain({
   });
 }
 
-export type UseChainsArgs = {
-  filter: ChainsFilter;
-};
+export type UseChainsArgs = ChainsRequest;
 /**
  * Fetches the list of supported chains.
  *
@@ -115,7 +114,7 @@ export type UseChainsArgs = {
  *
  * ```tsx
  * const { data } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  *   suspense: true,
  * });
  * ```
@@ -130,7 +129,7 @@ export function useChains(
  *
  * ```tsx
  * const { data } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  *   suspense: true,
  *   pause: true,
  * });
@@ -144,7 +143,7 @@ export function useChains(
  *
  * ```tsx
  * const { data, error, loading } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  * });
  * ```
  */
@@ -156,7 +155,7 @@ export function useChains(args?: UseChainsArgs): ReadResult<Chain[]>;
  *
  * ```tsx
  * const { data, error, loading, paused } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  *   pause: true,
  * });
  * ```
@@ -169,15 +168,15 @@ export function useChains(
   {
     suspense = false,
     pause = false,
-    filter,
+    ...request
   }: NullishDeep<UseChainsArgs> & {
     suspense?: boolean;
     pause?: boolean;
-  } = { filter: ChainsFilter.ALL },
+  } = { query: { filter: ChainsFilter.ALL } },
 ): SuspendableResult<Chain[], UnexpectedError> {
   return useSuspendableQuery({
     document: ChainsQuery,
-    variables: { filter },
+    variables: { request },
     suspense,
     pause,
   });

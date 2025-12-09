@@ -18,13 +18,18 @@ export type ChainRequest = RequestOf<typeof ChainQuery>;
  * @internal
  */
 export const ChainsQuery = graphql(
-  `query Chains($filter: ChainsFilter!) {
-    value: chains(filter: $filter) {
+  `query Chains($request: ChainsRequest!) {
+    value: chains(request: $request) {
       ...Chain
     }
   }`,
   [ChainFragment],
 );
+export type ChainsRequest = RequestOf<typeof ChainsQuery>;
+
+export type ChainsRequestQuery = ReturnType<
+  typeof graphql.scalar<'ChainsRequestQuery'>
+>;
 
 /**
  * @internal
