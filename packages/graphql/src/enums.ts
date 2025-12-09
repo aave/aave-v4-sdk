@@ -83,14 +83,21 @@ export enum HubAssetsRequestOrderBy {
 /**
  * The activity type for user history.
  */
-export enum ActivityType {
+export enum ActivityFeedType {
   Borrow = 'BORROW',
   Supply = 'SUPPLY',
   Withdraw = 'WITHDRAW',
   Repay = 'REPAY',
   Liquidated = 'LIQUIDATED',
   SetAsCollateral = 'SET_AS_COLLATERAL',
+  UpdatedDynamicConfig = 'UPDATED_DYNAMIC_CONFIG',
+  UpdatedRiskPremium = 'UPDATED_RISK_PREMIUM',
 }
+
+/**
+ * @deprecated Use `ActivityFeedType` instead.
+ */
+export const ActivityType = ActivityFeedType;
 
 /**
  * The APY metric for comparing rates.

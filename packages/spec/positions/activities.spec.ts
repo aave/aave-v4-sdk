@@ -1,6 +1,6 @@
 import {
+  ActivityFeedType,
   type ActivityItem,
-  ActivityType,
   assertOk,
   evmAddress,
   type OpaqueTypename,
@@ -23,18 +23,18 @@ const user = await createNewWallet(
 );
 
 describe('Querying User Activities on Aave V4', () => {
-  const activityTypes = Object.values(ActivityType);
+  const activityTypes = Object.values(ActivityFeedType);
 
   const typenameToActivityType: Record<
-    ActivityType,
+    ActivityFeedType,
     Exclude<ActivityItem['__typename'], OpaqueTypename>
   > = {
-    [ActivityType.Borrow]: 'BorrowActivity',
-    [ActivityType.Supply]: 'SupplyActivity',
-    [ActivityType.Withdraw]: 'WithdrawActivity',
-    [ActivityType.Repay]: 'RepayActivity',
-    [ActivityType.Liquidated]: 'LiquidatedActivity',
-    [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
+    [ActivityFeedType.Borrow]: 'BorrowActivity',
+    [ActivityFeedType.Supply]: 'SupplyActivity',
+    [ActivityFeedType.Withdraw]: 'WithdrawActivity',
+    [ActivityFeedType.Repay]: 'RepayActivity',
+    [ActivityFeedType.Liquidated]: 'LiquidatedActivity',
+    [ActivityFeedType.SetAsCollateral]: 'UsingAsCollateralActivity',
   };
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
@@ -57,7 +57,7 @@ describe('Querying User Activities on Aave V4', () => {
           });
           assertOk(result);
 
-          if ([ActivityType.Liquidated].includes(activityType)) {
+          if ([ActivityFeedType.Liquidated].includes(activityType)) {
             // Liquidated activities are not easily reproducible, so we skip them
             return;
           }
@@ -83,7 +83,7 @@ describe('Querying User Activities on Aave V4', () => {
       it('Then the returned activities should be filtered by the specified activities types', async () => {
         const result = await activities(client, {
           user: evmAddress(user.account.address),
-          types: [ActivityType.Supply, ActivityType.Borrow],
+          types: [ActivityFeedType.Supply, ActivityFeedType.Borrow],
           query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
@@ -249,7 +249,7 @@ describe('Querying User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if ([ActivityType.Liquidated].includes(activityType)) {
+          if ([ActivityFeedType.Liquidated].includes(activityType)) {
             // Liquidated activities are not easily reproducible, so we skip them
             return;
           }
@@ -267,7 +267,7 @@ describe('Querying User Activities on Aave V4', () => {
     describe('When fetching all activities by multiple activity types', () => {
       it('Then the returned activities are only of the specified activity types', async () => {
         const result = await activities(client, {
-          types: [ActivityType.Supply, ActivityType.Borrow],
+          types: [ActivityFeedType.Supply, ActivityFeedType.Borrow],
           query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
