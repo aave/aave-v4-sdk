@@ -17,8 +17,8 @@ import {
   type RepayRequest,
   SetSpokeUserPositionManagerQuery,
   type SetSpokeUserPositionManagerRequest,
-  SetUserSupplyAsCollateralQuery,
-  type SetUserSupplyAsCollateralRequest,
+  SetUserSuppliesAsCollateralQuery,
+  type SetUserSuppliesAsCollateralRequest,
   SupplyQuery,
   type SupplyRequest,
   type TransactionRequest,
@@ -369,25 +369,29 @@ export function preview(
 }
 
 /**
- * Sets whether a user's supply should be used as collateral.
+ * Updates the collateral status of user's supplies.
  *
  * ```ts
- * const result = await setUserSupplyAsCollateral(client, {
- *   reserve: reserveId('SGVsbG8h'),
- *   sender: evmAddress('0x456...'),
- *   enableCollateral: true
+ * const result = await setUserSuppliesAsCollateral(client, {
+ *   changes: [
+ *     {
+ *       reserve: reserveId('SGVsbG8h'),
+ *       enableCollateral: true
+ *     }
+ *   ],
+ *   sender: evmAddress('0x456...')
  * });
  * ```
  *
  * @param client - Aave client.
- * @param request - The set user supply as collateral request parameters.
- * @returns The transaction request to set collateral status.
+ * @param request - The request parameters.
+ * @returns The transaction request to update collateral status.
  */
-export function setUserSupplyAsCollateral(
+export function setUserSuppliesAsCollateral(
   client: AaveClient,
-  request: SetUserSupplyAsCollateralRequest,
+  request: SetUserSuppliesAsCollateralRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
-  return client.query(SetUserSupplyAsCollateralQuery, { request });
+  return client.query(SetUserSuppliesAsCollateralQuery, { request });
 }
 
 /**

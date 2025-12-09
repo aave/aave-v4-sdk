@@ -10,7 +10,7 @@ import {
 } from '@aave/client';
 import {
   activities,
-  setUserSupplyAsCollateral,
+  setUserSuppliesAsCollateral,
   userBorrows,
   userPositions,
   userSupplies,
@@ -124,18 +124,26 @@ export const recreateUserActivities = async (
     assertOk(supplyPositions);
     assertNonEmptyArray(supplyPositions.value);
     const supplyPosition = supplyPositions.value[0]!;
-    const result = await setUserSupplyAsCollateral(client, {
-      reserve: supplyPosition.reserve.id,
+    const result = await setUserSuppliesAsCollateral(client, {
+      changes: [
+        {
+          reserve: supplyPosition.reserve.id,
+          enableCollateral: !supplyPosition.isCollateral,
+        },
+      ],
       sender: evmAddress(user.account.address),
-      enableCollateral: !supplyPosition.isCollateral,
     })
       .andThen(sendWith(user))
       .andThen(client.waitForTransaction)
       .andThen(() =>
-        setUserSupplyAsCollateral(client, {
-          reserve: supplyPosition.reserve.id,
+        setUserSuppliesAsCollateral(client, {
+          changes: [
+            {
+              reserve: supplyPosition.reserve.id,
+              enableCollateral: supplyPosition.isCollateral,
+            },
+          ],
           sender: evmAddress(user.account.address),
-          enableCollateral: supplyPosition.isCollateral,
         }),
       )
       .andThen(sendWith(user))

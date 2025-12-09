@@ -14,7 +14,7 @@ import {
   renounceSpokeUserPositionManager,
   repay,
   setSpokeUserPositionManager,
-  setUserSupplyAsCollateral,
+  setUserSuppliesAsCollateral,
   supply,
   updateUserRiskPremium,
   withdraw,
@@ -39,7 +39,7 @@ import {
   type RepayRequest,
   ReservesQuery,
   type SetSpokeUserPositionManagerRequest,
-  type SetUserSupplyAsCollateralRequest,
+  type SetUserSuppliesAsCollateralRequest,
   SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
@@ -651,18 +651,22 @@ export function useUpdateUserRiskPremium(
 }
 
 /**
- * Hook for setting whether a user's supply should be used as collateral.
+ * Hook for updating the collateral status of user's supplies.
  *
  * ```ts
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [setUserSupplyAsCollateral, { loading, error }] = useSetUserSupplyAsCollateral((transaction, { cancel }) => {
+ * const [setUserSuppliesAsCollateral, { loading, error }] = useSetUserSuppliesAsCollateral((transaction, { cancel }) => {
  *   return sendTransaction(transaction);
  * });
  *
- * const result = await setUserSupplyAsCollateral({
- *   reserve: reserveId('SGVsbG8h'),
- *   sender: evmAddress('0x456...'),
- *   enableCollateral: true,
+ * const result = await setUserSuppliesAsCollateral({
+ *   changes: [
+ *     {
+ *       reserve: reserve.id,
+ *       enableCollateral: true
+ *     }
+ *   ],
+ *   sender: evmAddress('0x456...')
  * });
  *
  * if (result.isErr()) {
@@ -695,82 +699,99 @@ export function useUpdateUserRiskPremium(
  *
  * @param handler - The handler that will be used to handle the transaction.
  */
-export function useSetUserSupplyAsCollateral(
+export function useSetUserSuppliesAsCollateral(
   handler: TransactionHandler,
 ): UseAsyncTask<
-  SetUserSupplyAsCollateralRequest,
+  SetUserSuppliesAsCollateralRequest,
   TxHash,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: SetUserSupplyAsCollateralRequest) => {
-      const { chainId, spoke } = decodeReserveId(request.reserve);
-      return setUserSupplyAsCollateral(client, request)
+    (request: SetUserSuppliesAsCollateralRequest) => {
+      const reserveIds = request.changes.map((change) => change.reserve);
+      const reserveDetails = reserveIds.map((reserveId) =>
+        decodeReserveId(reserveId),
+      );
+      return setUserSuppliesAsCollateral(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pendingTransaction) => pendingTransaction.wait())
         .andThen(client.waitForTransaction)
         .andTee(() =>
           Promise.all([
             // update user positions
-            client.refreshQueryWhere(
-              UserPositionsQuery,
-              (variables, data) =>
-                variables.request.user === request.sender &&
-                data.some(
-                  (position) =>
-                    position.spoke.chain.chainId === chainId &&
-                    position.spoke.address === spoke,
-                ),
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(
+                UserPositionsQuery,
+                (variables, data) =>
+                  variables.request.user === request.sender &&
+                  data.some(
+                    (position) =>
+                      position.spoke.chain.chainId === chainId &&
+                      position.spoke.address === spoke,
+                  ),
+              ),
             ),
-            client.refreshQueryWhere(
-              UserPositionQuery,
-              (_, data) =>
-                data?.spoke.chain.chainId === chainId &&
-                data?.spoke.address === spoke &&
-                data.user === request.sender,
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(
+                UserPositionQuery,
+                (_, data) =>
+                  data?.spoke.chain.chainId === chainId &&
+                  data?.spoke.address === spoke &&
+                  data.user === request.sender,
+              ),
             ),
 
             // update user summary
-            client.refreshQueryWhere(UserSummaryQuery, (variables) =>
-              variables.request.user === request.sender &&
-              isSpokeInputVariant(variables.request.filter)
-                ? variables.request.filter.spoke.chainId === chainId &&
-                  variables.request.filter.spoke.address === spoke
-                : isChainIdsVariant(variables.request.filter)
-                  ? variables.request.filter.chainIds.some(
-                      (id) => id === chainId,
-                    )
-                  : false,
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(UserSummaryQuery, (variables) =>
+                variables.request.user === request.sender &&
+                isSpokeInputVariant(variables.request.filter)
+                  ? variables.request.filter.spoke.chainId === chainId &&
+                    variables.request.filter.spoke.address === spoke
+                  : isChainIdsVariant(variables.request.filter)
+                    ? variables.request.filter.chainIds.some(
+                        (id) => id === chainId,
+                      )
+                    : false,
+              ),
             ),
 
             // update reserves
             client.refreshQueryWhere(ReservesQuery, (_, data) =>
-              data.some((reserve) => reserve.id === request.reserve),
+              data.some((reserve) => reserveIds.includes(reserve.id)),
             ),
 
             // update spokes
-            client.refreshQueryWhere(SpokesQuery, (_, data) =>
-              data.some(
-                (item) =>
-                  item.chain.chainId === chainId && item.address === spoke,
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(SpokesQuery, (_, data) =>
+                data.some(
+                  (item) =>
+                    item.chain.chainId === chainId && item.address === spoke,
+                ),
               ),
             ),
 
             // update hubs
-            client.refreshQueryWhere(HubsQuery, (variables) =>
-              isChainIdsVariant(variables.request.query)
-                ? variables.request.query.chainIds.some((id) => id === chainId)
-                : variables.request.query.tokens.some(
-                    (token) => token.chainId === chainId,
-                  ),
+            ...reserveDetails.map(({ chainId }) =>
+              client.refreshQueryWhere(HubsQuery, (variables) =>
+                isChainIdsVariant(variables.request.query)
+                  ? variables.request.query.chainIds.some(
+                      (id) => id === chainId,
+                    )
+                  : variables.request.query.tokens.some(
+                      (token) => token.chainId === chainId,
+                    ),
+              ),
             ),
-            client.refreshQueryWhere(HubQuery, (variables) =>
-              isHubInputVariant(variables.request.query)
-                ? variables.request.query.hubInput.chainId === chainId
-                : decodeHubId(variables.request.query.hubId).chainId ===
-                  chainId,
+            ...reserveDetails.map(({ chainId }) =>
+              client.refreshQueryWhere(HubQuery, (variables) =>
+                isHubInputVariant(variables.request.query)
+                  ? variables.request.query.hubInput.chainId === chainId
+                  : decodeHubId(variables.request.query.hubId).chainId ===
+                    chainId,
+              ),
             ),
           ]),
         );

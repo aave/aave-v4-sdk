@@ -43,7 +43,7 @@ const gasEstimates: Record<keyof PreviewAction, bigint> = {
   borrow: 250_551n,
   withdraw: 195_049n,
   repay: 217_889n + estimatedApprovalGas,
-  setUserSupplyAsCollateral: 240_284n,
+  setUserSuppliesAsCollateral: 240_284n,
 };
 
 function inferGasEstimate(action: PreviewAction): bigint {
@@ -68,8 +68,9 @@ function extractReserveId(action: PreviewAction): ReserveId {
     return action.repay.reserve;
   }
 
-  if ('setUserSupplyAsCollateral' in action) {
-    return action.setUserSupplyAsCollateral.reserve;
+  if ('setUserSuppliesAsCollateral' in action) {
+    // assumes they are all on the same chain
+    return action.setUserSuppliesAsCollateral.changes[0]!.reserve;
   }
 
   return never('Expected reserve id');

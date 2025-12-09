@@ -128,16 +128,22 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         expectedGasCost: 501102n,
       },
       {
-        requestType: 'SetUserSupplyAsCollateralRequest',
+        requestType: 'SetUserSuppliesAsCollateralRequest',
         estimate: {
-          setUserSupplyAsCollateral: {
-            enableCollateral: true,
+          setUserSuppliesAsCollateral: {
+            changes: [
+              {
+                reserve: encodeReserveId({
+                  chainId: ETHEREUM_FORK_ID,
+                  spoke: evmAddress(
+                    '0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F',
+                  ),
+                  onChainId: '1' as OnChainReserveId,
+                }),
+                enableCollateral: true,
+              },
+            ],
             sender: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
-            reserve: encodeReserveId({
-              chainId: ETHEREUM_FORK_ID,
-              spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
-              onChainId: '1' as OnChainReserveId,
-            }),
           },
         },
         expectedGasCost: 480568n,

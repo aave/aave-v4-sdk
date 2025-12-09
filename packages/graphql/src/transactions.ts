@@ -133,16 +133,20 @@ export type SetSpokeUserPositionManagerRequest = RequestOf<
 /**
  * @internal
  */
-export const SetUserSupplyAsCollateralQuery = graphql(
-  `query SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
-    value: setUserSupplyAsCollateral(request: $request) {
+export const SetUserSuppliesAsCollateralQuery = graphql(
+  `query SetUserSuppliesAsCollateral($request: SetUserSuppliesAsCollateralRequest!) {
+    value: setUserSuppliesAsCollateral(request: $request) {
       ...TransactionRequest
     }
   }`,
   [TransactionRequestFragment],
 );
-export type SetUserSupplyAsCollateralRequest = RequestOf<
-  typeof SetUserSupplyAsCollateralQuery
+export type SetUserSuppliesAsCollateralRequest = RequestOf<
+  typeof SetUserSuppliesAsCollateralQuery
+>;
+
+export type UserSupplyAsCollateral = ReturnType<
+  typeof graphql.scalar<'UserSupplyAsCollateral'>
 >;
 
 /**
