@@ -3,6 +3,8 @@
 exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from ERC20 token to fiat currency > Then it should return the exchange rate in the requested currency 1`] = `
 {
   "__typename": "ExchangeAmount",
+  "decimals": Any<Number>,
+  "icon": "",
   "name": "USD",
   "symbol": "$",
   "value": Any<t>,
@@ -12,6 +14,8 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from fiat to fiat > Then it should return the cross-currency exchange rate 1`] = `
 {
   "__typename": "ExchangeAmount",
+  "decimals": Any<Number>,
+  "icon": "",
   "name": "EUR",
   "symbol": "€",
   "value": Any<t>,
@@ -21,6 +25,8 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate from native token to fiat currency > Then it should return the exchange rate for native token 1`] = `
 {
   "__typename": "ExchangeAmount",
+  "decimals": Any<Number>,
+  "icon": "",
   "name": "USD",
   "symbol": "$",
   "value": Any<t>,
@@ -30,6 +36,8 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in EUR 1`] = `
 {
   "__typename": "ExchangeAmount",
+  "decimals": Any<Number>,
+  "icon": "",
   "name": "EUR",
   "symbol": "€",
   "value": Any<t>,
@@ -39,6 +47,8 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in GBP 1`] = `
 {
   "__typename": "ExchangeAmount",
+  "decimals": Any<Number>,
+  "icon": "",
   "name": "GBP",
   "symbol": "£",
   "value": Any<t>,
@@ -48,6 +58,8 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exchange rates > When fetching exchange rate to different fiat currencies > Then it should return the exchange rate in USD 1`] = `
 {
   "__typename": "ExchangeAmount",
+  "decimals": Any<Number>,
+  "icon": "",
   "name": "USD",
   "symbol": "$",
   "value": Any<t>,
