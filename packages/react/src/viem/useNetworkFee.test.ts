@@ -13,6 +13,7 @@ import {
   type PreviewAction,
   type ReserveInfo,
   type Spoke,
+  tokenInfoId,
 } from '@aave/graphql';
 import { bigDecimal, evmAddress, txHash } from '@aave/types';
 import { describe, expect, it, vi } from 'vitest';
@@ -38,6 +39,7 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         rpcUrl: ETHEREUM_FORK_RPC_URL,
         explorerUrl: 'https://etherscan.io',
         isTestnet: false,
+        isFork: true,
         nativeWrappedToken: ETHEREUM_WETH_ADDRESS,
         nativeGateway: evmAddress('0x0000000000000000000000000000000000000001'),
         signatureGateway: evmAddress(
@@ -45,10 +47,12 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         ),
         nativeInfo: {
           __typename: 'TokenInfo',
+          id: tokenInfoId('1'),
           name: 'Ethereum',
           symbol: 'ETH',
           icon: 'https://example.com/eth-icon.png',
           decimals: 18,
+          categories: [],
         },
       },
       spoke: {} as Spoke,
