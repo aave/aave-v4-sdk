@@ -1,4 +1,4 @@
-  {
+{
   "name": "aave-sdk",
   "version": "0.0.0",
   "description": "The quickest way to build on Aave Protocol",
@@ -23,6 +23,7 @@
     "release": "pnpm run build && pnpm changeset publish",
     "spec": "vitest --project spec",
     "test:client": "vitest --project client",
+    "test:cli": "vitest --project cli --passWithNoTests",
     "test:client:ethers": "vitest --project client packages/client/src/ethers.test.ts",
     "test:client:thirdweb": "vitest --project client packages/client/src/thirdweb.test.ts",
     "test:client:viem": "vitest --project client packages/client/src/viem.test.ts",
@@ -30,21 +31,21 @@
     "test:react": "vitest --project react",
     "test:react:viem": "vitest --project react packages/react/src/viem/*.test.ts",
     "test:types": "vitest --project types",
-    "test": "pnpm test:types && pnpm test:core && pnpm test:client && pnpm test:react"
+    "test": "pnpm test:types && pnpm test:core && pnpm test:client && pnpm test:cli && pnpm test:react"
   },
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^2.2.5",
-    "@changesets/cli": "^2.29.5",
+    "@changesets/cli": "^2.29.8",
     "@types/node": "^24.0.7",
     "@vitest/ui": "^3.2.4",
     "jest-extended": "^6.0.0",
-    "plop": "^4.0.1",
-    "rimraf": "^6.0.1",
+    "plop": "^4.0.4",
+    "rimraf": "^6.1.2",
     "tsx": "^4.20.3",
     "turbo": "^2.5.4",
     "typescript": "^5.9.2",
-    "vite": "^7.0.0",
+    "vite": "^7.2.7",
     "vitest": "^3.2.4"
   },
   "pnpm": {

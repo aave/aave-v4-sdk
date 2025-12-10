@@ -3,6 +3,7 @@ import {
   ActivityType,
   assertOk,
   evmAddress,
+  type OpaqueTypename,
   PageSize,
 } from '@aave/client';
 import { activities } from '@aave/client/actions';
@@ -26,7 +27,7 @@ describe('Querying User Activities on Aave V4', () => {
 
   const typenameToActivityType: Record<
     ActivityType,
-    ActivityItem['__typename']
+    Exclude<ActivityItem['__typename'], OpaqueTypename>
   > = {
     [ActivityType.Borrow]: 'BorrowActivity',
     [ActivityType.Supply]: 'SupplyActivity',

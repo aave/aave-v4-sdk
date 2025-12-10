@@ -141,7 +141,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       );
 
       // Wait for the error boundary to catch the error
-      await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+      await vi.waitUntil(() => onError.mock.calls.length);
 
       expect(onError).toHaveBeenCalledWith(
         expect.any(UnexpectedError),

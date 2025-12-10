@@ -2,6 +2,9 @@ name: 'Verify'
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint
