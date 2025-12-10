@@ -12,7 +12,7 @@ import { graphql, type RequestOf } from './graphql';
  * @internal
  */
 export const UserSuppliesQuery = graphql(
-  `query UserSupplies($request: UserSuppliesRequest!, $currency: Currency!) {
+  `query UserSupplies($request: UserSuppliesRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userSupplies(request: $request) {
       ...UserSupplyItem
     }
@@ -25,7 +25,7 @@ export type UserSuppliesRequest = RequestOf<typeof UserSuppliesQuery>;
  * @internal
  */
 export const UserBorrowsQuery = graphql(
-  `query UserBorrows($request: UserBorrowsRequest!, $currency: Currency!) {
+  `query UserBorrows($request: UserBorrowsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userBorrows(request: $request) {
       ...UserBorrowItem
     }

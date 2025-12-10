@@ -52,9 +52,13 @@ import {
 export function userSupplies(
   client: AaveClient,
   request: UserSuppliesRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSupplyItem[], UnexpectedError> {
-  return client.query(UserSuppliesQuery, { request, ...options });
+  return client.query(UserSuppliesQuery, { request, currency, timeWindow });
 }
 
 /**
@@ -80,9 +84,13 @@ export function userSupplies(
 export function userBorrows(
   client: AaveClient,
   request: UserBorrowsRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBorrowItem[], UnexpectedError> {
-  return client.query(UserBorrowsQuery, { request, ...options });
+  return client.query(UserBorrowsQuery, { request, currency, timeWindow });
 }
 
 export type UserSummaryQueryOptions = Prettify<

@@ -13,7 +13,11 @@ import {
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
-import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
+} from '../options';
 
 /**
  * Fetches a specific reserve by reserve ID, spoke, and chain.
@@ -33,9 +37,13 @@ import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 export function reserve(
   client: AaveClient,
   request: ReserveRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve | null, UnexpectedError> {
-  return client.query(ReserveQuery, { request, ...options });
+  return client.query(ReserveQuery, { request, currency, timeWindow });
 }
 
 /**
@@ -62,9 +70,13 @@ export function reserve(
 export function reserves(
   client: AaveClient,
   request: ReservesRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve[], UnexpectedError> {
-  return client.query(ReservesQuery, { request, ...options });
+  return client.query(ReservesQuery, { request, currency, timeWindow });
 }
 
 /**

@@ -6,7 +6,7 @@ import { graphql, type RequestOf } from './graphql';
  * @internal
  */
 export const HubQuery = graphql(
-  `query Hub($request: HubRequest!, $currency: Currency!) {
+  `query Hub($request: HubRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: hub(request: $request) {
         ...Hub
       }
@@ -23,7 +23,7 @@ export type HubRequestQuery = ReturnType<
  * @internal
  */
 export const HubsQuery = graphql(
-  `query Hubs($request: HubsRequest!, $currency: Currency!) {
+  `query Hubs($request: HubsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: hubs(request: $request) {
         ...Hub
       }
@@ -36,7 +36,7 @@ export type HubsRequest = RequestOf<typeof HubsQuery>;
  * @internal
  */
 export const HubAssetsQuery = graphql(
-  `query HubAssets($request: HubAssetsRequest!, $currency: Currency!) {
+  `query HubAssets($request: HubAssetsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: hubAssets(request: $request) {
         ...HubAsset
       }

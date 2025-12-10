@@ -33,6 +33,7 @@ import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
   type RequestPolicyOptions,
+  type TimeWindowQueryOptions,
 } from '../options';
 
 /**
@@ -415,11 +416,17 @@ export function setUserSuppliesAsCollateral(
 export function activities(
   client: AaveClient,
   request: ActivitiesRequest,
-  options: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+  options: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedActivitiesResult, UnexpectedError> {
   return client.query(
     ActivitiesQuery,
-    { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
+    {
+      request,
+      currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
+      timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+    },
     {
       requestPolicy:
         options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,

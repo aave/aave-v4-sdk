@@ -28,7 +28,7 @@ export const SupplyApyHistoryQuery = graphql(
 export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
 
 export const ReserveQuery = graphql(
-  `query Reserve($request: ReserveRequest!, $currency: Currency!) {
+  `query Reserve($request: ReserveRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: reserve(request: $request) {
       ...Reserve
     }
@@ -42,7 +42,7 @@ export type ReserveRequestQuery = ReturnType<
 >;
 
 export const ReservesQuery = graphql(
-  `query Reserves($request: ReservesRequest!, $currency: Currency!) {
+  `query Reserves($request: ReservesRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: reserves(request: $request) {
       ...Reserve
     }

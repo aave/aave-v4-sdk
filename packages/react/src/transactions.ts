@@ -3,6 +3,7 @@ import type {
   ActivitiesRequest,
   CurrencyQueryOptions,
   PaginatedActivitiesResult,
+  TimeWindowQueryOptions,
   UnexpectedError,
 } from '@aave/client';
 import { DEFAULT_QUERY_OPTIONS } from '@aave/client';
@@ -1153,7 +1154,7 @@ export function usePreview({
 }
 
 export type UseActivitiesArgs = Prettify<
-  ActivitiesRequest & CurrencyQueryOptions
+  ActivitiesRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -1239,6 +1240,7 @@ export function useActivities({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseActivitiesArgs> & {
   suspense?: boolean;
@@ -1249,6 +1251,7 @@ export function useActivities({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -1267,13 +1270,17 @@ export function useActivities({
  * @returns The user history.
  */
 export function useActivitiesAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ActivitiesRequest, PaginatedActivitiesResult, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: ActivitiesRequest) =>
-      activities(client, request, { currency: options.currency }),
-    [client, options.currency],
+      activities(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }

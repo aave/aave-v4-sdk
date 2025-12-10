@@ -49,7 +49,7 @@ import {
 } from './helpers';
 
 export type UseUserSuppliesArgs = Prettify<
-  UserSuppliesRequest & CurrencyQueryOptions
+  UserSuppliesRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -146,6 +146,7 @@ export function useUserSupplies({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseUserSuppliesArgs> & {
   suspense?: boolean;
@@ -156,6 +157,7 @@ export function useUserSupplies({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -194,19 +196,23 @@ export function useUserSupplies({
  * ```
  */
 export function useUserSuppliesAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserSuppliesRequest, UserSupplyItem[], UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: UserSuppliesRequest) =>
-      userSupplies(client, request, { currency: options.currency }),
-    [client, options.currency],
+      userSupplies(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 
 export type UseUserBorrowsArgs = Prettify<
-  UserBorrowsRequest & CurrencyQueryOptions
+  UserBorrowsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -296,6 +302,7 @@ export function useUserBorrows({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseUserBorrowsArgs> & {
   suspense?: boolean;
@@ -306,6 +313,7 @@ export function useUserBorrows({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -344,14 +352,18 @@ export function useUserBorrows({
  * ```
  */
 export function useUserBorrowsAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserBorrowsRequest, UserBorrowItem[], UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: UserBorrowsRequest) =>
-      userBorrows(client, request, { currency: options.currency }),
-    [client, options.currency],
+      userBorrows(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 

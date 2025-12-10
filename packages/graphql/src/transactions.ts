@@ -533,7 +533,7 @@ export type PaginatedActivitiesResult = FragmentOf<
  * @internal
  */
 export const ActivitiesQuery = graphql(
-  `query Activities($request: ActivitiesRequest!, $currency: Currency!) {
+  `query Activities($request: ActivitiesRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: activities(request: $request) {
       ...PaginatedActivitiesResult
     }

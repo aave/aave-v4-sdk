@@ -1,6 +1,7 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
 import { reserve, reserves } from '@aave/client/actions';
@@ -32,7 +33,9 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseReserveArgs = Prettify<ReserveRequest & CurrencyQueryOptions>;
+export type UseReserveArgs = Prettify<
+  ReserveRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch a specific reserve by reserve ID, spoke, and chain.
@@ -99,6 +102,7 @@ export function useReserve({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseReserveArgs> & {
   suspense?: boolean;
@@ -109,6 +113,7 @@ export function useReserve({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -141,20 +146,25 @@ export function useReserve({
  * ```
  */
 export function useReserveAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReserveRequest, Reserve | null, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: ReserveRequest) =>
-      reserve(client, request, { currency: options.currency }),
-    [client, options.currency],
+      reserve(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 
 export type UseReservesArgs<T = Reserve[]> = Prettify<
   ReservesRequest &
-    CurrencyQueryOptions & {
+    CurrencyQueryOptions &
+    TimeWindowQueryOptions & {
       /**
        * A function that maps the full list of reserves
        * into a derived or narrowed value.
@@ -308,6 +318,7 @@ export function useReserves<T = Reserve[]>({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   selector,
   ...request
 }: NullishDeep<UseReservesArgs<T>> & {
@@ -319,6 +330,7 @@ export function useReserves<T = Reserve[]>({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -387,14 +399,18 @@ export function useReserves<T = Reserve[]>({
  * ```
  */
 export function useReservesAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReservesRequest, Reserve[], UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: ReservesRequest) =>
-      reserves(client, request, { currency: options.currency }),
-    [client, options.currency],
+      reserves(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 

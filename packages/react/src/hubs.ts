@@ -1,6 +1,7 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
 import { hubs } from '@aave/client/actions';
@@ -29,7 +30,9 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseHubArgs = Prettify<HubRequest & CurrencyQueryOptions>;
+export type UseHubArgs = Prettify<
+  HubRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch a specific hub by ID or by address and chain ID.
@@ -94,6 +97,7 @@ export function useHub({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseHubArgs> & {
   suspense?: boolean;
@@ -104,13 +108,16 @@ export function useHub({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
   });
 }
 
-export type UseHubsArgs = Prettify<HubsRequest & CurrencyQueryOptions>;
+export type UseHubsArgs = Prettify<
+  HubsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch multiple hubs based on specified criteria.
@@ -169,6 +176,7 @@ export function useHubs({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseHubsArgs> & {
   suspense?: boolean;
@@ -179,6 +187,7 @@ export function useHubs({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -186,7 +195,7 @@ export function useHubs({
 }
 
 export type UseHubAssetsArgs = Prettify<
-  HubAssetsRequest & CurrencyQueryOptions
+  HubAssetsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -254,6 +263,7 @@ export function useHubAssets({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseHubAssetsArgs> & {
   suspense?: boolean;
@@ -264,6 +274,7 @@ export function useHubAssets({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
