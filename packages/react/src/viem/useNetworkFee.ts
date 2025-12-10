@@ -51,34 +51,36 @@ function inferGasEstimate(action: PreviewAction): bigint {
   return gasEstimates[key] ?? never(`Expected gas estimate for action ${key}`);
 }
 
-function extractReserveId(action: PreviewAction): ReserveId {
+function extractChainId(action: PreviewAction): ChainId {
   if ('supply' in action) {
-    return action.supply.reserve;
+    return decodeReserveId(action.supply.reserve).chainId;
   }
 
   if ('borrow' in action) {
-    return action.borrow.reserve;
+    return decodeReserveId(action.borrow.reserve).chainId;
   }
 
   if ('withdraw' in action) {
-    return action.withdraw.reserve;
+    return decodeReserveId(action.withdraw.reserve).chainId;
   }
 
   if ('repay' in action) {
-    return action.repay.reserve;
+    return decodeReserveId(action.repay.reserve).chainId;
   }
 
   if ('setUserSuppliesAsCollateral' in action) {
-    // assumes they are all on the same chain
-    return action.setUserSuppliesAsCollateral.changes[0]!.reserve;
+    return action.setUserSuppliesAsCollateral.changes
+      .map(({ reserve }) => decodeReserveId(reserve))
+      .reduce((prev, current) => {
+        invariant(
+          prev.chainId === current.chainId && prev.spoke === current.spoke,
+          'All reserves MUST on the same spoke',
+        );
+        return prev;
+      }).chainId;
   }
 
-  return never('Expected reserve id');
-}
-
-function extractChainId(action: PreviewAction): ChainId {
-  const reserveId = extractReserveId(action);
-  return decodeReserveId(reserveId).chainId;
+  never('Expected reserve id');
 }
 
 function inferChainId(query: UseNetworkFeeRequestQuery): ChainId | undefined {
