@@ -25,6 +25,7 @@
     "test:client": "vitest --project client",
     "test:cli": "vitest --project cli --passWithNoTests",
     "test:client:ethers": "vitest --project client packages/client/src/ethers.test.ts",
+    "test:client:thirdweb": "vitest --project client packages/client/src/thirdweb.test.ts",
     "test:client:viem": "vitest --project client packages/client/src/viem.test.ts",
     "test:core": "vitest --project core",
     "test:react": "vitest --project react",
