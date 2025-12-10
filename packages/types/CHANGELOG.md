@@ -1,5 +1,11 @@
 # @aave/types
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- f651671: **chore:** adds patterns to avoid breaking changes on expanding enum and GQL unions.
+
 ## 1.0.0-next.3
 
 ### Patch Changes

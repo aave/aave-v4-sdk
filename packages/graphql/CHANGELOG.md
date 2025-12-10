@@ -1,5 +1,13 @@
 # @aave/graphql
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- f651671: **chore:** adds patterns to avoid breaking changes on expanding enum and GQL unions.
+- Updated dependencies [f651671]
+  - @aave/types@1.0.0-next.4
+
 ## 1.0.0-next.5
 
 ### Minor Changes

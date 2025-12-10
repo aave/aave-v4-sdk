@@ -1,5 +1,18 @@
 # @aave/react
 
+## 4.0.0-next.7
+
+### Patch Changes
+
+- 28dd334: **fix:** amends thirdweb integrations to leverage chain details from API whenever possible
+- f651671: **chore:** adds patterns to avoid breaking changes on expanding enum and GQL unions.
+- Updated dependencies [28dd334]
+- Updated dependencies [f651671]
+  - @aave/client@4.0.0-next.7
+  - @aave/graphql@1.0.0-next.6
+  - @aave/types@1.0.0-next.4
+  - @aave/core@1.0.0-next.5
+
 ## 4.0.0-next.6
 
 ### Patch Changes

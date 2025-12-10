@@ -7,10 +7,12 @@
     "@aave/graphql": "0.6.1",
     "@aave/react": "3.0.0",
     "@aave/spec": "0.0.0",
-    "@aave/types": "0.1.1"
+    "@aave/types": "0.1.1",
+    "@aave/cli": "4.0.0"
   },
   "changesets": [
     "clever-symbols-search",
+    "crazy-teams-attack",
     "easy-guests-invent",
     "eleven-baboons-sin",
     "expose-hubid-filters-in-balances-and-reserves",
@@ -18,13 +20,19 @@
     "flat-sloths-argue",
     "gold-flies-sink",
     "happy-actors-prove",
+    "hip-coats-serve",
+    "late-birds-punch",
     "long-cups-nail",
     "mighty-peaches-cheer",
     "modern-cases-battle",
     "nasty-wombats-heal",
     "real-numbers-do",
+    "rich-bikes-marry",
+    "salty-berries-hang",
     "silver-mugs-wait",
     "small-terms-open",
-    "ten-bags-bake"
+    "ten-bags-bake",
+    "whole-deer-scream",
+    "witty-meals-turn"
   ]
 }
