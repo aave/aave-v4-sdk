@@ -3,6 +3,7 @@ import {
   DecimalNumberFragment,
   DecimalNumberWithChangeFragment,
   Erc20TokenFragment,
+  ExchangeAmountFragment,
   ExchangeAmountWithChangeFragment,
   PercentNumberFragment,
 } from './fragments';
@@ -191,3 +192,36 @@ export type AssetBorrowHistoryRequest = RequestOf<
 export type AssetBorrowHistoryRequestQuery = ReturnType<
   typeof graphql.scalar<'AssetBorrowHistoryRequestQuery'>
 >;
+
+export const ProtocolHistorySampleFragment = graphql(
+  `fragment ProtocolHistorySample on ProtocolHistorySample {
+    __typename
+    date
+    deposits {
+      ...ExchangeAmount
+    }
+    borrows {
+      ...ExchangeAmount
+    }
+    earnings {
+      ...ExchangeAmount
+    }
+  }`,
+  [ExchangeAmountFragment],
+);
+export type ProtocolHistorySample = FragmentOf<
+  typeof ProtocolHistorySampleFragment
+>;
+
+/**
+ * @internal
+ */
+export const ProtocolHistoryQuery = graphql(
+  `query ProtocolHistory($request: ProtocolHistoryRequest!) {
+    value: protocolHistory(request: $request) {
+      ...ProtocolHistorySample
+    }
+  }`,
+  [ProtocolHistorySampleFragment],
+);
+export type ProtocolHistoryRequest = RequestOf<typeof ProtocolHistoryQuery>;

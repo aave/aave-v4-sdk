@@ -17,6 +17,9 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
+  ProtocolHistoryQuery,
+  type ProtocolHistoryRequest,
+  type ProtocolHistorySample,
 } from '@aave/graphql';
 import type { NullishDeep, Prettify } from '@aave/types';
 import {
@@ -354,6 +357,90 @@ export function useAssetBorrowHistory({
 }): SuspendableResult<AssetBorrowSample[], UnexpectedError> {
   return useSuspendableQuery({
     document: AssetBorrowHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
+export type UseProtocolHistoryArgs = ProtocolHistoryRequest;
+
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: UseProtocolHistoryArgs & Suspendable,
+): SuspenseResult<ProtocolHistorySample[]>;
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: Pausable<UseProtocolHistoryArgs> & Suspendable,
+): PausableSuspenseResult<ProtocolHistorySample[]>;
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * ```tsx
+ * const { data, error, loading } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: UseProtocolHistoryArgs,
+): ReadResult<ProtocolHistorySample[]>;
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: Pausable<UseProtocolHistoryArgs>,
+): PausableReadResult<ProtocolHistorySample[]>;
+
+export function useProtocolHistory({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseProtocolHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<ProtocolHistorySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: ProtocolHistoryQuery,
     variables: {
       request,
     },

@@ -12,6 +12,9 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
+  ProtocolHistoryQuery,
+  type ProtocolHistoryRequest,
+  type ProtocolHistorySample,
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
@@ -140,6 +143,36 @@ export function assetBorrowHistory(
 ): ResultAsync<AssetBorrowSample[], UnexpectedError> {
   return client.query(
     AssetBorrowHistoryQuery,
+    { request },
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
+  );
+}
+
+/**
+ * Fetches historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * ```ts
+ * const result = await protocolHistory(client, {
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The protocol history request parameters.
+ * @param options - The query options.
+ * @returns Array of protocol history samples over time.
+ */
+export function protocolHistory(
+  client: AaveClient,
+  request: ProtocolHistoryRequest,
+  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<ProtocolHistorySample[], UnexpectedError> {
+  return client.query(
+    ProtocolHistoryQuery,
     { request },
     {
       requestPolicy:

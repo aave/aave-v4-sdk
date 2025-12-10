@@ -121,6 +121,9 @@ export const exchange = cacheExchange({
     AssetSupplySample: {
       date: transformToDate,
     },
+    ProtocolHistorySample: {
+      date: transformToDate,
+    },
     BorrowActivity: {
       timestamp: transformToDate,
     },
@@ -334,6 +337,7 @@ export const exchange = cacheExchange({
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PreviewUserPosition: () => null,
+    ProtocolHistorySample: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,
     ReserveSummary: () => null,
