@@ -167,16 +167,16 @@ export type RenounceSpokeUserPositionManagerRequest = RequestOf<
 /**
  * @internal
  */
-export const UpdateUserRiskPremiumQuery = graphql(
-  `query UpdateUserRiskPremium($request: UpdateUserRiskPremiumRequest!) {
-    value: updateUserRiskPremium(request: $request) {
+export const UpdateUserPositionConditionsQuery = graphql(
+  `query UpdateUserPositionConditions($request: UpdateUserPositionConditionsRequest!) {
+    value: updateUserPositionConditions(request: $request) {
       ...TransactionRequest
     }
   }`,
   [TransactionRequestFragment],
 );
-export type UpdateUserRiskPremiumRequest = RequestOf<
-  typeof UpdateUserRiskPremiumQuery
+export type UpdateUserPositionConditionsRequest = RequestOf<
+  typeof UpdateUserPositionConditionsQuery
 >;
 
 export const PreviewUserPositionFragment = graphql(

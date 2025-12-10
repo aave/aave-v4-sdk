@@ -17,7 +17,7 @@ import {
   setSpokeUserPositionManager,
   setUserSuppliesAsCollateral,
   supply,
-  updateUserRiskPremium,
+  updateUserPositionConditions,
   withdraw,
 } from '@aave/client/actions';
 import { ValidationError } from '@aave/core';
@@ -44,7 +44,7 @@ import {
   SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
-  type UpdateUserRiskPremiumRequest,
+  type UpdateUserPositionConditionsRequest,
   UserBalancesQuery,
   UserPositionQuery,
   UserPositionsQuery,
@@ -573,17 +573,21 @@ export function useRenounceSpokeUserPositionManager(
 }
 
 /**
- * A hook that provides a way to update the user risk premium for a spoke.
+ * Hook for updating user position conditions (dynamic config and/or risk premium).
  *
  * ```ts
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [updateUserRiskPremium, { loading, error }] = useUpdateUserRiskPremium((transaction, { cancel }) => {
+ * const [update, { loading, error }] = useUpdateUserPositionConditions((transaction, { cancel }) => {
  *   return sendTransaction(transaction);
  * });
  *
  * // …
  *
- * const result = await updateUserRiskPremium({ ... });
+ * const result = await update({
+ *   userPositionId: userPosition.id,
+ *   dynamicConfig: true,
+ *   riskPremium: true,
+ * });
  *
  * if (result.isErr()) {
  *   switch (result.error.name) {
@@ -616,37 +620,33 @@ export function useRenounceSpokeUserPositionManager(
  * @param handler - The handler that will be used to handle the transaction.
  */
 
-export function useUpdateUserRiskPremium(
+export function useUpdateUserPositionConditions(
   handler: TransactionHandler,
 ): UseAsyncTask<
-  UpdateUserRiskPremiumRequest,
+  UpdateUserPositionConditionsRequest,
   TxHash,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: UpdateUserRiskPremiumRequest) =>
-      updateUserRiskPremium(client, request)
+    (request: UpdateUserPositionConditionsRequest) =>
+      updateUserPositionConditions(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pendingTransaction) => pendingTransaction.wait())
         .andThen(client.waitForTransaction)
-        .andTee(async () =>
-          Promise.all([
-            client.refreshQueryWhere(
-              UserPositionsQuery,
-              (variables, data) =>
-                variables.request.user === request.sender &&
-                data.some((position) => position.spoke.id === request.spoke),
+        .andTee(async () => {
+          const { userPositionId } = request;
+          return Promise.all([
+            client.refreshQueryWhere(UserPositionsQuery, (_, data) =>
+              data.some((position) => position.id === userPositionId),
             ),
             client.refreshQueryWhere(
               UserPositionQuery,
-              (_, data) =>
-                data?.spoke.id === request.spoke &&
-                data.user === request.sender,
+              (_, data) => data?.id === userPositionId,
             ),
-          ]),
-        ),
+          ]);
+        }),
     [client, handler],
   );
 }

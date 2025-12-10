@@ -22,8 +22,8 @@ import {
   SupplyQuery,
   type SupplyRequest,
   type TransactionRequest,
-  UpdateUserRiskPremiumQuery,
-  type UpdateUserRiskPremiumRequest,
+  UpdateUserPositionConditionsQuery,
+  type UpdateUserPositionConditionsRequest,
   WithdrawQuery,
   type WithdrawRequest,
 } from '@aave/graphql';
@@ -231,12 +231,13 @@ export function renounceSpokeUserPositionManager(
 }
 
 /**
- * Creates a transaction to update user risk premium for a specific spoke.
+ * Creates a transaction to update user position conditions (dynamic config and/or risk premium).
  *
  * ```ts
- * const result = await updateUserRiskPremium(client, {
- *   sender: evmAddress('0x9abc…'),
- *   spoke: spokeId('SGVsbG8h'),
+ * const result = await updateUserPositionConditions(client, {
+ *   userPositionId: userPositionId('SGVsbG8h'),
+ *   dynamicConfig: true,
+ *   riskPremium: true,
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -249,14 +250,14 @@ export function renounceSpokeUserPositionManager(
  *
  *
  * @param client - Aave client.
- * @param request - The update user risk premium request parameters.
+ * @param request - The update user position conditions request parameters.
  * @returns The transaction data.
  */
-export function updateUserRiskPremium(
+export function updateUserPositionConditions(
   client: AaveClient,
-  request: UpdateUserRiskPremiumRequest,
+  request: UpdateUserPositionConditionsRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
-  return client.query(UpdateUserRiskPremiumQuery, { request });
+  return client.query(UpdateUserPositionConditionsQuery, { request });
 }
 
 /**
