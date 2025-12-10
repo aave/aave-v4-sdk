@@ -19,6 +19,9 @@ import {
   type SwapByIntent,
   type SwapByIntentWithApprovalRequired,
   type SwapByTransaction,
+  type TokenInfo,
+  type UpdatedDynamicConfigActivity,
+  type UpdatedRiskPremiumActivity,
   type UserPosition,
   type UsingAsCollateralActivity,
   type VariablesOf,
@@ -84,9 +87,6 @@ export const exchange = cacheExchange({
       price: transformToBigDecimal,
       date: transformToDate,
     },
-    HubSummary: {
-      utilizationRate: transformToBigDecimal,
-    },
     Reserve: {
       borrowCap: transformToBigDecimal,
       supplyCap: transformToBigDecimal,
@@ -137,6 +137,12 @@ export const exchange = cacheExchange({
       timestamp: transformToDate,
     },
     UsingAsCollateralActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedDynamicConfigActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedRiskPremiumActivity: {
       timestamp: transformToDate,
     },
     SpokeUserPositionManager: {
@@ -267,9 +273,13 @@ export const exchange = cacheExchange({
     ) => data.quote.quoteId,
     SwapByTransaction: (data: SwapByTransaction) => data.quote.quoteId,
     UserPosition: (data: UserPosition) => data.id,
+    UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
+      data.id,
+    UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
     UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
     WithdrawActivity: (data: WithdrawActivity) => data.id,
     RepayActivity: (data: RepayActivity) => data.id,
+    TokenInfo: (data: TokenInfo) => data.id,
 
     // Entities with address field as key
     Erc20Token: (data: Erc20Token) => data.address,
@@ -338,7 +348,6 @@ export const exchange = cacheExchange({
     SwapPendingSignature: () => null,
     SwapQuote: () => null,
     SwapQuoteCosts: () => null,
-    TokenInfo: () => null,
     TransactionRequest: () => null,
     TypeDefinition: () => null,
     TypeField: () => null,
