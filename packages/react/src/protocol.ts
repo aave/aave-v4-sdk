@@ -12,6 +12,9 @@ import {
   AssetCategoryBorrowHistoryQuery,
   type AssetCategoryBorrowHistoryRequest,
   type AssetCategoryBorrowSample,
+  AssetCategorySupplyHistoryQuery,
+  type AssetCategorySupplyHistoryRequest,
+  type AssetCategorySupplySample,
   AssetPriceHistoryQuery,
   type AssetPriceHistoryRequest,
   type AssetPriceSample,
@@ -445,6 +448,92 @@ export function useAssetCategoryBorrowHistory({
 }): SuspendableResult<AssetCategoryBorrowSample[], UnexpectedError> {
   return useSuspendableQuery({
     document: AssetCategoryBorrowHistoryQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
+export type UseAssetCategorySupplyHistoryArgs = Prettify<
+  AssetCategorySupplyHistoryRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: UseAssetCategorySupplyHistoryArgs & Suspendable,
+): SuspenseResult<AssetCategorySupplySample[]>;
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: Pausable<UseAssetCategorySupplyHistoryArgs> & Suspendable,
+): PausableSuspenseResult<AssetCategorySupplySample[]>;
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * ```tsx
+ * const { data, error, loading } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: UseAssetCategorySupplyHistoryArgs,
+): ReadResult<AssetCategorySupplySample[]>;
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: Pausable<UseAssetCategorySupplyHistoryArgs>,
+): PausableReadResult<AssetCategorySupplySample[]>;
+
+export function useAssetCategorySupplyHistory({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseAssetCategorySupplyHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<AssetCategorySupplySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: AssetCategorySupplyHistoryQuery,
     variables: {
       request,
       currency,

@@ -121,6 +121,9 @@ export const exchange = cacheExchange({
     AssetCategoryBorrowSample: {
       date: transformToDate,
     },
+    AssetCategorySupplySample: {
+      date: transformToDate,
+    },
     AssetSupplySample: {
       date: transformToDate,
     },
@@ -310,6 +313,7 @@ export const exchange = cacheExchange({
     Asset: () => null,
     AssetBorrowSample: () => null,
     AssetCategoryBorrowSample: () => null,
+    AssetCategorySupplySample: () => null,
     AssetPriceSample: () => null,
     AssetSummary: () => null,
     AssetSupplySample: () => null,
