@@ -118,6 +118,9 @@ export const exchange = cacheExchange({
     AssetBorrowSample: {
       date: transformToDate,
     },
+    AssetCategoryBorrowSample: {
+      date: transformToDate,
+    },
     AssetSupplySample: {
       date: transformToDate,
     },
@@ -306,6 +309,7 @@ export const exchange = cacheExchange({
     ApySample: () => null,
     Asset: () => null,
     AssetBorrowSample: () => null,
+    AssetCategoryBorrowSample: () => null,
     AssetPriceSample: () => null,
     AssetSummary: () => null,
     AssetSupplySample: () => null,

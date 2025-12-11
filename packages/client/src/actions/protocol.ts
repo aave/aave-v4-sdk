@@ -4,6 +4,9 @@ import {
   AssetBorrowHistoryQuery,
   type AssetBorrowHistoryRequest,
   type AssetBorrowSample,
+  AssetCategoryBorrowHistoryQuery,
+  type AssetCategoryBorrowHistoryRequest,
+  type AssetCategoryBorrowSample,
   AssetPriceHistoryQuery,
   type AssetPriceHistoryRequest,
   type AssetPriceSample,
@@ -149,6 +152,29 @@ export function assetBorrowHistory(
         options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
     },
   );
+}
+
+/**
+ * Fetches historical borrow data for a specific token category.
+ *
+ * ```ts
+ * const result = await assetCategoryBorrowHistory(client, {
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The asset category borrow history request parameters.
+ * @param options - The query options.
+ * @returns Array of asset category borrow samples over time.
+ */
+export function assetCategoryBorrowHistory(
+  client: AaveClient,
+  request: AssetCategoryBorrowHistoryRequest,
+  { currency }: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<AssetCategoryBorrowSample[], UnexpectedError> {
+  return client.query(AssetCategoryBorrowHistoryQuery, { request, currency });
 }
 
 /**

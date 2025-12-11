@@ -9,6 +9,9 @@ import {
   AssetBorrowHistoryQuery,
   type AssetBorrowHistoryRequest,
   type AssetBorrowSample,
+  AssetCategoryBorrowHistoryQuery,
+  type AssetCategoryBorrowHistoryRequest,
+  type AssetCategoryBorrowSample,
   AssetPriceHistoryQuery,
   type AssetPriceHistoryRequest,
   type AssetPriceSample,
@@ -359,6 +362,92 @@ export function useAssetBorrowHistory({
     document: AssetBorrowHistoryQuery,
     variables: {
       request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
+export type UseAssetCategoryBorrowHistoryArgs = Prettify<
+  AssetCategoryBorrowHistoryRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: UseAssetCategoryBorrowHistoryArgs & Suspendable,
+): SuspenseResult<AssetCategoryBorrowSample[]>;
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: Pausable<UseAssetCategoryBorrowHistoryArgs> & Suspendable,
+): PausableSuspenseResult<AssetCategoryBorrowSample[]>;
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * ```tsx
+ * const { data, error, loading } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: UseAssetCategoryBorrowHistoryArgs,
+): ReadResult<AssetCategoryBorrowSample[]>;
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: Pausable<UseAssetCategoryBorrowHistoryArgs>,
+): PausableReadResult<AssetCategoryBorrowSample[]>;
+
+export function useAssetCategoryBorrowHistory({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseAssetCategoryBorrowHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<AssetCategoryBorrowSample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: AssetCategoryBorrowHistoryQuery,
+    variables: {
+      request,
+      currency,
     },
     suspense,
     pause,
