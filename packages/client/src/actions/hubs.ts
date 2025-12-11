@@ -6,6 +6,9 @@ import {
   type HubAssetsRequest,
   HubQuery,
   type HubRequest,
+  HubSummaryHistoryQuery,
+  type HubSummaryHistoryRequest,
+  type HubSummarySample,
   HubsQuery,
   type HubsRequest,
 } from '@aave/graphql';
@@ -105,4 +108,26 @@ export function hubAssets(
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubAsset[], UnexpectedError> {
   return client.query(HubAssetsQuery, { request, currency, timeWindow });
+}
+
+/**
+ * Fetches historical summary data for a specific hub.
+ *
+ * ```ts
+ * const result = await hubSummaryHistory(client, {
+ *   query: { hubId: hubId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub summary history request parameters.
+ * @returns Array of hub summary samples over time.
+ */
+export function hubSummaryHistory(
+  client: AaveClient,
+  request: HubSummaryHistoryRequest,
+): ResultAsync<HubSummarySample[], UnexpectedError> {
+  return client.query(HubSummaryHistoryQuery, { request });
 }

@@ -1,4 +1,9 @@
-import { HubAssetFragment } from './fragments';
+import type { FragmentOf } from 'gql.tada';
+import {
+  ExchangeAmountFragment,
+  HubAssetFragment,
+  PercentNumberFragment,
+} from './fragments';
 import { HubFragment } from './fragments/hubs';
 import { graphql, type RequestOf } from './graphql';
 
@@ -51,4 +56,42 @@ export type HubAssetsRequestQuery = ReturnType<
 
 export type HubsRequestQuery = ReturnType<
   typeof graphql.scalar<'HubsRequestQuery'>
+>;
+
+export const HubSummarySampleFragment = graphql(
+  `fragment HubSummarySample on HubSummarySample {
+      __typename
+      date
+      deposits {
+        ...ExchangeAmount
+      }
+      borrows {
+        ...ExchangeAmount
+      }
+      availableLiquidity {
+        ...ExchangeAmount
+      }
+      utilizationRate {
+        ...PercentNumber
+      }
+    }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type HubSummarySample = FragmentOf<typeof HubSummarySampleFragment>;
+
+/**
+ * @internal
+ */
+export const HubSummaryHistoryQuery = graphql(
+  `query HubSummaryHistory($request: HubSummaryHistoryRequest!) {
+      value: hubSummaryHistory(request: $request) {
+        ...HubSummarySample
+      }
+    }`,
+  [HubSummarySampleFragment],
+);
+export type HubSummaryHistoryRequest = RequestOf<typeof HubSummaryHistoryQuery>;
+
+export type HubSummaryHistoryRequestQuery = ReturnType<
+  typeof graphql.scalar<'HubSummaryHistoryRequestQuery'>
 >;

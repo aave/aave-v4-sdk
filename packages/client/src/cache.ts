@@ -127,6 +127,9 @@ export const exchange = cacheExchange({
     AssetSupplySample: {
       date: transformToDate,
     },
+    HubSummarySample: {
+      date: transformToDate,
+    },
     ProtocolHistorySample: {
       date: transformToDate,
     },
@@ -335,6 +338,7 @@ export const exchange = cacheExchange({
     HubAssetSummary: () => null,
     HubAssetUserState: () => null,
     HubSummary: () => null,
+    HubSummarySample: () => null,
     InsufficientBalanceError: () => null,
     NativeAmount: () => null,
     PercentNumber: () => null,

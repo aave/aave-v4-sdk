@@ -12,6 +12,9 @@ import {
   type HubAssetsRequest,
   HubQuery,
   type HubRequest,
+  HubSummaryHistoryQuery,
+  type HubSummaryHistoryRequest,
+  type HubSummarySample,
   HubsQuery,
   type HubsRequest,
 } from '@aave/graphql';
@@ -278,6 +281,90 @@ export function useHubAssets({
     },
     suspense,
     pause,
+  });
+}
+
+export type UseHubSummaryHistoryArgs = HubSummaryHistoryRequest;
+
+/**
+ * Fetch historical summary data for a specific hub.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubSummaryHistory({
+ *   query: { hubId: hubId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useHubSummaryHistory(
+  args: UseHubSummaryHistoryArgs & Suspendable,
+): SuspenseResult<HubSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific hub.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useHubSummaryHistory({
+ *   query: { hubId: hubId('SGVsbG8h') },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubSummaryHistory(
+  args: Pausable<UseHubSummaryHistoryArgs> & Suspendable,
+): PausableSuspenseResult<HubSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific hub.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubSummaryHistory({
+ *   query: { hubId: hubId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useHubSummaryHistory(
+  args: UseHubSummaryHistoryArgs,
+): ReadResult<HubSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific hub.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useHubSummaryHistory({
+ *   query: { hubId: hubId('SGVsbG8h') },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubSummaryHistory(
+  args: Pausable<UseHubSummaryHistoryArgs>,
+): PausableReadResult<HubSummarySample[]>;
+
+export function useHubSummaryHistory({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseHubSummaryHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<HubSummarySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: HubSummaryHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
   });
 }
 
