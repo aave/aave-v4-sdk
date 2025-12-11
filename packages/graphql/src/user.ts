@@ -2,6 +2,7 @@ import {
   UserBalanceFragment,
   UserBorrowItemFragment,
   UserPositionFragment,
+  UserRiskPremiumBreakdownItemFragment,
   UserSummaryFragment,
   UserSummaryHistoryItemFragment,
   UserSupplyItemFragment,
@@ -150,4 +151,23 @@ export type UserSuppliesRequestQuery = ReturnType<
 >;
 export type UserSuppliesRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserSuppliesRequestOrderBy'>
+>;
+
+/**
+ * @internal
+ */
+export const UserRiskPremiumBreakdownQuery = graphql(
+  `query UserRiskPremiumBreakdown($request: UserRiskPremiumBreakdownRequest!) {
+      value: userRiskPremiumBreakdown(request: $request) {
+        ...UserRiskPremiumBreakdownItem
+      }
+    }`,
+  [UserRiskPremiumBreakdownItemFragment],
+);
+export type UserRiskPremiumBreakdownRequest = RequestOf<
+  typeof UserRiskPremiumBreakdownQuery
+>;
+
+export type UserRiskPremiumBreakdownRequestQuery = ReturnType<
+  typeof graphql.scalar<'UserRiskPremiumBreakdownRequestQuery'>
 >;

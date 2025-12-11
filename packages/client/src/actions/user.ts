@@ -11,6 +11,9 @@ import {
   type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
+  type UserRiskPremiumBreakdownItem,
+  UserRiskPremiumBreakdownQuery,
+  type UserRiskPremiumBreakdownRequest,
   type UserSummary,
   type UserSummaryHistoryItem,
   UserSummaryHistoryQuery,
@@ -235,4 +238,27 @@ export function userSummaryHistory(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
   return client.query(UserSummaryHistoryQuery, { request, ...options });
+}
+
+/**
+ * Fetches the risk premium breakdown for a user position or spoke.
+ *
+ * ```ts
+ * const result = await userRiskPremiumBreakdown(client, {
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user risk premium breakdown request parameters.
+ * @returns Array of risk premium breakdown items.
+ */
+export function userRiskPremiumBreakdown(
+  client: AaveClient,
+  request: UserRiskPremiumBreakdownRequest,
+): ResultAsync<UserRiskPremiumBreakdownItem[], UnexpectedError> {
+  return client.query(UserRiskPremiumBreakdownQuery, { request });
 }

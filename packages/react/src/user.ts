@@ -23,6 +23,9 @@ import {
   type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
+  type UserRiskPremiumBreakdownItem,
+  UserRiskPremiumBreakdownQuery,
+  type UserRiskPremiumBreakdownRequest,
   type UserSummary,
   type UserSummaryHistoryItem,
   UserSummaryHistoryQuery,
@@ -774,6 +777,98 @@ export function useUserBalances({
     },
     suspense,
     pause,
+  });
+}
+
+export type UseUserRiskPremiumBreakdownArgs = UserRiskPremiumBreakdownRequest;
+
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: UseUserRiskPremiumBreakdownArgs & Suspendable,
+): SuspenseResult<UserRiskPremiumBreakdownItem[]>;
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: Pausable<UseUserRiskPremiumBreakdownArgs> & Suspendable,
+): PausableSuspenseResult<UserRiskPremiumBreakdownItem[]>;
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: UseUserRiskPremiumBreakdownArgs,
+): ReadResult<UserRiskPremiumBreakdownItem[]>;
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: Pausable<UseUserRiskPremiumBreakdownArgs>,
+): PausableReadResult<UserRiskPremiumBreakdownItem[]>;
+
+export function useUserRiskPremiumBreakdown({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseUserRiskPremiumBreakdownArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<UserRiskPremiumBreakdownItem[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: UserRiskPremiumBreakdownQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
   });
 }
 
