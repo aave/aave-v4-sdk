@@ -6,6 +6,8 @@ import {
   evmAddress,
   type HubId,
   hubId,
+  type SpokeId,
+  spokeId,
 } from '@aave/client';
 import { Command, Flags } from '@oclif/core';
 import TtyTable from 'tty-table';
@@ -24,6 +26,14 @@ export const hub = Flags.custom<HubId>({
   description: 'The hub ID (e.g. SGVsbG8h…)',
   helpValue: '<hub-id>',
   parse: async (input) => hubId(input),
+});
+
+export const spoke = Flags.custom<SpokeId>({
+  char: 's',
+  name: 'spoke',
+  description: 'The spoke ID (e.g. SGVsbG8h…)',
+  helpValue: '<spoke-id>',
+  parse: async (input) => spokeId(input),
 });
 
 export const address = Flags.custom<EvmAddress>({
