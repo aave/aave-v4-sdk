@@ -6,6 +6,7 @@ import {
   Erc20AmountFragment,
   type Erc20ApprovalRequired,
   Erc20ApprovalRequiredFragment,
+  Erc20TokenFragment,
   ExchangeAmountValueVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
@@ -179,6 +180,52 @@ export type UpdateUserPositionConditionsRequest = RequestOf<
   typeof UpdateUserPositionConditionsQuery
 >;
 
+export const ChangedDynamicConfigUserPositionConditionsFragment = graphql(
+  `fragment ChangedDynamicConfigUserPositionConditions on ChangedDynamicConfigUserPositionConditions {
+    __typename
+    ... on DynamicConfigUserPositionCollateralFactorVariation {
+      reserveId
+      token {
+        ...Erc20Token
+      }
+      current {
+        ...PercentNumber
+      }
+      after {
+        ...PercentNumber
+      }
+    }
+    ... on DynamicConfigUserPositionLiquidationFeeVariation {
+      reserveId
+      token {
+        ...Erc20Token
+      }
+      current {
+        ...PercentNumber
+      }
+      after {
+        ...PercentNumber
+      }
+    }
+    ... on DynamicConfigUserPositionMaxLiquidationBonusVariation {
+      reserveId
+      token {
+        ...Erc20Token
+      }
+      current {
+        ...PercentNumber
+      }
+      after {
+        ...PercentNumber
+      }
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type ChangedDynamicConfigUserPositionConditions = FragmentOf<
+  typeof ChangedDynamicConfigUserPositionConditionsFragment
+>;
+
 export const PreviewUserPositionFragment = graphql(
   `fragment PreviewUserPosition on PreviewUserPosition {
     __typename
@@ -198,11 +245,21 @@ export const PreviewUserPositionFragment = graphql(
     netBalance(currency: $currency) {
       ...ExchangeAmountValueVariation
     }
+    projectedEarnings(period: ANNUAL) {
+      ...ExchangeAmountValueVariation
+    }
+    borrowingPower {
+      ...ExchangeAmountValueVariation
+    }
+    changedDynamicConfigConditions {
+      ...ChangedDynamicConfigUserPositionConditions
+    }
   }`,
   [
     HealthFactorResultFragment,
     PercentNumberVariationFragment,
     ExchangeAmountValueVariationFragment,
+    ChangedDynamicConfigUserPositionConditionsFragment,
   ],
 );
 export type PreviewUserPosition = FragmentOf<
