@@ -7,7 +7,7 @@ import {
   type Erc20ApprovalRequired,
   Erc20ApprovalRequiredFragment,
   Erc20TokenFragment,
-  ExchangeAmountValueVariationFragment,
+  ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
   type InsufficientBalanceError,
@@ -180,50 +180,87 @@ export type UpdateUserPositionConditionsRequest = RequestOf<
   typeof UpdateUserPositionConditionsQuery
 >;
 
-export const ChangedDynamicConfigUserPositionConditionsFragment = graphql(
-  `fragment ChangedDynamicConfigUserPositionConditions on ChangedDynamicConfigUserPositionConditions {
+export const CollateralFactorVariationFragment = graphql(
+  `fragment CollateralFactorVariation on CollateralFactorVariation {
     __typename
-    ... on DynamicConfigUserPositionCollateralFactorVariation {
-      reserveId
-      token {
-        ...Erc20Token
-      }
-      current {
-        ...PercentNumber
-      }
-      after {
-        ...PercentNumber
-      }
+    reserveId
+    token {
+      ...Erc20Token
     }
-    ... on DynamicConfigUserPositionLiquidationFeeVariation {
-      reserveId
-      token {
-        ...Erc20Token
-      }
-      current {
-        ...PercentNumber
-      }
-      after {
-        ...PercentNumber
-      }
+    current {
+      ...PercentNumber
     }
-    ... on DynamicConfigUserPositionMaxLiquidationBonusVariation {
-      reserveId
-      token {
-        ...Erc20Token
-      }
-      current {
-        ...PercentNumber
-      }
-      after {
-        ...PercentNumber
-      }
+    after {
+      ...PercentNumber
     }
   }`,
   [Erc20TokenFragment, PercentNumberFragment],
 );
-export type ChangedDynamicConfigUserPositionConditions = FragmentOf<
-  typeof ChangedDynamicConfigUserPositionConditionsFragment
+export type CollateralFactorVariation = FragmentOf<
+  typeof CollateralFactorVariationFragment
+>;
+
+export const LiquidationFeeVariationFragment = graphql(
+  `fragment LiquidationFeeVariation on LiquidationFeeVariation {
+    __typename
+    reserveId
+    token {
+      ...Erc20Token
+    }
+    current {
+      ...PercentNumber
+    }
+    after {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type LiquidationFeeVariation = FragmentOf<
+  typeof LiquidationFeeVariationFragment
+>;
+
+export const MaxLiquidationBonusVariationFragment = graphql(
+  `fragment MaxLiquidationBonusVariation on MaxLiquidationBonusVariation {
+    __typename
+    reserveId
+    token {
+      ...Erc20Token
+    }
+    current {
+      ...PercentNumber
+    }
+    after {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type MaxLiquidationBonusVariation = FragmentOf<
+  typeof MaxLiquidationBonusVariationFragment
+>;
+
+export const UserPositionConditionVariationFragment = graphql(
+  `fragment UserPositionConditionVariation on UserPositionConditionVariation {
+    __typename
+    ... on CollateralFactorVariation {
+      ...CollateralFactorVariation
+    }
+    ... on LiquidationFeeVariation {
+      ...LiquidationFeeVariation
+    }
+    ... on MaxLiquidationBonusVariation {
+      ...MaxLiquidationBonusVariation
+    }
+  }`,
+  [
+    CollateralFactorVariationFragment,
+    LiquidationFeeVariationFragment,
+    MaxLiquidationBonusVariationFragment,
+  ],
+);
+export type UserPositionConditionVariation = FragmentOf<
+  typeof UserPositionConditionVariationFragment
 >;
 
 export const PreviewUserPositionFragment = graphql(
@@ -240,26 +277,26 @@ export const PreviewUserPositionFragment = graphql(
       ...PercentNumberVariation
     }
     netCollateral(currency: $currency) {
-      ...ExchangeAmountValueVariation
+      ...ExchangeAmountVariation
     }
     netBalance(currency: $currency) {
-      ...ExchangeAmountValueVariation
+      ...ExchangeAmountVariation
     }
     projectedEarnings(period: ANNUAL) {
-      ...ExchangeAmountValueVariation
+      ...ExchangeAmountVariation
     }
     borrowingPower {
-      ...ExchangeAmountValueVariation
+      ...ExchangeAmountVariation
     }
-    changedDynamicConfigConditions {
-      ...ChangedDynamicConfigUserPositionConditions
+    otherConditions {
+      ...UserPositionConditionVariation
     }
   }`,
   [
     HealthFactorResultFragment,
     PercentNumberVariationFragment,
-    ExchangeAmountValueVariationFragment,
-    ChangedDynamicConfigUserPositionConditionsFragment,
+    ExchangeAmountVariationFragment,
+    UserPositionConditionVariationFragment,
   ],
 );
 export type PreviewUserPosition = FragmentOf<

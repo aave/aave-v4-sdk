@@ -916,22 +916,58 @@
         "interfaces": []
       },
       {
-        "kind": "UNION",
-        "name": "ChangedDynamicConfigUserPositionConditions",
-        "possibleTypes": [
+        "kind": "OBJECT",
+        "name": "CollateralFactorVariation",
+        "fields": [
           {
-            "kind": "OBJECT",
-            "name": "DynamicConfigUserPositionCollateralFactorVariation"
+            "name": "reserveId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           },
           {
-            "kind": "OBJECT",
-            "name": "DynamicConfigUserPositionLiquidationFeeVariation"
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
           },
           {
-            "kind": "OBJECT",
-            "name": "DynamicConfigUserPositionMaxLiquidationBonusVariation"
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
           }
-        ]
+        ],
+        "interfaces": []
       },
       {
         "kind": "OBJECT",
@@ -1059,168 +1095,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "DynamicConfigUserPositionCollateralFactorVariation",
-        "fields": [
-          {
-            "name": "reserveId",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "token",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Token",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "current",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "after",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "DynamicConfigUserPositionLiquidationFeeVariation",
-        "fields": [
-          {
-            "name": "reserveId",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "token",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Token",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "current",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "after",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "DynamicConfigUserPositionMaxLiquidationBonusVariation",
-        "fields": [
-          {
-            "name": "reserveId",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "token",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Token",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "current",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "after",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
               }
             },
             "args": []
@@ -1510,7 +1384,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "ExchangeAmountValueVariation",
+        "name": "ExchangeAmountVariation",
         "fields": [
           {
             "name": "current",
@@ -2376,6 +2250,114 @@
       },
       {
         "kind": "OBJECT",
+        "name": "LiquidationFeeVariation",
+        "fields": [
+          {
+            "name": "reserveId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MaxLiquidationBonusVariation",
+        "fields": [
+          {
+            "name": "reserveId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "Mutation",
         "fields": [
           {
@@ -3094,7 +3076,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountValueVariation",
+                "name": "ExchangeAmountVariation",
                 "ofType": null
               }
             },
@@ -3117,7 +3099,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountValueVariation",
+                "name": "ExchangeAmountVariation",
                 "ofType": null
               }
             },
@@ -3140,7 +3122,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountValueVariation",
+                "name": "ExchangeAmountVariation",
                 "ofType": null
               }
             },
@@ -3163,14 +3145,14 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountValueVariation",
+                "name": "ExchangeAmountVariation",
                 "ofType": null
               }
             },
             "args": []
           },
           {
-            "name": "changedDynamicConfigConditions",
+            "name": "otherConditions",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3179,7 +3161,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "UNION",
-                    "name": "ChangedDynamicConfigUserPositionConditions",
+                    "name": "UserPositionConditionVariation",
                     "ofType": null
                   }
                 }
@@ -7144,6 +7126,24 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "UserPositionConditionVariation",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "CollateralFactorVariation"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "LiquidationFeeVariation"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "MaxLiquidationBonusVariation"
+          }
+        ]
       },
       {
         "kind": "OBJECT",

@@ -241,6 +241,11 @@ input ChainRequest {
   chainId: ChainId!
 }
 
+input ChainTokenCategories {
+  chain: ChainId!
+  categories: [TokenCategory!]!
+}
+
 input ChainTokenInput {
   """The chain id"""
   chainId: ChainId!
@@ -264,7 +269,12 @@ input ChainsRequestQuery @oneOf {
   filter: ChainsFilter
 }
 
-union ChangedDynamicConfigUserPositionConditions = DynamicConfigUserPositionCollateralFactorVariation | DynamicConfigUserPositionLiquidationFeeVariation | DynamicConfigUserPositionMaxLiquidationBonusVariation
+type CollateralFactorVariation {
+  reserveId: ReserveId!
+  token: Erc20Token!
+  current: PercentNumber!
+  after: PercentNumber!
+}
 
 enum CollateralMetric {
   HIGHEST
@@ -307,27 +317,6 @@ type DomainData {
 }
 
 scalar DynamicConfigKey
-
-type DynamicConfigUserPositionCollateralFactorVariation {
-  reserveId: ReserveId!
-  token: Erc20Token!
-  current: PercentNumber!
-  after: PercentNumber!
-}
-
-type DynamicConfigUserPositionLiquidationFeeVariation {
-  reserveId: ReserveId!
-  token: Erc20Token!
-  current: PercentNumber!
-  after: PercentNumber!
-}
-
-type DynamicConfigUserPositionMaxLiquidationBonusVariation {
-  reserveId: ReserveId!
-  token: Erc20Token!
-  current: PercentNumber!
-  after: PercentNumber!
-}
 
 input ERC20PermitSignature {
   """The signature for the erc721"""
@@ -410,7 +399,7 @@ type ExchangeAmount {
   decimals: Int!
 }
 
-type ExchangeAmountValueVariation {
+type ExchangeAmountVariation {
   current: ExchangeAmount!
   after: ExchangeAmount!
 }
@@ -752,6 +741,20 @@ type LiquidatedActivity {
   chain: Chain!
 }
 
+type LiquidationFeeVariation {
+  reserveId: ReserveId!
+  token: Erc20Token!
+  current: PercentNumber!
+  after: PercentNumber!
+}
+
+type MaxLiquidationBonusVariation {
+  reserveId: ReserveId!
+  token: Erc20Token!
+  current: PercentNumber!
+  after: PercentNumber!
+}
+
 type Mutation {
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
@@ -947,11 +950,11 @@ type PreviewUserPosition {
 
   """The net apy for one user position on a current spoke"""
   netApy: PercentNumberVariation!
-  netCollateral(currency: Currency! = USD): ExchangeAmountValueVariation!
-  netBalance(currency: Currency! = USD): ExchangeAmountValueVariation!
-  projectedEarnings(period: EarningPeriod! = ANNUAL): ExchangeAmountValueVariation!
-  borrowingPower: ExchangeAmountValueVariation!
-  changedDynamicConfigConditions: [ChangedDynamicConfigUserPositionConditions!]!
+  netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
+  netBalance(currency: Currency! = USD): ExchangeAmountVariation!
+  projectedEarnings(period: EarningPeriod! = ANNUAL): ExchangeAmountVariation!
+  borrowingPower: ExchangeAmountVariation!
+  otherConditions: [UserPositionConditionVariation!]!
 }
 
 input ProtocolHistoryRequest {
@@ -1287,7 +1290,7 @@ input ReservesRequestQuery @oneOf {
   userPositionId: UserPositionId
 
   """Get all the reserves based on the token categories"""
-  categories: [TokenCategory!]
+  chainTokenCategories: [ChainTokenCategories!]
 }
 
 input SetSpokeUserPositionManagerRequest {
@@ -1969,6 +1972,8 @@ type UserPosition {
   spoke: Spoke!
   averageCollateralFactor: PercentNumber!
 }
+
+union UserPositionConditionVariation = CollateralFactorVariation | LiquidationFeeVariation | MaxLiquidationBonusVariation
 
 scalar UserPositionId
 

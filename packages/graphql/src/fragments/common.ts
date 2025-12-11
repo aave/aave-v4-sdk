@@ -246,8 +246,8 @@ export type PercentNumberVariation = FragmentOf<
   typeof PercentNumberVariationFragment
 >;
 
-export const ExchangeAmountValueVariationFragment = graphql(
-  `fragment ExchangeAmountValueVariation on ExchangeAmountValueVariation {
+export const ExchangeAmountVariationFragment = graphql(
+  `fragment ExchangeAmountVariation on ExchangeAmountVariation {
     __typename
     current {
       ...ExchangeAmount
@@ -258,8 +258,8 @@ export const ExchangeAmountValueVariationFragment = graphql(
   }`,
   [ExchangeAmountFragment],
 );
-export type ExchangeAmountValueVariation = FragmentOf<
-  typeof ExchangeAmountValueVariationFragment
+export type ExchangeAmountVariation = FragmentOf<
+  typeof ExchangeAmountVariationFragment
 >;
 
 export const HealthFactorWithChangeFragment = graphql(
