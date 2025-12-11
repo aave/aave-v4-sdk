@@ -11,6 +11,12 @@ import { reserves } from '@aave/client/actions';
 
 import * as common from '../../common.js';
 
+
+
+function formatApy(apy: { normalized: unknown }, decimals = 4): string {
+  return `${parseFloat(String(apy.normalized)).toFixed(decimals)}%`;
+}
+
 export default class ListReserves extends common.V4Command {
   static override description = 'List Aave v4 reserves';
 
@@ -66,12 +72,12 @@ export default class ListReserves extends common.V4Command {
     { value: 'Chain' },
     { value: 'Supply APY' },
     { value: 'Borrow APY' },
+    { value: 'Available Liquidity' },
+    { value: 'Total Borrowed' },
+    { value: 'Can Supply' },
+    { value: 'Can Borrow' },
+    { value: 'Collateral' },
     { value: 'ID' },
-    // TODO: You can add more columns from Reserve type:
-    // - Available Liquidity: item.summary.supplied.amount (or formatted)
-    // - Borrowed: item.summary.borrowed.amount
-    // - Can Borrow: item.canBorrow
-    // - Can Supply: item.canSupply
   ];
 
   private getReservesRequest(): ResultAsync<
@@ -127,15 +133,20 @@ export default class ListReserves extends common.V4Command {
       this.error(result.error);
     }
 
-    // Format the output - map each reserve to an array of column values
+    
     this.display(
       result.value.map((item) => [
         item.asset.underlying.info.name,
         item.asset.underlying.info.symbol,
         item.spoke.name,
         `${item.chain.name} (${item.chain.chainId})`,
-        `${item.summary.supplyApy.normalized}%`,
-        `${item.summary.borrowApy.normalized}%`,
+        formatApy(item.summary.supplyApy),
+        formatApy(item.summary.borrowApy),
+        `$${item.summary.supplied.fiatAmount.value}`,
+        `$${item.summary.borrowed.fiatAmount.value}`,
+        item.canSupply ? 'Yes' : 'No',
+        item.canBorrow ? 'Yes' : 'No',
+        item.canUseAsCollateral ? 'Yes' : 'No',
         item.id,
       ]),
     );
