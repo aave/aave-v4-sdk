@@ -9,7 +9,6 @@ import {
   type ExchangeAmount,
   type NativeAmount,
   type PreviewAction,
-  type ReserveId,
 } from '@aave/graphql';
 import {
   bigDecimal,
