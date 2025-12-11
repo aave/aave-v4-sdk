@@ -1,12 +1,11 @@
 import {
   InvariantError,
+  invariant,
   ok,
   ResultAsync,
   type Reserve,
   type ReservesRequest,
   type UnexpectedError,
-  spokeId,
-  type SpokeId,
 } from '@aave/client';
 import { reserves } from '@aave/client/actions';
 
@@ -16,11 +15,48 @@ export default class ListReserves extends common.V4Command {
   static override description = 'List Aave v4 reserves';
 
   static override flags = {
-    spoke_id: common.spoke(),
-    // TODO: Add more flexible query options later:
-    // hub_id: common.hub(),
-    // chain_id: common.chain(),
-    // hub_address: common.address(),
+    spoke_id: common.spoke({
+      required: false,
+      relationships: [
+        {
+          type: 'none',
+          flags: ['hub_id', 'chain_id', 'hub_address'],
+        },
+      ],
+    }),
+    hub_id: common.hub({
+      required: false,
+      relationships: [
+        {
+          type: 'none',
+          flags: ['spoke_id', 'chain_id', 'hub_address'],
+        },
+      ],
+    }),
+    chain_id: common.chain({
+      required: false,
+      relationships: [
+        {
+          type: 'none',
+          flags: ['spoke_id', 'hub_id'],
+        },
+      ],
+    }),
+    hub_address: common.address({
+      name: 'hub_address',
+      description: 'The hub address (e.g. 0x123…)',
+      relationships: [
+        {
+          type: 'none',
+          flags: ['spoke_id', 'hub_id'],
+        },
+        {
+          type: 'all',
+          flags: ['chain_id'],
+        },
+      ],
+      dependsOn: ['chain_id'],
+    }),
   };
 
   protected override headers = [
@@ -46,33 +82,39 @@ export default class ListReserves extends common.V4Command {
       this.parse(ListReserves),
       (error) => new InvariantError(String(error)),
     ).andThen(({ flags }) => {
-      if (!flags.spoke_id) {
-        return ResultAsync.fromSafePromise(
-          Promise.reject(new InvariantError('--spoke_id is required')),
-        );
+      if (flags.spoke_id) {
+        return ok({
+          query: { spokeId: flags.spoke_id },
+        });
       }
-      
-      return ok({
-        query: { spokeId: flags.spoke_id },
-      });
 
-      // TODO: Add more flexible query options later:
-      // if (flags.hub_id) {
-      //   return ok({ query: { hubId: flags.hub_id } });
-      // }
-      // if (flags.chain_id) {
-      //   return ok({ query: { chainIds: [flags.chain_id] } });
-      // }
-      // if (flags.hub_address && flags.chain_id) {
-      //   return ok({
-      //     query: {
-      //       hub: {
-      //         address: flags.hub_address,
-      //         chainId: flags.chain_id,
-      //       },
-      //     },
-      //   });
-      // }
+      if (flags.hub_id) {
+        return ok({
+          query: { hubId: flags.hub_id },
+        });
+      }
+
+      if (flags.chain_id && flags.hub_address) {
+        return ok({
+          query: {
+            hub: {
+              address: flags.hub_address,
+              chainId: flags.chain_id,
+            },
+          },
+        });
+      }
+
+      if (flags.chain_id) {
+        return ok({
+          query: { chainIds: [flags.chain_id] },
+        });
+      }
+
+      invariant(
+        false,
+        'You must provide --spoke_id, --hub_id, --chain_id, or (--hub_address and --chain_id)',
+      );
     });
   }
 
