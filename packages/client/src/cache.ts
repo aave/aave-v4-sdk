@@ -112,7 +112,7 @@ export const exchange = cacheExchange({
     TransactionRequest: {
       value: transformToBigInt,
     },
-    APYSample: {
+    ApySample: {
       date: transformToDate,
     },
     AssetBorrowSample: {
@@ -303,7 +303,7 @@ export const exchange = cacheExchange({
     SwapTransactionRequest: () => null,
 
     // Value objects and result types
-    APYSample: () => null,
+    ApySample: () => null,
     Asset: () => null,
     AssetBorrowSample: () => null,
     AssetPriceSample: () => null,

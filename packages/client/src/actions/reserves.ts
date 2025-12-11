@@ -1,15 +1,15 @@
 import type { UnexpectedError } from '@aave/core';
 import {
-  type APYSample,
-  type BorrowAPYHistoryRequest,
+  type ApySample,
   BorrowApyHistoryQuery,
+  type BorrowApyHistoryRequest,
   type Reserve,
   ReserveQuery,
   type ReserveRequest,
   ReservesQuery,
   type ReservesRequest,
-  type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
+  type SupplyApyHistoryRequest,
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
@@ -95,8 +95,8 @@ export function reserves(
  */
 export function borrowApyHistory(
   client: AaveClient,
-  request: BorrowAPYHistoryRequest,
-): ResultAsync<APYSample[], UnexpectedError> {
+  request: BorrowApyHistoryRequest,
+): ResultAsync<ApySample[], UnexpectedError> {
   return client.query(BorrowApyHistoryQuery, { request });
 }
 
@@ -116,7 +116,7 @@ export function borrowApyHistory(
  */
 export function supplyApyHistory(
   client: AaveClient,
-  request: SupplyAPYHistoryRequest,
-): ResultAsync<APYSample[], UnexpectedError> {
+  request: SupplyApyHistoryRequest,
+): ResultAsync<ApySample[], UnexpectedError> {
   return client.query(SupplyApyHistoryQuery, { request });
 }

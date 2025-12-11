@@ -104,6 +104,9 @@ export type UserBalancesBySpoke = ReturnType<
 export type UserBalancesByUserPosition = ReturnType<
   typeof graphql.scalar<'UserBalancesByUserPosition'>
 >;
+export type UserBalancesByTokens = ReturnType<
+  typeof graphql.scalar<'UserBalancesByTokens'>
+>;
 
 /**
  * @internal

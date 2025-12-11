@@ -11,36 +11,6 @@
     "subscriptionType": null,
     "types": [
       {
-        "kind": "OBJECT",
-        "name": "APYSample",
-        "fields": [
-          {
-            "name": "date",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "avgRate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
         "kind": "UNION",
         "name": "ActivityItem",
         "possibleTypes": [
@@ -77,6 +47,36 @@
             "name": "UpdatedRiskPremiumActivity"
           }
         ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ApySample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "avgRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "OBJECT",
@@ -213,7 +213,7 @@
             "args": []
           },
           {
-            "name": "highestAPY",
+            "name": "highestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -225,7 +225,7 @@
             "args": []
           },
           {
-            "name": "lowestAPY",
+            "name": "lowestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -255,7 +255,7 @@
             "args": []
           },
           {
-            "name": "highestAPY",
+            "name": "highestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -267,7 +267,7 @@
             "args": []
           },
           {
-            "name": "lowestAPY",
+            "name": "lowestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -320,7 +320,7 @@
             "args": []
           },
           {
-            "name": "highestAPY",
+            "name": "highestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -332,7 +332,7 @@
             "args": []
           },
           {
-            "name": "lowestAPY",
+            "name": "lowestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -551,7 +551,7 @@
             "args": []
           },
           {
-            "name": "highestAPY",
+            "name": "highestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -563,7 +563,7 @@
             "args": []
           },
           {
-            "name": "lowestAPY",
+            "name": "lowestApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3990,7 +3990,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "APYSample",
+                    "name": "ApySample",
                     "ofType": null
                   }
                 }
@@ -4019,7 +4019,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "APYSample",
+                    "name": "ApySample",
                     "ofType": null
                   }
                 }

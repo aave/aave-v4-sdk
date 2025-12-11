@@ -25,10 +25,10 @@ export const AssetSupplySampleFragment = graphql(
       amount {
         ...DecimalNumber
       }
-      highestAPY {
+      highestApy {
         ...PercentNumber
       }
-      lowestAPY {
+      lowestApy {
         ...PercentNumber
       }
     }`,
@@ -43,10 +43,10 @@ export const AssetBorrowSampleFragment = graphql(
       amount {
         ...DecimalNumber
       }
-      highestAPY {
+      highestApy {
         ...PercentNumber
       }
-      lowestAPY {
+      lowestApy {
         ...PercentNumber
       }
     }`,

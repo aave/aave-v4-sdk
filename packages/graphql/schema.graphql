@@ -1,8 +1,3 @@
-type APYSample {
-  date: DateTime!
-  avgRate: PercentNumber!
-}
-
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
@@ -50,6 +45,11 @@ enum ApyMetric {
   AVERAGE
 }
 
+type ApySample {
+  date: DateTime!
+  avgRate: PercentNumber!
+}
+
 type Asset {
   id: AssetId!
   token: Erc20Token!
@@ -75,8 +75,8 @@ input AssetBorrowHistoryRequestQuery @oneOf {
 type AssetBorrowSample {
   date: DateTime!
   amount: DecimalNumber!
-  highestAPY: PercentNumber!
-  lowestAPY: PercentNumber!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
 }
 
 input AssetCategoryBorrowHistoryRequest {
@@ -86,8 +86,8 @@ input AssetCategoryBorrowHistoryRequest {
 
 type AssetCategoryBorrowSample {
   date: DateTime!
-  highestAPY: PercentNumber!
-  lowestAPY: PercentNumber!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
   borrows(currency: Currency! = USD): ExchangeAmount!
 }
 
@@ -98,8 +98,8 @@ input AssetCategorySupplyHistoryRequest {
 
 type AssetCategorySupplySample {
   date: DateTime!
-  highestAPY: PercentNumber!
-  lowestAPY: PercentNumber!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
   deposits(currency: Currency! = USD): ExchangeAmount!
 }
 
@@ -138,7 +138,7 @@ type AssetSummary {
   totalBorrowed: AssetAmountWithChange!
   totalBorrowable: AssetAmountWithChange!
 
-  """The supply APY dependent on what you pass in for the `metric`"""
+  """The supply apy dependent on what you pass in for the `metric`"""
   supplyApy(metric: ApyMetric! = AVERAGE): PercentNumber!
 
   """The borrow APY dependent on what you pass in for the `metric`"""
@@ -158,8 +158,8 @@ input AssetSupplyHistoryRequestQuery @oneOf {
 type AssetSupplySample {
   date: DateTime!
   amount: DecimalNumber!
-  highestAPY: PercentNumber!
-  lowestAPY: PercentNumber!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
 }
 
 scalar BigDecimal
@@ -167,11 +167,6 @@ scalar BigDecimal
 scalar BigInt
 
 scalar BlockchainData
-
-input BorrowAPYHistoryRequest {
-  reserve: ReserveId!
-  window: TimeWindow! = LAST_DAY
-}
 
 type BorrowActivity {
   id: ID!
@@ -182,6 +177,11 @@ type BorrowActivity {
   reserve: ReserveInfo!
   borrowed: Erc20Amount!
   chain: Chain!
+}
+
+input BorrowApyHistoryRequest {
+  reserve: ReserveId!
+  window: TimeWindow! = LAST_DAY
 }
 
 input BorrowRequest {
@@ -568,13 +568,13 @@ type HubAssetSummary {
   """The available liquidity"""
   availableLiquidity: Erc20Amount!
 
-  """The supply APY"""
+  """The supply apy"""
   supplyApy: PercentNumber!
 
-  """The borrow APY"""
+  """The borrow apy"""
   borrowApy: PercentNumber!
 
-  """The net APY"""
+  """The net apy"""
   netApy: PercentNumber!
 
   """The utilization rate"""
@@ -945,7 +945,7 @@ type PreviewUserPosition {
   healthFactor: HealthFactorResult!
   riskPremium: PercentNumberVariation!
 
-  """The net APY for one user position on a current spoke"""
+  """The net apy for one user position on a current spoke"""
   netApy: PercentNumberVariation!
   netCollateral(currency: Currency! = USD): ExchangeAmountValueVariation!
   netBalance(currency: Currency! = USD): ExchangeAmountValueVariation!
@@ -1003,8 +1003,8 @@ type Query {
   liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
   updateUserPositionConditions(request: UpdateUserPositionConditionsRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPosition!
-  borrowApyHistory(request: BorrowAPYHistoryRequest!): [APYSample!]!
-  supplyApyHistory(request: SupplyAPYHistoryRequest!): [APYSample!]!
+  borrowApyHistory(request: BorrowApyHistoryRequest!): [ApySample!]!
+  supplyApyHistory(request: SupplyApyHistoryRequest!): [ApySample!]!
   spoke(request: SpokeRequest!): Spoke
 
   """Lists all spokes"""
@@ -1410,11 +1410,6 @@ input SpokesRequestQuery @oneOf {
   chainIds: [ChainId!]
 }
 
-input SupplyAPYHistoryRequest {
-  reserve: ReserveId!
-  window: TimeWindow! = LAST_DAY
-}
-
 type SupplyActivity {
   id: ID!
   user: EvmAddress!
@@ -1424,6 +1419,11 @@ type SupplyActivity {
   reserve: ReserveInfo!
   supplied: Erc20Amount!
   chain: Chain!
+}
+
+input SupplyApyHistoryRequest {
+  reserve: ReserveId!
+  window: TimeWindow! = LAST_DAY
 }
 
 input SupplyPermitRequest {
@@ -1744,7 +1744,7 @@ type UserBalance {
   """The total exchange amount summed across all balances"""
   exchange(currency: Currency! = USD): ExchangeAmount!
 
-  """The supply APY dependent on what you pass in for the `metric`"""
+  """The supply apy dependent on what you pass in for the `metric`"""
   supplyApy(metric: ApyMetric! = HIGHEST): PercentNumber!
 
   """The borrow APY dependent on what you pass in for the `metric`"""
@@ -1800,6 +1800,16 @@ input UserBalancesBySpoke {
   byReservesType: ReservesRequestFilter! = ALL
 }
 
+input UserBalancesByTokens {
+  """The chain token input"""
+  chainTokens: [ChainTokenInput!]!
+
+  """
+  The type of reserve to use when determine the tokens to retrieve balances for
+  """
+  byReservesType: ReservesRequestFilter! = ALL
+}
+
 input UserBalancesByUserPosition {
   """The user position id"""
   userPositionId: UserPositionId!
@@ -1846,7 +1856,7 @@ input UserBalancesRequestFilter @oneOf {
   userPosition: UserBalancesByUserPosition
 
   """The balances for the chains tokens"""
-  tokens: [ChainTokenInput!]
+  tokens: UserBalancesByTokens
 }
 
 input UserBalancesRequestOrderBy @oneOf {
@@ -1883,11 +1893,6 @@ type UserBorrowItem {
 }
 
 scalar UserBorrowItemId
-
-input UserBorrowsAPYBreakdownRequestQuery @oneOf {
-  userSpoke: UserSpokeInput
-  userPositionId: UserPositionId
-}
 
 input UserBorrowsRequest {
   query: UserBorrowsRequestQuery!
@@ -2009,8 +2014,13 @@ type UserRiskPremiumBreakdownItem {
 }
 
 input UserRiskPremiumBreakdownRequest {
-  query: UserBorrowsAPYBreakdownRequestQuery!
+  query: UserRiskPremiumBreakdownRequestQuery!
   user: EvmAddress!
+}
+
+input UserRiskPremiumBreakdownRequestQuery @oneOf {
+  userSpoke: UserSpokeInput
+  userPositionId: UserPositionId
 }
 
 input UserSpokeInput {

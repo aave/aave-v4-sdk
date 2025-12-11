@@ -261,8 +261,8 @@ export type UserSummaryHistoryItem = FragmentOf<
   typeof UserSummaryHistoryItemFragment
 >;
 
-export const APYSampleFragment = graphql(
-  `fragment APYSample on APYSample {
+export const ApySampleFragment = graphql(
+  `fragment ApySample on ApySample {
     __typename
     date
     avgRate {
@@ -271,4 +271,4 @@ export const APYSampleFragment = graphql(
   }`,
   [PercentNumberFragment],
 );
-export type APYSample = FragmentOf<typeof APYSampleFragment>;
+export type ApySample = FragmentOf<typeof ApySampleFragment>;
