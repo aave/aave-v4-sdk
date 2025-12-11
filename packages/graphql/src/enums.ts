@@ -118,6 +118,7 @@ export enum Currency {
 export enum ReservesRequestFilter {
   Supply = 'SUPPLY',
   Borrow = 'BORROW',
+  Collateral = 'COLLATERAL',
   All = 'ALL',
 }
 
