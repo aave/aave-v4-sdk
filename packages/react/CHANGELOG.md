@@ -1,5 +1,19 @@
 # @aave/react
 
+## 4.0.0-next.8
+
+### Minor Changes
+
+- c3c34a1: **feat:** support for `protocolHistory` query.
+
+### Patch Changes
+
+- 0704c75: **chore:** updates APY > Apy renaming and other changes.
+- Updated dependencies [0704c75]
+- Updated dependencies [c3c34a1]
+  - @aave/graphql@1.0.0-next.7
+  - @aave/client@4.0.0-next.8
+
 ## 4.0.0-next.7
 
 ### Minor Changes

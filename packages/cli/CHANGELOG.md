@@ -1,5 +1,13 @@
 # @aave/cli
 
+## 4.1.0-next.1
+
+### Patch Changes
+
+- Updated dependencies [0704c75]
+- Updated dependencies [c3c34a1]
+  - @aave/client@4.0.0-next.8
+
 ## 4.1.0-next.0
 
 ### Minor Changes
