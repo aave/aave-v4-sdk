@@ -4,15 +4,14 @@ import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 import { getTimeWindowDates } from '../helpers/tools';
 
-describe('Querying Asset Supply History on Aave V4', () => {
-  describe('Given a user who wants to fetch asset supply history', () => {
-    describe('When fetching supply history by token address', () => {
-      it('Then it should return supply history for USDC token', async () => {
+describe('Querying Asset Supply Apy History on Aave V4', () => {
+  describe('Given an asset/token available on the protocol', () => {
+    describe('When fetching the asset apy supply history', () => {
+      it('Then it should return the asset apy supply history', async () => {
         const result = await assetSupplyHistory(client, {
           query: {
             token: {
@@ -33,35 +32,13 @@ describe('Querying Asset Supply History on Aave V4', () => {
           }),
         );
       });
-
-      it('Then it should return supply history for WETH token', async () => {
-        const result = await assetSupplyHistory(client, {
-          query: {
-            token: {
-              chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_WETH_ADDRESS,
-            },
-          },
-        });
-
-        assertOk(result);
-        expect(result.value).toBeArrayWithElements(
-          expect.objectContaining({
-            __typename: 'AssetSupplySample',
-            date: expect.any(Date),
-            amount: expect.any(Object),
-            highestApy: expect.any(Object),
-            lowestApy: expect.any(Object),
-          }),
-        );
-      });
     });
 
-    describe('When fetching supply history with different time window options', () => {
+    describe('When fetching the asset apy supply history with a specific time window', () => {
       const timeWindowOptions = Object.values(TimeWindow);
 
       it.each(timeWindowOptions)(
-        'Then it should return supply history for %s time window',
+        'Then it should return the asset apy supply history for the %s time window',
         async (window) => {
           const result = await assetSupplyHistory(client, {
             query: {

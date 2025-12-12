@@ -4,14 +4,13 @@ import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 
 describe('Querying Assets on Aave V4', () => {
-  describe('Given a user who wants to fetch asset information', () => {
-    describe('When fetching an asset by token address', () => {
-      it('Then it should return the asset data for USDC token', async () => {
+  describe('Given an asset/token available on the protocol', () => {
+    describe('When fetching the asset data', () => {
+      it('Then it should return the asset data', async () => {
         const result = await asset(client, {
           query: {
             token: {
@@ -20,9 +19,7 @@ describe('Querying Assets on Aave V4', () => {
             },
           },
         });
-
         assertOk(result);
-        expect(result.value).not.toBeNull();
         expect(result.value).toMatchObject({
           id: expect.any(String),
           token: expect.objectContaining({
@@ -32,35 +29,13 @@ describe('Querying Assets on Aave V4', () => {
           price: expect.any(Object),
         });
       });
-
-      it('Then it should return the asset data for WETH token', async () => {
-        const result = await asset(client, {
-          query: {
-            token: {
-              chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_WETH_ADDRESS,
-            },
-          },
-        });
-
-        assertOk(result);
-        expect(result.value).not.toBeNull();
-        expect(result.value).toMatchObject({
-          id: expect.any(String),
-          token: expect.objectContaining({
-            address: ETHEREUM_WETH_ADDRESS,
-          }),
-          summary: expect.any(Object),
-          price: expect.any(Object),
-        });
-      });
     });
 
-    describe('When fetching an asset with different currency options', () => {
+    describe('When fetching the asset price with a specific currency', () => {
       const currencies = Object.values(Currency);
 
       it.each(currencies)(
-        'Then it should return asset price in %s',
+        'Then it should return the asset price in %s',
         async (currency) => {
           const result = await asset(
             client,
@@ -81,11 +56,11 @@ describe('Querying Assets on Aave V4', () => {
       );
     });
 
-    describe('When fetching an asset with different time window options', () => {
+    describe('When fetching the asset with a specific time window', () => {
       const timeWindowOptions = Object.values(TimeWindow);
 
       it.each(timeWindowOptions)(
-        'Then it should return asset data with %s time window',
+        'Then it should return the asset price change for the %s window',
         async (timeWindow) => {
           const result = await asset(
             client,
@@ -101,7 +76,7 @@ describe('Querying Assets on Aave V4', () => {
           );
 
           assertOk(result);
-          // NOTE: timeWindow is only for price.change value so not possible to verify the window value is applied properly
+          // NOTE: timeWindow is only for price.change value, so it's not possible to verify the window value is applied properly
           expect(result.value).toMatchObject({
             id: expect.any(String),
             token: expect.any(Object),

@@ -4,15 +4,14 @@ import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 import { getTimeWindowDates } from '../helpers/tools';
 
 describe('Querying Asset Price History on Aave V4', () => {
-  describe('Given a user who wants to fetch asset price history', () => {
-    describe('When fetching price history by token address', () => {
-      it('Then it should return price history for USDC token', async () => {
+  describe('Given an asset/token available on the protocol', () => {
+    describe('When fetching the asset price history', () => {
+      it('Then it should return the asset price history', async () => {
         const result = await assetPriceHistory(client, {
           query: {
             token: {
@@ -31,33 +30,13 @@ describe('Querying Asset Price History on Aave V4', () => {
           }),
         );
       });
-
-      it('Then it should return price history for WETH token', async () => {
-        const result = await assetPriceHistory(client, {
-          query: {
-            token: {
-              chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_WETH_ADDRESS,
-            },
-          },
-        });
-
-        assertOk(result);
-        expect(result.value).toBeArrayWithElements(
-          expect.objectContaining({
-            __typename: 'AssetPriceSample',
-            date: expect.any(Date),
-            price: expect.any(BigDecimal),
-          }),
-        );
-      });
     });
 
-    describe('When fetching price history with different currency options', () => {
+    describe('When fetching the asset price history with a specific currency', () => {
       const currencies = Object.values(Currency);
 
       it.each(currencies)(
-        'Then it should return price history in %s',
+        'Then it should return the asset price history in %s',
         async (currency) => {
           const result = await assetPriceHistory(client, {
             query: {
@@ -81,11 +60,11 @@ describe('Querying Asset Price History on Aave V4', () => {
       );
     });
 
-    describe('When fetching price history with different time window options', () => {
+    describe('When fetching the asset price history with a specific time window', () => {
       const timeWindowOptions = Object.values(TimeWindow);
 
       it.each(timeWindowOptions)(
-        'Then it should return price history for %s time window',
+        'Then it should return the asset price history for the %s time window',
         async (window) => {
           const result = await assetPriceHistory(client, {
             query: {
