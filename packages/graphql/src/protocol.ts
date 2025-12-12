@@ -3,7 +3,8 @@ import {
   DecimalNumberFragment,
   DecimalNumberWithChangeFragment,
   Erc20TokenFragment,
-  FiatAmountWithChangeFragment,
+  ExchangeAmountFragment,
+  ExchangeAmountWithChangeFragment,
   PercentNumberFragment,
 } from './fragments';
 import { graphql, type RequestOf } from './graphql';
@@ -24,8 +25,14 @@ export const AssetSupplySampleFragment = graphql(
       amount {
         ...DecimalNumber
       }
+      highestApy {
+        ...PercentNumber
+      }
+      lowestApy {
+        ...PercentNumber
+      }
     }`,
-  [DecimalNumberFragment],
+  [DecimalNumberFragment, PercentNumberFragment],
 );
 export type AssetSupplySample = FragmentOf<typeof AssetSupplySampleFragment>;
 
@@ -36,10 +43,72 @@ export const AssetBorrowSampleFragment = graphql(
       amount {
         ...DecimalNumber
       }
+      highestApy {
+        ...PercentNumber
+      }
+      lowestApy {
+        ...PercentNumber
+      }
     }`,
-  [DecimalNumberFragment],
+  [DecimalNumberFragment, PercentNumberFragment],
 );
 export type AssetBorrowSample = FragmentOf<typeof AssetBorrowSampleFragment>;
+
+export const AssetCategoryBorrowSampleFragment = graphql(
+  `fragment AssetCategoryBorrowSample on AssetCategoryBorrowSample {
+      __typename
+      date
+      highestApy {
+        ...PercentNumber
+      }
+      lowestApy {
+        ...PercentNumber
+      }
+      borrows(currency: $currency) {
+        ...ExchangeAmount
+      }
+    }`,
+  [PercentNumberFragment, ExchangeAmountFragment],
+);
+export type AssetCategoryBorrowSample = FragmentOf<
+  typeof AssetCategoryBorrowSampleFragment
+>;
+
+export const AssetCategorySupplySampleFragment = graphql(
+  `fragment AssetCategorySupplySample on AssetCategorySupplySample {
+      __typename
+      date
+      highestApy {
+        ...PercentNumber
+      }
+      lowestApy {
+        ...PercentNumber
+      }
+      deposits(currency: $currency) {
+        ...ExchangeAmount
+      }
+    }`,
+  [PercentNumberFragment, ExchangeAmountFragment],
+);
+export type AssetCategorySupplySample = FragmentOf<
+  typeof AssetCategorySupplySampleFragment
+>;
+
+export const AssetAmountWithChangeFragment = graphql(
+  `fragment AssetAmountWithChange on AssetAmountWithChange {
+    __typename
+    amount {
+      ...DecimalNumberWithChange
+    }
+    exchange(currency: $currency) {
+      ...ExchangeAmountWithChange
+    }
+  }`,
+  [DecimalNumberWithChangeFragment, ExchangeAmountWithChangeFragment],
+);
+export type AssetAmountWithChange = FragmentOf<
+  typeof AssetAmountWithChangeFragment
+>;
 
 export const AssetSummaryFragment = graphql(
   `fragment AssetSummary on AssetSummary {
@@ -48,25 +117,19 @@ export const AssetSummaryFragment = graphql(
         ...DecimalNumberWithChange
       }
       totalSupplied {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalSuppliable {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalBorrowCap {
         ...DecimalNumberWithChange
       }
       totalBorrowed {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalBorrowable {
-        ...DecimalNumberWithChange
-      }
-      totalSuppliedFiat(currency: $currency) {
-        ...FiatAmountWithChange
-      }
-      totalBorrowedFiat(currency: $currency) {
-        ...FiatAmountWithChange
+        ...AssetAmountWithChange
       }
       averageBorrowApy: borrowApy(metric: AVERAGE) {
         ...PercentNumber
@@ -76,8 +139,8 @@ export const AssetSummaryFragment = graphql(
       }
     }`,
   [
+    AssetAmountWithChangeFragment,
     DecimalNumberWithChangeFragment,
-    FiatAmountWithChangeFragment,
     PercentNumberFragment,
   ],
 );
@@ -94,10 +157,10 @@ export const AssetFragment = graphql(
         ...AssetSummary
       }
       price(currency: $currency) {
-        ...FiatAmountWithChange
+        ...ExchangeAmountWithChange
       }
     }`,
-  [Erc20TokenFragment, AssetSummaryFragment, FiatAmountWithChangeFragment],
+  [Erc20TokenFragment, AssetSummaryFragment, ExchangeAmountWithChangeFragment],
 );
 export type Asset = FragmentOf<typeof AssetFragment>;
 
@@ -169,3 +232,66 @@ export type AssetBorrowHistoryRequest = RequestOf<
 export type AssetBorrowHistoryRequestQuery = ReturnType<
   typeof graphql.scalar<'AssetBorrowHistoryRequestQuery'>
 >;
+
+/**
+ * @internal
+ */
+export const AssetCategoryBorrowHistoryQuery = graphql(
+  `query AssetCategoryBorrowHistory($request: AssetCategoryBorrowHistoryRequest!, $currency: Currency! = USD) {
+      value: assetCategoryBorrowHistory(request: $request) {
+        ...AssetCategoryBorrowSample
+      }
+    }`,
+  [AssetCategoryBorrowSampleFragment],
+);
+export type AssetCategoryBorrowHistoryRequest = RequestOf<
+  typeof AssetCategoryBorrowHistoryQuery
+>;
+
+/**
+ * @internal
+ */
+export const AssetCategorySupplyHistoryQuery = graphql(
+  `query AssetCategorySupplyHistory($request: AssetCategorySupplyHistoryRequest!, $currency: Currency! = USD) {
+      value: assetCategorySupplyHistory(request: $request) {
+        ...AssetCategorySupplySample
+      }
+    }`,
+  [AssetCategorySupplySampleFragment],
+);
+export type AssetCategorySupplyHistoryRequest = RequestOf<
+  typeof AssetCategorySupplyHistoryQuery
+>;
+
+export const ProtocolHistorySampleFragment = graphql(
+  `fragment ProtocolHistorySample on ProtocolHistorySample {
+    __typename
+    date
+    deposits {
+      ...ExchangeAmount
+    }
+    borrows {
+      ...ExchangeAmount
+    }
+    earnings {
+      ...ExchangeAmount
+    }
+  }`,
+  [ExchangeAmountFragment],
+);
+export type ProtocolHistorySample = FragmentOf<
+  typeof ProtocolHistorySampleFragment
+>;
+
+/**
+ * @internal
+ */
+export const ProtocolHistoryQuery = graphql(
+  `query ProtocolHistory($request: ProtocolHistoryRequest!) {
+    value: protocolHistory(request: $request) {
+      ...ProtocolHistorySample
+    }
+  }`,
+  [ProtocolHistorySampleFragment],
+);
+export type ProtocolHistoryRequest = RequestOf<typeof ProtocolHistoryQuery>;

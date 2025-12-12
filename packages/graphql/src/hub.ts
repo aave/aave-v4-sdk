@@ -1,4 +1,9 @@
-import { HubAssetFragment } from './fragments';
+import type { FragmentOf } from 'gql.tada';
+import {
+  ExchangeAmountFragment,
+  HubAssetFragment,
+  PercentNumberFragment,
+} from './fragments';
 import { HubFragment } from './fragments/hubs';
 import { graphql, type RequestOf } from './graphql';
 
@@ -6,7 +11,7 @@ import { graphql, type RequestOf } from './graphql';
  * @internal
  */
 export const HubQuery = graphql(
-  `query Hub($request: HubRequest!, $currency: Currency!) {
+  `query Hub($request: HubRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: hub(request: $request) {
         ...Hub
       }
@@ -23,7 +28,7 @@ export type HubRequestQuery = ReturnType<
  * @internal
  */
 export const HubsQuery = graphql(
-  `query Hubs($request: HubsRequest!, $currency: Currency!) {
+  `query Hubs($request: HubsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: hubs(request: $request) {
         ...Hub
       }
@@ -36,7 +41,7 @@ export type HubsRequest = RequestOf<typeof HubsQuery>;
  * @internal
  */
 export const HubAssetsQuery = graphql(
-  `query HubAssets($request: HubAssetsRequest!, $currency: Currency!) {
+  `query HubAssets($request: HubAssetsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: hubAssets(request: $request) {
         ...HubAsset
       }
@@ -51,4 +56,42 @@ export type HubAssetsRequestQuery = ReturnType<
 
 export type HubsRequestQuery = ReturnType<
   typeof graphql.scalar<'HubsRequestQuery'>
+>;
+
+export const HubSummarySampleFragment = graphql(
+  `fragment HubSummarySample on HubSummarySample {
+      __typename
+      date
+      deposits {
+        ...ExchangeAmount
+      }
+      borrows {
+        ...ExchangeAmount
+      }
+      availableLiquidity {
+        ...ExchangeAmount
+      }
+      utilizationRate {
+        ...PercentNumber
+      }
+    }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type HubSummarySample = FragmentOf<typeof HubSummarySampleFragment>;
+
+/**
+ * @internal
+ */
+export const HubSummaryHistoryQuery = graphql(
+  `query HubSummaryHistory($request: HubSummaryHistoryRequest!) {
+      value: hubSummaryHistory(request: $request) {
+        ...HubSummarySample
+      }
+    }`,
+  [HubSummarySampleFragment],
+);
+export type HubSummaryHistoryRequest = RequestOf<typeof HubSummaryHistoryQuery>;
+
+export type HubSummaryHistoryRequestQuery = ReturnType<
+  typeof graphql.scalar<'HubSummaryHistoryRequestQuery'>
 >;

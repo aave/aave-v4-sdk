@@ -90,6 +90,8 @@ export enum ActivityType {
   Repay = 'REPAY',
   Liquidated = 'LIQUIDATED',
   SetAsCollateral = 'SET_AS_COLLATERAL',
+  UpdatedDynamicConfig = 'UPDATED_DYNAMIC_CONFIG',
+  UpdatedRiskPremium = 'UPDATED_RISK_PREMIUM',
 }
 
 /**
@@ -116,6 +118,7 @@ export enum Currency {
 export enum ReservesRequestFilter {
   Supply = 'SUPPLY',
   Borrow = 'BORROW',
+  Collateral = 'COLLATERAL',
   All = 'ALL',
 }
 
@@ -136,4 +139,12 @@ export enum SwapStatusFilter {
   Fulfilled = 'FULFILLED',
   Open = 'OPEN',
   PendingSignature = 'PENDING_SIGNATURE',
+}
+
+/**
+ * The category for tokens.
+ */
+export enum TokenCategory {
+  Stablecoin = 'STABLECOIN',
+  EthCorrelated = 'ETH_CORRELATED',
 }

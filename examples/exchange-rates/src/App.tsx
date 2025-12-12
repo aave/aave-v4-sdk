@@ -1,7 +1,7 @@
 import {
   Currency,
   chainId,
-  type FiatAmount,
+  type ExchangeAmount,
   useExchangeRate,
   useExchangeRateAction,
 } from '@aave/react';
@@ -17,7 +17,7 @@ export function App() {
   });
 
   const [getExchangeRate, { loading: asyncLoading }] = useExchangeRateAction();
-  const [exchangeRate, setExchangeRate] = useState<FiatAmount | null>(null);
+  const [exchangeRate, setExchangeRate] = useState<ExchangeAmount | null>(null);
 
   const handleGetRate = async (e: React.FormEvent) => {
     e.preventDefault();

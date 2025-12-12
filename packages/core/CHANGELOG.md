@@ -1,5 +1,12 @@
 # @aave/core
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- Updated dependencies [f651671]
+  - @aave/types@1.0.0-next.4
+
 ## 1.0.0-next.4
 
 ### Patch Changes

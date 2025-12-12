@@ -6,12 +6,14 @@ import {
   Erc20AmountFragment,
   type Erc20ApprovalRequired,
   Erc20ApprovalRequiredFragment,
+  Erc20TokenFragment,
+  ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
-  FiatAmountValueVariationFragment,
   HealthFactorResultFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
   PaginatedResultInfoFragment,
+  PercentNumberFragment,
   PercentNumberVariationFragment,
   ReserveInfoFragment,
   SpokeFragment,
@@ -132,16 +134,20 @@ export type SetSpokeUserPositionManagerRequest = RequestOf<
 /**
  * @internal
  */
-export const SetUserSupplyAsCollateralQuery = graphql(
-  `query SetUserSupplyAsCollateral($request: SetUserSupplyAsCollateralRequest!) {
-    value: setUserSupplyAsCollateral(request: $request) {
+export const SetUserSuppliesAsCollateralQuery = graphql(
+  `query SetUserSuppliesAsCollateral($request: SetUserSuppliesAsCollateralRequest!) {
+    value: setUserSuppliesAsCollateral(request: $request) {
       ...TransactionRequest
     }
   }`,
   [TransactionRequestFragment],
 );
-export type SetUserSupplyAsCollateralRequest = RequestOf<
-  typeof SetUserSupplyAsCollateralQuery
+export type SetUserSuppliesAsCollateralRequest = RequestOf<
+  typeof SetUserSuppliesAsCollateralQuery
+>;
+
+export type UserSupplyAsCollateral = ReturnType<
+  typeof graphql.scalar<'UserSupplyAsCollateral'>
 >;
 
 /**
@@ -162,16 +168,99 @@ export type RenounceSpokeUserPositionManagerRequest = RequestOf<
 /**
  * @internal
  */
-export const UpdateUserRiskPremiumQuery = graphql(
-  `query UpdateUserRiskPremium($request: UpdateUserRiskPremiumRequest!) {
-    value: updateUserRiskPremium(request: $request) {
+export const UpdateUserPositionConditionsQuery = graphql(
+  `query UpdateUserPositionConditions($request: UpdateUserPositionConditionsRequest!) {
+    value: updateUserPositionConditions(request: $request) {
       ...TransactionRequest
     }
   }`,
   [TransactionRequestFragment],
 );
-export type UpdateUserRiskPremiumRequest = RequestOf<
-  typeof UpdateUserRiskPremiumQuery
+export type UpdateUserPositionConditionsRequest = RequestOf<
+  typeof UpdateUserPositionConditionsQuery
+>;
+
+export const CollateralFactorVariationFragment = graphql(
+  `fragment CollateralFactorVariation on CollateralFactorVariation {
+    __typename
+    reserveId
+    token {
+      ...Erc20Token
+    }
+    current {
+      ...PercentNumber
+    }
+    after {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type CollateralFactorVariation = FragmentOf<
+  typeof CollateralFactorVariationFragment
+>;
+
+export const LiquidationFeeVariationFragment = graphql(
+  `fragment LiquidationFeeVariation on LiquidationFeeVariation {
+    __typename
+    reserveId
+    token {
+      ...Erc20Token
+    }
+    current {
+      ...PercentNumber
+    }
+    after {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type LiquidationFeeVariation = FragmentOf<
+  typeof LiquidationFeeVariationFragment
+>;
+
+export const MaxLiquidationBonusVariationFragment = graphql(
+  `fragment MaxLiquidationBonusVariation on MaxLiquidationBonusVariation {
+    __typename
+    reserveId
+    token {
+      ...Erc20Token
+    }
+    current {
+      ...PercentNumber
+    }
+    after {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type MaxLiquidationBonusVariation = FragmentOf<
+  typeof MaxLiquidationBonusVariationFragment
+>;
+
+export const UserPositionConditionVariationFragment = graphql(
+  `fragment UserPositionConditionVariation on UserPositionConditionVariation {
+    __typename
+    ... on CollateralFactorVariation {
+      ...CollateralFactorVariation
+    }
+    ... on LiquidationFeeVariation {
+      ...LiquidationFeeVariation
+    }
+    ... on MaxLiquidationBonusVariation {
+      ...MaxLiquidationBonusVariation
+    }
+  }`,
+  [
+    CollateralFactorVariationFragment,
+    LiquidationFeeVariationFragment,
+    MaxLiquidationBonusVariationFragment,
+  ],
+);
+export type UserPositionConditionVariation = FragmentOf<
+  typeof UserPositionConditionVariationFragment
 >;
 
 export const PreviewUserPositionFragment = graphql(
@@ -188,16 +277,26 @@ export const PreviewUserPositionFragment = graphql(
       ...PercentNumberVariation
     }
     netCollateral(currency: $currency) {
-      ...FiatAmountValueVariation
+      ...ExchangeAmountVariation
     }
     netBalance(currency: $currency) {
-      ...FiatAmountValueVariation
+      ...ExchangeAmountVariation
+    }
+    projectedEarnings(period: ANNUAL) {
+      ...ExchangeAmountVariation
+    }
+    borrowingPower {
+      ...ExchangeAmountVariation
+    }
+    otherConditions {
+      ...UserPositionConditionVariation
     }
   }`,
   [
     HealthFactorResultFragment,
     PercentNumberVariationFragment,
-    FiatAmountValueVariationFragment,
+    ExchangeAmountVariationFragment,
+    UserPositionConditionVariationFragment,
   ],
 );
 export type PreviewUserPosition = FragmentOf<
@@ -218,21 +317,6 @@ export const PreviewQuery = graphql(
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
-/**
- * @internal
- */
-export const UpdateUserDynamicConfigQuery = graphql(
-  `query UpdateUserDynamicConfig($request: UpdateUserDynamicConfigRequest!) {
-    value: updateUserDynamicConfig(request: $request) {
-      ...TransactionRequest
-      }
-  }`,
-  [TransactionRequestFragment],
-);
-export type UpdateUserDynamicConfigRequest = RequestOf<
-  typeof UpdateUserDynamicConfigQuery
->;
-
 export type LiquidatePositionDebtAmount = ReturnType<
   typeof graphql.scalar<'LiquidatePositionDebtAmount'>
 >;
@@ -247,6 +331,22 @@ export type WithdrawReserveAmountInput = ReturnType<
 >;
 
 // Activity Fragments
+export const PercentNumberChangeSnapshotFragment = graphql(
+  `fragment PercentNumberChangeSnapshot on PercentNumberChangeSnapshot {
+    __typename
+    before {
+      ...PercentNumber
+    }
+    after {
+      ...PercentNumber
+    }
+  }`,
+  [PercentNumberFragment],
+);
+export type PercentNumberChangeSnapshot = FragmentOf<
+  typeof PercentNumberChangeSnapshotFragment
+>;
+
 export const BorrowActivityFragment = graphql(
   `fragment BorrowActivity on BorrowActivity {
     __typename
@@ -398,6 +498,66 @@ export type UsingAsCollateralActivity = FragmentOf<
   typeof UsingAsCollateralActivityFragment
 >;
 
+export const UpdatedDynamicConfigActivityFragment = graphql(
+  `fragment UpdatedDynamicConfigActivity on UpdatedDynamicConfigActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    collateralFactor {
+      ...PercentNumberChangeSnapshot
+    }
+    maxLiquidationBonus {
+      ...PercentNumberChangeSnapshot
+    }
+    liquidationFee {
+      ...PercentNumberChangeSnapshot
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [
+    SpokeFragment,
+    ReserveInfoFragment,
+    PercentNumberChangeSnapshotFragment,
+    ChainFragment,
+  ],
+);
+export type UpdatedDynamicConfigActivity = FragmentOf<
+  typeof UpdatedDynamicConfigActivityFragment
+>;
+
+export const UpdatedRiskPremiumActivityFragment = graphql(
+  `fragment UpdatedRiskPremiumActivity on UpdatedRiskPremiumActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    premium {
+      ...PercentNumberChangeSnapshot
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [SpokeFragment, PercentNumberChangeSnapshotFragment, ChainFragment],
+);
+export type UpdatedRiskPremiumActivity = FragmentOf<
+  typeof UpdatedRiskPremiumActivityFragment
+>;
+
 export const ActivityItemFragment = graphql(
   `fragment ActivityItem on ActivityItem {
     __typename
@@ -419,6 +579,12 @@ export const ActivityItemFragment = graphql(
     ... on UsingAsCollateralActivity {
       ...UsingAsCollateralActivity
     }
+    ... on UpdatedDynamicConfigActivity {
+      ...UpdatedDynamicConfigActivity
+    }
+    ... on UpdatedRiskPremiumActivity {
+      ...UpdatedRiskPremiumActivity
+    }
   }`,
   [
     BorrowActivityFragment,
@@ -427,6 +593,8 @@ export const ActivityItemFragment = graphql(
     RepayActivityFragment,
     LiquidatedActivityFragment,
     UsingAsCollateralActivityFragment,
+    UpdatedDynamicConfigActivityFragment,
+    UpdatedRiskPremiumActivityFragment,
   ],
 );
 export type ActivityItem = ExtendWithOpaqueType<
@@ -459,7 +627,7 @@ export type PaginatedActivitiesResult = FragmentOf<
  * @internal
  */
 export const ActivitiesQuery = graphql(
-  `query Activities($request: ActivitiesRequest!, $currency: Currency!) {
+  `query Activities($request: ActivitiesRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: activities(request: $request) {
       ...PaginatedActivitiesResult
     }

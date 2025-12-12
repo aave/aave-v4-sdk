@@ -12,6 +12,24 @@
 - Use `pnpm test:react --run` to run `@aave/react` tests.
 - Use `pnpm vitest --run --project <project-name> <path-to-test-file> -t "<test-name>"` to focus on one single test.
 
+## SDK Architecture & Terminology
+
+The SDK is organized into packages:
+
+- **`@aave/graphql`**: GraphQL queries, fragments, and type definitions
+- **`@aave/client`**: TypeScript client actions (imperative API)
+- **`@aave/react`**: React hooks (declarative API)
+- **`@aave/types`**: Shared TypeScript types and utilities
+- **`@aave/core`**: Core SDK functionality and shared code
+- **`@aave/cli`**: Command-line tools
+
+**Terminology:**
+- **Actions** (`packages/client/src/actions/`): Imperative functions that execute GraphQL queries. Use when asked to update "actions" or "client actions".
+- **Hooks** (`packages/react/src/`): React hooks that wrap actions with reactive state management. Only update when explicitly requested.
+- **Queries/Documents** (`packages/graphql/src/`): GraphQL query definitions and fragments.
+
+When updating GraphQL queries, update corresponding actions. Only update hooks if explicitly requested.
+
 ## Schema updates
 
 When updating the GraphQL schema in the SDK:

@@ -4,6 +4,12 @@ import {
   AssetBorrowHistoryQuery,
   type AssetBorrowHistoryRequest,
   type AssetBorrowSample,
+  AssetCategoryBorrowHistoryQuery,
+  type AssetCategoryBorrowHistoryRequest,
+  type AssetCategoryBorrowSample,
+  AssetCategorySupplyHistoryQuery,
+  type AssetCategorySupplyHistoryRequest,
+  type AssetCategorySupplySample,
   AssetPriceHistoryQuery,
   type AssetPriceHistoryRequest,
   type AssetPriceSample,
@@ -12,6 +18,9 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
+  ProtocolHistoryQuery,
+  type ProtocolHistoryRequest,
+  type ProtocolHistorySample,
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
@@ -140,6 +149,82 @@ export function assetBorrowHistory(
 ): ResultAsync<AssetBorrowSample[], UnexpectedError> {
   return client.query(
     AssetBorrowHistoryQuery,
+    { request },
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
+  );
+}
+
+/**
+ * Fetches historical borrow data for a specific token category.
+ *
+ * ```ts
+ * const result = await assetCategoryBorrowHistory(client, {
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The asset category borrow history request parameters.
+ * @param options - The query options.
+ * @returns Array of asset category borrow samples over time.
+ */
+export function assetCategoryBorrowHistory(
+  client: AaveClient,
+  request: AssetCategoryBorrowHistoryRequest,
+  { currency }: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<AssetCategoryBorrowSample[], UnexpectedError> {
+  return client.query(AssetCategoryBorrowHistoryQuery, { request, currency });
+}
+
+/**
+ * Fetches historical supply data for a specific token category.
+ *
+ * ```ts
+ * const result = await assetCategorySupplyHistory(client, {
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The asset category supply history request parameters.
+ * @param options - The query options.
+ * @returns Array of asset category supply samples over time.
+ */
+export function assetCategorySupplyHistory(
+  client: AaveClient,
+  request: AssetCategorySupplyHistoryRequest,
+  { currency }: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<AssetCategorySupplySample[], UnexpectedError> {
+  return client.query(AssetCategorySupplyHistoryQuery, { request, currency });
+}
+
+/**
+ * Fetches historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * ```ts
+ * const result = await protocolHistory(client, {
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The protocol history request parameters.
+ * @param options - The query options.
+ * @returns Array of protocol history samples over time.
+ */
+export function protocolHistory(
+  client: AaveClient,
+  request: ProtocolHistoryRequest,
+  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<ProtocolHistorySample[], UnexpectedError> {
+  return client.query(
+    ProtocolHistoryQuery,
     { request },
     {
       requestPolicy:

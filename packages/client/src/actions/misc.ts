@@ -3,11 +3,11 @@ import {
   type Chain,
   ChainQuery,
   type ChainRequest,
-  ChainsFilter,
   ChainsQuery,
+  type ChainsRequest,
+  type ExchangeAmount,
   ExchangeRateQuery,
   type ExchangeRateRequest,
-  type FiatAmount,
   HasProcessedKnownTransactionQuery,
   type HasProcessedKnownTransactionRequest,
 } from '@aave/graphql';
@@ -53,18 +53,26 @@ export function chain(
  * Fetches the list of supported chains.
  *
  * ```ts
- * const chains = await chains(client, { filter: ChainsFilter.ALL });
+ * const chains = await chains(client, {
+ *   query: { filter: ChainsFilter.ALL }
+ * });
+ * ```
+ *
+ * ```ts
+ * const chains = await chains(client, {
+ *   query: { chainIds: [chainId(1), chainId(137)] }
+ * });
  * ```
  *
  * @param client - Aave client.
- * @param filter - The filter for chains.
+ * @param request - The chains request parameters.
  * @returns Array of supported chains.
  */
 export function chains(
   client: AaveClient,
-  filter: ChainsFilter = ChainsFilter.ALL,
+  request: ChainsRequest,
 ): ResultAsync<Chain[], UnexpectedError> {
-  return client.query(ChainsQuery, { filter });
+  return client.query(ChainsQuery, { request });
 }
 
 /**
@@ -105,6 +113,6 @@ export function hasProcessedKnownTransaction(
 export function exchangeRate(
   client: AaveClient,
   request: ExchangeRateRequest,
-): ResultAsync<FiatAmount, UnexpectedError> {
+): ResultAsync<ExchangeAmount, UnexpectedError> {
   return client.query(ExchangeRateQuery, { request });
 }

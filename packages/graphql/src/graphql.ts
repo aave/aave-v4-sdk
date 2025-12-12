@@ -22,7 +22,6 @@ import type {
   ApyMetric,
   ChainsFilter,
   Currency,
-  ExtendWithOpaqueVariant,
   HubAssetStatusType,
   HubAssetsRequestOrderBy,
   OperationType,
@@ -32,6 +31,7 @@ import type {
   SwapKind,
   SwapStatusFilter,
   TimeWindow,
+  TokenCategory,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -45,6 +45,7 @@ import type {
   SpokeId,
   SwapId,
   SwapQuoteId,
+  TokenInfoId,
   UserBalanceId,
   UserBorrowItemId,
   UserPositionId,
@@ -57,7 +58,7 @@ export const graphql = initGraphQLTada<{
   disableMasking: true;
   introspection: introspection;
   scalars: {
-    ActivityType: ExtendWithOpaqueVariant<ActivityType>;
+    ActivityType: ActivityType;
     AlwaysTrue: true;
     ApyMetric: ApyMetric;
     AssetId: AssetId;
@@ -65,19 +66,20 @@ export const graphql = initGraphQLTada<{
     BigInt: bigint;
     BlockchainData: BlockchainData;
     Boolean: boolean;
-    ChainsFilter: ChainsFilter;
     ChainId: ChainId;
+    ChainsFilter: ChainsFilter;
     Currency: Currency;
     Cursor: Cursor;
     DateTime: Date;
     EvmAddress: EvmAddress;
     Float: number;
     HubAssetId: HubAssetId;
-    HubAssetStatusType: HubAssetStatusType;
     HubAssetsRequestOrderBy: HubAssetsRequestOrderBy;
+    HubAssetStatusType: HubAssetStatusType;
     HubId: HubId;
     ID: ID;
     Int: number;
+    JSON: JSONString;
     OnChainHubAssetId: OnChainHubAssetId;
     OnChainReserveId: OnChainReserveId;
     OperationType: OperationType;
@@ -93,7 +95,8 @@ export const graphql = initGraphQLTada<{
     SwapQuoteId: SwapQuoteId;
     SwapStatusFilter: SwapStatusFilter;
     TimeWindow: TimeWindow;
-    JSON: JSONString;
+    TokenCategory: TokenCategory;
+    TokenInfoId: TokenInfoId;
     TxHash: TxHash;
     UserBalanceId: UserBalanceId;
     UserBorrowItemId: UserBorrowItemId;

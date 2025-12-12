@@ -3,8 +3,9 @@ import { graphql } from '../graphql';
 import {
   DecimalNumberFragment,
   Erc20AmountFragment,
-  FiatAmountFragment,
-  FiatAmountWithChangeFragment,
+  Erc20TokenFragment,
+  ExchangeAmountFragment,
+  ExchangeAmountWithChangeFragment,
   HealthFactorWithChangeFragment,
   PercentNumberFragment,
   PercentNumberWithChangeFragment,
@@ -64,28 +65,70 @@ export const UserSummaryFragment = graphql(
     __typename
     totalPositions
     netBalance(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalCollateral(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     totalSupplied(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     totalDebt(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     netApy {
       ...PercentNumber
     }
     netFeeEarned {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     lowestHealthFactor
   }`,
-  [FiatAmountWithChangeFragment, FiatAmountFragment, PercentNumberFragment],
+  [
+    ExchangeAmountWithChangeFragment,
+    ExchangeAmountFragment,
+    PercentNumberFragment,
+  ],
 );
 export type UserSummary = FragmentOf<typeof UserSummaryFragment>;
+
+export const UserRiskPremiumBreakdownItemFragment = graphql(
+  `fragment UserRiskPremiumBreakdownItem on UserRiskPremiumBreakdownItem {
+    __typename
+    token {
+      ...Erc20Token
+    }
+    riskPremiumWeight {
+      ...PercentNumber
+    }
+    collateral {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20TokenFragment, PercentNumberFragment],
+);
+export type UserRiskPremiumBreakdownItem = FragmentOf<
+  typeof UserRiskPremiumBreakdownItemFragment
+>;
+
+export const UserPositionRiskPremiumFragment = graphql(
+  `fragment UserPositionRiskPremium on UserPositionRiskPremium {
+    __typename
+    current {
+      ...PercentNumber
+    }
+    better {
+      ...PercentNumber
+    }
+    breakdown {
+      ...UserRiskPremiumBreakdownItem
+    }
+  }`,
+  [PercentNumberFragment, UserRiskPremiumBreakdownItemFragment],
+);
+export type UserPositionRiskPremium = FragmentOf<
+  typeof UserPositionRiskPremiumFragment
+>;
 
 export const UserPositionFragment = graphql(
   `fragment UserPosition on UserPosition {
@@ -100,19 +143,19 @@ export const UserPositionFragment = graphql(
       ...PercentNumber
     }
     netCollateral(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     netBalance(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalCollateral(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalSupplied(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     totalDebt(currency: $currency) {
-      ...FiatAmountWithChange
+      ...ExchangeAmountWithChange
     }
     netSupplyApy {
       ...PercentNumberWithChange
@@ -124,9 +167,16 @@ export const UserPositionFragment = graphql(
       ...HealthFactorWithChange
     }
     riskPremium {
-      ...PercentNumber
+      ...UserPositionRiskPremium
     }
-    betterRiskPremium {
+    liquidationPrice(currency: $currency) {
+      ...ExchangeAmount
+    }
+    borrowingPower(currency: $currency) {
+      ...ExchangeAmount
+    }
+    isUsingLatestDynamicConfigKey
+    netBalancePercentChange(window: $timeWindow) {
       ...PercentNumber
     }
     averageCollateralFactor {
@@ -136,9 +186,11 @@ export const UserPositionFragment = graphql(
   [
     SpokeFragment,
     PercentNumberFragment,
-    FiatAmountWithChangeFragment,
+    ExchangeAmountWithChangeFragment,
+    ExchangeAmountFragment,
     PercentNumberWithChangeFragment,
     HealthFactorWithChangeFragment,
+    UserPositionRiskPremiumFragment,
   ],
 );
 export type UserPosition = FragmentOf<typeof UserPositionFragment>;
@@ -156,8 +208,8 @@ export const UserBalanceFragment = graphql(
     balances {
       ...TokenAmount
     }
-    fiatAmount(currency: $currency) {
-      ...FiatAmount
+    exchange(currency: $currency) {
+      ...ExchangeAmount
     }
     highestSupplyApy: supplyApy(metric: HIGHEST) {
       ...PercentNumber
@@ -171,12 +223,18 @@ export const UserBalanceFragment = graphql(
     lowestBorrowApy: borrowApy(metric: LOWEST) {
       ...PercentNumber
     }
+    highestCollateralFactor: collateralFactor(metric: HIGHEST) {
+      ...PercentNumber
+    }
+    lowestCollateralFactor: collateralFactor(metric: LOWEST) {
+      ...PercentNumber
+    }
   }`,
   [
     TokenInfoFragment,
     DecimalNumberFragment,
     TokenAmountFragment,
-    FiatAmountFragment,
+    ExchangeAmountFragment,
     PercentNumberFragment,
   ],
 );
@@ -186,25 +244,25 @@ export const UserSummaryHistoryItemFragment = graphql(
   `fragment UserSummaryHistoryItem on UserSummaryHistoryItem {
     __typename
     netBalance(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     borrows(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     supplies(currency: $currency) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     healthFactor
     date
   }`,
-  [FiatAmountFragment],
+  [ExchangeAmountFragment],
 );
 export type UserSummaryHistoryItem = FragmentOf<
   typeof UserSummaryHistoryItemFragment
 >;
 
-export const APYSampleFragment = graphql(
-  `fragment APYSample on APYSample {
+export const ApySampleFragment = graphql(
+  `fragment ApySample on ApySample {
     __typename
     date
     avgRate {
@@ -213,4 +271,4 @@ export const APYSampleFragment = graphql(
   }`,
   [PercentNumberFragment],
 );
-export type APYSample = FragmentOf<typeof APYSampleFragment>;
+export type ApySample = FragmentOf<typeof ApySampleFragment>;

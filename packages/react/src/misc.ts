@@ -1,13 +1,14 @@
 import type { CurrencyQueryOptions } from '@aave/client';
 import { exchangeRate } from '@aave/client/actions';
 import type { UnexpectedError } from '@aave/core';
-import type { Chain, ExchangeRateRequest, FiatAmount } from '@aave/graphql';
+import type { Chain, ExchangeAmount, ExchangeRateRequest } from '@aave/graphql';
 import {
   type ActivityItem,
   ChainQuery,
   type ChainRequest,
   ChainsFilter,
   ChainsQuery,
+  type ChainsRequest,
   ExchangeRateQuery,
   type NativeAmount,
   type PreviewAction,
@@ -105,9 +106,7 @@ export function useChain({
   });
 }
 
-export type UseChainsArgs = {
-  filter: ChainsFilter;
-};
+export type UseChainsArgs = ChainsRequest;
 /**
  * Fetches the list of supported chains.
  *
@@ -115,7 +114,7 @@ export type UseChainsArgs = {
  *
  * ```tsx
  * const { data } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  *   suspense: true,
  * });
  * ```
@@ -130,7 +129,7 @@ export function useChains(
  *
  * ```tsx
  * const { data } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  *   suspense: true,
  *   pause: true,
  * });
@@ -144,7 +143,7 @@ export function useChains(
  *
  * ```tsx
  * const { data, error, loading } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  * });
  * ```
  */
@@ -156,7 +155,7 @@ export function useChains(args?: UseChainsArgs): ReadResult<Chain[]>;
  *
  * ```tsx
  * const { data, error, loading, paused } = useChains({
- *   filter: ChainsFilter.ALL,
+ *   query: { filter: ChainsFilter.ALL },
  *   pause: true,
  * });
  * ```
@@ -169,15 +168,15 @@ export function useChains(
   {
     suspense = false,
     pause = false,
-    filter,
+    ...request
   }: NullishDeep<UseChainsArgs> & {
     suspense?: boolean;
     pause?: boolean;
-  } = { filter: ChainsFilter.ALL },
+  } = { query: { filter: ChainsFilter.ALL } },
 ): SuspendableResult<Chain[], UnexpectedError> {
   return useSuspendableQuery({
     document: ChainsQuery,
-    variables: { filter },
+    variables: { request },
     suspense,
     pause,
   });
@@ -209,7 +208,7 @@ export function useChains(
  */
 export function useExchangeRateAction(): UseAsyncTask<
   ExchangeRateRequest,
-  FiatAmount,
+  ExchangeAmount,
   UnexpectedError
 > {
   const client = useAaveClient();
@@ -242,7 +241,7 @@ export type UseExchangeRateArgs = ExchangeRateRequest;
  */
 export function useExchangeRate(
   args: UseExchangeRateArgs & Suspendable,
-): SuspenseResult<FiatAmount>;
+): SuspenseResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -264,7 +263,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: Pausable<UseExchangeRateArgs> & Suspendable,
-): PausableSuspenseResult<FiatAmount>;
+): PausableSuspenseResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -284,7 +283,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: UseExchangeRateArgs,
-): ReadResult<FiatAmount>;
+): ReadResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -305,7 +304,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: Pausable<UseExchangeRateArgs>,
-): PausableReadResult<FiatAmount>;
+): PausableReadResult<ExchangeAmount>;
 
 export function useExchangeRate({
   suspense = false,
@@ -314,7 +313,7 @@ export function useExchangeRate({
 }: NullishDeep<UseExchangeRateArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<FiatAmount, UnexpectedError> {
+}): SuspendableResult<ExchangeAmount, UnexpectedError> {
   const client = useAaveClient();
 
   return useSuspendableQuery({

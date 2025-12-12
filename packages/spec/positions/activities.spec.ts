@@ -35,6 +35,8 @@ describe('Querying User Activities on Aave V4', () => {
     [ActivityType.Repay]: 'RepayActivity',
     [ActivityType.Liquidated]: 'LiquidatedActivity',
     [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
+    [ActivityType.UpdatedDynamicConfig]: 'UpdatedDynamicConfigActivity',
+    [ActivityType.UpdatedRiskPremium]: 'UpdatedRiskPremiumActivity',
   };
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
@@ -57,8 +59,15 @@ describe('Querying User Activities on Aave V4', () => {
           });
           assertOk(result);
 
-          if ([ActivityType.Liquidated].includes(activityType)) {
+          if (
+            [
+              ActivityType.Liquidated,
+              ActivityType.UpdatedDynamicConfig,
+              ActivityType.UpdatedRiskPremium,
+            ].includes(activityType)
+          ) {
             // Liquidated activities are not easily reproducible, so we skip them
+            // New activity types are not yet supported in tests
             return;
           }
 
@@ -249,8 +258,15 @@ describe('Querying User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if ([ActivityType.Liquidated].includes(activityType)) {
+          if (
+            [
+              ActivityType.Liquidated,
+              ActivityType.UpdatedDynamicConfig,
+              ActivityType.UpdatedRiskPremium,
+            ].includes(activityType)
+          ) {
             // Liquidated activities are not easily reproducible, so we skip them
+            // New activity types are not yet supported in tests
             return;
           }
           expect(result.value.items).toBeArrayWithElements(

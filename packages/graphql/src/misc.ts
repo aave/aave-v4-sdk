@@ -1,4 +1,4 @@
-import { ChainFragment, FiatAmountFragment } from './fragments';
+import { ChainFragment, ExchangeAmountFragment } from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
 /**
@@ -18,13 +18,18 @@ export type ChainRequest = RequestOf<typeof ChainQuery>;
  * @internal
  */
 export const ChainsQuery = graphql(
-  `query Chains($filter: ChainsFilter!) {
-    value: chains(filter: $filter) {
+  `query Chains($request: ChainsRequest!) {
+    value: chains(request: $request) {
       ...Chain
     }
   }`,
   [ChainFragment],
 );
+export type ChainsRequest = RequestOf<typeof ChainsQuery>;
+
+export type ChainsRequestQuery = ReturnType<
+  typeof graphql.scalar<'ChainsRequestQuery'>
+>;
 
 /**
  * @internal
@@ -53,10 +58,10 @@ export const HealthQuery = graphql(
 export const ExchangeRateQuery = graphql(
   `query ExchangeRate($request: ExchangeRateRequest!) {
     value: exchangeRate(request: $request) {
-      ...FiatAmount
+      ...ExchangeAmount
     }
   }`,
-  [FiatAmountFragment],
+  [ExchangeAmountFragment],
 );
 export type ExchangeRateRequest = RequestOf<typeof ExchangeRateQuery>;
 

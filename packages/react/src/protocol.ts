@@ -9,6 +9,12 @@ import {
   AssetBorrowHistoryQuery,
   type AssetBorrowHistoryRequest,
   type AssetBorrowSample,
+  AssetCategoryBorrowHistoryQuery,
+  type AssetCategoryBorrowHistoryRequest,
+  type AssetCategoryBorrowSample,
+  AssetCategorySupplyHistoryQuery,
+  type AssetCategorySupplyHistoryRequest,
+  type AssetCategorySupplySample,
   AssetPriceHistoryQuery,
   type AssetPriceHistoryRequest,
   type AssetPriceSample,
@@ -17,6 +23,9 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
+  ProtocolHistoryQuery,
+  type ProtocolHistoryRequest,
+  type ProtocolHistorySample,
 } from '@aave/graphql';
 import type { NullishDeep, Prettify } from '@aave/types';
 import {
@@ -354,6 +363,262 @@ export function useAssetBorrowHistory({
 }): SuspendableResult<AssetBorrowSample[], UnexpectedError> {
   return useSuspendableQuery({
     document: AssetBorrowHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
+export type UseAssetCategoryBorrowHistoryArgs = Prettify<
+  AssetCategoryBorrowHistoryRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: UseAssetCategoryBorrowHistoryArgs & Suspendable,
+): SuspenseResult<AssetCategoryBorrowSample[]>;
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: Pausable<UseAssetCategoryBorrowHistoryArgs> & Suspendable,
+): PausableSuspenseResult<AssetCategoryBorrowSample[]>;
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * ```tsx
+ * const { data, error, loading } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: UseAssetCategoryBorrowHistoryArgs,
+): ReadResult<AssetCategoryBorrowSample[]>;
+/**
+ * Fetch historical borrow data for a specific token category.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useAssetCategoryBorrowHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategoryBorrowHistory(
+  args: Pausable<UseAssetCategoryBorrowHistoryArgs>,
+): PausableReadResult<AssetCategoryBorrowSample[]>;
+
+export function useAssetCategoryBorrowHistory({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseAssetCategoryBorrowHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<AssetCategoryBorrowSample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: AssetCategoryBorrowHistoryQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
+export type UseAssetCategorySupplyHistoryArgs = Prettify<
+  AssetCategorySupplyHistoryRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: UseAssetCategorySupplyHistoryArgs & Suspendable,
+): SuspenseResult<AssetCategorySupplySample[]>;
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: Pausable<UseAssetCategorySupplyHistoryArgs> & Suspendable,
+): PausableSuspenseResult<AssetCategorySupplySample[]>;
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * ```tsx
+ * const { data, error, loading } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: UseAssetCategorySupplyHistoryArgs,
+): ReadResult<AssetCategorySupplySample[]>;
+/**
+ * Fetch historical supply data for a specific token category.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useAssetCategorySupplyHistory({
+ *   category: TokenCategory.Stablecoin,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useAssetCategorySupplyHistory(
+  args: Pausable<UseAssetCategorySupplyHistoryArgs>,
+): PausableReadResult<AssetCategorySupplySample[]>;
+
+export function useAssetCategorySupplyHistory({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseAssetCategorySupplyHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<AssetCategorySupplySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: AssetCategorySupplyHistoryQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
+export type UseProtocolHistoryArgs = ProtocolHistoryRequest;
+
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: UseProtocolHistoryArgs & Suspendable,
+): SuspenseResult<ProtocolHistorySample[]>;
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: Pausable<UseProtocolHistoryArgs> & Suspendable,
+): PausableSuspenseResult<ProtocolHistorySample[]>;
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * ```tsx
+ * const { data, error, loading } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: UseProtocolHistoryArgs,
+): ReadResult<ProtocolHistorySample[]>;
+/**
+ * Fetch historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useProtocolHistory({
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useProtocolHistory(
+  args: Pausable<UseProtocolHistoryArgs>,
+): PausableReadResult<ProtocolHistorySample[]>;
+
+export function useProtocolHistory({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseProtocolHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<ProtocolHistorySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: ProtocolHistoryQuery,
     variables: {
       request,
     },

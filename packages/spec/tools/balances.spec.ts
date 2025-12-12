@@ -184,7 +184,7 @@ describe('Querying User Balances on Aave V4', () => {
         assertOk(balances);
         let listOrderBalance = balances.value.map((elem) =>
           elem.balances.reduce(
-            (sum, balance) => sum.plus(balance.fiatAmount.value),
+            (sum, balance) => sum.plus(balance.exchange.value),
             bigDecimal('0'),
           ),
         );
@@ -202,7 +202,7 @@ describe('Querying User Balances on Aave V4', () => {
         assertOk(balances);
         listOrderBalance = balances.value.map((elem) =>
           elem.balances.reduce(
-            (sum, balance) => sum.plus(balance.fiatAmount.value),
+            (sum, balance) => sum.plus(balance.exchange.value),
             bigDecimal('0'),
           ),
         );
