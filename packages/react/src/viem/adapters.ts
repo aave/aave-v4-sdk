@@ -37,7 +37,7 @@ import { usePermitTypedDataAction } from '../permits';
  * @param walletClient - The wallet client to use for sending transactions.
  */
 export function useSendTransaction(
-  walletClient: WalletClient | undefined,
+  walletClient: WalletClient | null | undefined,
 ): UseSendTransactionResult {
   const client = useAaveClient();
 
@@ -95,7 +95,7 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  * ```
  */
 export function useERC20Permit(
-  walletClient: WalletClient | undefined,
+  walletClient: WalletClient | null | undefined,
 ): UseAsyncTask<PermitRequest, ERC20PermitSignature, SignERC20PermitError> {
   const [permitTypedData] = usePermitTypedDataAction();
 
@@ -134,7 +134,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * ```
  */
 export function useSignSwapTypedDataWith(
-  walletClient: WalletClient | undefined,
+  walletClient: WalletClient | null | undefined,
 ): UseAsyncTask<
   SwapByIntentTypedData,
   ERC20PermitSignature,
