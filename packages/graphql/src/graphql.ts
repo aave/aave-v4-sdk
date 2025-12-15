@@ -21,6 +21,7 @@ import type {
   ActivityType,
   ApyMetric,
   ChainsFilter,
+  CollateralMetric,
   Currency,
   HubAssetStatusType,
   HubAssetsRequestOrderBy,
@@ -68,6 +69,7 @@ export const graphql = initGraphQLTada<{
     Boolean: boolean;
     ChainId: ChainId;
     ChainsFilter: ChainsFilter;
+    CollateralMetric: CollateralMetric;
     Currency: Currency;
     Cursor: Cursor;
     DateTime: Date;

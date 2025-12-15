@@ -104,6 +104,14 @@ export enum ApyMetric {
 }
 
 /**
+ * The collateral metric for comparing collateral factors.
+ */
+export enum CollateralMetric {
+  Highest = 'HIGHEST',
+  Lowest = 'LOWEST',
+}
+
+/**
  * The currency for fiat amounts.
  */
 export enum Currency {

@@ -57,3 +57,6 @@ export type ReservesRequestOrderBy = ReturnType<
 export type ReservesRequestQuery = ReturnType<
   typeof graphql.scalar<'ReservesRequestQuery'>
 >;
+export type ChainTokenCategories = ReturnType<
+  typeof graphql.scalar<'ChainTokenCategories'>
+>;

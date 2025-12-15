@@ -242,7 +242,7 @@ input ChainRequest {
 }
 
 input ChainTokenCategories {
-  chain: ChainId!
+  chainId: ChainId!
   categories: [TokenCategory!]!
 }
 
@@ -1752,6 +1752,8 @@ type UserBalance {
 
   """The borrow APY dependent on what you pass in for the `metric`"""
   borrowApy(metric: ApyMetric! = HIGHEST): PercentNumber!
+
+  """The collateral factor dependent on what you pass in for the `metric`"""
   collateralFactor(metric: CollateralMetric! = HIGHEST): PercentNumber
 }
 
