@@ -24,6 +24,7 @@ describe('Querying Exchange Rates on Aave V4', () => {
 
         assertOk(result);
         expect(result.value).toMatchSnapshot({
+          decimals: expect.any(Number),
           value: expect.any(BigDecimal),
         });
       });
@@ -40,6 +41,7 @@ describe('Querying Exchange Rates on Aave V4', () => {
 
         assertOk(result);
         expect(result.value).toMatchSnapshot({
+          decimals: expect.any(Number),
           value: expect.any(BigDecimal),
         });
       });
@@ -63,6 +65,7 @@ describe('Querying Exchange Rates on Aave V4', () => {
 
           assertOk(result);
           expect(result.value).toMatchSnapshot({
+            decimals: expect.any(Number),
             value: expect.any(BigDecimal),
           });
         },
@@ -80,6 +83,7 @@ describe('Querying Exchange Rates on Aave V4', () => {
 
         assertOk(result);
         expect(result.value).toMatchSnapshot({
+          decimals: expect.any(Number),
           value: expect.any(BigDecimal),
         });
       });

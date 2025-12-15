@@ -1,5 +1,59 @@
 # @aave/graphql
 
+## 1.0.0-next.8
+
+### Patch Changes
+
+- f5950a3: **feat:** updates PreviewUserPosition fragment.
+- 453e6da: **fix:** export missing types and adjust GQL schema.
+- Updated dependencies [2f31f53]
+  - @aave/types@1.0.0-next.5
+
+## 1.0.0-next.7
+
+### Minor Changes
+
+- c3c34a1: **feat:** support for `protocolHistory` query.
+
+### Patch Changes
+
+- 0704c75: **chore:** updates APY > Apy renaming and other changes.
+
+## 1.0.0-next.6
+
+### Minor Changes
+
+- 1f2bcb8: **BREAKING CHANGES:** support breaking changes from last batch of GQL changes
+
+  - **Breaking**
+
+    - `FiatAmount` renamed to `ExchangeAmount` (all related types updated).
+    - `updateUserDynamicConfig` removed.
+    - `updateUserRiskPremium` replaced with `updateUserPositionConditions`.
+    - `setUserSuppliesAsCollateral` renamed to plural form.
+
+  - **Features**
+
+    - Expanded `ActivityFeedType` with new entries.
+    - Added new items to the `ActivityItem` union.
+    - Updated `AssetSummary` fragment and subfragments.
+    - Added fields to `AssetSupplySample` and `AssetBorrowSample`.
+    - Added new fields to `UserPosition`, including reworked risk premium via `UserPositionRiskPremium`.
+    - `Chains` query now accepts a request object.
+    - Added `isFork` field to `Chain`.
+    - Added new field to `UserBalance`.
+    - Added new fields to `ReserveSettings` and `ReserveUserState`.
+    - `TokenInfo` now includes an `id` scalar and `categories`.
+
+  - **Fixes**
+    - Corrected `utilizationRate` type in `HubSummary`.
+
+### Patch Changes
+
+- f651671: **chore:** adds patterns to avoid breaking changes on expanding enum and GQL unions.
+- Updated dependencies [f651671]
+  - @aave/types@1.0.0-next.4
+
 ## 1.0.0-next.5
 
 ### Minor Changes

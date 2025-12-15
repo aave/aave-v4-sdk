@@ -17,12 +17,16 @@ export const ReserveSettingsFragment = graphql(
     maxLiquidationBonus {
       ...PercentNumber
     }
+    liquidationFee {
+      ...PercentNumber
+    }
     collateralRisk {
       ...PercentNumber
     }
     borrowable
     collateral
     suppliable
+    latestDynamicConfigKey
   }`,
   [PercentNumberFragment],
 );
@@ -70,9 +74,23 @@ export const ReserveUserStateFragment = graphql(
     borrowable {
       ...Erc20Amount
     }
+    borrowingPower {
+      ...Erc20Amount
+    }
     borrowApy {
       ...PercentNumber
     }
+    collateralFactor {
+      ...PercentNumber
+    }
+    maxLiquidationBonus {
+      ...PercentNumber
+    }
+    liquidationFee {
+      ...PercentNumber
+    }
+    dynamicConfigKey
+    isUsingLatestDynamicConfigKey
   }`,
   [Erc20AmountFragment, PercentNumberFragment],
 );

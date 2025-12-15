@@ -19,6 +19,9 @@ import {
   type SwapByIntent,
   type SwapByIntentWithApprovalRequired,
   type SwapByTransaction,
+  type TokenInfo,
+  type UpdatedDynamicConfigActivity,
+  type UpdatedRiskPremiumActivity,
   type UserPosition,
   type UsingAsCollateralActivity,
   type VariablesOf,
@@ -77,15 +80,12 @@ export const exchange = cacheExchange({
       onChainValue: transformToBigInt,
       value: transformToBigDecimal,
     },
-    FiatAmount: {
+    ExchangeAmount: {
       value: transformToBigDecimal,
     },
     AssetPriceSample: {
       price: transformToBigDecimal,
       date: transformToDate,
-    },
-    HubSummary: {
-      utilizationRate: transformToBigDecimal,
     },
     Reserve: {
       borrowCap: transformToBigDecimal,
@@ -112,13 +112,25 @@ export const exchange = cacheExchange({
     TransactionRequest: {
       value: transformToBigInt,
     },
-    APYSample: {
+    ApySample: {
       date: transformToDate,
     },
     AssetBorrowSample: {
       date: transformToDate,
     },
+    AssetCategoryBorrowSample: {
+      date: transformToDate,
+    },
+    AssetCategorySupplySample: {
+      date: transformToDate,
+    },
     AssetSupplySample: {
+      date: transformToDate,
+    },
+    HubSummarySample: {
+      date: transformToDate,
+    },
+    ProtocolHistorySample: {
       date: transformToDate,
     },
     BorrowActivity: {
@@ -137,6 +149,12 @@ export const exchange = cacheExchange({
       timestamp: transformToDate,
     },
     UsingAsCollateralActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedDynamicConfigActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedRiskPremiumActivity: {
       timestamp: transformToDate,
     },
     SpokeUserPositionManager: {
@@ -267,9 +285,13 @@ export const exchange = cacheExchange({
     ) => data.quote.quoteId,
     SwapByTransaction: (data: SwapByTransaction) => data.quote.quoteId,
     UserPosition: (data: UserPosition) => data.id,
+    UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
+      data.id,
+    UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
     UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
     WithdrawActivity: (data: WithdrawActivity) => data.id,
     RepayActivity: (data: RepayActivity) => data.id,
+    TokenInfo: (data: TokenInfo) => data.id,
 
     // Entities with address field as key
     Erc20Token: (data: Erc20Token) => data.address,
@@ -290,9 +312,11 @@ export const exchange = cacheExchange({
     SwapTransactionRequest: () => null,
 
     // Value objects and result types
-    APYSample: () => null,
+    ApySample: () => null,
     Asset: () => null,
     AssetBorrowSample: () => null,
+    AssetCategoryBorrowSample: () => null,
+    AssetCategorySupplySample: () => null,
     AssetPriceSample: () => null,
     AssetSummary: () => null,
     AssetSupplySample: () => null,
@@ -303,9 +327,9 @@ export const exchange = cacheExchange({
     DomainData: () => null,
     Erc20Amount: () => null,
     Erc20ApprovalRequired: () => null,
-    FiatAmount: () => null,
-    FiatAmountValueVariation: () => null,
-    FiatAmountWithChange: () => null,
+    ExchangeAmount: () => null,
+    ExchangeAmountVariation: () => null,
+    ExchangeAmountWithChange: () => null,
     ForkTopUpResponse: () => null,
     HealthFactorError: () => null,
     HealthFactorVariation: () => null,
@@ -314,6 +338,7 @@ export const exchange = cacheExchange({
     HubAssetSummary: () => null,
     HubAssetUserState: () => null,
     HubSummary: () => null,
+    HubSummarySample: () => null,
     InsufficientBalanceError: () => null,
     NativeAmount: () => null,
     PercentNumber: () => null,
@@ -324,6 +349,7 @@ export const exchange = cacheExchange({
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PreviewUserPosition: () => null,
+    ProtocolHistorySample: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,
     ReserveSummary: () => null,
@@ -338,12 +364,12 @@ export const exchange = cacheExchange({
     SwapPendingSignature: () => null,
     SwapQuote: () => null,
     SwapQuoteCosts: () => null,
-    TokenInfo: () => null,
     TransactionRequest: () => null,
     TypeDefinition: () => null,
     TypeField: () => null,
     UserBalance: () => null,
     UserBorrowItem: () => null,
+    UserRiskPremiumBreakdownItem: () => null,
     UserSummary: () => null,
     UserSummaryHistoryItem: () => null,
     UserSupplyItem: () => null,

@@ -37,7 +37,7 @@ describe('Querying Supply APY History on Aave V4', () => {
           const { now, startDate } = getTimeWindowDates(window);
           expect(result.value).toBeArrayWithElements(
             expect.objectContaining({
-              __typename: 'APYSample',
+              __typename: 'ApySample',
               date: expect.toBeBetweenDates(startDate, now),
               avgRate: expect.any(Object),
             }),

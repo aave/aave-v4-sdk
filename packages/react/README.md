@@ -57,8 +57,13 @@ export function App() {
 That's it—you can now start using AaveKit React hooks.
 
 ```tsx
+import { useChains } from '@aave/react';
+import { ChainsFilter } from '@aave/react';
+
 function ChainsList() {
-  const { data, error, loading } = useChains();
+  const { data, error, loading } = useChains({
+    query: { filter: ChainsFilter.ALL },
+  });
 
   if (loading) return <div>Loading…</div>;
 
@@ -66,8 +71,8 @@ function ChainsList() {
 
   return (
     <div>
-      {chains.map((chain) => (
-        <div key={chain.id}>{chain.name}</div>
+      {data?.map((chain) => (
+        <div key={chain.chainId}>{chain.name}</div>
       ))}
     </div>
   );

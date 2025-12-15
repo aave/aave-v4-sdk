@@ -10,11 +10,21 @@ describe('Querying Chains on Aave V4', () => {
       it.each(filter)(
         'Then it should return the expected list chains with filter %s',
         async (filter) => {
-          const result = await chains(client, filter);
+          const result = await chains(client, { query: { filter } });
           assertOk(result);
           expect(result.value).toMatchSnapshot();
         },
       );
+    });
+
+    describe('When listing supported chains by chain IDs', () => {
+      it('Then it should return the expected chains', async () => {
+        const result = await chains(client, {
+          query: { chainIds: [ETHEREUM_FORK_ID] },
+        });
+        assertOk(result);
+        expect(result.value).toMatchSnapshot();
+      });
     });
   });
 

@@ -106,7 +106,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
     });
   });
 
-  describe('When fetching user history by tx hash', () => {
+  describe('When fetching activities by tx hash', () => {
     beforeAll(async () => {
       const setup = await reserves(client, {
         query: {
