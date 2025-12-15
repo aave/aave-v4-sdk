@@ -11,6 +11,7 @@
     "@aave/cli": "4.0.0"
   },
   "changesets": [
+    "clear-ears-smash",
     "clever-symbols-search",
     "crazy-teams-attack",
     "cuddly-apples-flash",
@@ -30,11 +31,13 @@
     "real-numbers-do",
     "rich-bikes-marry",
     "salty-berries-hang",
+    "silent-waves-agree",
     "silly-shirts-raise",
     "silver-mugs-wait",
     "small-terms-open",
     "ten-bags-bake",
     "wacky-weeks-allow",
+    "warm-lilies-marry",
     "whole-deer-scream",
     "witty-meals-turn"
   ]

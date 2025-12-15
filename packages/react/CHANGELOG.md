@@ -1,5 +1,19 @@
 # @aave/react
 
+## 4.0.0-next.9
+
+### Patch Changes
+
+- f5950a3: **feat:** updates PreviewUserPosition fragment.
+- 453e6da: **fix:** export missing types and adjust GQL schema.
+- Updated dependencies [2f31f53]
+- Updated dependencies [f5950a3]
+- Updated dependencies [453e6da]
+  - @aave/types@1.0.0-next.5
+  - @aave/graphql@1.0.0-next.8
+  - @aave/client@4.0.0-next.9
+  - @aave/core@1.0.0-next.6
+
 ## 4.0.0-next.8
 
 ### Minor Changes

@@ -1,5 +1,14 @@
 # @aave/graphql
 
+## 1.0.0-next.8
+
+### Patch Changes
+
+- f5950a3: **feat:** updates PreviewUserPosition fragment.
+- 453e6da: **fix:** export missing types and adjust GQL schema.
+- Updated dependencies [2f31f53]
+  - @aave/types@1.0.0-next.5
+
 ## 1.0.0-next.7
 
 ### Minor Changes
