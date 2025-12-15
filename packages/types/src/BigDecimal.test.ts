@@ -10,10 +10,13 @@ describe('Given a BigDecimal class', () => {
   });
 
   describe('When serializing as JSON', () => {
-    it('Then it should return the string representation of the number', () => {
-      const number = bigDecimal('0.1234567890134567890123456789');
-      expect(JSON.stringify(number)).toBe('"0.1234567890134567890123456789"');
-    });
+    it.each(['0.1234567890134567890123456789', '0.000000001'])(
+      'Then it should return the string representation of the number %s',
+      (value) => {
+        const number = bigDecimal(value);
+        expect(JSON.stringify(number)).toBe(`"${value}"`);
+      },
+    );
   });
 
   describe('When using BigDecimal#valueOf is invoked', () => {

@@ -17,15 +17,13 @@ import {
   type RepayRequest,
   SetSpokeUserPositionManagerQuery,
   type SetSpokeUserPositionManagerRequest,
-  SetUserSupplyAsCollateralQuery,
-  type SetUserSupplyAsCollateralRequest,
+  SetUserSuppliesAsCollateralQuery,
+  type SetUserSuppliesAsCollateralRequest,
   SupplyQuery,
   type SupplyRequest,
   type TransactionRequest,
-  UpdateUserDynamicConfigQuery,
-  type UpdateUserDynamicConfigRequest,
-  UpdateUserRiskPremiumQuery,
-  type UpdateUserRiskPremiumRequest,
+  UpdateUserPositionConditionsQuery,
+  type UpdateUserPositionConditionsRequest,
   WithdrawQuery,
   type WithdrawRequest,
 } from '@aave/graphql';
@@ -35,6 +33,7 @@ import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
   type RequestPolicyOptions,
+  type TimeWindowQueryOptions,
 } from '../options';
 
 /**
@@ -232,12 +231,13 @@ export function renounceSpokeUserPositionManager(
 }
 
 /**
- * Creates a transaction to update user dynamic config for a specific spoke.
+ * Creates a transaction to update user position conditions (dynamic config and/or risk premium).
  *
  * ```ts
- * const result = await updateUserDynamicConfig(client, {
- *   sender: evmAddress('0x9abc…'),
- *   spoke: spokeId('SGVsbG8h'),
+ * const result = await updateUserPositionConditions(client, {
+ *   userPositionId: userPositionId('SGVsbG8h'),
+ *   dynamicConfig: true,
+ *   riskPremium: true,
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
@@ -250,44 +250,14 @@ export function renounceSpokeUserPositionManager(
  *
  *
  * @param client - Aave client.
- * @param request - The update user dynamic config request parameters.
+ * @param request - The update user position conditions request parameters.
  * @returns The transaction data.
  */
-
-export function updateUserDynamicConfig(
+export function updateUserPositionConditions(
   client: AaveClient,
-  request: UpdateUserDynamicConfigRequest,
+  request: UpdateUserPositionConditionsRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
-  return client.query(UpdateUserDynamicConfigQuery, { request });
-}
-
-/**
- * Creates a transaction to update user risk premium for a specific spoke.
- *
- * ```ts
- * const result = await updateUserRiskPremium(client, {
- *   sender: evmAddress('0x9abc…'),
- *   spoke: spokeId('SGVsbG8h'),
- * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
- *
- * if (result.isErr()) {
- *   // Handle error
- *   return;
- * }
- *
- * // result.value: TxHash
- * ```
- *
- *
- * @param client - Aave client.
- * @param request - The update user risk premium request parameters.
- * @returns The transaction data.
- */
-export function updateUserRiskPremium(
-  client: AaveClient,
-  request: UpdateUserRiskPremiumRequest,
-): ResultAsync<TransactionRequest, UnexpectedError> {
-  return client.query(UpdateUserRiskPremiumQuery, { request });
+  return client.query(UpdateUserPositionConditionsQuery, { request });
 }
 
 /**
@@ -401,25 +371,29 @@ export function preview(
 }
 
 /**
- * Sets whether a user's supply should be used as collateral.
+ * Updates the collateral status of user's supplies.
  *
  * ```ts
- * const result = await setUserSupplyAsCollateral(client, {
- *   reserve: reserveId('SGVsbG8h'),
- *   sender: evmAddress('0x456...'),
- *   enableCollateral: true
+ * const result = await setUserSuppliesAsCollateral(client, {
+ *   changes: [
+ *     {
+ *       reserve: reserveId('SGVsbG8h'),
+ *       enableCollateral: true
+ *     }
+ *   ],
+ *   sender: evmAddress('0x456...')
  * });
  * ```
  *
  * @param client - Aave client.
- * @param request - The set user supply as collateral request parameters.
- * @returns The transaction request to set collateral status.
+ * @param request - The request parameters.
+ * @returns The transaction request to update collateral status.
  */
-export function setUserSupplyAsCollateral(
+export function setUserSuppliesAsCollateral(
   client: AaveClient,
-  request: SetUserSupplyAsCollateralRequest,
+  request: SetUserSuppliesAsCollateralRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
-  return client.query(SetUserSupplyAsCollateralQuery, { request });
+  return client.query(SetUserSuppliesAsCollateralQuery, { request });
 }
 
 /**
@@ -443,11 +417,17 @@ export function setUserSupplyAsCollateral(
 export function activities(
   client: AaveClient,
   request: ActivitiesRequest,
-  options: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+  options: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedActivitiesResult, UnexpectedError> {
   return client.query(
     ActivitiesQuery,
-    { request, currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency },
+    {
+      request,
+      currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
+      timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+    },
     {
       requestPolicy:
         options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,

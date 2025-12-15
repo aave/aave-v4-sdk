@@ -1,20 +1,21 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
 import { reserve, reserves } from '@aave/client/actions';
 import {
-  type APYSample,
-  type BorrowAPYHistoryRequest,
+  type ApySample,
   BorrowApyHistoryQuery,
+  type BorrowApyHistoryRequest,
   type Reserve,
   ReserveQuery,
   type ReserveRequest,
   ReservesQuery,
   type ReservesRequest,
-  type SupplyAPYHistoryRequest,
   SupplyApyHistoryQuery,
+  type SupplyApyHistoryRequest,
 } from '@aave/graphql';
 import type { NullishDeep, Prettify } from '@aave/types';
 import { useAaveClient } from './context';
@@ -32,7 +33,9 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseReserveArgs = Prettify<ReserveRequest & CurrencyQueryOptions>;
+export type UseReserveArgs = Prettify<
+  ReserveRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch a specific reserve by reserve ID, spoke, and chain.
@@ -99,6 +102,7 @@ export function useReserve({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseReserveArgs> & {
   suspense?: boolean;
@@ -109,6 +113,7 @@ export function useReserve({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -141,20 +146,25 @@ export function useReserve({
  * ```
  */
 export function useReserveAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReserveRequest, Reserve | null, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: ReserveRequest) =>
-      reserve(client, request, { currency: options.currency }),
-    [client, options.currency],
+      reserve(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 
 export type UseReservesArgs<T = Reserve[]> = Prettify<
   ReservesRequest &
-    CurrencyQueryOptions & {
+    CurrencyQueryOptions &
+    TimeWindowQueryOptions & {
       /**
        * A function that maps the full list of reserves
        * into a derived or narrowed value.
@@ -308,6 +318,7 @@ export function useReserves<T = Reserve[]>({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   selector,
   ...request
 }: NullishDeep<UseReservesArgs<T>> & {
@@ -319,6 +330,7 @@ export function useReserves<T = Reserve[]>({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -387,18 +399,22 @@ export function useReserves<T = Reserve[]>({
  * ```
  */
 export function useReservesAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReservesRequest, Reserve[], UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: ReservesRequest) =>
-      reserves(client, request, { currency: options.currency }),
-    [client, options.currency],
+      reserves(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 
-export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
+export type UseBorrowApyHistoryArgs = BorrowApyHistoryRequest;
 
 /**
  * Fetch borrow APY history for a specific reserve over time.
@@ -415,7 +431,7 @@ export type UseBorrowApyHistoryArgs = BorrowAPYHistoryRequest;
  */
 export function useBorrowApyHistory(
   args: UseBorrowApyHistoryArgs & Suspendable,
-): SuspenseResult<APYSample[]>;
+): SuspenseResult<ApySample[]>;
 /**
  * Fetch borrow APY history for a specific reserve over time.
  *
@@ -432,7 +448,7 @@ export function useBorrowApyHistory(
  */
 export function useBorrowApyHistory(
   args: Pausable<UseBorrowApyHistoryArgs> & Suspendable,
-): PausableSuspenseResult<APYSample[]>;
+): PausableSuspenseResult<ApySample[]>;
 /**
  * Fetch borrow APY history for a specific reserve over time.
  *
@@ -445,7 +461,7 @@ export function useBorrowApyHistory(
  */
 export function useBorrowApyHistory(
   args: UseBorrowApyHistoryArgs,
-): ReadResult<APYSample[]>;
+): ReadResult<ApySample[]>;
 /**
  * Fetch borrow APY history for a specific reserve over time.
  *
@@ -461,7 +477,7 @@ export function useBorrowApyHistory(
  */
 export function useBorrowApyHistory(
   args: Pausable<UseBorrowApyHistoryArgs>,
-): PausableReadResult<APYSample[]>;
+): PausableReadResult<ApySample[]>;
 
 export function useBorrowApyHistory({
   suspense = false,
@@ -470,7 +486,7 @@ export function useBorrowApyHistory({
 }: NullishDeep<UseBorrowApyHistoryArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<APYSample[], UnexpectedError> {
+}): SuspendableResult<ApySample[], UnexpectedError> {
   return useSuspendableQuery({
     document: BorrowApyHistoryQuery,
     variables: {
@@ -482,7 +498,7 @@ export function useBorrowApyHistory({
   });
 }
 
-export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
+export type UseSupplyApyHistoryArgs = SupplyApyHistoryRequest;
 
 /**
  * Fetch supply APY history for a specific reserve over time.
@@ -499,7 +515,7 @@ export type UseSupplyApyHistoryArgs = SupplyAPYHistoryRequest;
  */
 export function useSupplyApyHistory(
   args: UseSupplyApyHistoryArgs & Suspendable,
-): SuspenseResult<APYSample[]>;
+): SuspenseResult<ApySample[]>;
 /**
  * Fetch supply APY history for a specific reserve over time.
  *
@@ -516,7 +532,7 @@ export function useSupplyApyHistory(
  */
 export function useSupplyApyHistory(
   args: Pausable<UseSupplyApyHistoryArgs> & Suspendable,
-): PausableSuspenseResult<APYSample[]>;
+): PausableSuspenseResult<ApySample[]>;
 /**
  * Fetch supply APY history for a specific reserve over time.
  *
@@ -529,7 +545,7 @@ export function useSupplyApyHistory(
  */
 export function useSupplyApyHistory(
   args: UseSupplyApyHistoryArgs,
-): ReadResult<APYSample[]>;
+): ReadResult<ApySample[]>;
 /**
  * Fetch supply APY history for a specific reserve over time.
  *
@@ -545,7 +561,7 @@ export function useSupplyApyHistory(
  */
 export function useSupplyApyHistory(
   args: Pausable<UseSupplyApyHistoryArgs>,
-): PausableReadResult<APYSample[]>;
+): PausableReadResult<ApySample[]>;
 
 export function useSupplyApyHistory({
   suspense = false,
@@ -554,7 +570,7 @@ export function useSupplyApyHistory({
 }: NullishDeep<UseSupplyApyHistoryArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<APYSample[], UnexpectedError> {
+}): SuspendableResult<ApySample[], UnexpectedError> {
   return useSuspendableQuery({
     document: SupplyApyHistoryQuery,
     variables: {

@@ -138,10 +138,13 @@ describe('Supplying Assets on Aave V4', () => {
         assertOk(previewResult);
         expect(previewResult.value).toMatchSnapshot({
           id: expect.any(String),
+          borrowingPower: expect.any(Object),
           netBalance: expect.any(Object),
           netCollateral: expect.any(Object),
           netApy: expect.any(Object),
           riskPremium: expect.any(Object),
+          otherConditions: expect.any(Array),
+          projectedEarnings: expect.any(Object),
         });
       });
     });
@@ -327,10 +330,13 @@ describe('Supplying Assets on Aave V4', () => {
         assertOk(reservePreview);
         expect(reservePreview.value).toMatchSnapshot({
           id: expect.any(String),
+          borrowingPower: expect.any(Object),
           netBalance: expect.any(Object),
           netCollateral: expect.any(Object),
           netApy: expect.any(Object),
           riskPremium: expect.any(Object),
+          otherConditions: expect.any(Array),
+          projectedEarnings: expect.any(Object),
         });
       });
     });

@@ -1,7 +1,7 @@
 import { assertOk, bigDecimal, evmAddress } from '@aave/client';
 import {
   preview,
-  setUserSupplyAsCollateral,
+  setUserSuppliesAsCollateral,
   userSupplies,
 } from '@aave/client/actions';
 import {
@@ -65,9 +65,13 @@ describe('Setting Supply as Collateral on Aave V4', () => {
         assertNonEmptyArray(positions.value);
         expect(positions.value[0].isCollateral).toBe(false);
 
-        const result = await setUserSupplyAsCollateral(client, {
-          enableCollateral: true,
-          reserve: positions.value[0].reserve.id,
+        const result = await setUserSuppliesAsCollateral(client, {
+          changes: [
+            {
+              reserve: positions.value[0].reserve.id,
+              enableCollateral: true,
+            },
+          ],
           sender: evmAddress(user.account.address),
         })
           .andThen(sendWith(user))
@@ -104,9 +108,13 @@ describe('Setting Supply as Collateral on Aave V4', () => {
 
         const previewResult = await preview(client, {
           action: {
-            setUserSupplyAsCollateral: {
-              reserve: positions.value[0].reserve.id,
-              enableCollateral: !positions.value[0].isCollateral,
+            setUserSuppliesAsCollateral: {
+              changes: [
+                {
+                  reserve: positions.value[0].reserve.id,
+                  enableCollateral: !positions.value[0].isCollateral,
+                },
+              ],
               sender: evmAddress(user.account.address),
             },
           },

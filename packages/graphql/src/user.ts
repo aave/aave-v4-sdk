@@ -2,6 +2,7 @@ import {
   UserBalanceFragment,
   UserBorrowItemFragment,
   UserPositionFragment,
+  UserRiskPremiumBreakdownItemFragment,
   UserSummaryFragment,
   UserSummaryHistoryItemFragment,
   UserSupplyItemFragment,
@@ -12,7 +13,7 @@ import { graphql, type RequestOf } from './graphql';
  * @internal
  */
 export const UserSuppliesQuery = graphql(
-  `query UserSupplies($request: UserSuppliesRequest!, $currency: Currency!) {
+  `query UserSupplies($request: UserSuppliesRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userSupplies(request: $request) {
       ...UserSupplyItem
     }
@@ -25,7 +26,7 @@ export type UserSuppliesRequest = RequestOf<typeof UserSuppliesQuery>;
  * @internal
  */
 export const UserBorrowsQuery = graphql(
-  `query UserBorrows($request: UserBorrowsRequest!, $currency: Currency!) {
+  `query UserBorrows($request: UserBorrowsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userBorrows(request: $request) {
       ...UserBorrowItem
     }
@@ -104,6 +105,9 @@ export type UserBalancesBySpoke = ReturnType<
 export type UserBalancesByUserPosition = ReturnType<
   typeof graphql.scalar<'UserBalancesByUserPosition'>
 >;
+export type UserBalancesByTokens = ReturnType<
+  typeof graphql.scalar<'UserBalancesByTokens'>
+>;
 
 /**
  * @internal
@@ -126,7 +130,7 @@ export type UserBalancesRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserBalancesRequestOrderBy'>
 >;
 export type UserBorrowsRequestQuery = ReturnType<
-  typeof graphql.scalar<'UserBorrowsQueryRequest'>
+  typeof graphql.scalar<'UserBorrowsRequestQuery'>
 >;
 export type UserToken = ReturnType<typeof graphql.scalar<'UserToken'>>;
 export type UserChains = ReturnType<typeof graphql.scalar<'UserChains'>>;
@@ -143,8 +147,27 @@ export type UserSummaryFilter = ReturnType<
   typeof graphql.scalar<'UserSummaryFilter'>
 >;
 export type UserSuppliesRequestQuery = ReturnType<
-  typeof graphql.scalar<'UserSuppliesQueryRequest'>
+  typeof graphql.scalar<'UserSuppliesRequestQuery'>
 >;
 export type UserSuppliesRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserSuppliesRequestOrderBy'>
+>;
+
+/**
+ * @internal
+ */
+export const UserRiskPremiumBreakdownQuery = graphql(
+  `query UserRiskPremiumBreakdown($request: UserRiskPremiumBreakdownRequest!) {
+      value: userRiskPremiumBreakdown(request: $request) {
+        ...UserRiskPremiumBreakdownItem
+      }
+    }`,
+  [UserRiskPremiumBreakdownItemFragment],
+);
+export type UserRiskPremiumBreakdownRequest = RequestOf<
+  typeof UserRiskPremiumBreakdownQuery
+>;
+
+export type UserRiskPremiumBreakdownRequestQuery = ReturnType<
+  typeof graphql.scalar<'UserRiskPremiumBreakdownRequestQuery'>
 >;

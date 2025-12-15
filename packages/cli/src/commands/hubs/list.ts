@@ -1,4 +1,5 @@
 import {
+  ChainsFilter,
   type Hub,
   type HubsRequest,
   InvariantError,
@@ -40,7 +41,9 @@ export default class ListHubs extends common.V4Command {
         });
       }
 
-      return chains(this.client).andThen((items) =>
+      return chains(this.client, {
+        query: { filter: ChainsFilter.ALL },
+      }).andThen((items) =>
         ok({
           query: {
             chainIds: items.map((item) => item.chainId),

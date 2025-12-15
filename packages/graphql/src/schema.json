@@ -11,36 +11,6 @@
     "subscriptionType": null,
     "types": [
       {
-        "kind": "OBJECT",
-        "name": "APYSample",
-        "fields": [
-          {
-            "name": "date",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "avgRate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
         "kind": "UNION",
         "name": "ActivityItem",
         "possibleTypes": [
@@ -67,8 +37,46 @@
           {
             "kind": "OBJECT",
             "name": "UsingAsCollateralActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "UpdatedDynamicConfigActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "UpdatedRiskPremiumActivity"
           }
         ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ApySample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "avgRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "OBJECT",
@@ -115,7 +123,49 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
+                "name": "ExchangeAmountWithChange",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AssetAmountWithChange",
+        "fields": [
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "exchange",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -161,6 +211,160 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "highestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lowestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AssetCategoryBorrowSample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "highestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lowestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "borrows",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AssetCategorySupplySample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "highestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lowestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "deposits",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -216,7 +420,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
@@ -228,7 +432,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
@@ -252,7 +456,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
@@ -264,57 +468,11 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
             "args": []
-          },
-          {
-            "name": "totalSuppliedFiat",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "currency",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "totalBorrowedFiat",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "currency",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
           },
           {
             "name": "supplyApy",
@@ -387,6 +545,30 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "highestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lowestApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -718,6 +900,71 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "isFork",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "CollateralFactorVariation",
+        "fields": [
+          {
+            "name": "reserveId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -872,12 +1119,12 @@
             "args": []
           },
           {
-            "name": "fiatAmount",
+            "name": "exchange",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -895,7 +1142,7 @@
             ]
           },
           {
-            "name": "fiatRate",
+            "name": "exchangeRate",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -1074,30 +1321,8 @@
         "interfaces": []
       },
       {
-        "kind": "UNION",
-        "name": "ExecutionPlan",
-        "possibleTypes": [
-          {
-            "kind": "OBJECT",
-            "name": "TransactionRequest"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "Erc20ApprovalRequired"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "PreContractActionRequired"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "InsufficientBalanceError"
-          }
-        ]
-      },
-      {
         "kind": "OBJECT",
-        "name": "FiatAmount",
+        "name": "ExchangeAmount",
         "fields": [
           {
             "name": "value",
@@ -1131,13 +1356,35 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "icon",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "decimals",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
       },
       {
         "kind": "OBJECT",
-        "name": "FiatAmountValueVariation",
+        "name": "ExchangeAmountVariation",
         "fields": [
           {
             "name": "current",
@@ -1145,7 +1392,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -1157,7 +1404,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -1168,7 +1415,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "FiatAmountWithChange",
+        "name": "ExchangeAmountWithChange",
         "fields": [
           {
             "name": "current",
@@ -1176,7 +1423,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -1207,6 +1454,28 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "ExecutionPlan",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "TransactionRequest"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Erc20ApprovalRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "PreContractActionRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -1673,7 +1942,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -1685,7 +1954,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -1697,7 +1966,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -1709,7 +1978,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -1720,8 +1989,75 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HubSummarySample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "deposits",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "borrows",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "availableLiquidity",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "utilizationRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
               }
             },
             "args": []
@@ -1914,6 +2250,114 @@
       },
       {
         "kind": "OBJECT",
+        "name": "LiquidationFeeVariation",
+        "fields": [
+          {
+            "name": "reserveId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MaxLiquidationBonusVariation",
+        "fields": [
+          {
+            "name": "reserveId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "Mutation",
         "fields": [
           {
@@ -1971,12 +2415,12 @@
             "args": []
           },
           {
-            "name": "fiatAmount",
+            "name": "exchange",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -1994,7 +2438,7 @@
             ]
           },
           {
-            "name": "fiatRate",
+            "name": "exchangeRate",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -2265,6 +2709,37 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PercentNumberChangeSnapshot",
+        "fields": [
+          {
+            "name": "before",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
               }
             },
             "args": []
@@ -2601,7 +3076,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountValueVariation",
+                "name": "ExchangeAmountVariation",
                 "ofType": null
               }
             },
@@ -2624,7 +3099,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountValueVariation",
+                "name": "ExchangeAmountVariation",
                 "ofType": null
               }
             },
@@ -2640,6 +3115,113 @@
                 }
               }
             ]
+          },
+          {
+            "name": "projectedEarnings",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "period",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "borrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "otherConditions",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "UNION",
+                    "name": "UserPositionConditionVariation",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProtocolHistorySample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "deposits",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "borrows",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "earnings",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -2697,7 +3279,7 @@
             },
             "args": [
               {
-                "name": "filter",
+                "name": "request",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {
@@ -2737,8 +3319,37 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "protocolHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ProtocolHistorySample",
+                    "ofType": null
+                  }
+                }
               }
             },
             "args": [
@@ -2785,6 +3396,64 @@
                   "ofType": {
                     "kind": "OBJECT",
                     "name": "AssetSupplySample",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "assetCategoryBorrowHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AssetCategoryBorrowSample",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "assetCategorySupplyHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AssetCategorySupplySample",
                     "ofType": null
                   }
                 }
@@ -2921,6 +3590,35 @@
                   "ofType": {
                     "kind": "OBJECT",
                     "name": "HubAsset",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "hubSummaryHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "HubSummarySample",
                     "ofType": null
                   }
                 }
@@ -3173,7 +3871,7 @@
             ]
           },
           {
-            "name": "setUserSupplyAsCollateral",
+            "name": "setUserSuppliesAsCollateral",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3219,30 +3917,7 @@
             ]
           },
           {
-            "name": "updateUserRiskPremium",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "updateUserDynamicConfig",
+            "name": "updateUserPositionConditions",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3297,7 +3972,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "APYSample",
+                    "name": "ApySample",
                     "ofType": null
                   }
                 }
@@ -3326,7 +4001,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "APYSample",
+                    "name": "ApySample",
                     "ofType": null
                   }
                 }
@@ -3564,6 +4239,35 @@
                   "ofType": {
                     "kind": "OBJECT",
                     "name": "UserSupplyItem",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "userRiskPremiumBreakdown",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "UserRiskPremiumBreakdownItem",
                     "ofType": null
                   }
                 }
@@ -4143,6 +4847,18 @@
             "args": []
           },
           {
+            "name": "liquidationFee",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "collateralRisk",
             "type": {
               "kind": "NON_NULL",
@@ -4178,6 +4894,17 @@
           },
           {
             "name": "suppliable",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "latestDynamicConfigKey",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4326,6 +5053,18 @@
             "args": []
           },
           {
+            "name": "borrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "borrowApy",
             "type": {
               "kind": "NON_NULL",
@@ -4333,6 +5072,64 @@
                 "kind": "OBJECT",
                 "name": "PercentNumber",
                 "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "maxLiquidationBonus",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "liquidationFee",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "dynamicConfigKey",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "isUsingLatestDynamicConfigKey",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -5362,6 +6159,17 @@
         "name": "TokenInfo",
         "fields": [
           {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "name",
             "type": {
               "kind": "NON_NULL",
@@ -5401,6 +6209,23 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "categories",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
               }
             },
             "args": []
@@ -5558,6 +6383,216 @@
       },
       {
         "kind": "OBJECT",
+        "name": "UpdatedDynamicConfigActivity",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "spoke",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Spoke",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "reserve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ReserveInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberChangeSnapshot",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "maxLiquidationBonus",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberChangeSnapshot",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "liquidationFee",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberChangeSnapshot",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UpdatedRiskPremiumActivity",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "spoke",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Spoke",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "premium",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberChangeSnapshot",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "UserBalance",
         "fields": [
           {
@@ -5614,12 +6649,12 @@
             "args": []
           },
           {
-            "name": "fiatAmount",
+            "name": "exchange",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -5668,6 +6703,26 @@
                 "name": "PercentNumber",
                 "ofType": null
               }
+            },
+            "args": [
+              {
+                "name": "metric",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "collateralFactor",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
             },
             "args": [
               {
@@ -5802,7 +6857,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -5825,7 +6880,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -5848,7 +6903,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -5871,7 +6926,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -5894,7 +6949,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -5960,22 +7015,64 @@
             "args": []
           },
           {
-            "name": "betterRiskPremium",
+            "name": "riskPremium",
             "type": {
               "kind": "OBJECT",
-              "name": "PercentNumber",
+              "name": "UserPositionRiskPremium",
               "ofType": null
             },
             "args": []
           },
           {
-            "name": "riskPremium",
+            "name": "liquidationPrice",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExchangeAmount",
+              "ofType": null
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "borrowingPower",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PercentNumber",
+                "name": "ExchangeAmount",
                 "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "isUsingLatestDynamicConfigKey",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -6031,6 +7128,113 @@
         "interfaces": []
       },
       {
+        "kind": "UNION",
+        "name": "UserPositionConditionVariation",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "CollateralFactorVariation"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "LiquidationFeeVariation"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "MaxLiquidationBonusVariation"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserPositionRiskPremium",
+        "fields": [
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "better",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "breakdown",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "UserRiskPremiumBreakdownItem",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserRiskPremiumBreakdownItem",
+        "fields": [
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "riskPremiumWeight",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateral",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "OBJECT",
         "name": "UserSummary",
         "fields": [
@@ -6051,7 +7255,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmountWithChange",
+                "name": "ExchangeAmountWithChange",
                 "ofType": null
               }
             },
@@ -6074,7 +7278,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -6097,7 +7301,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -6120,7 +7324,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -6155,7 +7359,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -6201,7 +7405,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -6224,7 +7428,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -6247,7 +7451,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FiatAmount",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },

@@ -1,12 +1,7 @@
-type APYSample {
-  date: DateTime!
-  avgRate: PercentNumber!
-}
-
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [ActivityFeedType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL]
+  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -18,18 +13,21 @@ input ActivitiesRequestQuery @oneOf {
   spokeId: SpokeId
   chainIds: [ChainId!]
   txHash: TxHashInput
+  userPositionId: UserPositionId
 }
 
-enum ActivityFeedType {
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity
+
+enum ActivityType {
   SUPPLY
   BORROW
   REPAY
   WITHDRAW
   LIQUIDATED
   SET_AS_COLLATERAL
+  UPDATED_DYNAMIC_CONFIG
+  UPDATED_RISK_PREMIUM
 }
-
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity
 
 scalar AlwaysTrue
 
@@ -47,11 +45,21 @@ enum ApyMetric {
   AVERAGE
 }
 
+type ApySample {
+  date: DateTime!
+  avgRate: PercentNumber!
+}
+
 type Asset {
   id: AssetId!
   token: Erc20Token!
   summary: AssetSummary!
-  price(currency: Currency! = USD): FiatAmountWithChange!
+  price(currency: Currency! = USD): ExchangeAmountWithChange!
+}
+
+type AssetAmountWithChange {
+  amount: DecimalNumberWithChange!
+  exchange(currency: Currency! = USD): ExchangeAmountWithChange!
 }
 
 input AssetBorrowHistoryRequest {
@@ -67,6 +75,32 @@ input AssetBorrowHistoryRequestQuery @oneOf {
 type AssetBorrowSample {
   date: DateTime!
   amount: DecimalNumber!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
+}
+
+input AssetCategoryBorrowHistoryRequest {
+  category: TokenCategory!
+  window: TimeWindow! = LAST_DAY
+}
+
+type AssetCategoryBorrowSample {
+  date: DateTime!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
+  borrows(currency: Currency! = USD): ExchangeAmount!
+}
+
+input AssetCategorySupplyHistoryRequest {
+  category: TokenCategory!
+  window: TimeWindow! = LAST_DAY
+}
+
+type AssetCategorySupplySample {
+  date: DateTime!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
+  deposits(currency: Currency! = USD): ExchangeAmount!
 }
 
 scalar AssetId
@@ -98,15 +132,13 @@ input AssetRequestQuery @oneOf {
 
 type AssetSummary {
   totalSupplyCap: DecimalNumberWithChange!
-  totalSupplied: DecimalNumberWithChange!
-  totalSuppliable: DecimalNumberWithChange!
+  totalSupplied: AssetAmountWithChange!
+  totalSuppliable: AssetAmountWithChange!
   totalBorrowCap: DecimalNumberWithChange!
-  totalBorrowed: DecimalNumberWithChange!
-  totalBorrowable: DecimalNumberWithChange!
-  totalSuppliedFiat(currency: Currency! = USD): FiatAmountWithChange!
-  totalBorrowedFiat(currency: Currency! = USD): FiatAmountWithChange!
+  totalBorrowed: AssetAmountWithChange!
+  totalBorrowable: AssetAmountWithChange!
 
-  """The supply APY dependent on what you pass in for the `metric`"""
+  """The supply apy dependent on what you pass in for the `metric`"""
   supplyApy(metric: ApyMetric! = AVERAGE): PercentNumber!
 
   """The borrow APY dependent on what you pass in for the `metric`"""
@@ -126,6 +158,8 @@ input AssetSupplyHistoryRequestQuery @oneOf {
 type AssetSupplySample {
   date: DateTime!
   amount: DecimalNumber!
+  highestApy: PercentNumber!
+  lowestApy: PercentNumber!
 }
 
 scalar BigDecimal
@@ -133,11 +167,6 @@ scalar BigDecimal
 scalar BigInt
 
 scalar BlockchainData
-
-input BorrowAPYHistoryRequest {
-  reserve: ReserveId!
-  window: TimeWindow! = LAST_DAY
-}
 
 type BorrowActivity {
   id: ID!
@@ -148,6 +177,11 @@ type BorrowActivity {
   reserve: ReserveInfo!
   borrowed: Erc20Amount!
   chain: Chain!
+}
+
+input BorrowApyHistoryRequest {
+  reserve: ReserveId!
+  window: TimeWindow! = LAST_DAY
 }
 
 input BorrowRequest {
@@ -196,6 +230,7 @@ type Chain {
   nativeGateway: EvmAddress!
   signatureGateway: EvmAddress!
   rpcUrl: String!
+  isFork: Boolean!
 }
 
 """A supported blockchain chain ID"""
@@ -206,10 +241,44 @@ input ChainRequest {
   chainId: ChainId!
 }
 
+input ChainTokenCategories {
+  chainId: ChainId!
+  categories: [TokenCategory!]!
+}
+
+input ChainTokenInput {
+  """The chain id"""
+  chainId: ChainId!
+
+  """The token input"""
+  token: TokenInput!
+}
+
 enum ChainsFilter {
   TESTNET_ONLY
   MAINNET_ONLY
   ALL
+}
+
+input ChainsRequest {
+  query: ChainsRequestQuery!
+}
+
+input ChainsRequestQuery @oneOf {
+  chainIds: [ChainId!]
+  filter: ChainsFilter
+}
+
+type CollateralFactorVariation {
+  reserveId: ReserveId!
+  token: Erc20Token!
+  current: PercentNumber!
+  after: PercentNumber!
+}
+
+enum CollateralMetric {
+  HIGHEST
+  LOWEST
 }
 
 enum Currency {
@@ -247,6 +316,8 @@ type DomainData {
   verifyingContract: EvmAddress!
 }
 
+scalar DynamicConfigKey
+
 input ERC20PermitSignature {
   """The signature for the erc721"""
   value: Signature!
@@ -255,15 +326,19 @@ input ERC20PermitSignature {
   deadline: Int!
 }
 
+enum EarningPeriod {
+  ANNUAL
+}
+
 type Erc20Amount {
   """The value"""
   amount: DecimalNumber!
 
-  """The fiat amount"""
-  fiatAmount(currency: Currency! = USD): FiatAmount!
+  """The exchange amount"""
+  exchange(currency: Currency! = USD): ExchangeAmount!
 
-  """The fiat rate"""
-  fiatRate(currency: Currency! = USD): DecimalNumber!
+  """The exchange rate"""
+  exchangeRate(currency: Currency! = USD): DecimalNumber!
   isWrappedNative: Boolean!
   token: Erc20Token!
 }
@@ -316,6 +391,24 @@ type Erc20Token {
 
 scalar EvmAddress
 
+type ExchangeAmount {
+  value: BigDecimal!
+  name: String!
+  symbol: String!
+  icon: String!
+  decimals: Int!
+}
+
+type ExchangeAmountVariation {
+  current: ExchangeAmount!
+  after: ExchangeAmount!
+}
+
+type ExchangeAmountWithChange {
+  current: ExchangeAmount!
+  change(window: TimeWindow! = LAST_DAY): PercentNumber!
+}
+
 input ExchangeRateRequest {
   """The from criteria"""
   from: ExchangeRateRequestFrom!
@@ -341,22 +434,6 @@ input ExchangeRateRequestFrom @oneOf {
 }
 
 union ExecutionPlan = TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired | InsufficientBalanceError
-
-type FiatAmount {
-  value: BigDecimal!
-  name: String!
-  symbol: String!
-}
-
-type FiatAmountValueVariation {
-  current: FiatAmount!
-  after: FiatAmount!
-}
-
-type FiatAmountWithChange {
-  current: FiatAmount!
-  change(window: TimeWindow! = LAST_DAY): PercentNumber!
-}
 
 input ForkTopUpErc20 {
   """The token address"""
@@ -480,13 +557,13 @@ type HubAssetSummary {
   """The available liquidity"""
   availableLiquidity: Erc20Amount!
 
-  """The supply APY"""
+  """The supply apy"""
   supplyApy: PercentNumber!
 
-  """The borrow APY"""
+  """The borrow apy"""
   borrowApy: PercentNumber!
 
-  """The net APY"""
+  """The net apy"""
   netApy: PercentNumber!
 
   """The utilization rate"""
@@ -542,29 +619,46 @@ input HubRequestQuery @oneOf {
 
 type HubSummary {
   """
-  The total spoke reserves aggregated borrowed using this hub, showed in fiat as each asset has a different value
+  The total spoke reserves aggregated borrowed using this hub, showed in exchange amount as each asset has a different value
   """
-  totalBorrowed: FiatAmount!
+  totalBorrowed: ExchangeAmountWithChange!
 
   """
-  The total spoke reserves aggregated borrow caps using this hub, showed in fiat as each asset has a different value
+  The total spoke reserves aggregated borrow caps using this hub, showed in exchange amount as each asset has a different value
   """
-  totalBorrowCap: FiatAmount!
+  totalBorrowCap: ExchangeAmount!
 
   """
-  The total spoke reserves aggregated supplied using this hub, showed in fiat as each asset has a different value
+  The total spoke reserves aggregated supplied using this hub, showed in exchange amount as each asset has a different value
   """
-  totalSupplied: FiatAmount!
+  totalSupplied: ExchangeAmountWithChange!
 
   """
-  The total spoke reserves aggregated supply caps using this hub, showed in fiat as each asset has a different value
+  The total spoke reserves aggregated supply caps using this hub, showed in exchange amount as each asset has a different value
   """
-  totalSupplyCap: FiatAmount!
+  totalSupplyCap: ExchangeAmount!
 
-  """
-  The utilization rate"
-  """
-  utilizationRate: BigDecimal!
+  """The utilization rate"""
+  utilizationRate: PercentNumber!
+}
+
+input HubSummaryHistoryRequest {
+  query: HubSummaryHistoryRequestQuery!
+  currency: Currency! = USD
+  window: TimeWindow! = LAST_DAY
+}
+
+input HubSummaryHistoryRequestQuery @oneOf {
+  hubInput: HubInput
+  hubId: HubId
+}
+
+type HubSummarySample {
+  date: DateTime!
+  deposits: ExchangeAmount!
+  borrows: ExchangeAmount!
+  availableLiquidity: ExchangeAmount!
+  utilizationRate: PercentNumber!
 }
 
 input HubTokenInput {
@@ -647,6 +741,20 @@ type LiquidatedActivity {
   chain: Chain!
 }
 
+type LiquidationFeeVariation {
+  reserveId: ReserveId!
+  token: Erc20Token!
+  current: PercentNumber!
+  after: PercentNumber!
+}
+
+type MaxLiquidationBonusVariation {
+  reserveId: ReserveId!
+  token: Erc20Token!
+  current: PercentNumber!
+  after: PercentNumber!
+}
+
 type Mutation {
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
@@ -659,11 +767,11 @@ type NativeAmount {
   """The value"""
   amount: DecimalNumber!
 
-  """The fiat amount"""
-  fiatAmount(currency: Currency! = USD): FiatAmount!
+  """The exchange amount"""
+  exchange(currency: Currency! = USD): ExchangeAmount!
 
-  """The fiat rate"""
-  fiatRate(currency: Currency! = USD): DecimalNumber!
+  """The exchange rate"""
+  exchangeRate(currency: Currency! = USD): DecimalNumber!
 }
 
 type NativeToken {
@@ -739,6 +847,11 @@ type PercentNumber {
 
   """The human-friendly percentage value formatted for display."""
   normalized: BigDecimal!
+}
+
+type PercentNumberChangeSnapshot {
+  before: PercentNumber!
+  after: PercentNumber!
 }
 
 type PercentNumberVariation {
@@ -822,7 +935,8 @@ input PreviewAction @oneOf {
   borrow: BorrowRequest
   repay: RepayRequest
   withdraw: WithdrawRequest
-  setUserSupplyAsCollateral: SetUserSupplyAsCollateralRequest
+  setUserSuppliesAsCollateral: SetUserSuppliesAsCollateralRequest
+  updateUserPositionConditions: UpdateUserPositionConditionsRequest
 }
 
 input PreviewRequest {
@@ -834,24 +948,42 @@ type PreviewUserPosition {
   healthFactor: HealthFactorResult!
   riskPremium: PercentNumberVariation!
 
-  """The net APY for one user position on a current spoke"""
+  """The net apy for one user position on a current spoke"""
   netApy: PercentNumberVariation!
-  netCollateral(currency: Currency! = USD): FiatAmountValueVariation!
-  netBalance(currency: Currency! = USD): FiatAmountValueVariation!
+  netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
+  netBalance(currency: Currency! = USD): ExchangeAmountVariation!
+  projectedEarnings(period: EarningPeriod! = ANNUAL): ExchangeAmountVariation!
+  borrowingPower: ExchangeAmountVariation!
+  otherConditions: [UserPositionConditionVariation!]!
+}
+
+input ProtocolHistoryRequest {
+  currency: Currency! = USD
+  window: TimeWindow! = LAST_DAY
+}
+
+type ProtocolHistorySample {
+  date: DateTime!
+  deposits: ExchangeAmount!
+  borrows: ExchangeAmount!
+  earnings: ExchangeAmount!
 }
 
 type Query {
   health: Boolean!
   chain(request: ChainRequest!): Chain
-  chains(filter: ChainsFilter!): [Chain!]!
+  chains(request: ChainsRequest!): [Chain!]!
 
   """Generate EIP-712 typed data for EIP-2612 permit signature"""
   permitTypedData(request: PermitRequest!): PermitTypedDataResponse!
 
   """Get the exchange rate of tokens > currency or currency > currency"""
-  exchangeRate(request: ExchangeRateRequest!): FiatAmount!
+  exchangeRate(request: ExchangeRateRequest!): ExchangeAmount!
+  protocolHistory(request: ProtocolHistoryRequest!): [ProtocolHistorySample!]!
   asset(request: AssetRequest!): Asset
   assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
+  assetCategoryBorrowHistory(request: AssetCategoryBorrowHistoryRequest!): [AssetCategoryBorrowSample!]!
+  assetCategorySupplyHistory(request: AssetCategorySupplyHistoryRequest!): [AssetCategorySupplySample!]!
   assetBorrowHistory(request: AssetBorrowHistoryRequest!): [AssetBorrowSample!]!
   assetPriceHistory(request: AssetPriceHistoryRequest!): [AssetPriceSample!]!
 
@@ -859,6 +991,7 @@ type Query {
   hubs(request: HubsRequest!): [Hub!]!
   hub(request: HubRequest!): Hub
   hubAssets(request: HubAssetsRequest!): [HubAsset!]!
+  hubSummaryHistory(request: HubSummaryHistoryRequest!): [HubSummarySample!]!
   reserve(request: ReserveRequest!): Reserve
   reserves(request: ReservesRequest!): [Reserve!]!
   supply(request: SupplyRequest!): ExecutionPlan!
@@ -869,13 +1002,12 @@ type Query {
   spokeUserPositionManagers(request: SpokeUserPositionManagersRequest!): PaginatedSpokeUserPositionManagerResult!
   setSpokeUserPositionManager(request: SetSpokeUserPositionManagerRequest!): TransactionRequest!
   renounceSpokeUserPositionManager(request: RenounceSpokeUserPositionManagerRequest!): TransactionRequest!
-  setUserSupplyAsCollateral(request: SetUserSupplyAsCollateralRequest!): TransactionRequest!
+  setUserSuppliesAsCollateral(request: SetUserSuppliesAsCollateralRequest!): TransactionRequest!
   liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
-  updateUserRiskPremium(request: UpdateUserRiskPremiumRequest!): TransactionRequest!
-  updateUserDynamicConfig(request: UpdateUserDynamicConfigRequest!): TransactionRequest!
+  updateUserPositionConditions(request: UpdateUserPositionConditionsRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPosition!
-  borrowApyHistory(request: BorrowAPYHistoryRequest!): [APYSample!]!
-  supplyApyHistory(request: SupplyAPYHistoryRequest!): [APYSample!]!
+  borrowApyHistory(request: BorrowApyHistoryRequest!): [ApySample!]!
+  supplyApyHistory(request: SupplyApyHistoryRequest!): [ApySample!]!
   spoke(request: SpokeRequest!): Spoke
 
   """Lists all spokes"""
@@ -892,6 +1024,7 @@ type Query {
   userPositions(request: UserPositionsRequest!): [UserPosition!]!
   userPosition(request: UserPositionRequest!): UserPosition
   userSupplies(request: UserSuppliesRequest!): [UserSupplyItem!]!
+  userRiskPremiumBreakdown(request: UserRiskPremiumBreakdownRequest!): [UserRiskPremiumBreakdownItem!]!
 
   """
   This lets you know the API has processed the known transaction hash, as the API uses caching to make things as fast
@@ -1058,10 +1191,12 @@ input ReserveRequestQuery @oneOf {
 type ReserveSettings {
   collateralFactor: PercentNumber!
   maxLiquidationBonus: PercentNumber!
+  liquidationFee: PercentNumber!
   collateralRisk: PercentNumber!
   borrowable: Boolean!
   collateral: Boolean!
   suppliable: Boolean!
+  latestDynamicConfigKey: DynamicConfigKey!
 }
 
 type ReserveStatus {
@@ -1081,7 +1216,13 @@ type ReserveUserState {
   balance: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+  borrowingPower: Erc20Amount!
   borrowApy: PercentNumber!
+  collateralFactor: PercentNumber!
+  maxLiquidationBonus: PercentNumber!
+  liquidationFee: PercentNumber!
+  dynamicConfigKey: DynamicConfigKey!
+  isUsingLatestDynamicConfigKey: Boolean!
 }
 
 input ReservesRequest {
@@ -1103,6 +1244,7 @@ input ReservesRequest {
 enum ReservesRequestFilter {
   SUPPLY
   BORROW
+  COLLATERAL
   ALL
 }
 
@@ -1146,6 +1288,9 @@ input ReservesRequestQuery @oneOf {
 
   """Get all the reserves on based on user position id"""
   userPositionId: UserPositionId
+
+  """Get all the reserves based on the token categories"""
+  chainTokenCategories: [ChainTokenCategories!]
 }
 
 input SetSpokeUserPositionManagerRequest {
@@ -1165,15 +1310,12 @@ input SetSpokeUserPositionManagerRequest {
   signature: ERC20PermitSignature
 }
 
-input SetUserSupplyAsCollateralRequest {
-  """The reserve id"""
-  reserve: ReserveId!
+input SetUserSuppliesAsCollateralRequest {
+  """The collateral to make changes to"""
+  changes: [UserSupplyAsCollateral!]!
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
-
-  """If you want to enable the collateral or disable"""
-  enableCollateral: Boolean!
 }
 
 scalar Signature
@@ -1271,11 +1413,6 @@ input SpokesRequestQuery @oneOf {
   chainIds: [ChainId!]
 }
 
-input SupplyAPYHistoryRequest {
-  reserve: ReserveId!
-  window: TimeWindow! = LAST_DAY
-}
-
 type SupplyActivity {
   id: ID!
   user: EvmAddress!
@@ -1285,6 +1422,11 @@ type SupplyActivity {
   reserve: ReserveInfo!
   supplied: Erc20Amount!
   chain: Chain!
+}
+
+input SupplyApyHistoryRequest {
+  reserve: ReserveId!
+  window: TimeWindow! = LAST_DAY
 }
 
 input SupplyPermitRequest {
@@ -1499,7 +1641,15 @@ union Token = NativeToken | Erc20Token
 
 union TokenAmount = NativeAmount | Erc20Amount
 
+enum TokenCategory {
+  STABLECOIN
+  ETH_CORRELATED
+}
+
 type TokenInfo {
+  """The token info id"""
+  id: TokenInfoId!
+
   """The token name"""
   name: String!
 
@@ -1511,7 +1661,12 @@ type TokenInfo {
 
   """The token decimals"""
   decimals: Int!
+
+  """The token category,"""
+  categories: [TokenCategory!]!
 }
+
+scalar TokenInfoId
 
 input TokenInput @oneOf {
   """Native token"""
@@ -1547,26 +1702,33 @@ type TypeField {
   type: String!
 }
 
-input UpdateUserDynamicConfigRequest {
-  """The spoke id"""
-  spoke: SpokeId!
-
-  """The user sending the transaction (normally the user's wallet address)"""
-  sender: EvmAddress!
-
-  """If not supplied, this will use `sender` which is the normal route"""
-  onBehalfOf: EvmAddress
+input UpdateUserPositionConditionsRequest {
+  userPositionId: UserPositionId!
+  dynamicConfig: Boolean!
+  riskPremium: Boolean!
 }
 
-input UpdateUserRiskPremiumRequest {
-  """The spoke id"""
-  spoke: SpokeId!
+type UpdatedDynamicConfigActivity {
+  id: ID!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  reserve: ReserveInfo!
+  collateralFactor: PercentNumberChangeSnapshot!
+  maxLiquidationBonus: PercentNumberChangeSnapshot!
+  liquidationFee: PercentNumberChangeSnapshot!
+  chain: Chain!
+}
 
-  """The user sending the transaction (normally the user's wallet address)"""
-  sender: EvmAddress!
-
-  """If not supplied, this will use `sender` which is the normal route"""
-  onBehalfOf: EvmAddress
+type UpdatedRiskPremiumActivity {
+  id: ID!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  premium: PercentNumberChangeSnapshot!
+  chain: Chain!
 }
 
 type UserBalance {
@@ -1582,14 +1744,17 @@ type UserBalance {
   """The total amount summed across all balances"""
   totalAmount: DecimalNumber!
 
-  """The total fiat amount summed across all balances"""
-  fiatAmount(currency: Currency! = USD): FiatAmount!
+  """The total exchange amount summed across all balances"""
+  exchange(currency: Currency! = USD): ExchangeAmount!
 
-  """The supply APY dependent on what you pass in for the `metric`"""
+  """The supply apy dependent on what you pass in for the `metric`"""
   supplyApy(metric: ApyMetric! = HIGHEST): PercentNumber!
 
   """The borrow APY dependent on what you pass in for the `metric`"""
   borrowApy(metric: ApyMetric! = HIGHEST): PercentNumber!
+
+  """The collateral factor dependent on what you pass in for the `metric`"""
+  collateralFactor(metric: CollateralMetric! = HIGHEST): PercentNumber
 }
 
 scalar UserBalanceId
@@ -1633,6 +1798,16 @@ input UserBalancesBySpoke {
 
   """The chain id the spoke is deployed to"""
   chainId: ChainId!
+
+  """
+  The type of reserve to use when determine the tokens to retrieve balances for
+  """
+  byReservesType: ReservesRequestFilter! = ALL
+}
+
+input UserBalancesByTokens {
+  """The chain token input"""
+  chainTokens: [ChainTokenInput!]!
 
   """
   The type of reserve to use when determine the tokens to retrieve balances for
@@ -1684,6 +1859,9 @@ input UserBalancesRequestFilter @oneOf {
   The balances for the tokens of the spoke associated with the given user position
   """
   userPosition: UserBalancesByUserPosition
+
+  """The balances for the chains tokens"""
+  tokens: UserBalancesByTokens
 }
 
 input UserBalancesRequestOrderBy @oneOf {
@@ -1721,15 +1899,8 @@ type UserBorrowItem {
 
 scalar UserBorrowItemId
 
-input UserBorrowsQueryRequest @oneOf {
-  userSpoke: UserSpokeInput
-  userToken: UserToken
-  userPositionId: UserPositionId
-  userChains: UserChains
-}
-
 input UserBorrowsRequest {
-  query: UserBorrowsQueryRequest!
+  query: UserBorrowsRequestQuery!
   orderBy: UserBorrowsRequestOrderBy! = {amount: DESC}
 
   """If you wish to include zero balances in the results"""
@@ -1743,9 +1914,30 @@ input UserBorrowsRequestOrderBy @oneOf {
   apy: OrderDirection
 }
 
+input UserBorrowsRequestQuery @oneOf {
+  userSpoke: UserSpokeInput
+  userToken: UserToken
+  userPositionId: UserPositionId
+  userChains: UserChains
+  userHub: UserHub
+}
+
 input UserChains {
   user: EvmAddress!
   chainIds: [ChainId!]!
+}
+
+input UserHub {
+  """The user address"""
+  user: EvmAddress!
+
+  """The user hub input"""
+  hub: UserHubInput!
+}
+
+input UserHubInput @oneOf {
+  input: HubInput
+  id: HubId
 }
 
 type UserPosition {
@@ -1755,37 +1947,47 @@ type UserPosition {
   """The user holding this position"""
   user: EvmAddress!
   createdAt: DateTime!
-  totalSupplied(currency: Currency! = USD): FiatAmountWithChange!
+  totalSupplied(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """
   Total collateral which is the full some of the assets supplied which are enabled as collateral
   """
-  totalCollateral(currency: Currency! = USD): FiatAmountWithChange!
+  totalCollateral(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """Total debt which is the total amount borrowed plus the accrued premium"""
-  totalDebt(currency: Currency! = USD): FiatAmountWithChange!
+  totalDebt(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """The net balance which is `total_supplied` - `borrows`"""
-  netBalance(currency: Currency! = USD): FiatAmountWithChange!
+  netBalance(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """The net collateral which is `totalCollateral` - `totalDebt`"""
-  netCollateral(currency: Currency! = USD): FiatAmountWithChange!
+  netCollateral(currency: Currency! = USD): ExchangeAmountWithChange!
   netApy: PercentNumber!
   netSupplyApy: PercentNumberWithChange!
   netBorrowApy: PercentNumberWithChange!
   healthFactor: HealthFactorWithChange!
-  betterRiskPremium: PercentNumber
-  riskPremium: PercentNumber!
+  riskPremium: UserPositionRiskPremium
+  liquidationPrice(currency: Currency! = USD): ExchangeAmount
+  borrowingPower(currency: Currency! = USD): ExchangeAmount!
+  isUsingLatestDynamicConfigKey: Boolean!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentNumber!
   spoke: Spoke!
   averageCollateralFactor: PercentNumber!
 }
+
+union UserPositionConditionVariation = CollateralFactorVariation | LiquidationFeeVariation | MaxLiquidationBonusVariation
 
 scalar UserPositionId
 
 input UserPositionRequest @oneOf {
   userSpoke: UserSpokeInput
   id: UserPositionId
+}
+
+type UserPositionRiskPremium {
+  current: PercentNumber!
+  better: PercentNumber
+  breakdown: [UserRiskPremiumBreakdownItem!]!
 }
 
 input UserPositionsRequest {
@@ -1812,6 +2014,22 @@ input UserPositionsRequestOrderBy @oneOf {
   netCollateral: OrderDirection
 }
 
+type UserRiskPremiumBreakdownItem {
+  token: Erc20Token!
+  riskPremiumWeight: PercentNumber!
+  collateral: PercentNumber!
+}
+
+input UserRiskPremiumBreakdownRequest {
+  query: UserRiskPremiumBreakdownRequestQuery!
+  user: EvmAddress!
+}
+
+input UserRiskPremiumBreakdownRequestQuery @oneOf {
+  userSpoke: UserSpokeInput
+  userPositionId: UserPositionId
+}
+
 input UserSpokeInput {
   spoke: SpokeId!
   user: EvmAddress!
@@ -1821,16 +2039,16 @@ type UserSummary {
   totalPositions: Int!
 
   """Net balance = supply - debt"""
-  netBalance(currency: Currency! = USD): FiatAmountWithChange!
+  netBalance(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """Total supply where is_collateral is true"""
-  totalCollateral(currency: Currency! = USD): FiatAmount!
+  totalCollateral(currency: Currency! = USD): ExchangeAmount!
 
   """Total supplied across all positions"""
-  totalSupplied(currency: Currency! = USD): FiatAmount!
+  totalSupplied(currency: Currency! = USD): ExchangeAmount!
 
   """Total debt across all positions"""
-  totalDebt(currency: Currency! = USD): FiatAmount!
+  totalDebt(currency: Currency! = USD): ExchangeAmount!
 
   """
   Net APY = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
@@ -1838,7 +2056,7 @@ type UserSummary {
   netApy: PercentNumber!
 
   """Interest earned (net fee earned)"""
-  netFeeEarned: FiatAmount!
+  netFeeEarned: ExchangeAmount!
 
   """Lowest health factor across all positions"""
   lowestHealthFactor: BigDecimal
@@ -1856,13 +2074,13 @@ type UserSummaryHistoryItem {
   date: DateTime!
 
   """The aggregated net balance for the time period"""
-  netBalance(currency: Currency! = USD): FiatAmount!
+  netBalance(currency: Currency! = USD): ExchangeAmount!
 
   """The aggregated borrows for the time period"""
-  borrows(currency: Currency! = USD): FiatAmount!
+  borrows(currency: Currency! = USD): ExchangeAmount!
 
   """The aggregated supplies for the time period"""
-  supplies(currency: Currency! = USD): FiatAmount!
+  supplies(currency: Currency! = USD): ExchangeAmount!
 }
 
 input UserSummaryHistoryRequest {
@@ -1876,15 +2094,8 @@ input UserSummaryRequest {
   filter: UserSummaryFilter
 }
 
-input UserSuppliesQueryRequest @oneOf {
-  userSpoke: UserSpokeInput
-  userToken: UserToken
-  userPositionId: UserPositionId
-  userChains: UserChains
-}
-
 input UserSuppliesRequest {
-  query: UserSuppliesQueryRequest!
+  query: UserSuppliesRequestQuery!
   orderBy: UserSuppliesRequestOrderBy! = {amount: DESC}
 
   """If you wish to include zero balances in the results"""
@@ -1896,6 +2107,22 @@ input UserSuppliesRequestOrderBy @oneOf {
   created: OrderDirection
   amount: OrderDirection
   apy: OrderDirection
+}
+
+input UserSuppliesRequestQuery @oneOf {
+  userSpoke: UserSpokeInput
+  userToken: UserToken
+  userPositionId: UserPositionId
+  userChains: UserChains
+  userHub: UserHub
+}
+
+input UserSupplyAsCollateral {
+  """The reserve id"""
+  reserve: ReserveId!
+
+  """If you want to enable the collateral or disable"""
+  enableCollateral: Boolean!
 }
 
 type UserSupplyItem {
