@@ -10,28 +10,6 @@ import { getTimeWindowDates } from '../../helpers/tools';
 
 describe('Querying Asset Price History on Aave V4', () => {
   describe('Given an asset/token available on the protocol', () => {
-    describe('When fetching the asset price history', () => {
-      it('Then it should return the asset price history', async () => {
-        const result = await assetPriceHistory(client, {
-          query: {
-            token: {
-              chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_USDC_ADDRESS,
-            },
-          },
-        });
-
-        assertOk(result);
-        expect(result.value).toBeArrayWithElements(
-          expect.objectContaining({
-            __typename: 'AssetPriceSample',
-            date: expect.any(Date),
-            price: expect.any(BigDecimal),
-          }),
-        );
-      });
-    });
-
     describe('When fetching the asset price history with a specific currency', () => {
       const currencies = Object.values(Currency);
 

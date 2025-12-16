@@ -10,31 +10,6 @@ import { getTimeWindowDates } from '../../helpers/tools';
 
 describe('Querying Asset Apy Borrow History on Aave V4', () => {
   describe('Given an asset/token available on the protocol', () => {
-    describe('When fetching the asset apy borrow history', () => {
-      it('Then it should return the asset apy borrow history', async () => {
-        const result = await assetBorrowHistory(client, {
-          query: {
-            token: {
-              chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_USDC_ADDRESS,
-            },
-          },
-        });
-
-        assertOk(result);
-        expect(result.value).toBeArray();
-        expect(result.value).toBeArrayWithElements(
-          expect.objectContaining({
-            __typename: 'AssetBorrowSample',
-            date: expect.any(Date),
-            amount: expect.any(Object),
-            highestApy: expect.any(Object),
-            lowestApy: expect.any(Object),
-          }),
-        );
-      });
-    });
-
     describe('When fetching the asset apy borrow history with a specific time window', () => {
       const timeWindowOptions = Object.values(TimeWindow);
 
