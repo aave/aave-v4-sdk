@@ -1704,8 +1704,7 @@ type TypeField {
 
 input UpdateUserPositionConditionsRequest {
   userPositionId: UserPositionId!
-  dynamicConfig: Boolean!
-  riskPremium: Boolean!
+  update: UserPositionConditionsUpdate!
 }
 
 type UpdatedDynamicConfigActivity {
@@ -1976,6 +1975,11 @@ type UserPosition {
 }
 
 union UserPositionConditionVariation = CollateralFactorVariation | LiquidationFeeVariation | MaxLiquidationBonusVariation
+
+enum UserPositionConditionsUpdate {
+  ALL_DYNAMIC_CONFIG
+  JUST_RISK_PREMIUM
+}
 
 scalar UserPositionId
 
