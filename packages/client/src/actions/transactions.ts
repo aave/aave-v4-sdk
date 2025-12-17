@@ -236,8 +236,7 @@ export function renounceSpokeUserPositionManager(
  * ```ts
  * const result = await updateUserPositionConditions(client, {
  *   userPositionId: userPositionId('SGVsbG8h'),
- *   dynamicConfig: true,
- *   riskPremium: true,
+ *   update: UserPositionConditionsUpdate.AllDynamicConfig,
  * }).andThen(sendWith(wallet)).andThen(client.waitForTransaction);
  *
  * if (result.isErr()) {
