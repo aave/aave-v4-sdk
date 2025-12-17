@@ -6,8 +6,11 @@ import {
   evmAddress,
   type HubId,
   hubId,
+  local,
+  production,
   type SpokeId,
   spokeId,
+  staging,
 } from '@aave/client';
 import { Command, Flags } from '@oclif/core';
 import TtyTable from 'tty-table';
@@ -41,12 +44,19 @@ export const address = Flags.custom<EvmAddress>({
   helpValue: '<evm-address>',
 });
 
+const environment =
+  process.env.ENVIRONMENT === 'staging'
+    ? staging
+    : process.env.ENVIRONMENT === 'local'
+      ? local
+      : production;
+
 export abstract class V4Command extends Command {
   protected headers: TtyTable.Header[] = [];
 
   public static enableJsonFlag = true;
 
-  protected client = AaveClient.create();
+  protected client = AaveClient.create({ environment: environment });
 
   protected display(rows: unknown[]) {
     const out = TtyTable(this.headers, rows).render();
