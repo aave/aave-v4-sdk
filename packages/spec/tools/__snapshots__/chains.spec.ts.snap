@@ -12,10 +12,12 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to fetch a single c
   "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
   "nativeInfo": {
     "__typename": "TokenInfo",
-    "categories": [],
+    "categories": [
+      "ETH_CORRELATED",
+    ],
     "decimals": 18,
     "icon": "https://statics.aave.com/ethereum.svg",
-    "id": "RXRoZXI=",
+    "id": "RXRoZXI6OkVUSA==",
     "name": "Ether",
     "symbol": "ETH",
   },
@@ -38,10 +40,12 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
     "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
@@ -65,10 +69,12 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
     "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
@@ -87,10 +93,12 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
     "nativeGateway": "0xaFFeb64d35B9b7e540A43E1F3482Dd77A88912d1",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
@@ -116,10 +124,12 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
     "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
@@ -138,10 +148,12 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
     "nativeGateway": "0xaFFeb64d35B9b7e540A43E1F3482Dd77A88912d1",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },

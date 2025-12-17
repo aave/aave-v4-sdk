@@ -15,10 +15,12 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
     "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
@@ -47,10 +49,12 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
     "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
@@ -79,10 +83,12 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
     "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
@@ -111,10 +117,12 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
     "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
-      "categories": [],
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI=",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },

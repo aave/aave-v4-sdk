@@ -314,6 +314,7 @@ export const exchange = cacheExchange({
     // Value objects and result types
     ApySample: () => null,
     Asset: () => null,
+    AssetAmountWithChange: () => null,
     AssetBorrowSample: () => null,
     AssetCategoryBorrowSample: () => null,
     AssetCategorySupplySample: () => null,

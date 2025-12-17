@@ -71,7 +71,9 @@ export function asset(
  *
  * ```ts
  * const result = await assetPriceHistory(client, {
- *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   query: {
+ *     token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   },
  *   currency: Currency.Usd,
  *   window: TimeWindow.LastWeek,
  * });
@@ -102,7 +104,9 @@ export function assetPriceHistory(
  *
  * ```ts
  * const result = await assetSupplyHistory(client, {
- *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   query: {
+ *     token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   },
  *   window: TimeWindow.LastWeek,
  * });
  * ```
@@ -132,7 +136,9 @@ export function assetSupplyHistory(
  *
  * ```ts
  * const result = await assetBorrowHistory(client, {
- *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   query: {
+ *     token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   },
  *   window: TimeWindow.LastWeek,
  * });
  * ```
