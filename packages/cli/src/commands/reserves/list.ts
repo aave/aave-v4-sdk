@@ -2,19 +2,18 @@ import {
   InvariantError,
   invariant,
   ok,
-  ResultAsync,
+  type PercentNumber,
   type Reserve,
   type ReservesRequest,
+  ResultAsync,
   type UnexpectedError,
 } from '@aave/client';
 import { reserves } from '@aave/client/actions';
 
 import * as common from '../../common.js';
 
-
-
-function formatApy(apy: { normalized: unknown }, decimals = 4): string {
-  return `${parseFloat(String(apy.normalized)).toFixed(decimals)}%`;
+function formatApy(apy: PercentNumber, decimals = 4): string {
+  return `${apy.normalized.toFixed(decimals)}%`;
 }
 
 export default class ListReserves extends common.V4Command {
@@ -133,7 +132,6 @@ export default class ListReserves extends common.V4Command {
       this.error(result.error);
     }
 
-    
     this.display(
       result.value.map((item) => [
         item.asset.underlying.info.name,
@@ -142,8 +140,8 @@ export default class ListReserves extends common.V4Command {
         `${item.chain.name} (${item.chain.chainId})`,
         formatApy(item.summary.supplyApy),
         formatApy(item.summary.borrowApy),
-        `$${item.summary.supplied.fiatAmount.value}`,
-        `$${item.summary.borrowed.fiatAmount.value}`,
+        `${item.summary.supplied.exchange.symbol}${item.summary.supplied.exchange.value.toFixed(2)}`,
+        `${item.summary.borrowed.exchange.symbol}${item.summary.borrowed.exchange.value.toFixed(2)}`,
         item.canSupply ? 'Yes' : 'No',
         item.canBorrow ? 'Yes' : 'No',
         item.canUseAsCollateral ? 'Yes' : 'No',
