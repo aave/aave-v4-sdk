@@ -36,7 +36,8 @@
     "@oclif/core": "^4",
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
-    "tty-table": "^5.0.0"
+    "tty-table": "^5.0.0",
+    "viem": "^2.37.5"
   },
   "devDependencies": {
     "@oclif/test": "^4",
@@ -57,7 +58,11 @@
       },
       "spokes": {
         "description": "List available spokes"
+      },
+      "sandbox": {
+        "description": "Sandbox related commands"
       }
+
     }
   },
   "license": "MIT",

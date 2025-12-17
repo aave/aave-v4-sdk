@@ -37,14 +37,14 @@ import { local, production, staging } from './environments';
 import { toViemChain } from './viem';
 
 export const environment =
-  import.meta.env.ENVIRONMENT === 'local'
+  import.meta.env?.ENVIRONMENT === 'local'
     ? local
-    : import.meta.env.ENVIRONMENT === 'production'
+    : import.meta.env?.ENVIRONMENT === 'production'
       ? production
       : staging;
 
 export const ETHEREUM_FORK_ID = chainId(
-  Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
+  Number.parseInt(import.meta.env?.ETHEREUM_TENDERLY_FORK_ID ?? '0', 10),
 );
 
 // Token addresses
@@ -105,11 +105,11 @@ export const ETHEREUM_HUB_CORE_ID = encodeHubId({
   address: ETHEREUM_HUB_CORE_ADDRESS,
 });
 
-export const ETHEREUM_FORK_RPC_URL = import.meta.env
-  .ETHEREUM_TENDERLY_PUBLIC_RPC;
+export const ETHEREUM_FORK_RPC_URL =
+  import.meta.env?.ETHEREUM_TENDERLY_PUBLIC_RPC ?? '';
 
-export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
-  .ETHEREUM_TENDERLY_ADMIN_RPC;
+export const ETHEREUM_FORK_RPC_URL_ADMIN =
+  import.meta.env?.ETHEREUM_TENDERLY_ADMIN_RPC ?? '';
 
 export const client = AaveClient.create({
   environment,
@@ -128,6 +128,7 @@ export async function createNewWallet(
 ): Promise<WalletClient<Transport, Chain, Account>> {
   if (!privateKey) {
     const privateKey = generatePrivateKey();
+    console.log('privateKey', privateKey);
     const wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
       chain: devnetChain,
