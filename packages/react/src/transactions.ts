@@ -585,8 +585,7 @@ export function useRenounceSpokeUserPositionManager(
  *
  * const result = await update({
  *   userPositionId: userPosition.id,
- *   dynamicConfig: true,
- *   riskPremium: true,
+ *   update: UserPositionConditionsUpdate.AllDynamicConfig,
  * });
  *
  * if (result.isErr()) {
