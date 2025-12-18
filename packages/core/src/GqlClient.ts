@@ -21,7 +21,6 @@ import {
   extractOperationName,
   isActiveQueryOperation,
   isTeardownOperation,
-  takeValue,
 } from './utils';
 
 /**
@@ -99,7 +98,7 @@ export class GqlClient {
     const query = this.resolver.replaceFrom(document);
     return this.resultFrom(
       this.urql.query(query, variables, { batch, requestPolicy }),
-    ).map(takeValue);
+    );
   }
 
   /**
@@ -113,9 +112,7 @@ export class GqlClient {
     document: TypedDocumentNode<StandardData<TValue>, TVariables>,
     variables: TVariables,
   ): ResultAsync<TValue, UnexpectedError> {
-    return this.resultFrom(this.urql.mutation(document, variables)).map(
-      takeValue,
-    );
+    return this.resultFrom(this.urql.mutation(document, variables));
   }
 
   protected async refreshWhere(
@@ -199,9 +196,11 @@ export class GqlClient {
         );
   }
 
-  private resultFrom<TData, TVariables extends AnyVariables>(
-    source: OperationResultSource<OperationResult<TData, TVariables>>,
-  ): ResultAsync<OperationResult<TData, TVariables>, UnexpectedError> {
+  private resultFrom<TValue, TVariables extends AnyVariables>(
+    source: OperationResultSource<
+      OperationResult<StandardData<TValue>, TVariables>
+    >,
+  ): ResultAsync<TValue, UnexpectedError> {
     return ResultAsync.fromPromise(source.toPromise(), (err: unknown) => {
       this.logger.error(err);
       return UnexpectedError.from(err);
@@ -209,7 +208,12 @@ export class GqlClient {
       if (result.error?.networkError) {
         return errAsync(UnexpectedError.from(result.error.networkError));
       }
-      return okAsync(result);
+
+      if (result.data) {
+        return okAsync(result.data.value);
+      }
+
+      return errAsync(UnexpectedError.from(result.error));
     });
   }
 }

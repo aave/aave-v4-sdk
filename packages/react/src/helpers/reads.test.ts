@@ -1,4 +1,5 @@
-import { UnexpectedError } from '@aave/client';
+import { GraphQLErrorCode, UnexpectedError } from '@aave/client';
+import { createGraphQLErrorObject } from '@aave/core/testing';
 import { act } from '@testing-library/react';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -66,9 +67,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       server.use(
         graphql.query(AnyQuery, () => {
           return HttpResponse.json({
-            errors: [
-              { message: 'Test error', extensions: { code: 'TEST_ERROR' } },
-            ],
+            errors: [createGraphQLErrorObject(GraphQLErrorCode.BAD_REQUEST)],
           });
         }),
       );

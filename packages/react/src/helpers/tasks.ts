@@ -1,4 +1,4 @@
-import { invariant, type ResultAsync } from '@aave/types';
+import { invariant, nonNullable, type ResultAsync } from '@aave/types';
 import { type DependencyList, useCallback, useRef, useState } from 'react';
 
 /**
@@ -149,29 +149,38 @@ export function useAsyncTask<
       );
 
       loadingRef.current = true;
-      setState(({ data }) => {
+
+      let previousState: AsyncTaskState<TValue, TError> | undefined;
+      setState((state) => {
+        previousState = state;
         return {
           called: true,
           loading: true,
-          data,
+          data: state.data,
           error: undefined,
         };
       });
 
-      const result = handle(input);
+      try {
+        const result = handle(input);
 
-      result.match(
-        (value) => {
-          loadingRef.current = false;
-          setState(AsyncTaskState.Success(value));
-        },
-        (error) => {
-          loadingRef.current = false;
-          setState(AsyncTaskState.Failed(error));
-        },
-      );
+        result.match(
+          (value) => {
+            loadingRef.current = false;
+            setState(AsyncTaskState.Success(value));
+          },
+          (error) => {
+            loadingRef.current = false;
+            setState(AsyncTaskState.Failed(error));
+          },
+        );
 
-      return result;
+        return result;
+      } catch (error) {
+        loadingRef.current = false;
+        setState(nonNullable(previousState));
+        throw error;
+      }
     },
     [handle],
   );
