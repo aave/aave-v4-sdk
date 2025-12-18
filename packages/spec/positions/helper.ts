@@ -16,24 +16,26 @@ import {
   userSupplies,
 } from '@aave/client/actions';
 import {
+  ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_SPOKE_ETHENA_ID,
+  ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
+
 import {
   findReservesToBorrow,
   findReservesToSupply,
 } from '../helpers/reserves';
 import {
+  borrowFromRandomReserve,
   borrowFromReserve,
   findReserveAndSupply,
-  supplyAndBorrowNativeToken,
   supplyToReserve,
 } from '../helpers/supplyBorrow';
 import {
@@ -201,41 +203,6 @@ export const recreateUserActivities = async (
       assertOk(result);
     }
   }
-};
-
-export const recreateUserSummary = async (
-  client: AaveClient,
-  user: WalletClient<Transport, Chain, Account>,
-) => {
-  const setup = await fundErc20Address(evmAddress(user.account.address), {
-    address: ETHEREUM_WETH_ADDRESS,
-    amount: bigDecimal('0.5'),
-  })
-    .andThen(() =>
-      fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_WSTETH_ADDRESS,
-        amount: bigDecimal('0.5'),
-      }),
-    )
-    .andThen(() =>
-      fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_GHO_ADDRESS,
-        amount: bigDecimal('100'),
-      }),
-    )
-    .andThen(() =>
-      findReserveAndSupply(client, user, {
-        token: ETHEREUM_GHO_ADDRESS,
-        amount: bigDecimal('100'),
-      }),
-    )
-    .andThen(() =>
-      supplyAndBorrowNativeToken(client, user, {
-        spoke: ETHEREUM_SPOKE_CORE_ID,
-        ratioToBorrow: 0.4,
-      }),
-    );
-  assertOk(setup);
 };
 
 export const recreateUserBorrows = async (
@@ -421,5 +388,88 @@ export const recreateUserPositions = async (
         ),
     );
     assertOk(resultEmodeSpoke);
+  }
+};
+
+export const recreateUserPositionInOneSpoke = async (
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+) => {
+  // Check the user has at least one
+  const supplies = await userSupplies(client, {
+    query: {
+      userSpoke: {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+        user: evmAddress(user.account.address),
+      },
+    },
+  });
+  assertOk(supplies);
+  const userInfo = await userPositions(client, {
+    user: evmAddress(user.account.address),
+    filter: {
+      chainIds: [ETHEREUM_FORK_ID],
+    },
+  });
+  assertOk(userInfo);
+
+  // Create a position in the spoke
+  if (
+    supplies.value.length < 3 ||
+    // Add supply if health factor is less than 4
+    userInfo.value[0]!.healthFactor.current!.lt(4)
+  ) {
+    const supplyGHOCollateral = await findReserveAndSupply(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ID,
+      token: ETHEREUM_GHO_ADDRESS,
+      asCollateral: true,
+      amount: bigDecimal('100'),
+      autoFund: true,
+    });
+    assertOk(supplyGHOCollateral);
+
+    const supplyUSDCDNoCollateral = await findReserveAndSupply(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ID,
+      token: ETHEREUM_USDC_ADDRESS,
+      asCollateral: false,
+      amount: bigDecimal('100'),
+      autoFund: true,
+    });
+    assertOk(supplyUSDCDNoCollateral);
+
+    const supplyWETHCollateral = await findReserveAndSupply(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ID,
+      token: ETHEREUM_AAVE_ADDRESS,
+      asCollateral: true,
+      amount: bigDecimal('0.5'),
+      autoFund: true,
+    });
+    assertOk(supplyWETHCollateral);
+  }
+
+  const borrows = await userBorrows(client, {
+    query: {
+      userSpoke: {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+        user: evmAddress(user.account.address),
+      },
+    },
+  });
+  assertOk(borrows);
+
+  if (borrows.value.length < 2) {
+    const borrowAAVE = await borrowFromRandomReserve(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ID,
+      token: ETHEREUM_AAVE_ADDRESS,
+      ratioToBorrow: 0.1,
+    });
+    assertOk(borrowAAVE);
+
+    const borrowWETH = await borrowFromRandomReserve(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ID,
+      token: ETHEREUM_WETH_ADDRESS,
+      ratioToBorrow: 0.1,
+    });
+    assertOk(borrowWETH);
   }
 };

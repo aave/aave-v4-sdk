@@ -8,7 +8,6 @@ import {
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
-  fundErc20Address,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
@@ -33,21 +32,13 @@ describe('Querying User Balances on Aave V4', () => {
       assertOk(balances);
       if (balances.value.length < 3) {
         for (const token of [ETHEREUM_USDC_ADDRESS, ETHEREUM_1INCH_ADDRESS]) {
-          const result = await fundErc20Address(
-            evmAddress(user.account.address),
-            {
-              address: token,
-              amount: bigDecimal('100'),
-              decimals: token === ETHEREUM_1INCH_ADDRESS ? 18 : 6,
-            },
-          ).andThen(() =>
-            findReserveAndSupply(client, user, {
-              token: token,
-              amount: bigDecimal('50'),
-              asCollateral: true,
-            }),
-          );
-          assertOk(result);
+          const setup = await findReserveAndSupply(client, user, {
+            token: token,
+            amount: bigDecimal('100'),
+            asCollateral: true,
+            autoFund: true,
+          });
+          assertOk(setup);
         }
       }
     }, 60_000);

@@ -72,11 +72,13 @@ export function findReserveAndSupply(
     amount,
     spoke,
     asCollateral,
+    autoFund,
   }: {
     token: EvmAddress;
     amount: BigDecimal;
     spoke?: SpokeId;
     asCollateral?: boolean;
+    autoFund?: boolean;
   },
 ): ResultAsync<Reserve, Error> {
   return findReservesToSupply(client, user, {
@@ -84,11 +86,25 @@ export function findReserveAndSupply(
     spoke: spoke,
     asCollateral: asCollateral,
   }).andThen((reserves) =>
-    supplyToReserve(client, user, {
-      reserve: reserves[0].id,
-      amount: { erc20: { value: amount } },
-      sender: evmAddress(user.account.address),
-    }).map(() => reserves[0]),
+    autoFund
+      ? fundErc20Address(evmAddress(user.account.address), {
+          address: token,
+          amount: amount,
+          decimals: reserves[0]!.asset.underlying.info.decimals,
+        }).andThen(() =>
+          supplyToReserve(client, user, {
+            reserve: reserves[0]!.id,
+            amount: { erc20: { value: amount } },
+            sender: evmAddress(user.account.address),
+            enableCollateral: asCollateral ?? true,
+          }).map(() => reserves[0]),
+        )
+      : supplyToReserve(client, user, {
+          reserve: reserves[0].id,
+          amount: { erc20: { value: amount } },
+          sender: evmAddress(user.account.address),
+          enableCollateral: asCollateral ?? true,
+        }).map(() => reserves[0]),
   );
 }
 
@@ -139,6 +155,33 @@ export function supplyAndBorrow(
         })),
     ),
   );
+}
+
+export function borrowFromRandomReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  params: {
+    spoke?: SpokeId;
+    token?: EvmAddress;
+    ratioToBorrow?: number;
+  },
+): ResultAsync<Reserve, Error> {
+  return findReservesToBorrow(client, user, {
+    spoke: params.spoke,
+    token: params.token,
+  }).andThen((reserves) => {
+    return borrowFromReserve(client, user, {
+      reserve: reserves[0].id,
+      amount: {
+        erc20: {
+          value: reserves[0].userState!.borrowable.amount.value.times(
+            params.ratioToBorrow ?? 0.1,
+          ),
+        },
+      },
+      sender: evmAddress(user.account.address),
+    }).map(() => reserves[0]);
+  });
 }
 
 export function supplyAndBorrowNativeToken(
