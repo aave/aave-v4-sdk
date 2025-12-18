@@ -6,7 +6,6 @@ import {
   evmAddress,
   type HubId,
   hubId,
-  local,
   production,
   type SpokeId,
   spokeId,
@@ -14,8 +13,6 @@ import {
 } from '@aave/client';
 import { Command, Flags } from '@oclif/core';
 import TtyTable from 'tty-table';
-
-
 
 declare global {
   interface BigInt {
