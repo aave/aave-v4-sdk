@@ -316,6 +316,7 @@ type DomainData {
   verifyingContract: EvmAddress!
 }
 
+"""A dynamic reserve configuration key"""
 scalar DynamicConfigKey
 
 input ERC20PermitSignature {
@@ -1216,13 +1217,11 @@ type ReserveUserState {
   balance: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
-  borrowingPower: Erc20Amount!
   borrowApy: PercentNumber!
   collateralFactor: PercentNumber!
   maxLiquidationBonus: PercentNumber!
   liquidationFee: PercentNumber!
   dynamicConfigKey: DynamicConfigKey!
-  isUsingLatestDynamicConfigKey: Boolean!
 }
 
 input ReservesRequest {
@@ -1968,7 +1967,7 @@ type UserPosition {
   riskPremium: UserPositionRiskPremium
   liquidationPrice(currency: Currency! = USD): ExchangeAmount
   borrowingPower(currency: Currency! = USD): ExchangeAmount!
-  isUsingLatestDynamicConfigKey: Boolean!
+  canUpdateDynamicConfig: Boolean!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentNumber!
   spoke: Spoke!
   averageCollateralFactor: PercentNumber!
@@ -1990,7 +1989,7 @@ input UserPositionRequest @oneOf {
 
 type UserPositionRiskPremium {
   current: PercentNumber!
-  better: PercentNumber
+  latest: PercentNumber!
   breakdown: [UserRiskPremiumBreakdownItem!]!
 }
 
@@ -2020,7 +2019,8 @@ input UserPositionsRequestOrderBy @oneOf {
 
 type UserRiskPremiumBreakdownItem {
   token: Erc20Token!
-  riskPremiumWeight: PercentNumber!
+  currentRiskPremiumWeight: PercentNumber!
+  latestRiskPremiumWeight: PercentNumber!
   collateral: PercentNumber!
 }
 
