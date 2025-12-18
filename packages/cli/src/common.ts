@@ -15,6 +15,18 @@ import {
 import { Command, Flags } from '@oclif/core';
 import TtyTable from 'tty-table';
 
+
+
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 export const chain = Flags.custom<ChainId>({
   char: 'c',
   name: 'chain',
@@ -44,19 +56,27 @@ export const address = Flags.custom<EvmAddress>({
   helpValue: '<evm-address>',
 });
 
-const environment =
-  process.env.ENVIRONMENT === 'staging'
-    ? staging
-    : process.env.ENVIRONMENT === 'local'
-      ? local
-      : production;
-
 export abstract class V4Command extends Command {
   protected headers: TtyTable.Header[] = [];
 
   public static enableJsonFlag = true;
 
-  protected client = AaveClient.create({ environment: environment });
+  static baseFlags = {
+    staging: Flags.boolean({
+      hidden: true,
+      description: 'Use staging environment',
+      default: false,
+    }),
+  };
+
+  protected client!: AaveClient;
+
+  async init(): Promise<void> {
+    await super.init();
+    const { flags } = await this.parse(this.constructor as typeof V4Command);
+    const environment = flags.staging ? staging : production;
+    this.client = AaveClient.create({ environment });
+  }
 
   protected display(rows: unknown[]) {
     const out = TtyTable(this.headers, rows).render();
