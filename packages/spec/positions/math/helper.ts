@@ -4,7 +4,6 @@ import { type Address, createPublicClient, http } from 'viem';
 
 // Constants
 const WAD = 10n ** 18n; // 1e18 = 1.0 in WAD format
-const MAX_UINT256 = 2n ** 256n - 1n;
 const userAccountDataABI = [
   {
     inputs: [{ name: 'user', type: 'address' }],
@@ -39,20 +38,12 @@ export interface UserAccountData {
   borrowedCount: number;
 }
 
-function formatHealthFactor(healthFactor: bigint): BigDecimal {
-  if (healthFactor === MAX_UINT256) {
-    return bigDecimal(0);
-  }
-  const hf = bigDecimal(healthFactor).div(WAD);
-  return hf;
+function formatWAD(value: bigint): BigDecimal {
+  return bigDecimal(value).div(WAD);
 }
 
 function formatUSD(value: bigint): BigDecimal {
   return bigDecimal(value).div(bigDecimal('1e26'));
-}
-
-function formatPercentage(value: bigint): BigDecimal {
-  return bigDecimal(value).div(WAD).mul(bigDecimal('100'));
 }
 
 function formatBPS(value: bigint): BigDecimal {
@@ -83,8 +74,8 @@ export async function getAccountData(
 
   return {
     riskPremium: formatBPS(result.riskPremium),
-    avgCollateralFactor: formatPercentage(result.avgCollateralFactor),
-    healthFactor: formatHealthFactor(result.healthFactor),
+    avgCollateralFactor: formatWAD(result.avgCollateralFactor),
+    healthFactor: formatWAD(result.healthFactor),
     totalCollateralValue: formatUSD(result.totalCollateralValue),
     totalDebtValue: formatUSD(result.totalDebtValue),
     activeCollateralCount: Number(result.activeCollateralCount),

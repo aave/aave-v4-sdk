@@ -133,6 +133,34 @@ describe('Check User Positions Math on Aave V4', () => {
         );
       });
 
+      it('Then it should return the correct netCollateral value', async () => {
+        // net collateral is the sum of the total collateral minus the total debt
+        const totalCollateral = suppliesPositions
+          .filter((supply) => supply.isCollateral)
+          .reduce(
+            (acc, supply) =>
+              acc.plus(
+                supply.principal.exchange.value.plus(
+                  supply.interest.exchange.value,
+                ),
+              ),
+            bigDecimal('0'),
+          );
+        const totalDebt = borrowPositions.reduce(
+          (acc, borrow) =>
+            acc.plus(
+              borrow.debt.exchange.value.plus(borrow.interest.exchange.value),
+            ),
+          bigDecimal('0'),
+        );
+
+        // Cross check with the user positions
+        expect(totalCollateral.minus(totalDebt)).toBeBigDecimalCloseTo(
+          positions.netCollateral.current.value,
+          1,
+        );
+      });
+
       it('Then it should return the correct totalDebt value', async () => {
         // total debt is the sum of the principal and interest for all positions in the spoke
         const totalDebt = borrowPositions.reduce(
@@ -189,24 +217,16 @@ describe('Check User Positions Math on Aave V4', () => {
         // For each collateral asset:
         //   - Calculate collateral value: (principal + interest) in USD
         //   - Accumulate: avgCollateralFactorWeightedSum += collateralFactor × collateralValue
-        let avgCollateralFactorWeightedSum = bigDecimal('0');
-        let totalCollateralValue = bigDecimal('0');
-
-        for (const supply of suppliesPositions) {
-          if (supply.isCollateral) {
+        const avgCollateralFactorWeightedSum = suppliesPositions
+          .filter((supply) => supply.isCollateral)
+          .reduce((acc, supply) => {
             const collateralValue = supply.principal.exchange.value.plus(
               supply.interest.exchange.value,
             );
             const collateralFactor =
               supply.reserve.settings.collateralFactor.value;
-
-            avgCollateralFactorWeightedSum =
-              avgCollateralFactorWeightedSum.plus(
-                collateralFactor.times(collateralValue),
-              );
-            totalCollateralValue = totalCollateralValue.plus(collateralValue);
-          }
-        }
+            return acc.plus(collateralFactor.times(collateralValue));
+          }, bigDecimal('0'));
 
         // Step 2: Calculate total debt value
         // For each debt asset: debt = drawnDebt + premiumDebt = debt + interest
@@ -236,6 +256,53 @@ describe('Check User Positions Math on Aave V4', () => {
           );
         }
       });
+
+      it('Then it should return the correct averageCollateralFactor value', async () => {
+        const collateralPositions = suppliesPositions.filter(
+          (supply) => supply.isCollateral,
+        );
+
+        const { weightedSum, totalValue } = collateralPositions.reduce(
+          (acc, supply) => {
+            const collateralValue = supply.principal.exchange.value.plus(
+              supply.interest.exchange.value,
+            );
+            const collateralFactor =
+              supply.reserve.settings.collateralFactor.value;
+            return {
+              weightedSum: acc.weightedSum.plus(
+                collateralFactor.times(collateralValue),
+              ),
+              totalValue: acc.totalValue.plus(collateralValue),
+            };
+          },
+          {
+            weightedSum: bigDecimal('0'),
+            totalValue: bigDecimal('0'),
+          },
+        );
+
+        // Normalize: avgCollateralFactor = weightedSum / totalValue
+        const averageCollateralFactor = weightedSum.div(totalValue);
+
+        // Cross check with the account data on chain
+        expect(averageCollateralFactor).toBeBigDecimalCloseTo(
+          accountDataOnChain.avgCollateralFactor,
+          5,
+        );
+        // Cross check with the user positions
+        expect(averageCollateralFactor).toBeBigDecimalCloseTo(
+          positions.averageCollateralFactor.value,
+          5,
+        );
+      });
+
+      it.todo('Then it should return the correct netApy value');
+      it.todo('Then it should return the correct netSupplyApy value');
+      it.todo('Then it should return the correct netBorrowApy value');
+      it.todo('Then it should return the correct riskPremium value');
+      it.todo('Then it should return the correct liquidationPrice value');
+      it.todo('Then it should return the correct borrowingPower value');
     });
   });
 });
