@@ -25,9 +25,8 @@ const user = await createNewWallet(
 );
 
 describe('Check User Positions Math on Aave V4', () => {
-  describe('Given a user with multiple deposits and at least one borrow in one spoke', () => {
+  describe('Given a user with multiple deposits and at least two borrows in one spoke', () => {
     beforeAll(async () => {
-      // NOTE: Recreate user with at least one position with multiple deposits and at least two borrow in one spoke
       await recreateUserPositionInOneSpoke(client, user);
     }, 180_000);
 
