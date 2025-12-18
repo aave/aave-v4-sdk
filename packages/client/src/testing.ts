@@ -118,7 +118,7 @@ export const client = AaveClient.create({
   environment,
 });
 
-const devnetChain = await chain(client, { chainId: ETHEREUM_FORK_ID })
+export const devnetChain = await chain(client, { chainId: ETHEREUM_FORK_ID })
   .map(nonNullable)
   .map(toViemChain)
   .match(
