@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.7
+
+### Patch Changes
+
+- 0966b94: **fix:** issue with GQL errors suchas Bad User Input or Bad Request blocking indefintely transaction hooks.
+
 ## 1.0.0-next.6
 
 ### Patch Changes
