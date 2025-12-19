@@ -1,4 +1,4 @@
-import { assertOk, ResultAsync } from '@aave/types';
+import { assertErr, assertOk, ResultAsync } from '@aave/types';
 import { gql, stringifyDocument } from '@urql/core';
 import * as msw from 'msw';
 import { setupServer } from 'msw/node';
@@ -11,9 +11,10 @@ import {
   expect,
   it,
 } from 'vitest';
-
 import type { Context } from './context';
+import { GraphQLErrorCode } from './errors';
 import { GqlClient } from './GqlClient';
+import { createGraphQLErrorObject } from './testing';
 import { delay } from './utils';
 
 // see: https://mswjs.io/docs/graphql/mocking-responses/query-batching
@@ -150,6 +151,26 @@ describe(`Given an instance of the ${GqlClient.name}`, () => {
 
       assertOk(resul);
       expect(requests).toHaveLength(2); // 2 HTTP requests were made
+    });
+  });
+
+  describe('When executing a query that fails with GraphQL errors', () => {
+    beforeAll(() => {
+      server.use(
+        api.query(TestQuery, () => {
+          return msw.HttpResponse.json({
+            errors: [createGraphQLErrorObject(GraphQLErrorCode.BAD_REQUEST)],
+          });
+        }),
+      );
+    });
+
+    it('Then it should fail with an `UnexpectedError`', async () => {
+      const client = new GqlClient(context);
+
+      const result = await client.query(TestQuery, { id: 1 });
+
+      assertErr(result);
     });
   });
 

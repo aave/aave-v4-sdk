@@ -1,6 +1,6 @@
 {
   "name": "@aave/core",
-  "version": "1.0.0-next.6",
+  "version": "1.0.0-next.7",
   "description": "The shared core across Aave SDKs.",
   "repository": {
     "directory": "packages/core",
@@ -15,6 +15,9 @@
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./testing": {
+      "default": "./dist/testing.js"
     }
   },
   "typesVersions": {
@@ -24,6 +27,9 @@
       ],
       "require": [
         "./dist/index.d.cts"
+      ],
+      "testing": [
+        "./dist/testing.d.ts"
       ]
     }
   },

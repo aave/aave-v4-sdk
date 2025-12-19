@@ -5053,18 +5053,6 @@
             "args": []
           },
           {
-            "name": "borrowingPower",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Erc20Amount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "borrowApy",
             "type": {
               "kind": "NON_NULL",
@@ -5114,17 +5102,6 @@
           },
           {
             "name": "dynamicConfigKey",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "isUsingLatestDynamicConfigKey",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -7067,7 +7044,7 @@
             ]
           },
           {
-            "name": "isUsingLatestDynamicConfigKey",
+            "name": "canUpdateDynamicConfig",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -7162,11 +7139,14 @@
             "args": []
           },
           {
-            "name": "better",
+            "name": "latest",
             "type": {
-              "kind": "OBJECT",
-              "name": "PercentNumber",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
             },
             "args": []
           },
@@ -7208,7 +7188,19 @@
             "args": []
           },
           {
-            "name": "riskPremiumWeight",
+            "name": "currentRiskPremiumWeight",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "latestRiskPremiumWeight",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

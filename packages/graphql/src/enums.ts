@@ -156,3 +156,11 @@ export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
 }
+
+/**
+ * The update type for user position conditions.
+ */
+export enum UserPositionConditionsUpdate {
+  AllDynamicConfig = 'ALL_DYNAMIC_CONFIG',
+  JustRiskPremium = 'JUST_RISK_PREMIUM',
+}

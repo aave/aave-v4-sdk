@@ -1,5 +1,20 @@
 # @aave/react
 
+## 4.0.0-next.10
+
+### Patch Changes
+
+- 0966b94: **fix:** issue with GQL errors suchas Bad User Input or Bad Request blocking indefintely transaction hooks.
+- 1a2afe7: **chore:** adjusts `UpdateUserPositionConditionsRequest` to latest GQL schema.
+- 9765eea: **chore:** support latest minor GQL changes.
+- 0dd70a2: **fix:** allow `null` for `WalletClient` parameter in viem hooks
+- Updated dependencies [0966b94]
+- Updated dependencies [1a2afe7]
+- Updated dependencies [9765eea]
+  - @aave/client@4.0.0-next.10
+  - @aave/core@1.0.0-next.7
+  - @aave/graphql@1.0.0-next.9
+
 ## 4.0.0-next.9
 
 ### Patch Changes

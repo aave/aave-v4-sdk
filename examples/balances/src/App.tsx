@@ -1,12 +1,9 @@
 import {
-  chainId,
   evmAddress,
   ReservesRequestFilter,
   useUserBalances,
 } from '@aave/react';
-import { supportedChains } from '@aave/react/viem';
-
-const defaultChainId = chainId(supportedChains[0]!.id);
+import { defaultChainId } from './config';
 
 export function App() {
   const { data, loading } = useUserBalances({

@@ -39,7 +39,7 @@ export function HubSelector({
         {hubs?.map((hub) => (
           <option key={hub.address} value={hub.address}>
             {hub.name} -{' '}
-            {`${hub.summary.totalSupplied.symbol}${hub.summary.totalSupplied.value}`}
+            {`${hub.summary.totalSupplied.current.symbol}${hub.summary.totalSupplied.current.value}`}
           </option>
         ))}
       </select>

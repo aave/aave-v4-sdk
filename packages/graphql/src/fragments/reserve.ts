@@ -74,9 +74,6 @@ export const ReserveUserStateFragment = graphql(
     borrowable {
       ...Erc20Amount
     }
-    borrowingPower {
-      ...Erc20Amount
-    }
     borrowApy {
       ...PercentNumber
     }
@@ -90,7 +87,6 @@ export const ReserveUserStateFragment = graphql(
       ...PercentNumber
     }
     dynamicConfigKey
-    isUsingLatestDynamicConfigKey
   }`,
   [Erc20AmountFragment, PercentNumberFragment],
 );

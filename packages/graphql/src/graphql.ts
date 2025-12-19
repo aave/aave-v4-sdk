@@ -33,6 +33,7 @@ import type {
   SwapStatusFilter,
   TimeWindow,
   TokenCategory,
+  UserPositionConditionsUpdate,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -102,6 +103,7 @@ export const graphql = initGraphQLTada<{
     TxHash: TxHash;
     UserBalanceId: UserBalanceId;
     UserBorrowItemId: UserBorrowItemId;
+    UserPositionConditionsUpdate: UserPositionConditionsUpdate;
     UserPositionId: UserPositionId;
     UserSupplyItemId: UserSupplyItemId;
     Void: Void;

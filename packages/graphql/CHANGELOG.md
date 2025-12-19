@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- 1a2afe7: **chore:** adjusts `UpdateUserPositionConditionsRequest` to latest GQL schema.
+- 9765eea: **chore:** support latest minor GQL changes.
+
 ## 1.0.0-next.8
 
 ### Patch Changes

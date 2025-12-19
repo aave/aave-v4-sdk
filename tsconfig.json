@@ -7,6 +7,7 @@
     "types": ["node"],
     "paths": {
       "@aave/core": ["./packages/core/src"],
+      "@aave/core/testing": ["./packages/core/src/testing"],
       "@aave/client": ["./packages/client/src"],
       "@aave/client/actions": ["./packages/client/src/actions"],
       "@aave/client/ethers": ["./packages/client/src/ethers"],
