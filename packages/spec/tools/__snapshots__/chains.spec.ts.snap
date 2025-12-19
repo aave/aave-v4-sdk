@@ -82,30 +82,6 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
     "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
     "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  {
-    "__typename": "Chain",
-    "chainId": 111222333444,
-    "explorerUrl": "https://etherscan.io",
-    "icon": "https://statics.aave.com/ethereum.svg",
-    "isFork": true,
-    "isTestnet": true,
-    "name": "Vector Demo",
-    "nativeGateway": "0xaFFeb64d35B9b7e540A43E1F3482Dd77A88912d1",
-    "nativeInfo": {
-      "__typename": "TokenInfo",
-      "categories": [
-        "ETH_CORRELATED",
-      ],
-      "decimals": 18,
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI6OkVUSA==",
-      "name": "Ether",
-      "symbol": "ETH",
-    },
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/9297c351-c07f-4985-a015-8d2b034419bf",
-    "signatureGateway": "0x8a9B909c6F9BBFdE5b4Db1D83509a7f2abbd6f45",
-  },
 ]
 `;
 
@@ -136,30 +112,6 @@ exports[`Querying Chains on Aave V4 > Given a user who wants to list available c
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
     "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
-  },
-  {
-    "__typename": "Chain",
-    "chainId": 111222333444,
-    "explorerUrl": "https://etherscan.io",
-    "icon": "https://statics.aave.com/ethereum.svg",
-    "isFork": true,
-    "isTestnet": true,
-    "name": "Vector Demo",
-    "nativeGateway": "0xaFFeb64d35B9b7e540A43E1F3482Dd77A88912d1",
-    "nativeInfo": {
-      "__typename": "TokenInfo",
-      "categories": [
-        "ETH_CORRELATED",
-      ],
-      "decimals": 18,
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI6OkVUSA==",
-      "name": "Ether",
-      "symbol": "ETH",
-    },
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/9297c351-c07f-4985-a015-8d2b034419bf",
-    "signatureGateway": "0x8a9B909c6F9BBFdE5b4Db1D83509a7f2abbd6f45",
   },
 ]
 `;
