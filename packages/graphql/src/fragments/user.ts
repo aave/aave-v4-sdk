@@ -98,7 +98,10 @@ export const UserRiskPremiumBreakdownItemFragment = graphql(
     token {
       ...Erc20Token
     }
-    riskPremiumWeight {
+    currentRiskPremiumWeight {
+      ...PercentNumber
+    }
+    latestRiskPremiumWeight {
       ...PercentNumber
     }
     collateral {
@@ -117,7 +120,7 @@ export const UserPositionRiskPremiumFragment = graphql(
     current {
       ...PercentNumber
     }
-    better {
+    latest {
       ...PercentNumber
     }
     breakdown {
@@ -175,7 +178,7 @@ export const UserPositionFragment = graphql(
     borrowingPower(currency: $currency) {
       ...ExchangeAmount
     }
-    isUsingLatestDynamicConfigKey
+    canUpdateDynamicConfig
     netBalancePercentChange(window: $timeWindow) {
       ...PercentNumber
     }

@@ -1,20 +1,12 @@
-import {
-  chainId,
-  evmAddress,
-  type Hub,
-  type Reserve,
-  type Spoke,
-} from '@aave/react';
-import { supportedChains } from '@aave/react/viem';
+import { evmAddress, type Hub, type Reserve, type Spoke } from '@aave/react';
 import { useState } from 'react';
 import { BorrowForm } from './BorrowForm';
+import { defaultChainId } from './config';
 import { HubSelector } from './HubSelector';
 import { AllUserPositions, SingleUserPosition } from './positions';
 import { ReserveSelector } from './ReserveSelector';
 import { StrategySelector } from './StrategySelector';
 import { address, walletClient } from './wallet';
-
-const defaultChainId = chainId(supportedChains[0]!.id);
 
 export function App() {
   const [hub, setHub] = useState<Hub | null>(null);
@@ -32,7 +24,7 @@ export function App() {
         <p style={{ color: '#666', marginBottom: '30px' }}>
           <small>
             This example demonstrates how to borrow assets from an Aave reserve
-            using the Aave React SDK.
+            using the AaveKit React.
           </small>
         </p>
       </header>
