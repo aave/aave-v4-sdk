@@ -54,46 +54,6 @@ export const AssetBorrowSampleFragment = graphql(
 );
 export type AssetBorrowSample = FragmentOf<typeof AssetBorrowSampleFragment>;
 
-export const AssetCategoryBorrowSampleFragment = graphql(
-  `fragment AssetCategoryBorrowSample on AssetCategoryBorrowSample {
-      __typename
-      date
-      highestApy {
-        ...PercentNumber
-      }
-      lowestApy {
-        ...PercentNumber
-      }
-      borrows(currency: $currency) {
-        ...ExchangeAmount
-      }
-    }`,
-  [PercentNumberFragment, ExchangeAmountFragment],
-);
-export type AssetCategoryBorrowSample = FragmentOf<
-  typeof AssetCategoryBorrowSampleFragment
->;
-
-export const AssetCategorySupplySampleFragment = graphql(
-  `fragment AssetCategorySupplySample on AssetCategorySupplySample {
-      __typename
-      date
-      highestApy {
-        ...PercentNumber
-      }
-      lowestApy {
-        ...PercentNumber
-      }
-      deposits(currency: $currency) {
-        ...ExchangeAmount
-      }
-    }`,
-  [PercentNumberFragment, ExchangeAmountFragment],
-);
-export type AssetCategorySupplySample = FragmentOf<
-  typeof AssetCategorySupplySampleFragment
->;
-
 export const AssetAmountWithChangeFragment = graphql(
   `fragment AssetAmountWithChange on AssetAmountWithChange {
     __typename
@@ -231,36 +191,6 @@ export type AssetBorrowHistoryRequest = RequestOf<
 >;
 export type AssetBorrowHistoryRequestQuery = ReturnType<
   typeof graphql.scalar<'AssetBorrowHistoryRequestQuery'>
->;
-
-/**
- * @internal
- */
-export const AssetCategoryBorrowHistoryQuery = graphql(
-  `query AssetCategoryBorrowHistory($request: AssetCategoryBorrowHistoryRequest!, $currency: Currency! = USD) {
-      value: assetCategoryBorrowHistory(request: $request) {
-        ...AssetCategoryBorrowSample
-      }
-    }`,
-  [AssetCategoryBorrowSampleFragment],
-);
-export type AssetCategoryBorrowHistoryRequest = RequestOf<
-  typeof AssetCategoryBorrowHistoryQuery
->;
-
-/**
- * @internal
- */
-export const AssetCategorySupplyHistoryQuery = graphql(
-  `query AssetCategorySupplyHistory($request: AssetCategorySupplyHistoryRequest!, $currency: Currency! = USD) {
-      value: assetCategorySupplyHistory(request: $request) {
-        ...AssetCategorySupplySample
-      }
-    }`,
-  [AssetCategorySupplySampleFragment],
-);
-export type AssetCategorySupplyHistoryRequest = RequestOf<
-  typeof AssetCategorySupplyHistoryQuery
 >;
 
 export const ProtocolHistorySampleFragment = graphql(
