@@ -1,34 +1,34 @@
-import { APYSampleFragment, ReserveFragment } from './fragments';
+import { ApySampleFragment, ReserveFragment } from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
 /**
  * @internal
  */
 export const BorrowApyHistoryQuery = graphql(
-  `query BorrowApyHistory($request: BorrowAPYHistoryRequest!) {
+  `query BorrowApyHistory($request: BorrowApyHistoryRequest!) {
     value: borrowApyHistory(request: $request) {
-      ...APYSample
+      ...ApySample
     }
   }`,
-  [APYSampleFragment],
+  [ApySampleFragment],
 );
-export type BorrowAPYHistoryRequest = RequestOf<typeof BorrowApyHistoryQuery>;
+export type BorrowApyHistoryRequest = RequestOf<typeof BorrowApyHistoryQuery>;
 
 /**
  * @internal
  */
 export const SupplyApyHistoryQuery = graphql(
-  `query SupplyApyHistory($request: SupplyAPYHistoryRequest!) {
+  `query SupplyApyHistory($request: SupplyApyHistoryRequest!) {
     value: supplyApyHistory(request: $request) {
-      ...APYSample
+      ...ApySample
     }
   }`,
-  [APYSampleFragment],
+  [ApySampleFragment],
 );
-export type SupplyAPYHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
+export type SupplyApyHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
 
 export const ReserveQuery = graphql(
-  `query Reserve($request: ReserveRequest!, $currency: Currency!) {
+  `query Reserve($request: ReserveRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: reserve(request: $request) {
       ...Reserve
     }
@@ -42,7 +42,7 @@ export type ReserveRequestQuery = ReturnType<
 >;
 
 export const ReservesQuery = graphql(
-  `query Reserves($request: ReservesRequest!, $currency: Currency!) {
+  `query Reserves($request: ReservesRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: reserves(request: $request) {
       ...Reserve
     }
@@ -56,4 +56,7 @@ export type ReservesRequestOrderBy = ReturnType<
 >;
 export type ReservesRequestQuery = ReturnType<
   typeof graphql.scalar<'ReservesRequestQuery'>
+>;
+export type ChainTokenCategories = ReturnType<
+  typeof graphql.scalar<'ChainTokenCategories'>
 >;

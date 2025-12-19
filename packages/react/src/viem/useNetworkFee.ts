@@ -6,10 +6,9 @@ import {
   Currency,
   type DecimalNumber,
   decodeReserveId,
-  type FiatAmount,
+  type ExchangeAmount,
   type NativeAmount,
   type PreviewAction,
-  type ReserveId,
 } from '@aave/graphql';
 import {
   bigDecimal,
@@ -43,7 +42,7 @@ const gasEstimates: Record<keyof PreviewAction, bigint> = {
   borrow: 250_551n,
   withdraw: 195_049n,
   repay: 217_889n + estimatedApprovalGas,
-  setUserSupplyAsCollateral: 240_284n,
+  setUserSuppliesAsCollateral: 240_284n,
 };
 
 function inferGasEstimate(action: PreviewAction): bigint {
@@ -51,33 +50,36 @@ function inferGasEstimate(action: PreviewAction): bigint {
   return gasEstimates[key] ?? never(`Expected gas estimate for action ${key}`);
 }
 
-function extractReserveId(action: PreviewAction): ReserveId {
+function extractChainId(action: PreviewAction): ChainId {
   if ('supply' in action) {
-    return action.supply.reserve;
+    return decodeReserveId(action.supply.reserve).chainId;
   }
 
   if ('borrow' in action) {
-    return action.borrow.reserve;
+    return decodeReserveId(action.borrow.reserve).chainId;
   }
 
   if ('withdraw' in action) {
-    return action.withdraw.reserve;
+    return decodeReserveId(action.withdraw.reserve).chainId;
   }
 
   if ('repay' in action) {
-    return action.repay.reserve;
+    return decodeReserveId(action.repay.reserve).chainId;
   }
 
-  if ('setUserSupplyAsCollateral' in action) {
-    return action.setUserSupplyAsCollateral.reserve;
+  if ('setUserSuppliesAsCollateral' in action) {
+    return action.setUserSuppliesAsCollateral.changes
+      .map(({ reserve }) => decodeReserveId(reserve))
+      .reduce((prev, current) => {
+        invariant(
+          prev.chainId === current.chainId && prev.spoke === current.spoke,
+          'All reserves MUST on the same spoke',
+        );
+        return prev;
+      }).chainId;
   }
 
-  return never('Expected reserve id');
-}
-
-function extractChainId(action: PreviewAction): ChainId {
-  const reserveId = extractReserveId(action);
-  return decodeReserveId(reserveId).chainId;
+  never('Expected reserve id');
 }
 
 function inferChainId(query: UseNetworkFeeRequestQuery): ChainId | undefined {
@@ -177,7 +179,7 @@ function useExecutionDetails(): UseAsyncTask<
 
 function createNetworkFeeAmount(
   details: ExecutionDetails,
-  rate: FiatAmount,
+  rate: ExchangeAmount,
 ): NativeAmount {
   const gasCostInWei = details.gasPrice * details.gasUnits;
   const gasCost = bigDecimal(gasCostInWei).rescale(
@@ -199,13 +201,15 @@ function createNetworkFeeAmount(
       chain: details.chain,
     },
     amount,
-    fiatAmount: {
-      __typename: 'FiatAmount',
+    exchange: {
+      __typename: 'ExchangeAmount',
       value: gasCost.mul(rate.value),
       name: rate.name,
       symbol: rate.symbol,
+      icon: rate.icon,
+      decimals: rate.decimals,
     },
-    fiatRate: {
+    exchangeRate: {
       __typename: 'DecimalNumber',
       decimals: 2,
       onChainValue: BigInt(rate.value.rescale(2).toFixed(0, RoundingMode.Down)),

@@ -14,6 +14,9 @@ on:
           - staging
           - production
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-tests-on-demand
   cancel-in-progress: true

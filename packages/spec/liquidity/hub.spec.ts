@@ -120,7 +120,7 @@ describe('Querying Hubs on Aave V4', () => {
 
         assertOk(listHubs);
         let listHubsTotalBorrowed = listHubs.value.map(
-          (hub) => hub.summary.totalBorrowed.value,
+          (hub) => hub.summary.totalBorrowed.current.value,
         );
         expect(listHubsTotalBorrowed).toBeSortedNumerically('asc');
 
@@ -132,7 +132,7 @@ describe('Querying Hubs on Aave V4', () => {
         });
         assertOk(listHubs);
         listHubsTotalBorrowed = listHubs.value.map(
-          (hub) => hub.summary.totalBorrowed.value,
+          (hub) => hub.summary.totalBorrowed.current.value,
         );
         expect(listHubsTotalBorrowed).toBeSortedNumerically('desc');
       });
@@ -149,7 +149,7 @@ describe('Querying Hubs on Aave V4', () => {
 
         assertOk(listHubs);
         let listHubsTotalSupplied = listHubs.value.map(
-          (hub) => hub.summary.totalSupplied.value,
+          (hub) => hub.summary.totalSupplied.current.value,
         );
         expect(listHubsTotalSupplied).toBeSortedNumerically('asc');
 
@@ -161,7 +161,7 @@ describe('Querying Hubs on Aave V4', () => {
         });
         assertOk(listHubs);
         listHubsTotalSupplied = listHubs.value.map(
-          (hub) => hub.summary.totalSupplied.value,
+          (hub) => hub.summary.totalSupplied.current.value,
         );
         expect(listHubsTotalSupplied).toBeSortedNumerically('desc');
       });

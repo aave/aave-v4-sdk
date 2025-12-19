@@ -1,5 +1,6 @@
 import { SigningError, TransactionError, UnexpectedError } from '@aave/client';
-import { supportedChains } from '@aave/client/thirdweb';
+import { chain as fetchChain } from '@aave/client/actions';
+import { toThirdwebChain } from '@aave/client/thirdweb';
 import type {
   CancelSwapTypedData,
   ERC20PermitSignature,
@@ -9,7 +10,6 @@ import type {
 } from '@aave/graphql';
 import {
   invariant,
-  never,
   okAsync,
   ResultAsync,
   signatureFrom,
@@ -22,6 +22,7 @@ import {
   waitForReceipt,
 } from 'thirdweb';
 import { useActiveAccount, useSwitchActiveWalletChain } from 'thirdweb/react';
+import { useAaveClient } from './context';
 import {
   PendingTransaction,
   type UseAsyncTask,
@@ -38,6 +39,7 @@ import { usePermitTypedDataAction } from './permits';
 export function useSendTransaction(
   thirdwebClient: ThirdwebClient,
 ): UseSendTransactionResult {
+  const client = useAaveClient();
   const account = useActiveAccount();
   const switchChain = useSwitchActiveWalletChain();
 
@@ -48,54 +50,64 @@ export function useSendTransaction(
         'No Account found. Ensure you have connected your wallet.',
       );
 
-      const chain =
-        supportedChains[request.chainId] ??
-        never(`Chain not supported: ${request.chainId}`);
-
-      return ResultAsync.fromPromise(switchChain(chain), (err) =>
-        UnexpectedError.from(err),
+      return fetchChain(
+        client,
+        { chainId: request.chainId },
+        {
+          batch: false,
+        },
       )
-        .andThen(() =>
-          ResultAsync.fromPromise(
-            sendTransaction({
-              account,
-              transaction: prepareTransaction({
-                to: request.to,
-                data: request.data,
-                value: BigInt(request.value),
-                chain,
-                client: thirdwebClient,
-              }),
-            }),
-            (err) => SigningError.from(err),
-          ),
-        )
-        .map(
-          ({ transactionHash }) =>
-            new PendingTransaction(() =>
+        .map((chain) => {
+          invariant(chain, `Chain ${request.chainId} is not supported`);
+
+          return toThirdwebChain(chain);
+        })
+        .andThen((chain) => {
+          return ResultAsync.fromPromise(switchChain(chain), (err) =>
+            UnexpectedError.from(err),
+          )
+            .andThen(() =>
               ResultAsync.fromPromise(
-                waitForReceipt({
-                  client: thirdwebClient,
-                  chain,
-                  transactionHash,
+                sendTransaction({
+                  account,
+                  transaction: prepareTransaction({
+                    to: request.to,
+                    data: request.data,
+                    value: BigInt(request.value),
+                    chain,
+                    client: thirdwebClient,
+                  }),
                 }),
-                (err) => UnexpectedError.from(err),
-              ).andThen(({ status, transactionHash }) => {
-                if (status === 'reverted') {
-                  return TransactionError.new({
-                    txHash: txHash(transactionHash),
-                    request,
-                  }).asResultAsync();
-                }
-                return okAsync({
-                  operations: request.operations,
-                  txHash: txHash(transactionHash),
-                });
-              }),
-            ),
-        );
+                (err) => SigningError.from(err),
+              ),
+            )
+            .map(
+              ({ transactionHash }) =>
+                new PendingTransaction(() =>
+                  ResultAsync.fromPromise(
+                    waitForReceipt({
+                      client: thirdwebClient,
+                      chain,
+                      transactionHash,
+                    }),
+                    (err) => UnexpectedError.from(err),
+                  ).andThen(({ status, transactionHash }) => {
+                    if (status === 'reverted') {
+                      return TransactionError.new({
+                        txHash: txHash(transactionHash),
+                        request,
+                      }).asResultAsync();
+                    }
+                    return okAsync({
+                      operations: request.operations,
+                      txHash: txHash(transactionHash),
+                    });
+                  }),
+                ),
+            );
+        });
     },
-    [account, switchChain, thirdwebClient],
+    [account, client, switchChain, thirdwebClient],
   );
 }
 

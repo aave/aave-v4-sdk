@@ -35,11 +35,14 @@ export const client = AaveClient.create();
 ## Usage
 
 ```ts
-import { chains, userSupplies } from '@aave/client/actions';
+import { chains } from '@aave/client/actions';
+import { ChainsFilter } from '@aave/client';
 import { client } from './client';
 
-// Query user positions
-const chains = await chains(client);
+// Query chains by filter
+const result = await chains(client, {
+  query: { filter: ChainsFilter.ALL },
+});
 
 if (result.isOk()) {
   console.log("Chains:", result.value); // Chain[]

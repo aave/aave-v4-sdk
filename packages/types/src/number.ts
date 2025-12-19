@@ -305,7 +305,7 @@ export class BigDecimal {
    * This method is used by JSON.stringify() to serialize BigDecimal values.
    */
   toJSON(): string {
-    return this.value.toJSON();
+    return this.value.toFixed();
   }
 
   /**
