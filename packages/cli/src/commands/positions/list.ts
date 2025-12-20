@@ -14,9 +14,7 @@ import { userPositions } from '@aave/client/actions';
 import * as common from '../../common.js';
 
 export default class ListPositions extends common.V4Command {
-  static override description = 'List user positions across chains';
-
-
+  static override description = 'List user positions for a specific chain (API requires at least one chain ID)';
 
   static override flags = {
     user: common.address({
@@ -39,7 +37,10 @@ export default class ListPositions extends common.V4Command {
     { value: 'Collateral Enabled' },
   ];
 
-  private getPositionsRequest(): ResultAsync<UserPositionsRequest, InvariantError | UnexpectedError> {
+  private getPositionsRequest(): ResultAsync<
+    UserPositionsRequest,
+    InvariantError | UnexpectedError
+  > {
     return ResultAsync.fromPromise(
       this.parse(ListPositions),
       (error) => new InvariantError(String(error)),
