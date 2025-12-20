@@ -14,7 +14,7 @@ import { userPositions } from '@aave/client/actions';
 import * as common from '../../common.js';
 
 export default class ListPositions extends common.V4Command {
-  static override description = 'List user positions for a specific chain (API requires at least one chain ID)';
+  static override description = 'List user positions across chains';
 
   static override flags = {
     user: common.address({
@@ -77,7 +77,9 @@ export default class ListPositions extends common.V4Command {
             `${item.totalSupplied.current.symbol}${item.totalSupplied.current.value.toFixed(2)}`,
             `${item.totalDebt.current.symbol}${item.totalDebt.current.value.toFixed(2)}`,
             item.healthFactor.current?.toFixed(2) ?? 'N/A',
-            item.totalCollateral.current.value.toNumber() > 0 ? 'Yes' : 'No',
+            Number(item.totalCollateral.current.value.toFixed(0)) > 0
+              ? 'Yes'
+              : 'No',
           ]),
         );
         return ok(positions);
