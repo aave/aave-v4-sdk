@@ -14,16 +14,6 @@ import {
 import { Command, Flags } from '@oclif/core';
 import TtyTable from 'tty-table';
 
-declare global {
-  interface BigInt {
-    toJSON(): string;
-  }
-}
-
-BigInt.prototype.toJSON = function () {
-  return this.toString();
-};
-
 export const chain = Flags.custom<ChainId>({
   char: 'c',
   name: 'chain',
@@ -53,6 +43,26 @@ export const address = Flags.custom<EvmAddress>({
   helpValue: '<evm-address>',
 });
 
+function convertBigIntsToStrings(obj: unknown): unknown {
+  if (typeof obj === 'bigint') {
+    return obj.toString();
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertBigIntsToStrings);
+  }
+
+  if (obj !== null && typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = convertBigIntsToStrings(value);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
 export abstract class V4Command extends Command {
   protected headers: TtyTable.Header[] = [];
 
@@ -78,5 +88,9 @@ export abstract class V4Command extends Command {
   protected display(rows: unknown[]) {
     const out = TtyTable(this.headers, rows).render();
     this.log(out);
+  }
+
+  protected toSuccessJson(result: unknown): unknown {
+    return convertBigIntsToStrings(result);
   }
 }
