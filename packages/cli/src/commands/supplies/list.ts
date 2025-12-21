@@ -34,6 +34,7 @@ export default class ListSupplies extends common.V4Command {
     { value: 'Withdrawable' },
     { value: 'APY' },
     { value: 'Collateral' },
+    { value: 'Spoke' },
   ];
 
   private getSuppliesRequest(): ResultAsync<
@@ -78,6 +79,7 @@ export default class ListSupplies extends common.V4Command {
             `${item.withdrawable.amount.value.toFixed(4)}`,
             `${item.reserve.summary.supplyApy.normalized.toFixed(4)}%`,
             item.isCollateral ? 'Yes' : 'No',
+            item.reserve.spoke.name,
           ]),
         );
         return ok(supplies);
