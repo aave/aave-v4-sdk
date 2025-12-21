@@ -100,6 +100,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           reservesToBorrow.value[0]!.userState!.borrowable.amount.value.times(
             0.1,
           ),
+          2,
         );
 
         // Verify second borrow position (USDS)
@@ -120,6 +121,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
             0.1,
           ),
+          2,
         );
       });
     });

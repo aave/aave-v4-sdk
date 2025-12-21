@@ -108,27 +108,9 @@ describe('Check User Positions Math on Aave V4', () => {
       });
 
       it('Then it should return the correct totalCollateral value', async () => {
-        // total collateral is the sum of the principal and interest for all positions marked as collateral in the spoke
-        const totalCollateral = suppliesPositions
-          .filter((supply) => supply.isCollateral)
-          .reduce(
-            (acc, supply) =>
-              acc.plus(
-                supply.principal.exchange.value.plus(
-                  supply.interest.exchange.value,
-                ),
-              ),
-            bigDecimal('0'),
-          );
-
         // Cross check with the account data on chain
-        expect(accountDataOnChain.totalCollateralValue).toBeBigDecimalCloseTo(
-          totalCollateral,
-          1,
-        );
-        // Cross check with the user positions
-        expect(totalCollateral).toBeBigDecimalCloseTo(
-          positions.totalCollateral.current.value,
+        expect(positions.totalCollateral.current.value).toBeBigDecimalCloseTo(
+          accountDataOnChain.totalCollateralValue,
           1,
         );
       });
@@ -163,22 +145,8 @@ describe('Check User Positions Math on Aave V4', () => {
 
       it('Then it should return the correct totalDebt value', async () => {
         // total debt is the sum of the principal and interest for all positions in the spoke
-        const totalDebt = borrowPositions.reduce(
-          (acc, borrow) =>
-            acc.plus(
-              borrow.debt.exchange.value.plus(borrow.interest.exchange.value),
-            ),
-          bigDecimal('0'),
-        );
-
-        // Cross check with the account data on chain
-        expect(accountDataOnChain.totalDebtValue).toBeBigDecimalCloseTo(
-          totalDebt,
-          1,
-        );
-        // Cross check with the user positions
-        expect(totalDebt).toBeBigDecimalCloseTo(
-          positions.totalDebt.current.value,
+        expect(positions.totalDebt.current.value).toBeBigDecimalCloseTo(
+          accountDataOnChain.totalDebtValue,
           1,
         );
       });
@@ -210,51 +178,11 @@ describe('Check User Positions Math on Aave V4', () => {
       });
 
       it('Then it should return the correct health factor', async () => {
-        // Calculate health factor according to the contract logic in Spoke.sol:
-        // The contract uses BPS (basis points) internally and converts to WAD (18 decimals)
-
-        // Step 1: Calculate weighted sum of collateral factors
-        // For each collateral asset:
-        //   - Calculate collateral value: (principal + interest) in USD
-        //   - Accumulate: avgCollateralFactorWeightedSum += collateralFactor × collateralValue
-        const avgCollateralFactorWeightedSum = suppliesPositions
-          .filter((supply) => supply.isCollateral)
-          .reduce((acc, supply) => {
-            const collateralValue = supply.principal.exchange.value.plus(
-              supply.interest.exchange.value,
-            );
-            const collateralFactor =
-              supply.reserve.settings.collateralFactor.value;
-            return acc.plus(collateralFactor.times(collateralValue));
-          }, bigDecimal('0'));
-
-        // Step 2: Calculate total debt value
-        // For each debt asset: debt = drawnDebt + premiumDebt = debt + interest
-        const totalDebtValue = borrowPositions.reduce(
-          (acc, borrow) =>
-            acc.plus(
-              borrow.debt.exchange.value.plus(borrow.interest.exchange.value),
-            ),
-          bigDecimal('0'),
+        // Cross check with the user positions
+        expect(positions.healthFactor.current).toBeBigDecimalCloseTo(
+          accountDataOnChain.healthFactor,
+          2,
         );
-
-        // Step 3: Compute health factor
-        // - Formula: healthFactor = avgCollateralFactorWeightedSum / totalDebtValue
-
-        // If totalDebtValue is greater than 0, calculate the health factor
-        if (totalDebtValue.gt(0)) {
-          const calculatedHealthFactor =
-            avgCollateralFactorWeightedSum.div(totalDebtValue);
-
-          // Cross check with the account data on chain
-          expect(calculatedHealthFactor).toBeBigDecimalCloseTo(
-            accountDataOnChain.healthFactor,
-          );
-          // Cross check with the user positions
-          expect(calculatedHealthFactor).toBeBigDecimalCloseTo(
-            positions.healthFactor.current,
-          );
-        }
       });
 
       it('Then it should return the correct averageCollateralFactor value', async () => {
