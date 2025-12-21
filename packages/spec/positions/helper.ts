@@ -16,12 +16,9 @@ import {
   userSupplies,
 } from '@aave/client/actions';
 import {
-  ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_SPOKE_ETHENA_ID,
-  ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
@@ -33,7 +30,6 @@ import {
   findReservesToSupply,
 } from '../helpers/reserves';
 import {
-  borrowFromRandomReserve,
   borrowFromReserve,
   findReserveAndSupply,
   supplyToReserve,
