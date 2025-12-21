@@ -1,0 +1,26 @@
+{
+  "name": "react-stories",
+  "description": "Examples using AaveKit React",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "ladle serve"
+  },
+  "dependencies": {
+    "@aave/client": "next",
+    "@aave/react": "next",
+    "@ladle/react": "^5.1.1",
+    "baseui": "0.0.0-next-e19fc5fd2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "styletron-engine-monolithic": "^1.0.0",
+    "styletron-react": "^6.1.1",
+    "viem": "^2.37.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "typescript": "^5.6.3"
+  }
+}
