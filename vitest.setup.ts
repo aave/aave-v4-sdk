@@ -8,7 +8,7 @@ expect.extend({
   toBeBigDecimalCloseTo(
     received: BigDecimal,
     expected: BigDecimal,
-    precision = 2,
+    precision: number,
   ) {
     const pass = received.round(precision).eq(expected.round(precision));
 

@@ -17,15 +17,14 @@ import {
 } from '@aave/client/actions';
 import {
   ETHEREUM_FORK_ID,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_SPOKE_ETHENA_ID,
   ETHEREUM_WETH_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
+
 import {
   findReservesToBorrow,
   findReservesToSupply,
@@ -33,7 +32,6 @@ import {
 import {
   borrowFromReserve,
   findReserveAndSupply,
-  supplyAndBorrowNativeToken,
   supplyToReserve,
 } from '../helpers/supplyBorrow';
 import {
@@ -201,41 +199,6 @@ export const recreateUserActivities = async (
       assertOk(result);
     }
   }
-};
-
-export const recreateUserSummary = async (
-  client: AaveClient,
-  user: WalletClient<Transport, Chain, Account>,
-) => {
-  const setup = await fundErc20Address(evmAddress(user.account.address), {
-    address: ETHEREUM_WETH_ADDRESS,
-    amount: bigDecimal('0.5'),
-  })
-    .andThen(() =>
-      fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_WSTETH_ADDRESS,
-        amount: bigDecimal('0.5'),
-      }),
-    )
-    .andThen(() =>
-      fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_GHO_ADDRESS,
-        amount: bigDecimal('100'),
-      }),
-    )
-    .andThen(() =>
-      findReserveAndSupply(client, user, {
-        token: ETHEREUM_GHO_ADDRESS,
-        amount: bigDecimal('100'),
-      }),
-    )
-    .andThen(() =>
-      supplyAndBorrowNativeToken(client, user, {
-        spoke: ETHEREUM_SPOKE_CORE_ID,
-        ratioToBorrow: 0.4,
-      }),
-    );
-  assertOk(setup);
 };
 
 export const recreateUserBorrows = async (

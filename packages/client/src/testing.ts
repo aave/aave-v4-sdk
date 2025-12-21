@@ -66,6 +66,9 @@ export const ETHEREUM_WSTETH_ADDRESS = evmAddress(
 export const ETHEREUM_1INCH_ADDRESS = evmAddress(
   '0x111111111117dC0aa78b770fA6A738034120C302',
 );
+export const ETHEREUM_AAVE_ADDRESS = evmAddress(
+  '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
+);
 
 // Spoke addresses and ids
 export const ETHEREUM_SPOKE_CORE_ADDRESS = evmAddress(
@@ -115,7 +118,7 @@ export const client = AaveClient.create({
   environment,
 });
 
-const devnetChain = await chain(client, { chainId: ETHEREUM_FORK_ID })
+export const devnetChain = await chain(client, { chainId: ETHEREUM_FORK_ID })
   .map(nonNullable)
   .map(toViemChain)
   .match(

@@ -82,6 +82,7 @@ describe('Supplying Assets on Aave V4', () => {
         expect(supplyPosition.isCollateral).toEqual(true);
         expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
+          2,
         );
 
         // Check the other reserves were not affected
@@ -295,6 +296,7 @@ describe('Supplying Assets on Aave V4', () => {
           supplyPositionBefore.value?.withdrawable.amount.value.plus(
             amountToSupply,
           ),
+          2,
         );
       });
     });

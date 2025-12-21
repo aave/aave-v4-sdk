@@ -5,7 +5,6 @@ import {
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
-  fundErc20Address,
 } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -21,18 +20,12 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
       beforeAll(async () => {
         const amountToSupply = bigDecimal('100');
 
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
+        const setup = await findReserveAndSupply(client, user, {
+          token: ETHEREUM_USDC_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           amount: amountToSupply,
-          decimals: 6,
-        }).andThen(() =>
-          findReserveAndSupply(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            amount: amountToSupply,
-            asCollateral: true,
-          }),
-        );
+          asCollateral: true,
+        });
 
         assertOk(setup);
       }, 120_000);
@@ -107,6 +100,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           reservesToBorrow.value[0]!.userState!.borrowable.amount.value.times(
             0.1,
           ),
+          2,
         );
 
         // Verify second borrow position (USDS)
@@ -127,6 +121,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
             0.1,
           ),
+          2,
         );
       });
     });
