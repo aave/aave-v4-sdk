@@ -402,11 +402,11 @@ function signSwapTypedData(
       domain: result.domain as TypedDataDomain,
       types: result.types as TypedData,
       primaryType: result.primaryType,
-      message: JSON.parse(result.message),
+      message: result.message as any,
     }),
     (err) => SigningError.from(err),
   ).map((hex) => ({
-    deadline: JSON.parse(result.message).deadline,
+    deadline: (result.message as any).validTo,
     value: signatureFrom(hex),
   }));
 }
