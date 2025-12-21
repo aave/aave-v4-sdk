@@ -28,7 +28,6 @@ describe('Borrowing Assets on Aave V4', () => {
         spoke: ETHEREUM_SPOKE_CORE_ID,
         amount: amountToSupply,
         asCollateral: true,
-        autoFund: true,
       });
 
       assertOk(setup);

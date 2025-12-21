@@ -424,7 +424,6 @@ export const recreateUserPositionInOneSpoke = async (
       token: ETHEREUM_GHO_ADDRESS,
       asCollateral: true,
       amount: bigDecimal('100'),
-      autoFund: true,
     });
     assertOk(supplyGHOCollateral);
 
@@ -433,7 +432,6 @@ export const recreateUserPositionInOneSpoke = async (
       token: ETHEREUM_USDC_ADDRESS,
       asCollateral: false,
       amount: bigDecimal('100'),
-      autoFund: true,
     });
     assertOk(supplyUSDCDNoCollateral);
 
@@ -442,7 +440,6 @@ export const recreateUserPositionInOneSpoke = async (
       token: ETHEREUM_AAVE_ADDRESS,
       asCollateral: true,
       amount: bigDecimal('0.5'),
-      autoFund: true,
     });
     assertOk(supplyWETHCollateral);
   }

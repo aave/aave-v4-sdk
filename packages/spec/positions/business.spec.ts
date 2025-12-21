@@ -45,7 +45,6 @@ describe('Health Factor Scenarios on Aave V4', () => {
           spoke: ETHEREUM_SPOKE_CORE_ID,
           asCollateral: true,
           amount: amountToSupply,
-          autoFund: true,
         });
 
         assertOk(setup);

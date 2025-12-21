@@ -36,7 +36,6 @@ describe('Querying User Balances on Aave V4', () => {
             token: token,
             amount: bigDecimal('100'),
             asCollateral: true,
-            autoFund: true,
           });
           assertOk(setup);
         }

@@ -17,14 +17,11 @@ import { sendWith, signERC20PermitWith } from '@aave/client/viem';
 import type { Reserve } from '@aave/graphql';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  findReservesToBorrow,
-  findReservesToSupply,
-} from '../helpers/reserves';
+import { findReservesToBorrow } from '../helpers/reserves';
 import {
   borrowFromReserve,
+  findReserveAndSupply,
   supplyAndBorrowNativeToken,
-  supplyToReserve,
 } from '../helpers/supplyBorrow';
 
 const user = await createNewWallet();
@@ -34,29 +31,13 @@ describe('Repaying Loans on Aave V4', () => {
     let reserve: Reserve;
 
     beforeEach(async () => {
-      const supplySetup = await findReservesToSupply(client, user, {
+      const supplySetup = await findReserveAndSupply(client, user, {
         token: ETHEREUM_USDC_ADDRESS,
         spoke: ETHEREUM_SPOKE_CORE_ID,
         asCollateral: true,
-      }).andThen((supplyReserves) => {
-        const amountToSupply = supplyReserves[0].supplyCap
-          .minus(supplyReserves[0].summary.supplied.amount.value)
-          .div(10000);
-
-        return fundErc20Address(evmAddress(user.account.address), {
-          address: supplyReserves[0].asset.underlying.address,
-          amount: amountToSupply,
-          decimals: supplyReserves[0].asset.underlying.info.decimals,
-        }).andThen(() =>
-          supplyToReserve(client, user, {
-            reserve: supplyReserves[0].id,
-            amount: { erc20: { value: amountToSupply } },
-            sender: evmAddress(user.account.address),
-            enableCollateral: true,
-          }),
-        );
       });
       assertOk(supplySetup);
+
       const borrowSetup = await findReservesToBorrow(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
       }).andThen((borrowReserves) => {
