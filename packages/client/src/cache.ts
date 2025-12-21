@@ -370,6 +370,7 @@ export const exchange = cacheExchange({
     TypeField: () => null,
     UserBalance: () => null,
     UserBorrowItem: () => null,
+    UserPositionRiskPremium: () => null,
     UserRiskPremiumBreakdownItem: () => null,
     UserSummary: () => null,
     UserSummaryHistoryItem: () => null,
