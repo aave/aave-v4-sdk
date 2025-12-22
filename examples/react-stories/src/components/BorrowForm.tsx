@@ -20,7 +20,7 @@ export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
   } | null>(null);
 
   const [sendTransaction] = useSendTransaction(walletClient);
-  const [borrow, { loading, error }] = useBorrow((plan) => {
+  const [borrow, { loading }] = useBorrow((plan) => {
     switch (plan.__typename) {
       case 'TransactionRequest':
         setStatus({
