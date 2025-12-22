@@ -48,6 +48,7 @@ export enum OperationType {
   SpokeSupply = 'SPOKE_SUPPLY',
   SpokeWithdraw = 'SPOKE_WITHDRAW',
   SpokeUpdateUserRiskPremium = 'SPOKE_UPDATE_USER_RISK_PREMIUM',
+  SpokeUpdateUserDynamicConfig = 'SPOKE_UPDATE_USER_DYNAMIC_CONFIG',
   SpokeSetUserUsingAsCollateral = 'SPOKE_SET_USER_USING_AS_COLLATERAL',
   SpokeSetUserPositionManager = 'SPOKE_SET_USER_POSITION_MANAGER',
   RenounceSpokeUserPositionManager = 'RENOUNCE_SPOKE_USER_POSITION_MANAGER',

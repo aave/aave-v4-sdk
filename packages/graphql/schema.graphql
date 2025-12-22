@@ -79,30 +79,6 @@ type AssetBorrowSample {
   lowestApy: PercentNumber!
 }
 
-input AssetCategoryBorrowHistoryRequest {
-  category: TokenCategory!
-  window: TimeWindow! = LAST_DAY
-}
-
-type AssetCategoryBorrowSample {
-  date: DateTime!
-  highestApy: PercentNumber!
-  lowestApy: PercentNumber!
-  borrows(currency: Currency! = USD): ExchangeAmount!
-}
-
-input AssetCategorySupplyHistoryRequest {
-  category: TokenCategory!
-  window: TimeWindow! = LAST_DAY
-}
-
-type AssetCategorySupplySample {
-  date: DateTime!
-  highestApy: PercentNumber!
-  lowestApy: PercentNumber!
-  deposits(currency: Currency! = USD): ExchangeAmount!
-}
-
 scalar AssetId
 
 input AssetPriceHistoryRequest {
@@ -205,18 +181,6 @@ union CancelSwapExecutionPlan = TransactionRequest | SwapCancelled
 input CancelSwapRequest @oneOf {
   intent: CancelIntentSwapInput
   transaction: SwapId
-}
-
-type CancelSwapTypeDefinition {
-  EIP712Domain: [TypeField!]!
-  OrderCancellations: [TypeField!]!
-}
-
-type CancelSwapTypedData {
-  types: CancelSwapTypeDefinition!
-  primaryType: String!
-  domain: DomainData!
-  message: JSON!
 }
 
 type Chain {
@@ -791,6 +755,7 @@ enum OperationType {
   SPOKE_SUPPLY
   SPOKE_WITHDRAW
   SPOKE_UPDATE_USER_RISK_PREMIUM
+  SPOKE_UPDATE_USER_DYNAMIC_CONFIG
   SPOKE_SET_USER_USING_AS_COLLATERAL
   SPOKE_SET_USER_POSITION_MANAGER
   RENOUNCE_SPOKE_USER_POSITION_MANAGER
@@ -893,7 +858,7 @@ type PositionAmount {
 
 type PositionSwapAdapterContractApproval {
   byTransaction: TransactionRequest
-  bySignature: TypedData
+  bySignature: SwapTypedData
 }
 
 union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapPositionManagerApproval
@@ -901,12 +866,11 @@ union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapP
 type PositionSwapByIntentApprovalsRequired {
   quote: SwapQuote!
   approvals: [PositionSwapApproval!]!
-  preview: PreviewUserPosition!
 }
 
 type PositionSwapPositionManagerApproval {
   byTransaction: TransactionRequest
-  bySignature: TypedData
+  bySignature: SwapTypedData
 }
 
 type PreContractActionRequired {
@@ -933,7 +897,6 @@ input PrepareFromQuoteDebtSwapInput {
   newSellAmount: BigDecimal
   newBuyAmount: BigDecimal
   newSlippage: BigDecimal
-  newReceiver: EvmAddress
   user: EvmAddress!
 }
 
@@ -942,7 +905,6 @@ input PrepareFromQuoteRepayWithCollateralInput {
   newSellAmount: BigDecimal
   newBuyAmount: BigDecimal
   newSlippage: BigDecimal
-  newReceiver: EvmAddress
   user: EvmAddress!
 }
 
@@ -959,7 +921,6 @@ input PrepareFromQuoteWithdrawAndSwapInput {
   newSellAmount: BigDecimal
   newBuyAmount: BigDecimal
   newSlippage: BigDecimal
-  newReceiver: EvmAddress
   user: EvmAddress!
 }
 
@@ -976,10 +937,9 @@ input PrepareLimitOrderSwapInput {
   quoteId: SwapQuoteId!
   newSellAmount: BigDecimal
   newBuyAmount: BigDecimal
-
-  """Slippage in basis points"""
   newSlippage: BigDecimal
   newReceiver: EvmAddress
+  newKind: SwapKind
 }
 
 input PrepareLimitRepayWithCollateralInput {
@@ -1080,7 +1040,7 @@ input PrepareSwapCancelRequest {
 }
 
 type PrepareSwapCancelResult {
-  data: CancelSwapTypedData!
+  data: SwapTypedData!
 }
 
 union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
@@ -1154,8 +1114,6 @@ type Query {
   protocolHistory(request: ProtocolHistoryRequest!): [ProtocolHistorySample!]!
   asset(request: AssetRequest!): Asset
   assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
-  assetCategoryBorrowHistory(request: AssetCategoryBorrowHistoryRequest!): [AssetCategoryBorrowSample!]!
-  assetCategorySupplyHistory(request: AssetCategorySupplyHistoryRequest!): [AssetCategorySupplySample!]!
   assetBorrowHistory(request: AssetBorrowHistoryRequest!): [AssetBorrowSample!]!
   assetPriceHistory(request: AssetPriceHistoryRequest!): [AssetPriceSample!]!
 
@@ -1640,7 +1598,7 @@ type SwapApprovalRequired {
 
 type SwapByIntent {
   quote: SwapQuote!
-  data: SwapByIntentTypedData!
+  data: SwapTypedData!
 }
 
 input SwapByIntentInput {
@@ -1648,22 +1606,10 @@ input SwapByIntentInput {
   signature: Signature!
 }
 
-type SwapByIntentTypeDefinition {
-  EIP712Domain: [TypeField!]!
-  Order: [TypeField!]!
-}
-
-type SwapByIntentTypedData {
-  types: SwapByIntentTypeDefinition!
-  primaryType: String!
-  domain: DomainData!
-  message: JSON!
-}
-
 type SwapByIntentWithApprovalRequired {
   quote: SwapQuote!
   approval: TransactionRequest!
-  data: SwapByIntentTypedData!
+  data: SwapTypedData!
 }
 
 type SwapByTransaction {
@@ -1779,6 +1725,13 @@ type SwapTransactionRequest {
   orderReceipt: SwapReceipt!
 }
 
+type SwapTypedData {
+  types: JSON!
+  primaryType: String!
+  domain: DomainData!
+  message: JSON!
+}
+
 input SwapWithTransactionInput {
   quoteId: SwapQuoteId!
   permitSig: Signature
@@ -1876,13 +1829,6 @@ type TypeDefinition {
 type TypeField {
   name: String!
   type: String!
-}
-
-type TypedData {
-  types: JSON!
-  primaryType: String!
-  domain: DomainData!
-  message: JSON!
 }
 
 input UpdateUserPositionConditionsRequest {
