@@ -1,4 +1,4 @@
-import { bigDecimal, evmAddress, type Reserve, useSupply } from '@aave/react';
+import { bigDecimal, evmAddress, type Reserve, useBorrow } from '@aave/react';
 import { useSendTransaction } from '@aave/react/viem';
 import { Block } from 'baseui/block';
 import { Button } from 'baseui/button';
@@ -8,29 +8,29 @@ import { KIND, Notification } from 'baseui/notification';
 import { useState } from 'react';
 import type { WalletClient } from 'viem';
 
-interface SupplyFormProps {
+interface BorrowFormProps {
   reserve: Reserve;
   walletClient: WalletClient;
 }
 
-export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
+export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
   const [status, setStatus] = useState<{
     kind: keyof typeof KIND;
     message: string;
   } | null>(null);
 
   const [sendTransaction] = useSendTransaction(walletClient);
-  const [supply, { loading }] = useSupply((plan) => {
+  const [borrow, { loading, error }] = useBorrow((plan) => {
     switch (plan.__typename) {
       case 'TransactionRequest':
         setStatus({
           kind: KIND.info,
-          message: 'Sign the Supply Transaction in your wallet',
+          message: 'Sign the Borrow Transaction in your wallet',
         });
         return sendTransaction(plan).andTee(() =>
           setStatus({
             kind: KIND.info,
-            message: 'Sending Supply Transaction…',
+            message: 'Sending Borrow Transaction…',
           }),
         );
 
@@ -58,7 +58,7 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
       return;
     }
 
-    const result = await supply({
+    const result = await borrow({
       reserve: reserve.id,
       amount: {
         erc20: {
@@ -73,7 +73,7 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
         case 'ValidationError':
           setStatus({
             kind: KIND.warning,
-            message: 'Insufficient funds in your wallet',
+            message: 'Insufficient borrow capacity for this reserve',
           });
           return;
         case 'CancelError':
@@ -85,7 +85,7 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
       }
     }
 
-    setStatus({ kind: KIND.info, message: 'Supply successful!' });
+    setStatus({ kind: KIND.info, message: 'Borrow successful!' });
   };
 
   return (
@@ -99,12 +99,12 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
           type='number'
           step={0.000000000000000001}
           disabled={loading}
-          placeholder='Amount to supply (in token units)'
+          placeholder='Amount to borrow (in token units)'
         />
       </FormControl>
 
       <Button type='submit' disabled={loading} isLoading={loading}>
-        Supply
+        Borrow
       </Button>
 
       {status && (
