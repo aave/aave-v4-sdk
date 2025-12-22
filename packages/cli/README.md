@@ -30,6 +30,7 @@ USAGE
 # Commands
 <!-- commands -->
 * [`aave hubs list`](#aave-hubs-list)
+* [`aave reserves list`](#aave-reserves-list)
 * [`aave spokes list`](#aave-spokes-list)
 
 ## `aave hubs list`
@@ -51,6 +52,31 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/hubs/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.3/src/commands/hubs/list.ts)_
+
+## `aave reserves list`
+
+List Aave v4 reserves
+
+```
+USAGE
+  $ aave reserves list [-s <spoke-id>] [-h <hub-id>] [--hub_address <evm-address> -c <chain-id>]
+
+FLAGS
+  -c, --chain_id=<chain-id>        The chain ID (e.g. 1, 137, 42161)
+  -h, --hub_id=<hub-id>            The hub ID (e.g. SGVsbG8h…)
+  -s, --spoke_id=<spoke-id>        The spoke ID (e.g. SGVsbG8h…)
+      --hub_address=<evm-address>  The hub address (e.g. 0x123…)
+
+DESCRIPTION
+  List Aave v4 reserves
+
+EXAMPLES
+  $ aave reserves list --spoke_id MTIzNDU2Nzg5OjoweEJh...
+  $ aave reserves list --hub_id MTIzNDU2Nzg5OjoweGFEOTA1...
+  $ aave reserves list --chain_id 123456789
+```
+
+_See code: [src/commands/reserves/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.0.0/src/commands/reserves/list.ts)_
 
 ## `aave spokes list`
 
