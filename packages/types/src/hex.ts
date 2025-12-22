@@ -50,6 +50,13 @@ export type Signature = Tagged<HexString, 'Signature'>;
 export const signatureFrom = hexString<Signature>;
 
 /**
+ * Type guard for a Signature.
+ */
+export function isSignature(value: unknown): value is Signature {
+  return typeof value === 'string' && isValidHexString(value);
+}
+
+/**
  * A transaction hash.
  */
 export type TxHash = Tagged<HexString, 'TxHash'>;

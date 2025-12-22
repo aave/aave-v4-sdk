@@ -1,6 +1,8 @@
 import {
   CancelSwapExecutionPlanFragment,
   PaginatedUserSwapsResultFragment,
+  PreparePositionSwapResultFragment,
+  PrepareSupplySwapResultFragment,
   PrepareSwapCancelResultFragment,
   PrepareSwapResultFragment,
   SwapExecutionPlanFragment,
@@ -113,6 +115,34 @@ export const UserSwapsQuery = graphql(
   [PaginatedUserSwapsResultFragment],
 );
 export type UserSwapsRequest = RequestOf<typeof UserSwapsQuery>;
+
+/**
+ * @internal
+ */
+export const SupplySwapQuoteQuery = graphql(
+  `query SupplySwapQuote($request: PrepareSupplySwapRequest!, $currency: Currency!) {
+    value: supplySwapQuote(request: $request) {
+      ...PrepareSupplySwapResult
+    }
+  }`,
+  [PrepareSupplySwapResultFragment],
+);
+export type PrepareSupplySwapRequest = RequestOf<typeof SupplySwapQuoteQuery>;
+
+/**
+ * @internal
+ */
+export const PreparePositionSwapQuery = graphql(
+  `query PreparePositionSwap($request: PreparePositionSwapRequest!, $currency: Currency!) {
+    value: preparePositionSwap(request: $request) {
+      ...PreparePositionSwapResult
+    }
+  }`,
+  [PreparePositionSwapResultFragment],
+);
+export type PreparePositionSwapRequest = RequestOf<
+  typeof PreparePositionSwapQuery
+>;
 
 export type CancelIntentSwapInput = ReturnType<
   typeof graphql.scalar<'CancelIntentSwapInput'>

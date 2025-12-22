@@ -429,3 +429,118 @@ export const PaginatedUserSwapsResultFragment = graphql(
 export type PaginatedUserSwapsResult = FragmentOf<
   typeof PaginatedUserSwapsResultFragment
 >;
+
+export const SwapTypedDataFragment = graphql(
+  `fragment TypedData on TypedData {
+    __typename
+    types
+    primaryType
+    domain {
+      ...DomainData
+    }
+    message
+  }`,
+  [DomainDataFragment],
+);
+export type SwapTypedData = FragmentOf<typeof SwapTypedDataFragment>;
+
+export const PositionSwapAdapterContractApprovalFragment = graphql(
+  `fragment PositionSwapAdapterContractApproval on PositionSwapAdapterContractApproval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    bySignature {
+      ...TypedData
+    }
+  }`,
+  [TransactionRequestFragment, SwapTypedDataFragment],
+);
+export type PositionSwapAdapterContractApproval = FragmentOf<
+  typeof PositionSwapAdapterContractApprovalFragment
+>;
+
+export const PositionSwapPositionManagerApprovalFragment = graphql(
+  `fragment PositionSwapPositionManagerApproval on PositionSwapPositionManagerApproval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    bySignature {
+      ...TypedData
+    }
+  }`,
+  [TransactionRequestFragment, SwapTypedDataFragment],
+);
+export type PositionSwapPositionManagerApproval = FragmentOf<
+  typeof PositionSwapPositionManagerApprovalFragment
+>;
+
+export type PositionSwapApproval =
+  | PositionSwapAdapterContractApproval
+  | PositionSwapPositionManagerApproval;
+
+export const PositionSwapApprovalFragment: FragmentDocumentFor<
+  PositionSwapApproval,
+  'PositionSwapApproval'
+> = graphql(
+  `fragment PositionSwapApproval on PositionSwapApproval {
+    __typename
+    ... on PositionSwapAdapterContractApproval {
+      ...PositionSwapAdapterContractApproval
+    }
+    ... on PositionSwapPositionManagerApproval {
+      ...PositionSwapPositionManagerApproval
+    }
+  }`,
+  [
+    PositionSwapAdapterContractApprovalFragment,
+    PositionSwapPositionManagerApprovalFragment,
+  ],
+);
+
+export const PositionSwapByIntentApprovalsRequiredFragment = graphql(
+  `fragment PositionSwapByIntentApprovalsRequired on PositionSwapByIntentApprovalsRequired {
+    __typename
+    quote {
+      ...SwapQuote
+    }
+    approvals {
+      ...PositionSwapApproval
+    }
+  }`,
+  [SwapQuoteFragment, PositionSwapApprovalFragment],
+);
+export type PositionSwapByIntentApprovalsRequired = FragmentOf<
+  typeof PositionSwapByIntentApprovalsRequiredFragment
+>;
+
+export type PrepareSupplySwapResult = PositionSwapByIntentApprovalsRequired;
+
+export const PrepareSupplySwapResultFragment: FragmentDocumentFor<
+  PrepareSupplySwapResult,
+  'PrepareSupplySwapResult'
+> = graphql(
+  `fragment PrepareSupplySwapResult on PrepareSupplySwapResult {
+    __typename
+    ... on PositionSwapByIntentApprovalsRequired {
+      ...PositionSwapByIntentApprovalsRequired
+    }
+  }`,
+  [PositionSwapByIntentApprovalsRequiredFragment],
+);
+
+export type PreparePositionSwapResult = SwapByIntent;
+
+export const PreparePositionSwapResultFragment: FragmentDocumentFor<
+  PreparePositionSwapResult,
+  'PreparePositionSwapResult'
+> = graphql(
+  `fragment PreparePositionSwapResult on PreparePositionSwapResult {
+    __typename
+    ... on SwapByIntent {
+      ...SwapByIntent
+    }
+  }`,
+  [SwapByIntentFragment],
+);
