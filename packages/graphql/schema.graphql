@@ -759,6 +759,7 @@ type MaxLiquidationBonusVariation {
 type Mutation {
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
+  swap(request: SwapRequest!): SwapExecutionPlan!
 }
 
 type NativeAmount {
@@ -885,6 +886,29 @@ type PermitTypedDataResponse {
   message: PermitMessageData!
 }
 
+type PositionAmount {
+  reserve: ReserveInfo
+  amount: Erc20Amount!
+}
+
+type PositionSwapAdapterContractApproval {
+  byTransaction: TransactionRequest
+  bySignature: TypedData
+}
+
+union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapPositionManagerApproval
+
+type PositionSwapByIntentApprovalsRequired {
+  quote: SwapQuote!
+  approvals: [PositionSwapApproval!]!
+  preview: PreviewUserPosition!
+}
+
+type PositionSwapPositionManagerApproval {
+  byTransaction: TransactionRequest
+  bySignature: TypedData
+}
+
 type PreContractActionRequired {
   """The transaction requires a pre-contract action first"""
   transaction: TransactionRequest!
@@ -894,6 +918,58 @@ type PreContractActionRequired {
 
   """The transaction to send after the approval is complete"""
   originalTransaction: TransactionRequest!
+}
+
+input PrepareBorrowSwapRequest @oneOf {
+  market: PrepareMarketDebtSwapInput
+  limit: PrepareLimitDebtSwapInput
+  fromQuote: PrepareFromQuoteDebtSwapInput
+}
+
+union PrepareBorrowSwapResult = PositionSwapByIntentApprovalsRequired
+
+input PrepareFromQuoteDebtSwapInput {
+  quoteId: SwapQuoteId!
+  newSellAmount: BigDecimal
+  newBuyAmount: BigDecimal
+  newSlippage: BigDecimal
+  newReceiver: EvmAddress
+  user: EvmAddress!
+}
+
+input PrepareFromQuoteRepayWithCollateralInput {
+  quoteId: SwapQuoteId!
+  newSellAmount: BigDecimal
+  newBuyAmount: BigDecimal
+  newSlippage: BigDecimal
+  newReceiver: EvmAddress
+  user: EvmAddress!
+}
+
+input PrepareFromQuoteSupplySwapInput {
+  quoteId: SwapQuoteId!
+  newSellAmount: BigDecimal!
+  newBuyAmount: BigDecimal!
+  slippage: BigDecimal
+  user: EvmAddress!
+}
+
+input PrepareFromQuoteWithdrawAndSwapInput {
+  quoteId: SwapQuoteId!
+  newSellAmount: BigDecimal
+  newBuyAmount: BigDecimal
+  newSlippage: BigDecimal
+  newReceiver: EvmAddress
+  user: EvmAddress!
+}
+
+input PrepareLimitDebtSwapInput {
+  quoteId: SwapQuoteId!
+  sellPosition: UserBorrowItemId!
+  newSellAmount: BigDecimal!
+  buyReserve: ReserveId!
+  newBuyAmount: BigDecimal!
+  user: EvmAddress!
 }
 
 input PrepareLimitOrderSwapInput {
@@ -906,6 +982,40 @@ input PrepareLimitOrderSwapInput {
   newReceiver: EvmAddress
 }
 
+input PrepareLimitRepayWithCollateralInput {
+  quoteId: SwapQuoteId!
+  repayPosition: UserBorrowItemId!
+  newSellAmount: BigDecimal!
+  supplyPosition: UserSupplyItemId!
+  newBuyAmount: BigDecimal!
+  user: EvmAddress!
+}
+
+input PrepareLimitSupplySwapInput {
+  quoteId: SwapQuoteId!
+  sellPosition: UserSupplyItemId!
+  newSellAmount: BigDecimal!
+  buyReserve: ReserveId!
+  newBuyAmount: BigDecimal!
+  user: EvmAddress!
+}
+
+input PrepareLimitWithdrawAndSwapInput {
+  quoteId: SwapQuoteId!
+  withdrawPosition: UserSupplyItemId!
+  newSellAmount: BigDecimal!
+  buyToken: TokenInput!
+  newBuyAmount: BigDecimal!
+  user: EvmAddress!
+}
+
+input PrepareMarketDebtSwapInput {
+  debtPosition: UserBorrowItemId!
+  buyReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
 input PrepareMarketOrderSwapInput {
   chainId: ChainId!
   buy: TokenInput!
@@ -916,6 +1026,55 @@ input PrepareMarketOrderSwapInput {
   receiver: EvmAddress
 }
 
+input PrepareMarketRepayWithCollateralInput {
+  debtPosition: UserBorrowItemId!
+  RepayWithReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
+input PrepareMarketSupplySwapInput {
+  sellPosition: UserSupplyItemId!
+  buyReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
+input PrepareMarketWithdrawAndSwapInput {
+  position: UserSupplyItemId!
+  buyReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
+input PreparePositionSwapRequest {
+  quoteId: SwapQuoteId!
+
+  """postHook adapter signature - can be approved via transaction"""
+  adapterContractSignature: Signature
+
+  """position manager signature - can be approved via transaction"""
+  positionManagerSignature: Signature
+}
+
+union PreparePositionSwapResult = SwapByIntent
+
+input PrepareRepayWithSupplyRequest @oneOf {
+  market: PrepareMarketRepayWithCollateralInput
+  limit: PrepareLimitRepayWithCollateralInput
+  fromQuote: PrepareFromQuoteRepayWithCollateralInput
+}
+
+union PrepareRepayWithSupplyResult = PositionSwapByIntentApprovalsRequired
+
+input PrepareSupplySwapRequest @oneOf {
+  market: PrepareMarketSupplySwapInput
+  limit: PrepareLimitSupplySwapInput
+  fromQuote: PrepareFromQuoteSupplySwapInput
+}
+
+union PrepareSupplySwapResult = PositionSwapByIntentApprovalsRequired
+
 input PrepareSwapCancelRequest {
   id: SwapId!
 }
@@ -924,12 +1083,20 @@ type PrepareSwapCancelResult {
   data: CancelSwapTypedData!
 }
 
-input PrepareSwapRequest @oneOf {
+union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
+
+input PrepareTokenSwapRequest @oneOf {
   market: PrepareMarketOrderSwapInput
   limit: PrepareLimitOrderSwapInput
 }
 
-union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
+input PrepareWithdrawSwapRequest @oneOf {
+  market: PrepareMarketWithdrawAndSwapInput
+  limit: PrepareLimitWithdrawAndSwapInput
+  fromQuote: PrepareFromQuoteWithdrawAndSwapInput
+}
+
+union PrepareWithdrawSwapResult = PositionSwapByIntentApprovalsRequired
 
 input PreviewAction @oneOf {
   supply: SupplyRequest
@@ -938,6 +1105,10 @@ input PreviewAction @oneOf {
   withdraw: WithdrawRequest
   setUserSuppliesAsCollateral: SetUserSuppliesAsCollateralRequest
   updateUserPositionConditions: UpdateUserPositionConditionsRequest
+  supplySwap: PrepareSupplySwapRequest
+  borrowSwap: PrepareBorrowSwapRequest
+  repayWithSupply: PrepareRepayWithSupplyRequest
+  withdrawSwap: PrepareWithdrawSwapRequest
 }
 
 input PreviewRequest {
@@ -1037,8 +1208,12 @@ type Query {
   hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
   activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
   swapQuote(request: SwapQuoteRequest!): SwapQuote!
-  prepareSwap(request: PrepareSwapRequest!): PrepareSwapResult!
-  swap(request: SwapRequest!): SwapExecutionPlan!
+  supplySwapQuote(request: PrepareSupplySwapRequest!): PrepareSupplySwapResult!
+  borrowSwapQuote(request: PrepareBorrowSwapRequest!): PrepareBorrowSwapResult!
+  repayWithSupplyQuote(request: PrepareRepayWithSupplyRequest!): PrepareRepayWithSupplyResult!
+  withdrawSwapQuote(request: PrepareWithdrawSwapRequest!): PrepareWithdrawSwapResult!
+  preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult!
+  prepareSwap(request: PrepareTokenSwapRequest!): PrepareSwapResult!
   swapStatus(request: SwapStatusRequest!): SwapStatus!
   userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
@@ -1456,6 +1631,8 @@ input SupplyRequest {
   sender: EvmAddress!
 }
 
+union SwapAmount = PositionAmount | NativeAmount | Erc20Amount
+
 type SwapApprovalRequired {
   approval: TransactionRequest!
   originalTransaction: SwapTransactionRequest!
@@ -1509,10 +1686,10 @@ type SwapExpired {
 
 type SwapFulfilled {
   txHash: String!
-  desiredSell: TokenAmount!
-  desiredBuy: TokenAmount!
-  sold: TokenAmount!
-  bought: TokenAmount!
+  desiredSell: SwapAmount!
+  desiredBuy: SwapAmount!
+  sold: SwapAmount!
+  bought: SwapAmount!
   createdAt: DateTime!
   fulfilledAt: DateTime!
   explorerLink: String!
@@ -1531,8 +1708,8 @@ type SwapOpen {
   createdAt: DateTime!
   deadline: DateTime!
   explorerLink: String!
-  desiredSell: TokenAmount!
-  desiredBuy: TokenAmount!
+  desiredSell: SwapAmount!
+  desiredBuy: SwapAmount!
 }
 
 type SwapPendingSignature {
@@ -1699,6 +1876,13 @@ type TypeDefinition {
 type TypeField {
   name: String!
   type: String!
+}
+
+type TypedData {
+  types: JSON!
+  primaryType: String!
+  domain: DomainData!
+  message: JSON!
 }
 
 input UpdateUserPositionConditionsRequest {

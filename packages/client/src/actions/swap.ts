@@ -5,8 +5,8 @@ import type {
   PaginatedUserSwapsResult,
   PrepareSwapCancelRequest,
   PrepareSwapCancelResult,
-  PrepareSwapRequest,
   PrepareSwapResult,
+  PrepareTokenSwapRequest,
   SwapCancelled,
   SwapExecutionPlan,
   SwapExpired,
@@ -25,8 +25,8 @@ import {
   CancelSwapQuery,
   PrepareSwapCancelQuery,
   PrepareSwapQuery,
+  SwapMutation,
   SwappableTokensQuery,
-  SwapQuery,
   SwapQuoteQuery,
   SwapStatusQuery,
   UserSwapsQuery,
@@ -137,7 +137,7 @@ export function swappableTokens(
  */
 export function prepareSwap(
   client: AaveClient,
-  request: PrepareSwapRequest,
+  request: PrepareTokenSwapRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PrepareSwapResult, UnexpectedError> {
   return client.query(PrepareSwapQuery, { request, ...options });
@@ -293,7 +293,7 @@ export function swap(
   client: AaveClient,
   request: SwapRequest,
 ): ResultAsync<SwapExecutionPlan, UnexpectedError> {
-  return client.query(SwapQuery, { request });
+  return client.mutation(SwapMutation, { request });
 }
 
 /**

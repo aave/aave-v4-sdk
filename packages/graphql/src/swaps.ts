@@ -40,14 +40,14 @@ export type SwappableTokensRequest = RequestOf<typeof SwappableTokensQuery>;
  * @internal
  */
 export const PrepareSwapQuery = graphql(
-  `query PrepareSwap($request: PrepareSwapRequest!, $currency: Currency!) {
+  `query PrepareSwap($request: PrepareTokenSwapRequest!, $currency: Currency!) {
     value: prepareSwap(request: $request) {
       ...PrepareSwapResult
     }
   }`,
   [PrepareSwapResultFragment],
 );
-export type PrepareSwapRequest = RequestOf<typeof PrepareSwapQuery>;
+export type PrepareTokenSwapRequest = RequestOf<typeof PrepareSwapQuery>;
 
 /**
  * @internal
@@ -65,15 +65,15 @@ export type SwapStatusRequest = RequestOf<typeof SwapStatusQuery>;
 /**
  * @internal
  */
-export const SwapQuery = graphql(
-  `query Swap($request: SwapRequest!) {
+export const SwapMutation = graphql(
+  `mutation Swap($request: SwapRequest!) {
     value: swap(request: $request) {
       ...SwapExecutionPlan
     }
   }`,
   [SwapExecutionPlanFragment],
 );
-export type SwapRequest = RequestOf<typeof SwapQuery>;
+export type SwapRequest = RequestOf<typeof SwapMutation>;
 
 /**
  * @internal

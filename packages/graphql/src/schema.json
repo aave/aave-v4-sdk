@@ -2382,6 +2382,29 @@
                 }
               }
             ]
+          },
+          {
+            "name": "swap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapExecutionPlan",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -2938,6 +2961,147 @@
       },
       {
         "kind": "OBJECT",
+        "name": "PositionAmount",
+        "fields": [
+          {
+            "name": "reserve",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveInfo",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PositionSwapAdapterContractApproval",
+        "fields": [
+          {
+            "name": "byTransaction",
+            "type": {
+              "kind": "OBJECT",
+              "name": "TransactionRequest",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "bySignature",
+            "type": {
+              "kind": "OBJECT",
+              "name": "TypedData",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "PositionSwapApproval",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapAdapterContractApproval"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapPositionManagerApproval"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PositionSwapByIntentApprovalsRequired",
+        "fields": [
+          {
+            "name": "quote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapQuote",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "approvals",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "UNION",
+                    "name": "PositionSwapApproval",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "preview",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PreviewUserPosition",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PositionSwapPositionManagerApproval",
+        "fields": [
+          {
+            "name": "byTransaction",
+            "type": {
+              "kind": "OBJECT",
+              "name": "TransactionRequest",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "bySignature",
+            "type": {
+              "kind": "OBJECT",
+              "name": "TypedData",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "PreContractActionRequired",
         "fields": [
           {
@@ -2979,6 +3143,46 @@
         "interfaces": []
       },
       {
+        "kind": "UNION",
+        "name": "PrepareBorrowSwapResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
+        "name": "PreparePositionSwapResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "SwapByIntent"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
+        "name": "PrepareRepayWithSupplyResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
+        "name": "PrepareSupplySwapResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
+          }
+        ]
+      },
+      {
         "kind": "OBJECT",
         "name": "PrepareSwapCancelResult",
         "fields": [
@@ -3016,6 +3220,16 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientBalanceError"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
+        "name": "PrepareWithdrawSwapResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
           }
         ]
       },
@@ -4355,12 +4569,12 @@
             ]
           },
           {
-            "name": "prepareSwap",
+            "name": "supplySwapQuote",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "PrepareSwapResult",
+                "name": "PrepareSupplySwapResult",
                 "ofType": null
               }
             },
@@ -4378,12 +4592,104 @@
             ]
           },
           {
-            "name": "swap",
+            "name": "borrowSwapQuote",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "SwapExecutionPlan",
+                "name": "PrepareBorrowSwapResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "repayWithSupplyQuote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "PrepareRepayWithSupplyResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "withdrawSwapQuote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "PrepareWithdrawSwapResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "preparePositionSwap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "PreparePositionSwapResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "prepareSwap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "PrepareSwapResult",
                 "ofType": null
               }
             },
@@ -5053,6 +5359,18 @@
             "args": []
           },
           {
+            "name": "borrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "borrowApy",
             "type": {
               "kind": "NON_NULL",
@@ -5102,6 +5420,17 @@
           },
           {
             "name": "dynamicConfigKey",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "isUsingLatestDynamicConfigKey",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5355,6 +5684,24 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "SwapAmount",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionAmount"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "NativeAmount"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Erc20Amount"
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -5696,7 +6043,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "TokenAmount",
+                "name": "SwapAmount",
                 "ofType": null
               }
             },
@@ -5708,7 +6055,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "TokenAmount",
+                "name": "SwapAmount",
                 "ofType": null
               }
             },
@@ -5720,7 +6067,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "TokenAmount",
+                "name": "SwapAmount",
                 "ofType": null
               }
             },
@@ -5732,7 +6079,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "TokenAmount",
+                "name": "SwapAmount",
                 "ofType": null
               }
             },
@@ -5836,7 +6183,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "TokenAmount",
+                "name": "SwapAmount",
                 "ofType": null
               }
             },
@@ -5848,7 +6195,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "TokenAmount",
+                "name": "SwapAmount",
                 "ofType": null
               }
             },
@@ -6346,6 +6693,58 @@
           },
           {
             "name": "type",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TypedData",
+        "fields": [
+          {
+            "name": "types",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "primaryType",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "domain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainData",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "message",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -7044,7 +7443,7 @@
             ]
           },
           {
-            "name": "canUpdateDynamicConfig",
+            "name": "isUsingLatestDynamicConfigKey",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -7139,14 +7538,11 @@
             "args": []
           },
           {
-            "name": "latest",
+            "name": "better",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
             },
             "args": []
           },
@@ -7188,19 +7584,7 @@
             "args": []
           },
           {
-            "name": "currentRiskPremiumWeight",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "latestRiskPremiumWeight",
+            "name": "riskPremiumWeight",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

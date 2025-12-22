@@ -36,7 +36,7 @@ import type {
 import {
   type CancelSwapTypedData,
   type ERC20PermitSignature,
-  type PrepareSwapRequest,
+  type PrepareTokenSwapRequest,
   type SwapApprovalRequired,
   SwappableTokensQuery,
   type SwappableTokensRequest,
@@ -405,7 +405,7 @@ export function useUserSwaps({
 }
 
 export type UseSwapTokensRequest = Prettify<
-  PrepareSwapRequest & CurrencyQueryOptions
+  PrepareTokenSwapRequest & CurrencyQueryOptions
 >;
 
 export type SwapIntent =
@@ -481,7 +481,7 @@ function isERC20PermitSignature(
 export function useSwapTokens(
   handler: SwapHandler,
 ): UseAsyncTask<
-  PrepareSwapRequest,
+  PrepareTokenSwapRequest,
   SwapReceipt,
   | SendTransactionError
   | PendingTransactionError
