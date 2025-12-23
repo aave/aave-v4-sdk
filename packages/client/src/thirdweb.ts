@@ -26,8 +26,6 @@ import {
 import {
   defineChain,
   Engine,
-  prepareTransaction,
-  sendAndConfirmTransaction,
   type Chain as ThirdwebChain,
   type ThirdwebClient,
   waitForReceipt,
