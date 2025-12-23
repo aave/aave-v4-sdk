@@ -39,6 +39,7 @@ import {
   type ERC20PermitSignature,
   type PreparePositionSwapRequest,
   type PrepareTokenSwapRequest,
+  SupplySwapQuoteQuery,
   type SwapApprovalRequired,
   type SwapByIntent,
   SwappableTokensQuery,
@@ -83,7 +84,7 @@ export type UseSwapQuoteArgs = Prettify<
 >;
 
 /**
- * @internal
+ * @experimental
  * Fetch a swap quote for the specified trade parameters.
  *
  * This signature supports React Suspense:
@@ -91,10 +92,10 @@ export type UseSwapQuoteArgs = Prettify<
  * ```tsx
  * const { data } = useSwapQuote({
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *   sell: { erc20: evmAddress('0x6B175474E…') },
  *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
+ *   kind: SwapKind.Sell,
  *   suspense: true,
  * });
  * ```
@@ -103,7 +104,7 @@ export function useSwapQuote(
   args: UseSwapQuoteArgs & Suspendable,
 ): SuspenseResult<SwapQuote>;
 /**
- * @internal
+ * @experimental
  * Fetch a swap quote for the specified trade parameters.
  *
  * Pausable suspense mode.
@@ -111,11 +112,11 @@ export function useSwapQuote(
  * ```tsx
  * const { data } = useSwapQuote({
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *   sell: { erc20: evmAddress('0x6B175474E…') },
  *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
- *   from: evmAddress('0x742d35cc...'),
+ *   kind: SwapKind.Sell,
+ *   from: evmAddress('0x742d35cc…'),
  *   suspense: true,
  *   pause: true,
  * });
@@ -125,22 +126,22 @@ export function useSwapQuote(
   args: Pausable<UseSwapQuoteArgs> & Suspendable,
 ): PausableSuspenseResult<SwapQuote>;
 /**
- * @internal
+ * @experimental
  * Fetch a swap quote for the specified trade parameters.
  *
  * ```tsx
  * const { data, error, loading } = useSwapQuote({
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *   sell: { erc20: evmAddress('0x6B175474E…') },
  *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
+ *   kind: SwapKind.Sell,
  * });
  * ```
  */
 export function useSwapQuote(args: UseSwapQuoteArgs): ReadResult<SwapQuote>;
 /**
- * @internal
+ * @experimental
  * Fetch a swap quote for the specified trade parameters.
  *
  * Pausable loading state mode.
@@ -148,11 +149,11 @@ export function useSwapQuote(args: UseSwapQuoteArgs): ReadResult<SwapQuote>;
  * ```tsx
  * const { data, error, loading, paused } = useSwapQuote({
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *   sell: { erc20: evmAddress('0x6B175474E…') },
  *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
- *   from: evmAddress('0x742d35cc...'),
+ *   kind: SwapKind.Sell,
+ *   from: evmAddress('0x742d35cc…'),
  *   pause: true,
  * });
  * ```
@@ -161,9 +162,6 @@ export function useSwapQuote(
   args: Pausable<UseSwapQuoteArgs>,
 ): PausableReadResult<SwapQuote>;
 
-/**
- * @internal
- */
 export function useSwapQuote({
   suspense = false,
   pause = false,
@@ -185,7 +183,7 @@ export function useSwapQuote({
 }
 
 /**
- * @internal
+ * @experimental
  * Low-level hook to execute a swap quote action directly.
  *
  * @experimental This hook is experimental and may be subject to breaking changes.
@@ -201,10 +199,10 @@ export function useSwapQuote({
  *
  * const result = await getQuote({
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
+ *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *   sell: { erc20: evmAddress('0x6B175474E…') },
  *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
+ *   kind: SwapKind.Sell,
  * });
  *
  * if (result.isOk()) {
@@ -229,7 +227,7 @@ export function useSwapQuoteAction(
 export type UseSwappableTokensArgs = SwappableTokensRequest;
 
 /**
- * @internal
+ * @experimental
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * This signature supports React Suspense:
@@ -245,7 +243,7 @@ export function useSwappableTokens(
   args: UseSwappableTokensArgs & Suspendable,
 ): SuspenseResult<Token[]>;
 /**
- * @internal
+ * @experimental
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * Pausable suspense mode.
@@ -262,7 +260,7 @@ export function useSwappableTokens(
   args: Pausable<UseSwappableTokensArgs> & Suspendable,
 ): PausableSuspenseResult<Token[]>;
 /**
- * @internal
+ * @experimental
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * ```tsx
@@ -275,7 +273,7 @@ export function useSwappableTokens(
   args: UseSwappableTokensArgs,
 ): ReadResult<Token[]>;
 /**
- * @internal
+ * @experimental
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * Pausable loading state mode.
@@ -291,9 +289,6 @@ export function useSwappableTokens(
   args: Pausable<UseSwappableTokensArgs>,
 ): PausableReadResult<Token[]>;
 
-/**
- * @internal
- */
 export function useSwappableTokens({
   suspense = false,
   pause = false,
@@ -317,7 +312,7 @@ export type UseUserSwapsArgs = Prettify<
 >;
 
 /**
- * @internal
+ * @experimental
  * Fetch the user's swap history for a specific chain.
  *
  * This signature supports React Suspense:
@@ -325,7 +320,7 @@ export type UseUserSwapsArgs = Prettify<
  * ```tsx
  * const { data } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  *   suspense: true,
  * });
@@ -335,7 +330,7 @@ export function useUserSwaps(
   args: UseUserSwapsArgs & Suspendable,
 ): SuspenseResult<PaginatedUserSwapsResult>;
 /**
- * @internal
+ * @experimental
  * Fetch the user's swap history for a specific chain.
  *
  * Pausable suspense mode.
@@ -343,7 +338,7 @@ export function useUserSwaps(
  * ```tsx
  * const { data } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  *   suspense: true,
  *   pause: true,
@@ -354,13 +349,13 @@ export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs> & Suspendable,
 ): PausableSuspenseResult<PaginatedUserSwapsResult>;
 /**
- * @internal
+ * @experimental
  * Fetch the user's swap history for a specific chain.
  *
  * ```tsx
  * const { data, error, loading } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  * });
  * ```
@@ -369,7 +364,7 @@ export function useUserSwaps(
   args: UseUserSwapsArgs,
 ): ReadResult<PaginatedUserSwapsResult>;
 /**
- * @internal
+ * @experimental
  * Fetch the user's swap history for a specific chain.
  *
  * Pausable loading state mode.
@@ -377,7 +372,7 @@ export function useUserSwaps(
  * ```tsx
  * const { data, error, loading, paused } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  *   pause: true,
  * });
@@ -387,9 +382,6 @@ export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs>,
 ): PausableReadResult<PaginatedUserSwapsResult>;
 
-/**
- * @internal
- */
 export function useUserSwaps({
   suspense = false,
   pause = false,
@@ -405,6 +397,116 @@ export function useUserSwaps({
       request,
       currency,
     },
+    suspense,
+    pause,
+  });
+}
+
+// ------------------------------------------------------------
+
+export type UseSupplySwapQuoteArgs = Prettify<
+  PrepareSupplySwapRequest & CurrencyQueryOptions
+>;
+
+/**
+ * @experimental
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: UseSupplySwapQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: Pausable<UseSupplySwapQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: UseSupplySwapQuoteArgs,
+): ReadResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: Pausable<UseSupplySwapQuoteArgs>,
+): PausableReadResult<SwapQuote>;
+
+export function useSupplySwapQuote({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseSupplySwapQuoteArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SwapQuote, UnexpectedError> {
+  return useSuspendableQuery({
+    document: SupplySwapQuoteQuery,
+    variables: {
+      request,
+      currency,
+    },
+    selector: (data) => data.quote,
     suspense,
     pause,
   });
@@ -601,7 +703,7 @@ function isERC20PermitSignature(
 }
 
 /**
- * @internal
+ * @experimental
  * Orchestrate the swap execution plan.
  *
  * ```tsx
@@ -625,11 +727,11 @@ function isERC20PermitSignature(
  * const result = await swap({
  *   market: {
  *     chainId: chainId(1),
- *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *     sell: { erc20: evmAddress('0x6B175474E...') },
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
  *     amount: bigDecimal('1000'),
- *     kind: SwapKind.SELL,
- *     user: evmAddress('0x742d35cc...'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
  *   },
  * });
  *
@@ -765,7 +867,7 @@ export type CancelSwapError =
   | UnexpectedError;
 
 /**
- * @internal
+ * @experimental
  * Executes the complete swap cancellation workflow combining preparation and execution.
  *
  * ```tsx
@@ -783,7 +885,7 @@ export type CancelSwapError =
  * });
  *
  * const result = await cancelSwap({
- *   id: swapId('123...'),
+ *   id: swapId('123…'),
  * });
  *
  * if (result.isErr()) {
