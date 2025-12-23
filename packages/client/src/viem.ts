@@ -6,11 +6,10 @@ import {
   ValidationError,
 } from '@aave/core';
 import type {
-  CancelSwapTypedData,
   Chain,
   ExecutionPlan,
   PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
@@ -392,7 +391,7 @@ export function signERC20PermitWith(
 
 function signSwapTypedData(
   walletClient: WalletClient,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
   invariant(walletClient.account, 'Wallet account is required');
 
@@ -402,13 +401,10 @@ function signSwapTypedData(
       domain: result.domain as TypedDataDomain,
       types: result.types as TypedData,
       primaryType: result.primaryType,
-      message: JSON.parse(result.message),
+      message: result.message,
     }),
     (err) => SigningError.from(err),
-  ).map((hex) => ({
-    deadline: JSON.parse(result.message).deadline,
-    value: signatureFrom(hex),
-  }));
+  ).map(signatureFrom);
 }
 
 /**
@@ -424,11 +420,11 @@ export function signSwapTypedDataWith(
  */
 export function signSwapTypedDataWith(
   walletClient: WalletClient,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler>;
 export function signSwapTypedDataWith(
   walletClient: WalletClient,
-  result?: SwapByIntentTypedData | CancelSwapTypedData,
+  result?: SwapTypedData,
 ): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
   return result
     ? signSwapTypedData(walletClient, result)

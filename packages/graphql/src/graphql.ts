@@ -6,7 +6,7 @@ import type {
   ChainId,
   Cursor,
   EvmAddress,
-  JsonValue,
+  JsonObject,
   Signature,
   TxHash,
   TypedSelectionSet,
@@ -82,7 +82,7 @@ export const graphql = initGraphQLTada<{
     HubId: HubId;
     ID: ID;
     Int: number;
-    JSON: JsonValue;
+    JSON: JsonObject;
     OnChainHubAssetId: OnChainHubAssetId;
     OnChainReserveId: OnChainReserveId;
     OperationType: OperationType;
