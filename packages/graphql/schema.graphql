@@ -857,8 +857,8 @@ type PositionAmount {
 }
 
 type PositionSwapAdapterContractApproval {
-  byTransaction: TransactionRequest
-  bySignature: SwapTypedData
+  byTransaction: TransactionRequest!
+  bySignature: SwapTypedData!
 }
 
 union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapPositionManagerApproval
@@ -869,8 +869,8 @@ type PositionSwapByIntentApprovalsRequired {
 }
 
 type PositionSwapPositionManagerApproval {
-  byTransaction: TransactionRequest
-  bySignature: SwapTypedData
+  byTransaction: TransactionRequest!
+  bySignature: SwapTypedData!
 }
 
 type PreContractActionRequired {
@@ -1043,12 +1043,12 @@ type PrepareSwapCancelResult {
   data: SwapTypedData!
 }
 
-union PrepareSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
-
 input PrepareTokenSwapRequest @oneOf {
   market: PrepareMarketOrderSwapInput
   limit: PrepareLimitOrderSwapInput
 }
+
+union PrepareTokenSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
 
 input PrepareWithdrawSwapRequest @oneOf {
   market: PrepareMarketWithdrawAndSwapInput
@@ -1098,7 +1098,6 @@ type ProtocolHistorySample {
   date: DateTime!
   deposits: ExchangeAmount!
   borrows: ExchangeAmount!
-  earnings: ExchangeAmount!
 }
 
 type Query {
@@ -1171,7 +1170,7 @@ type Query {
   repayWithSupplyQuote(request: PrepareRepayWithSupplyRequest!): PrepareRepayWithSupplyResult!
   withdrawSwapQuote(request: PrepareWithdrawSwapRequest!): PrepareWithdrawSwapResult!
   preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult!
-  prepareSwap(request: PrepareTokenSwapRequest!): PrepareSwapResult!
+  prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult!
   swapStatus(request: SwapStatusRequest!): SwapStatus!
   userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!

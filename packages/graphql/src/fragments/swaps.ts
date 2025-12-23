@@ -53,12 +53,13 @@ export type SwapQuote = FragmentOf<typeof SwapQuoteFragment>;
 
 export const SwapTypedDataFragment = graphql(
   `fragment SwapTypedData on SwapTypedData {
-      types
-      primaryType
-      domain {
-        ...DomainData
-      }
-      message
+    __typename
+    types
+    primaryType
+    domain {
+      ...DomainData
+    }
+    message
   }`,
   [DomainDataFragment],
 );
@@ -118,8 +119,8 @@ export const SwapReceiptFragment = graphql(
 );
 export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
 
-export const PrepareSwapResultFragment = graphql(
-  `fragment PrepareSwapResult on PrepareSwapResult {
+export const PrepareTokenSwapResultFragment = graphql(
+  `fragment PrepareTokenSwapResult on PrepareTokenSwapResult {
     __typename
     ... on SwapByIntent {
       ...SwapByIntent
@@ -141,7 +142,9 @@ export const PrepareSwapResultFragment = graphql(
     InsufficientBalanceErrorFragment,
   ],
 );
-export type PrepareSwapResult = FragmentOf<typeof PrepareSwapResultFragment>;
+export type PrepareTokenSwapResult = FragmentOf<
+  typeof PrepareTokenSwapResultFragment
+>;
 
 export const SwapTransactionRequestFragment = graphql(
   `fragment SwapTransactionRequest on SwapTransactionRequest {

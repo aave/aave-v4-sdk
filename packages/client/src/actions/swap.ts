@@ -9,8 +9,8 @@ import type {
   PrepareSupplySwapResult,
   PrepareSwapCancelRequest,
   PrepareSwapCancelResult,
-  PrepareSwapResult,
   PrepareTokenSwapRequest,
+  PrepareTokenSwapResult,
   SwapCancelled,
   SwapExecutionPlan,
   SwapExpired,
@@ -29,7 +29,7 @@ import {
   CancelSwapQuery,
   PreparePositionSwapQuery,
   PrepareSwapCancelQuery,
-  PrepareSwapQuery,
+  PrepareTokenSwapQuery,
   SupplySwapQuoteQuery,
   SwapMutation,
   SwappableTokensQuery,
@@ -42,7 +42,7 @@ import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
- * @internal
+ * @experimental
  * Fetches a swap quote for the specified trade parameters.
  *
  * ```ts
@@ -70,7 +70,7 @@ export function swapQuote(
 }
 
 /**
- * @internal
+ * @experimental
  * Fetches the list of tokens available for swapping on a specific chain.
  *
  * ```ts
@@ -91,11 +91,11 @@ export function swappableTokens(
 }
 
 /**
- * @internal
+ * @experimental
  * Prepares a swap for the specified trade parameters.
  *
  * ```ts
- * const result = await prepareSwap(client, {
+ * const result = await prepareTokenSwap(client, {
  *   market: {
  *     chainId: chainId(1),
  *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
@@ -141,16 +141,16 @@ export function swappableTokens(
  * @param options - The query options.
  * @returns The prepared swap result containing details of the swap.
  */
-export function prepareSwap(
+export function prepareTokenSwap(
   client: AaveClient,
   request: PrepareTokenSwapRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PrepareSwapResult, UnexpectedError> {
-  return client.query(PrepareSwapQuery, { request, ...options });
+): ResultAsync<PrepareTokenSwapResult, UnexpectedError> {
+  return client.query(PrepareTokenSwapQuery, { request, ...options });
 }
 
 /**
- * @internal
+ * @experimental
  * Fetches a supply swap quote for swapping supplied collateral.
  *
  * ```ts
@@ -182,7 +182,7 @@ export function supplySwapQuote(
 }
 
 /**
- * @internal
+ * @experimental
  * Prepares a position swap by obtaining the typed data for signing.
  *
  * ```ts
@@ -211,7 +211,7 @@ export function preparePositionSwap(
 }
 
 /**
- * @internal
+ * @experimental
  * Fetches the status of a specific swap.
  *
  * ```ts
@@ -236,7 +236,7 @@ export function swapStatus(
 export type SwapOutcome = SwapCancelled | SwapExpired | SwapFulfilled;
 
 /**
- * @internal
+ * @experimental
  * Waits for a swap to reach a final outcome (cancelled, expired, or fulfilled).
  *
  * ```ts
@@ -313,7 +313,7 @@ export function waitForSwapOutcome(
 }
 
 /**
- * @internal
+ * @experimental
  * Executes a swap for the specified request parameters.
  *
  * ```ts
@@ -364,7 +364,7 @@ export function swap(
 }
 
 /**
- * @internal
+ * @experimental
  * Prepares a swap cancellation for the specified swap ID.
  *
  * ```ts
@@ -385,7 +385,7 @@ export function prepareSwapCancel(
 }
 
 /**
- * @internal
+ * @experimental
  * Executes a swap cancellation for the specified request parameters.
  *
  * ```ts
@@ -421,7 +421,7 @@ export function cancelSwap(
 }
 
 /**
- * @internal
+ * @experimental
  * Fetches the user's swap history for a specific chain.
  *
  * ```ts

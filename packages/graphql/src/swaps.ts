@@ -4,7 +4,7 @@ import {
   PreparePositionSwapResultFragment,
   PrepareSupplySwapResultFragment,
   PrepareSwapCancelResultFragment,
-  PrepareSwapResultFragment,
+  PrepareTokenSwapResultFragment,
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
   SwapStatusFragment,
@@ -41,15 +41,15 @@ export type SwappableTokensRequest = RequestOf<typeof SwappableTokensQuery>;
 /**
  * @internal
  */
-export const PrepareSwapQuery = graphql(
-  `query PrepareSwap($request: PrepareTokenSwapRequest!, $currency: Currency!) {
-    value: prepareSwap(request: $request) {
-      ...PrepareSwapResult
+export const PrepareTokenSwapQuery = graphql(
+  `query PrepareTokenSwap($request: PrepareTokenSwapRequest!, $currency: Currency!) {
+    value: prepareTokenSwap(request: $request) {
+      ...PrepareTokenSwapResult
     }
   }`,
-  [PrepareSwapResultFragment],
+  [PrepareTokenSwapResultFragment],
 );
-export type PrepareTokenSwapRequest = RequestOf<typeof PrepareSwapQuery>;
+export type PrepareTokenSwapRequest = RequestOf<typeof PrepareTokenSwapQuery>;
 
 /**
  * @internal

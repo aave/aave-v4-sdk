@@ -2768,18 +2768,24 @@
           {
             "name": "byTransaction",
             "type": {
-              "kind": "OBJECT",
-              "name": "TransactionRequest",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
             },
             "args": []
           },
           {
             "name": "bySignature",
             "type": {
-              "kind": "OBJECT",
-              "name": "SwapTypedData",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapTypedData",
+                "ofType": null
+              }
             },
             "args": []
           }
@@ -2844,18 +2850,24 @@
           {
             "name": "byTransaction",
             "type": {
-              "kind": "OBJECT",
-              "name": "TransactionRequest",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
             },
             "args": []
           },
           {
             "name": "bySignature",
             "type": {
-              "kind": "OBJECT",
-              "name": "SwapTypedData",
-              "ofType": null
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapTypedData",
+                "ofType": null
+              }
             },
             "args": []
           }
@@ -2965,7 +2977,7 @@
       },
       {
         "kind": "UNION",
-        "name": "PrepareSwapResult",
+        "name": "PrepareTokenSwapResult",
         "possibleTypes": [
           {
             "kind": "OBJECT",
@@ -3177,18 +3189,6 @@
           },
           {
             "name": "borrows",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ExchangeAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "earnings",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4388,12 +4388,12 @@
             ]
           },
           {
-            "name": "prepareSwap",
+            "name": "prepareTokenSwap",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "PrepareSwapResult",
+                "name": "PrepareTokenSwapResult",
                 "ofType": null
               }
             },
