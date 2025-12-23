@@ -10,14 +10,14 @@ import type {
 } from './fragments';
 import { tokenInfoId } from './id';
 
-function mockRandomBase64String(): string {
+function randomBase64String(): string {
   return atob(crypto.randomUUID());
 }
 
 /**
  * @internal
  */
-export function mockPercentNumber(value: number, decimals = 6): PercentNumber {
+export function percentNumber(value: number, decimals = 6): PercentNumber {
   const normalized = bigDecimal(value);
 
   return {
@@ -32,7 +32,7 @@ export function mockPercentNumber(value: number, decimals = 6): PercentNumber {
 /**
  * @internal
  */
-export function mockDecimalNumber(value: number, decimals = 18): DecimalNumber {
+export function decimalNumber(value: number, decimals = 18): DecimalNumber {
   return {
     __typename: 'DecimalNumber',
     value: bigDecimal(value),
@@ -43,7 +43,7 @@ export function mockDecimalNumber(value: number, decimals = 18): DecimalNumber {
   };
 }
 
-function mockRandomHexString(size: number): `0x${string}` {
+function randomHexString(size: number): `0x${string}` {
   return [...Array<string>(size)]
     .map(() => Math.floor(Math.random() * 16).toString(16))
     .join('') as `0x${string}`;
@@ -52,8 +52,8 @@ function mockRandomHexString(size: number): `0x${string}` {
 /**
  * @internal
  */
-export function mockEvmAddress(): EvmAddress {
-  return evmAddress(`0x${mockRandomHexString(20 * 2)}`);
+export function randomEvmAddress(): EvmAddress {
+  return evmAddress(`0x${randomHexString(20 * 2)}`);
 }
 
 export const TestTokens = {
@@ -83,12 +83,12 @@ export const TestTokens = {
   },
 } as const;
 
-export function mockTokenInfo(symbol: keyof typeof TestTokens): TokenInfo {
+export function tokenInfo(symbol: keyof typeof TestTokens): TokenInfo {
   const { name, decimals } = TestTokens[symbol];
 
   return {
     __typename: 'TokenInfo',
-    id: tokenInfoId(mockRandomBase64String()),
+    id: tokenInfoId(randomBase64String()),
     name,
     symbol,
     decimals,
@@ -97,7 +97,7 @@ export function mockTokenInfo(symbol: keyof typeof TestTokens): TokenInfo {
   };
 }
 
-export function mockChain(): Chain {
+export function chain(): Chain {
   return {
     __typename: 'Chain',
     name: 'Ethereum',
@@ -107,27 +107,27 @@ export function mockChain(): Chain {
     explorerUrl: 'https://example.com/explorer.json',
     isTestnet: false,
     isFork: false,
-    nativeWrappedToken: mockEvmAddress(),
-    nativeGateway: mockEvmAddress(),
-    signatureGateway: mockEvmAddress(),
-    nativeInfo: mockTokenInfo('WETH'),
+    nativeWrappedToken: randomEvmAddress(),
+    nativeGateway: randomEvmAddress(),
+    signatureGateway: randomEvmAddress(),
+    nativeInfo: tokenInfo('WETH'),
   };
 }
 
-export function mockErc20Token(symbol: keyof typeof TestTokens): Erc20Token {
+export function erc20Token(symbol: keyof typeof TestTokens): Erc20Token {
   const { isWrappedNativeToken } = TestTokens[symbol];
 
   return {
     __typename: 'Erc20Token',
-    address: mockEvmAddress(),
-    chain: mockChain(),
-    info: mockTokenInfo(symbol),
+    address: randomEvmAddress(),
+    chain: chain(),
+    info: tokenInfo(symbol),
     isWrappedNativeToken,
     permitSupported: false,
   };
 }
 
-export function mockExchangeAmount(value: number): ExchangeAmount {
+export function exchangeAmount(value: number): ExchangeAmount {
   return {
     __typename: 'ExchangeAmount',
     value: bigDecimal(value),
@@ -141,15 +141,15 @@ export function mockExchangeAmount(value: number): ExchangeAmount {
 /**
  * @internal
  */
-export function mockErc20Amount(
+export function erc20Amount(
   value: number,
   symbol: keyof typeof TestTokens,
 ): Erc20Amount {
   return {
     __typename: 'Erc20Amount',
-    amount: mockDecimalNumber(value, TestTokens[symbol].decimals),
-    token: mockErc20Token(symbol),
-    exchange: mockExchangeAmount(value),
-    exchangeRate: mockDecimalNumber(value),
+    amount: decimalNumber(value, TestTokens[symbol].decimals),
+    token: erc20Token(symbol),
+    exchange: exchangeAmount(value),
+    exchangeRate: decimalNumber(value),
   };
 }
