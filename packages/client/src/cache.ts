@@ -118,12 +118,6 @@ export const exchange = cacheExchange({
     AssetBorrowSample: {
       date: transformToDate,
     },
-    AssetCategoryBorrowSample: {
-      date: transformToDate,
-    },
-    AssetCategorySupplySample: {
-      date: transformToDate,
-    },
     AssetSupplySample: {
       date: transformToDate,
     },
@@ -316,13 +310,9 @@ export const exchange = cacheExchange({
     Asset: () => null,
     AssetAmountWithChange: () => null,
     AssetBorrowSample: () => null,
-    AssetCategoryBorrowSample: () => null,
-    AssetCategorySupplySample: () => null,
     AssetPriceSample: () => null,
     AssetSummary: () => null,
     AssetSupplySample: () => null,
-    CancelSwapTypedData: () => null,
-    CancelSwapTypeDefinition: () => null,
     DecimalNumber: () => null,
     DecimalNumberWithChange: () => null,
     DomainData: () => null,
@@ -356,8 +346,6 @@ export const exchange = cacheExchange({
     ReserveSummary: () => null,
     ReserveUserState: () => null,
     SwapApprovalRequired: () => null,
-    SwapByIntentTypedData: () => null,
-    SwapByIntentTypeDefinition: () => null,
     SwapCancelled: () => null,
     SwapExpired: () => null,
     SwapFulfilled: () => null,
@@ -365,6 +353,7 @@ export const exchange = cacheExchange({
     SwapPendingSignature: () => null,
     SwapQuote: () => null,
     SwapQuoteCosts: () => null,
+    SwapTypedData: () => null,
     TransactionRequest: () => null,
     TypeDefinition: () => null,
     TypeField: () => null,
