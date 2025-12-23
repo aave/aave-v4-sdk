@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 1.0.0-next.10
+
+### Patch Changes
+
+- 7920b63: **chore:** removes deprecated `ProtocolHistorySample.earnings` field.
+- 312863d: **chore:** removes support for `assetCategoryBorrowHistory` and `assetCategorySupplyHistory`.
+
 ## 1.0.0-next.9
 
 ### Patch Changes
