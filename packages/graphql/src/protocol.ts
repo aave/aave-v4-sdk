@@ -203,9 +203,6 @@ export const ProtocolHistorySampleFragment = graphql(
     borrows {
       ...ExchangeAmount
     }
-    earnings {
-      ...ExchangeAmount
-    }
   }`,
   [ExchangeAmountFragment],
 );
