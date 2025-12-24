@@ -183,7 +183,7 @@ function signSwapTypedData(
       },
     }),
     (err) => SigningError.from(err),
-  ).map((response) => signatureFrom(response.signature));
+  ).map(({ signature }) => signatureFrom(signature));
 }
 
 /**
