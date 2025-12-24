@@ -47,6 +47,19 @@ describe(`Given the '${useAsyncTask.name}' hook`, () => {
 
         expect(result.current[1]).toMatchObject(expectation);
       });
+
+      it('Then it should throw an InvariantError if another task execution is attempted', async () => {
+        const { result } = renderHook(() =>
+          useAsyncTask((input: string) => okAsync(input), []),
+        );
+
+        await act(async () => {
+          await expect(async () => {
+            result.current[0]('test');
+            result.current[0]('test');
+          }).rejects.toThrow(InvariantError);
+        });
+      });
     });
 
     describe('When the tasks succeeds', () => {

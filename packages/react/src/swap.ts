@@ -37,6 +37,7 @@ import type {
 } from '@aave/graphql';
 import {
   type ERC20PermitSignature,
+  type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
   type PrepareTokenSwapRequest,
   SupplySwapQuoteQuery,
@@ -50,16 +51,13 @@ import {
   type TransactionRequest,
   UserSwapsQuery,
 } from '@aave/graphql';
-import {
-  invariant,
-  isSignature,
-  type NullishDeep,
-  okAsync,
-  type Prettify,
+import type {
+  NullishDeep,
+  Prettify,
   ResultAsync,
-  ResultAwareError,
-  type Signature,
+  Signature,
 } from '@aave/types';
+import { invariant, isSignature, okAsync, ResultAwareError } from '@aave/types';
 import { useCallback } from 'react';
 import { useAaveClient } from './context';
 import {
@@ -577,13 +575,32 @@ export function useSupplySwap(
   const client = useAaveClient();
 
   const processApprovals = useCallback(
-    (approvals: PositionSwapApproval[]) =>
-      ResultAsync.combine(
-        approvals.map((approval) => {
-          return handler(approval, { cancel }).map((value) => ({
-            __typename: approval.__typename,
-            value,
-          }));
+    (result: PositionSwapByIntentApprovalsRequired) =>
+      result.approvals.reduce<
+        ResultAsync<PreparePositionSwapRequest, SwapSignerError>
+      >(
+        (acc, approval) =>
+          acc.andThen((request) =>
+            handler(approval, { cancel }).map((value) => {
+              switch (approval.__typename) {
+                case 'PositionSwapAdapterContractApproval':
+                  request.adapterContractSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
+                case 'PositionSwapPositionManagerApproval':
+                  request.positionManagerSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
+              }
+              return request;
+            }),
+          ),
+        okAsync({
+          quoteId: result.quote.quoteId,
+          adapterContractSignature: null,
+          positionManagerSignature: null,
         }),
       ),
     [handler],
@@ -598,71 +615,47 @@ export function useSupplySwap(
         (result) => {
           invariant(
             result.__typename === 'PositionSwapByIntentApprovalsRequired',
-            'Unsupported swap plan',
+            `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
           );
 
-          return processApprovals(result.approvals)
-            .map(
-              (results): PreparePositionSwapRequest =>
-                results.reduce(
-                  (
-                    request: PreparePositionSwapRequest,
-                    { __typename, value },
-                  ) => {
-                    if (value) {
-                      switch (__typename) {
-                        case 'PositionSwapAdapterContractApproval':
-                          request.adapterContractSignature = isSignature(value)
-                            ? value
-                            : null;
-                          break;
-                        case 'PositionSwapPositionManagerApproval':
-                          request.positionManagerSignature = isSignature(value)
-                            ? value
-                            : null;
-                          break;
-                      }
-                    }
-                    return request;
-                  },
-                  {
-                    quoteId: result.quote.quoteId,
-                    adapterContractSignature: null,
-                    positionManagerSignature: null,
-                  },
-                ),
-            )
+          return processApprovals(result)
             .andThen((request) =>
-              preparePositionSwap(client, request, { currency }),
+              preparePositionSwap(client, request, { currency }).map(
+                (result) => {
+                  invariant(
+                    result.__typename === 'SwapByIntent',
+                    `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
+                  );
+                  return result;
+                },
+              ),
             )
-            .andThen((result) => {
-              invariant(
-                result.__typename === 'SwapByIntent',
-                `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-              );
-
-              return handler(result, { cancel });
-            })
-            .andThen((signature) => {
-              invariant(isSignature(signature), 'Invalid signature');
-
-              return swap(client, {
+            .andThen((intent) =>
+              handler(intent, { cancel }).map((result) => {
+                invariant(
+                  isSignature(result),
+                  'Expected signature, got an object instead.',
+                );
+                return result;
+              }),
+            )
+            .andThen((signature) =>
+              swap(client, {
                 intent: {
                   quoteId: result.quote.quoteId,
                   signature,
                 },
-              });
-            })
-            .andThen((plan) => {
-              switch (plan.__typename) {
-                case 'SwapReceipt':
-                  return okAsync(plan);
-                case 'InsufficientBalanceError':
-                  return ValidationError.fromGqlNode(plan).asResultAsync();
-                default:
-                  return UnexpectedError.from(plan).asResultAsync();
-              }
-            });
+              }).andThen((plan) => {
+                switch (plan.__typename) {
+                  case 'SwapReceipt':
+                    return okAsync(plan);
+                  case 'InsufficientBalanceError':
+                    return ValidationError.fromGqlNode(plan).asResultAsync();
+                  default:
+                    return UnexpectedError.from(plan).asResultAsync();
+                }
+              }),
+            );
         },
       );
     },
