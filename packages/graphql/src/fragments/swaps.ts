@@ -1,11 +1,17 @@
+import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 import {
   DomainDataFragment,
+  type Erc20Amount,
+  Erc20AmountFragment,
+  type NativeAmount,
+  NativeAmountFragment,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   TokenAmountFragment,
 } from './common';
+import { ReserveInfoFragment } from './reserve';
 import {
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
@@ -142,8 +148,8 @@ export const PrepareTokenSwapResultFragment = graphql(
     InsufficientBalanceErrorFragment,
   ],
 );
-export type PrepareTokenSwapResult = FragmentOf<
-  typeof PrepareTokenSwapResultFragment
+export type PrepareTokenSwapResult = ExtendWithOpaqueType<
+  FragmentOf<typeof PrepareTokenSwapResultFragment>
 >;
 
 export const SwapTransactionRequestFragment = graphql(
@@ -178,11 +184,12 @@ export type SwapApprovalRequired = FragmentOf<
   typeof SwapApprovalRequiredFragment
 >;
 
-export type SwapExecutionPlan =
+export type SwapExecutionPlan = ExtendWithOpaqueType<
   | SwapTransactionRequest
   | SwapApprovalRequired
   | InsufficientBalanceError
-  | SwapReceipt;
+  | SwapReceipt
+>;
 
 export const SwapExecutionPlanFragment: FragmentDocumentFor<
   SwapExecutionPlan,
@@ -231,6 +238,39 @@ export const SwapExpiredFragment = graphql(
 );
 export type SwapExpired = FragmentOf<typeof SwapExpiredFragment>;
 
+export const PositionAmountFragment = graphql(
+  `fragment PositionAmount on PositionAmount {
+    __typename
+    reserve {
+      ...ReserveInfo
+    }
+    amount {
+      ...Erc20Amount
+    }
+  }`,
+  [ReserveInfoFragment, Erc20AmountFragment],
+);
+export type PositionAmount = FragmentOf<typeof PositionAmountFragment>;
+
+export type SwapAmount = PositionAmount | NativeAmount | Erc20Amount;
+
+export const SwapAmountFragment: FragmentDocumentFor<SwapAmount, 'SwapAmount'> =
+  graphql(
+    `fragment SwapAmount on SwapAmount {
+    __typename
+    ... on PositionAmount {
+      ...PositionAmount
+    }
+    ... on NativeAmount {
+      ...NativeAmount
+    }
+    ... on Erc20Amount {
+      ...Erc20Amount
+    }
+  }`,
+    [PositionAmountFragment, NativeAmountFragment, Erc20AmountFragment],
+  );
+
 export const SwapOpenFragment = graphql(
   `fragment SwapOpen on SwapOpen {
     __typename
@@ -239,13 +279,13 @@ export const SwapOpenFragment = graphql(
     deadline
     explorerLink
     desiredSell {
-      ...TokenAmount
+      ...SwapAmount
     }
     desiredBuy {
-      ...TokenAmount
+      ...SwapAmount
     }
   }`,
-  [TokenAmountFragment],
+  [SwapAmountFragment],
 );
 export type SwapOpen = FragmentOf<typeof SwapOpenFragment>;
 
@@ -266,36 +306,28 @@ export const SwapFulfilledFragment = graphql(
     __typename
     txHash
     desiredSell {
-      ...TokenAmount
+      ...SwapAmount
     }
     desiredBuy {
-      ...TokenAmount
+      ...SwapAmount
     }
     sold {
-      ...TokenAmount
+      ...SwapAmount
     }
     bought {
-      ...TokenAmount
+      ...SwapAmount
     }
     createdAt
     fulfilledAt
     explorerLink
     refundTxHash
   }`,
-  [TokenAmountFragment],
+  [SwapAmountFragment],
 );
 export type SwapFulfilled = FragmentOf<typeof SwapFulfilledFragment>;
 
-export type SwapStatus =
-  | SwapOpen
-  | SwapPendingSignature
-  | SwapCancelled
-  | SwapExpired
-  | SwapFulfilled;
-
-export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
-  graphql(
-    `fragment SwapStatus on SwapStatus {
+export const SwapStatusFragment = graphql(
+  `fragment SwapStatus on SwapStatus {
     __typename
     ... on SwapOpen {
       ...SwapOpen
@@ -313,14 +345,22 @@ export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
       ...SwapFulfilled
     }
   }`,
-    [
-      SwapOpenFragment,
-      SwapPendingSignatureFragment,
-      SwapCancelledFragment,
-      SwapExpiredFragment,
-      SwapFulfilledFragment,
-    ],
-  );
+  [
+    SwapOpenFragment,
+    SwapPendingSignatureFragment,
+    SwapCancelledFragment,
+    SwapExpiredFragment,
+    SwapFulfilledFragment,
+  ],
+);
+
+export type SwapStatus = ExtendWithOpaqueType<
+  FragmentOf<typeof SwapStatusFragment>,
+  {
+    createdAt: Date;
+    explorerLink: string;
+  }
+>;
 
 export const PrepareSwapCancelResultFragment = graphql(
   `fragment PrepareSwapCancelResult on PrepareSwapCancelResult {
@@ -497,7 +537,7 @@ export const PrepareWithdrawSwapResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
-export type PreparePositionSwapResult = SwapByIntent;
+export type PreparePositionSwapResult = ExtendWithOpaqueType<SwapByIntent>;
 
 export const PreparePositionSwapResultFragment: FragmentDocumentFor<
   PreparePositionSwapResult,
