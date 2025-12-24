@@ -1,5 +1,13 @@
 # @aave/types
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- 5fad9a6: **feat:** `preparePositionSwap` and `supplySwapQuote` actions.
+- 5fad9a6: **feat:** `useSupplySwap` and `useSupplySwapQuote` hooks.
+- 5fad9a6: **feat:** support latest GQL schema.
+
 ## 1.0.0-next.5
 
 ### Patch Changes
