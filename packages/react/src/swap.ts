@@ -36,8 +36,10 @@ import type {
   UserSwapsRequest,
 } from '@aave/graphql';
 import {
+  BorrowSwapQuoteQuery,
   type ERC20PermitSignature,
   type PositionSwapByIntentApprovalsRequired,
+  type PrepareBorrowSwapRequest,
   type PreparePositionSwapRequest,
   type PrepareTokenSwapRequest,
   SupplySwapQuoteQuery,
@@ -500,6 +502,116 @@ export function useSupplySwapQuote({
 }): SuspendableResult<SwapQuote, UnexpectedError> {
   return useSuspendableQuery({
     document: SupplySwapQuoteQuery,
+    variables: {
+      request,
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense,
+    pause,
+  });
+}
+
+// ------------------------------------------------------------
+
+export type UseBorrowSwapQuoteArgs = Prettify<
+  PrepareBorrowSwapRequest & CurrencyQueryOptions
+>;
+
+/**
+ * @experimental
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: UseBorrowSwapQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: Pausable<UseBorrowSwapQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * ```tsx
+ * const { data, error, loading } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: UseBorrowSwapQuoteArgs,
+): ReadResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: Pausable<UseBorrowSwapQuoteArgs>,
+): PausableReadResult<SwapQuote>;
+
+export function useBorrowSwapQuote({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseBorrowSwapQuoteArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SwapQuote, UnexpectedError> {
+  return useSuspendableQuery({
+    document: BorrowSwapQuoteQuery,
     variables: {
       request,
       currency,
