@@ -466,6 +466,22 @@ export const PrepareBorrowSwapResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
+export type PrepareRepayWithSupplyResult =
+  PositionSwapByIntentApprovalsRequired;
+
+export const PrepareRepayWithSupplyResultFragment: FragmentDocumentFor<
+  PrepareRepayWithSupplyResult,
+  'PrepareRepayWithSupplyResult'
+> = graphql(
+  `fragment PrepareRepayWithSupplyResult on PrepareRepayWithSupplyResult {
+    __typename
+    ... on PositionSwapByIntentApprovalsRequired {
+      ...PositionSwapByIntentApprovalsRequired
+    }
+  }`,
+  [PositionSwapByIntentApprovalsRequiredFragment],
+);
+
 export type PreparePositionSwapResult = SwapByIntent;
 
 export const PreparePositionSwapResultFragment: FragmentDocumentFor<

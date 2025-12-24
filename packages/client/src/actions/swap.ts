@@ -7,6 +7,8 @@ import type {
   PrepareBorrowSwapResult,
   PreparePositionSwapRequest,
   PreparePositionSwapResult,
+  PrepareRepayWithSupplyRequest,
+  PrepareRepayWithSupplyResult,
   PrepareSupplySwapRequest,
   PrepareSupplySwapResult,
   PrepareSwapCancelRequest,
@@ -33,6 +35,7 @@ import {
   PreparePositionSwapQuery,
   PrepareSwapCancelQuery,
   PrepareTokenSwapQuery,
+  RepayWithSupplyQuoteQuery,
   SupplySwapQuoteQuery,
   SwapMutation,
   SwappableTokensQuery,
@@ -211,6 +214,38 @@ export function borrowSwapQuote(
 ): ResultAsync<PrepareBorrowSwapResult, UnexpectedError> {
   return client.query(
     BorrowSwapQuoteQuery,
+    { request, currency: options.currency },
+    { batch: false },
+  );
+}
+
+/**
+ * @experimental
+ * Fetches a repay with supply quote for repaying debt using collateral.
+ *
+ * ```ts
+ * const result = await repayWithSupplyQuote(client, {
+ *   market: {
+ *     sellPosition: userSupplyItemId('collateral_123'),
+ *     buyPosition: userBorrowItemId('debt_456'),
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc...'),
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The repay with supply request parameters.
+ * @param options - The query options.
+ * @returns The repay with supply result with quote, approvals, and preview.
+ */
+export function repayWithSupplyQuote(
+  client: AaveClient,
+  request: PrepareRepayWithSupplyRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PrepareRepayWithSupplyResult, UnexpectedError> {
+  return client.query(
+    RepayWithSupplyQuoteQuery,
     { request, currency: options.currency },
     { batch: false },
   );
