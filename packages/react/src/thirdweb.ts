@@ -2,16 +2,16 @@ import { SigningError, TransactionError, UnexpectedError } from '@aave/client';
 import { chain as fetchChain } from '@aave/client/actions';
 import { toThirdwebChain } from '@aave/client/thirdweb';
 import type {
-  CancelSwapTypedData,
   ERC20PermitSignature,
   PermitRequest,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
   invariant,
   okAsync,
   ResultAsync,
+  type Signature,
   signatureFrom,
   txHash,
 } from '@aave/types';
@@ -203,17 +203,15 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * ```
  */
 export function useSignSwapTypedDataWith(): UseAsyncTask<
-  SwapByIntentTypedData | CancelSwapTypedData,
-  ERC20PermitSignature,
+  SwapTypedData,
+  Signature,
   SignSwapTypedDataError
 > {
   const account = useActiveAccount();
 
   return useAsyncTask(
-    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
+    (typedData: SwapTypedData) => {
       invariant(account, 'Expected an active account to sign swap typed data');
-
-      const message = JSON.parse(typedData.message);
 
       return ResultAsync.fromPromise(
         account.signTypedData({
@@ -221,13 +219,10 @@ export function useSignSwapTypedDataWith(): UseAsyncTask<
           types: typedData.types as Record<string, unknown>,
           domain: typedData.domain,
           primaryType: typedData.primaryType,
-          message,
+          message: typedData.message,
         }),
         (err) => SigningError.from(err),
-      ).map((signature) => ({
-        deadline: message.deadline,
-        value: signatureFrom(signature),
-      }));
+      ).map(signatureFrom);
     },
     [account],
   );

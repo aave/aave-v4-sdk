@@ -6,8 +6,8 @@ import {
 import {
   cancelSwap,
   preparePositionSwap,
-  prepareSwap,
   prepareSwapCancel,
+  prepareTokenSwap,
   supplySwapQuote,
   swap,
   swapQuote,
@@ -577,16 +577,15 @@ export function useSupplySwap(
   const client = useAaveClient();
 
   const processApprovals = useCallback(
-    (approvals: PositionSwapApproval[]) => {
-      return ResultAsync.combine(
-        approvals.map((approval) =>
-          handler(approval, { cancel }).map((value) => ({
+    (approvals: PositionSwapApproval[]) =>
+      ResultAsync.combine(
+        approvals.map((approval) => {
+          return handler(approval, { cancel }).map((value) => ({
             __typename: approval.__typename,
             value,
-          })),
-        ),
-      );
-    },
+          }));
+        }),
+      ),
     [handler],
   );
 
@@ -795,7 +794,7 @@ export function useTokenSwap(
       currency = DEFAULT_QUERY_OPTIONS.currency,
       ...request
     }: UseTokenSwapRequest) =>
-      prepareSwap(client, request, { currency }).andThen((preparePlan) => {
+      prepareTokenSwap(client, request, { currency }).andThen((preparePlan) => {
         switch (preparePlan.__typename) {
           case 'SwapByTransaction':
             return swap(client, {
