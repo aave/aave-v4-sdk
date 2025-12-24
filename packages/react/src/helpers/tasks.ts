@@ -1,4 +1,4 @@
-import { invariant, nonNullable, type ResultAsync } from '@aave/types';
+import { nonNullable, type ResultAsync } from '@aave/types';
 import { type DependencyList, useCallback, useRef, useState } from 'react';
 
 /**
@@ -143,11 +143,6 @@ export function useAsyncTask<
 
   const execute = useCallback(
     (input: TInput) => {
-      invariant(
-        !loadingRef.current,
-        'Cannot execute a task while another is in progress.',
-      );
-
       loadingRef.current = true;
 
       let previousState: AsyncTaskState<TValue, TError> | undefined;
