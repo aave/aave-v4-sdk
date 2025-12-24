@@ -7,6 +7,7 @@ import {
   PrepareSupplySwapResultFragment,
   PrepareSwapCancelResultFragment,
   PrepareTokenSwapResultFragment,
+  PrepareWithdrawSwapResultFragment,
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
   SwapStatusFragment,
@@ -157,6 +158,21 @@ export const RepayWithSupplyQuoteQuery = graphql(
 );
 export type PrepareRepayWithSupplyRequest = RequestOf<
   typeof RepayWithSupplyQuoteQuery
+>;
+
+/**
+ * @internal
+ */
+export const WithdrawSwapQuoteQuery = graphql(
+  `query WithdrawSwapQuote($request: PrepareWithdrawSwapRequest!, $currency: Currency!) {
+    value: withdrawSwapQuote(request: $request) {
+      ...PrepareWithdrawSwapResult
+    }
+  }`,
+  [PrepareWithdrawSwapResultFragment],
+);
+export type PrepareWithdrawSwapRequest = RequestOf<
+  typeof WithdrawSwapQuoteQuery
 >;
 
 /**

@@ -11,9 +11,11 @@ import {
   PreparePositionSwapQuery,
   type PrepareRepayWithSupplyRequest,
   type PrepareSupplySwapRequest,
+  type PrepareWithdrawSwapRequest,
   RepayWithSupplyQuoteQuery,
   SupplySwapQuoteQuery,
   SwapMutation,
+  WithdrawSwapQuoteQuery,
 } from '@aave/graphql';
 import {
   makePositionSwapAdapterContractApproval,
@@ -34,7 +36,12 @@ import {
   describe,
   it,
 } from 'vitest';
-import { useBorrowSwap, useRepayWithSupply, useSupplySwap } from './swap';
+import {
+  useBorrowSwap,
+  useRepayWithSupply,
+  useSupplySwap,
+  useWithdrawSwap,
+} from './swap';
 import { renderHookWithinContext } from './test-utils';
 import { useSendTransaction } from './viem';
 
@@ -299,6 +306,78 @@ describe('Given the swap hooks', () => {
       });
 
       const result = await swap({} as PrepareRepayWithSupplyRequest);
+
+      assertOk(result);
+    });
+  });
+
+  describe(`When using the '${useWithdrawSwap.name}' hook`, () => {
+    beforeEach(() => {
+      server.use(
+        api.query(WithdrawSwapQuoteQuery, () =>
+          msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PositionSwapByIntentApprovalsRequired',
+                quote: makeSwapQuote(),
+                approvals: [
+                  makePositionSwapPositionManagerApproval({
+                    byTransaction: dummyTransactionRequest,
+                  }),
+                  makePositionSwapAdapterContractApproval({
+                    byTransaction: dummyTransactionRequest,
+                  }),
+                ],
+              },
+            },
+          }),
+        ),
+      );
+    });
+
+    it('Then it should support position swap with position manager and adapter contract approvals via signatures', async () => {
+      const {
+        result: {
+          current: [swap],
+        },
+      } = renderHookWithinContext(() =>
+        useWithdrawSwap((plan) => {
+          switch (plan.__typename) {
+            case 'PositionSwapPositionManagerApproval':
+            case 'PositionSwapAdapterContractApproval':
+              return signSwapTypedDataWith(walletClient, plan.bySignature);
+
+            case 'SwapByIntent':
+              return signSwapTypedDataWith(walletClient, plan.data);
+          }
+        }),
+      );
+
+      const result = await swap({} as PrepareWithdrawSwapRequest);
+
+      assertOk(result);
+    });
+
+    it('Then it should support position swap with position manager and adapter contract approvals via transactions', async () => {
+      const {
+        result: {
+          current: [swap],
+        },
+      } = renderHookWithinContext(() => {
+        const [sendTransaction] = useSendTransaction(walletClient);
+        return useWithdrawSwap((plan) => {
+          switch (plan.__typename) {
+            case 'PositionSwapPositionManagerApproval':
+            case 'PositionSwapAdapterContractApproval':
+              return sendTransaction(plan.byTransaction);
+
+            case 'SwapByIntent':
+              return signSwapTypedDataWith(walletClient, plan.data);
+          }
+        });
+      });
+
+      const result = await swap({} as PrepareWithdrawSwapRequest);
 
       assertOk(result);
     });

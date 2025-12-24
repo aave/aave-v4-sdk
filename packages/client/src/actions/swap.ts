@@ -15,6 +15,8 @@ import type {
   PrepareSwapCancelResult,
   PrepareTokenSwapRequest,
   PrepareTokenSwapResult,
+  PrepareWithdrawSwapRequest,
+  PrepareWithdrawSwapResult,
   SwapCancelled,
   SwapExecutionPlan,
   SwapExpired,
@@ -42,6 +44,7 @@ import {
   SwapQuoteQuery,
   SwapStatusQuery,
   UserSwapsQuery,
+  WithdrawSwapQuoteQuery,
 } from '@aave/graphql';
 import { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
@@ -246,6 +249,38 @@ export function repayWithSupplyQuote(
 ): ResultAsync<PrepareRepayWithSupplyResult, UnexpectedError> {
   return client.query(
     RepayWithSupplyQuoteQuery,
+    { request, currency: options.currency },
+    { batch: false },
+  );
+}
+
+/**
+ * @experimental
+ * Fetches a withdraw swap quote for withdrawing deposits and swapping on the fly.
+ *
+ * ```ts
+ * const result = await withdrawSwapQuote(client, {
+ *   market: {
+ *     position: userSupplyItemId('position_123'),
+ *     buyReserve: reserveId('reserve_456'),
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc...'),
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The withdraw swap request parameters.
+ * @param options - The query options.
+ * @returns The withdraw swap result with quote, approvals, and preview.
+ */
+export function withdrawSwapQuote(
+  client: AaveClient,
+  request: PrepareWithdrawSwapRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PrepareWithdrawSwapResult, UnexpectedError> {
+  return client.query(
+    WithdrawSwapQuoteQuery,
     { request, currency: options.currency },
     { batch: false },
   );
