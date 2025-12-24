@@ -54,8 +54,8 @@ export type SwapQuote = FragmentOf<typeof SwapQuoteFragment>;
 export const SwapTypedDataFragment = graphql(
   `fragment SwapTypedData on SwapTypedData {
     __typename
-    types
     primaryType
+    types
     domain {
       ...DomainData
     }
