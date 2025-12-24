@@ -1152,7 +1152,13 @@ export function useWithdrawSwapQuote({
       request,
       currency,
     },
-    selector: (data) => data.quote,
+    selector: (data) => {
+      invariant(
+        data.__typename === 'PositionSwapByIntentApprovalsRequired',
+        `Unsupported swap plan: ${data.__typename}. Upgrade to a newer version of the @aave/react package.`,
+      );
+      return data.quote;
+    },
     suspense,
     pause,
   });
@@ -1320,6 +1326,7 @@ export function useTokenSwap(
       | SendTransactionError
       | PendingTransactionError
       | ValidationError<InsufficientBalanceError>
+      | UnexpectedError
     > => {
       switch (plan.__typename) {
         case 'SwapTransactionRequest':
@@ -1329,6 +1336,7 @@ export function useTokenSwap(
             .andThen(() => {
               return okAsync(plan.orderReceipt);
             });
+
         case 'SwapApprovalRequired':
           return handler(plan, { cancel })
             .map(PendingTransaction.ensure)
@@ -1339,10 +1347,17 @@ export function useTokenSwap(
             .andThen(() => {
               return okAsync(plan.originalTransaction.orderReceipt);
             });
+
         case 'InsufficientBalanceError':
           return ValidationError.fromGqlNode(plan).asResultAsync();
+
         case 'SwapReceipt':
           return okAsync(plan);
+
+        default:
+          return new UnexpectedError(
+            `Unsupported swap plan: ${plan.__typename}. Upgrade to a newer version of the @aave/react package.`,
+          ).asResultAsync();
       }
     },
     [handler],
@@ -1399,6 +1414,11 @@ export function useTokenSwap(
 
           case 'InsufficientBalanceError':
             return ValidationError.fromGqlNode(preparePlan).asResultAsync();
+
+          default:
+            return new UnexpectedError(
+              `Unsupported swap plan: ${preparePlan.__typename}. Upgrade to a newer version of the @aave/react package.`,
+            ).asResultAsync();
         }
       }),
     [client, handler, executeSwap],

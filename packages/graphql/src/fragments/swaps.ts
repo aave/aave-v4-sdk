@@ -1,7 +1,6 @@
 import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import type { SwapId } from '../id';
 import {
   DomainDataFragment,
   type Erc20Amount,
@@ -149,8 +148,8 @@ export const PrepareTokenSwapResultFragment = graphql(
     InsufficientBalanceErrorFragment,
   ],
 );
-export type PrepareTokenSwapResult = FragmentOf<
-  typeof PrepareTokenSwapResultFragment
+export type PrepareTokenSwapResult = ExtendWithOpaqueType<
+  FragmentOf<typeof PrepareTokenSwapResultFragment>
 >;
 
 export const SwapTransactionRequestFragment = graphql(
@@ -185,11 +184,12 @@ export type SwapApprovalRequired = FragmentOf<
   typeof SwapApprovalRequiredFragment
 >;
 
-export type SwapExecutionPlan =
+export type SwapExecutionPlan = ExtendWithOpaqueType<
   | SwapTransactionRequest
   | SwapApprovalRequired
   | InsufficientBalanceError
-  | SwapReceipt;
+  | SwapReceipt
+>;
 
 export const SwapExecutionPlanFragment: FragmentDocumentFor<
   SwapExecutionPlan,
@@ -357,7 +357,6 @@ export const SwapStatusFragment = graphql(
 export type SwapStatus = ExtendWithOpaqueType<
   FragmentOf<typeof SwapStatusFragment>,
   {
-    swapId: SwapId;
     createdAt: Date;
     explorerLink: string;
   }
@@ -538,7 +537,7 @@ export const PrepareWithdrawSwapResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
-export type PreparePositionSwapResult = SwapByIntent;
+export type PreparePositionSwapResult = ExtendWithOpaqueType<SwapByIntent>;
 
 export const PreparePositionSwapResultFragment: FragmentDocumentFor<
   PreparePositionSwapResult,
