@@ -1,5 +1,14 @@
 # @aave/cli
 
+## 4.1.0-next.4
+
+### Patch Changes
+
+- cca9e91: **feat:** add reserves list command to CLI
+- Updated dependencies [7920b63]
+- Updated dependencies [312863d]
+  - @aave/client@4.0.0-next.11
+
 ## 4.1.0-next.3
 
 ### Patch Changes
