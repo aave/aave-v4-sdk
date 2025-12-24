@@ -3,6 +3,8 @@ import type {
   CancelSwapExecutionPlan,
   CancelSwapRequest,
   PaginatedUserSwapsResult,
+  PrepareBorrowSwapRequest,
+  PrepareBorrowSwapResult,
   PreparePositionSwapRequest,
   PreparePositionSwapResult,
   PrepareSupplySwapRequest,
@@ -26,6 +28,7 @@ import type {
   UserSwapsRequest,
 } from '@aave/graphql';
 import {
+  BorrowSwapQuoteQuery,
   CancelSwapQuery,
   PreparePositionSwapQuery,
   PrepareSwapCancelQuery,
@@ -151,7 +154,7 @@ export function prepareTokenSwap(
 
 /**
  * @experimental
- * Fetches a supply swap quote for swapping supplied collateral.
+ * Fetches a supply swap quote for swapping deposited funds.
  *
  * ```ts
  * const result = await supplySwapQuote(client, {
@@ -176,6 +179,38 @@ export function supplySwapQuote(
 ): ResultAsync<PrepareSupplySwapResult, UnexpectedError> {
   return client.query(
     SupplySwapQuoteQuery,
+    { request, currency: options.currency },
+    { batch: false },
+  );
+}
+
+/**
+ * @experimental
+ * Fetches a borrow swap quote for swapping debt positions.
+ *
+ * ```ts
+ * const result = await borrowSwapQuote(client, {
+ *   market: {
+ *     sellPosition: userBorrowItemId('position_123'),
+ *     buyReserve: reserveId('reserve_456'),
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc...'),
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The borrow swap request parameters.
+ * @param options - The query options.
+ * @returns The borrow swap result with quote, approvals, and preview.
+ */
+export function borrowSwapQuote(
+  client: AaveClient,
+  request: PrepareBorrowSwapRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PrepareBorrowSwapResult, UnexpectedError> {
+  return client.query(
+    BorrowSwapQuoteQuery,
     { request, currency: options.currency },
     { batch: false },
   );
