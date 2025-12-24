@@ -59,4 +59,3 @@ export const WithdrawERC20: Story = () => {
 };
 
 WithdrawERC20.storyName = 'ERC-20 Tokens';
-
