@@ -6,6 +6,8 @@ import {
 } from '@aave/client/testing';
 import { signSwapTypedDataWith } from '@aave/client/viem';
 import {
+  BorrowSwapQuoteQuery,
+  type PrepareBorrowSwapRequest,
   PreparePositionSwapQuery,
   type PrepareSupplySwapRequest,
   SupplySwapQuoteQuery,
@@ -19,43 +21,31 @@ import {
   makeSwapTypedData,
   makeTransactionRequest,
 } from '@aave/graphql/testing';
-import { assertOk, evmAddress, never } from '@aave/types';
+import { assertOk, evmAddress } from '@aave/types';
 import * as msw from 'msw';
 import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, it } from 'vitest';
-import { useSupplySwap } from './swap';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  it,
+} from 'vitest';
+import { useBorrowSwap, useSupplySwap } from './swap';
 import { renderHookWithinContext } from './test-utils';
 import { useSendTransaction } from './viem';
 
 const walletClient = await createNewWallet();
 await fundNativeAddress(evmAddress(walletClient.account.address));
 
+const dummyTransactionRequest = makeTransactionRequest({
+  chainId: ETHEREUM_FORK_ID,
+  from: evmAddress(walletClient.account.address),
+});
+
 const api = msw.graphql.link(environment.backend);
 const server = setupServer(
-  api.query(SupplySwapQuoteQuery, () =>
-    msw.HttpResponse.json({
-      data: {
-        value: {
-          __typename: 'PositionSwapByIntentApprovalsRequired',
-          quote: makeSwapQuote(),
-          approvals: [
-            makePositionSwapPositionManagerApproval({
-              byTransaction: makeTransactionRequest({
-                chainId: ETHEREUM_FORK_ID,
-                from: evmAddress(walletClient.account.address),
-              }),
-            }),
-            makePositionSwapAdapterContractApproval({
-              byTransaction: makeTransactionRequest({
-                chainId: ETHEREUM_FORK_ID,
-                from: evmAddress(walletClient.account.address),
-              }),
-            }),
-          ],
-        },
-      },
-    }),
-  ),
   api.query(PreparePositionSwapQuery, () =>
     msw.HttpResponse.json({
       data: {
@@ -97,6 +87,29 @@ describe('Given the swap hooks', () => {
   });
 
   describe(`When using the '${useSupplySwap.name}' hook`, () => {
+    beforeEach(() => {
+      server.use(
+        api.query(SupplySwapQuoteQuery, () =>
+          msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PositionSwapByIntentApprovalsRequired',
+                quote: makeSwapQuote(),
+                approvals: [
+                  makePositionSwapPositionManagerApproval({
+                    byTransaction: dummyTransactionRequest,
+                  }),
+                  makePositionSwapAdapterContractApproval({
+                    byTransaction: dummyTransactionRequest,
+                  }),
+                ],
+              },
+            },
+          }),
+        ),
+      );
+    });
+
     it('Then it should support position swap with position manager and adapter contract approvals via signatures', async () => {
       const {
         result: {
@@ -111,9 +124,6 @@ describe('Given the swap hooks', () => {
 
             case 'SwapByIntent':
               return signSwapTypedDataWith(walletClient, plan.data);
-
-            default:
-              return never('not implemented');
           }
         }),
       );
@@ -138,14 +148,83 @@ describe('Given the swap hooks', () => {
 
             case 'SwapByIntent':
               return signSwapTypedDataWith(walletClient, plan.data);
-
-            default:
-              return never('not implemented');
           }
         });
       });
 
       const result = await swap({} as PrepareSupplySwapRequest);
+
+      assertOk(result);
+    });
+  });
+
+  describe(`When using the '${useBorrowSwap.name}' hook`, () => {
+    beforeEach(() => {
+      server.use(
+        api.query(BorrowSwapQuoteQuery, () =>
+          msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PositionSwapByIntentApprovalsRequired',
+                quote: makeSwapQuote(),
+                approvals: [
+                  makePositionSwapPositionManagerApproval({
+                    byTransaction: dummyTransactionRequest,
+                  }),
+                  makePositionSwapAdapterContractApproval({
+                    byTransaction: dummyTransactionRequest,
+                  }),
+                ],
+              },
+            },
+          }),
+        ),
+      );
+    });
+
+    it('Then it should support position swap with position manager and adapter contract approvals via signatures', async () => {
+      const {
+        result: {
+          current: [swap],
+        },
+      } = renderHookWithinContext(() =>
+        useBorrowSwap((plan) => {
+          switch (plan.__typename) {
+            case 'PositionSwapPositionManagerApproval':
+            case 'PositionSwapAdapterContractApproval':
+              return signSwapTypedDataWith(walletClient, plan.bySignature);
+
+            case 'SwapByIntent':
+              return signSwapTypedDataWith(walletClient, plan.data);
+          }
+        }),
+      );
+
+      const result = await swap({} as PrepareBorrowSwapRequest);
+
+      assertOk(result);
+    });
+
+    it('Then it should support position swap with position manager and adapter contract approvals via transactions', async () => {
+      const {
+        result: {
+          current: [swap],
+        },
+      } = renderHookWithinContext(() => {
+        const [sendTransaction] = useSendTransaction(walletClient);
+        return useBorrowSwap((plan) => {
+          switch (plan.__typename) {
+            case 'PositionSwapPositionManagerApproval':
+            case 'PositionSwapAdapterContractApproval':
+              return sendTransaction(plan.byTransaction);
+
+            case 'SwapByIntent':
+              return signSwapTypedDataWith(walletClient, plan.data);
+          }
+        });
+      });
+
+      const result = await swap({} as PrepareBorrowSwapRequest);
 
       assertOk(result);
     });

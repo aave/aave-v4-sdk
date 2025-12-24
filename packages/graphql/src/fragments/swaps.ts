@@ -451,6 +451,21 @@ export const PrepareSupplySwapResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
+export type PrepareBorrowSwapResult = PositionSwapByIntentApprovalsRequired;
+
+export const PrepareBorrowSwapResultFragment: FragmentDocumentFor<
+  PrepareBorrowSwapResult,
+  'PrepareBorrowSwapResult'
+> = graphql(
+  `fragment PrepareBorrowSwapResult on PrepareBorrowSwapResult {
+    __typename
+    ... on PositionSwapByIntentApprovalsRequired {
+      ...PositionSwapByIntentApprovalsRequired
+    }
+  }`,
+  [PositionSwapByIntentApprovalsRequiredFragment],
+);
+
 export type PreparePositionSwapResult = SwapByIntent;
 
 export const PreparePositionSwapResultFragment: FragmentDocumentFor<

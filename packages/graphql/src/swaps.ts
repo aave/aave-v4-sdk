@@ -1,6 +1,7 @@
 import {
   CancelSwapExecutionPlanFragment,
   PaginatedUserSwapsResultFragment,
+  PrepareBorrowSwapResultFragment,
   PreparePositionSwapResultFragment,
   PrepareSupplySwapResultFragment,
   PrepareSwapCancelResultFragment,
@@ -128,6 +129,19 @@ export const SupplySwapQuoteQuery = graphql(
   [PrepareSupplySwapResultFragment],
 );
 export type PrepareSupplySwapRequest = RequestOf<typeof SupplySwapQuoteQuery>;
+
+/**
+ * @internal
+ */
+export const BorrowSwapQuoteQuery = graphql(
+  `query BorrowSwapQuote($request: PrepareBorrowSwapRequest!, $currency: Currency!) {
+    value: borrowSwapQuote(request: $request) {
+      ...PrepareBorrowSwapResult
+    }
+  }`,
+  [PrepareBorrowSwapResultFragment],
+);
+export type PrepareBorrowSwapRequest = RequestOf<typeof BorrowSwapQuoteQuery>;
 
 /**
  * @internal
