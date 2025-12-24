@@ -1,7 +1,7 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import { DomainDataFragment, TypeFieldFragment } from '../permits';
 import {
+  DomainDataFragment,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   TokenAmountFragment,
@@ -51,38 +51,19 @@ export const SwapQuoteFragment = graphql(
 );
 export type SwapQuote = FragmentOf<typeof SwapQuoteFragment>;
 
-export const SwapByIntentTypeDefinitionFragment = graphql(
-  `fragment SwapByIntentTypeDefinition on SwapByIntentTypeDefinition {
-    EIP712Domain {
-      ...TypeField
-    }
-    Order {
-      ...TypeField
-    }
-  }`,
-  [TypeFieldFragment],
-);
-export type SwapByIntentTypeDefinition = FragmentOf<
-  typeof SwapByIntentTypeDefinitionFragment
->;
-
-export const SwapByIntentTypedDataFragment = graphql(
-  `fragment SwapByIntentTypedData on SwapByIntentTypedData {
+export const SwapTypedDataFragment = graphql(
+  `fragment SwapTypedData on SwapTypedData {
     __typename
-    types {
-      ...SwapByIntentTypeDefinition
-    }
     primaryType
+    types
     domain {
       ...DomainData
     }
     message
   }`,
-  [SwapByIntentTypeDefinitionFragment, DomainDataFragment],
+  [DomainDataFragment],
 );
-export type SwapByIntentTypedData = FragmentOf<
-  typeof SwapByIntentTypedDataFragment
->;
+export type SwapTypedData = FragmentOf<typeof SwapTypedDataFragment>;
 
 export const SwapByIntentFragment = graphql(
   `fragment SwapByIntent on SwapByIntent {
@@ -91,10 +72,10 @@ export const SwapByIntentFragment = graphql(
       ...SwapQuote
     }
     data {
-      ...SwapByIntentTypedData
+      ...SwapTypedData
     }
   }`,
-  [SwapQuoteFragment, SwapByIntentTypedDataFragment],
+  [SwapQuoteFragment, SwapTypedDataFragment],
 );
 export type SwapByIntent = FragmentOf<typeof SwapByIntentFragment>;
 
@@ -108,14 +89,10 @@ export const SwapByIntentWithApprovalRequiredFragment = graphql(
       ...SwapQuote
     }
     data {
-      ...SwapByIntentTypedData
+      ...SwapTypedData
     }
   }`,
-  [
-    TransactionRequestFragment,
-    SwapQuoteFragment,
-    SwapByIntentTypedDataFragment,
-  ],
+  [TransactionRequestFragment, SwapQuoteFragment, SwapTypedDataFragment],
 );
 export type SwapByIntentWithApprovalRequired = FragmentOf<
   typeof SwapByIntentWithApprovalRequiredFragment
@@ -142,17 +119,8 @@ export const SwapReceiptFragment = graphql(
 );
 export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
 
-export type PrepareSwapResult =
-  | SwapByIntent
-  | SwapByIntentWithApprovalRequired
-  | SwapByTransaction
-  | InsufficientBalanceError;
-
-export const PrepareSwapResultFragment: FragmentDocumentFor<
-  PrepareSwapResult,
-  'PrepareSwapResult'
-> = graphql(
-  `fragment PrepareSwapResult on PrepareSwapResult {
+export const PrepareTokenSwapResultFragment = graphql(
+  `fragment PrepareTokenSwapResult on PrepareTokenSwapResult {
     __typename
     ... on SwapByIntent {
       ...SwapByIntent
@@ -174,6 +142,9 @@ export const PrepareSwapResultFragment: FragmentDocumentFor<
     InsufficientBalanceErrorFragment,
   ],
 );
+export type PrepareTokenSwapResult = FragmentOf<
+  typeof PrepareTokenSwapResultFragment
+>;
 
 export const SwapTransactionRequestFragment = graphql(
   `fragment SwapTransactionRequest on SwapTransactionRequest {
@@ -351,46 +322,14 @@ export const SwapStatusFragment: FragmentDocumentFor<SwapStatus, 'SwapStatus'> =
     ],
   );
 
-export const CancelSwapTypeDefinitionFragment = graphql(
-  `fragment CancelSwapTypeDefinition on CancelSwapTypeDefinition {
-    OrderCancellations {
-      ...TypeField
-    }
-    EIP712Domain {
-      ...TypeField
-    }
-  }`,
-  [TypeFieldFragment],
-);
-export type CancelSwapTypeDefinition = FragmentOf<
-  typeof CancelSwapTypeDefinitionFragment
->;
-
-export const CancelSwapTypedDataFragment = graphql(
-  `fragment CancelSwapTypedData on CancelSwapTypedData {
-    types {
-      ...CancelSwapTypeDefinition
-    }
-    primaryType
-    domain {
-      ...DomainData
-    }
-    message
-  }`,
-  [CancelSwapTypeDefinitionFragment, DomainDataFragment],
-);
-export type CancelSwapTypedData = FragmentOf<
-  typeof CancelSwapTypedDataFragment
->;
-
 export const PrepareSwapCancelResultFragment = graphql(
   `fragment PrepareSwapCancelResult on PrepareSwapCancelResult {
     __typename
     data {
-      ...CancelSwapTypedData
+      ...SwapTypedData
     }
   }`,
-  [CancelSwapTypedDataFragment],
+  [SwapTypedDataFragment],
 );
 export type PrepareSwapCancelResult = FragmentOf<
   typeof PrepareSwapCancelResultFragment
@@ -429,3 +368,100 @@ export const PaginatedUserSwapsResultFragment = graphql(
 export type PaginatedUserSwapsResult = FragmentOf<
   typeof PaginatedUserSwapsResultFragment
 >;
+
+export const PositionSwapAdapterContractApprovalFragment = graphql(
+  `fragment PositionSwapAdapterContractApproval on PositionSwapAdapterContractApproval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    bySignature {
+      ...SwapTypedData
+    }
+  }`,
+  [TransactionRequestFragment, SwapTypedDataFragment],
+);
+export type PositionSwapAdapterContractApproval = FragmentOf<
+  typeof PositionSwapAdapterContractApprovalFragment
+>;
+
+export const PositionSwapPositionManagerApprovalFragment = graphql(
+  `fragment PositionSwapPositionManagerApproval on PositionSwapPositionManagerApproval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    bySignature {
+      ...SwapTypedData
+    }
+  }`,
+  [TransactionRequestFragment, SwapTypedDataFragment],
+);
+export type PositionSwapPositionManagerApproval = FragmentOf<
+  typeof PositionSwapPositionManagerApprovalFragment
+>;
+
+export const PositionSwapApprovalFragment = graphql(
+  `fragment PositionSwapApproval on PositionSwapApproval {
+    __typename
+    ... on PositionSwapAdapterContractApproval {
+      ...PositionSwapAdapterContractApproval
+    }
+    ... on PositionSwapPositionManagerApproval {
+      ...PositionSwapPositionManagerApproval
+    }
+  }`,
+  [
+    PositionSwapAdapterContractApprovalFragment,
+    PositionSwapPositionManagerApprovalFragment,
+  ],
+);
+export type PositionSwapApproval = FragmentOf<
+  typeof PositionSwapApprovalFragment
+>;
+
+export const PositionSwapByIntentApprovalsRequiredFragment = graphql(
+  `fragment PositionSwapByIntentApprovalsRequired on PositionSwapByIntentApprovalsRequired {
+    __typename
+    quote {
+      ...SwapQuote
+    }
+    approvals {
+      ...PositionSwapApproval
+    }
+  }`,
+  [SwapQuoteFragment, PositionSwapApprovalFragment],
+);
+export type PositionSwapByIntentApprovalsRequired = FragmentOf<
+  typeof PositionSwapByIntentApprovalsRequiredFragment
+>;
+
+export type PrepareSupplySwapResult = PositionSwapByIntentApprovalsRequired;
+
+export const PrepareSupplySwapResultFragment: FragmentDocumentFor<
+  PrepareSupplySwapResult,
+  'PrepareSupplySwapResult'
+> = graphql(
+  `fragment PrepareSupplySwapResult on PrepareSupplySwapResult {
+    __typename
+    ... on PositionSwapByIntentApprovalsRequired {
+      ...PositionSwapByIntentApprovalsRequired
+    }
+  }`,
+  [PositionSwapByIntentApprovalsRequiredFragment],
+);
+
+export type PreparePositionSwapResult = SwapByIntent;
+
+export const PreparePositionSwapResultFragment: FragmentDocumentFor<
+  PreparePositionSwapResult,
+  'PreparePositionSwapResult'
+> = graphql(
+  `fragment PreparePositionSwapResult on PreparePositionSwapResult {
+    __typename
+    ... on SwapByIntent {
+      ...SwapByIntent
+    }
+  }`,
+  [SwapByIntentFragment],
+);

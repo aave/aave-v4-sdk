@@ -5,11 +5,10 @@ import {
   ValidationError,
 } from '@aave/core';
 import type {
-  CancelSwapTypedData,
   Chain,
   ExecutionPlan,
   PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
@@ -40,31 +39,6 @@ import type {
   SwapSignatureHandler,
   TransactionResult,
 } from './types';
-
-const devnetChain: ThirdwebChain = defineChain({
-  id: Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
-  name: 'Devnet',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: { http: [import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC] },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Devnet Explorer',
-      url: import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
-    },
-  },
-});
-
-/**
- * @internal
- */
-export const supportedChains: Record<ChainId, ThirdwebChain> = {
-  // TODO add them back when deployed on these chains
-  // [chainId(mainnet.id)]: mainnet,
-  // [chainId(sepolia.id)]: sepolia,
-  [chainId(devnetChain.id)]: devnetChain,
-};
 
 /**
  * @internal
@@ -231,15 +205,9 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
 }
 
 async function signTypedData(
-  client: ThirdwebClient,
+  wallet: Engine.ServerWallet,
   result: PermitTypedDataResponse,
 ): Promise<Signature> {
-  const wallet = Engine.serverWallet({
-    client,
-    chain: supportedChains[result.domain.chainId],
-    address: result.message.owner,
-  });
-
   const signature = await wallet.signTypedData({
     // silence the rest of the type inference
     types: result.types as Record<string, unknown>,
@@ -251,46 +219,35 @@ async function signTypedData(
   return signatureFrom(signature);
 }
 
-function signERC20Permit(
-  client: ThirdwebClient,
-  result: PermitTypedDataResponse,
-): ReturnType<ERC20PermitHandler> {
-  return ResultAsync.fromPromise(signTypedData(client, result), (err) =>
-    SigningError.from(err),
-  ).map((value) => ({
-    deadline: result.message.deadline,
-    value,
-  }));
-}
-
 /**
  * Creates an ERC20 permit handler that signs ERC20 permits using the provided Thirdweb client and account.
  */
 export function signERC20PermitWith(
-  client: ThirdwebClient,
+  wallet: Engine.ServerWallet,
 ): ERC20PermitHandler {
-  return signERC20Permit.bind(null, client);
+  return function signERC20Permit(
+    result: PermitTypedDataResponse,
+  ): ReturnType<ERC20PermitHandler> {
+    return ResultAsync.fromPromise(signTypedData(wallet, result), (err) =>
+      SigningError.from(err),
+    ).map((value) => ({
+      deadline: result.message.deadline,
+      value,
+    }));
+  };
 }
 
 function signSwapTypedData(
-  client: ThirdwebClient,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  wallet: Engine.ServerWallet,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
-  const message = JSON.parse(result.message);
-
   const signTypedDataPromise = async (): Promise<Signature> => {
-    const wallet = Engine.serverWallet({
-      client,
-      chain: supportedChains[result.domain.chainId],
-      address: message.user,
-    });
-
     const signature = await wallet.signTypedData({
       // silence the rest of the type inference
       types: result.types as Record<string, unknown>,
       domain: result.domain,
       primaryType: result.primaryType,
-      message,
+      message: result.message,
     });
 
     return signatureFrom(signature);
@@ -298,10 +255,7 @@ function signSwapTypedData(
 
   return ResultAsync.fromPromise(signTypedDataPromise(), (err) =>
     SigningError.from(err),
-  ).map((value) => ({
-    deadline: message.deadline,
-    value,
-  }));
+  ).map(signatureFrom);
 }
 
 /**
@@ -309,21 +263,21 @@ function signSwapTypedData(
  * Creates a swap signature handler that signs swap typed data using the provided Thirdweb client.
  */
 export function signSwapTypedDataWith(
-  client: ThirdwebClient,
+  wallet: Engine.ServerWallet,
 ): SwapSignatureHandler;
 /**
  * @internal
  * Signs swap typed data using the provided Thirdweb client.
  */
 export function signSwapTypedDataWith(
-  client: ThirdwebClient,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  wallet: Engine.ServerWallet,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler>;
 export function signSwapTypedDataWith(
-  client: ThirdwebClient,
-  result?: SwapByIntentTypedData | CancelSwapTypedData,
+  wallet: Engine.ServerWallet,
+  result?: SwapTypedData,
 ): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
   return result
-    ? signSwapTypedData(client, result)
-    : signSwapTypedData.bind(null, client);
+    ? signSwapTypedData(wallet, result)
+    : signSwapTypedData.bind(null, wallet);
 }

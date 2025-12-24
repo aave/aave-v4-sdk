@@ -9,10 +9,10 @@ import {
 import type {
   ERC20PermitSignature,
   PermitRequest,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
-import { invariant } from '@aave/types';
+import { invariant, type Signature } from '@aave/types';
 import type { WalletClient } from 'viem';
 import { useAaveClient } from '../context';
 import {
@@ -135,19 +135,15 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  */
 export function useSignSwapTypedDataWith(
   walletClient: WalletClient | null | undefined,
-): UseAsyncTask<
-  SwapByIntentTypedData,
-  ERC20PermitSignature,
-  SignSwapTypedDataError
-> {
+): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
   return useAsyncTask(
-    (typedData: SwapByIntentTypedData) => {
+    (typedData: SwapTypedData) => {
       invariant(
         walletClient,
         'Expected a WalletClient to sign swap typed data',
       );
 
-      return signSwapTypedDataWith(walletClient)(typedData);
+      return signSwapTypedDataWith(walletClient, typedData);
     },
     [walletClient],
   );

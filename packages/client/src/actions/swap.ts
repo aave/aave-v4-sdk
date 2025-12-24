@@ -3,10 +3,14 @@ import type {
   CancelSwapExecutionPlan,
   CancelSwapRequest,
   PaginatedUserSwapsResult,
+  PreparePositionSwapRequest,
+  PreparePositionSwapResult,
+  PrepareSupplySwapRequest,
+  PrepareSupplySwapResult,
   PrepareSwapCancelRequest,
   PrepareSwapCancelResult,
-  PrepareSwapRequest,
-  PrepareSwapResult,
+  PrepareTokenSwapRequest,
+  PrepareTokenSwapResult,
   SwapCancelled,
   SwapExecutionPlan,
   SwapExpired,
@@ -23,10 +27,12 @@ import type {
 } from '@aave/graphql';
 import {
   CancelSwapQuery,
+  PreparePositionSwapQuery,
   PrepareSwapCancelQuery,
-  PrepareSwapQuery,
+  PrepareTokenSwapQuery,
+  SupplySwapQuoteQuery,
+  SwapMutation,
   SwappableTokensQuery,
-  SwapQuery,
   SwapQuoteQuery,
   SwapStatusQuery,
   UserSwapsQuery,
@@ -36,7 +42,7 @@ import type { AaveClient } from '../AaveClient';
 import { type CurrencyQueryOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
- * @internal
+ * @experimental
  * Fetches a swap quote for the specified trade parameters.
  *
  * ```ts
@@ -64,7 +70,7 @@ export function swapQuote(
 }
 
 /**
- * @internal
+ * @experimental
  * Fetches the list of tokens available for swapping on a specific chain.
  *
  * ```ts
@@ -85,11 +91,11 @@ export function swappableTokens(
 }
 
 /**
- * @internal
+ * @experimental
  * Prepares a swap for the specified trade parameters.
  *
  * ```ts
- * const result = await prepareSwap(client, {
+ * const result = await prepareTokenSwap(client, {
  *   market: {
  *     chainId: chainId(1),
  *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
@@ -135,16 +141,77 @@ export function swappableTokens(
  * @param options - The query options.
  * @returns The prepared swap result containing details of the swap.
  */
-export function prepareSwap(
+export function prepareTokenSwap(
   client: AaveClient,
-  request: PrepareSwapRequest,
+  request: PrepareTokenSwapRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PrepareSwapResult, UnexpectedError> {
-  return client.query(PrepareSwapQuery, { request, ...options });
+): ResultAsync<PrepareTokenSwapResult, UnexpectedError> {
+  return client.query(PrepareTokenSwapQuery, { request, ...options });
 }
 
 /**
- * @internal
+ * @experimental
+ * Fetches a supply swap quote for swapping supplied collateral.
+ *
+ * ```ts
+ * const result = await supplySwapQuote(client, {
+ *   market: {
+ *     sellPosition: userSupplyItemId('position_123'),
+ *     buyReserve: reserveId('reserve_456'),
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc...'),
+ *   },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The supply swap request parameters.
+ * @param options - The query options.
+ * @returns The supply swap result with quote, approvals, and preview.
+ */
+export function supplySwapQuote(
+  client: AaveClient,
+  request: PrepareSupplySwapRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PrepareSupplySwapResult, UnexpectedError> {
+  return client.query(
+    SupplySwapQuoteQuery,
+    { request, currency: options.currency },
+    { batch: false },
+  );
+}
+
+/**
+ * @experimental
+ * Prepares a position swap by obtaining the typed data for signing.
+ *
+ * ```ts
+ * const result = await preparePositionSwap(client, {
+ *   quoteId: swapQuoteId('quote_123'),
+ *   adapterContractSignature: signature('0x456...'),
+ *   positionManagerSignature: signature('0x789...'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The position swap request with quote ID and signatures.
+ * @param options - The query options.
+ * @returns The position swap result with intent data for execution.
+ */
+export function preparePositionSwap(
+  client: AaveClient,
+  request: PreparePositionSwapRequest,
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PreparePositionSwapResult, UnexpectedError> {
+  return client.query(
+    PreparePositionSwapQuery,
+    { request, currency: options.currency },
+    { batch: false },
+  );
+}
+
+/**
+ * @experimental
  * Fetches the status of a specific swap.
  *
  * ```ts
@@ -169,7 +236,7 @@ export function swapStatus(
 export type SwapOutcome = SwapCancelled | SwapExpired | SwapFulfilled;
 
 /**
- * @internal
+ * @experimental
  * Waits for a swap to reach a final outcome (cancelled, expired, or fulfilled).
  *
  * ```ts
@@ -246,7 +313,7 @@ export function waitForSwapOutcome(
 }
 
 /**
- * @internal
+ * @experimental
  * Executes a swap for the specified request parameters.
  *
  * ```ts
@@ -293,11 +360,11 @@ export function swap(
   client: AaveClient,
   request: SwapRequest,
 ): ResultAsync<SwapExecutionPlan, UnexpectedError> {
-  return client.query(SwapQuery, { request });
+  return client.mutation(SwapMutation, { request });
 }
 
 /**
- * @internal
+ * @experimental
  * Prepares a swap cancellation for the specified swap ID.
  *
  * ```ts
@@ -318,7 +385,7 @@ export function prepareSwapCancel(
 }
 
 /**
- * @internal
+ * @experimental
  * Executes a swap cancellation for the specified request parameters.
  *
  * ```ts
@@ -354,7 +421,7 @@ export function cancelSwap(
 }
 
 /**
- * @internal
+ * @experimental
  * Fetches the user's swap history for a specific chain.
  *
  * ```ts

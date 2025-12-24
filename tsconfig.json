@@ -15,6 +15,7 @@
       "@aave/client/testing": ["./packages/client/src/testing"],
       "@aave/client/viem": ["./packages/client/src/viem"],
       "@aave/graphql": ["./packages/graphql/src"],
+      "@aave/graphql/testing": ["./packages/graphql/src/testing"],
       "@aave/types": ["./packages/types/src"]
     }
   },

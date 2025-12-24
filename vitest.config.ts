@@ -38,6 +38,15 @@ export default defineConfig({
         test: {
           name: 'react',
           environment: 'happy-dom',
+          environmentOptions: {
+            happyDOM: {
+              settings: {
+                fetch: {
+                  disableSameOriginPolicy: true,
+                },
+              },
+            },
+          },
           setupFiles: [resolve(__dirname, './packages/react/vitest.setup.ts')],
           include: ['packages/react/**/*.test.{ts,tsx}'],
           typecheck: {

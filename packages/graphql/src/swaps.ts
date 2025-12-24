@@ -1,8 +1,10 @@
 import {
   CancelSwapExecutionPlanFragment,
   PaginatedUserSwapsResultFragment,
+  PreparePositionSwapResultFragment,
+  PrepareSupplySwapResultFragment,
   PrepareSwapCancelResultFragment,
-  PrepareSwapResultFragment,
+  PrepareTokenSwapResultFragment,
   SwapExecutionPlanFragment,
   SwapQuoteFragment,
   SwapStatusFragment,
@@ -39,15 +41,15 @@ export type SwappableTokensRequest = RequestOf<typeof SwappableTokensQuery>;
 /**
  * @internal
  */
-export const PrepareSwapQuery = graphql(
-  `query PrepareSwap($request: PrepareSwapRequest!, $currency: Currency!) {
-    value: prepareSwap(request: $request) {
-      ...PrepareSwapResult
+export const PrepareTokenSwapQuery = graphql(
+  `query PrepareTokenSwap($request: PrepareTokenSwapRequest!, $currency: Currency!) {
+    value: prepareTokenSwap(request: $request) {
+      ...PrepareTokenSwapResult
     }
   }`,
-  [PrepareSwapResultFragment],
+  [PrepareTokenSwapResultFragment],
 );
-export type PrepareSwapRequest = RequestOf<typeof PrepareSwapQuery>;
+export type PrepareTokenSwapRequest = RequestOf<typeof PrepareTokenSwapQuery>;
 
 /**
  * @internal
@@ -65,15 +67,15 @@ export type SwapStatusRequest = RequestOf<typeof SwapStatusQuery>;
 /**
  * @internal
  */
-export const SwapQuery = graphql(
-  `query Swap($request: SwapRequest!) {
+export const SwapMutation = graphql(
+  `mutation Swap($request: SwapRequest!) {
     value: swap(request: $request) {
       ...SwapExecutionPlan
     }
   }`,
   [SwapExecutionPlanFragment],
 );
-export type SwapRequest = RequestOf<typeof SwapQuery>;
+export type SwapRequest = RequestOf<typeof SwapMutation>;
 
 /**
  * @internal
@@ -113,6 +115,34 @@ export const UserSwapsQuery = graphql(
   [PaginatedUserSwapsResultFragment],
 );
 export type UserSwapsRequest = RequestOf<typeof UserSwapsQuery>;
+
+/**
+ * @internal
+ */
+export const SupplySwapQuoteQuery = graphql(
+  `query SupplySwapQuote($request: PrepareSupplySwapRequest!, $currency: Currency!) {
+    value: supplySwapQuote(request: $request) {
+      ...PrepareSupplySwapResult
+    }
+  }`,
+  [PrepareSupplySwapResultFragment],
+);
+export type PrepareSupplySwapRequest = RequestOf<typeof SupplySwapQuoteQuery>;
+
+/**
+ * @internal
+ */
+export const PreparePositionSwapQuery = graphql(
+  `query PreparePositionSwap($request: PreparePositionSwapRequest!, $currency: Currency!) {
+    value: preparePositionSwap(request: $request) {
+      ...PreparePositionSwapResult
+    }
+  }`,
+  [PreparePositionSwapResultFragment],
+);
+export type PreparePositionSwapRequest = RequestOf<
+  typeof PreparePositionSwapQuery
+>;
 
 export type CancelIntentSwapInput = ReturnType<
   typeof graphql.scalar<'CancelIntentSwapInput'>

@@ -29,6 +29,7 @@
     "test:client:viem": "vitest --project client packages/client/src/viem.test.ts",
     "test:core": "vitest --project core",
     "test:react": "vitest --project react",
+    "test:react:swap": "vitest --project react packages/react/src/swap.test.ts",
     "test:react:viem": "vitest --project react packages/react/src/viem/*.test.ts",
     "test:types": "vitest --project types",
     "test": "pnpm test:types && pnpm test:core && pnpm test:client && pnpm test:cli && pnpm test:react"
@@ -52,6 +53,9 @@
     "overrides": {
       "react": "^19.1.0",
       "react-dom": "^19.1.0"
+    },
+    "patchedDependencies": {
+      "happy-dom@20.0.10": "patches/happy-dom@20.0.10.patch"
     }
   },
   "packageManager": "pnpm@9.15.4"

@@ -1,6 +1,16 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 
+export const DomainDataFragment = graphql(
+  `fragment DomainData on DomainData {
+    name
+    version
+    chainId
+    verifyingContract
+  }`,
+);
+export type DomainData = FragmentOf<typeof DomainDataFragment>;
+
 export const DecimalNumberFragment =
   graphql(`fragment DecimalNumber on DecimalNumber {
     __typename

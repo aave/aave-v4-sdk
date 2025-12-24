@@ -6,14 +6,12 @@ import {
   waitForTransactionResult,
 } from '@aave/client/ethers';
 import type {
-  CancelSwapTypedData,
   ERC20PermitSignature,
   PermitRequest,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
-
-import { invariant } from '@aave/types';
+import { invariant, type Signature } from '@aave/types';
 import type { Signer } from 'ethers';
 import {
   PendingTransaction,
@@ -135,13 +133,9 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  */
 export function useSignSwapTypedDataWith(
   signer: Signer | undefined,
-): UseAsyncTask<
-  SwapByIntentTypedData | CancelSwapTypedData,
-  ERC20PermitSignature,
-  SignSwapTypedDataError
-> {
+): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
   return useAsyncTask(
-    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
+    (typedData: SwapTypedData) => {
       invariant(signer, 'Expected a Signer to sign swap typed data');
 
       return signSwapTypedDataWith(signer)(typedData);
