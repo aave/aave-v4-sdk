@@ -3,6 +3,7 @@ import {
   PaginatedUserSwapsResultFragment,
   PrepareBorrowSwapResultFragment,
   PreparePositionSwapResultFragment,
+  PrepareRepayWithSupplyResultFragment,
   PrepareSupplySwapResultFragment,
   PrepareSwapCancelResultFragment,
   PrepareTokenSwapResultFragment,
@@ -142,6 +143,21 @@ export const BorrowSwapQuoteQuery = graphql(
   [PrepareBorrowSwapResultFragment],
 );
 export type PrepareBorrowSwapRequest = RequestOf<typeof BorrowSwapQuoteQuery>;
+
+/**
+ * @internal
+ */
+export const RepayWithSupplyQuoteQuery = graphql(
+  `query RepayWithSupplyQuote($request: PrepareRepayWithSupplyRequest!, $currency: Currency!) {
+    value: repayWithSupplyQuote(request: $request) {
+      ...PrepareRepayWithSupplyResult
+    }
+  }`,
+  [PrepareRepayWithSupplyResultFragment],
+);
+export type PrepareRepayWithSupplyRequest = RequestOf<
+  typeof RepayWithSupplyQuoteQuery
+>;
 
 /**
  * @internal
