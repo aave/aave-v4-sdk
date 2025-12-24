@@ -482,6 +482,21 @@ export const PrepareRepayWithSupplyResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
+export type PrepareWithdrawSwapResult = PositionSwapByIntentApprovalsRequired;
+
+export const PrepareWithdrawSwapResultFragment: FragmentDocumentFor<
+  PrepareWithdrawSwapResult,
+  'PrepareWithdrawSwapResult'
+> = graphql(
+  `fragment PrepareWithdrawSwapResult on PrepareWithdrawSwapResult {
+    __typename
+    ... on PositionSwapByIntentApprovalsRequired {
+      ...PositionSwapByIntentApprovalsRequired
+    }
+  }`,
+  [PositionSwapByIntentApprovalsRequiredFragment],
+);
+
 export type PreparePositionSwapResult = SwapByIntent;
 
 export const PreparePositionSwapResultFragment: FragmentDocumentFor<

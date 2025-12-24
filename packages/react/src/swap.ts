@@ -15,6 +15,7 @@ import {
   swap,
   swapQuote,
   swapStatus,
+  withdrawSwapQuote,
 } from '@aave/client/actions';
 import {
   type CancelError,
@@ -46,6 +47,7 @@ import {
   type PreparePositionSwapRequest,
   type PrepareRepayWithSupplyRequest,
   type PrepareTokenSwapRequest,
+  type PrepareWithdrawSwapRequest,
   RepayWithSupplyQuoteQuery,
   SupplySwapQuoteQuery,
   type SwapApprovalRequired,
@@ -58,6 +60,7 @@ import {
   type Token,
   type TransactionRequest,
   UserSwapsQuery,
+  WithdrawSwapQuoteQuery,
 } from '@aave/graphql';
 import type {
   NullishDeep,
@@ -1004,6 +1007,187 @@ export function useRepayWithSupply(
       ...request
     }: UseRepayWithSupplyRequest) => {
       return repayWithSupplyQuote(client, request, { currency }).andThen(
+        (result) => {
+          invariant(
+            result.__typename === 'PositionSwapByIntentApprovalsRequired',
+            `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
+          );
+
+          return processApprovals(result)
+            .with(handler)
+            .andThen((request) =>
+              preparePositionSwap(client, request, { currency }).map(
+                (result) => {
+                  invariant(
+                    result.__typename === 'SwapByIntent',
+                    `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
+                  );
+                  return result;
+                },
+              ),
+            )
+            .andThen((intent) =>
+              handler(intent, { cancel }).map((result) => {
+                invariant(
+                  isSignature(result),
+                  'Expected signature, got an object instead.',
+                );
+                return result;
+              }),
+            )
+            .andThen((signature) =>
+              swapPosition(client, {
+                quoteId: result.quote.quoteId,
+                signature,
+              }),
+            );
+        },
+      );
+    },
+    [client, handler],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseWithdrawSwapQuoteArgs = Prettify<
+  PrepareWithdrawSwapRequest & CurrencyQueryOptions
+>;
+
+/**
+ * @experimental
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: UseWithdrawSwapQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: Pausable<UseWithdrawSwapQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * ```tsx
+ * const { data, error, loading } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: UseWithdrawSwapQuoteArgs,
+): ReadResult<SwapQuote>;
+/**
+ * @experimental
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: Pausable<UseWithdrawSwapQuoteArgs>,
+): PausableReadResult<SwapQuote>;
+
+export function useWithdrawSwapQuote({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseWithdrawSwapQuoteArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SwapQuote, UnexpectedError> {
+  return useSuspendableQuery({
+    document: WithdrawSwapQuoteQuery,
+    variables: {
+      request,
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense,
+    pause,
+  });
+}
+
+// ------------------------------------------------------------
+
+/**
+ * @experimental
+ */
+export type UseWithdrawSwapRequest = Prettify<
+  PrepareWithdrawSwapRequest & CurrencyQueryOptions
+>;
+
+/**
+ * @experimental
+ */
+export function useWithdrawSwap(
+  handler: PositionSwapHandler,
+): UseAsyncTask<
+  PrepareWithdrawSwapRequest,
+  SwapReceipt,
+  | SwapSignerError
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseWithdrawSwapRequest) => {
+      return withdrawSwapQuote(client, request, { currency }).andThen(
         (result) => {
           invariant(
             result.__typename === 'PositionSwapByIntentApprovalsRequired',
