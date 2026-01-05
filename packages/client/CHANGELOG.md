@@ -1,5 +1,30 @@
 # @aave/client
 
+## 4.0.0-next.12
+
+### Patch Changes
+
+- 1b7736a: **fix:** removes `period` argument from `PreviewUserPosition.projectedEarnings` field.
+- 5fad9a6: **feat:** `preparePositionSwap` and `supplySwapQuote` actions.
+- 3eb2d1a: **feat:** support changes to `SwapStatus` union.
+- 6c71713: **feat:** allows to expand swap strategies without breaking changes.
+- b06776a: **feat:** `withdrawSwapQuote` action, `useWithdrawSwapQuote` and `useWithdrawSwap` hooks.
+- 1931215: **feat:** `repayWithSupplyQuote` action, `useRepayWithSupplyQuote` and `useRepayWithSupply` hooks.
+- 551c14c: **feat:** `borrowSwapQuote` action and `useBorrowSwap` hook.
+- Updated dependencies [1b7736a]
+- Updated dependencies [5fad9a6]
+- Updated dependencies [3eb2d1a]
+- Updated dependencies [6c71713]
+- Updated dependencies [b06776a]
+- Updated dependencies [5fad9a6]
+- Updated dependencies [1931215]
+- Updated dependencies [5fad9a6]
+- Updated dependencies [551c14c]
+- Updated dependencies [4c076bd]
+  - @aave/graphql@1.0.0-next.11
+  - @aave/types@1.0.0-next.6
+  - @aave/core@1.0.0-next.8
+
 ## 4.0.0-next.11
 
 ### Patch Changes
