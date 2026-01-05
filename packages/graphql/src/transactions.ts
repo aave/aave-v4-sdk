@@ -282,7 +282,7 @@ export const PreviewUserPositionFragment = graphql(
     netBalance(currency: $currency) {
       ...ExchangeAmountVariation
     }
-    projectedEarnings(period: ANNUAL) {
+    projectedEarnings {
       ...ExchangeAmountVariation
     }
     borrowingPower {
