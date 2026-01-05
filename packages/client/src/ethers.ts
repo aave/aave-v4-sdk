@@ -6,10 +6,9 @@ import {
   ValidationError,
 } from '@aave/core';
 import type {
-  CancelSwapTypedData,
   ExecutionPlan,
   PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
@@ -22,7 +21,12 @@ import {
   signatureFrom,
   txHash,
 } from '@aave/types';
-import { isError, type Signer, type TransactionResponse } from 'ethers';
+import {
+  isError,
+  type Signer,
+  type TransactionResponse,
+  type TypedDataField,
+} from 'ethers';
 import type {
   ERC20PermitHandler,
   ExecutionPlanHandler,
@@ -186,18 +190,22 @@ export function signERC20PermitWith(signer: Signer): ERC20PermitHandler {
   return signERC20Permit.bind(null, signer);
 }
 
+function isTypedDataTypesField(
+  value: unknown,
+): value is Record<string, TypedDataField[]> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function signSwapTypedData(
   signer: Signer,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
-  const message = JSON.parse(result.message);
+  invariant(isTypedDataTypesField(result.types), 'Invalid types');
+
   return ResultAsync.fromPromise(
-    signer.signTypedData(result.domain, result.types, message),
+    signer.signTypedData(result.domain, result.types, result.message),
     (err) => SigningError.from(err),
-  ).map((signature) => ({
-    deadline: message.deadline,
-    value: signatureFrom(signature),
-  }));
+  ).map(signatureFrom);
 }
 
 /**
@@ -211,11 +219,11 @@ export function signSwapTypedDataWith(signer: Signer): SwapSignatureHandler;
  */
 export function signSwapTypedDataWith(
   signer: Signer,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler>;
 export function signSwapTypedDataWith(
   signer: Signer,
-  result?: SwapByIntentTypedData | CancelSwapTypedData,
+  result?: SwapTypedData,
 ): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
   return result
     ? signSwapTypedData(signer, result)

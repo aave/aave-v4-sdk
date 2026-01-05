@@ -4,10 +4,9 @@ import {
   ValidationError,
 } from '@aave/core';
 import type {
-  CancelSwapTypedData,
   ExecutionPlan,
   PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
@@ -171,24 +170,20 @@ export function signERC20PermitWith(
 function signSwapTypedData(
   privy: PrivyClient,
   walletId: string,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
-  const message = JSON.parse(result.message);
   return ResultAsync.fromPromise(
     privy.walletApi.ethereum.signTypedData({
       walletId,
       typedData: {
         domain: result.domain,
         types: result.types,
-        message,
+        message: result.message,
         primaryType: result.primaryType,
       },
     }),
     (err) => SigningError.from(err),
-  ).map((response) => ({
-    deadline: message.deadline,
-    value: signatureFrom(response.signature),
-  }));
+  ).map(({ signature }) => signatureFrom(signature));
 }
 
 /**
@@ -206,12 +201,12 @@ export function signSwapTypedDataWith(
 export function signSwapTypedDataWith(
   privy: PrivyClient,
   walletId: string,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler>;
 export function signSwapTypedDataWith(
   privy: PrivyClient,
   walletId: string,
-  result?: SwapByIntentTypedData | CancelSwapTypedData,
+  result?: SwapTypedData,
 ): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
   return result
     ? signSwapTypedData(privy, walletId, result)

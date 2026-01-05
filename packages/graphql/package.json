@@ -1,6 +1,6 @@
 {
   "name": "@aave/graphql",
-  "version": "1.0.0-next.9",
+  "version": "1.0.0-next.10",
   "description": "GraphQL bindings for the Aave API",
   "repository": {
     "directory": "packages/graphql",
@@ -16,14 +16,13 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./test-utils": {
-      "import": "./dist/test-utils.js",
-      "require": "./dist/test-utils.cjs"
-    },
     "./schema": {
       "types": "./dist/schema.d.ts",
       "import": "./dist/schema.js",
       "require": "./dist/schema.cjs"
+    },
+    "./testing": {
+      "default": "./dist/testing.js"
     }
   },
   "typesVersions": {
@@ -34,11 +33,11 @@
       "require": [
         "./dist/index.d.cts"
       ],
-      "test-utils": [
-        "./dist/test-utils.d.ts"
-      ],
       "schema": [
         "./dist/schema.d.ts"
+      ],
+      "testing": [
+        "./dist/testing.d.ts"
       ]
     }
   },

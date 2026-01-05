@@ -1,5 +1,16 @@
 # @aave/react
 
+## 4.0.0-next.11
+
+### Patch Changes
+
+- 7920b63: **chore:** removes deprecated `ProtocolHistorySample.earnings` field.
+- 312863d: **chore:** removes support for `assetCategoryBorrowHistory` and `assetCategorySupplyHistory`.
+- Updated dependencies [7920b63]
+- Updated dependencies [312863d]
+  - @aave/graphql@1.0.0-next.10
+  - @aave/client@4.0.0-next.11
+
 ## 4.0.0-next.10
 
 ### Patch Changes

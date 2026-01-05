@@ -11,14 +11,17 @@
     "@aave/cli": "4.0.0"
   },
   "changesets": [
+    "bumpy-plants-guess",
     "clear-ears-smash",
     "clever-symbols-search",
     "crazy-teams-attack",
     "cuddly-apples-flash",
+    "eager-ducks-add",
     "easy-guests-invent",
     "eleven-baboons-sin",
     "expose-hubid-filters-in-balances-and-reserves",
     "fast-rats-bet",
+    "fiery-suns-beam",
     "flat-sloths-argue",
     "gold-flies-sink",
     "grumpy-bottles-relax",
@@ -26,6 +29,7 @@
     "hip-coats-serve",
     "hip-views-cough",
     "kind-lines-wave",
+    "large-phones-rule",
     "late-birds-punch",
     "long-cups-nail",
     "lovely-plums-marry",
@@ -40,11 +44,13 @@
     "silly-shirts-raise",
     "silver-mugs-wait",
     "small-terms-open",
+    "smooth-dryers-find",
     "sweet-planets-hunt",
     "ten-bags-bake",
     "wacky-weeks-allow",
     "warm-lilies-marry",
     "whole-deer-scream",
+    "whole-horses-flash",
     "witty-meals-turn"
   ]
 }

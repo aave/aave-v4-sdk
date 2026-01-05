@@ -1,0 +1,13 @@
+diff --git a/lib/fetch/utilities/FetchBodyUtility.js b/lib/fetch/utilities/FetchBodyUtility.js
+index 7f1e2bf53c7d037631e5fcf87bd066fec064911a..300889bb307f692e771b51ce0c317c746dd5470d 100644
+--- a/lib/fetch/utilities/FetchBodyUtility.js
++++ b/lib/fetch/utilities/FetchBodyUtility.js
+@@ -127,7 +127,7 @@ export default class FetchBodyUtility {
+         const [stream1, stream2] = requestOrResponse.body.tee();
+         // Sets the body of the cloned request to the first pass through stream.
+         // TODO: check id this is required as request should be read only object
+-        requestOrResponse.body = stream1;
++        requestOrResponse[PropertySymbol.body] = stream1;
+         // Returns the other stream as the clone
+         return stream2;
+     }

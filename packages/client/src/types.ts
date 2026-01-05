@@ -6,16 +6,15 @@ import type {
   ValidationError,
 } from '@aave/core';
 import type {
-  CancelSwapTypedData,
   ERC20PermitSignature,
   ExecutionPlan,
   HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
   OperationType,
   PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  SwapTypedData,
 } from '@aave/graphql';
-import type { ResultAsync, TxHash } from '@aave/types';
+import type { ResultAsync, Signature, TxHash } from '@aave/types';
 
 /**
  * @internal
@@ -50,5 +49,5 @@ export type ERC20PermitHandler = (
 ) => ResultAsync<ERC20PermitSignature, SigningError>;
 
 export type SwapSignatureHandler = (
-  result: CancelSwapTypedData | SwapByIntentTypedData,
-) => ResultAsync<ERC20PermitSignature, SigningError>;
+  result: SwapTypedData,
+) => ResultAsync<Signature, SigningError>;
