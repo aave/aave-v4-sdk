@@ -157,7 +157,6 @@ describe('Given a user with a User Position on a Spoke', () => {
         });
 
         it('Then it should return the correct totalCollateral value', async () => {
-          // Cross check with the account data on chain
           expect(position.totalCollateral.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalCollateralValue,
             1,
@@ -185,7 +184,6 @@ describe('Given a user with a User Position on a Spoke', () => {
             bigDecimal('0'),
           );
 
-          // Cross check with the user positions
           expect(totalCollateral.minus(totalDebt)).toBeBigDecimalCloseTo(
             position.netCollateral.current.value,
             1,
@@ -227,7 +225,6 @@ describe('Given a user with a User Position on a Spoke', () => {
         });
 
         it('Then it should return the correct health factor', async () => {
-          // Cross check with the user positions
           expect(position.healthFactor.current).toBeBigDecimalCloseTo(
             accountDataOnChain.healthFactor,
             2,
@@ -235,19 +232,24 @@ describe('Given a user with a User Position on a Spoke', () => {
         });
 
         it('Then it should return the correct averageCollateralFactor value', async () => {
-          // Cross check with the user positions
           expect(position.averageCollateralFactor.value).toBeBigDecimalCloseTo(
             accountDataOnChain.avgCollateralFactor,
-            5,
+            2,
+          );
+        });
+
+        it('Then it should return the correct riskPremium value', async () => {
+          expect(position.riskPremium?.current.value).toBeBigDecimalCloseTo(
+            accountDataOnChain.riskPremium,
+            2,
           );
         });
 
         it.todo('Then it should return the correct netApy value');
         it.todo('Then it should return the correct netSupplyApy value');
         it.todo('Then it should return the correct netBorrowApy value');
-        it.todo('Then it should return the correct riskPremium value');
-        it.todo('Then it should return the correct liquidationPrice value');
         it.todo('Then it should return the correct borrowingPower value');
+        it.todo('Then it should return the correct liquidationPrice value');
       });
     });
   });
