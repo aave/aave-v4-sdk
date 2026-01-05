@@ -118,13 +118,20 @@ export const client = AaveClient.create({
   environment,
 });
 
-export const devnetChain = await chain(client, { chainId: ETHEREUM_FORK_ID })
+const devnetChain = await chain(client, { chainId: ETHEREUM_FORK_ID })
   .map(nonNullable)
   .map(toViemChain)
   .match(
     (c) => c,
     () => never('No devnet chain found'),
   );
+
+export async function createForkPublicClient() {
+  return createPublicClient({
+    chain: devnetChain,
+    transport: http(ETHEREUM_FORK_RPC_URL),
+  });
+}
 
 export async function createNewWallet(
   privateKey?: `0x${string}`,

@@ -152,7 +152,7 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
           expect(totalSupplied).toBeBigDecimalCloseTo(
             position.totalSupplied.current.value,
-            1,
+            2,
           );
         });
 

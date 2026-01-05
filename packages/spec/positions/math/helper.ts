@@ -1,6 +1,6 @@
 import { type BigDecimal, bigDecimal } from '@aave/client';
-import { devnetChain, ETHEREUM_FORK_RPC_URL } from '@aave/client/testing';
-import { type Address, createPublicClient, http } from 'viem';
+import { createForkPublicClient } from '@aave/client/testing';
+import type { Address } from 'viem';
 
 // Constants
 const WAD = 10n ** 18n; // 1e18 = 1.0 in WAD format
@@ -60,12 +60,8 @@ export async function getAccountData(
   address: Address,
   spoke: Address,
 ): Promise<UserAccountData> {
-  const publicClient = createPublicClient({
-    chain: devnetChain,
-    transport: http(ETHEREUM_FORK_RPC_URL),
-  });
-
-  const result = await publicClient.readContract({
+  const forkPublicClient = await createForkPublicClient();
+  const result = await forkPublicClient.readContract({
     address: spoke,
     abi: userAccountDataABI,
     functionName: 'getUserAccountData',
