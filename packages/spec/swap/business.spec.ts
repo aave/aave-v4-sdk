@@ -6,9 +6,8 @@ import {
   SwapKind,
 } from '@aave/client';
 import {
-  prepareSwap,
+  prepareTokenSwap,
   swap,
-  swapQuote,
   swapStatus,
   userSwaps,
 } from '@aave/client/actions';
@@ -40,58 +39,56 @@ describe('Aave V4 Swap Scenarios', () => {
       });
 
       it(`Then the user's swap positions are updated`, async ({ annotate }) => {
-        const swapResult = await swapQuote(client, {
-          amount: bigDecimal('20'),
-          sell: { erc20: ETHEREUM_USDC_ADDRESS },
-          buy: { erc20: ETHEREUM_WETH_ADDRESS },
-          chainId: ETHEREUM_FORK_ID,
-          from: evmAddress(user.account.address),
-          kind: SwapKind.Sell,
-          receiver: evmAddress(user.account.address),
-        })
-          .andThen((quote) =>
-            prepareSwap(client, {
-              limit: {
-                quoteId: quote.quoteId,
-              },
-            }),
-          )
-          .andThen((swapPlan) => {
-            switch (swapPlan.__typename) {
-              case 'SwapByIntent':
-                return signSwapTypedDataWith(user, swapPlan.data).andThen(
+        const swapResult = await prepareTokenSwap(client, {
+          market: {
+            amount: bigDecimal('20'),
+            sell: { erc20: ETHEREUM_USDC_ADDRESS },
+            buy: { erc20: ETHEREUM_WETH_ADDRESS },
+            chainId: ETHEREUM_FORK_ID,
+            kind: SwapKind.Sell,
+            receiver: evmAddress(user.account.address),
+            user: evmAddress(user.account.address),
+          },
+        }).andThen((swapPlan) => {
+          switch (swapPlan.__typename) {
+            case 'SwapByIntent':
+              return signSwapTypedDataWith(user, swapPlan.data).andThen(
+                (signature) => {
+                  return swap(client, {
+                    intent: {
+                      quoteId: swapPlan.quote.quoteId,
+                      signature: signature,
+                    },
+                  });
+                },
+              );
+            case 'SwapByIntentWithApprovalRequired':
+              return sendTransaction(user, swapPlan.approval).andThen(() =>
+                signSwapTypedDataWith(user, swapPlan.data).andThen(
                   (signature) => {
                     return swap(client, {
                       intent: {
                         quoteId: swapPlan.quote.quoteId,
-                        signature: signature.value,
+                        signature: signature,
                       },
                     });
                   },
-                );
-              case 'SwapByIntentWithApprovalRequired':
-                return sendTransaction(user, swapPlan.approval).andThen(() =>
-                  signSwapTypedDataWith(user, swapPlan.data).andThen(
-                    (signature) => {
-                      return swap(client, {
-                        intent: {
-                          quoteId: swapPlan.quote.quoteId,
-                          signature: signature.value,
-                        },
-                      });
-                    },
-                  ),
-                );
-              case 'SwapByTransaction':
-                return swap(client, {
-                  transaction: { quoteId: swapPlan.quote.quoteId },
-                });
-              case 'InsufficientBalanceError':
-                throw new Error(
-                  `Insufficient balance: ${swapPlan.required.value} required.`,
-                );
-            }
-          });
+                ),
+              );
+            case 'SwapByTransaction':
+              return swap(client, {
+                transaction: { quoteId: swapPlan.quote.quoteId },
+              });
+            case 'InsufficientBalanceError':
+              throw new Error(
+                `Insufficient balance: ${swapPlan.required.value} required.`,
+              );
+            default:
+              throw new Error(
+                `Unexpected swap plan type: ${(swapPlan as unknown as { __typename: string }).__typename}`,
+              );
+          }
+        });
 
         assertOk(swapResult);
         invariant(
