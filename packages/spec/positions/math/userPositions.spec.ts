@@ -112,7 +112,7 @@ describe('Given a user with a User Position on a Spoke', () => {
         }
       }, 180_000);
 
-      describe('When fetching the user positions for the user', () => {
+      describe('When fetching the User Position data', () => {
         let position: UserPosition;
         let accountDataOnChain: UserAccountData;
 
@@ -224,7 +224,7 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then it should return the correct health factor', async () => {
+        it('Then it should return the correct healthFactor', async () => {
           expect(position.healthFactor.current).toBeBigDecimalCloseTo(
             accountDataOnChain.healthFactor,
             2,
