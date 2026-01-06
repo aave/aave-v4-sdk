@@ -1,470 +1,137 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 1`] = `
-{
-  "__typename": "HubAsset",
-  "hub": Any<Object>,
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjE=",
-  "onchainAssetId": "1",
-  "settings": {
-    "__typename": "HubAssetSettings",
-    "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
-    "irStrategy": "0xBE8a8510124E83a9e23766dd4487eA70B0ee0C1a",
-    "liquidityFee": {
-      "__typename": "PercentNumber",
-      "decimals": 4,
-      "normalized": "50",
-      "onChainValue": 5000n,
-      "value": "0.5",
-    },
-    "reinvestmentController": null,
-  },
-  "summary": Any<Object>,
-  "underlying": {
-    "__typename": "Erc20Token",
-    "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
-    "chain": {
-      "__typename": "Chain",
-      "chainId": 123456789,
-      "explorerUrl": "https://etherscan.io",
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "isTestnet": true,
-      "name": "Devnet",
-      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
-      "nativeInfo": {
-        "__typename": "TokenInfo",
-        "decimals": 18,
-        "icon": "https://statics.aave.com/ethereum.svg",
-        "name": "Ether",
-        "symbol": "ETH",
-      },
-      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
-    },
-    "info": {
-      "__typename": "TokenInfo",
-      "decimals": 8,
-      "icon": "https://token-logos.family.co/asset?id=123456789:0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf&token=cbBTC",
-      "name": "Coinbase Wrapped BTC",
-      "symbol": "cbBTC",
-    },
-    "isWrappedNativeToken": false,
-    "permitSupported": true,
-  },
-  "userState": null,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 2`] = `
-{
-  "__typename": "HubAsset",
-  "hub": Any<Object>,
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjU=",
-  "onchainAssetId": "5",
-  "settings": {
-    "__typename": "HubAssetSettings",
-    "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
-    "irStrategy": "0xBE8a8510124E83a9e23766dd4487eA70B0ee0C1a",
-    "liquidityFee": {
-      "__typename": "PercentNumber",
-      "decimals": 4,
-      "normalized": "5",
-      "onChainValue": 500n,
-      "value": "0.05",
-    },
-    "reinvestmentController": null,
-  },
-  "summary": Any<Object>,
-  "underlying": {
-    "__typename": "Erc20Token",
-    "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
-    "chain": {
-      "__typename": "Chain",
-      "chainId": 123456789,
-      "explorerUrl": "https://etherscan.io",
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "isTestnet": true,
-      "name": "Devnet",
-      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
-      "nativeInfo": {
-        "__typename": "TokenInfo",
-        "decimals": 18,
-        "icon": "https://statics.aave.com/ethereum.svg",
-        "name": "Ether",
-        "symbol": "ETH",
-      },
-      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
-    },
-    "info": {
-      "__typename": "TokenInfo",
-      "decimals": 18,
-      "icon": "https://token-logos.family.co/asset?id=123456789:0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f&token=GHO",
-      "name": "Gho Token",
-      "symbol": "GHO",
-    },
-    "isWrappedNativeToken": false,
-    "permitSupported": true,
-  },
-  "userState": null,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 3`] = `
-{
-  "__typename": "HubAsset",
-  "hub": Any<Object>,
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjQ=",
-  "onchainAssetId": "4",
-  "settings": {
-    "__typename": "HubAssetSettings",
-    "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
-    "irStrategy": "0xBE8a8510124E83a9e23766dd4487eA70B0ee0C1a",
-    "liquidityFee": {
-      "__typename": "PercentNumber",
-      "decimals": 4,
-      "normalized": "10",
-      "onChainValue": 1000n,
-      "value": "0.1",
-    },
-    "reinvestmentController": null,
-  },
-  "summary": Any<Object>,
-  "underlying": {
-    "__typename": "Erc20Token",
-    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "chain": {
-      "__typename": "Chain",
-      "chainId": 123456789,
-      "explorerUrl": "https://etherscan.io",
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "isTestnet": true,
-      "name": "Devnet",
-      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
-      "nativeInfo": {
-        "__typename": "TokenInfo",
-        "decimals": 18,
-        "icon": "https://statics.aave.com/ethereum.svg",
-        "name": "Ether",
-        "symbol": "ETH",
-      },
-      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
-    },
-    "info": {
-      "__typename": "TokenInfo",
-      "decimals": 6,
-      "icon": "https://token-logos.family.co/asset?id=123456789:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&token=USDC",
-      "name": "USD Coin",
-      "symbol": "USDC",
-    },
-    "isWrappedNativeToken": false,
-    "permitSupported": true,
-  },
-  "userState": null,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 4`] = `
-{
-  "__typename": "HubAsset",
-  "hub": Any<Object>,
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjM=",
-  "onchainAssetId": "3",
-  "settings": {
-    "__typename": "HubAssetSettings",
-    "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
-    "irStrategy": "0xBE8a8510124E83a9e23766dd4487eA70B0ee0C1a",
-    "liquidityFee": {
-      "__typename": "PercentNumber",
-      "decimals": 4,
-      "normalized": "10",
-      "onChainValue": 1000n,
-      "value": "0.1",
-    },
-    "reinvestmentController": null,
-  },
-  "summary": Any<Object>,
-  "underlying": {
-    "__typename": "Erc20Token",
-    "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
-    "chain": {
-      "__typename": "Chain",
-      "chainId": 123456789,
-      "explorerUrl": "https://etherscan.io",
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "isTestnet": true,
-      "name": "Devnet",
-      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
-      "nativeInfo": {
-        "__typename": "TokenInfo",
-        "decimals": 18,
-        "icon": "https://statics.aave.com/ethereum.svg",
-        "name": "Ether",
-        "symbol": "ETH",
-      },
-      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
-    },
-    "info": {
-      "__typename": "TokenInfo",
-      "decimals": 18,
-      "icon": "https://token-logos.family.co/asset?id=123456789:0xdC035D45d973E3EC169d2276DDab16f1e407384F&token=USDS",
-      "name": "USDS Stablecoin",
-      "symbol": "USDS",
-    },
-    "isWrappedNativeToken": false,
-    "permitSupported": true,
-  },
-  "userState": null,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 5`] = `
-{
-  "__typename": "HubAsset",
-  "hub": Any<Object>,
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjI=",
-  "onchainAssetId": "2",
-  "settings": {
-    "__typename": "HubAssetSettings",
-    "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
-    "irStrategy": "0xBE8a8510124E83a9e23766dd4487eA70B0ee0C1a",
-    "liquidityFee": {
-      "__typename": "PercentNumber",
-      "decimals": 4,
-      "normalized": "50",
-      "onChainValue": 5000n,
-      "value": "0.5",
-    },
-    "reinvestmentController": null,
-  },
-  "summary": Any<Object>,
-  "underlying": {
-    "__typename": "Erc20Token",
-    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-    "chain": {
-      "__typename": "Chain",
-      "chainId": 123456789,
-      "explorerUrl": "https://etherscan.io",
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "isTestnet": true,
-      "name": "Devnet",
-      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
-      "nativeInfo": {
-        "__typename": "TokenInfo",
-        "decimals": 18,
-        "icon": "https://statics.aave.com/ethereum.svg",
-        "name": "Ether",
-        "symbol": "ETH",
-      },
-      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
-    },
-    "info": {
-      "__typename": "TokenInfo",
-      "decimals": 8,
-      "icon": "https://token-logos.family.co/asset?id=123456789:0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599&token=WBTC",
-      "name": "Wrapped BTC",
-      "symbol": "WBTC",
-    },
-    "isWrappedNativeToken": false,
-    "permitSupported": false,
-  },
-  "userState": null,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 6`] = `
-{
-  "__typename": "HubAsset",
-  "hub": Any<Object>,
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjA=",
-  "onchainAssetId": "0",
-  "settings": {
-    "__typename": "HubAssetSettings",
-    "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
-    "irStrategy": "0xBE8a8510124E83a9e23766dd4487eA70B0ee0C1a",
-    "liquidityFee": {
-      "__typename": "PercentNumber",
-      "decimals": 4,
-      "normalized": "10",
-      "onChainValue": 1000n,
-      "value": "0.1",
-    },
-    "reinvestmentController": null,
-  },
-  "summary": Any<Object>,
-  "underlying": {
-    "__typename": "Erc20Token",
-    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "chain": {
-      "__typename": "Chain",
-      "chainId": 123456789,
-      "explorerUrl": "https://etherscan.io",
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "isTestnet": true,
-      "name": "Devnet",
-      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
-      "nativeInfo": {
-        "__typename": "TokenInfo",
-        "decimals": 18,
-        "icon": "https://statics.aave.com/ethereum.svg",
-        "name": "Ether",
-        "symbol": "ETH",
-      },
-      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
-    },
-    "info": {
-      "__typename": "TokenInfo",
-      "decimals": 18,
-      "icon": "https://token-logos.family.co/asset?id=123456789:0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&token=WETH",
-      "name": "Wrapped Ether",
-      "symbol": "WETH",
-    },
-    "isWrappedNativeToken": true,
-    "permitSupported": false,
-  },
-  "userState": null,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to know assets in a hub > When fetching assets in a hub > Then it should return the expected data for assets in a hub 7`] = `
-{
-  "__typename": "HubAsset",
-  "hub": Any<Object>,
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY6OjY=",
-  "onchainAssetId": "6",
-  "settings": {
-    "__typename": "HubAssetSettings",
-    "feeReceiver": "0xFC2685999D5a1d15AAEf0E73426673829A483cA6",
-    "irStrategy": "0xBE8a8510124E83a9e23766dd4487eA70B0ee0C1a",
-    "liquidityFee": {
-      "__typename": "PercentNumber",
-      "decimals": 4,
-      "normalized": "5",
-      "onChainValue": 500n,
-      "value": "0.05",
-    },
-    "reinvestmentController": null,
-  },
-  "summary": Any<Object>,
-  "underlying": {
-    "__typename": "Erc20Token",
-    "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
-    "chain": {
-      "__typename": "Chain",
-      "chainId": 123456789,
-      "explorerUrl": "https://etherscan.io",
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "isTestnet": true,
-      "name": "Devnet",
-      "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
-      "nativeInfo": {
-        "__typename": "TokenInfo",
-        "decimals": 18,
-        "icon": "https://statics.aave.com/ethereum.svg",
-        "name": "Ether",
-        "symbol": "ETH",
-      },
-      "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
-    },
-    "info": {
-      "__typename": "TokenInfo",
-      "decimals": 18,
-      "icon": "https://token-logos.family.co/asset?id=123456789:0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0&token=wstETH",
-      "name": "Wrapped liquid staked Ether 2.0",
-      "symbol": "wstETH",
-    },
-    "isWrappedNativeToken": false,
-    "permitSupported": true,
-  },
-  "userState": null,
-}
-`;
-
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
 {
   "__typename": "Hub",
-  "address": "0x2559E4E04F2cA7180e5f20C2872d22EC89601b56",
+  "address": "0xaD905aD5EA5B98cD50AE40Cfe368344686a21366",
   "chain": {
     "__typename": "Chain",
     "chainId": 123456789,
     "explorerUrl": "https://etherscan.io",
     "icon": "https://statics.aave.com/ethereum.svg",
+    "isFork": true,
     "isTestnet": true,
     "name": "Devnet",
-    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
+    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
+    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
+    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  "id": "MTIzNDU2Nzg5OjoweDI1NTlFNEUwNEYyY0E3MTgwZTVmMjBDMjg3MmQyMkVDODk2MDFiNTY=",
+  "id": "MTIzNDU2Nzg5OjoweGFEOTA1YUQ1RUE1Qjk4Y0Q1MEFFNDBDZmUzNjgzNDQ2ODZhMjEzNjY=",
   "name": "Core",
   "summary": Any<Object>,
 }
 `;
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
 {
   "__typename": "Hub",
-  "address": "0x37fd54685Db43a4947e5AE0a80F51cf1D2FE0F57",
+  "address": "0x5DDF2369cB82F9514043627731157B8d313E8295",
   "chain": {
     "__typename": "Chain",
     "chainId": 123456789,
     "explorerUrl": "https://etherscan.io",
     "icon": "https://statics.aave.com/ethereum.svg",
+    "isFork": true,
     "isTestnet": true,
     "name": "Devnet",
-    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
+    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
+    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
+    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  "id": "MTIzNDU2Nzg5OjoweDM3ZmQ1NDY4NURiNDNhNDk0N2U1QUUwYTgwRjUxY2YxRDJGRTBGNTc=",
-  "name": "ISO Gov",
+  "id": "MTIzNDU2Nzg5OjoweDVEREYyMzY5Y0I4MkY5NTE0MDQzNjI3NzMxMTU3QjhkMzEzRTgyOTU=",
+  "name": "Frontier",
   "summary": Any<Object>,
 }
 `;
 
-exports[`Aave V4 Hub Scenarios > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
 {
   "__typename": "Hub",
-  "address": "0xD14B5Fe920B11d99B583501efe524A8e94390205",
+  "address": "0x6ACF162ca44eB6929eff8c3296a2cdD6bFA7b8BF",
   "chain": {
     "__typename": "Chain",
     "chainId": 123456789,
     "explorerUrl": "https://etherscan.io",
     "icon": "https://statics.aave.com/ethereum.svg",
+    "isFork": true,
     "isTestnet": true,
     "name": "Devnet",
-    "nativeGateway": "0x10568906206cfa2604489ABDB5E469021f5FCAa7",
+    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "nativeInfo": {
       "__typename": "TokenInfo",
+      "categories": [
+        "ETH_CORRELATED",
+      ],
       "decimals": 18,
       "icon": "https://statics.aave.com/ethereum.svg",
+      "id": "RXRoZXI6OkVUSA==",
       "name": "Ether",
       "symbol": "ETH",
     },
     "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "signatureGateway": "0x94C97AE18bAeD1262eEE7596ac627d3c232e54C1",
+    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
+    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  "id": "MTIzNDU2Nzg5OjoweEQxNEI1RmU5MjBCMTFkOTlCNTgzNTAxZWZlNTI0QThlOTQzOTAyMDU=",
-  "name": "ISO Stable",
+  "id": "MTIzNDU2Nzg5OjoweDZBQ0YxNjJjYTQ0ZUI2OTI5ZWZmOGMzMjk2YTJjZEQ2YkZBN2I4QkY=",
+  "name": "Prime",
+  "summary": Any<Object>,
+}
+`;
+
+exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 4`] = `
+{
+  "__typename": "Hub",
+  "address": "0x86F37ba3b480c5fE22A7eb1ba2B2D49c94089FBB",
+  "chain": {
+    "__typename": "Chain",
+    "chainId": 123456789,
+    "explorerUrl": "https://etherscan.io",
+    "icon": "https://statics.aave.com/ethereum.svg",
+    "isFork": true,
+    "isTestnet": true,
+    "name": "Devnet",
+    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
+    "nativeInfo": {
+      "__typename": "TokenInfo",
+      "categories": [
+        "ETH_CORRELATED",
+      ],
+      "decimals": 18,
+      "icon": "https://statics.aave.com/ethereum.svg",
+      "id": "RXRoZXI6OkVUSA==",
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
+    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
+  },
+  "id": "MTIzNDU2Nzg5OjoweDg2RjM3YmEzYjQ4MGM1ZkUyMkE3ZWIxYmEyQjJENDljOTQwODlGQkI=",
+  "name": "Yield Seeking",
   "summary": Any<Object>,
 }
 `;

@@ -1,5 +1,12 @@
 import type { Primitive, Tagged } from 'type-fest';
 
+export type {
+  JsonArray,
+  JsonObject,
+  JsonPrimitive,
+  JsonValue,
+} from 'type-fest';
+
 /**
  * A void value.
  */
@@ -9,11 +16,6 @@ export type Void = Tagged<undefined, 'Void'>;
  * An opaque pagination cursor.
  */
 export type Cursor = Tagged<string, 'Cursor'>;
-
-/**
- * A JSON value.
- */
-export type JSONString = Tagged<string, 'JSONString'>;
 
 /**
  * Beautify the  readout of all of the members of that intersection.

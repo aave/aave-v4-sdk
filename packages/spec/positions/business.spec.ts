@@ -4,22 +4,23 @@ import {
   bigDecimal,
   evmAddress,
   type Reserve,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   borrow,
   repay,
   userSummary,
+  userSupplies,
   withdraw,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   findReservesToBorrow,
@@ -33,19 +34,22 @@ import {
 
 const user = await createNewWallet();
 
-describe('Aave V4 Health Factor Positions Scenarios', () => {
+describe('Health Factor Scenarios on Aave V4', () => {
   describe('Given a user with a one supply position as collateral', () => {
     describe('When the user checks the health factor', () => {
       beforeAll(async () => {
+        const amountToSupply = bigDecimal('100');
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.5'),
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: amountToSupply,
+          decimals: 6,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+            token: ETHEREUM_USDC_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
             asCollateral: true,
-            amount: bigDecimal('0.3'),
+            amount: amountToSupply,
           }),
         );
 
@@ -69,23 +73,27 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
 
       beforeAll(async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         });
         assertOk(reservesToBorrow);
 
         const setup = await findReservesToSupply(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           asCollateral: true,
-        }).andThen((reservesToSupply) =>
-          fundErc20Address(evmAddress(user.account.address), {
+        }).andThen((reservesToSupply) => {
+          const amountToSupply = reservesToSupply[0].supplyCap
+            .minus(reservesToSupply[0].summary.supplied.amount.value)
+            .div(10000);
+
+          return fundErc20Address(evmAddress(user.account.address), {
             address: reservesToSupply[0].asset.underlying.address,
-            amount: bigDecimal('0.2'),
+            amount: amountToSupply,
             decimals: reservesToSupply[0].asset.underlying.info.decimals,
           })
             .andThen(() =>
               supplyAndBorrow(client, user, {
                 reserveToSupply: reservesToSupply[0],
-                amountToSupply: bigDecimal('0.1'),
+                amountToSupply: amountToSupply,
                 reserveToBorrow: reservesToBorrow.value[0],
                 ratioToBorrow: 0.1,
               }),
@@ -93,8 +101,8 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             .map(() => ({
               borrowReserve: reservesToBorrow.value[0],
               supplyReserve: reservesToSupply[0],
-            })),
-        );
+            }));
+        });
         assertOk(setup);
         usedReserves = setup!.value;
       }, 60_000);
@@ -125,12 +133,26 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeSupply = summary.value.lowestHealthFactor!;
 
-          const setup = await supplyToReserve(client, user, {
-            amount: { erc20: { value: bigDecimal('0.1') } },
-            reserve: usedReserves.supplyReserve.id,
-            enableCollateral: true,
-            sender: evmAddress(user.account.address),
-          });
+          const amountToSupply = usedReserves.supplyReserve.supplyCap
+            .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
+            .div(10000);
+
+          const setup = await fundErc20Address(
+            evmAddress(user.account.address),
+            {
+              address: usedReserves.supplyReserve.asset.underlying.address,
+              amount: amountToSupply,
+              decimals:
+                usedReserves.supplyReserve.asset.underlying.info.decimals,
+            },
+          ).andThen(() =>
+            supplyToReserve(client, user, {
+              amount: { erc20: { value: amountToSupply } },
+              reserve: usedReserves.supplyReserve.id,
+              enableCollateral: true,
+              sender: evmAddress(user.account.address),
+            }),
+          );
 
           assertOk(setup);
         });
@@ -168,7 +190,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
               address: usedReserves.borrowReserve.asset.underlying.address,
               amount:
                 usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
-                  2,
+                  1.5,
                 ),
               decimals:
                 usedReserves.borrowReserve.asset.underlying.info.decimals,
@@ -182,8 +204,8 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
                   erc20: {
                     value: {
                       exact:
-                        usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
-                          0.5,
+                        usedReserves.borrowReserve.userState!.borrowable.amount.value.div(
+                          20,
                         ),
                     },
                   },
@@ -228,7 +250,10 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             reserve: usedReserves.borrowReserve.id,
             amount: {
               erc20: {
-                value: bigDecimal('50'),
+                value:
+                  usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+                    0.1,
+                  ),
               },
             },
           })
@@ -265,12 +290,27 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
           assertOk(summary);
           HFBeforeWithdraw = summary.value.lowestHealthFactor!;
 
+          const supplies = await userSupplies(client, {
+            query: {
+              userSpoke: {
+                spoke: usedReserves.supplyReserve.spoke.id,
+                user: evmAddress(user.account.address),
+              },
+            },
+          });
+          assertOk(supplies);
+          const amountToWithdraw = supplies.value
+            .find(
+              (supply) => supply.reserve.id === usedReserves.supplyReserve.id,
+            )!
+            .withdrawable.amount.value.div(2);
+
           const setup = await withdraw(client, {
             reserve: usedReserves.supplyReserve.id,
             sender: evmAddress(user.account.address),
             amount: {
               erc20: {
-                exact: bigDecimal('0.02'),
+                exact: amountToWithdraw,
               },
             },
           })
@@ -278,7 +318,7 @@ describe('Aave V4 Health Factor Positions Scenarios', () => {
             .andThen(client.waitForTransaction);
 
           assertOk(setup);
-        });
+        }, 60_000);
 
         it('Then the health factor should be less than before withdrawing collateral', async () => {
           const summary = await userSummary(client, {

@@ -1,11 +1,11 @@
 {
-  "name": "@aave/graphql-next",
-  "version": "0.6.1",
+  "name": "@aave/graphql",
+  "version": "1.0.0-next.11",
   "description": "GraphQL bindings for the Aave API",
   "repository": {
     "directory": "packages/graphql",
     "type": "git",
-    "url": "git://github.com/aave/aave-sdk.git"
+    "url": "git://github.com/aave/aave-v4-sdk.git"
   },
   "type": "module",
   "main": "dist/index.cjs",
@@ -16,14 +16,13 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./test-utils": {
-      "import": "./dist/test-utils.js",
-      "require": "./dist/test-utils.cjs"
-    },
     "./schema": {
       "types": "./dist/schema.d.ts",
       "import": "./dist/schema.js",
       "require": "./dist/schema.cjs"
+    },
+    "./testing": {
+      "default": "./dist/testing.js"
     }
   },
   "typesVersions": {
@@ -34,11 +33,11 @@
       "require": [
         "./dist/index.d.cts"
       ],
-      "test-utils": [
-        "./dist/test-utils.d.ts"
-      ],
       "schema": [
         "./dist/schema.d.ts"
+      ],
+      "testing": [
+        "./dist/testing.d.ts"
       ]
     }
   },
@@ -58,19 +57,19 @@
     "prebuild": "pnpm run gql:turbo"
   },
   "dependencies": {
-    "@aave/types-next": "workspace:*",
+    "@aave/types": "workspace:*",
     "gql.tada": "^1.8.13",
     "graphql": "^16.11.0",
     "type-fest": "^5.1.0"
   },
   "devDependencies": {
     "@urql/introspection": "^1.2.1",
-    "tsup": "^8.5.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

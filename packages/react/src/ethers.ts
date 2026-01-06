@@ -1,19 +1,17 @@
-import type { SigningError, UnexpectedError } from '@aave/client-next';
+import type { SigningError, UnexpectedError } from '@aave/client';
 import {
   sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
   waitForTransactionResult,
-} from '@aave/client-next/ethers';
+} from '@aave/client/ethers';
 import type {
-  CancelSwapTypedData,
   ERC20PermitSignature,
   PermitRequest,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
-
-import { invariant } from '@aave/types-next';
+} from '@aave/graphql';
+import { invariant, type Signature } from '@aave/types';
 import type { Signer } from 'ethers';
 import {
   PendingTransaction,
@@ -108,6 +106,7 @@ export function useERC20Permit(
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
+ * @internal
  * A hook that provides a way to sign swap typed data using an ethers Signer instance.
  *
  * ```ts
@@ -134,13 +133,9 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  */
 export function useSignSwapTypedDataWith(
   signer: Signer | undefined,
-): UseAsyncTask<
-  SwapByIntentTypedData | CancelSwapTypedData,
-  ERC20PermitSignature,
-  SignSwapTypedDataError
-> {
+): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
   return useAsyncTask(
-    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
+    (typedData: SwapTypedData) => {
       invariant(signer, 'Expected a Signer to sign swap typed data');
 
       return signSwapTypedDataWith(signer)(typedData);

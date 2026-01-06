@@ -1,26 +1,28 @@
 import {
   Currency,
   chainId,
-  type FiatAmount,
+  type ExchangeAmount,
   useExchangeRate,
   useExchangeRateAction,
-} from '@aave/react-next';
-import { supportedChains } from '@aave/react-next/viem';
+} from '@aave/react';
+import { supportedChains } from '@aave/react/viem';
 import { useState } from 'react';
+
+const defaultChainId = chainId(supportedChains[0]!.id);
 
 export function App() {
   const { data, loading } = useExchangeRate({
-    from: { native: chainId(supportedChains[0].id) },
+    from: { native: defaultChainId },
     to: Currency.Usd,
   });
 
   const [getExchangeRate, { loading: asyncLoading }] = useExchangeRateAction();
-  const [exchangeRate, setExchangeRate] = useState<FiatAmount | null>(null);
+  const [exchangeRate, setExchangeRate] = useState<ExchangeAmount | null>(null);
 
   const handleGetRate = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await getExchangeRate({
-      from: { native: chainId(supportedChains[0].id) },
+      from: { native: defaultChainId },
       to: Currency.Usd,
     });
     if (result.isOk()) {
@@ -30,8 +32,13 @@ export function App() {
 
   return (
     <div>
-      <header>
+      <header style={{ textAlign: 'center', padding: '20px' }}>
         <h1>Exchange Rates</h1>
+        <p style={{ color: '#666', marginBottom: '30px' }}>
+          <small>
+            This example demonstrates how to get the ETH / USD exchange rate.
+          </small>
+        </p>
       </header>
 
       <div style={{ marginBottom: '40px' }}>
@@ -39,7 +46,11 @@ export function App() {
         <div>
           <strong>
             ETH to USD:{' '}
-            {loading ? 'Loading...' : data ? `$${data.value}` : 'No data'}
+            {loading
+              ? 'Loading...'
+              : data
+                ? `$${data.value.toDisplayString(2)}`
+                : 'No data'}
           </strong>
         </div>
       </div>
@@ -53,7 +64,9 @@ export function App() {
         </form>
         {exchangeRate && (
           <div>
-            <strong>Current Rate: ${exchangeRate.value}</strong>
+            <strong>
+              Current Rate: ${exchangeRate.value.toDisplayString(2)}
+            </strong>
           </div>
         )}
       </div>

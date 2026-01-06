@@ -1,4 +1,4 @@
-import type { AaveClient } from '@aave/client-next';
+import type { AaveClient } from '@aave/client';
 // biome-ignore lint/correctness/noUnusedImports: intentional
 import React, { type ReactNode } from 'react';
 

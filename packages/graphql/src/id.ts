@@ -5,7 +5,7 @@ import {
   evmAddress,
   invariant,
   isValidHexString,
-} from '@aave/types-next';
+} from '@aave/types';
 import type { Tagged } from 'type-fest';
 
 /**
@@ -378,4 +378,20 @@ export function userSupplyItemId(value: string): UserSupplyItemId {
     `UserSupplyItemId must be valid base64: ${value}`,
   );
   return value as UserSupplyItemId;
+}
+
+/**
+ * A token info identifier.
+ */
+export type TokenInfoId = Tagged<string, 'TokenInfoId'>;
+
+/**
+ * @internal
+ */
+export function tokenInfoId(value: string): TokenInfoId {
+  invariant(
+    typeof value === 'string' && value.length > 0,
+    `Invalid TokenInfoId: ${value}`,
+  );
+  return value as TokenInfoId;
 }

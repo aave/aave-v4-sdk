@@ -3,6 +3,7 @@
 exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the user wants to preview the supply action before performing it > Then the user can review the supply details before proceeding 1`] = `
 {
   "__typename": "PreviewUserPosition",
+  "borrowingPower": Any<Object>,
   "healthFactor": {
     "__typename": "HealthFactorVariation",
     "after": null,
@@ -12,38 +13,8 @@ exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the use
   "netApy": Any<Object>,
   "netBalance": Any<Object>,
   "netCollateral": Any<Object>,
-  "riskPremium": {
-    "__typename": "PercentNumberVariation",
-    "after": {
-      "__typename": "PercentNumber",
-      "decimals": 27,
-      "normalized": "0",
-      "onChainValue": 0n,
-      "value": "0",
-    },
-    "current": {
-      "__typename": "PercentNumber",
-      "decimals": 0,
-      "normalized": "0",
-      "onChainValue": 0n,
-      "value": "0",
-    },
-  },
-}
-`;
-
-exports[`Supplying Assets on Aave V4 > Given a user and a reserve that supports native token deposits > When the user wants to preview the supply action before performing it > Then the user can review the supply details before proceeding 1`] = `
-{
-  "__typename": "PreviewUserPosition",
-  "healthFactor": {
-    "__typename": "HealthFactorVariation",
-    "after": null,
-    "current": null,
-  },
-  "id": Any<String>,
-  "netApy": Any<Object>,
-  "netBalance": Any<Object>,
-  "netCollateral": Any<Object>,
+  "otherConditions": Any<Array>,
+  "projectedEarnings": Any<Object>,
   "riskPremium": Any<Object>,
 }
 `;

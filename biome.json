@@ -48,7 +48,11 @@
   },
   "overrides": [
     {
-      "includes": ["**/package.json", "packages/graphql/src/schema.json"],
+      "includes": [
+        ".changeset/*.json",
+        "**/package.json",
+        "packages/graphql/src/schema.json"
+      ],
       "formatter": {
         "enabled": false
       },

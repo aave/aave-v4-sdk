@@ -1,4 +1,4 @@
-import { Currency, ReservesRequestFilter } from '@aave/graphql-next';
+import { Currency, ReservesRequestFilter } from '@aave/graphql';
 import {
   assertOk,
   BigDecimal,
@@ -6,7 +6,7 @@ import {
   evmAddress,
   never,
   ResultAsync,
-} from '@aave/types-next';
+} from '@aave/types';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   activities,
@@ -20,8 +20,9 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_WETH_ADDRESS,
-} from './test-utils';
+  ETHEREUM_USDC_ADDRESS,
+  fundErc20Address,
+} from './testing';
 import { sendWith } from './viem';
 
 const user = await createNewWallet();
@@ -52,7 +53,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
     });
   });
 
-  describe(`When fetching a single 'Hub'`, () => {
+  describe(`When fetching a single 'Hub' by hubId`, () => {
     it('Then it should leverage cached data whenever possible', async () => {
       const primed = await hubs(client, {
         query: {
@@ -78,14 +79,41 @@ describe('Given the Aave SDK normalized graph cache', () => {
     });
   });
 
-  describe('When fetching user history by tx hash', () => {
+  describe(`When fetching a single 'Hub' by hubInput`, () => {
+    it('Then it should leverage cached data whenever possible', async () => {
+      const primed = await hubs(client, {
+        query: {
+          chainIds: [ETHEREUM_FORK_ID],
+        },
+      });
+      assertOk(primed);
+      const result = await hub(
+        client,
+        {
+          query: {
+            hubInput: {
+              address: primed.value[0]!.address,
+              chainId: ETHEREUM_FORK_ID,
+            },
+          },
+        },
+        {
+          requestPolicy: 'cache-only',
+        },
+      );
+      assertOk(result);
+      expect(result.value).toEqual(primed.value[0]);
+    });
+  });
+
+  describe('When fetching activities by tx hash', () => {
     beforeAll(async () => {
       const setup = await reserves(client, {
         query: {
           tokens: [
             {
               chainId: ETHEREUM_FORK_ID,
-              address: ETHEREUM_WETH_ADDRESS,
+              address: ETHEREUM_USDC_ADDRESS,
             },
           ],
         },
@@ -97,29 +125,39 @@ describe('Given the Aave SDK normalized graph cache', () => {
             never('No reserve found to supply to for the token'),
         )
         .andThen((reserve) =>
-          ResultAsync.combine([
-            // supply activity 1
-            supply(client, {
-              sender: evmAddress(user.account.address),
-              reserve: reserve.id,
-              amount: {
-                native: bigDecimal('0.1'),
-              },
-            }),
-            // supply activity 2
-            supply(client, {
-              sender: evmAddress(user.account.address),
-              reserve: reserve.id,
-              amount: {
-                native: bigDecimal('0.1'),
-              },
-            }),
-          ]).andThen(([plan1, plan2]) =>
-            sendWith(user, plan1)
-              .andThen(client.waitForTransaction)
-              .andThen(() =>
-                sendWith(user, plan2).andThen(client.waitForTransaction),
-              ),
+          fundErc20Address(evmAddress(user.account.address), {
+            address: ETHEREUM_USDC_ADDRESS,
+            amount: bigDecimal('1'),
+            decimals: reserve.asset.underlying.info.decimals,
+          }).andThen(() =>
+            ResultAsync.combine([
+              // supply activity 1
+              supply(client, {
+                sender: evmAddress(user.account.address),
+                reserve: reserve.id,
+                amount: {
+                  erc20: {
+                    value: bigDecimal('0.1'),
+                  },
+                },
+              }),
+              // supply activity 2
+              supply(client, {
+                sender: evmAddress(user.account.address),
+                reserve: reserve.id,
+                amount: {
+                  erc20: {
+                    value: bigDecimal('0.1'),
+                  },
+                },
+              }),
+            ]).andThen(([plan1, plan2]) =>
+              sendWith(user, plan1)
+                .andThen(client.waitForTransaction)
+                .andThen(() =>
+                  sendWith(user, plan2).andThen(client.waitForTransaction),
+                ),
+            ),
           ),
         );
 

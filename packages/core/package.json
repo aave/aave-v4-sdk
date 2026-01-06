@@ -1,11 +1,11 @@
 {
-  "name": "@aave/core-next",
-  "version": "0.0.0",
+  "name": "@aave/core",
+  "version": "1.0.0-next.8",
   "description": "The shared core across Aave SDKs.",
   "repository": {
     "directory": "packages/core",
     "type": "git",
-    "url": "git://github.com/aave/aave-sdk.git"
+    "url": "git://github.com/aave/aave-v4-sdk.git"
   },
   "type": "module",
   "main": "dist/index.cjs",
@@ -15,6 +15,9 @@
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./testing": {
+      "default": "./dist/testing.js"
     }
   },
   "typesVersions": {
@@ -24,6 +27,9 @@
       ],
       "require": [
         "./dist/index.d.cts"
+      ],
+      "testing": [
+        "./dist/testing.d.ts"
       ]
     }
   },
@@ -34,17 +40,18 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/types-next": "workspace:*",
+    "@aave/types": "workspace:*",
     "@urql/core": "^6.0.1",
     "graphql": "^16.11.0",
     "wonka": "^6.3.5"
   },
   "devDependencies": {
-    "tsup": "^8.5.0",
+    "msw": "^2.10.5",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.2"
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

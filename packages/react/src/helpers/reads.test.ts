@@ -1,4 +1,5 @@
-import { UnexpectedError } from '@aave/client-next';
+import { GraphQLErrorCode, UnexpectedError } from '@aave/client';
+import { createGraphQLErrorObject } from '@aave/core/testing';
 import { act } from '@testing-library/react';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -66,9 +67,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       server.use(
         graphql.query(AnyQuery, () => {
           return HttpResponse.json({
-            errors: [
-              { message: 'Test error', extensions: { code: 'TEST_ERROR' } },
-            ],
+            errors: [createGraphQLErrorObject(GraphQLErrorCode.BAD_REQUEST)],
           });
         }),
       );
@@ -113,7 +112,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
         }),
       );
 
-      await vi.waitUntil(() => result.current);
+      await vi.waitUntil(() => result.current?.data);
 
       expect(result.current.data).toEqual(expect.any(Number));
     });
@@ -141,7 +140,7 @@ describe(`Given the '${useSuspendableQuery.name}' hook`, () => {
       );
 
       // Wait for the error boundary to catch the error
-      await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+      await vi.waitUntil(() => onError.mock.calls.length);
 
       expect(onError).toHaveBeenCalledWith(
         expect.any(UnexpectedError),

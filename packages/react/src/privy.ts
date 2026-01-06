@@ -1,18 +1,26 @@
-import { SigningError, UnexpectedError } from '@aave/client-next';
+import { SigningError, UnexpectedError } from '@aave/client';
 import {
   sendTransaction,
   supportedChains,
   waitForTransactionResult,
-} from '@aave/client-next/viem';
+} from '@aave/client/viem';
 import type {
-  CancelSwapTypedData,
   ERC20PermitSignature,
   PermitRequest,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
-import { invariant, ResultAsync, signatureFrom } from '@aave/types-next';
-import { useSignTypedData, useWallets } from '@privy-io/react-auth';
+} from '@aave/graphql';
+import {
+  invariant,
+  ResultAsync,
+  type Signature,
+  signatureFrom,
+} from '@aave/types';
+import {
+  type MessageTypes,
+  useSignTypedData,
+  useWallets,
+} from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import {
   PendingTransaction,
@@ -133,6 +141,7 @@ export function useERC20Permit(): UseAsyncTask<
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
+ * @internal
  * A hook that provides a way to sign swap typed data using a Privy wallet.
  *
  * ```ts
@@ -151,28 +160,23 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * ```
  */
 export function useSignSwapTypedDataWith(): UseAsyncTask<
-  SwapByIntentTypedData | CancelSwapTypedData,
-  ERC20PermitSignature,
+  SwapTypedData,
+  Signature,
   SignSwapTypedDataError
 > {
   const { signTypedData } = useSignTypedData();
 
   return useAsyncTask(
-    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
-      const message = JSON.parse(typedData.message);
-
+    (typedData: SwapTypedData) => {
       return ResultAsync.fromPromise(
         signTypedData({
-          types: typedData.types,
-          primaryType: typedData.primaryType,
           domain: typedData.domain,
-          message,
+          types: typedData.types as MessageTypes,
+          primaryType: typedData.primaryType,
+          message: typedData.message,
         }),
         (error) => SigningError.from(error),
-      ).map(({ signature }) => ({
-        deadline: message.deadline,
-        value: signatureFrom(signature),
-      }));
+      ).map(({ signature }) => signatureFrom(signature));
     },
     [signTypedData],
   );

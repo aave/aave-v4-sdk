@@ -1,41 +1,52 @@
 # `@aave/client`
 
-The official TypeScript library for interacting with Aave Protocol.
+The official TypeScript client for interacting with Aave Protocol v4.
 
 ---
 
+`@aave/client` exposes the core Aave v4 actions through a type-safe interface with integrated error handling and result types.
 
-The `@aave/client` package contains the core functionality to query markets, execute transactions, and manage user positions across Aave lending markets. It provides a type-safe interface with built-in error handling and result types.
 
+## Install SDK
+
+First, install the AaveKit TypeScript package using your package manager of choice.
+
+```bash
+pnpm add @aave/client@v4
+
+// OR
+
+yarn add @aave/client@v4
+
+// OR
+
+npm install @aave/client@v4
+```
+
+## Setup Client 
+
+```ts
+// client.ts
+import { AaveClient } from "@aave/client";
+
+export const client = AaveClient.create();
+```
 
 ## Usage
 
 ```ts
-import { AaveClient, evmAddress, chainId } from '@aave/client';
-import { supply, userSupplies } from '@aave/client/actions';
-import { sendWith } from '@aave/client/viem';
+import { chains } from '@aave/client/actions';
+import { ChainsFilter } from '@aave/client';
+import { client } from './client';
 
-// Create client
-const client = AaveClient.create();
-
-// Query user positions
-const positions = await userSupplies(client, {
-  markets: [evmAddress('0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2')],
-  user: evmAddress('0x742d35cc6e5c4ce3b69a2a8c7c8e5f7e9a0b1234'),
+// Query chains by filter
+const result = await chains(client, {
+  query: { filter: ChainsFilter.ALL },
 });
 
-// Execute transactions
-const result = await supply(client, {
-  market: evmAddress('0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2'),
-  amount: {
-    erc20: {
-      currency: evmAddress('0xa0b86a33e6441c8c5f0bb9b7e5e1f8bbf5b78b5c'),
-      value: '1000'
-    }
-  },
-  supplier: evmAddress('0x742d35cc6e5c4ce3b69a2a8c7c8e5f7e9a0b1234'),
-  chainId: chainId(1),
-})
-  .andThen(sendWith(wallet))
-  .andThen(client.waitForTransaction);
+if (result.isOk()) {
+  console.log("Chains:", result.value); // Chain[]
+} else {
+  console.error("Error:", result.error);
+}
 ```

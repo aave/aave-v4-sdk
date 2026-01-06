@@ -1,14 +1,15 @@
-import { assertOk, TimeWindow } from '@aave/client-next';
-import { borrowApyHistory, reserves } from '@aave/client-next/actions';
+import { assertOk, TimeWindow } from '@aave/client';
+import { borrowApyHistory, reserves } from '@aave/client/actions';
 import {
   client,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
-} from '@aave/client-next/test-utils';
-import { describe, it } from 'vitest';
+} from '@aave/client/testing';
+import { describe, expect, it } from 'vitest';
+import { getTimeWindowDates } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';
 
-describe('Borrow APY History on Aave V4', () => {
+describe('Querying Borrow APY History on Aave V4', () => {
   describe('Given a reserve with borrow activity', () => {
     describe('When fetching borrow APY history with different time windows', () => {
       const timeWindowOptions = Object.values(TimeWindow);
@@ -32,8 +33,15 @@ describe('Borrow APY History on Aave V4', () => {
             reserve: usdcReserve.value[0].id,
             window: window,
           });
-
           assertOk(result);
+          const { now, startDate } = getTimeWindowDates(window);
+          expect(result.value).toBeArrayWithElements(
+            expect.objectContaining({
+              __typename: 'ApySample',
+              date: expect.toBeBetweenDates(startDate, now),
+              avgRate: expect.any(Object),
+            }),
+          );
         },
       );
     });

@@ -1,18 +1,18 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
+import { assertOk, bigDecimal, evmAddress } from '@aave/client';
 import {
   preview,
-  setUserSupplyAsCollateral,
+  setUserSuppliesAsCollateral,
   userSupplies,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
+  ETHEREUM_SPOKE_ETHENA_ID,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToSupply } from '../helpers/reserves';
@@ -21,7 +21,7 @@ import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Setting Supply as Collateral in Aave V4', () => {
+describe('Setting Supply as Collateral on Aave V4', () => {
   describe('Given a user with a supply position disabled as collateral', () => {
     beforeAll(async () => {
       const setup = await fundErc20Address(evmAddress(user.account.address), {
@@ -32,7 +32,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         .andThen(() =>
           findReservesToSupply(client, user, {
             token: ETHEREUM_USDC_ADDRESS,
-            spoke: ETHEREUM_SPOKE_ISO_GOV_ADDRESS,
+            spoke: ETHEREUM_SPOKE_ETHENA_ID,
           }),
         )
         .andThen((listReserves) =>
@@ -65,9 +65,13 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         assertNonEmptyArray(positions.value);
         expect(positions.value[0].isCollateral).toBe(false);
 
-        const result = await setUserSupplyAsCollateral(client, {
-          enableCollateral: true,
-          reserve: positions.value[0].reserve.id,
+        const result = await setUserSuppliesAsCollateral(client, {
+          changes: [
+            {
+              reserve: positions.value[0].reserve.id,
+              enableCollateral: true,
+            },
+          ],
           sender: evmAddress(user.account.address),
         })
           .andThen(sendWith(user))
@@ -104,9 +108,13 @@ describe('Setting Supply as Collateral in Aave V4', () => {
 
         const previewResult = await preview(client, {
           action: {
-            setUserSupplyAsCollateral: {
-              reserve: positions.value[0].reserve.id,
-              enableCollateral: !positions.value[0].isCollateral,
+            setUserSuppliesAsCollateral: {
+              changes: [
+                {
+                  reserve: positions.value[0].reserve.id,
+                  enableCollateral: !positions.value[0].isCollateral,
+                },
+              ],
               sender: evmAddress(user.account.address),
             },
           },
@@ -115,10 +123,7 @@ describe('Setting Supply as Collateral in Aave V4', () => {
         // netBalance should be the same
         expect(
           previewResult.value.netBalance.after.value,
-        ).toBeBigDecimalCloseTo(
-          previewResult.value.netBalance.current.value,
-          1,
-        );
+        ).toBeBigDecimalCloseTo(previewResult.value.netBalance.current.value);
         if (!positions.value[0].isCollateral) {
           expect(
             previewResult.value.netCollateral.after.value,

@@ -1,8 +1,13 @@
-import { chainId, useHubs } from '@aave/react-next';
+import { chainId, useHubs } from '@aave/react';
+import { supportedChains } from '@aave/react/viem';
+
+const defaultChainId = chainId(supportedChains[0]!.id);
 
 export function App() {
   const { data, loading } = useHubs({
-    chainIds: [chainId(1)],
+    query: {
+      chainIds: [defaultChainId],
+    },
   });
 
   if (loading) {
@@ -11,8 +16,14 @@ export function App() {
 
   return (
     <div>
-      <header>
+      <header style={{ textAlign: 'center', padding: '20px' }}>
         <h1>List all Hubs</h1>
+        <p style={{ color: '#666', marginBottom: '30px' }}>
+          <small>
+            This example demonstrates how to list all hubs on the selected
+            chain.
+          </small>
+        </p>
       </header>
       <div>
         {data?.map((hub) => (

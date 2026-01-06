@@ -4,14 +4,14 @@ import {
   type StandardData,
   TimeoutError,
   UnexpectedError,
-} from '@aave/core-next';
-import type { HasProcessedKnownTransactionRequest } from '@aave/graphql-next';
+} from '@aave/core';
+import type { HasProcessedKnownTransactionRequest } from '@aave/graphql';
 import {
   type AnyVariables,
   invariant,
   ResultAsync,
   type TxHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import type { TypedDocumentNode } from '@urql/core';
 import { hasProcessedKnownTransaction } from './actions';
 import { type ClientConfig, configureContext } from './config';
@@ -77,11 +77,9 @@ export class AaveClient extends GqlClient {
   ): Promise<void> {
     await this.refreshWhere(async (op) => {
       if (op.query === document) {
-        const result = await this.query(
-          document,
-          op.variables as TVariables,
-          'cache-only',
-        );
+        const result = await this.query(document, op.variables as TVariables, {
+          requestPolicy: 'cache-only',
+        });
 
         if (result.isErr()) {
           return false;

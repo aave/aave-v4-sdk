@@ -1,16 +1,15 @@
-import { UnexpectedError } from '@aave/client-next';
-import { chain as fetchChain } from '@aave/client-next/actions';
-import { supportedChains } from '@aave/client-next/viem';
+import { type AaveClient, UnexpectedError } from '@aave/client';
+import { chain as fetchChain } from '@aave/client/actions';
+import { toViemChain } from '@aave/client/viem';
 import {
   type Chain,
   Currency,
   type DecimalNumber,
   decodeReserveId,
-  type FiatAmount,
+  type ExchangeAmount,
   type NativeAmount,
   type PreviewAction,
-  type ReserveId,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   bigDecimal,
   type ChainId,
@@ -20,7 +19,7 @@ import {
   okAsync,
   ResultAsync,
   RoundingMode,
-} from '@aave/types-next';
+} from '@aave/types';
 import { useEffect } from 'react';
 import { createPublicClient, http } from 'viem';
 import { useAaveClient } from '../context';
@@ -43,7 +42,7 @@ const gasEstimates: Record<keyof PreviewAction, bigint> = {
   borrow: 250_551n,
   withdraw: 195_049n,
   repay: 217_889n + estimatedApprovalGas,
-  setUserSupplyAsCollateral: 240_284n,
+  setUserSuppliesAsCollateral: 240_284n,
 };
 
 function inferGasEstimate(action: PreviewAction): bigint {
@@ -51,28 +50,36 @@ function inferGasEstimate(action: PreviewAction): bigint {
   return gasEstimates[key] ?? never(`Expected gas estimate for action ${key}`);
 }
 
-function extractReserveId(action: PreviewAction): ReserveId {
+function extractChainId(action: PreviewAction): ChainId {
   if ('supply' in action) {
-    return action.supply.reserve;
+    return decodeReserveId(action.supply.reserve).chainId;
   }
 
   if ('borrow' in action) {
-    return action.borrow.reserve;
+    return decodeReserveId(action.borrow.reserve).chainId;
   }
 
   if ('withdraw' in action) {
-    return action.withdraw.reserve;
+    return decodeReserveId(action.withdraw.reserve).chainId;
   }
 
   if ('repay' in action) {
-    return action.repay.reserve;
+    return decodeReserveId(action.repay.reserve).chainId;
   }
 
-  if ('setUserSupplyAsCollateral' in action) {
-    return action.setUserSupplyAsCollateral.reserve;
+  if ('setUserSuppliesAsCollateral' in action) {
+    return action.setUserSuppliesAsCollateral.changes
+      .map(({ reserve }) => decodeReserveId(reserve))
+      .reduce((prev, current) => {
+        invariant(
+          prev.chainId === current.chainId && prev.spoke === current.spoke,
+          'All reserves MUST on the same spoke',
+        );
+        return prev;
+      }).chainId;
   }
 
-  return never('Expected reserve id');
+  never('Expected reserve id');
 }
 
 function inferChainId(query: UseNetworkFeeRequestQuery): ChainId | undefined {
@@ -81,9 +88,7 @@ function inferChainId(query: UseNetworkFeeRequestQuery): ChainId | undefined {
   }
 
   if ('estimate' in query && query.estimate) {
-    const reserveId = extractReserveId(query.estimate);
-
-    return decodeReserveId(reserveId).chainId;
+    return extractChainId(query.estimate);
   }
 
   return undefined;
@@ -96,6 +101,23 @@ function inferTimestampForExchangeRateLookup(
     return query.activity.timestamp;
   }
   return undefined; // i.e., now
+}
+
+function resolveChain(
+  client: AaveClient,
+  query: UseNetworkFeeRequestQuery,
+): ResultAsync<Chain, UnexpectedError> {
+  if ('activity' in query && query.activity) {
+    return okAsync(query.activity.chain);
+  }
+
+  if ('estimate' in query && query.estimate) {
+    return fetchChain(client, {
+      chainId: extractChainId(query.estimate),
+    }).map(nonNullable);
+  }
+
+  return never('Expected chain');
 }
 
 type ExecutionDetails = {
@@ -112,56 +134,52 @@ function useExecutionDetails(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask(
-    (query) => {
-      const chainId = nonNullable(inferChainId(query));
-      const publicClient = createPublicClient({
-        chain: supportedChains[chainId]
-          ? supportedChains[chainId]
-          : never(`Expected supported chain for chainId ${chainId}`),
-        transport: http(),
-      });
-
-      if ('activity' in query) {
-        return ResultAsync.fromPromise(
-          publicClient.getTransactionReceipt({ hash: query.activity.txHash }),
-          (error) => UnexpectedError.from(error),
-        ).map((receipt) => {
-          return {
-            chain: query.activity.chain,
-            gasPrice: receipt.effectiveGasPrice,
-            gasUnits: receipt.gasUsed,
-          };
+    (query) =>
+      resolveChain(client, query).andThen((chain) => {
+        const publicClient = createPublicClient({
+          chain: toViemChain(chain),
+          transport: http(),
         });
-      }
 
-      if ('estimate' in query && query.estimate) {
-        return ResultAsync.combine([
-          ResultAsync.fromPromise(publicClient.estimateFeesPerGas(), (error) =>
-            UnexpectedError.from(error),
-          ),
-          fetchChain(client, { chainId }).map(nonNullable),
-        ]).map(([{ maxFeePerGas }, chain]) => {
-          return {
-            chain,
-            gasPrice: maxFeePerGas,
-            gasUnits: inferGasEstimate(query.estimate),
-          };
+        if ('activity' in query) {
+          return ResultAsync.fromPromise(
+            publicClient.getTransactionReceipt({ hash: query.activity.txHash }),
+            (error) => UnexpectedError.from(error),
+          ).map((receipt) => {
+            return {
+              chain: query.activity.chain,
+              gasPrice: receipt.effectiveGasPrice,
+              gasUnits: receipt.gasUsed,
+            };
+          });
+        }
+
+        if ('estimate' in query && query.estimate) {
+          return ResultAsync.fromPromise(
+            publicClient.estimateFeesPerGas(),
+            (error) => UnexpectedError.from(error),
+          ).map(({ maxFeePerGas }) => {
+            return {
+              chain,
+              gasPrice: maxFeePerGas,
+              gasUnits: inferGasEstimate(query.estimate),
+            };
+          });
+        }
+
+        return okAsync({
+          chain: never('Expected chain'),
+          gasPrice: 0n,
+          gasUnits: 0n,
         });
-      }
-
-      return okAsync({
-        chain: never('Expected chain'),
-        gasPrice: 0n,
-        gasUnits: 0n,
-      });
-    },
+      }),
     [client],
   );
 }
 
 function createNetworkFeeAmount(
   details: ExecutionDetails,
-  rate: FiatAmount,
+  rate: ExchangeAmount,
 ): NativeAmount {
   const gasCostInWei = details.gasPrice * details.gasUnits;
   const gasCost = bigDecimal(gasCostInWei).rescale(
@@ -183,13 +201,15 @@ function createNetworkFeeAmount(
       chain: details.chain,
     },
     amount,
-    fiatAmount: {
-      __typename: 'FiatAmount',
+    exchange: {
+      __typename: 'ExchangeAmount',
       value: gasCost.mul(rate.value),
       name: rate.name,
       symbol: rate.symbol,
+      icon: rate.icon,
+      decimals: rate.decimals,
     },
-    fiatRate: {
+    exchangeRate: {
       __typename: 'DecimalNumber',
       decimals: 2,
       onChainValue: BigInt(rate.value.rescale(2).toFixed(0, RoundingMode.Down)),

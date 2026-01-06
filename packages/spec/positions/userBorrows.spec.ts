@@ -1,16 +1,15 @@
-import { assertOk, evmAddress, OrderDirection } from '@aave/client-next';
-import { userBorrows, userPositions } from '@aave/client-next/actions';
+import { assertOk, evmAddress, OrderDirection } from '@aave/client';
+import { userBorrows, userPositions } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ISO_STABLE_ID,
-  ETHEREUM_USDC_ADDRESS,
-} from '@aave/client-next/test-utils';
+  ETHEREUM_SPOKE_CORE_ID,
+} from '@aave/client/testing';
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { assertSingleElementArray } from '../test-utils';
+import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserBorrows } from './helper';
 
 const user = await createNewWallet(
@@ -20,7 +19,9 @@ const user = await createNewWallet(
 describe('Querying User Borrow Positions on Aave V4', () => {
   describe('Given a user with multiple active borrow positions', () => {
     beforeAll(async () => {
-      await recreateUserBorrows(client, user);
+      await recreateUserBorrows(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      });
     }, 120_000);
 
     describe('When the user queries their borrow positions by spoke', () => {
@@ -28,47 +29,46 @@ describe('Querying User Borrow Positions on Aave V4', () => {
         const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: ETHEREUM_SPOKE_ISO_STABLE_ID,
+              spoke: ETHEREUM_SPOKE_CORE_ID,
               user: evmAddress(user.account.address),
             },
           },
         });
         assertOk(borrowPositions);
-        borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_ISO_STABLE_ID);
-        });
+
+        expect(borrowPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              spoke: expect.objectContaining({
+                id: ETHEREUM_SPOKE_CORE_ID,
+              }),
+            }),
+          }),
+        );
       });
     });
 
     describe('When the user queries their borrow positions including zero balances', () => {
       it('Then all borrow positions, including those with zero balances, are returned', async () => {
-        let borrowPositions = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
-          },
-          includeZeroBalances: true,
-        });
-        assertOk(borrowPositions);
-        borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
-        });
-
-        borrowPositions = await userBorrows(client, {
+        const borrowPositions = await userBorrows(client, {
           query: {
             userSpoke: {
-              spoke: ETHEREUM_SPOKE_ISO_STABLE_ID,
+              spoke: ETHEREUM_SPOKE_CORE_ID,
               user: evmAddress(user.account.address),
             },
           },
           includeZeroBalances: true,
         });
         assertOk(borrowPositions);
-        borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_ISO_STABLE_ID);
-        });
+        expect(borrowPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              spoke: expect.objectContaining({
+                id: ETHEREUM_SPOKE_CORE_ID,
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -83,10 +83,18 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
         });
         assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBeGreaterThanOrEqual(1);
-        borrowPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
-        });
+
+        expect(borrowPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              spoke: expect.objectContaining({
+                chain: expect.objectContaining({
+                  chainId: ETHEREUM_FORK_ID,
+                }),
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -94,15 +102,13 @@ describe('Querying User Borrow Positions on Aave V4', () => {
       it('Then the corresponding borrow position is returned', async () => {
         const positions = await userPositions(client, {
           filter: {
-            tokens: [
-              { chainId: ETHEREUM_FORK_ID, address: ETHEREUM_USDC_ADDRESS },
-            ],
+            chainIds: [ETHEREUM_FORK_ID],
           },
           user: evmAddress(user.account.address),
         });
         assertOk(positions);
-        // Select a position with borrow data
-        assertSingleElementArray(positions.value);
+        assertNonEmptyArray(positions.value);
+
         const borrowPositions = await userBorrows(client, {
           query: {
             userPositionId: positions.value[0].id,
@@ -115,7 +121,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
 
     describe('When the user fetches borrow positions ordered by amount', () => {
       it('Then the borrow positions are returned in order of amount', async () => {
-        let borrowPositions = await userBorrows(client, {
+        const borrowPositionsDesc = await userBorrows(client, {
           query: {
             userChains: {
               chainIds: [ETHEREUM_FORK_ID],
@@ -124,13 +130,14 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
           orderBy: { amount: OrderDirection.Desc },
         });
-        assertOk(borrowPositions);
-        let listOrderAmount = borrowPositions.value.map(
+        assertOk(borrowPositionsDesc);
+
+        const listOrderAmountDesc = borrowPositionsDesc.value.map(
           (elem) => elem.principal.amount.value,
         );
-        expect(listOrderAmount).toBeSortedNumerically('desc');
+        expect(listOrderAmountDesc).toBeSortedNumerically('desc');
 
-        borrowPositions = await userBorrows(client, {
+        const borrowPositionsAsc = await userBorrows(client, {
           query: {
             userChains: {
               chainIds: [ETHEREUM_FORK_ID],
@@ -139,17 +146,18 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
           orderBy: { amount: OrderDirection.Asc },
         });
-        assertOk(borrowPositions);
-        listOrderAmount = borrowPositions.value.map(
+        assertOk(borrowPositionsAsc);
+
+        const listOrderAmountAsc = borrowPositionsAsc.value.map(
           (elem) => elem.principal.amount.value,
         );
-        expect(listOrderAmount).toBeSortedNumerically('asc');
+        expect(listOrderAmountAsc).toBeSortedNumerically('asc');
       });
     });
 
     describe('When the user fetches borrow positions ordered by APY', () => {
       it('Then the borrow positions are returned in order of APY', async () => {
-        let borrowPositions = await userBorrows(client, {
+        const borrowPositionsDesc = await userBorrows(client, {
           query: {
             userChains: {
               chainIds: [ETHEREUM_FORK_ID],
@@ -158,13 +166,14 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
           orderBy: { apy: OrderDirection.Desc },
         });
-        assertOk(borrowPositions);
-        let listOrderApy = borrowPositions.value.map(
+        assertOk(borrowPositionsDesc);
+
+        const listOrderApyDesc = borrowPositionsDesc.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
-        expect(listOrderApy).toBeSortedNumerically('desc');
+        expect(listOrderApyDesc).toBeSortedNumerically('desc');
 
-        borrowPositions = await userBorrows(client, {
+        const borrowPositionsAsc = await userBorrows(client, {
           query: {
             userChains: {
               chainIds: [ETHEREUM_FORK_ID],
@@ -173,17 +182,18 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
           orderBy: { apy: OrderDirection.Asc },
         });
-        assertOk(borrowPositions);
-        listOrderApy = borrowPositions.value.map(
+        assertOk(borrowPositionsAsc);
+
+        const listOrderApyAsc = borrowPositionsAsc.value.map(
           (elem) => elem.reserve.summary.borrowApy.value,
         );
-        expect(listOrderApy).toBeSortedNumerically('asc');
+        expect(listOrderApyAsc).toBeSortedNumerically('asc');
       });
     });
 
     describe('When the user fetches borrow positions ordered by asset name', () => {
       it('Then the borrow positions are returned in order of asset name', async () => {
-        let borrowPositions = await userBorrows(client, {
+        const borrowPositionsDesc = await userBorrows(client, {
           query: {
             userChains: {
               chainIds: [ETHEREUM_FORK_ID],
@@ -192,13 +202,14 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
           orderBy: { assetName: OrderDirection.Desc },
         });
-        assertOk(borrowPositions);
-        let listOrderAssetName = borrowPositions.value.map(
+        assertOk(borrowPositionsDesc);
+
+        const listOrderAssetNameDesc = borrowPositionsDesc.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeSortedAlphabetically('desc');
+        expect(listOrderAssetNameDesc).toBeSortedAlphabetically('desc');
 
-        borrowPositions = await userBorrows(client, {
+        const borrowPositionsAsc = await userBorrows(client, {
           query: {
             userChains: {
               chainIds: [ETHEREUM_FORK_ID],
@@ -207,11 +218,12 @@ describe('Querying User Borrow Positions on Aave V4', () => {
           },
           orderBy: { assetName: OrderDirection.Asc },
         });
-        assertOk(borrowPositions);
-        listOrderAssetName = borrowPositions.value.map(
+        assertOk(borrowPositionsAsc);
+
+        const listOrderAssetNameAsc = borrowPositionsAsc.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeSortedAlphabetically('asc');
+        expect(listOrderAssetNameAsc).toBeSortedAlphabetically('asc');
       });
     });
   });

@@ -2,25 +2,21 @@ import type {
   AaveClient,
   BorrowRequest,
   Reserve,
+  SpokeId,
   SupplyRequest,
-} from '@aave/client-next';
+} from '@aave/client';
 import {
   type BigDecimal,
-  bigDecimal,
   type EvmAddress,
   evmAddress,
   invariant,
   type ResultAsync,
   type TxHash,
-} from '@aave/client-next';
+} from '@aave/client';
 
-import { borrow, reserve, supply } from '@aave/client-next/actions';
-import {
-  ETHEREUM_SPOKE_EMODE_ADDRESS,
-  ETHEREUM_WETH_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+import { borrow, reserve, supply } from '@aave/client/actions';
+import { fundErc20Address } from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import {
   findReservesToBorrow,
@@ -51,7 +47,7 @@ export function supplyNativeTokenToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   amount: BigDecimal,
-  spoke?: EvmAddress,
+  spoke?: SpokeId,
 ): ResultAsync<Reserve, Error> {
   return findReservesToSupply(client, user, {
     spoke: spoke,
@@ -79,7 +75,7 @@ export function findReserveAndSupply(
   }: {
     token: EvmAddress;
     amount: BigDecimal;
-    spoke?: EvmAddress;
+    spoke?: SpokeId;
     asCollateral?: boolean;
   },
 ): ResultAsync<Reserve, Error> {
@@ -145,40 +141,61 @@ export function supplyAndBorrow(
   );
 }
 
-export function supplyWSTETHAndBorrowETH(
+export function supplyAndBorrowNativeToken(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
+  params: {
+    spoke: SpokeId;
+    ratioToBorrow?: number;
+  },
 ): ResultAsync<{ borrowReserve: Reserve; supplyReserve: Reserve }, Error> {
   return findReservesToSupply(client, user, {
-    token: ETHEREUM_WSTETH_ADDRESS,
-    spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
-  }).andThen((listSupplyReserves) =>
-    supplyToReserve(client, user, {
-      reserve: listSupplyReserves[0].id,
-      amount: { erc20: { value: bigDecimal(0.2) } },
-      sender: evmAddress(user.account.address),
-      enableCollateral: true,
+    spoke: params.spoke,
+  }).andThen((listSupplyReserves) => {
+    const amountToSupply = listSupplyReserves[0].supplyCap
+      .minus(listSupplyReserves[0].summary.supplied.amount.value)
+      .div(10000);
+
+    // Fund the wallet with the amount to supply
+    return fundErc20Address(evmAddress(user.account.address), {
+      address: listSupplyReserves[0].asset.underlying.address,
+      amount: amountToSupply,
+      decimals: listSupplyReserves[0].asset.underlying.info.decimals,
     })
       .andThen(() =>
-        findReservesToBorrow(client, user, {
-          token: ETHEREUM_WETH_ADDRESS,
-          spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+        supplyToReserve(client, user, {
+          reserve: listSupplyReserves[0].id,
+          amount: { erc20: { value: amountToSupply } },
+          sender: evmAddress(user.account.address),
+          enableCollateral: true,
         }),
       )
-      .andThen((reservesToBorrow) =>
-        borrow(client, {
+      .andThen(() =>
+        findReservesToBorrow(client, user, {
+          spoke: params.spoke,
+        }),
+      )
+      .andThen((reservesToBorrow) => {
+        const nativeReserve = reservesToBorrow.find(
+          (reserve) => reserve.asset.underlying.isWrappedNativeToken === true,
+        );
+        invariant(nativeReserve, 'Native reserve not found');
+
+        return borrow(client, {
           sender: evmAddress(user.account.address),
-          reserve: reservesToBorrow[0].id,
+          reserve: nativeReserve.id,
           amount: {
-            native: reservesToBorrow[0].userState!.borrowable.amount.value,
+            native: nativeReserve.userState!.borrowable.amount.value.times(
+              params.ratioToBorrow ?? 0.2,
+            ),
           },
         })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
           .map(() => ({
-            borrowReserve: reservesToBorrow[0],
+            borrowReserve: nativeReserve,
             supplyReserve: listSupplyReserves[0],
-          })),
-      ),
-  );
+          }));
+      });
+  });
 }

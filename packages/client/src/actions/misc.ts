@@ -1,18 +1,19 @@
-import type { UnexpectedError } from '@aave/core-next';
+import type { UnexpectedError } from '@aave/core';
 import {
   type Chain,
   ChainQuery,
   type ChainRequest,
-  ChainsFilter,
   ChainsQuery,
+  type ChainsRequest,
+  type ExchangeAmount,
   ExchangeRateQuery,
   type ExchangeRateRequest,
-  type FiatAmount,
   HasProcessedKnownTransactionQuery,
   type HasProcessedKnownTransactionRequest,
-} from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+} from '@aave/graphql';
+import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
+import { type BatchOptions, DEFAULT_QUERY_OPTIONS } from '../options';
 
 /**
  * Fetches a specific chain by chain ID.
@@ -27,29 +28,51 @@ import type { AaveClient } from '../AaveClient';
  * @param request - The chain request parameters.
  * @returns The chain data, or null if not found.
  */
+
 export function chain(
   client: AaveClient,
   request: ChainRequest,
+): ResultAsync<Chain | null, UnexpectedError>;
+/**
+ * @internal
+ */
+export function chain(
+  client: AaveClient,
+  request: ChainRequest,
+  options: BatchOptions,
+): ResultAsync<Chain | null, UnexpectedError>;
+export function chain(
+  client: AaveClient,
+  request: ChainRequest,
+  { batch }: BatchOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Chain | null, UnexpectedError> {
-  return client.query(ChainQuery, { request });
+  return client.query(ChainQuery, { request }, { batch });
 }
 
 /**
  * Fetches the list of supported chains.
  *
  * ```ts
- * const chains = await chains(client, { filter: ChainsFilter.ALL });
+ * const chains = await chains(client, {
+ *   query: { filter: ChainsFilter.ALL }
+ * });
+ * ```
+ *
+ * ```ts
+ * const chains = await chains(client, {
+ *   query: { chainIds: [chainId(1), chainId(137)] }
+ * });
  * ```
  *
  * @param client - Aave client.
- * @param filter - The filter for chains.
+ * @param request - The chains request parameters.
  * @returns Array of supported chains.
  */
 export function chains(
   client: AaveClient,
-  filter: ChainsFilter = ChainsFilter.ALL,
+  request: ChainsRequest,
 ): ResultAsync<Chain[], UnexpectedError> {
-  return client.query(ChainsQuery, { filter });
+  return client.query(ChainsQuery, { request });
 }
 
 /**
@@ -66,7 +89,10 @@ export function hasProcessedKnownTransaction(
   return client.query(
     HasProcessedKnownTransactionQuery,
     { request },
-    'network-only',
+    {
+      requestPolicy: 'network-only', // alwats hit the network
+      batch: false, // never batch, always run ASAP
+    },
   );
 }
 
@@ -87,6 +113,6 @@ export function hasProcessedKnownTransaction(
 export function exchangeRate(
   client: AaveClient,
   request: ExchangeRateRequest,
-): ResultAsync<FiatAmount, UnexpectedError> {
+): ResultAsync<ExchangeAmount, UnexpectedError> {
   return client.query(ExchangeRateQuery, { request });
 }

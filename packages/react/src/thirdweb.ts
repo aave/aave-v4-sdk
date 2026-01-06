@@ -1,30 +1,28 @@
-import {
-  SigningError,
-  TransactionError,
-  UnexpectedError,
-} from '@aave/client-next';
+import { SigningError, TransactionError, UnexpectedError } from '@aave/client';
+import { chain as fetchChain } from '@aave/client/actions';
+import { toThirdwebChain } from '@aave/client/thirdweb';
 import type {
-  CancelSwapTypedData,
   ERC20PermitSignature,
   PermitRequest,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   invariant,
   okAsync,
   ResultAsync,
+  type Signature,
   signatureFrom,
   txHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import {
-  defineChain,
   prepareTransaction,
   sendTransaction,
   type ThirdwebClient,
   waitForReceipt,
 } from 'thirdweb';
 import { useActiveAccount, useSwitchActiveWalletChain } from 'thirdweb/react';
+import { useAaveClient } from './context';
 import {
   PendingTransaction,
   type UseAsyncTask,
@@ -41,6 +39,7 @@ import { usePermitTypedDataAction } from './permits';
 export function useSendTransaction(
   thirdwebClient: ThirdwebClient,
 ): UseSendTransactionResult {
+  const client = useAaveClient();
   const account = useActiveAccount();
   const switchChain = useSwitchActiveWalletChain();
 
@@ -51,55 +50,64 @@ export function useSendTransaction(
         'No Account found. Ensure you have connected your wallet.',
       );
 
-      const chain = defineChain({
-        id: request.chainId,
-        rpc: `https://${request.chainId}.rpc.thirdweb.com/${thirdwebClient.clientId}`,
-      });
-
-      return ResultAsync.fromPromise(switchChain(chain), (err) =>
-        UnexpectedError.from(err),
+      return fetchChain(
+        client,
+        { chainId: request.chainId },
+        {
+          batch: false,
+        },
       )
-        .andThen(() =>
-          ResultAsync.fromPromise(
-            sendTransaction({
-              account,
-              transaction: prepareTransaction({
-                to: request.to,
-                data: request.data,
-                value: BigInt(request.value),
-                chain,
-                client: thirdwebClient,
-              }),
-            }),
-            (err) => SigningError.from(err),
-          ),
-        )
-        .map(
-          ({ transactionHash }) =>
-            new PendingTransaction(() =>
+        .map((chain) => {
+          invariant(chain, `Chain ${request.chainId} is not supported`);
+
+          return toThirdwebChain(chain);
+        })
+        .andThen((chain) => {
+          return ResultAsync.fromPromise(switchChain(chain), (err) =>
+            UnexpectedError.from(err),
+          )
+            .andThen(() =>
               ResultAsync.fromPromise(
-                waitForReceipt({
-                  client: thirdwebClient,
-                  chain,
-                  transactionHash,
+                sendTransaction({
+                  account,
+                  transaction: prepareTransaction({
+                    to: request.to,
+                    data: request.data,
+                    value: BigInt(request.value),
+                    chain,
+                    client: thirdwebClient,
+                  }),
                 }),
-                (err) => UnexpectedError.from(err),
-              ).andThen(({ status, transactionHash }) => {
-                if (status === 'reverted') {
-                  return TransactionError.new({
-                    txHash: txHash(transactionHash),
-                    request,
-                  }).asResultAsync();
-                }
-                return okAsync({
-                  operations: request.operations,
-                  txHash: txHash(transactionHash),
-                });
-              }),
-            ),
-        );
+                (err) => SigningError.from(err),
+              ),
+            )
+            .map(
+              ({ transactionHash }) =>
+                new PendingTransaction(() =>
+                  ResultAsync.fromPromise(
+                    waitForReceipt({
+                      client: thirdwebClient,
+                      chain,
+                      transactionHash,
+                    }),
+                    (err) => UnexpectedError.from(err),
+                  ).andThen(({ status, transactionHash }) => {
+                    if (status === 'reverted') {
+                      return TransactionError.new({
+                        txHash: txHash(transactionHash),
+                        request,
+                      }).asResultAsync();
+                    }
+                    return okAsync({
+                      operations: request.operations,
+                      txHash: txHash(transactionHash),
+                    });
+                  }),
+                ),
+            );
+        });
     },
-    [account, switchChain, thirdwebClient],
+    [account, client, switchChain, thirdwebClient],
   );
 }
 
@@ -176,6 +184,7 @@ export function useERC20Permit(): UseAsyncTask<
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
+ * @internal
  * A hook that provides a way to sign swap typed data using a Thirdweb wallet.
  *
  * ```ts
@@ -194,17 +203,15 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * ```
  */
 export function useSignSwapTypedDataWith(): UseAsyncTask<
-  SwapByIntentTypedData | CancelSwapTypedData,
-  ERC20PermitSignature,
+  SwapTypedData,
+  Signature,
   SignSwapTypedDataError
 > {
   const account = useActiveAccount();
 
   return useAsyncTask(
-    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
+    (typedData: SwapTypedData) => {
       invariant(account, 'Expected an active account to sign swap typed data');
-
-      const message = JSON.parse(typedData.message);
 
       return ResultAsync.fromPromise(
         account.signTypedData({
@@ -212,13 +219,10 @@ export function useSignSwapTypedDataWith(): UseAsyncTask<
           types: typedData.types as Record<string, unknown>,
           domain: typedData.domain,
           primaryType: typedData.primaryType,
-          message,
+          message: typedData.message,
         }),
         (err) => SigningError.from(err),
-      ).map((signature) => ({
-        deadline: message.deadline,
-        value: signatureFrom(signature),
-      }));
+      ).map(signatureFrom);
     },
     [account],
   );

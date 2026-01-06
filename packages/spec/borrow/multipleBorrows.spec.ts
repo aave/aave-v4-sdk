@@ -1,14 +1,13 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { borrow, userBorrows } from '@aave/client-next/actions';
+import { assertOk, bigDecimal, evmAddress } from '@aave/client';
+import { borrow, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_WSTETH_ADDRESS,
+  ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';
@@ -20,14 +19,17 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
   describe('Given a user with collateral supplied to a reserve', () => {
     describe('When the user borrows from two different reserves', () => {
       beforeAll(async () => {
+        const amountToSupply = bigDecimal('100');
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.2'),
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: amountToSupply,
+          decimals: 6,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-            amount: bigDecimal('0.1'),
+            token: ETHEREUM_USDC_ADDRESS,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            amount: amountToSupply,
             asCollateral: true,
           }),
         );
@@ -37,7 +39,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
 
       it('Then the user has two active borrow positions with correct amounts', async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         });
         assertOk(reservesToBorrow);
         expect(reservesToBorrow.value.length).toBeGreaterThanOrEqual(2);
@@ -93,12 +95,18 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address ===
             reservesToBorrow.value[0]!.asset.underlying.address,
         );
-        expect(usdcPosition).toBeDefined();
+        expect(usdcPosition!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
         expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[0]!.userState!.borrowable.amount.value.times(
             0.1,
           ),
-          2,
         );
 
         // Verify second borrow position (USDS)
@@ -107,12 +115,18 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
             position.reserve.asset.underlying.address ===
             reservesToBorrow.value[1]!.asset.underlying.address,
         );
-        expect(usdsPosition).toBeDefined();
+        expect(usdsPosition!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
         expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
             0.1,
           ),
-          2,
         );
       });
     });

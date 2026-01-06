@@ -1,19 +1,20 @@
-import type { SigningError, UnexpectedError } from '@aave/client-next';
+import type { SigningError, UnexpectedError } from '@aave/client';
 import {
+  ensureChain,
   sendTransaction,
   signERC20PermitWith,
   signSwapTypedDataWith,
   waitForTransactionResult,
-} from '@aave/client-next/viem';
+} from '@aave/client/viem';
 import type {
   ERC20PermitSignature,
   PermitRequest,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
-import { invariant } from '@aave/types-next';
+} from '@aave/graphql';
+import { invariant, type Signature } from '@aave/types';
 import type { WalletClient } from 'viem';
-
+import { useAaveClient } from '../context';
 import {
   PendingTransaction,
   type UseAsyncTask,
@@ -36,8 +37,10 @@ import { usePermitTypedDataAction } from '../permits';
  * @param walletClient - The wallet client to use for sending transactions.
  */
 export function useSendTransaction(
-  walletClient: WalletClient | undefined,
+  walletClient: WalletClient | null | undefined,
 ): UseSendTransactionResult {
+  const client = useAaveClient();
+
   return useAsyncTask(
     (request: TransactionRequest) => {
       invariant(
@@ -45,14 +48,16 @@ export function useSendTransaction(
         'Expected a WalletClient to handle the operation result.',
       );
 
-      return sendTransaction(walletClient, request).map(
-        (hash) =>
-          new PendingTransaction(() =>
-            waitForTransactionResult(walletClient, request, hash),
-          ),
-      );
+      return ensureChain(client, walletClient, request)
+        .andThen(() => sendTransaction(walletClient, request))
+        .map(
+          (hash) =>
+            new PendingTransaction(() =>
+              waitForTransactionResult(walletClient, request, hash),
+            ),
+        );
     },
-    [walletClient],
+    [client, walletClient],
   );
 }
 
@@ -90,7 +95,7 @@ export type SignERC20PermitError = SigningError | UnexpectedError;
  * ```
  */
 export function useERC20Permit(
-  walletClient: WalletClient | undefined,
+  walletClient: WalletClient | null | undefined,
 ): UseAsyncTask<PermitRequest, ERC20PermitSignature, SignERC20PermitError> {
   const [permitTypedData] = usePermitTypedDataAction();
 
@@ -109,6 +114,7 @@ export function useERC20Permit(
 export type SignSwapTypedDataError = SigningError | UnexpectedError;
 
 /**
+ * @internal
  * A hook that provides a way to sign swap typed data using a viem WalletClient instance.
  *
  * ```ts
@@ -128,20 +134,16 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * ```
  */
 export function useSignSwapTypedDataWith(
-  walletClient: WalletClient | undefined,
-): UseAsyncTask<
-  SwapByIntentTypedData,
-  ERC20PermitSignature,
-  SignSwapTypedDataError
-> {
+  walletClient: WalletClient | null | undefined,
+): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
   return useAsyncTask(
-    (typedData: SwapByIntentTypedData) => {
+    (typedData: SwapTypedData) => {
       invariant(
         walletClient,
         'Expected a WalletClient to sign swap typed data',
       );
 
-      return signSwapTypedDataWith(walletClient)(typedData);
+      return signSwapTypedDataWith(walletClient, typedData);
     },
     [walletClient],
   );

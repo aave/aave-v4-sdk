@@ -1,0 +1,67 @@
+{
+  "name": "@aave/cli",
+  "version": "4.1.0-next.5",
+  "description": "CLI to interact with AaveKit API",
+  "keywords": [
+    "aave",
+    "cli"
+  ],
+  "repository": {
+    "directory": "packages/cli",
+    "type": "git",
+    "url": "git://github.com/aave/aave-v4-sdk.git"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "aave": "./bin/run.js"
+  },
+  "engines": {
+    "node": ">=22.17.0"
+  },
+  "files": [
+    "./bin",
+    "./dist",
+    "./oclif.manifest.json"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsc -b",
+    "postpack": "rimraf oclif.manifest.json",
+    "prepack": "oclif manifest && oclif readme",
+    "version": "oclif readme && git add README.md"
+  },
+  "dependencies": {
+    "@aave/client": "workspace:*",
+    "@oclif/core": "^4",
+    "@oclif/plugin-help": "^6",
+    "@oclif/plugin-plugins": "^5",
+    "tty-table": "^5.0.0"
+  },
+  "devDependencies": {
+    "@oclif/test": "^4",
+    "@types/node": "^24",
+    "oclif": "^4",
+    "rimraf": "^6.1.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5"
+  },
+  "oclif": {
+    "bin": "aave",
+    "dirname": "aave",
+    "commands": "./dist/commands",
+    "topicSeparator": " ",
+    "topics": {
+      "hubs": {
+        "description": "List available liquidity hubs"
+      },
+      "spokes": {
+        "description": "List available spokes"
+      }
+    }
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

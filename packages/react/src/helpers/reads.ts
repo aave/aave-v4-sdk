@@ -1,11 +1,11 @@
-import { type StandardData, UnexpectedError } from '@aave/client-next';
+import { type StandardData, UnexpectedError } from '@aave/client';
 import {
   type AnyVariables,
   identity,
   invariant,
   type NullishDeep,
   type Prettify,
-} from '@aave/types-next';
+} from '@aave/types';
 import { useEffect, useMemo, useState } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
 import {
@@ -51,6 +51,7 @@ export type UseSuspendableQueryArgs<
   suspense: Suspense;
   selector?: Selector<Value, Output>;
   pollInterval?: number;
+  batch?: boolean;
   pause?: Pause;
 };
 
@@ -120,6 +121,7 @@ export function useSuspendableQuery<
   pause,
   selector = identity as Selector<Value, Output>,
   pollInterval = 0,
+  batch = true,
 }: UseSuspendableQueryArgs<
   Value,
   Output,
@@ -134,9 +136,10 @@ export function useSuspendableQuery<
     pause,
     context: useMemo(
       () => ({
+        batch,
         suspense,
       }),
-      [suspense],
+      [batch, suspense],
     ),
   });
 
@@ -154,6 +157,7 @@ export function useSuspendableQuery<
     const timerId = setTimeout(() => {
       executeQuery({
         requestPolicy: 'network-only',
+        batch: false, // never batch, run now!
       });
     }, pollInterval);
 

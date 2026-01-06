@@ -1,13 +1,45 @@
 # @aave/types
 
-## 0.1.1
+## 1.0.0-next.6
 
 ### Patch Changes
 
-- 9fbf4bd: **fix:** republish due to CI issue with previous release
+- 5fad9a6: **feat:** `preparePositionSwap` and `supplySwapQuote` actions.
+- 5fad9a6: **feat:** `useSupplySwap` and `useSupplySwapQuote` hooks.
+- 5fad9a6: **feat:** support latest GQL schema.
 
-## 0.1.0
+## 1.0.0-next.5
 
-### Minor Changes
+### Patch Changes
 
-- fb26904: **feat:** first release
+- 2f31f53: **fix:** JSON serialization of BigDecimal to not produce scientific notation.
+
+## 1.0.0-next.4
+
+### Patch Changes
+
+- f651671: **chore:** adds patterns to avoid breaking changes on expanding enum and GQL unions.
+
+## 1.0.0-next.3
+
+### Patch Changes
+
+- de80d52: **fix:** improves `chainId` helper to support bigint values.
+
+## 1.0.0-next.2
+
+### Patch Changes
+
+- 39649f8: **fix:** `BigDecimal#toDisplayString(n)` behaviour with `minFractionDigits` (see test).
+
+## 1.0.0-next.1
+
+### Patch Changes
+
+- 7ed8ac6: **fix:** rebuild from local
+
+## 1.0.0-next.0
+
+### Major Changes
+
+- 7789c8e: **feat:** new AaveKit v4.

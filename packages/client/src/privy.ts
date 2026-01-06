@@ -2,14 +2,13 @@ import {
   SigningError,
   type TransactionError,
   ValidationError,
-} from '@aave/core-next';
+} from '@aave/core';
 import type {
-  CancelSwapTypedData,
   ExecutionPlan,
   PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   errAsync,
   okAsync,
@@ -17,7 +16,7 @@ import {
   signatureFrom,
   type TxHash,
   txHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import type { PrivyClient } from '@privy-io/server-auth';
 import { createPublicClient, http } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
@@ -171,27 +170,24 @@ export function signERC20PermitWith(
 function signSwapTypedData(
   privy: PrivyClient,
   walletId: string,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
-  const message = JSON.parse(result.message);
   return ResultAsync.fromPromise(
     privy.walletApi.ethereum.signTypedData({
       walletId,
       typedData: {
         domain: result.domain,
         types: result.types,
-        message,
+        message: result.message,
         primaryType: result.primaryType,
       },
     }),
     (err) => SigningError.from(err),
-  ).map((response) => ({
-    deadline: message.deadline,
-    value: signatureFrom(response.signature),
-  }));
+  ).map(({ signature }) => signatureFrom(signature));
 }
 
 /**
+ * @internal
  * Creates a swap signature handler that signs swap typed data using the specified Privy wallet.
  */
 export function signSwapTypedDataWith(
@@ -199,17 +195,18 @@ export function signSwapTypedDataWith(
   walletId: string,
 ): SwapSignatureHandler;
 /**
+ * @internal
  * Signs swap typed data using the specified Privy wallet.
  */
 export function signSwapTypedDataWith(
   privy: PrivyClient,
   walletId: string,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler>;
 export function signSwapTypedDataWith(
   privy: PrivyClient,
   walletId: string,
-  result?: SwapByIntentTypedData | CancelSwapTypedData,
+  result?: SwapTypedData,
 ): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
   return result
     ? signSwapTypedData(privy, walletId, result)

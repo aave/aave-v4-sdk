@@ -3,9 +3,10 @@ import type {
   ActivitiesRequest,
   CurrencyQueryOptions,
   PaginatedActivitiesResult,
+  TimeWindowQueryOptions,
   UnexpectedError,
-} from '@aave/client-next';
-import { DEFAULT_QUERY_OPTIONS } from '@aave/client-next';
+} from '@aave/client';
+import { DEFAULT_QUERY_OPTIONS } from '@aave/client';
 import {
   activities,
   borrow,
@@ -14,13 +15,12 @@ import {
   renounceSpokeUserPositionManager,
   repay,
   setSpokeUserPositionManager,
-  setUserSupplyAsCollateral,
+  setUserSuppliesAsCollateral,
   supply,
-  updateUserDynamicConfig,
-  updateUserRiskPremium,
+  updateUserPositionConditions,
   withdraw,
-} from '@aave/client-next/actions';
-import { ValidationError } from '@aave/core-next';
+} from '@aave/client/actions';
+import { ValidationError } from '@aave/core';
 import {
   ActivitiesQuery,
   type BorrowRequest,
@@ -40,24 +40,23 @@ import {
   type RepayRequest,
   ReservesQuery,
   type SetSpokeUserPositionManagerRequest,
-  type SetUserSupplyAsCollateralRequest,
+  type SetUserSuppliesAsCollateralRequest,
   SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
-  type UpdateUserDynamicConfigRequest,
-  type UpdateUserRiskPremiumRequest,
+  type UpdateUserPositionConditionsRequest,
   UserBalancesQuery,
   UserPositionQuery,
   UserPositionsQuery,
   UserSummaryQuery,
   type WithdrawRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
   errAsync,
   type NullishDeep,
   type Prettify,
   type TxHash,
-} from '@aave/types-next';
+} from '@aave/types';
 import { useAaveClient } from './context';
 import {
   cancel,
@@ -574,17 +573,20 @@ export function useRenounceSpokeUserPositionManager(
 }
 
 /**
- * A hook that provides a way to update the user risk premium for a spoke.
+ * Hook for updating user position conditions (dynamic config and/or risk premium).
  *
  * ```ts
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [updateUserRiskPremium, { loading, error }] = useUpdateUserRiskPremium((transaction, { cancel }) => {
+ * const [update, { loading, error }] = useUpdateUserPositionConditions((transaction, { cancel }) => {
  *   return sendTransaction(transaction);
  * });
  *
  * // …
  *
- * const result = await updateUserRiskPremium({ ... });
+ * const result = await update({
+ *   userPositionId: userPosition.id,
+ *   update: UserPositionConditionsUpdate.AllDynamicConfig,
+ * });
  *
  * if (result.isErr()) {
  *   switch (result.error.name) {
@@ -617,118 +619,54 @@ export function useRenounceSpokeUserPositionManager(
  * @param handler - The handler that will be used to handle the transaction.
  */
 
-export function useUpdateUserRiskPremium(
+export function useUpdateUserPositionConditions(
   handler: TransactionHandler,
 ): UseAsyncTask<
-  UpdateUserRiskPremiumRequest,
+  UpdateUserPositionConditionsRequest,
   TxHash,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: UpdateUserRiskPremiumRequest) =>
-      updateUserRiskPremium(client, request)
+    (request: UpdateUserPositionConditionsRequest) =>
+      updateUserPositionConditions(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pendingTransaction) => pendingTransaction.wait())
         .andThen(client.waitForTransaction)
-        .andTee(async () =>
-          Promise.all([
-            client.refreshQueryWhere(
-              UserPositionsQuery,
-              (variables, data) =>
-                variables.request.user === request.sender &&
-                data.some((position) => position.spoke.id === request.spoke),
+        .andTee(async () => {
+          const { userPositionId } = request;
+          return Promise.all([
+            client.refreshQueryWhere(UserPositionsQuery, (_, data) =>
+              data.some((position) => position.id === userPositionId),
             ),
             client.refreshQueryWhere(
               UserPositionQuery,
-              (_, data) =>
-                data?.spoke.id === request.spoke &&
-                data.user === request.sender,
+              (_, data) => data?.id === userPositionId,
             ),
-          ]),
-        ),
+          ]);
+        }),
     [client, handler],
   );
 }
 
 /**
- * A hook that provides a way to update the user dynamic configuration for a spoke.
+ * Hook for updating the collateral status of user's supplies.
  *
  * ```ts
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [updateUserDynamicConfig, { loading, error }] = useUpdateUserDynamicConfig((transaction, { cancel }) => {
+ * const [setUserSuppliesAsCollateral, { loading, error }] = useSetUserSuppliesAsCollateral((transaction, { cancel }) => {
  *   return sendTransaction(transaction);
  * });
  *
- * // …
- *
- * const result = await updateUserDynamicConfig({ ... });
- *
- * if (result.isErr()) {
- *   switch (result.error.name) {
- *     case 'CancelError':
- *       // The user cancelled the operation
- *       return;
- *
- *     case 'SigningError':
- *       console.error(`Failed to sign the transaction: ${result.error.message}`);
- *       break;
- *
- *     case 'TimeoutError':
- *       console.error(`Transaction timed out: ${result.error.message}`);
- *       break;
- *
- *     case 'TransactionError':
- *       console.error(`Transaction failed: ${result.error.message}`);
- *       break;
- *
- *     case 'UnexpectedError':
- *       console.error(result.error.message);
- *       break;
- *   }
- *   return;
- * }
- *
- * console.log('Transaction sent with hash:', result.value);
- * ```
- *
- * @param handler - The handler that will be used to handle the transaction.
- */
-
-export function useUpdateUserDynamicConfig(
-  handler: TransactionHandler,
-): UseAsyncTask<
-  UpdateUserDynamicConfigRequest,
-  TxHash,
-  SendTransactionError | PendingTransactionError
-> {
-  const client = useAaveClient();
-
-  // TODO update relevant active queries once the location of dynamic config is clarified
-  return useAsyncTask(
-    (request: UpdateUserDynamicConfigRequest) =>
-      updateUserDynamicConfig(client, request)
-        .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
-        .andThen(client.waitForTransaction),
-    [client, handler],
-  );
-}
-
-/**
- * Hook for setting whether a user's supply should be used as collateral.
- *
- * ```ts
- * const [sendTransaction] = useSendTransaction(wallet);
- * const [setUserSupplyAsCollateral, { loading, error }] = useSetUserSupplyAsCollateral((transaction, { cancel }) => {
- *   return sendTransaction(transaction);
- * });
- *
- * const result = await setUserSupplyAsCollateral({
- *   reserve: reserveId('SGVsbG8h'),
- *   sender: evmAddress('0x456...'),
- *   enableCollateral: true,
+ * const result = await setUserSuppliesAsCollateral({
+ *   changes: [
+ *     {
+ *       reserve: reserve.id,
+ *       enableCollateral: true
+ *     }
+ *   ],
+ *   sender: evmAddress('0x456...')
  * });
  *
  * if (result.isErr()) {
@@ -761,82 +699,99 @@ export function useUpdateUserDynamicConfig(
  *
  * @param handler - The handler that will be used to handle the transaction.
  */
-export function useSetUserSupplyAsCollateral(
+export function useSetUserSuppliesAsCollateral(
   handler: TransactionHandler,
 ): UseAsyncTask<
-  SetUserSupplyAsCollateralRequest,
+  SetUserSuppliesAsCollateralRequest,
   TxHash,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: SetUserSupplyAsCollateralRequest) => {
-      const { chainId, spoke } = decodeReserveId(request.reserve);
-      return setUserSupplyAsCollateral(client, request)
+    (request: SetUserSuppliesAsCollateralRequest) => {
+      const reserveIds = request.changes.map((change) => change.reserve);
+      const reserveDetails = reserveIds.map((reserveId) =>
+        decodeReserveId(reserveId),
+      );
+      return setUserSuppliesAsCollateral(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pendingTransaction) => pendingTransaction.wait())
         .andThen(client.waitForTransaction)
         .andTee(() =>
           Promise.all([
             // update user positions
-            client.refreshQueryWhere(
-              UserPositionsQuery,
-              (variables, data) =>
-                variables.request.user === request.sender &&
-                data.some(
-                  (position) =>
-                    position.spoke.chain.chainId === chainId &&
-                    position.spoke.address === spoke,
-                ),
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(
+                UserPositionsQuery,
+                (variables, data) =>
+                  variables.request.user === request.sender &&
+                  data.some(
+                    (position) =>
+                      position.spoke.chain.chainId === chainId &&
+                      position.spoke.address === spoke,
+                  ),
+              ),
             ),
-            client.refreshQueryWhere(
-              UserPositionQuery,
-              (_, data) =>
-                data?.spoke.chain.chainId === chainId &&
-                data?.spoke.address === spoke &&
-                data.user === request.sender,
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(
+                UserPositionQuery,
+                (_, data) =>
+                  data?.spoke.chain.chainId === chainId &&
+                  data?.spoke.address === spoke &&
+                  data.user === request.sender,
+              ),
             ),
 
             // update user summary
-            client.refreshQueryWhere(UserSummaryQuery, (variables) =>
-              variables.request.user === request.sender &&
-              isSpokeInputVariant(variables.request.filter)
-                ? variables.request.filter.spoke.chainId === chainId &&
-                  variables.request.filter.spoke.address === spoke
-                : isChainIdsVariant(variables.request.filter)
-                  ? variables.request.filter.chainIds.some(
-                      (id) => id === chainId,
-                    )
-                  : false,
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(UserSummaryQuery, (variables) =>
+                variables.request.user === request.sender &&
+                isSpokeInputVariant(variables.request.filter)
+                  ? variables.request.filter.spoke.chainId === chainId &&
+                    variables.request.filter.spoke.address === spoke
+                  : isChainIdsVariant(variables.request.filter)
+                    ? variables.request.filter.chainIds.some(
+                        (id) => id === chainId,
+                      )
+                    : false,
+              ),
             ),
 
             // update reserves
             client.refreshQueryWhere(ReservesQuery, (_, data) =>
-              data.some((reserve) => reserve.id === request.reserve),
+              data.some((reserve) => reserveIds.includes(reserve.id)),
             ),
 
             // update spokes
-            client.refreshQueryWhere(SpokesQuery, (_, data) =>
-              data.some(
-                (item) =>
-                  item.chain.chainId === chainId && item.address === spoke,
+            ...reserveDetails.map(({ chainId, spoke }) =>
+              client.refreshQueryWhere(SpokesQuery, (_, data) =>
+                data.some(
+                  (item) =>
+                    item.chain.chainId === chainId && item.address === spoke,
+                ),
               ),
             ),
 
             // update hubs
-            client.refreshQueryWhere(HubsQuery, (variables) =>
-              isChainIdsVariant(variables.request.query)
-                ? variables.request.query.chainIds.some((id) => id === chainId)
-                : variables.request.query.tokens.some(
-                    (token) => token.chainId === chainId,
-                  ),
+            ...reserveDetails.map(({ chainId }) =>
+              client.refreshQueryWhere(HubsQuery, (variables) =>
+                isChainIdsVariant(variables.request.query)
+                  ? variables.request.query.chainIds.some(
+                      (id) => id === chainId,
+                    )
+                  : variables.request.query.tokens.some(
+                      (token) => token.chainId === chainId,
+                    ),
+              ),
             ),
-            client.refreshQueryWhere(HubQuery, (variables) =>
-              isHubInputVariant(variables.request.query)
-                ? variables.request.query.hubInput.chainId === chainId
-                : decodeHubId(variables.request.query.hubId).chainId ===
-                  chainId,
+            ...reserveDetails.map(({ chainId }) =>
+              client.refreshQueryWhere(HubQuery, (variables) =>
+                isHubInputVariant(variables.request.query)
+                  ? variables.request.query.hubInput.chainId === chainId
+                  : decodeHubId(variables.request.query.hubId).chainId ===
+                    chainId,
+              ),
             ),
           ]),
         );
@@ -1198,7 +1153,7 @@ export function usePreview({
 }
 
 export type UseActivitiesArgs = Prettify<
-  ActivitiesRequest & CurrencyQueryOptions
+  ActivitiesRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -1284,6 +1239,7 @@ export function useActivities({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseActivitiesArgs> & {
   suspense?: boolean;
@@ -1294,6 +1250,7 @@ export function useActivities({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -1312,13 +1269,17 @@ export function useActivities({
  * @returns The user history.
  */
 export function useActivitiesAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ActivitiesRequest, PaginatedActivitiesResult, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: ActivitiesRequest) =>
-      activities(client, request, { currency: options.currency }),
-    [client, options.currency],
+      activities(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }

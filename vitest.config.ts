@@ -38,12 +38,32 @@ export default defineConfig({
         test: {
           name: 'react',
           environment: 'happy-dom',
+          environmentOptions: {
+            happyDOM: {
+              settings: {
+                fetch: {
+                  disableSameOriginPolicy: true,
+                },
+              },
+            },
+          },
+          setupFiles: [resolve(__dirname, './packages/react/vitest.setup.ts')],
           include: ['packages/react/**/*.test.{ts,tsx}'],
           typecheck: {
             enabled: true,
             include: ['packages/react/**/*.test-d.ts'],
             tsconfig: 'packages/react/tsconfig.build.json',
           },
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'cli',
+          include: ['packages/cli/**/*.test.ts'],
+          environment: 'node',
+          disableConsoleIntercept: true, // for oclif tests
+          setupFiles: ['tsx/esm'],
         },
       },
       {
@@ -57,9 +77,22 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: 'core',
+          include: ['packages/core/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: 'types',
           include: ['packages/types/**/*.test.ts'],
           environment: 'node',
+          typecheck: {
+            enabled: true,
+            include: ['packages/types/**/*.test-d.ts'],
+            tsconfig: 'packages/types/tsconfig.build.json',
+          },
         },
       },
     ],

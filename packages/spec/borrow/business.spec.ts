@@ -1,35 +1,37 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { borrow, preview, userBorrows } from '@aave/client-next/actions';
+import { assertOk, bigDecimal, evmAddress } from '@aave/client';
+import { borrow, preview, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_SPOKE_CORE_ADDRESS,
-  ETHEREUM_SPOKE_EMODE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-  ETHEREUM_WSTETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
+} from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { assertSingleElementArray } from '../test-utils';
+import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Feature: Borrowing Assets on Aave V4', () => {
+describe('Borrowing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     beforeAll(async () => {
+      const amountToSupply = bigDecimal('100');
+
       const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_WSTETH_ADDRESS,
-        amount: bigDecimal('0.2'),
+        address: ETHEREUM_USDC_ADDRESS,
+        amount: amountToSupply,
+        decimals: 6,
       }).andThen(() =>
         findReserveAndSupply(client, user, {
-          token: ETHEREUM_WSTETH_ADDRESS,
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
-          amount: bigDecimal('0.1'),
+          token: ETHEREUM_USDC_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          amount: amountToSupply,
           asCollateral: true,
         }),
       );
@@ -40,7 +42,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
     describe('When the user wants to preview the borrow action before performing it', () => {
       it('Then the user can review the borrow details before proceeding', async () => {
         const borrowPreviewResult = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         }).andThen((reserves) =>
           preview(client, {
             action: {
@@ -68,7 +70,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
     describe('When the user borrows an ERC20 asset', () => {
       it(`Then the user's borrow position is updated to reflect the ERC20 loan`, async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
         });
         assertOk(reservesToBorrow);
         const amountToBorrow =
@@ -103,25 +105,26 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
         assertSingleElementArray(result.value);
         expect(result.value[0].debt.amount.value).toBeBigDecimalCloseTo(
           amountToBorrow,
-          2,
         );
-        expect(result.value[0].debt.isWrappedNative).toBe(false);
+        expect(result.value[0].debt.token.isWrappedNativeToken).toBe(false);
       });
     });
   });
 
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     describe('When the user borrows a native asset from the reserve', () => {
-      // NOTE: Need to use Emode Spoke to borrow native assets
       beforeAll(async () => {
+        const amountToSupply = bigDecimal('100');
+
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_WSTETH_ADDRESS,
-          amount: bigDecimal('0.2'),
+          address: ETHEREUM_USDC_ADDRESS,
+          amount: amountToSupply,
+          decimals: 6,
         }).andThen(() =>
           findReserveAndSupply(client, user, {
-            token: ETHEREUM_WSTETH_ADDRESS,
-            amount: bigDecimal('0.1'),
-            spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+            token: ETHEREUM_USDC_ADDRESS,
+            amount: amountToSupply,
+            spoke: ETHEREUM_SPOKE_CORE_ID,
             asCollateral: true,
           }),
         );
@@ -130,7 +133,7 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
       });
       it(`Then the user's borrow position is updated to reflect the native asset loan`, async () => {
         const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_EMODE_ADDRESS,
+          spoke: ETHEREUM_SPOKE_CORE_ID,
           token: ETHEREUM_WETH_ADDRESS,
         });
         assertOk(reservesToBorrow);
@@ -165,16 +168,30 @@ describe('Feature: Borrowing Assets on Aave V4', () => {
           );
 
         assertOk(result);
-        assertSingleElementArray(result.value);
+        assertNonEmptyArray(result.value);
+        const position = result.value.find((position) => {
+          return (
+            position.reserve.asset.underlying.address ===
+            reservesToBorrow.value[0].asset.underlying.address
+          );
+        });
+        expect(position!).toMatchObject({
+          id: expect.any(String),
+          reserve: expect.any(Object),
+          debt: expect.any(Object),
+          interest: expect.any(Object),
+          principal: expect.any(Object),
+          createdAt: expect.any(String),
+        });
+
         const balanceAfter = await getNativeBalance(
           evmAddress(user.account.address),
         );
         expect(balanceAfter).toBeBigDecimalCloseTo(
           balanceBefore.add(amountToBorrow),
-          4,
         );
 
-        expect(result.value[0].debt.amount.value).toBeBigDecimalCloseTo(
+        expect(position?.debt.amount.value).toBeBigDecimalCloseTo(
           amountToBorrow,
           4,
         );

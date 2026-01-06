@@ -1,9 +1,9 @@
 ---
-"@aave/graphql-next": major
-"@aave/client-next": major
-"@aave/react-next": major
-"@aave/types-next": major
-"@aave/core-next": major
+"@aave/graphql": major
+"@aave/client": major
+"@aave/react": major
+"@aave/types": major
+"@aave/core": major
 ---
 
-**feat:** new Aave v4 SDK
+**feat:** new AaveKit v4.

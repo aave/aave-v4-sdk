@@ -1,8 +1,9 @@
 import {
   ETHEREUM_FORK_ID,
+  ETHEREUM_FORK_RPC_URL,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client-next/test-utils';
-import type { SupplyActivity } from '@aave/graphql-next';
+} from '@aave/client/testing';
+import type { SupplyActivity } from '@aave/graphql';
 import {
   Currency,
   type Erc20Amount,
@@ -12,8 +13,9 @@ import {
   type PreviewAction,
   type ReserveInfo,
   type Spoke,
-} from '@aave/graphql-next';
-import { bigDecimal, evmAddress, txHash } from '@aave/types-next';
+  tokenInfoId,
+} from '@aave/graphql';
+import { bigDecimal, evmAddress, txHash } from '@aave/types';
 import { describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useNetworkFee } from './useNetworkFee';
@@ -34,8 +36,10 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         chainId: ETHEREUM_FORK_ID,
         name: 'Ethereum',
         icon: 'https://example.com/eth-icon.png',
+        rpcUrl: ETHEREUM_FORK_RPC_URL,
         explorerUrl: 'https://etherscan.io',
         isTestnet: false,
+        isFork: true,
         nativeWrappedToken: ETHEREUM_WETH_ADDRESS,
         nativeGateway: evmAddress('0x0000000000000000000000000000000000000001'),
         signatureGateway: evmAddress(
@@ -43,10 +47,12 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         ),
         nativeInfo: {
           __typename: 'TokenInfo',
+          id: tokenInfoId('1'),
           name: 'Ethereum',
           symbol: 'ETH',
           icon: 'https://example.com/eth-icon.png',
           decimals: 18,
+          categories: [],
         },
       },
       spoke: {} as Spoke,
@@ -75,8 +81,8 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
       );
 
       // Assert correct conversion
-      expect(fee.fiatAmount.value).toEqual(
-        fee.amount.value.mul(fee.fiatRate.value),
+      expect(fee.exchange.value).toEqual(
+        fee.amount.value.mul(fee.exchangeRate.value),
       );
     });
   });
@@ -126,16 +132,22 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         expectedGasCost: 501102n,
       },
       {
-        requestType: 'SetUserSupplyAsCollateralRequest',
+        requestType: 'SetUserSuppliesAsCollateralRequest',
         estimate: {
-          setUserSupplyAsCollateral: {
-            enableCollateral: true,
+          setUserSuppliesAsCollateral: {
+            changes: [
+              {
+                reserve: encodeReserveId({
+                  chainId: ETHEREUM_FORK_ID,
+                  spoke: evmAddress(
+                    '0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F',
+                  ),
+                  onChainId: '1' as OnChainReserveId,
+                }),
+                enableCollateral: true,
+              },
+            ],
             sender: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
-            reserve: encodeReserveId({
-              chainId: ETHEREUM_FORK_ID,
-              spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
-              onChainId: '1' as OnChainReserveId,
-            }),
           },
         },
         expectedGasCost: 480568n,

@@ -1,6 +1,3 @@
-permissions:
-  contents: write
-  pull-requests: write
 name: Release
 
 on:
@@ -8,12 +5,31 @@ on:
     branches:
       - main
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  release:
-    name: Release
+
+  verify:
+    name: Verify
+    uses: ./.github/workflows/verify.yml
+    secrets: inherit
+
+  changesets:
+    name: Changesets
     runs-on: ubuntu-latest
+    needs: verify
+    env:
+      ETHEREUM_TENDERLY_FORK_ID: ${{ vars.ETHEREUM_TENDERLY_FORK_ID }}
+      ETHEREUM_TENDERLY_PUBLIC_RPC: ${{ vars.ETHEREUM_TENDERLY_PUBLIC_RPC }}
+      ETHEREUM_TENDERLY_BLOCKEXPLORER: ${{ vars.ETHEREUM_TENDERLY_BLOCKEXPLORER }}
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -21,10 +37,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Configure NPM Auth Token
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" >> ~/.npmrc
-
-      - name: Create Release Pull Request
+      - name: Run Changesets
         uses: changesets/action@v1
         with:
           title: '[Release] Candidate'
@@ -33,10 +46,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  verify:
-    needs: release
-    if: ${{ needs.release.outputs.pullRequestNumber != '' }}
-    uses: ./.github/workflows/verify.yml
-    secrets: inherit
-    with:
-      run-acceptance: true

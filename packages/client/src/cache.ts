@@ -1,5 +1,6 @@
 import {
   type ActivitiesQuery,
+  type Asset,
   type BorrowActivity,
   type Chain,
   type Erc20Token,
@@ -16,15 +17,16 @@ import {
   type ReserveInfo,
   type Spoke,
   type SupplyActivity,
-  type SwapByIntent,
-  type SwapByIntentWithApprovalRequired,
-  type SwapByTransaction,
+  type TokenInfo,
+  type UpdatedDynamicConfigActivity,
+  type UpdatedRiskPremiumActivity,
   type UserPosition,
+  type UsingAsCollateralActivity,
   type VariablesOf,
   type WithdrawActivity,
-} from '@aave/graphql-next';
-import introspectedSchema from '@aave/graphql-next/schema';
-import { BigDecimal, type TxHash } from '@aave/types-next';
+} from '@aave/graphql';
+import introspectedSchema from '@aave/graphql/schema';
+import { BigDecimal, type TxHash } from '@aave/types';
 import {
   cacheExchange,
   type Resolver,
@@ -76,15 +78,12 @@ export const exchange = cacheExchange({
       onChainValue: transformToBigInt,
       value: transformToBigDecimal,
     },
-    FiatAmount: {
+    ExchangeAmount: {
       value: transformToBigDecimal,
     },
     AssetPriceSample: {
       price: transformToBigDecimal,
       date: transformToDate,
-    },
-    HubSummary: {
-      utilizationRate: transformToBigDecimal,
     },
     Reserve: {
       borrowCap: transformToBigDecimal,
@@ -111,13 +110,19 @@ export const exchange = cacheExchange({
     TransactionRequest: {
       value: transformToBigInt,
     },
-    APYSample: {
+    ApySample: {
       date: transformToDate,
     },
     AssetBorrowSample: {
       date: transformToDate,
     },
     AssetSupplySample: {
+      date: transformToDate,
+    },
+    HubSummarySample: {
+      date: transformToDate,
+    },
+    ProtocolHistorySample: {
       date: transformToDate,
     },
     BorrowActivity: {
@@ -133,6 +138,15 @@ export const exchange = cacheExchange({
       timestamp: transformToDate,
     },
     WithdrawActivity: {
+      timestamp: transformToDate,
+    },
+    UsingAsCollateralActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedDynamicConfigActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedRiskPremiumActivity: {
       timestamp: transformToDate,
     },
     SpokeUserPositionManager: {
@@ -229,11 +243,6 @@ export const exchange = cacheExchange({
               }
             }
             return true;
-          })
-          .sort((a, b) => {
-            const ta = cache.resolve(a, 'timestamp') as Date;
-            const tb = cache.resolve(b, 'timestamp') as Date;
-            return tb.getTime() <= ta.getTime() ? 1 : -1;
           });
 
         if (matches.length === 0) return undefined;
@@ -251,25 +260,24 @@ export const exchange = cacheExchange({
     },
   },
   keys: {
-    // Entitied with composite key
+    // Entities with id field as key
+    Asset: (data: Asset) => data.id,
+    BorrowActivity: (data: BorrowActivity) => data.id,
     Hub: (data: Hub) => data.id,
     HubAsset: (data: HubAsset) => data.id,
+    LiquidatedActivity: (data: LiquidatedActivity) => data.id,
+    RepayActivity: (data: RepayActivity) => data.id,
     Reserve: (data: Reserve) => data.id,
     ReserveInfo: (data: ReserveInfo) => data.id,
     Spoke: (data: Spoke) => data.id,
-
-    // Entities with id field as key
-    BorrowActivity: (data: BorrowActivity) => data.id,
-    LiquidatedActivity: (data: LiquidatedActivity) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
-    SwapByIntent: (data: SwapByIntent) => data.quote.quoteId,
-    SwapByIntentWithApprovalRequired: (
-      data: SwapByIntentWithApprovalRequired,
-    ) => data.quote.quoteId,
-    SwapByTransaction: (data: SwapByTransaction) => data.quote.quoteId,
+    TokenInfo: (data: TokenInfo) => data.id,
     UserPosition: (data: UserPosition) => data.id,
+    UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
     WithdrawActivity: (data: WithdrawActivity) => data.id,
-    RepayActivity: (data: RepayActivity) => data.id,
+    UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
+      data.id,
+    UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
 
     // Entities with address field as key
     Erc20Token: (data: Erc20Token) => data.address,
@@ -278,34 +286,21 @@ export const exchange = cacheExchange({
     Chain: (data: Chain) => data.chainId.toString(),
     NativeToken: (data: NativeToken) => data.chain.chainId.toString(),
 
-    // Entities without keys will be embedded directly on the parent entity
-    PaginatedActivitiesResult: () => null,
-    PaginatedResultInfo: () => null,
-    PaginatedSpokePositionManagerResult: () => null,
-    PaginatedSpokeUserPositionManagerResult: () => null,
-    PaginatedUserSwapsResult: () => null,
-    SpokePositionManger: () => null,
-    SpokeUserPositionManager: () => null,
-    SwapReceipt: () => null,
-    SwapTransactionRequest: () => null,
-
     // Value objects and result types
-    APYSample: () => null,
-    Asset: () => null,
+    ApySample: () => null,
+    AssetAmountWithChange: () => null,
     AssetBorrowSample: () => null,
     AssetPriceSample: () => null,
     AssetSummary: () => null,
     AssetSupplySample: () => null,
-    CancelSwapTypedData: () => null,
-    CancelSwapTypeDefinition: () => null,
     DecimalNumber: () => null,
     DecimalNumberWithChange: () => null,
     DomainData: () => null,
     Erc20Amount: () => null,
     Erc20ApprovalRequired: () => null,
-    FiatAmount: () => null,
-    FiatAmountValueVariation: () => null,
-    FiatAmountWithChange: () => null,
+    ExchangeAmount: () => null,
+    ExchangeAmountVariation: () => null,
+    ExchangeAmountWithChange: () => null,
     ForkTopUpResponse: () => null,
     HealthFactorError: () => null,
     HealthFactorVariation: () => null,
@@ -314,23 +309,36 @@ export const exchange = cacheExchange({
     HubAssetSummary: () => null,
     HubAssetUserState: () => null,
     HubSummary: () => null,
+    HubSummarySample: () => null,
     InsufficientBalanceError: () => null,
     NativeAmount: () => null,
+    PaginatedActivitiesResult: () => null,
+    PaginatedResultInfo: () => null,
+    PaginatedSpokePositionManagerResult: () => null,
+    PaginatedSpokeUserPositionManagerResult: () => null,
+    PaginatedUserSwapsResult: () => null,
     PercentNumber: () => null,
     PercentNumberVariation: () => null,
     PercentNumberWithChange: () => null,
     PermitMessageData: () => null,
     PermitTypedDataResponse: () => null,
+    PositionSwapAdapterContractApproval: () => null,
+    PositionSwapByIntentApprovalsRequired: () => null,
+    PositionSwapPositionManagerApproval: () => null,
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PreviewUserPosition: () => null,
+    ProtocolHistorySample: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,
     ReserveSummary: () => null,
     ReserveUserState: () => null,
+    SpokePositionManger: () => null,
+    SpokeUserPositionManager: () => null,
     SwapApprovalRequired: () => null,
-    SwapByIntentTypedData: () => null,
-    SwapByIntentTypeDefinition: () => null,
+    SwapByIntent: () => null,
+    SwapByIntentWithApprovalRequired: () => null,
+    SwapByTransaction: () => null,
     SwapCancelled: () => null,
     SwapExpired: () => null,
     SwapFulfilled: () => null,
@@ -338,12 +346,16 @@ export const exchange = cacheExchange({
     SwapPendingSignature: () => null,
     SwapQuote: () => null,
     SwapQuoteCosts: () => null,
-    TokenInfo: () => null,
+    SwapReceipt: () => null,
+    SwapTransactionRequest: () => null,
+    SwapTypedData: () => null,
     TransactionRequest: () => null,
     TypeDefinition: () => null,
     TypeField: () => null,
     UserBalance: () => null,
     UserBorrowItem: () => null,
+    UserPositionRiskPremium: () => null,
+    UserRiskPremiumBreakdownItem: () => null,
     UserSummary: () => null,
     UserSummaryHistoryItem: () => null,
     UserSupplyItem: () => null,

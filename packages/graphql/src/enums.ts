@@ -1,3 +1,16 @@
+import type { Tagged } from 'type-fest';
+
+type EnumValues<E> = E[keyof E];
+
+export type OpaqueEnumVariant = Tagged<string, 'OpaqueEnumVariant'>;
+
+/**
+ * Adds an opaque value to an enum-union.
+ *
+ * @internal
+ */
+export type ExtendWithOpaqueVariant<E> = EnumValues<E> | OpaqueEnumVariant;
+
 /**
  * The order direction for sorting results.
  */
@@ -35,9 +48,11 @@ export enum OperationType {
   SpokeSupply = 'SPOKE_SUPPLY',
   SpokeWithdraw = 'SPOKE_WITHDRAW',
   SpokeUpdateUserRiskPremium = 'SPOKE_UPDATE_USER_RISK_PREMIUM',
+  SpokeUpdateUserDynamicConfig = 'SPOKE_UPDATE_USER_DYNAMIC_CONFIG',
   SpokeSetUserUsingAsCollateral = 'SPOKE_SET_USER_USING_AS_COLLATERAL',
   SpokeSetUserPositionManager = 'SPOKE_SET_USER_POSITION_MANAGER',
   RenounceSpokeUserPositionManager = 'RENOUNCE_SPOKE_USER_POSITION_MANAGER',
+  Liquidation = 'LIQUIDATION',
 }
 
 /**
@@ -76,6 +91,8 @@ export enum ActivityType {
   Repay = 'REPAY',
   Liquidated = 'LIQUIDATED',
   SetAsCollateral = 'SET_AS_COLLATERAL',
+  UpdatedDynamicConfig = 'UPDATED_DYNAMIC_CONFIG',
+  UpdatedRiskPremium = 'UPDATED_RISK_PREMIUM',
 }
 
 /**
@@ -85,6 +102,14 @@ export enum ApyMetric {
   Highest = 'HIGHEST',
   Lowest = 'LOWEST',
   Average = 'AVERAGE',
+}
+
+/**
+ * The collateral metric for comparing collateral factors.
+ */
+export enum CollateralMetric {
+  Highest = 'HIGHEST',
+  Lowest = 'LOWEST',
 }
 
 /**
@@ -102,6 +127,7 @@ export enum Currency {
 export enum ReservesRequestFilter {
   Supply = 'SUPPLY',
   Borrow = 'BORROW',
+  Collateral = 'COLLATERAL',
   All = 'ALL',
 }
 
@@ -122,4 +148,20 @@ export enum SwapStatusFilter {
   Fulfilled = 'FULFILLED',
   Open = 'OPEN',
   PendingSignature = 'PENDING_SIGNATURE',
+}
+
+/**
+ * The category for tokens.
+ */
+export enum TokenCategory {
+  Stablecoin = 'STABLECOIN',
+  EthCorrelated = 'ETH_CORRELATED',
+}
+
+/**
+ * The update type for user position conditions.
+ */
+export enum UserPositionConditionsUpdate {
+  AllDynamicConfig = 'ALL_DYNAMIC_CONFIG',
+  JustRiskPremium = 'JUST_RISK_PREMIUM',
 }

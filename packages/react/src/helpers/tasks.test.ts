@@ -1,4 +1,4 @@
-import { errAsync, InvariantError, okAsync } from '@aave/types-next';
+import { errAsync, InvariantError, okAsync } from '@aave/types';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {
@@ -115,8 +115,27 @@ describe(`Given the '${useAsyncTask.name}' hook`, () => {
       });
     });
 
+    describe('When the task throws an error synchronously', () => {
+      it('Then it should revert to the previous state and rethrow the error', async () => {
+        const { result } = renderHook(() =>
+          useAsyncTask((_: string) => {
+            throw new Error('test error');
+          }, []),
+        );
+        const state = result.current[1];
+
+        await act(async () => {
+          await expect(async () => {
+            await result.current[0]('test');
+          }).rejects.toThrow(Error);
+        });
+
+        expect(result.current[1]).toMatchObject(state);
+      });
+    });
+
     describe('When the task fails', () => {
-      it('Then it should return the state in line with type of `AsyncTaskFailed`', async () => {
+      it('Then it should return the state in line with type of `AsyncTaskError`', async () => {
         const { result } = renderHook(() =>
           useAsyncTask((_: string) => errAsync(new Error('test error')), []),
         );
@@ -150,7 +169,7 @@ describe(`Given the '${useAsyncTask.name}' hook`, () => {
     });
   });
 
-  describe('And the hook is executed once with an error', () => {
+  describe('And a previous execution failed', () => {
     describe('When the hook is executed again', () => {
       it('Then it should return the state in line with type of `AsyncTaskLoading`', async () => {
         const { result } = renderHook(() =>
@@ -235,7 +254,7 @@ describe(`Given the '${useAsyncTask.name}' hook`, () => {
     });
 
     describe('When the task fails', () => {
-      it('Then it should return the state in line with type of `AsyncTaskFailed`', async () => {
+      it('Then it should return the state in line with type of `AsyncTaskError`', async () => {
         const { result } = renderHook(() =>
           useAsyncTask((input: string) => {
             if (input === 'one') return okAsync(input);

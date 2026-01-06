@@ -1,11 +1,21 @@
 {
-  "name": "@aave/client-next",
-  "version": "0.6.1",
-  "description": "The official JavaScript client for the Aave API",
+  "name": "@aave/client",
+  "version": "4.0.0-next.12",
+  "description": "The official TypeScript client for the AaveKit API",
+  "keywords": [
+    "aave",
+    "aave-sdk",
+    "aave-kit",
+    "aave-protocol",
+    "typescript",
+    "ts",
+    "defi",
+    "de-fi"
+  ],
   "repository": {
     "directory": "packages/client",
     "type": "git",
-    "url": "git://github.com/aave/aave-sdk.git"
+    "url": "git://github.com/aave/aave-v4-sdk.git"
   },
   "type": "module",
   "main": "dist/index.cjs",
@@ -40,9 +50,8 @@
       "import": "./dist/viem.js",
       "require": "./dist/viem.cjs"
     },
-    "./test-utils": {
-      "import": "./dist/test-utils.js",
-      "require": "./dist/test-utils.cjs"
+    "./testing": {
+      "default": "./dist/testing.js"
     }
   },
   "typesVersions": {
@@ -65,8 +74,8 @@
       "viem": [
         "./dist/viem.d.ts"
       ],
-      "test-utils": [
-        "./dist/test-utils.d.ts"
+      "testing": [
+        "./dist/testing.d.ts"
       ]
     }
   },
@@ -78,9 +87,9 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@aave/core-next": "workspace:*",
-    "@aave/graphql-next": "workspace:*",
-    "@aave/types-next": "workspace:*",
+    "@aave/core": "workspace:*",
+    "@aave/graphql": "workspace:*",
+    "@aave/types": "workspace:*",
     "@urql/core": "^6.0.1",
     "@urql/exchange-graphcache": "^8.1.0",
     "graphql": "^16.11.0"
@@ -88,12 +97,12 @@
   "devDependencies": {
     "@bgd-labs/aave-address-book": "^4.25.3",
     "@node-kit/pnpm-workspace-root": "^3.3.1",
-    "@privy-io/server-auth": "^1.28.8",
+    "@privy-io/server-auth": "^1.32.5",
     "dotenv": "^17.2.3",
     "ethers": "^6.14.4",
     "msw": "^2.10.5",
     "thirdweb": "^5.105.25",
-    "tsup": "^8.5.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.2",
     "viem": "^2.37.5"
   },
@@ -119,6 +128,6 @@
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

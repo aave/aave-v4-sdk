@@ -1,11 +1,11 @@
 {
-  "name": "@aave/types-next",
-  "version": "0.1.1",
+  "name": "@aave/types",
+  "version": "1.0.0-next.6",
   "description": "Core types for the Aave SDK",
   "repository": {
     "directory": "packages/types",
     "type": "git",
-    "url": "git://github.com/aave/aave-sdk.git"
+    "url": "git://github.com/aave/aave-v4-sdk.git"
   },
   "type": "module",
   "main": "dist/index.cjs",
@@ -41,11 +41,11 @@
     "type-fest": "^5.1.0"
   },
   "devDependencies": {
-    "tsup": "^8.5.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.2"
   },
   "license": "MIT",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

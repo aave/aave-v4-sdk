@@ -1,3 +1,4 @@
+import { DomainDataFragment } from './fragments';
 import { type FragmentOf, graphql, type RequestOf } from './graphql';
 
 export const TypeFieldFragment = graphql(
@@ -20,16 +21,6 @@ export const TypeDefinitionFragment = graphql(
   [TypeFieldFragment],
 );
 export type TypeDefinition = FragmentOf<typeof TypeDefinitionFragment>;
-
-export const DomainDataFragment = graphql(
-  `fragment DomainData on DomainData {
-    name
-    version
-    chainId
-    verifyingContract
-  }`,
-);
-export type DomainData = FragmentOf<typeof DomainDataFragment>;
 
 export const PermitMessageDataFragment = graphql(
   `fragment PermitMessageData on PermitMessageData {

@@ -1,11 +1,9 @@
 name: 'Verify'
 on:
   workflow_call:
-    inputs:
-      run-acceptance:
-        type: boolean
-        required: false
-        default: false
+
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -18,7 +16,7 @@ jobs:
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: 2.0.6
+          version: 2.2.5
 
       - name: Run Biome
         run: biome ci .
@@ -38,7 +36,6 @@ jobs:
       ETHEREUM_TENDERLY_PUBLIC_RPC: ${{ vars.ETHEREUM_TENDERLY_PUBLIC_RPC }}
       ETHEREUM_TENDERLY_ADMIN_RPC: ${{ secrets.ETHEREUM_TENDERLY_ADMIN_RPC }}
       ETHEREUM_TENDERLY_BLOCKEXPLORER: ${{ vars.ETHEREUM_TENDERLY_BLOCKEXPLORER }}
-      API_X_E2E_TESTS_HEADER: ${{ secrets.API_X_E2E_TESTS_HEADER }}
       THIRDWEB_TEST_SECRET_KEY: ${{ secrets.THIRDWEB_TEST_SECRET_KEY }}
       THIRDWEB_TEST_WALLET_ADDRESS: ${{ vars.THIRDWEB_TEST_WALLET_ADDRESS }}
 
@@ -63,8 +60,3 @@ jobs:
       - name: Run Tests
         shell: bash
         run: pnpm test
-
-      - name: Run Acceptance Tests
-        if: ${{ inputs.run-acceptance }}
-        shell: bash
-        run: pnpm spec

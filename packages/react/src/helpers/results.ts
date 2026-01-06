@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/client-next';
+import type { UnexpectedError } from '@aave/client';
 
 /**
  * A read hook result.

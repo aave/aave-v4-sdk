@@ -1,14 +1,20 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client-next';
-import { preview, userSupplies, withdraw } from '@aave/client-next/actions';
+import {
+  assertOk,
+  type BigDecimal,
+  bigDecimal,
+  evmAddress,
+} from '@aave/client';
+import { preview, userSupplies, withdraw } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
+  ETHEREUM_SPOKE_CORE_ID,
   fundErc20Address,
   getBalance,
   getNativeBalance,
-} from '@aave/client-next/test-utils';
-import { sendWith } from '@aave/client-next/viem';
-import type { Reserve } from '@aave/graphql-next';
+} from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
+import type { Reserve } from '@aave/graphql';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { findReservesToSupply } from '../helpers/reserves';
@@ -23,34 +29,39 @@ const user = await createNewWallet();
 describe('Withdrawing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position', () => {
     let reserve: Reserve;
-    const amountToSupply = bigDecimal(0.1);
+    let amountToSupply: BigDecimal;
 
     beforeEach(async () => {
-      const setup = await findReservesToSupply(client, user).andThen(
-        (listReserves) =>
-          fundErc20Address(evmAddress(user.account!.address), {
-            address: listReserves[0].asset.underlying.address,
-            amount: bigDecimal('1'),
-            decimals: listReserves[0].asset.underlying.info.decimals,
-          }).andThen(() =>
-            supplyToReserve(client, user, {
-              reserve: listReserves[0].id,
-              amount: {
-                erc20: {
-                  value: amountToSupply,
-                },
+      const setup = await findReservesToSupply(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      }).andThen((listReserves) => {
+        amountToSupply = listReserves[0].supplyCap
+          .minus(listReserves[0].summary.supplied.amount.value)
+          .div(10000);
+
+        return fundErc20Address(evmAddress(user.account!.address), {
+          address: listReserves[0].asset.underlying.address,
+          amount: amountToSupply,
+          decimals: listReserves[0].asset.underlying.info.decimals,
+        }).andThen(() =>
+          supplyToReserve(client, user, {
+            reserve: listReserves[0].id,
+            amount: {
+              erc20: {
+                value: amountToSupply,
               },
-              sender: evmAddress(user.account.address),
-            }).map(() => listReserves[0]),
-          ),
-      );
+            },
+            sender: evmAddress(user.account.address),
+          }).map(() => listReserves[0]),
+        );
+      });
       assertOk(setup);
       reserve = setup.value;
     }, 40_000);
 
     describe('When the user withdraws part of their supplied tokens', () => {
       it("Then the user's supply position is updated to reflect the partial withdrawal", async () => {
-        const amountToWithdraw = amountToSupply.times(0.5);
+        const amountToWithdraw = amountToSupply.div(2);
         const balanceBefore = await getBalance(
           evmAddress(user.account.address),
           reserve.asset.underlying.address,
@@ -79,7 +90,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         assertSingleElementArray(withdrawResult.value);
         expect(
           withdrawResult.value[0].withdrawable.amount.value,
-        ).toBeBigDecimalCloseTo(amountToSupply.minus(amountToWithdraw), 2);
+        ).toBeBigDecimalCloseTo(amountToSupply.minus(amountToWithdraw));
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),
@@ -94,7 +105,7 @@ describe('Withdrawing Assets on Aave V4', () => {
 
     describe('When the user wants to preview the withdrawal action before performing it', () => {
       it('Then the user can review the withdrawal details before proceeding', async () => {
-        const amountToWithdraw = amountToSupply.div(3);
+        const amountToWithdraw = amountToSupply.div(4);
 
         const previewResult = await preview(client, {
           action: {
@@ -103,7 +114,7 @@ describe('Withdrawing Assets on Aave V4', () => {
               sender: evmAddress(user.account.address),
               amount: {
                 erc20: {
-                  exact: bigDecimal(amountToWithdraw),
+                  exact: amountToWithdraw,
                 },
               },
             },
@@ -158,7 +169,8 @@ describe('Withdrawing Assets on Aave V4', () => {
     });
   });
 
-  describe('Given a user and a reserve that supports withdrawals in native tokens', () => {
+  // TODO: Enable when we have a test fork that allow us to control
+  describe.skip('Given a user and a reserve that supports withdrawals in native tokens', () => {
     let reserveSupportingNative: Reserve;
     const amountToSupply = bigDecimal(0.05);
 
@@ -175,10 +187,11 @@ describe('Withdrawing Assets on Aave V4', () => {
 
     describe('When the user withdraws part of their supplied native tokens', () => {
       it('Then the user receives the partial amount in native tokens and their supply position is updated', async () => {
-        const amountToWithdraw = amountToSupply.times(0.5);
+        const amountToWithdraw = amountToSupply.div(2);
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
         );
+
         const withdrawResult = await withdraw(client, {
           reserve: reserveSupportingNative.id,
           sender: evmAddress(user.account.address),

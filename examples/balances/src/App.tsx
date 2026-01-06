@@ -1,9 +1,19 @@
-import { chainId, evmAddress, useUserBalances } from '@aave/react-next';
+import {
+  evmAddress,
+  ReservesRequestFilter,
+  useUserBalances,
+} from '@aave/react';
+import { defaultChainId } from './config';
 
 export function App() {
   const { data, loading } = useUserBalances({
-    chainIds: [chainId(1)],
-    user: evmAddress('0x26D595DDDBAD81BF976EF6F24686A12A800B141F'),
+    user: evmAddress('0x6e82eeef7d4aa83da6de167bed33443a40fada8d'),
+    filter: {
+      chains: {
+        chainIds: [defaultChainId],
+        byReservesType: ReservesRequestFilter.All,
+      },
+    },
   });
 
   if (loading) {
@@ -12,8 +22,14 @@ export function App() {
 
   return (
     <div>
-      <header>
+      <header style={{ textAlign: 'center', padding: '20px' }}>
         <h1>User Balances</h1>
+        <p style={{ color: '#666', marginBottom: '30px' }}>
+          <small>
+            This example demonstrates how to get the user's balances across all
+            reserves on the selected chain.
+          </small>
+        </p>
       </header>
       <div>
         {data?.map((balance) => (

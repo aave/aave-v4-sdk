@@ -1,9 +1,9 @@
-import { assertOk, PageSize } from '@aave/client-next';
-import { spokePositionManagers } from '@aave/client-next/actions';
-import { client, ETHEREUM_SPOKE_CORE_ID } from '@aave/client-next/test-utils';
+import { assertOk, PageSize } from '@aave/client';
+import { spokePositionManagers } from '@aave/client/actions';
+import { client, ETHEREUM_SPOKE_CORE_ID } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 
-describe('Available Position Managers in a Spoke on Aave V4', () => {
+describe('Querying Position Managers on Aave V4', () => {
   describe('Given a user who wants to fetch position managers for a specific spoke', () => {
     describe('When fetching position managers with default settings', () => {
       it('Then it should return active position managers', async () => {

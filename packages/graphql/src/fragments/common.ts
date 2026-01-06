@@ -1,6 +1,16 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 
+export const DomainDataFragment = graphql(
+  `fragment DomainData on DomainData {
+    name
+    version
+    chainId
+    verifyingContract
+  }`,
+);
+export type DomainData = FragmentOf<typeof DomainDataFragment>;
+
 export const DecimalNumberFragment =
   graphql(`fragment DecimalNumber on DecimalNumber {
     __typename
@@ -9,22 +19,6 @@ export const DecimalNumberFragment =
     value
   }`);
 export type DecimalNumber = FragmentOf<typeof DecimalNumberFragment>;
-
-export const DecimalNumberWithChangeFragment = graphql(
-  `fragment DecimalNumberWithChange on DecimalNumberWithChange {
-    __typename
-    current {
-      ...DecimalNumber
-    }
-    change(window: $timeWindow) {
-      ...DecimalNumber
-    }
-  }`,
-  [DecimalNumberFragment],
-);
-export type DecimalNumberWithChange = FragmentOf<
-  typeof DecimalNumberWithChangeFragment
->;
 
 export const PercentNumberFragment = graphql(
   `fragment PercentNumber on PercentNumber {
@@ -37,23 +31,43 @@ export const PercentNumberFragment = graphql(
 );
 export type PercentNumber = FragmentOf<typeof PercentNumberFragment>;
 
-export const FiatAmountFragment = graphql(
-  `fragment FiatAmount on FiatAmount {
+export const DecimalNumberWithChangeFragment = graphql(
+  `fragment DecimalNumberWithChange on DecimalNumberWithChange {
+    __typename
+    current {
+      ...DecimalNumber
+    }
+    change(window: $timeWindow) {
+      ...PercentNumber
+    }
+  }`,
+  [DecimalNumberFragment, PercentNumberFragment],
+);
+export type DecimalNumberWithChange = FragmentOf<
+  typeof DecimalNumberWithChangeFragment
+>;
+
+export const ExchangeAmountFragment = graphql(
+  `fragment ExchangeAmount on ExchangeAmount {
     __typename
     value
     name
     symbol
+    icon
+    decimals
   }`,
 );
-export type FiatAmount = FragmentOf<typeof FiatAmountFragment>;
+export type ExchangeAmount = FragmentOf<typeof ExchangeAmountFragment>;
 
 export const TokenInfoFragment = graphql(
   `fragment TokenInfo on TokenInfo {
     __typename
+    id
     name
     symbol
     icon
     decimals
+    categories
   }`,
 );
 export type TokenInfo = FragmentOf<typeof TokenInfoFragment>;
@@ -64,8 +78,10 @@ export const ChainFragment = graphql(
     name
     icon
     chainId
+    rpcUrl
     explorerUrl
     isTestnet
+    isFork
     nativeWrappedToken
     nativeGateway
     signatureGateway
@@ -117,15 +133,14 @@ export const Erc20AmountFragment = graphql(
     amount {
       ...DecimalNumber
     }
-    fiatAmount(currency: $currency){
-      ...FiatAmount
+    exchange(currency: $currency){
+      ...ExchangeAmount
     }
-    fiatRate(currency: $currency){
+    exchangeRate(currency: $currency){
       ...DecimalNumber
     }
-    isWrappedNative
   }`,
-  [Erc20TokenFragment, DecimalNumberFragment, FiatAmountFragment],
+  [Erc20TokenFragment, DecimalNumberFragment, ExchangeAmountFragment],
 );
 export type Erc20Amount = FragmentOf<typeof Erc20AmountFragment>;
 
@@ -138,14 +153,14 @@ export const NativeAmountFragment = graphql(
     amount {
       ...DecimalNumber
     }
-    fiatAmount(currency: $currency){
-      ...FiatAmount
+    exchange(currency: $currency){
+      ...ExchangeAmount
     }
-    fiatRate(currency: $currency){
+    exchangeRate(currency: $currency){
       ...DecimalNumber
     }
   }`,
-  [NativeTokenFragment, DecimalNumberFragment, FiatAmountFragment],
+  [NativeTokenFragment, DecimalNumberFragment, ExchangeAmountFragment],
 );
 export type NativeAmount = FragmentOf<typeof NativeAmountFragment>;
 
@@ -182,20 +197,20 @@ export const TokenFragment: FragmentDocumentFor<Token, 'Token'> = graphql(
   [Erc20TokenFragment, NativeTokenFragment],
 );
 
-export const FiatAmountWithChangeFragment = graphql(
-  `fragment FiatAmountWithChange on FiatAmountWithChange {
+export const ExchangeAmountWithChangeFragment = graphql(
+  `fragment ExchangeAmountWithChange on ExchangeAmountWithChange {
     __typename
     current {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     change(window: $timeWindow){
       ...PercentNumber
     }
   }`,
-  [FiatAmountFragment, PercentNumberFragment],
+  [ExchangeAmountFragment, PercentNumberFragment],
 );
-export type FiatAmountWithChange = FragmentOf<
-  typeof FiatAmountWithChangeFragment
+export type ExchangeAmountWithChange = FragmentOf<
+  typeof ExchangeAmountWithChangeFragment
 >;
 
 export const PercentNumberWithChangeFragment = graphql(
@@ -241,20 +256,20 @@ export type PercentNumberVariation = FragmentOf<
   typeof PercentNumberVariationFragment
 >;
 
-export const FiatAmountValueVariationFragment = graphql(
-  `fragment FiatAmountValueVariation on FiatAmountValueVariation {
+export const ExchangeAmountVariationFragment = graphql(
+  `fragment ExchangeAmountVariation on ExchangeAmountVariation {
     __typename
     current {
-      ...FiatAmount
+      ...ExchangeAmount
     }
     after {
-      ...FiatAmount
+      ...ExchangeAmount
     }
   }`,
-  [FiatAmountFragment],
+  [ExchangeAmountFragment],
 );
-export type FiatAmountValueVariation = FragmentOf<
-  typeof FiatAmountValueVariationFragment
+export type ExchangeAmountVariation = FragmentOf<
+  typeof ExchangeAmountVariationFragment
 >;
 
 export const HealthFactorWithChangeFragment = graphql(

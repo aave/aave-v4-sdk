@@ -3,14 +3,14 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type TimeWindowQueryOptions,
   type UnexpectedError,
-} from '@aave/client-next';
-import type { UserPositionQueryOptions } from '@aave/client-next/actions';
+} from '@aave/client';
+import type { UserPositionQueryOptions } from '@aave/client/actions';
 import {
   userBalances,
   userBorrows,
   userPositions,
   userSupplies,
-} from '@aave/client-next/actions';
+} from '@aave/client/actions';
 import {
   type UserBalance,
   UserBalancesQuery,
@@ -23,6 +23,9 @@ import {
   type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
+  type UserRiskPremiumBreakdownItem,
+  UserRiskPremiumBreakdownQuery,
+  type UserRiskPremiumBreakdownRequest,
   type UserSummary,
   type UserSummaryHistoryItem,
   UserSummaryHistoryQuery,
@@ -32,8 +35,8 @@ import {
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql-next';
-import type { NullishDeep, Prettify } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep, Prettify } from '@aave/types';
 import { useAaveClient } from './context';
 import {
   type Pausable,
@@ -49,7 +52,7 @@ import {
 } from './helpers';
 
 export type UseUserSuppliesArgs = Prettify<
-  UserSuppliesRequest & CurrencyQueryOptions
+  UserSuppliesRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -146,6 +149,7 @@ export function useUserSupplies({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseUserSuppliesArgs> & {
   suspense?: boolean;
@@ -156,6 +160,7 @@ export function useUserSupplies({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -194,19 +199,23 @@ export function useUserSupplies({
  * ```
  */
 export function useUserSuppliesAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserSuppliesRequest, UserSupplyItem[], UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: UserSuppliesRequest) =>
-      userSupplies(client, request, { currency: options.currency }),
-    [client, options.currency],
+      userSupplies(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 
 export type UseUserBorrowsArgs = Prettify<
-  UserBorrowsRequest & CurrencyQueryOptions
+  UserBorrowsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -296,6 +305,7 @@ export function useUserBorrows({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseUserBorrowsArgs> & {
   suspense?: boolean;
@@ -306,6 +316,7 @@ export function useUserBorrows({
     variables: {
       request,
       currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -344,14 +355,18 @@ export function useUserBorrows({
  * ```
  */
 export function useUserBorrowsAction(
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  options: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserBorrowsRequest, UserBorrowItem[], UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: UserBorrowsRequest) =>
-      userBorrows(client, request, { currency: options.currency }),
-    [client, options.currency],
+      userBorrows(client, request, {
+        currency: options.currency,
+        timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+      }),
+    [client, options.currency, options.timeWindow],
   );
 }
 
@@ -765,6 +780,98 @@ export function useUserBalances({
   });
 }
 
+export type UseUserRiskPremiumBreakdownArgs = UserRiskPremiumBreakdownRequest;
+
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: UseUserRiskPremiumBreakdownArgs & Suspendable,
+): SuspenseResult<UserRiskPremiumBreakdownItem[]>;
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: Pausable<UseUserRiskPremiumBreakdownArgs> & Suspendable,
+): PausableSuspenseResult<UserRiskPremiumBreakdownItem[]>;
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * ```tsx
+ * const { data, error, loading } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: UseUserRiskPremiumBreakdownArgs,
+): ReadResult<UserRiskPremiumBreakdownItem[]>;
+/**
+ * Fetch the risk premium breakdown for a user position or spoke.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useUserRiskPremiumBreakdown({
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useUserRiskPremiumBreakdown(
+  args: Pausable<UseUserRiskPremiumBreakdownArgs>,
+): PausableReadResult<UserRiskPremiumBreakdownItem[]>;
+
+export function useUserRiskPremiumBreakdown({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseUserRiskPremiumBreakdownArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<UserRiskPremiumBreakdownItem[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: UserRiskPremiumBreakdownQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
 /**
  * Low-level hook to execute a {@link userBalances} action directly.
  *
@@ -893,5 +1000,6 @@ export function useUserSummaryHistory({
     },
     suspense,
     pause,
+    batch: false, // Do not batch this since it's a slower than average query
   });
 }

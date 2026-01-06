@@ -1,16 +1,16 @@
-import { assertOk } from '@aave/client-next';
-import { hub, hubAssets, hubs } from '@aave/client-next/actions';
+import { assertOk, OrderDirection } from '@aave/client';
+import { hub, hubAssets, hubs } from '@aave/client/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
 
-describe('Aave V4 Hub Scenarios', () => {
+describe('Querying Hubs on Aave V4', () => {
   describe('Given a user who wants to list available hubs', () => {
     describe('When fetching hubs by chain ID(s)', () => {
       it('Then it should return the expected data for each hub', async () => {
@@ -39,6 +39,7 @@ describe('Aave V4 Hub Scenarios', () => {
           },
         });
         assertOk(listHubs);
+        assertNonEmptyArray(listHubs.value);
 
         for (const hub of listHubs.value) {
           const result = await hubAssets(client, {
@@ -71,35 +72,98 @@ describe('Aave V4 Hub Scenarios', () => {
           query: { hubId: listHubs.value[0].id },
         });
         assertOk(result);
-        expect(result.value).toMatchObject(listHubs.value[0]);
+        expect(result.value).toMatchObject({
+          id: listHubs.value[0].id,
+          name: listHubs.value[0].name,
+          address: listHubs.value[0].address,
+          chain: listHubs.value[0].chain,
+          summary: expect.any(Object),
+        });
       });
     });
-  });
 
-  describe('Given a user who wants to know assets in a hub', () => {
-    describe('When fetching assets in a hub', () => {
-      it('Then it should return the expected data for assets in a hub', async () => {
-        const listHubs = await hubs(client, {
+    describe('Given a user who wants to list available hubs', () => {
+      describe('When fetching hubs sorted by name', () => {
+        it('Then it should return the hubs sorted by name', async () => {
+          const listHubsAsc = await hubs(client, {
+            query: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
+            orderBy: { name: OrderDirection.Asc },
+          });
+
+          assertOk(listHubsAsc);
+          const listHubsNameAsc = listHubsAsc.value.map((hub) => hub.name);
+          expect(listHubsNameAsc).toBeSortedAlphabetically('asc');
+
+          const listHubsDesc = await hubs(client, {
+            query: {
+              chainIds: [ETHEREUM_FORK_ID],
+            },
+            orderBy: { name: OrderDirection.Desc },
+          });
+          assertOk(listHubsDesc);
+          const listHubsNameDesc = listHubsDesc.value.map((hub) => hub.name);
+          expect(listHubsNameDesc).toBeSortedAlphabetically('desc');
+        });
+      });
+    });
+
+    describe('When fetching hubs sorted by total borrowed', () => {
+      it('Then it should return the hubs sorted by total borrowed', async () => {
+        let listHubs = await hubs(client, {
           query: {
             chainIds: [ETHEREUM_FORK_ID],
           },
+          orderBy: { totalBorrowed: OrderDirection.Asc },
         });
 
         assertOk(listHubs);
-        assertNonEmptyArray(listHubs.value);
+        let listHubsTotalBorrowed = listHubs.value.map(
+          (hub) => hub.summary.totalBorrowed.current.value,
+        );
+        expect(listHubsTotalBorrowed).toBeSortedNumerically('asc');
 
-        const result = await hubAssets(client, {
-          query: { hubId: listHubs.value[0].id },
+        listHubs = await hubs(client, {
+          query: {
+            chainIds: [ETHEREUM_FORK_ID],
+          },
+          orderBy: { totalBorrowed: OrderDirection.Desc },
         });
-        assertOk(result);
-        assertNonEmptyArray(result.value);
-        result.value.forEach((asset) => {
-          expect(asset).toMatchSnapshot({
-            hub: expect.any(Object),
-            summary: expect.any(Object),
-          });
-          expect(asset.hub.address).toBe(listHubs.value[0]!.address);
+        assertOk(listHubs);
+        listHubsTotalBorrowed = listHubs.value.map(
+          (hub) => hub.summary.totalBorrowed.current.value,
+        );
+        expect(listHubsTotalBorrowed).toBeSortedNumerically('desc');
+      });
+    });
+
+    describe('When fetching hubs sorted by total supplied', () => {
+      it('Then it should return the hubs sorted by total supplied', async () => {
+        let listHubs = await hubs(client, {
+          query: {
+            chainIds: [ETHEREUM_FORK_ID],
+          },
+          orderBy: { totalSupplied: OrderDirection.Asc },
         });
+
+        assertOk(listHubs);
+        let listHubsTotalSupplied = listHubs.value.map(
+          (hub) => hub.summary.totalSupplied.current.value,
+        );
+        expect(listHubsTotalSupplied).toBeSortedNumerically('asc');
+
+        listHubs = await hubs(client, {
+          query: {
+            chainIds: [ETHEREUM_FORK_ID],
+          },
+          orderBy: { totalSupplied: OrderDirection.Desc },
+        });
+        assertOk(listHubs);
+        listHubsTotalSupplied = listHubs.value.map(
+          (hub) => hub.summary.totalSupplied.current.value,
+        );
+        expect(listHubsTotalSupplied).toBeSortedNumerically('desc');
       });
     });
   });

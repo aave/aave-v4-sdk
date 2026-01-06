@@ -1,25 +1,32 @@
 import {
+  CancelError,
   SigningError,
   TransactionError,
   UnexpectedError,
   ValidationError,
-} from '@aave/core-next';
+} from '@aave/core';
 import type {
-  CancelSwapTypedData,
   ExecutionPlan,
   PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  SwapTypedData,
   TransactionRequest,
-} from '@aave/graphql-next';
+} from '@aave/graphql';
 import {
+  chainId,
   errAsync,
+  invariant,
   nonNullable,
   okAsync,
   ResultAsync,
   signatureFrom,
   txHash,
-} from '@aave/types-next';
-import type { Signer, TransactionResponse } from 'ethers';
+} from '@aave/types';
+import {
+  isError,
+  type Signer,
+  type TransactionResponse,
+  type TypedDataField,
+} from 'ethers';
 import type {
   ERC20PermitHandler,
   ExecutionPlanHandler,
@@ -27,13 +34,33 @@ import type {
   TransactionResult,
 } from './types';
 
-/**
- * @internal
- */
-export function sendTransaction(
+function ensureChain(
   signer: Signer,
   request: TransactionRequest,
-): ResultAsync<TransactionResponse, SigningError> {
+): ResultAsync<Signer, UnexpectedError> {
+  invariant(
+    signer.provider,
+    'Detached signer, the signer MUST have a provider',
+  );
+
+  return ResultAsync.fromPromise(signer.provider.getNetwork(), (err) =>
+    UnexpectedError.from(err),
+  ).andThen((network) => {
+    if (chainId(network.chainId) === request.chainId) {
+      return okAsync(signer);
+    }
+    return errAsync(
+      new UnexpectedError(
+        `Signer is on chain ${chainId(network.chainId)} but the request is for chain ${request.chainId}.`,
+      ),
+    );
+  });
+}
+
+function sendEip1559Transaction(
+  signer: Signer,
+  request: TransactionRequest,
+): ResultAsync<TransactionResponse, CancelError | SigningError> {
   return ResultAsync.fromPromise(
     signer.sendTransaction({
       to: request.to,
@@ -41,7 +68,27 @@ export function sendTransaction(
       value: request.value,
       from: request.from,
     }),
-    (err) => SigningError.from(err),
+    (err) => {
+      if (isError(err, 'ACTION_REJECTED')) {
+        return CancelError.from(err);
+      }
+      return SigningError.from(err);
+    },
+  );
+}
+
+/**
+ * @internal
+ */
+export function sendTransaction(
+  signer: Signer,
+  request: TransactionRequest,
+): ResultAsync<
+  TransactionResponse,
+  CancelError | SigningError | UnexpectedError
+> {
+  return ensureChain(signer, request).andThen((_) =>
+    sendEip1559Transaction(signer, request),
   );
 }
 
@@ -77,7 +124,7 @@ function sendTransactionAndWait(
   request: TransactionRequest,
 ): ResultAsync<
   TransactionResult,
-  SigningError | TransactionError | UnexpectedError
+  CancelError | SigningError | TransactionError | UnexpectedError
 > {
   return sendTransaction(signer, request).andThen((tx) =>
     waitForTransactionResult(request, tx),
@@ -143,34 +190,40 @@ export function signERC20PermitWith(signer: Signer): ERC20PermitHandler {
   return signERC20Permit.bind(null, signer);
 }
 
+function isTypedDataTypesField(
+  value: unknown,
+): value is Record<string, TypedDataField[]> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function signSwapTypedData(
   signer: Signer,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
-  const message = JSON.parse(result.message);
+  invariant(isTypedDataTypesField(result.types), 'Invalid types');
+
   return ResultAsync.fromPromise(
-    signer.signTypedData(result.domain, result.types, message),
+    signer.signTypedData(result.domain, result.types, result.message),
     (err) => SigningError.from(err),
-  ).map((signature) => ({
-    deadline: message.deadline,
-    value: signatureFrom(signature),
-  }));
+  ).map(signatureFrom);
 }
 
 /**
+ * @internal
  * Creates a swap signature handler that signs swap typed data using the provided ethers signer.
  */
 export function signSwapTypedDataWith(signer: Signer): SwapSignatureHandler;
 /**
+ * @internal
  * Signs swap typed data using the provided ethers signer.
  */
 export function signSwapTypedDataWith(
   signer: Signer,
-  result: SwapByIntentTypedData | CancelSwapTypedData,
+  result: SwapTypedData,
 ): ReturnType<SwapSignatureHandler>;
 export function signSwapTypedDataWith(
   signer: Signer,
-  result?: SwapByIntentTypedData | CancelSwapTypedData,
+  result?: SwapTypedData,
 ): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
   return result
     ? signSwapTypedData(signer, result)

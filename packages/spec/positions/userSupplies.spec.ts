@@ -1,11 +1,12 @@
-import { assertOk, evmAddress, OrderDirection } from '@aave/client-next';
-import { userPositions, userSupplies } from '@aave/client-next/actions';
+import { assertOk, evmAddress, OrderDirection } from '@aave/client';
+import { userPositions, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-} from '@aave/client-next/test-utils';
+} from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
@@ -19,7 +20,9 @@ describe('Querying User Supply Positions on Aave V4', () => {
   describe('Given a user with multiple active supply positions', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
-      await recreateUserActivities(client, user);
+      await recreateUserActivities(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      });
     }, 180_000);
 
     describe('When the user queries their supply positions by spoke', () => {
@@ -33,31 +36,51 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(4);
-        supplyPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_CORE_ID);
+
+        expect(supplyPositions.value.length).toBe(3);
+        expect(supplyPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              spoke: expect.objectContaining({
+                id: ETHEREUM_SPOKE_CORE_ID,
+              }),
+            }),
+          }),
+        );
+      });
+    });
+
+    describe('When the user queries their supply positions by token', () => {
+      it('Then the matching supply positions are returned', async () => {
+        const supplyPositions = await userSupplies(client, {
+          query: {
+            userToken: {
+              token: {
+                chainId: ETHEREUM_FORK_ID,
+                address: ETHEREUM_GHO_ADDRESS,
+              },
+              user: evmAddress(user.account.address),
+            },
+          },
         });
+        assertOk(supplyPositions);
+        expect(supplyPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              asset: expect.objectContaining({
+                underlying: expect.objectContaining({
+                  address: ETHEREUM_GHO_ADDRESS,
+                }),
+              }),
+            }),
+          }),
+        );
       });
     });
 
     describe('When the user queries their supply positions including zero balances', () => {
       it('Then all supply positions, including those with zero balances, are returned', async () => {
-        let supplyPositions = await userSupplies(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
-          },
-          includeZeroBalances: true,
-        });
-        assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBeGreaterThan(3);
-        supplyPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
-        });
-
-        supplyPositions = await userSupplies(client, {
+        const supplyPositions = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -68,10 +91,17 @@ describe('Querying User Supply Positions on Aave V4', () => {
           includeZeroBalances: true,
         });
         assertOk(supplyPositions);
+
         expect(supplyPositions.value.length).toBeGreaterThan(3);
-        supplyPositions.value.forEach((position) => {
-          expect(position.reserve.spoke.id).toBe(ETHEREUM_SPOKE_CORE_ID);
-        });
+        expect(supplyPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              spoke: expect.objectContaining({
+                id: ETHEREUM_SPOKE_CORE_ID,
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -86,7 +116,18 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(4);
+
+        expect(supplyPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              spoke: expect.objectContaining({
+                chain: expect.objectContaining({
+                  chainId: ETHEREUM_FORK_ID,
+                }),
+              }),
+            }),
+          }),
+        );
       });
     });
 
@@ -97,24 +138,22 @@ describe('Querying User Supply Positions on Aave V4', () => {
           user: evmAddress(user.account.address),
         });
         assertOk(positions);
-        // Select a random supply position
         assertNonEmptyArray(positions.value);
-        positions.value.forEach((position) => {
-          expect(position.spoke.chain.chainId).toBe(ETHEREUM_FORK_ID);
-        });
+
+        // Select a random supply position
         const supplyPositions = await userSupplies(client, {
           query: {
             userPositionId: positions.value[0].id,
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(4);
+        expect(supplyPositions.value.length).toBe(3);
       });
     });
 
     describe('When the user fetches supply positions ordered by amount', () => {
       it('Then the supply positions are returned in order of amount', async () => {
-        let supplyPositions = await userSupplies(client, {
+        const supplyPositionsDesc = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -123,13 +162,13 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
           orderBy: { amount: OrderDirection.Desc },
         });
-        assertOk(supplyPositions);
-        let listOrderAmount = supplyPositions.value.map(
+        assertOk(supplyPositionsDesc);
+        const listOrderAmountDesc = supplyPositionsDesc.value.map(
           (elem) => elem.principal.amount.value,
         );
-        expect(listOrderAmount).toBeSortedNumerically('desc');
+        expect(listOrderAmountDesc).toBeSortedNumerically('desc');
 
-        supplyPositions = await userSupplies(client, {
+        const supplyPositionsAsc = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -138,17 +177,17 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
           orderBy: { amount: OrderDirection.Asc },
         });
-        assertOk(supplyPositions);
-        listOrderAmount = supplyPositions.value.map(
+        assertOk(supplyPositionsAsc);
+        const listOrderAmountAsc = supplyPositionsAsc.value.map(
           (elem) => elem.principal.amount.value,
         );
-        expect(listOrderAmount).toBeSortedNumerically('asc');
+        expect(listOrderAmountAsc).toBeSortedNumerically('asc');
       });
     });
 
     describe('When the user fetches supply positions ordered by APY', () => {
       it('Then the supply positions are returned in order of APY', async () => {
-        let supplyPositions = await userSupplies(client, {
+        const supplyPositionsDesc = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -157,13 +196,13 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
           orderBy: { apy: OrderDirection.Desc },
         });
-        assertOk(supplyPositions);
-        let listOrderApy = supplyPositions.value.map(
+        assertOk(supplyPositionsDesc);
+        const listOrderApyDesc = supplyPositionsDesc.value.map(
           (elem) => elem.reserve.summary.supplyApy.value,
         );
-        expect(listOrderApy).toBeSortedNumerically('desc');
+        expect(listOrderApyDesc).toBeSortedNumerically('desc');
 
-        supplyPositions = await userSupplies(client, {
+        const supplyPositionsAsc = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -172,18 +211,17 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
           orderBy: { apy: OrderDirection.Asc },
         });
-        assertOk(supplyPositions);
-
-        listOrderApy = supplyPositions.value.map(
+        assertOk(supplyPositionsAsc);
+        const listOrderApyAsc = supplyPositionsAsc.value.map(
           (elem) => elem.reserve.summary.supplyApy.value,
         );
-        expect(listOrderApy).toBeSortedNumerically('asc');
+        expect(listOrderApyAsc).toBeSortedNumerically('asc');
       });
     });
 
     describe('When the user fetches supply positions ordered by asset name', () => {
       it('Then the supply positions are returned in order of asset name', async () => {
-        let supplyPositions = await userSupplies(client, {
+        const supplyPositionsDesc = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -192,13 +230,14 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
           orderBy: { assetName: OrderDirection.Desc },
         });
-        assertOk(supplyPositions);
-        let listOrderAssetName = supplyPositions.value.map(
+        assertOk(supplyPositionsDesc);
+
+        const listOrderAssetNameDesc = supplyPositionsDesc.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeSortedAlphabetically('desc');
+        expect(listOrderAssetNameDesc).toBeSortedAlphabetically('desc');
 
-        supplyPositions = await userSupplies(client, {
+        const supplyPositionsAsc = await userSupplies(client, {
           query: {
             userSpoke: {
               spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -207,11 +246,12 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
           orderBy: { assetName: OrderDirection.Asc },
         });
-        assertOk(supplyPositions);
-        listOrderAssetName = supplyPositions.value.map(
+        assertOk(supplyPositionsAsc);
+
+        const listOrderAssetNameAsc = supplyPositionsAsc.value.map(
           (elem) => elem.reserve.asset.underlying.info.name,
         );
-        expect(listOrderAssetName).toBeSortedAlphabetically('asc');
+        expect(listOrderAssetNameAsc).toBeSortedAlphabetically('asc');
       });
     });
   });

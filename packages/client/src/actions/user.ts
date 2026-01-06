@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core-next';
+import type { UnexpectedError } from '@aave/core';
 import {
   type UserBalance,
   UserBalancesQuery,
@@ -11,6 +11,9 @@ import {
   type UserPositionRequest,
   UserPositionsQuery,
   type UserPositionsRequest,
+  type UserRiskPremiumBreakdownItem,
+  UserRiskPremiumBreakdownQuery,
+  type UserRiskPremiumBreakdownRequest,
   type UserSummary,
   type UserSummaryHistoryItem,
   UserSummaryHistoryQuery,
@@ -20,8 +23,8 @@ import {
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql-next';
-import type { Prettify, ResultAsync } from '@aave/types-next';
+} from '@aave/graphql';
+import type { Prettify, ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
@@ -52,9 +55,13 @@ import {
 export function userSupplies(
   client: AaveClient,
   request: UserSuppliesRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSupplyItem[], UnexpectedError> {
-  return client.query(UserSuppliesQuery, { request, ...options });
+  return client.query(UserSuppliesQuery, { request, currency, timeWindow });
 }
 
 /**
@@ -80,9 +87,13 @@ export function userSupplies(
 export function userBorrows(
   client: AaveClient,
   request: UserBorrowsRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  }: Required<CurrencyQueryOptions> &
+    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBorrowItem[], UnexpectedError> {
-  return client.query(UserBorrowsQuery, { request, ...options });
+  return client.query(UserBorrowsQuery, { request, currency, timeWindow });
 }
 
 export type UserSummaryQueryOptions = Prettify<
@@ -227,4 +238,27 @@ export function userSummaryHistory(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
   return client.query(UserSummaryHistoryQuery, { request, ...options });
+}
+
+/**
+ * Fetches the risk premium breakdown for a user position or spoke.
+ *
+ * ```ts
+ * const result = await userRiskPremiumBreakdown(client, {
+ *   query: {
+ *     userPositionId: userPositionId('SGVsbG8h'),
+ *   },
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The user risk premium breakdown request parameters.
+ * @returns Array of risk premium breakdown items.
+ */
+export function userRiskPremiumBreakdown(
+  client: AaveClient,
+  request: UserRiskPremiumBreakdownRequest,
+): ResultAsync<UserRiskPremiumBreakdownItem[], UnexpectedError> {
+  return client.query(UserRiskPremiumBreakdownQuery, { request });
 }

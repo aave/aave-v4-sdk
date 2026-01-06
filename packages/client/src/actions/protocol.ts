@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core-next';
+import type { UnexpectedError } from '@aave/core';
 import {
   type Asset,
   AssetBorrowHistoryQuery,
@@ -12,8 +12,11 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
-} from '@aave/graphql-next';
-import type { ResultAsync } from '@aave/types-next';
+  ProtocolHistoryQuery,
+  type ProtocolHistoryRequest,
+  type ProtocolHistorySample,
+} from '@aave/graphql';
+import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
@@ -50,7 +53,10 @@ export function asset(
       currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
       timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
     },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
 
@@ -59,7 +65,9 @@ export function asset(
  *
  * ```ts
  * const result = await assetPriceHistory(client, {
- *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   query: {
+ *     token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   },
  *   currency: Currency.Usd,
  *   window: TimeWindow.LastWeek,
  * });
@@ -78,7 +86,10 @@ export function assetPriceHistory(
   return client.query(
     AssetPriceHistoryQuery,
     { request },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
 
@@ -87,7 +98,9 @@ export function assetPriceHistory(
  *
  * ```ts
  * const result = await assetSupplyHistory(client, {
- *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   query: {
+ *     token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   },
  *   window: TimeWindow.LastWeek,
  * });
  * ```
@@ -105,7 +118,10 @@ export function assetSupplyHistory(
   return client.query(
     AssetSupplyHistoryQuery,
     { request },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }
 
@@ -114,7 +130,9 @@ export function assetSupplyHistory(
  *
  * ```ts
  * const result = await assetBorrowHistory(client, {
- *   token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   query: {
+ *     token: { chainId: chainId(1), address: evmAddress('0x123…') },
+ *   },
  *   window: TimeWindow.LastWeek,
  * });
  * ```
@@ -132,6 +150,39 @@ export function assetBorrowHistory(
   return client.query(
     AssetBorrowHistoryQuery,
     { request },
-    options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
+  );
+}
+
+/**
+ * Fetches historical protocol-wide data (deposits, borrows, earnings).
+ *
+ * ```ts
+ * const result = await protocolHistory(client, {
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The protocol history request parameters.
+ * @param options - The query options.
+ * @returns Array of protocol history samples over time.
+ */
+export function protocolHistory(
+  client: AaveClient,
+  request: ProtocolHistoryRequest,
+  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<ProtocolHistorySample[], UnexpectedError> {
+  return client.query(
+    ProtocolHistoryQuery,
+    { request },
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
   );
 }

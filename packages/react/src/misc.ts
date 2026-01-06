@@ -1,22 +1,19 @@
-import type { CurrencyQueryOptions } from '@aave/client-next';
-import { exchangeRate } from '@aave/client-next/actions';
-import type { UnexpectedError } from '@aave/core-next';
-import type {
-  Chain,
-  ExchangeRateRequest,
-  FiatAmount,
-} from '@aave/graphql-next';
+import type { CurrencyQueryOptions } from '@aave/client';
+import { exchangeRate } from '@aave/client/actions';
+import type { UnexpectedError } from '@aave/core';
+import type { Chain, ExchangeAmount, ExchangeRateRequest } from '@aave/graphql';
 import {
   type ActivityItem,
   ChainQuery,
   type ChainRequest,
   ChainsFilter,
   ChainsQuery,
+  type ChainsRequest,
   ExchangeRateQuery,
   type NativeAmount,
   type PreviewAction,
-} from '@aave/graphql-next';
-import type { NullishDeep, Prettify } from '@aave/types-next';
+} from '@aave/graphql';
+import type { NullishDeep, Prettify } from '@aave/types';
 import { useAaveClient } from './context';
 import {
   type Pausable,
@@ -30,7 +27,7 @@ import {
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
-export type UseAaveChainArgs = ChainRequest;
+export type UseChainArgs = ChainRequest;
 
 /**
  * Fetch a specific chain by chain ID.
@@ -38,15 +35,15 @@ export type UseAaveChainArgs = ChainRequest;
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useAaveChain({
+ * const { data } = useChain({
  *   chainId: chainId(1),
  *   suspense: true,
  * });
  * // data will be Chain | null
  * ```
  */
-export function useAaveChain(
-  args: UseAaveChainArgs & Suspendable,
+export function useChain(
+  args: UseChainArgs & Suspendable,
 ): SuspenseResult<Chain | null>;
 /**
  * Fetch a specific chain by chain ID.
@@ -54,48 +51,48 @@ export function useAaveChain(
  * Pausable suspense mode.
  *
  * ```tsx
- * const { data } = useAaveChain({
+ * const { data } = useChain({
  *   chainId: chainId(1),
  *   suspense: true,
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChain(
-  args: Pausable<UseAaveChainArgs> & Suspendable,
+export function useChain(
+  args: Pausable<UseChainArgs> & Suspendable,
 ): PausableSuspenseResult<Chain | null>;
 /**
  * Fetch a specific chain by chain ID.
  *
  * ```tsx
- * const { data, error, loading } = useAaveChain({
+ * const { data, error, loading } = useChain({
  *   chainId: chainId(1),
  * });
  * // data will be Chain | null
  * ```
  */
-export function useAaveChain(args: UseAaveChainArgs): ReadResult<Chain | null>;
+export function useChain(args: UseChainArgs): ReadResult<Chain | null>;
 /**
  * Fetch a specific chain by chain ID.
  *
  * Pausable loading state mode.
  *
  * ```tsx
- * const { data, error, loading, paused } = useAaveChain({
+ * const { data, error, loading, paused } = useChain({
  *   chainId: chainId(1),
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChain(
-  args: Pausable<UseAaveChainArgs>,
+export function useChain(
+  args: Pausable<UseChainArgs>,
 ): PausableReadResult<Chain | null>;
 
-export function useAaveChain({
+export function useChain({
   suspense = false,
   pause = false,
   ...request
-}: NullishDeep<UseAaveChainArgs> & {
+}: NullishDeep<UseChainArgs> & {
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<Chain | null, UnexpectedError> {
@@ -109,23 +106,21 @@ export function useAaveChain({
   });
 }
 
-export type UseAaveChainsArgs = {
-  filter: ChainsFilter;
-};
+export type UseChainsArgs = ChainsRequest;
 /**
  * Fetches the list of supported chains.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useAaveChains({
- *   filter: ChainsFilter.ALL,
+ * const { data } = useChains({
+ *   query: { filter: ChainsFilter.ALL },
  *   suspense: true,
  * });
  * ```
  */
-export function useAaveChains(
-  args: UseAaveChainsArgs & Suspendable,
+export function useChains(
+  args: UseChainsArgs & Suspendable,
 ): SuspenseResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
@@ -133,55 +128,55 @@ export function useAaveChains(
  * Pausable suspense mode.
  *
  * ```tsx
- * const { data } = useAaveChains({
- *   filter: ChainsFilter.ALL,
+ * const { data } = useChains({
+ *   query: { filter: ChainsFilter.ALL },
  *   suspense: true,
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChains(
-  args: Pausable<UseAaveChainsArgs> & Suspendable,
+export function useChains(
+  args: Pausable<UseChainsArgs> & Suspendable,
 ): PausableSuspenseResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
  *
  * ```tsx
- * const { data, error, loading } = useAaveChains({
- *   filter: ChainsFilter.ALL,
+ * const { data, error, loading } = useChains({
+ *   query: { filter: ChainsFilter.ALL },
  * });
  * ```
  */
-export function useAaveChains(args?: UseAaveChainsArgs): ReadResult<Chain[]>;
+export function useChains(args?: UseChainsArgs): ReadResult<Chain[]>;
 /**
  * Fetches the list of supported chains.
  *
  * Pausable loading state mode.
  *
  * ```tsx
- * const { data, error, loading, paused } = useAaveChains({
- *   filter: ChainsFilter.ALL,
+ * const { data, error, loading, paused } = useChains({
+ *   query: { filter: ChainsFilter.ALL },
  *   pause: true,
  * });
  * ```
  */
-export function useAaveChains(
-  args?: Pausable<UseAaveChainsArgs>,
+export function useChains(
+  args?: Pausable<UseChainsArgs>,
 ): PausableReadResult<Chain[]>;
 
-export function useAaveChains(
+export function useChains(
   {
     suspense = false,
     pause = false,
-    filter,
-  }: NullishDeep<UseAaveChainsArgs> & {
+    ...request
+  }: NullishDeep<UseChainsArgs> & {
     suspense?: boolean;
     pause?: boolean;
-  } = { filter: ChainsFilter.ALL },
+  } = { query: { filter: ChainsFilter.ALL } },
 ): SuspendableResult<Chain[], UnexpectedError> {
   return useSuspendableQuery({
     document: ChainsQuery,
-    variables: { filter },
+    variables: { request },
     suspense,
     pause,
   });
@@ -213,7 +208,7 @@ export function useAaveChains(
  */
 export function useExchangeRateAction(): UseAsyncTask<
   ExchangeRateRequest,
-  FiatAmount,
+  ExchangeAmount,
   UnexpectedError
 > {
   const client = useAaveClient();
@@ -246,7 +241,7 @@ export type UseExchangeRateArgs = ExchangeRateRequest;
  */
 export function useExchangeRate(
   args: UseExchangeRateArgs & Suspendable,
-): SuspenseResult<FiatAmount>;
+): SuspenseResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -268,7 +263,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: Pausable<UseExchangeRateArgs> & Suspendable,
-): PausableSuspenseResult<FiatAmount>;
+): PausableSuspenseResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -288,7 +283,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: UseExchangeRateArgs,
-): ReadResult<FiatAmount>;
+): ReadResult<ExchangeAmount>;
 /**
  * Fetches exchange rates between tokens and fiat currencies with automatic polling.
  *
@@ -309,7 +304,7 @@ export function useExchangeRate(
  */
 export function useExchangeRate(
   args: Pausable<UseExchangeRateArgs>,
-): PausableReadResult<FiatAmount>;
+): PausableReadResult<ExchangeAmount>;
 
 export function useExchangeRate({
   suspense = false,
@@ -318,7 +313,7 @@ export function useExchangeRate({
 }: NullishDeep<UseExchangeRateArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<FiatAmount, UnexpectedError> {
+}): SuspendableResult<ExchangeAmount, UnexpectedError> {
   const client = useAaveClient();
 
   return useSuspendableQuery({
