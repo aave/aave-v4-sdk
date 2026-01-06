@@ -16,6 +16,8 @@ import type {
   PercentNumber,
   PositionSwapAdapterContractApproval,
   PositionSwapPositionManagerApproval,
+  SwapCancelled,
+  SwapOpen,
   SwapQuote,
   SwapReceipt,
   SwapTypedData,
@@ -243,6 +245,33 @@ export function makeSwapReceipt(): SwapReceipt {
     __typename: 'SwapReceipt',
     id: randomBase64String() as SwapId,
     createdAt: new Date(),
+    explorerLink: 'https://example.com/explorer.json',
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapOpen(): SwapOpen {
+  return {
+    __typename: 'SwapOpen',
+    swapId: randomBase64String() as SwapId,
+    createdAt: new Date(),
+    deadline: new Date(Date.now() + 3600_000), // 1 hour from now
+    explorerLink: 'https://example.com/explorer.json',
+    desiredSell: makeErc20Amount(1000, 'WETH'),
+    desiredBuy: makeErc20Amount(1000, 'USDC'),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapCancelled(): SwapCancelled {
+  return {
+    __typename: 'SwapCancelled',
+    createdAt: new Date(),
+    cancelledAt: new Date(),
     explorerLink: 'https://example.com/explorer.json',
   };
 }
