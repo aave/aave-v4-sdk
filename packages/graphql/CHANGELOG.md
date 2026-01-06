@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.12
+
+### Patch Changes
+
+- 93adceb: **fix:** `useTokenSwap` and `useCancelSwap` hooks.
+
 ## 1.0.0-next.11
 
 ### Patch Changes
