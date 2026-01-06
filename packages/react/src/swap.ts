@@ -55,6 +55,7 @@ import {
   type SwapApprovalRequired,
   type SwapByIntent,
   type SwapByIntentInput,
+  type SwapId,
   SwappableTokensQuery,
   type SwappableTokensRequest,
   SwapQuoteQuery,
@@ -71,7 +72,7 @@ import type {
   Signature,
 } from '@aave/types';
 import { invariant, isSignature, okAsync, ResultAwareError } from '@aave/types';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAaveClient } from './context';
 import {
   type CancelOperation,
@@ -88,11 +89,7 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from './helpers';
-import {
-  type AsyncTaskState,
-  type UseAsyncTask,
-  useAsyncTask,
-} from './helpers/tasks';
+import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
 export type UseSwapQuoteArgs = Prettify<
   SwapQuoteRequest & CurrencyQueryOptions
@@ -1539,90 +1536,167 @@ export function useCancelSwap(
   );
 }
 
-export type WaitForSwapOutcomesState = Omit<
-  AsyncTaskState<SwapOutcome[], TimeoutError | UnexpectedError>,
-  'data'
-> & {
-  data: SwapOutcome[];
+type SwapOrderWithOutcome = {
+  receipt: SwapReceipt;
+  outcome?: SwapOutcome;
+};
+
+export type UseWaitForSwapOutcomesOptions = {
+  /**
+   * Callback function that is triggered when a swap reaches a final outcome.
+   * This is useful for showing notifications/toasts when swaps complete.
+   *
+   * @param receipt - The swap receipt that reached a final outcome
+   * @param outcome - The final outcome (SwapFulfilled, SwapCancelled, or SwapExpired)
+   */
+  onOutcome?: (receipt: SwapReceipt, outcome: SwapOutcome) => void;
 };
 
 /**
  * Wait for multiple swaps to reach their final outcomes (cancelled, expired, or fulfilled).
  *
- * This hook accumulates all swap outcomes in an array and supports concurrent executions.
- * Multiple swaps can be tracked simultaneously without blocking.
+ * When a swap reaches a final outcome, the optional `onOutcome` callback is triggered,
+ * making it perfect for showing notifications/toasts.
  *
  * ```tsx
- * const [waitForOutcome, { loading, error, data }] = useWaitForSwapOutcomes();
+ * const [waitForOutcome, { loading, data, error }] = useWaitForSwapOutcomes({
+ *   onOutcome: (receipt, outcome) => {
+ *     switch (outcome.__typename) {
+ *       case 'SwapFulfilled':
+ *         toast.success(`Swap completed! ${receipt.explorerLink}`);
+ *         break;
+ *       case 'SwapCancelled':
+ *         toast.info('Swap was cancelled');
+ *         break;
+ *       case 'SwapExpired':
+ *         toast.error('Swap expired');
+ *         break;
+ *     }
+ *   },
+ * });
  *
- * const result1 = waitForOutcome(swapReceipt1);
- * const result2 = waitForOutcome(swapReceipt2);
- *
- * const result = await result1;
- * if (result.isOk()) {
- *   const outcome = result.value;
- *   switch (outcome.__typename) {
- *     case 'SwapFulfilled':
- *       console.log('Swap completed successfully:', outcome.txHash);
- *       break;
- *     case 'SwapCancelled':
- *       console.log('Swap was cancelled:', outcome.cancelledAt);
- *       break;
- *     case 'SwapExpired':
- *       console.log('Swap expired:', outcome.expiredAt);
- *       break;
+ * // Start tracking swaps in the background
+ * useEffect(() => {
+ *   if (swapReceipt) {
+ *     waitForOutcome(swapReceipt);
  *   }
- * }
+ * }, [swapReceipt, waitForOutcome]);
  * ```
  */
-export function useWaitForSwapOutcomes(): [
+export function useWaitForSwapOutcomes(
+  options?: UseWaitForSwapOutcomesOptions,
+): [
   (
     receipt: SwapReceipt,
   ) => ResultAsync<SwapOutcome, TimeoutError | UnexpectedError>,
-  WaitForSwapOutcomesState,
+  {
+    loading: boolean;
+    data: Map<SwapId, SwapOrderWithOutcome>;
+    error: TimeoutError | UnexpectedError | undefined;
+  },
 ] {
   const client = useAaveClient();
+  const { onOutcome } = options ?? {};
 
-  const [state, setState] = useState<WaitForSwapOutcomesState>({
-    called: false,
-    loading: false,
-    data: [],
-    error: undefined,
-  });
+  const [data, setData] = useState<Map<SwapId, SwapOrderWithOutcome>>(
+    new Map(),
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<
+    TimeoutError | UnexpectedError | undefined
+  >(undefined);
 
   const pendingCountRef = useRef(0);
+  const activePollsRef = useRef<Map<SwapId, AbortController>>(new Map());
+  // Keep a ref of the latest callback to avoid stale closures
+  const onOutcomeRef = useRef(onOutcome);
+  useEffect(() => {
+    onOutcomeRef.current = onOutcome;
+  }, [onOutcome]);
+  // Keep a ref of the latest data to avoid stale closures
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   const execute = useCallback(
     (receipt: SwapReceipt) => {
-      pendingCountRef.current += 1;
+      const id = receipt.id;
 
-      setState((prev) => ({
-        called: true,
-        loading: true,
-        data: prev.data,
-        error: undefined,
-      }));
+      // Cancel existing poll if any
+      const existingPoll = activePollsRef.current.get(id);
+      if (existingPoll) {
+        existingPoll.abort();
+      }
+
+      // Skip if already has final outcome
+      const existing = dataRef.current.get(id);
+      if (existing?.outcome) {
+        // Already have final outcome - notify if callback provided
+        if (onOutcomeRef.current) {
+          onOutcomeRef.current(existing.receipt, existing.outcome);
+        }
+        // Remove from tracking since we have the final outcome
+        setData((prev) => {
+          const updated = new Map(prev);
+          updated.delete(id);
+          return updated;
+        });
+        // Return the existing result
+        return okAsync(existing.outcome);
+      }
+
+      pendingCountRef.current += 1;
+      setLoading(true);
+      setError(undefined);
+
+      // Initialize the entry
+      setData((prev) => {
+        const updated = new Map(prev);
+        updated.set(id, {
+          receipt,
+          outcome: undefined,
+        });
+        return updated;
+      });
+
+      const abortController = new AbortController();
+      activePollsRef.current.set(id, abortController);
 
       const result = waitForSwapOutcome(client)(receipt);
 
       result.match(
         (outcome) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
+
           pendingCountRef.current -= 1;
-          setState((prev) => ({
-            called: true,
-            loading: pendingCountRef.current > 0,
-            data: [...prev.data, outcome],
-            error: undefined,
-          }));
+
+          // Trigger notification callback if provided
+          if (onOutcomeRef.current) {
+            onOutcomeRef.current(receipt, outcome);
+          }
+
+          // Remove from tracking since we have the final outcome
+          setData((prev) => {
+            const updated = new Map(prev);
+            updated.delete(id);
+            return updated;
+          });
+
+          setLoading(pendingCountRef.current > 0);
+          activePollsRef.current.delete(id);
         },
-        (error) => {
+        (err) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
+
           pendingCountRef.current -= 1;
-          setState((prev) => ({
-            called: true,
-            loading: pendingCountRef.current > 0,
-            data: prev.data,
-            error,
-          }));
+          setError(err);
+          setLoading(pendingCountRef.current > 0);
+          activePollsRef.current.delete(id);
         },
       );
 
@@ -1631,5 +1705,5 @@ export function useWaitForSwapOutcomes(): [
     [client],
   );
 
-  return [execute, state];
+  return [execute, { loading, data, error }];
 }
