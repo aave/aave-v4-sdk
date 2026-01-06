@@ -1559,7 +1559,7 @@ export type UseWaitForSwapOutcomesOptions = {
  * making it perfect for showing notifications/toasts.
  *
  * ```tsx
- * const [waitForOutcome, { loading, data, error }] = useWaitForSwapOutcomes({
+ * const [waitForOutcome, { loading, error }] = useWaitForSwapOutcomes({
  *   onOutcome: (receipt, outcome) => {
  *     switch (outcome.__typename) {
  *       case 'SwapFulfilled':
@@ -1591,7 +1591,6 @@ export function useWaitForSwapOutcomes(
   ) => ResultAsync<SwapOutcome, TimeoutError | UnexpectedError>,
   {
     loading: boolean;
-    data: Map<SwapId, SwapOrderWithOutcome>;
     error: TimeoutError | UnexpectedError | undefined;
   },
 ] {
@@ -1705,5 +1704,5 @@ export function useWaitForSwapOutcomes(
     [client],
   );
 
-  return [execute, { loading, data, error }];
+  return [execute, { loading, error }];
 }
