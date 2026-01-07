@@ -31,6 +31,7 @@
     "test:react": "vitest --project react",
     "test:react:swap": "vitest --project react packages/react/src/swap.test.ts",
     "test:react:viem": "vitest --project react packages/react/src/viem/*.test.ts",
+    "test:swap": "vitest --project spec packages/spec/swap/business.spec.ts",
     "test:types": "vitest --project types",
     "test": "pnpm test:types && pnpm test:core && pnpm test:client && pnpm test:cli && pnpm test:react"
   },
