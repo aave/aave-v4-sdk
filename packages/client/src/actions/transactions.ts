@@ -416,20 +416,17 @@ export function setUserSuppliesAsCollateral(
 export function activities(
   client: AaveClient,
   request: ActivitiesRequest,
-  options: CurrencyQueryOptions &
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
     TimeWindowQueryOptions &
     RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedActivitiesResult, UnexpectedError> {
   return client.query(
     ActivitiesQuery,
-    {
-      request,
-      currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
-      timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-    },
-    {
-      requestPolicy:
-        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
-    },
+    { request, currency, timeWindow },
+    { requestPolicy },
   );
 }

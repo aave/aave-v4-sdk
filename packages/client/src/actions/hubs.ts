@@ -78,8 +78,7 @@ export function hubs(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: Required<CurrencyQueryOptions> &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Hub[], UnexpectedError> {
   return client.query(HubsQuery, { request, currency, timeWindow });
 }
@@ -104,8 +103,7 @@ export function hubAssets(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: Required<CurrencyQueryOptions> &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubAsset[], UnexpectedError> {
   return client.query(HubAssetsQuery, { request, currency, timeWindow });
 }
