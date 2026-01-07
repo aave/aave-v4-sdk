@@ -58,7 +58,7 @@ import {
  * Fetches a swap quote for the specified trade parameters.
  *
  * ```ts
- * const result = await swapQuote(client, {
+ * const result = await tokenSwapQuote(client, {
  *   market: {
  *     chainId: chainId(1),
  *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
@@ -75,7 +75,7 @@ import {
  * @param options - The query options.
  * @returns The swap quote including pricing and cost information.
  */
-export function swapQuote(
+export function tokenSwapQuote(
   client: AaveClient,
   request: TokenSwapQuoteRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
