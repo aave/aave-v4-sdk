@@ -337,7 +337,6 @@ export const exchange = cacheExchange({
     ReserveUserState: () => null,
     SpokePositionManger: () => null,
     SpokeUserPositionManager: () => null,
-    SwapApprovalRequired: () => null,
     SwapByIntent: () => null,
     SwapByIntentWithApprovalRequired: () => null,
     SupplySwapQuoteResult: () => null,
