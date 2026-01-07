@@ -324,3 +324,19 @@ export const HealthFactorResultFragment: FragmentDocumentFor<
   }`,
   [HealthFactorVariationFragment, HealthFactorErrorFragment],
 );
+
+export const InsufficientBalanceErrorFragment = graphql(
+  `fragment InsufficientBalanceError on InsufficientBalanceError {
+    __typename
+    required {
+      ...DecimalNumber
+    }
+    available {
+      ...DecimalNumber
+    }
+  }`,
+  [DecimalNumberFragment],
+);
+export type InsufficientBalanceError = FragmentOf<
+  typeof InsufficientBalanceErrorFragment
+>;

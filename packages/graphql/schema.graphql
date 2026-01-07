@@ -828,7 +828,7 @@ input MarketOrderTokenSwapQuoteInput {
 
 input MarketRepayWithSupplyQuoteInput {
   debtPosition: UserBorrowItemId!
-  RepayWithReserve: ReserveId!
+  repayWithReserve: ReserveId!
   amount: BigDecimal!
   user: EvmAddress!
 }
@@ -1028,7 +1028,7 @@ input PreparePositionSwapRequest {
   positionManagerSignature: Signature
 }
 
-union PreparePositionSwapResult = SwapByIntent
+union PreparePositionSwapResult = SwapByIntent | InsufficientBalanceError
 
 input PrepareSwapCancelRequest {
   id: SwapId!
@@ -1040,10 +1040,10 @@ type PrepareSwapCancelResult {
 
 input PrepareTokenSwapRequest {
   quoteId: SwapQuoteId!
-  permitSig: Signature!
+  permitSig: Signature
 }
 
-union PrepareTokenSwapResult = SwapByIntent
+union PrepareTokenSwapResult = SwapByIntent | InsufficientBalanceError
 
 input PreviewAction @oneOf {
   supply: SupplyRequest
@@ -1627,7 +1627,7 @@ type SwapCancelled {
   explorerLink: String!
 }
 
-union SwapExecutionPlan = SwapTransactionRequest | SwapReceipt
+union SwapExecutionPlan = SwapTransactionRequest | SwapReceipt | InsufficientBalanceError
 
 type SwapExpired {
   createdAt: DateTime!
@@ -1672,15 +1672,15 @@ type SwapPendingSignature {
 type SwapQuote {
   quoteId: SwapQuoteId!
   suggestedSlippage: PercentNumber!
-  sell: TokenAmount!
-  buy: TokenAmount!
+  spotSell: TokenAmount!
+  spotBuy: TokenAmount!
   costs: SwapQuoteCosts!
 
   """Final buy amount after all fees and slippage"""
-  finalBuyAmount: TokenAmount!
+  finalBuy: TokenAmount!
 
   """Final sell amount after all fees and slippage"""
-  finalSellAmount: TokenAmount!
+  finalSell: TokenAmount!
 }
 
 type SwapQuoteCosts {
@@ -1815,7 +1815,7 @@ input TokenSwapQuoteRequest @oneOf {
   fromQuote: FromQuoteSwapQuoteInput
 }
 
-union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
+union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
 
 type TransactionRequest {
   to: EvmAddress!

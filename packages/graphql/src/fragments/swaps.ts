@@ -6,6 +6,8 @@ import {
   DomainDataFragment,
   type Erc20Amount,
   Erc20AmountFragment,
+  type InsufficientBalanceError,
+  InsufficientBalanceErrorFragment,
   type NativeAmount,
   NativeAmountFragment,
   PaginatedResultInfoFragment,
@@ -14,7 +16,6 @@ import {
 } from './common';
 import { ReserveInfoFragment } from './reserve';
 import {
-  InsufficientBalanceErrorFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './transactions';
@@ -60,19 +61,19 @@ export const SwapQuoteFragment = graphql(
     suggestedSlippage {
       ...PercentNumber
     }
-    desiredSell: sell {
+    spotBuy {
       ...TokenAmount
     }
-    desiredBuy: buy {
+    spotSell {
       ...TokenAmount
     }
     costs {
       ...SwapQuoteCosts
     }
-    finalBuy: finalBuyAmount {
+    finalBuy {
       ...TokenAmount
     }
-    finalSell: finalSellAmount {
+    finalSell {
       ...TokenAmount
     }
   }`,
@@ -157,15 +158,11 @@ export const TokenSwapQuoteResultFragment = graphql(
     ... on SwapByTransaction {
       ...SwapByTransaction
     }
-    ... on InsufficientBalanceError {
-      ...InsufficientBalanceError
-    }
   }`,
   [
     SwapByIntentFragment,
     SwapByIntentWithApprovalRequiredFragment,
     SwapByTransactionFragment,
-    InsufficientBalanceErrorFragment,
   ],
 );
 export type TokenSwapQuoteResult = ExtendWithOpaqueType<
@@ -178,8 +175,11 @@ export const PrepareTokenSwapResultFragment = graphql(
     ... on SwapByIntent {
       ...SwapByIntent
     }
+    ... on InsufficientBalanceError {
+      ...InsufficientBalanceError
+    }
   }`,
-  [SwapByIntentFragment],
+  [SwapByIntentFragment, InsufficientBalanceErrorFragment],
 );
 export type PrepareTokenSwapResult = ExtendWithOpaqueType<
   FragmentOf<typeof PrepareTokenSwapResultFragment>
@@ -202,7 +202,7 @@ export type SwapTransactionRequest = FragmentOf<
 >;
 
 export type SwapExecutionPlan = ExtendWithOpaqueType<
-  SwapTransactionRequest | SwapReceipt
+  SwapTransactionRequest | SwapReceipt | InsufficientBalanceError
 >;
 
 export const SwapExecutionPlanFragment: FragmentDocumentFor<
@@ -217,8 +217,15 @@ export const SwapExecutionPlanFragment: FragmentDocumentFor<
     ... on SwapReceipt {
       ...SwapReceipt
     }
+    ... on InsufficientBalanceError {
+      ...InsufficientBalanceError
+    }
   }`,
-  [SwapTransactionRequestFragment, SwapReceiptFragment],
+  [
+    SwapTransactionRequestFragment,
+    SwapReceiptFragment,
+    InsufficientBalanceErrorFragment,
+  ],
 );
 
 export const SwapCancelledFragment = graphql(
@@ -536,7 +543,9 @@ export const WithdrawSwapQuoteResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
-export type PreparePositionSwapResult = ExtendWithOpaqueType<SwapByIntent>;
+export type PreparePositionSwapResult = ExtendWithOpaqueType<
+  SwapByIntent | InsufficientBalanceError
+>;
 
 export const PreparePositionSwapResultFragment: FragmentDocumentFor<
   PreparePositionSwapResult,
@@ -547,6 +556,9 @@ export const PreparePositionSwapResultFragment: FragmentDocumentFor<
     ... on SwapByIntent {
       ...SwapByIntent
     }
+    ... on InsufficientBalanceError {
+      ...InsufficientBalanceError
+    }
   }`,
-  [SwapByIntentFragment],
+  [SwapByIntentFragment, InsufficientBalanceErrorFragment],
 );

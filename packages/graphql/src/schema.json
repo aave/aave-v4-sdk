@@ -2972,6 +2972,10 @@
           {
             "kind": "OBJECT",
             "name": "SwapByIntent"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
           }
         ]
       },
@@ -3001,6 +3005,10 @@
           {
             "kind": "OBJECT",
             "name": "SwapByIntent"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
           }
         ]
       },
@@ -5496,6 +5504,10 @@
           {
             "kind": "OBJECT",
             "name": "SwapReceipt"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
           }
         ]
       },
@@ -5789,7 +5801,7 @@
             "args": []
           },
           {
-            "name": "sell",
+            "name": "spotSell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5801,7 +5813,7 @@
             "args": []
           },
           {
-            "name": "buy",
+            "name": "spotBuy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5825,7 +5837,7 @@
             "args": []
           },
           {
-            "name": "finalBuyAmount",
+            "name": "finalBuy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5837,7 +5849,7 @@
             "args": []
           },
           {
-            "name": "finalSellAmount",
+            "name": "finalSell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6174,10 +6186,6 @@
           {
             "kind": "OBJECT",
             "name": "SwapByTransaction"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "InsufficientBalanceError"
           }
         ]
       },
