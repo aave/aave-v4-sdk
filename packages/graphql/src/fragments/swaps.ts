@@ -1,6 +1,7 @@
 import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
+import { PermitTypedDataResponseFragment } from '../permits';
 import {
   DomainDataFragment,
   type Erc20Amount,
@@ -13,11 +14,24 @@ import {
 } from './common';
 import { ReserveInfoFragment } from './reserve';
 import {
-  type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './transactions';
+
+export const Erc20ApprovalFragment = graphql(
+  `fragment Erc20Approval on Erc20Approval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    bySignature {
+      ...PermitTypedDataResponse
+    }
+  }`,
+  [TransactionRequestFragment, PermitTypedDataResponseFragment],
+);
+export type Erc20Approval = FragmentOf<typeof Erc20ApprovalFragment>;
 
 export const SwapQuoteCostsFragment = graphql(
   `fragment SwapQuoteCosts on SwapQuoteCosts {
@@ -26,6 +40,12 @@ export const SwapQuoteCostsFragment = graphql(
       ...TokenAmount
     }
     partnerFee {
+      ...TokenAmount
+    }
+    flashloanFee {
+      ...TokenAmount
+    }
+    providerFee {
       ...TokenAmount
     }
   }`,
@@ -40,16 +60,19 @@ export const SwapQuoteFragment = graphql(
     suggestedSlippage {
       ...PercentNumber
     }
-    desiredSell {
+    desiredSell: sell {
       ...TokenAmount
     }
-    desiredBuy {
+    desiredBuy: buy {
       ...TokenAmount
     }
     costs {
       ...SwapQuoteCosts
     }
-    minimumReceived {
+    finalBuy: finalBuyAmount {
+      ...TokenAmount
+    }
+    finalSell: finalSellAmount {
       ...TokenAmount
     }
   }`,
@@ -89,16 +112,13 @@ export const SwapByIntentWithApprovalRequiredFragment = graphql(
   `fragment SwapByIntentWithApprovalRequired on SwapByIntentWithApprovalRequired {
     __typename
     approval {
-      ...TransactionRequest
+      ...Erc20Approval
     }
     quote {
       ...SwapQuote
     }
-    data {
-      ...SwapTypedData
-    }
   }`,
-  [TransactionRequestFragment, SwapQuoteFragment, SwapTypedDataFragment],
+  [Erc20ApprovalFragment, SwapQuoteFragment, SwapTypedDataFragment],
 );
 export type SwapByIntentWithApprovalRequired = FragmentOf<
   typeof SwapByIntentWithApprovalRequiredFragment
@@ -125,8 +145,8 @@ export const SwapReceiptFragment = graphql(
 );
 export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
 
-export const PrepareTokenSwapResultFragment = graphql(
-  `fragment PrepareTokenSwapResult on PrepareTokenSwapResult {
+export const TokenSwapQuoteResultFragment = graphql(
+  `fragment TokenSwapQuoteResult on TokenSwapQuoteResult {
     __typename
     ... on SwapByIntent {
       ...SwapByIntent
@@ -148,6 +168,19 @@ export const PrepareTokenSwapResultFragment = graphql(
     InsufficientBalanceErrorFragment,
   ],
 );
+export type TokenSwapQuoteResult = ExtendWithOpaqueType<
+  FragmentOf<typeof TokenSwapQuoteResultFragment>
+>;
+
+export const PrepareTokenSwapResultFragment = graphql(
+  `fragment PrepareTokenSwapResult on PrepareTokenSwapResult {
+    __typename
+    ... on SwapByIntent {
+      ...SwapByIntent
+    }
+  }`,
+  [SwapByIntentFragment],
+);
 export type PrepareTokenSwapResult = ExtendWithOpaqueType<
   FragmentOf<typeof PrepareTokenSwapResultFragment>
 >;
@@ -168,27 +201,8 @@ export type SwapTransactionRequest = FragmentOf<
   typeof SwapTransactionRequestFragment
 >;
 
-export const SwapApprovalRequiredFragment = graphql(
-  `fragment SwapApprovalRequired on SwapApprovalRequired {
-    __typename
-    approval {
-      ...TransactionRequest
-    }
-    originalTransaction {
-      ...SwapTransactionRequest
-    }
-  }`,
-  [TransactionRequestFragment, SwapTransactionRequestFragment],
-);
-export type SwapApprovalRequired = FragmentOf<
-  typeof SwapApprovalRequiredFragment
->;
-
 export type SwapExecutionPlan = ExtendWithOpaqueType<
-  | SwapTransactionRequest
-  | SwapApprovalRequired
-  | InsufficientBalanceError
-  | SwapReceipt
+  SwapTransactionRequest | SwapReceipt
 >;
 
 export const SwapExecutionPlanFragment: FragmentDocumentFor<
@@ -200,22 +214,11 @@ export const SwapExecutionPlanFragment: FragmentDocumentFor<
     ... on SwapTransactionRequest {
       ...SwapTransactionRequest
     }
-    ... on SwapApprovalRequired {
-      ...SwapApprovalRequired
-    }
-    ... on InsufficientBalanceError {
-      ...InsufficientBalanceError
-    }
     ... on SwapReceipt {
       ...SwapReceipt
     }
   }`,
-  [
-    SwapTransactionRequestFragment,
-    SwapApprovalRequiredFragment,
-    InsufficientBalanceErrorFragment,
-    SwapReceiptFragment,
-  ],
+  [SwapTransactionRequestFragment, SwapReceiptFragment],
 );
 
 export const SwapCancelledFragment = graphql(
@@ -412,14 +415,11 @@ export type PaginatedUserSwapsResult = FragmentOf<
 export const PositionSwapAdapterContractApprovalFragment = graphql(
   `fragment PositionSwapAdapterContractApproval on PositionSwapAdapterContractApproval {
     __typename
-    byTransaction {
-      ...TransactionRequest
-    }
     bySignature {
       ...SwapTypedData
     }
   }`,
-  [TransactionRequestFragment, SwapTypedDataFragment],
+  [SwapTypedDataFragment],
 );
 export type PositionSwapAdapterContractApproval = FragmentOf<
   typeof PositionSwapAdapterContractApprovalFragment
@@ -476,13 +476,13 @@ export type PositionSwapByIntentApprovalsRequired = FragmentOf<
   typeof PositionSwapByIntentApprovalsRequiredFragment
 >;
 
-export type PrepareSupplySwapResult = PositionSwapByIntentApprovalsRequired;
+export type SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired;
 
-export const PrepareSupplySwapResultFragment: FragmentDocumentFor<
-  PrepareSupplySwapResult,
-  'PrepareSupplySwapResult'
+export const SupplySwapQuoteResultFragment: FragmentDocumentFor<
+  SupplySwapQuoteResult,
+  'SupplySwapQuoteResult'
 > = graphql(
-  `fragment PrepareSupplySwapResult on PrepareSupplySwapResult {
+  `fragment SupplySwapQuoteResult on SupplySwapQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
       ...PositionSwapByIntentApprovalsRequired
@@ -491,13 +491,13 @@ export const PrepareSupplySwapResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
-export type PrepareBorrowSwapResult = PositionSwapByIntentApprovalsRequired;
+export type BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired;
 
-export const PrepareBorrowSwapResultFragment: FragmentDocumentFor<
-  PrepareBorrowSwapResult,
-  'PrepareBorrowSwapResult'
+export const BorrowSwapQuoteResultFragment: FragmentDocumentFor<
+  BorrowSwapQuoteResult,
+  'BorrowSwapQuoteResult'
 > = graphql(
-  `fragment PrepareBorrowSwapResult on PrepareBorrowSwapResult {
+  `fragment BorrowSwapQuoteResult on BorrowSwapQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
       ...PositionSwapByIntentApprovalsRequired
@@ -506,14 +506,13 @@ export const PrepareBorrowSwapResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
-export type PrepareRepayWithSupplyResult =
-  PositionSwapByIntentApprovalsRequired;
+export type RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired;
 
-export const PrepareRepayWithSupplyResultFragment: FragmentDocumentFor<
-  PrepareRepayWithSupplyResult,
-  'PrepareRepayWithSupplyResult'
+export const RepayWithSupplyQuoteResultFragment: FragmentDocumentFor<
+  RepayWithSupplyQuoteResult,
+  'RepayWithSupplyQuoteResult'
 > = graphql(
-  `fragment PrepareRepayWithSupplyResult on PrepareRepayWithSupplyResult {
+  `fragment RepayWithSupplyQuoteResult on RepayWithSupplyQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
       ...PositionSwapByIntentApprovalsRequired
@@ -522,13 +521,13 @@ export const PrepareRepayWithSupplyResultFragment: FragmentDocumentFor<
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
 
-export type PrepareWithdrawSwapResult = PositionSwapByIntentApprovalsRequired;
+export type WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired;
 
-export const PrepareWithdrawSwapResultFragment: FragmentDocumentFor<
-  PrepareWithdrawSwapResult,
-  'PrepareWithdrawSwapResult'
+export const WithdrawSwapQuoteResultFragment: FragmentDocumentFor<
+  WithdrawSwapQuoteResult,
+  'WithdrawSwapQuoteResult'
 > = graphql(
-  `fragment PrepareWithdrawSwapResult on PrepareWithdrawSwapResult {
+  `fragment WithdrawSwapQuoteResult on WithdrawSwapQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
       ...PositionSwapByIntentApprovalsRequired

@@ -20,6 +20,7 @@ import {
 import type {
   ActivityType,
   ApyMetric,
+  BorrowSwapKind,
   ChainsFilter,
   CollateralMetric,
   Currency,
@@ -28,12 +29,15 @@ import type {
   OperationType,
   OrderDirection,
   PageSize,
+  RepayWithSupplyKind,
   ReservesRequestFilter,
+  SupplySwapKind,
   SwapKind,
   SwapStatusFilter,
   TimeWindow,
   TokenCategory,
   UserPositionConditionsUpdate,
+  WithdrawSwapKind,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -68,10 +72,12 @@ export const graphql = initGraphQLTada<{
     BigInt: bigint;
     BlockchainData: BlockchainData;
     Boolean: boolean;
+    BorrowSwapKind: BorrowSwapKind;
     ChainId: ChainId;
     ChainsFilter: ChainsFilter;
     CollateralMetric: CollateralMetric;
     Currency: Currency;
+    RepayWithSupplyKind: RepayWithSupplyKind;
     Cursor: Cursor;
     DateTime: Date;
     EvmAddress: EvmAddress;
@@ -93,6 +99,7 @@ export const graphql = initGraphQLTada<{
     Signature: Signature;
     SpokeId: SpokeId;
     String: string;
+    SupplySwapKind: SupplySwapKind;
     SwapId: SwapId;
     SwapKind: SwapKind;
     SwapQuoteId: SwapQuoteId;
@@ -107,6 +114,7 @@ export const graphql = initGraphQLTada<{
     UserPositionId: UserPositionId;
     UserSupplyItemId: UserSupplyItemId;
     Void: Void;
+    WithdrawSwapKind: WithdrawSwapKind;
   };
 }>();
 

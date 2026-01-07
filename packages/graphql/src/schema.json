@@ -548,6 +548,16 @@
       },
       {
         "kind": "UNION",
+        "name": "BorrowSwapQuoteResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
         "name": "CancelSwapExecutionPlan",
         "possibleTypes": [
           {
@@ -958,6 +968,34 @@
                 "name": "Erc20Token",
                 "ofType": null
               }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Erc20Approval",
+        "fields": [
+          {
+            "name": "byTransaction",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "bySignature",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PermitTypedDataResponse",
+              "ofType": null
             },
             "args": []
           }
@@ -2179,6 +2217,29 @@
                 }
               }
             ]
+          },
+          {
+            "name": "cancelSwap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "CancelSwapExecutionPlan",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -2766,18 +2827,6 @@
         "name": "PositionSwapAdapterContractApproval",
         "fields": [
           {
-            "name": "byTransaction",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "bySignature",
             "type": {
               "kind": "NON_NULL",
@@ -2918,41 +2967,11 @@
       },
       {
         "kind": "UNION",
-        "name": "PrepareBorrowSwapResult",
-        "possibleTypes": [
-          {
-            "kind": "OBJECT",
-            "name": "PositionSwapByIntentApprovalsRequired"
-          }
-        ]
-      },
-      {
-        "kind": "UNION",
         "name": "PreparePositionSwapResult",
         "possibleTypes": [
           {
             "kind": "OBJECT",
             "name": "SwapByIntent"
-          }
-        ]
-      },
-      {
-        "kind": "UNION",
-        "name": "PrepareRepayWithSupplyResult",
-        "possibleTypes": [
-          {
-            "kind": "OBJECT",
-            "name": "PositionSwapByIntentApprovalsRequired"
-          }
-        ]
-      },
-      {
-        "kind": "UNION",
-        "name": "PrepareSupplySwapResult",
-        "possibleTypes": [
-          {
-            "kind": "OBJECT",
-            "name": "PositionSwapByIntentApprovalsRequired"
           }
         ]
       },
@@ -2982,28 +3001,6 @@
           {
             "kind": "OBJECT",
             "name": "SwapByIntent"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "SwapByIntentWithApprovalRequired"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "SwapByTransaction"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "InsufficientBalanceError"
-          }
-        ]
-      },
-      {
-        "kind": "UNION",
-        "name": "PrepareWithdrawSwapResult",
-        "possibleTypes": [
-          {
-            "kind": "OBJECT",
-            "name": "PositionSwapByIntentApprovalsRequired"
           }
         ]
       },
@@ -3114,18 +3111,7 @@
                 "ofType": null
               }
             },
-            "args": [
-              {
-                "name": "period",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
+            "args": []
           },
           {
             "name": "borrowingPower",
@@ -4250,127 +4236,12 @@
             ]
           },
           {
-            "name": "swapQuote",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapQuote",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "supplySwapQuote",
+            "name": "tokenSwapQuote",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "PrepareSupplySwapResult",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "borrowSwapQuote",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "PrepareBorrowSwapResult",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "repayWithSupplyQuote",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "PrepareRepayWithSupplyResult",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "withdrawSwapQuote",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "PrepareWithdrawSwapResult",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "preparePositionSwap",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "PreparePositionSwapResult",
+                "name": "TokenSwapQuoteResult",
                 "ofType": null
               }
             },
@@ -4394,6 +4265,121 @@
               "ofType": {
                 "kind": "UNION",
                 "name": "PrepareTokenSwapResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "supplySwapQuote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SupplySwapQuoteResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "borrowSwapQuote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "BorrowSwapQuoteResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "repayWithSupplyQuote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "RepayWithSupplyQuoteResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "withdrawSwapQuote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "WithdrawSwapQuoteResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "preparePositionSwap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "PreparePositionSwapResult",
                 "ofType": null
               }
             },
@@ -4463,29 +4449,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PrepareSwapCancelResult",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "cancelSwap",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "CancelSwapExecutionPlan",
                 "ofType": null
               }
             },
@@ -4632,6 +4595,16 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "RepayWithSupplyQuoteResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -5368,6 +5341,16 @@
       },
       {
         "kind": "UNION",
+        "name": "SupplySwapQuoteResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
         "name": "SwapAmount",
         "possibleTypes": [
           {
@@ -5383,37 +5366,6 @@
             "name": "Erc20Amount"
           }
         ]
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SwapApprovalRequired",
-        "fields": [
-          {
-            "name": "approval",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "originalTransaction",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapTransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
       },
       {
         "kind": "OBJECT",
@@ -5468,19 +5420,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TransactionRequest",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "data",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapTypedData",
+                "name": "Erc20Approval",
                 "ofType": null
               }
             },
@@ -5552,14 +5492,6 @@
           {
             "kind": "OBJECT",
             "name": "SwapTransactionRequest"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "SwapApprovalRequired"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "InsufficientBalanceError"
           },
           {
             "kind": "OBJECT",
@@ -5857,7 +5789,7 @@
             "args": []
           },
           {
-            "name": "desiredSell",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5869,7 +5801,7 @@
             "args": []
           },
           {
-            "name": "desiredBuy",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5893,7 +5825,19 @@
             "args": []
           },
           {
-            "name": "minimumReceived",
+            "name": "finalBuyAmount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "TokenAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "finalSellAmount",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5925,6 +5869,27 @@
           },
           {
             "name": "partnerFee",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "TokenAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "flashloanFee",
+            "type": {
+              "kind": "UNION",
+              "name": "TokenAmount",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "providerFee",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6193,6 +6158,28 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "TokenSwapQuoteResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "SwapByIntent"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SwapByIntentWithApprovalRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SwapByTransaction"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -7728,6 +7715,16 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "WithdrawSwapQuoteResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapByIntentApprovalsRequired"
+          }
+        ]
       },
       {
         "kind": "SCALAR",

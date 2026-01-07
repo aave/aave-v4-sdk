@@ -140,6 +140,38 @@ export enum SwapKind {
 }
 
 /**
+ * The borrow swap kind for debt swaps.
+ */
+export enum BorrowSwapKind {
+  Current = 'CURRENT',
+  New = 'NEW',
+}
+
+/**
+ * The repay with supply kind for repay swaps.
+ */
+export enum RepayWithSupplyKind {
+  Repay = 'REPAY',
+  Supply = 'SUPPLY',
+}
+
+/**
+ * The supply swap kind for supply swaps.
+ */
+export enum SupplySwapKind {
+  Current = 'CURRENT',
+  New = 'NEW',
+}
+
+/**
+ * The withdraw swap kind for withdraw swaps.
+ */
+export enum WithdrawSwapKind {
+  Withdraw = 'WITHDRAW',
+  Buy = 'BUY',
+}
+
+/**
  * The filter for swap status.
  */
 export enum SwapStatusFilter {

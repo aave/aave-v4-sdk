@@ -232,8 +232,11 @@ export function makeSwapQuote(): SwapQuote {
       __typename: 'SwapQuoteCosts',
       networkCosts: makeErc20Amount(1000, 'WETH'),
       partnerFee: makeErc20Amount(1000, 'USDC'),
+      flashloanFee: makeErc20Amount(1000, 'WETH'),
+      providerFee: makeErc20Amount(1000, 'USDC'),
     },
-    minimumReceived: makeErc20Amount(1000, 'USDC'),
+    finalBuy: makeErc20Amount(1000, 'USDC'),
+    finalSell: makeErc20Amount(1000, 'WETH'),
   };
 }
 
@@ -281,7 +284,6 @@ export function makeSwapCancelled(): SwapCancelled {
  */
 export function makePositionSwapAdapterContractApproval({
   bySignature = makeSwapTypedData(),
-  byTransaction = makeTransactionRequest(),
 }: {
   bySignature?: SwapTypedData;
   byTransaction?: TransactionRequest;
@@ -289,7 +291,6 @@ export function makePositionSwapAdapterContractApproval({
   return {
     __typename: 'PositionSwapAdapterContractApproval',
     bySignature,
-    byTransaction,
   };
 }
 
