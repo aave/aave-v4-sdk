@@ -199,7 +199,7 @@ export function useUserSupplies({
  * ```
  */
 export function useUserSuppliesAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserSuppliesRequest, UserSupplyItem[], UnexpectedError> {
   const client = useAaveClient();
@@ -207,7 +207,7 @@ export function useUserSuppliesAction(
   return useAsyncTask(
     (request: UserSuppliesRequest) =>
       userSupplies(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
       }),
     [client, options.currency, options.timeWindow],
@@ -355,7 +355,7 @@ export function useUserBorrows({
  * ```
  */
 export function useUserBorrowsAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserBorrowsRequest, UserBorrowItem[], UnexpectedError> {
   const client = useAaveClient();
@@ -363,7 +363,7 @@ export function useUserBorrowsAction(
   return useAsyncTask(
     (request: UserBorrowsRequest) =>
       userBorrows(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
       }),
     [client, options.currency, options.timeWindow],
