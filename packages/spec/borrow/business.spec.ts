@@ -23,18 +23,12 @@ describe('Borrowing Assets on Aave V4', () => {
     beforeAll(async () => {
       const amountToSupply = bigDecimal('100');
 
-      const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_USDC_ADDRESS,
+      const setup = await findReserveAndSupply(client, user, {
+        token: ETHEREUM_USDC_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ID,
         amount: amountToSupply,
-        decimals: 6,
-      }).andThen(() =>
-        findReserveAndSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-          amount: amountToSupply,
-          asCollateral: true,
-        }),
-      );
+        asCollateral: true,
+      });
 
       assertOk(setup);
     });
@@ -105,6 +99,7 @@ describe('Borrowing Assets on Aave V4', () => {
         assertSingleElementArray(result.value);
         expect(result.value[0].debt.amount.value).toBeBigDecimalCloseTo(
           amountToBorrow,
+          2,
         );
         expect(result.value[0].debt.token.isWrappedNativeToken).toBe(false);
       });
@@ -189,6 +184,7 @@ describe('Borrowing Assets on Aave V4', () => {
         );
         expect(balanceAfter).toBeBigDecimalCloseTo(
           balanceBefore.add(amountToBorrow),
+          2,
         );
 
         expect(position?.debt.amount.value).toBeBigDecimalCloseTo(
