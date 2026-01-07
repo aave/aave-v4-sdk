@@ -126,31 +126,13 @@ export function swappableTokens(
  * }).andThen(plan => {
  *   switch (plan.__typename) {
  *     case 'SwapByIntent':
- *       return signSwapByIntentWith(plan.data)
- *         .andThen((signature) => swap({ intent: { quoteId: quote.quoteId, signature } }))
- *         .andThen((plan) => {
- *           // …
- *         });
- *       );
+ *       return signSwapTypedDataWith(wallet, plan.data)
+ *         .andThen((signature) =>
+ *           swap({ intent: { quoteId: plan.quote.quoteId, signature } }),
+ *         );
  *
- *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(plan.transaction)
- *         .andThen(signSwapByIntentWith(plan.data))
- *         .andThen((signature) => swap({ intent: { quoteId: quote.quoteId, signature } }))
- *         .andThen((plan) => {
- *         // …
- *         });
- *       );
- *
- *     case 'SwapByTransaction':
- *       return swap({ transaction: { quoteId: quote.quoteId } })
- *         .andThen((plan) => {
- *           // …
- *         });
- *       );
- *
- *     case 'InsufficientBalanceError':
- *       return errAsync(new Error(`Insufficient balance: ${plan.required.value} required.`));
+ *     default:
+ *       return new UnexpectedError(`Unsupported swap plan: ${plan.__typename}`).asResultAsync();
  *   }
  * });
  * ```
@@ -430,7 +412,7 @@ export function waitForSwapOutcome(
  * const result = await swap(client, {
  *   intent: {
  *     quoteId: swapQuoteId('123...'),
- *     signature: {signature('0x456...'),
+ *     signature: signature('0x456...'),
  *   },
  * }).andThen((plan) => {
  *   switch (plan.__typename) {
