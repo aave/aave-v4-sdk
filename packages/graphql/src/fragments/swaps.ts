@@ -146,7 +146,14 @@ export const SwapReceiptFragment = graphql(
 );
 export type SwapReceipt = FragmentOf<typeof SwapReceiptFragment>;
 
-export const TokenSwapQuoteResultFragment = graphql(
+export type TokenSwapQuoteResult = ExtendWithOpaqueType<
+  SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
+>;
+
+export const TokenSwapQuoteResultFragment: FragmentDocumentFor<
+  TokenSwapQuoteResult,
+  'TokenSwapQuoteResult'
+> = graphql(
   `fragment TokenSwapQuoteResult on TokenSwapQuoteResult {
     __typename
     ... on SwapByIntent {
@@ -165,9 +172,6 @@ export const TokenSwapQuoteResultFragment = graphql(
     SwapByTransactionFragment,
   ],
 );
-export type TokenSwapQuoteResult = ExtendWithOpaqueType<
-  FragmentOf<typeof TokenSwapQuoteResultFragment>
->;
 
 export const PrepareTokenSwapResultFragment = graphql(
   `fragment PrepareTokenSwapResult on PrepareTokenSwapResult {

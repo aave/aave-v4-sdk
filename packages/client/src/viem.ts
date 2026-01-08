@@ -361,21 +361,21 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
 
 function signERC20Permit(
   walletClient: WalletClient,
-  result: PermitTypedDataResponse,
+  data: PermitTypedDataResponse,
 ): ReturnType<ERC20PermitHandler> {
   invariant(walletClient.account, 'Wallet account is required');
 
   return ResultAsync.fromPromise(
     signTypedData(walletClient, {
       account: walletClient.account,
-      domain: result.domain as TypedDataDomain,
-      types: result.types as TypedData,
-      primaryType: result.primaryType as keyof typeof result.types,
-      message: result.message,
+      domain: data.domain as TypedDataDomain,
+      types: data.types as TypedData,
+      primaryType: data.primaryType as keyof typeof data.types,
+      message: data.message,
     }),
     (err) => SigningError.from(err),
   ).map((hex) => ({
-    deadline: result.message.deadline,
+    deadline: data.message.deadline,
     value: signatureFrom(hex),
   }));
 }
@@ -385,8 +385,21 @@ function signERC20Permit(
  */
 export function signERC20PermitWith(
   walletClient: WalletClient,
-): ERC20PermitHandler {
-  return signERC20Permit.bind(null, walletClient);
+): ERC20PermitHandler;
+/**
+ * Signs ERC20 permits using the provided wallet client.
+ */
+export function signERC20PermitWith(
+  walletClient: WalletClient,
+  data: PermitTypedDataResponse,
+): ReturnType<ERC20PermitHandler>;
+export function signERC20PermitWith(
+  walletClient: WalletClient,
+  data?: PermitTypedDataResponse,
+): ERC20PermitHandler | ReturnType<ERC20PermitHandler> {
+  return typeof data === 'undefined'
+    ? signERC20Permit.bind(null, walletClient)
+    : signERC20Permit(walletClient, data);
 }
 
 function signSwapTypedData(
@@ -408,14 +421,12 @@ function signSwapTypedData(
 }
 
 /**
- * @internal
  * Creates a swap signature handler that signs swap typed data using the provided wallet client.
  */
 export function signSwapTypedDataWith(
   walletClient: WalletClient,
 ): SwapSignatureHandler;
 /**
- * @internal
  * Signs swap typed data using the provided wallet client.
  */
 export function signSwapTypedDataWith(

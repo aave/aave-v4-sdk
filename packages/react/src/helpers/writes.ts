@@ -57,9 +57,16 @@ export class PendingTransaction {
   /**
    * @internal
    */
+  static isInstanceOf(value: unknown): value is PendingTransaction {
+    return value instanceof PendingTransaction;
+  }
+
+  /**
+   * @internal
+   */
   static ensure<T>(value: T): PendingTransaction & T {
     invariant(
-      value instanceof PendingTransaction,
+      PendingTransaction.isInstanceOf(value),
       'Expected PendingTransaction',
     );
     return value as PendingTransaction & T;

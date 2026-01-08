@@ -209,12 +209,10 @@ function signSwapTypedData(
 }
 
 /**
- * @internal
  * Creates a swap signature handler that signs swap typed data using the provided ethers signer.
  */
 export function signSwapTypedDataWith(signer: Signer): SwapSignatureHandler;
 /**
- * @internal
  * Signs swap typed data using the provided ethers signer.
  */
 export function signSwapTypedDataWith(

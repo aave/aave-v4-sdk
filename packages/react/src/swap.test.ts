@@ -4,28 +4,33 @@ import {
   environment,
   fundNativeAddress,
 } from '@aave/client/testing';
-import { signSwapTypedDataWith } from '@aave/client/viem';
+import { signERC20PermitWith, signSwapTypedDataWith } from '@aave/client/viem';
 import {
   BorrowSwapQuoteQuery,
-  CancelSwapQuery,
-  type PrepareBorrowSwapRequest,
+  type BorrowSwapQuoteRequest,
+  CancelSwapMutation,
   PreparePositionSwapQuery,
-  type PrepareRepayWithSupplyRequest,
-  type PrepareSupplySwapRequest,
   PrepareSwapCancelQuery,
   type PrepareSwapCancelRequest,
   PrepareTokenSwapQuery,
-  type PrepareTokenSwapRequest,
-  type PrepareWithdrawSwapRequest,
   RepayWithSupplyQuoteQuery,
+  type RepayWithSupplyQuoteRequest,
   SupplySwapQuoteQuery,
+  type SupplySwapQuoteRequest,
   SwapMutation,
   SwapStatusQuery,
+  TokenSwapQuoteQuery,
+  type TokenSwapQuoteRequest,
   WithdrawSwapQuoteQuery,
+  type WithdrawSwapQuoteRequest,
 } from '@aave/graphql';
 import {
+  makeErc20Approval,
   makePositionSwapAdapterContractApproval,
   makePositionSwapPositionManagerApproval,
+  makeSwapByIntent,
+  makeSwapByIntentWithApprovalRequired,
+  makeSwapByTransaction,
   makeSwapCancelled,
   makeSwapOpen,
   makeSwapQuote,
@@ -109,13 +114,10 @@ describe('Given the swap hooks', () => {
     describe('And the requested swap is by transaction', () => {
       beforeEach(() => {
         server.use(
-          api.query(PrepareTokenSwapQuery, () =>
+          api.query(TokenSwapQuoteQuery, () =>
             msw.HttpResponse.json({
               data: {
-                value: {
-                  __typename: 'SwapByTransaction',
-                  quote: makeSwapQuote(),
-                },
+                value: makeSwapByTransaction(),
               },
             }),
           ),
@@ -147,71 +149,12 @@ describe('Given the swap hooks', () => {
                 return sendTransaction(plan.transaction);
 
               default:
-                return cancel(`Unexpected plan: ${plan.__typename}`);
+                return cancel(`Unexpected in this test: ${plan.__typename}`);
             }
           });
         });
 
-        const result = await swap({} as PrepareTokenSwapRequest);
-
-        assertOk(result);
-      });
-    });
-
-    describe('And the requested swap is by transaction with ERC-20 pre-approval', () => {
-      beforeEach(() => {
-        server.use(
-          api.query(PrepareTokenSwapQuery, () =>
-            msw.HttpResponse.json({
-              data: {
-                value: {
-                  __typename: 'SwapByTransaction',
-                  quote: makeSwapQuote(),
-                },
-              },
-            }),
-          ),
-          api.mutation(SwapMutation, () =>
-            msw.HttpResponse.json({
-              data: {
-                value: {
-                  __typename: 'SwapApprovalRequired',
-                  approval: dummyTransactionRequest,
-                  originalTransaction: {
-                    __typename: 'SwapTransactionRequest',
-                    transaction: dummyTransactionRequest,
-                    orderReceipt: makeSwapReceipt(),
-                  },
-                },
-              },
-            }),
-          ),
-        );
-      });
-
-      it('Then it should support the corresponding execution plan', async () => {
-        const {
-          result: {
-            current: [swap],
-          },
-        } = renderHookWithinContext(() => {
-          const [sendTransaction] = useSendTransaction(walletClient);
-
-          return useTokenSwap((plan, { cancel }) => {
-            switch (plan.__typename) {
-              case 'SwapApprovalRequired':
-                return sendTransaction(plan.approval);
-
-              case 'SwapTransactionRequest':
-                return sendTransaction(plan.transaction);
-
-              default:
-                return cancel(`Unexpected plan: ${plan.__typename}`);
-            }
-          });
-        });
-
-        const result = await swap({} as PrepareTokenSwapRequest);
+        const result = await swap({} as TokenSwapQuoteRequest);
 
         assertOk(result);
       });
@@ -220,14 +163,10 @@ describe('Given the swap hooks', () => {
     describe('And the requested swap is by intent', () => {
       beforeEach(() => {
         server.use(
-          api.query(PrepareTokenSwapQuery, () =>
+          api.query(TokenSwapQuoteQuery, () =>
             msw.HttpResponse.json({
               data: {
-                value: {
-                  __typename: 'SwapByIntent',
-                  quote: makeSwapQuote(),
-                  data: makeSwapTypedData(),
-                },
+                value: makeSwapByIntent(),
               },
             }),
           ),
@@ -240,20 +179,6 @@ describe('Given the swap hooks', () => {
       });
 
       it('Then it should support the corresponding execution plan', async () => {
-        server.use(
-          api.query(PrepareTokenSwapQuery, () =>
-            msw.HttpResponse.json({
-              data: {
-                value: {
-                  __typename: 'SwapByIntent',
-                  quote: makeSwapQuote(),
-                  data: makeSwapTypedData(),
-                },
-              },
-            }),
-          ),
-        );
-
         const {
           result: {
             current: [swap],
@@ -265,12 +190,12 @@ describe('Given the swap hooks', () => {
                 return signSwapTypedDataWith(walletClient, plan);
 
               default:
-                return cancel(`Unexpected plan: ${plan.__typename}`);
+                return cancel(`Unexpected in this test: ${plan.__typename}`);
             }
           }),
         );
 
-        const result = await swap({} as PrepareTokenSwapRequest);
+        const result = await swap({} as TokenSwapQuoteRequest);
 
         assertOk(result);
       });
@@ -279,15 +204,21 @@ describe('Given the swap hooks', () => {
     describe('And the requested swap is by intent with ERC-20 pre-approval', () => {
       beforeEach(() => {
         server.use(
+          api.query(TokenSwapQuoteQuery, () =>
+            msw.HttpResponse.json({
+              data: {
+                value: makeSwapByIntentWithApprovalRequired({
+                  approval: makeErc20Approval({
+                    byTransaction: dummyTransactionRequest,
+                  }),
+                }),
+              },
+            }),
+          ),
           api.query(PrepareTokenSwapQuery, () =>
             msw.HttpResponse.json({
               data: {
-                value: {
-                  __typename: 'SwapByIntentWithApprovalRequired',
-                  approval: dummyTransactionRequest,
-                  quote: makeSwapQuote(),
-                  data: makeSwapTypedData(),
-                },
+                value: makeSwapByIntent(),
               },
             }),
           ),
@@ -299,7 +230,7 @@ describe('Given the swap hooks', () => {
         );
       });
 
-      it('Then it should support the corresponding execution plan', async () => {
+      it('Then it should support the flow involving a pre-approval by transaction', async () => {
         const {
           result: {
             current: [swap],
@@ -308,19 +239,44 @@ describe('Given the swap hooks', () => {
           const [sendTransaction] = useSendTransaction(walletClient);
           return useTokenSwap((plan, { cancel }) => {
             switch (plan.__typename) {
-              case 'SwapByIntentWithApprovalRequired':
-                return sendTransaction(plan.approval);
+              case 'Erc20Approval':
+                return sendTransaction(plan.byTransaction);
 
               case 'SwapTypedData':
                 return signSwapTypedDataWith(walletClient, plan);
 
               default:
-                return cancel(`Unexpected plan: ${plan.__typename}`);
+                return cancel(`Unexpected in this test: ${plan.__typename}`);
             }
           });
         });
 
-        const result = await swap({} as PrepareTokenSwapRequest);
+        const result = await swap({} as TokenSwapQuoteRequest);
+
+        assertOk(result);
+      });
+
+      it('Then it should support the flow involving a pre-approval by signature', async () => {
+        const {
+          result: {
+            current: [swap],
+          },
+        } = renderHookWithinContext(() =>
+          useTokenSwap((plan, { cancel }) => {
+            switch (plan.__typename) {
+              case 'Erc20Approval':
+                return signERC20PermitWith(walletClient, plan.bySignature!);
+
+              case 'SwapTypedData':
+                return signSwapTypedDataWith(walletClient, plan);
+
+              default:
+                return cancel(`Unexpected in this test: ${plan.__typename}`);
+            }
+          }),
+        );
+
+        const result = await swap({} as TokenSwapQuoteRequest);
 
         assertOk(result);
       });
@@ -346,7 +302,7 @@ describe('Given the swap hooks', () => {
               },
             }),
           ),
-          api.query(CancelSwapQuery, () =>
+          api.mutation(CancelSwapMutation, () =>
             msw.HttpResponse.json({
               data: {
                 value: makeSwapCancelled(),
@@ -368,7 +324,7 @@ describe('Given the swap hooks', () => {
                 return signSwapTypedDataWith(walletClient, plan);
 
               default:
-                return cancel(`Unexpected plan: ${plan.__typename}`);
+                return cancel(`Unexpected in this test: ${plan.__typename}`);
             }
           }),
         );
@@ -381,11 +337,11 @@ describe('Given the swap hooks', () => {
 
     describe('To cancel a swap-by-transaction', () => {
       beforeEach(() => {
-        let firstStatusCall = true;
+        let firstCall = true;
         server.use(
           api.query(SwapStatusQuery, () => {
-            if (firstStatusCall) {
-              firstStatusCall = false;
+            if (firstCall) {
+              firstCall = false;
               return msw.HttpResponse.json({
                 data: {
                   value: makeSwapOpen(),
@@ -408,7 +364,7 @@ describe('Given the swap hooks', () => {
               },
             }),
           ),
-          api.query(CancelSwapQuery, () =>
+          api.mutation(CancelSwapMutation, () =>
             msw.HttpResponse.json({
               data: { value: dummyTransactionRequest },
             }),
@@ -483,12 +439,12 @@ describe('Given the swap hooks', () => {
         }),
       );
 
-      const result = await swap({} as PrepareSupplySwapRequest);
+      const result = await swap({} as SupplySwapQuoteRequest);
 
       assertOk(result);
     });
 
-    it('Then it should support position swap with position manager and adapter contract approvals via transactions', async () => {
+    it('Then it should support position swap with position manager approval via transaction and adapter contract approval via signature', async () => {
       const {
         result: {
           current: [swap],
@@ -498,8 +454,10 @@ describe('Given the swap hooks', () => {
         return useSupplySwap((plan) => {
           switch (plan.__typename) {
             case 'PositionSwapPositionManagerApproval':
-            case 'PositionSwapAdapterContractApproval':
               return sendTransaction(plan.byTransaction);
+
+            case 'PositionSwapAdapterContractApproval':
+              return signSwapTypedDataWith(walletClient, plan.bySignature);
 
             case 'SwapByIntent':
               return signSwapTypedDataWith(walletClient, plan.data);
@@ -507,7 +465,7 @@ describe('Given the swap hooks', () => {
         });
       });
 
-      const result = await swap({} as PrepareSupplySwapRequest);
+      const result = await swap({} as SupplySwapQuoteRequest);
 
       assertOk(result);
     });
@@ -555,12 +513,12 @@ describe('Given the swap hooks', () => {
         }),
       );
 
-      const result = await swap({} as PrepareBorrowSwapRequest);
+      const result = await swap({} as BorrowSwapQuoteRequest);
 
       assertOk(result);
     });
 
-    it('Then it should support position swap with position manager and adapter contract approvals via transactions', async () => {
+    it('Then it should support position swap with position manager approval via transaction and adapter contract approval via signature', async () => {
       const {
         result: {
           current: [swap],
@@ -570,8 +528,10 @@ describe('Given the swap hooks', () => {
         return useBorrowSwap((plan) => {
           switch (plan.__typename) {
             case 'PositionSwapPositionManagerApproval':
-            case 'PositionSwapAdapterContractApproval':
               return sendTransaction(plan.byTransaction);
+
+            case 'PositionSwapAdapterContractApproval':
+              return signSwapTypedDataWith(walletClient, plan.bySignature);
 
             case 'SwapByIntent':
               return signSwapTypedDataWith(walletClient, plan.data);
@@ -579,7 +539,7 @@ describe('Given the swap hooks', () => {
         });
       });
 
-      const result = await swap({} as PrepareBorrowSwapRequest);
+      const result = await swap({} as BorrowSwapQuoteRequest);
 
       assertOk(result);
     });
@@ -627,12 +587,12 @@ describe('Given the swap hooks', () => {
         }),
       );
 
-      const result = await swap({} as PrepareRepayWithSupplyRequest);
+      const result = await swap({} as RepayWithSupplyQuoteRequest);
 
       assertOk(result);
     });
 
-    it('Then it should support position swap with position manager and adapter contract approvals via transactions', async () => {
+    it('Then it should support position swap with position manager approval via transaction and adapter contract approval via signature', async () => {
       const {
         result: {
           current: [swap],
@@ -642,8 +602,10 @@ describe('Given the swap hooks', () => {
         return useRepayWithSupply((plan) => {
           switch (plan.__typename) {
             case 'PositionSwapPositionManagerApproval':
-            case 'PositionSwapAdapterContractApproval':
               return sendTransaction(plan.byTransaction);
+
+            case 'PositionSwapAdapterContractApproval':
+              return signSwapTypedDataWith(walletClient, plan.bySignature);
 
             case 'SwapByIntent':
               return signSwapTypedDataWith(walletClient, plan.data);
@@ -651,7 +613,7 @@ describe('Given the swap hooks', () => {
         });
       });
 
-      const result = await swap({} as PrepareRepayWithSupplyRequest);
+      const result = await swap({} as RepayWithSupplyQuoteRequest);
 
       assertOk(result);
     });
@@ -699,12 +661,12 @@ describe('Given the swap hooks', () => {
         }),
       );
 
-      const result = await swap({} as PrepareWithdrawSwapRequest);
+      const result = await swap({} as WithdrawSwapQuoteRequest);
 
       assertOk(result);
     });
 
-    it('Then it should support position swap with position manager and adapter contract approvals via transactions', async () => {
+    it('Then it should support position swap with position manager approval via transaction and adapter contract approval via signature', async () => {
       const {
         result: {
           current: [swap],
@@ -714,8 +676,10 @@ describe('Given the swap hooks', () => {
         return useWithdrawSwap((plan) => {
           switch (plan.__typename) {
             case 'PositionSwapPositionManagerApproval':
-            case 'PositionSwapAdapterContractApproval':
               return sendTransaction(plan.byTransaction);
+
+            case 'PositionSwapAdapterContractApproval':
+              return signSwapTypedDataWith(walletClient, plan.bySignature);
 
             case 'SwapByIntent':
               return signSwapTypedDataWith(walletClient, plan.data);
@@ -723,7 +687,7 @@ describe('Given the swap hooks', () => {
         });
       });
 
-      const result = await swap({} as PrepareWithdrawSwapRequest);
+      const result = await swap({} as WithdrawSwapQuoteRequest);
 
       assertOk(result);
     });

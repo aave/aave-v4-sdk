@@ -297,6 +297,7 @@ export const exchange = cacheExchange({
     DecimalNumberWithChange: () => null,
     DomainData: () => null,
     Erc20Amount: () => null,
+    Erc20Approval: () => null,
     Erc20ApprovalRequired: () => null,
     ExchangeAmount: () => null,
     ExchangeAmountVariation: () => null,
