@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.14
+
+### Patch Changes
+
+- 40a234e: **feat:** support latest swap GQL changes.
+- Updated dependencies [40a234e]
+  - @aave/graphql@1.0.0-next.13
+  - @aave/client@4.0.0-next.14
+
 ## 4.0.0-next.13
 
 ### Patch Changes

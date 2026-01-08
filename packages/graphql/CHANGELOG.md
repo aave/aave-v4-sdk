@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.13
+
+### Patch Changes
+
+- 40a234e: **feat:** support latest swap GQL changes.
+
 ## 1.0.0-next.12
 
 ### Patch Changes
