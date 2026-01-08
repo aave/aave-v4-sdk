@@ -9,6 +9,7 @@ import {
   prepareTokenSwap,
   swap,
   swapStatus,
+  tokenSwapQuote,
   userSwaps,
 } from '@aave/client/actions';
 import {
@@ -47,7 +48,7 @@ describe('Token swapping on Aave V4', () => {
       it('Then the swap executes without requiring approval', async ({
         annotate,
       }) => {
-        const swapResult = await prepareTokenSwap(client, {
+        const swapResult = await tokenSwapQuote(client, {
           market: {
             amount: bigDecimal('20'),
             sell: { erc20: ETHEREUM_USDC_ADDRESS },
@@ -121,7 +122,7 @@ describe('Token swapping on Aave V4', () => {
 
     describe('When the user initiates the swap', () => {
       it('Then the user must approve before swapping', async ({ annotate }) => {
-        const swapResult = await prepareTokenSwap(client, {
+        const swapResult = await tokenSwapQuote(client, {
           market: {
             amount: bigDecimal('20'),
             sell: { erc20: ETHEREUM_USDC_ADDRESS },
@@ -136,17 +137,28 @@ describe('Token swapping on Aave V4', () => {
             swapPlan.__typename === 'SwapByIntentWithApprovalRequired',
             `Swap plan is not a swap by intent: ${swapPlan.__typename}`,
           );
-          return sendTransaction(newUser, swapPlan.approval).andThen(() =>
-            signSwapTypedDataWith(newUser, swapPlan.data).andThen(
-              (signature) => {
-                return swap(client, {
-                  intent: {
-                    quoteId: swapPlan.quote.quoteId,
-                    signature: signature,
-                  },
-                });
-              },
-            ),
+          return sendTransaction(
+            newUser,
+            swapPlan.approval.byTransaction,
+          ).andThen(() =>
+            prepareTokenSwap(client, {
+              quoteId: swapPlan.quote.quoteId,
+            }).andThen((prepareResult) => {
+              invariant(
+                prepareResult.__typename === 'SwapByIntent',
+                `Prepare token swap result is not a swap by intent: ${prepareResult.__typename}`,
+              );
+              return signSwapTypedDataWith(newUser, prepareResult.data).andThen(
+                (signature) => {
+                  return swap(client, {
+                    intent: {
+                      quoteId: swapPlan.quote.quoteId,
+                      signature: signature,
+                    },
+                  });
+                },
+              );
+            }),
           );
         });
 
