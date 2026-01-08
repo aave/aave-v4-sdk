@@ -1246,7 +1246,7 @@ export type TokenSwapHandler = (
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signSwapTypedData] = useSignSwapTypedDataWith(wallet);
+ * const [signSwapTypedData] = useSignSwapTypedData(wallet);
  *
  * const [swap, { loading, error }] = useTokenSwap((plan) => {
  *   switch (plan.__typename) {
@@ -1427,7 +1427,7 @@ export type CancelSwapError =
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signSwapTypedData] = useSignSwapTypedDataWith(wallet);
+ * const [signSwapTypedData] = useSignSwapTypedData(wallet);
  *
  * const [cancelSwap, { loading, error }] = useCancelSwap((plan) => {
  *   switch (plan.__typename) {

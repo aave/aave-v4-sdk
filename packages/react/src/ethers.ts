@@ -115,7 +115,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  *
  * // …
  *
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith(signer);
+ * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData(signer);
  *
  * const run = async () => {
  *   const result = await signSwapTypedData(swapTypedData);
@@ -131,7 +131,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  *
  * @param signer - The ethers Signer to use for signing swap typed data.
  */
-export function useSignSwapTypedDataWith(
+export function useSignSwapTypedData(
   signer: Signer | undefined,
 ): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
   return useAsyncTask(
