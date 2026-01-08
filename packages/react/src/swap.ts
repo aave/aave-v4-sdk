@@ -32,7 +32,6 @@ import type {
   PositionSwapApproval,
   PrepareSwapCancelRequest,
   SupplySwapQuoteRequest,
-  SwapByIntentWithApprovalRequired,
   SwapCancelled,
   SwapExecutionPlan,
   SwapQuote,
