@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.15
+
+### Patch Changes
+
+- 402281c: **feat:** expose tx hash from `TransactionError`.
+- Updated dependencies [402281c]
+  - @aave/core@1.0.0-next.9
+  - @aave/client@4.0.0-next.15
+
 ## 4.0.0-next.14
 
 ### Patch Changes
