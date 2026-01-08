@@ -1311,15 +1311,6 @@ export function useTokenSwap(
             .andThen((pendingTransaction) => pendingTransaction.wait())
             .andThen(() => okAsync(plan.orderReceipt));
 
-        // case 'SwapApprovalRequired':
-        //   return handler(plan, { cancel })
-        //     .map(PendingTransaction.ensure)
-        //     .andThen((pendingTransaction) => pendingTransaction.wait())
-        //     .andThen(() => handler(plan.originalTransaction, { cancel }))
-        //     .map(PendingTransaction.ensure)
-        //     .andThen((pendingTransaction) => pendingTransaction.wait())
-        //     .andThen(() => okAsync(plan.originalTransaction.orderReceipt));
-
         case 'InsufficientBalanceError':
           return ValidationError.fromGqlNode(plan).asResultAsync();
 
@@ -1410,58 +1401,6 @@ export function useTokenSwap(
             );
         }
       }),
-
-    // prepareTokenSwap(client, request, { currency }).andThen((preparePlan) => {
-    //   switch (preparePlan.__typename) {
-    //     case 'SwapByTransaction':
-    //       return swap(client, {
-    //         transaction: { quoteId: preparePlan.quote.quoteId },
-    //       }).andThen(executeSwap);
-
-    //     case 'SwapByIntent':
-    //       return handler(preparePlan.data, { cancel })
-    //         .map((result) => {
-    //           invariant(isSignature(result), 'Invalid signature');
-    //           return result;
-    //         })
-    //         .andThen((signature) =>
-    //           swap(client, {
-    //             intent: {
-    //               quoteId: preparePlan.quote.quoteId,
-    //               signature,
-    //             },
-    //           }),
-    //         )
-    //         .andThen(executeSwap);
-
-    //     case 'SwapByIntentWithApprovalRequired':
-    //       return handler(preparePlan, { cancel })
-    //         .map(PendingTransaction.ensure)
-    //         .andThen((pendingTransaction) => pendingTransaction.wait())
-    //         .andThen(() => handler(preparePlan.data, { cancel }))
-    //         .map((result) => {
-    //           invariant(isSignature(result), 'Invalid signature');
-    //           return result;
-    //         })
-    //         .andThen((signature) =>
-    //           swap(client, {
-    //             intent: {
-    //               quoteId: preparePlan.quote.quoteId,
-    //               signature,
-    //             },
-    //           }),
-    //         )
-    //         .andThen(executeSwap);
-
-    //     case 'InsufficientBalanceError':
-    //       return ValidationError.fromGqlNode(preparePlan).asResultAsync();
-
-    //     default:
-    //       return new UnexpectedError(
-    //         `Unsupported swap plan: ${preparePlan.__typename}. Upgrade to a newer version of the @aave/react package.`,
-    //       ).asResultAsync();
-    //   }
-    // }),
     [client, handler, executeSwap],
   );
 }
