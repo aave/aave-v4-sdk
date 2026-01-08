@@ -1,5 +1,13 @@
 # @aave/client
 
+## 4.0.0-next.16
+
+### Patch Changes
+
+- f31d016: **fix:** issue with decodeUserPositionId`.
+- Updated dependencies [f31d016]
+  - @aave/graphql@1.0.0-next.14
+
 ## 4.0.0-next.15
 
 ### Patch Changes
