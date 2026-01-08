@@ -1,5 +1,11 @@
 # @aave/cli
 
+## 4.1.0-next.10
+
+### Patch Changes
+
+- @aave/client@4.0.0-next.17
+
 ## 4.1.0-next.9
 
 ### Patch Changes

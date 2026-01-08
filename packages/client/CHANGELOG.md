@@ -1,5 +1,7 @@
 # @aave/client
 
+## 4.0.0-next.17
+
 ## 4.0.0-next.16
 
 ### Patch Changes

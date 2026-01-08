@@ -1,5 +1,12 @@
 # @aave/react
 
+## 4.0.0-next.17
+
+### Patch Changes
+
+- fffac6d: **feat:** implements `useSupplySwapQuoteAction`, `useBorrowSwapQuoteAction`, `useRepayWithSupplyQuoteAction`, `useWithdrawSwapQuoteAction` hooks.
+  - @aave/client@4.0.0-next.17
+
 ## 4.0.0-next.16
 
 ### Patch Changes
