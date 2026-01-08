@@ -1,5 +1,16 @@
 # @aave/react
 
+## 4.0.0-next.15
+
+### Patch Changes
+
+- 402281c: **feat:** expose tx hash from `TransactionError`.
+- 990608b: **feat:** support network fee estimation for `updateUserPositionConditions` preview action.
+- 41d5e4d: **fix:** renames `useSignSwapTypedDataWith` into `useSignSwapTypedData`.
+- Updated dependencies [402281c]
+  - @aave/core@1.0.0-next.9
+  - @aave/client@4.0.0-next.15
+
 ## 4.0.0-next.14
 
 ### Patch Changes
