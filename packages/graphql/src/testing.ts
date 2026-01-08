@@ -11,20 +11,31 @@ import type {
   DecimalNumber,
   DomainData,
   Erc20Amount,
+  Erc20Approval,
   Erc20Token,
   ExchangeAmount,
   PercentNumber,
   PositionSwapAdapterContractApproval,
   PositionSwapPositionManagerApproval,
+  SwapByIntent,
+  SwapByIntentWithApprovalRequired,
+  SwapByTransaction,
   SwapCancelled,
   SwapOpen,
   SwapQuote,
   SwapReceipt,
+  SwapTransactionRequest,
   SwapTypedData,
   TokenInfo,
   TransactionRequest,
 } from './fragments';
 import { type SwapId, type SwapQuoteId, tokenInfoId } from './id';
+import type {
+  PermitMessageData,
+  PermitTypedDataResponse,
+  TypeDefinition,
+  TypeField,
+} from './permits';
 
 function randomBase64String(): string {
   return btoa(crypto.randomUUID());
@@ -195,6 +206,9 @@ export function makeTransactionRequest({
  * @internal
  */
 export function makeSwapTypedData(): SwapTypedData {
+  // __typenames that you see and are normally not part of the fragment fieldset selection
+  // are used here to allow the URQL cache to be able to normalize the data. Hence the need to
+  // assert the type (as DomainData)
   return {
     __typename: 'SwapTypedData',
     primaryType: 'Swap',
@@ -226,14 +240,17 @@ export function makeSwapQuote(): SwapQuote {
     __typename: 'SwapQuote',
     quoteId: randomBase64String() as SwapQuoteId,
     suggestedSlippage: percentNumber(0.01),
-    desiredSell: makeErc20Amount(1000, 'WETH'),
-    desiredBuy: makeErc20Amount(1000, 'USDC'),
+    spotBuy: makeErc20Amount(1000, 'USDC'),
+    spotSell: makeErc20Amount(1000, 'WETH'),
     costs: {
       __typename: 'SwapQuoteCosts',
       networkCosts: makeErc20Amount(1000, 'WETH'),
       partnerFee: makeErc20Amount(1000, 'USDC'),
+      flashloanFee: makeErc20Amount(1000, 'WETH'),
+      providerFee: makeErc20Amount(1000, 'USDC'),
     },
-    minimumReceived: makeErc20Amount(1000, 'USDC'),
+    finalBuy: makeErc20Amount(1000, 'USDC'),
+    finalSell: makeErc20Amount(1000, 'WETH'),
   };
 }
 
@@ -281,7 +298,6 @@ export function makeSwapCancelled(): SwapCancelled {
  */
 export function makePositionSwapAdapterContractApproval({
   bySignature = makeSwapTypedData(),
-  byTransaction = makeTransactionRequest(),
 }: {
   bySignature?: SwapTypedData;
   byTransaction?: TransactionRequest;
@@ -289,7 +305,6 @@ export function makePositionSwapAdapterContractApproval({
   return {
     __typename: 'PositionSwapAdapterContractApproval',
     bySignature,
-    byTransaction,
   };
 }
 
@@ -307,5 +322,132 @@ export function makePositionSwapPositionManagerApproval({
     __typename: 'PositionSwapPositionManagerApproval',
     bySignature,
     byTransaction,
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapTransactionRequest({
+  transaction = makeTransactionRequest(),
+}: {
+  transaction?: TransactionRequest;
+} = {}): SwapTransactionRequest {
+  return {
+    __typename: 'SwapTransactionRequest',
+    transaction,
+    orderReceipt: makeSwapReceipt(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapByTransaction(): SwapByTransaction {
+  return {
+    __typename: 'SwapByTransaction',
+    quote: makeSwapQuote(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapByIntent(): SwapByIntent {
+  return {
+    __typename: 'SwapByIntent',
+    quote: makeSwapQuote(),
+    data: makeSwapTypedData(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makePermitTypedDataResponse(): PermitTypedDataResponse {
+  // __typenames that you see and are normally not part of the fragment fieldset selection
+  // are used here to allow the URQL cache to be able to normalize the data. Hence the need to
+  // assert the type (as TypeField, TypeDefinition, etc.)
+  return {
+    __typename: 'PermitTypedDataResponse',
+    types: {
+      __typename: 'TypeDefinition',
+      EIP712Domain: [
+        { __typename: 'TypeField', name: 'name', type: 'string' } as TypeField,
+      ],
+      Permit: [
+        {
+          __typename: 'TypeField',
+          name: 'owner',
+          type: 'address',
+        } as TypeField,
+        {
+          __typename: 'TypeField',
+          name: 'spender',
+          type: 'address',
+        } as TypeField,
+        {
+          __typename: 'TypeField',
+          name: 'value',
+          type: 'uint256',
+        } as TypeField,
+        {
+          __typename: 'TypeField',
+          name: 'nonce',
+          type: 'uint256',
+        } as TypeField,
+        {
+          __typename: 'TypeField',
+          name: 'deadline',
+          type: 'uint256',
+        } as TypeField,
+      ],
+    } as TypeDefinition,
+    primaryType: 'Permit',
+    domain: {
+      __typename: 'DomainData',
+      name: 'Permit',
+      version: '1',
+      chainId: toChainId(1),
+      verifyingContract: randomEvmAddress(),
+    } as DomainData,
+    message: {
+      __typename: 'PermitMessageData',
+      owner: randomEvmAddress(),
+      spender: randomEvmAddress(),
+      value: 1000000000000000000n,
+      nonce: 0n,
+      deadline: 1234567890,
+    } as PermitMessageData,
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeErc20Approval({
+  byTransaction = makeTransactionRequest(),
+}: {
+  byTransaction?: TransactionRequest;
+} = {}): Erc20Approval {
+  return {
+    __typename: 'Erc20Approval',
+    byTransaction,
+    bySignature: makePermitTypedDataResponse(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapByIntentWithApprovalRequired({
+  approval = makeErc20Approval(),
+}: {
+  approval?: Erc20Approval;
+} = {}): SwapByIntentWithApprovalRequired {
+  return {
+    __typename: 'SwapByIntentWithApprovalRequired',
+    quote: makeSwapQuote(),
+    approval,
   };
 }

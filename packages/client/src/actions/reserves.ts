@@ -40,8 +40,7 @@ export function reserve(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: Required<CurrencyQueryOptions> &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve | null, UnexpectedError> {
   return client.query(ReserveQuery, { request, currency, timeWindow });
 }
@@ -73,8 +72,7 @@ export function reserves(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: Required<CurrencyQueryOptions> &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve[], UnexpectedError> {
   return client.query(ReservesQuery, { request, currency, timeWindow });
 }

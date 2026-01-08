@@ -35,6 +35,7 @@ export type PermitMessageData = FragmentOf<typeof PermitMessageDataFragment>;
 
 export const PermitTypedDataResponseFragment = graphql(
   `fragment PermitTypedDataResponse on PermitTypedDataResponse {
+    __typename
     types {
       ...TypeDefinition
     }
@@ -55,6 +56,20 @@ export type PermitTypedDataResponse = FragmentOf<
 export type ERC20PermitSignature = ReturnType<
   typeof graphql.scalar<'ERC20PermitSignature'>
 >;
+
+/**
+ * Type guard for an ERC20 permit signature.
+ */
+export function isERC20PermitSignature(
+  signature: unknown,
+): signature is ERC20PermitSignature {
+  return (
+    typeof signature === 'object' &&
+    signature !== null &&
+    'deadline' in signature &&
+    'value' in signature
+  );
+}
 
 /**
  * @internal

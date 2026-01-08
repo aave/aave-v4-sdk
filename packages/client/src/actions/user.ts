@@ -58,8 +58,7 @@ export function userSupplies(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: Required<CurrencyQueryOptions> &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSupplyItem[], UnexpectedError> {
   return client.query(UserSuppliesQuery, { request, currency, timeWindow });
 }
@@ -90,8 +89,7 @@ export function userBorrows(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: Required<CurrencyQueryOptions> &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBorrowItem[], UnexpectedError> {
   return client.query(UserBorrowsQuery, { request, currency, timeWindow });
 }

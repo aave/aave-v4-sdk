@@ -1,6 +1,10 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import { DecimalNumberFragment } from './common';
+import {
+  DecimalNumberFragment,
+  type InsufficientBalanceError,
+  InsufficientBalanceErrorFragment,
+} from './common';
 
 export const TransactionRequestFragment = graphql(
   `fragment TransactionRequest on TransactionRequest {
@@ -53,22 +57,6 @@ export const PreContractActionRequiredFragment = graphql(
 );
 export type PreContractActionRequired = FragmentOf<
   typeof PreContractActionRequiredFragment
->;
-
-export const InsufficientBalanceErrorFragment = graphql(
-  `fragment InsufficientBalanceError on InsufficientBalanceError {
-    __typename
-    required {
-      ...DecimalNumber
-    }
-    available {
-      ...DecimalNumber
-    }
-  }`,
-  [DecimalNumberFragment],
-);
-export type InsufficientBalanceError = FragmentOf<
-  typeof InsufficientBalanceErrorFragment
 >;
 
 export type ExecutionPlan =

@@ -8,6 +8,7 @@ export type {
   AsyncTaskLoading,
   AsyncTaskState,
   AsyncTaskSuccess,
+  PendingTransactionError,
   SendTransactionError,
   TransactionHandlerOptions,
   UseAsyncTask,
