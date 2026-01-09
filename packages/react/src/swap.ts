@@ -12,10 +12,12 @@ import {
   prepareSwapCancel,
   prepareTokenSwap,
   repayWithSupplyQuote,
+  type SwapOutcome,
   supplySwapQuote,
   swap,
   swapStatus,
   tokenSwapQuote,
+  waitForSwapOutcome,
   withdrawSwapQuote,
 } from '@aave/client/actions';
 import {
@@ -57,6 +59,7 @@ import {
   SupplySwapQuoteQuery,
   type SwapByIntent,
   type SwapByIntentInput,
+  type SwapId,
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type SwapTypedData,
@@ -81,7 +84,7 @@ import {
   okAsync,
   ResultAwareError,
 } from '@aave/types';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAaveClient } from './context';
 import {
   type CancelOperation,
@@ -1690,4 +1693,189 @@ export function useCancelSwap(
       }),
     [client, handler],
   );
+}
+
+type SwapOrderWithOutcome = {
+  receipt: SwapReceipt;
+  outcome?: SwapOutcome;
+};
+
+export type UseWaitForSwapOutcomesOptions = {
+  /**
+   * Callback function that is triggered when a swap reaches a final outcome.
+   * This is useful for showing notifications/toasts when swaps complete.
+   *
+   * @param receipt - The swap receipt that reached a final outcome
+   * @param outcome - The final outcome (SwapFulfilled, SwapCancelled, or SwapExpired)
+   */
+  onOutcome?: (receipt: SwapReceipt, outcome: SwapOutcome) => void;
+};
+
+/**
+ * Wait for multiple swaps to reach their final outcomes (cancelled, expired, or fulfilled).
+ *
+ * When a swap reaches a final outcome, the optional `onOutcome` callback is triggered,
+ * making it perfect for showing notifications/toasts.
+ *
+ * The hook returns `data` which is an array of swap receipts that are still waiting
+ * for their final status. When an order reaches final status, it is automatically
+ * removed from the data array.
+ *
+ * ```tsx
+ * const [waitForOutcome, { data, loading, error }] = useWaitForSwapOutcomes({
+ *   onOutcome: (receipt, outcome) => {
+ *     switch (outcome.__typename) {
+ *       case 'SwapFulfilled':
+ *         toast.success(`Swap completed! ${receipt.explorerLink}`);
+ *         break;
+ *       case 'SwapCancelled':
+ *         toast.info('Swap was cancelled');
+ *         break;
+ *       case 'SwapExpired':
+ *         toast.error('Swap expired');
+ *         break;
+ *     }
+ *   },
+ * });
+ *
+ * // Start tracking swaps in the background
+ * useEffect(() => {
+ *   if (swapReceipt) {
+ *     waitForOutcome(swapReceipt);
+ *   }
+ * }, [swapReceipt, waitForOutcome]);
+ *
+ * // Display pending swaps
+ * {data.map((receipt) => (
+ *   <div key={receipt.id}>Waiting for swap {receipt.id}...</div>
+ * ))}
+ * ```
+ */
+export function useWaitForSwapOutcomes(
+  options?: UseWaitForSwapOutcomesOptions,
+): [
+  (
+    receipt: SwapReceipt,
+  ) => ResultAsync<SwapOutcome, TimeoutError | UnexpectedError>,
+  {
+    data: SwapReceipt[];
+    loading: boolean;
+    error: TimeoutError | UnexpectedError | undefined;
+  },
+] {
+  const client = useAaveClient();
+  const { onOutcome } = options ?? {};
+
+  const [data, setData] = useState<Map<SwapId, SwapOrderWithOutcome>>(
+    new Map(),
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<
+    TimeoutError | UnexpectedError | undefined
+  >(undefined);
+
+  const pendingCountRef = useRef(0);
+  const activePollsRef = useRef<Map<SwapId, AbortController>>(new Map());
+  // Keep a ref of the latest callback to avoid stale closures
+  const onOutcomeRef = useRef(onOutcome);
+  useEffect(() => {
+    onOutcomeRef.current = onOutcome;
+  }, [onOutcome]);
+  // Keep a ref of the latest data to avoid stale closures
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
+  const execute = useCallback(
+    (receipt: SwapReceipt) => {
+      const id = receipt.id;
+
+      // Cancel existing poll if any
+      const existingPoll = activePollsRef.current.get(id);
+      if (existingPoll) {
+        existingPoll.abort();
+      }
+
+      // Skip if already has final outcome
+      const existing = dataRef.current.get(id);
+      if (existing?.outcome) {
+        // Already have final outcome - notify if callback provided
+        if (onOutcomeRef.current) {
+          onOutcomeRef.current(existing.receipt, existing.outcome);
+        }
+        // Remove from tracking since we have the final outcome
+        setData((prev) => {
+          const updated = new Map(prev);
+          updated.delete(id);
+          return updated;
+        });
+        // Return the existing result
+        return okAsync(existing.outcome);
+      }
+
+      pendingCountRef.current += 1;
+      setLoading(true);
+      setError(undefined);
+
+      // Initialize the entry
+      setData((prev) => {
+        const updated = new Map(prev);
+        updated.set(id, {
+          receipt,
+          outcome: undefined,
+        });
+        return updated;
+      });
+
+      const abortController = new AbortController();
+      activePollsRef.current.set(id, abortController);
+
+      const result = waitForSwapOutcome(client)(receipt);
+
+      result.match(
+        (outcome) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
+
+          pendingCountRef.current -= 1;
+
+          // Trigger notification callback if provided
+          if (onOutcomeRef.current) {
+            onOutcomeRef.current(receipt, outcome);
+          }
+
+          // Remove from tracking since we have the final outcome
+          setData((prev) => {
+            const updated = new Map(prev);
+            updated.delete(id);
+            return updated;
+          });
+
+          setLoading(pendingCountRef.current > 0);
+          activePollsRef.current.delete(id);
+        },
+        (err) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
+
+          pendingCountRef.current -= 1;
+          setError(err);
+          setLoading(pendingCountRef.current > 0);
+          activePollsRef.current.delete(id);
+        },
+      );
+
+      return result;
+    },
+    [client],
+  );
+
+  const dataArray = Array.from(data.values())
+    .filter((order) => !order.outcome)
+    .map((order) => order.receipt);
+
+  return [execute, { data: dataArray, loading, error }];
 }
