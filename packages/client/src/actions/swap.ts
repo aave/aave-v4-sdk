@@ -73,7 +73,7 @@ import {
  * @param client - Aave client.
  * @param request - The swap quote request parameters.
  * @param options - The query options.
- * @returns The swap quote including pricing and cost information.
+ * @returns The swap quote including pricing and cost information and plan to start executing the swap.
  */
 export function tokenSwapQuote(
   client: AaveClient,
@@ -115,14 +115,7 @@ export function swappableTokens(
  *
  * ```ts
  * const result = await prepareTokenSwap(client, {
- *   market: {
- *     chainId: chainId(1),
- *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *     sell: { erc20: evmAddress('0x6B175474E...') },
- *     amount: bigDecimal('1000'),
- *     kind: SwapKind.Sell,
- *     user: evmAddress('0x742d35cc...'),
- *   },
+ *   quoteId: swapQuoteId('quote_123'),
  * }).andThen(plan => {
  *   switch (plan.__typename) {
  *     case 'SwapByIntent':
@@ -130,9 +123,10 @@ export function swappableTokens(
  *         .andThen((signature) =>
  *           swap({ intent: { quoteId: plan.quote.quoteId, signature } }),
  *         );
- *
- *     default:
- *       return new UnexpectedError(`Unsupported swap plan: ${plan.__typename}`).asResultAsync();
+ *     case 'InsufficientBalanceError':
+ *       return errAsync(
+ *         new Error(`Insufficient balance: ${plan.required.value} required.`)
+ *       );
  *   }
  * });
  * ```
