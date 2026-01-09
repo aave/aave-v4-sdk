@@ -63,16 +63,25 @@ describe('Token swapping on Aave V4', () => {
             swapPlan.__typename === 'SwapByIntent',
             `Swap plan is not a swap by intent: ${swapPlan.__typename}`,
           );
-          return signSwapTypedDataWith(userDidSwap, swapPlan.data).andThen(
-            (signature) => {
-              return swap(client, {
+          return prepareTokenSwap(client, {
+            quoteId: swapPlan.quote.quoteId,
+          }).andThen((prepareResult) => {
+            invariant(
+              prepareResult.__typename === 'SwapByIntent',
+              `Prepare token swap result is not a swap by intent: ${prepareResult.__typename}`,
+            );
+            return signSwapTypedDataWith(
+              userDidSwap,
+              prepareResult.data,
+            ).andThen((finalSignature) =>
+              swap(client, {
                 intent: {
                   quoteId: swapPlan.quote.quoteId,
-                  signature: signature,
+                  signature: finalSignature,
                 },
-              });
-            },
-          );
+              }),
+            );
+          });
         });
 
         assertOk(swapResult);
