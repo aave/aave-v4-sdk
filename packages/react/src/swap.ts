@@ -1717,8 +1717,12 @@ export type UseWaitForSwapOutcomesOptions = {
  * When a swap reaches a final outcome, the optional `onOutcome` callback is triggered,
  * making it perfect for showing notifications/toasts.
  *
+ * The hook returns `data` which is an array of swap receipts that are still waiting
+ * for their final status. When an order reaches final status, it is automatically
+ * removed from the data array.
+ *
  * ```tsx
- * const [waitForOutcome, { loading, error }] = useWaitForSwapOutcomes({
+ * const [waitForOutcome, { data, loading, error }] = useWaitForSwapOutcomes({
  *   onOutcome: (receipt, outcome) => {
  *     switch (outcome.__typename) {
  *       case 'SwapFulfilled':
@@ -1740,6 +1744,11 @@ export type UseWaitForSwapOutcomesOptions = {
  *     waitForOutcome(swapReceipt);
  *   }
  * }, [swapReceipt, waitForOutcome]);
+ *
+ * // Display pending swaps
+ * {data.map((receipt) => (
+ *   <div key={receipt.id}>Waiting for swap {receipt.id}...</div>
+ * ))}
  * ```
  */
 export function useWaitForSwapOutcomes(
@@ -1749,6 +1758,7 @@ export function useWaitForSwapOutcomes(
     receipt: SwapReceipt,
   ) => ResultAsync<SwapOutcome, TimeoutError | UnexpectedError>,
   {
+    data: SwapReceipt[];
     loading: boolean;
     error: TimeoutError | UnexpectedError | undefined;
   },
@@ -1863,5 +1873,9 @@ export function useWaitForSwapOutcomes(
     [client],
   );
 
-  return [execute, { loading, error }];
+  const dataArray = Array.from(data.values())
+    .filter((order) => !order.outcome)
+    .map((order) => order.receipt);
+
+  return [execute, { data: dataArray, loading, error }];
 }
