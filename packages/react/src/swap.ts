@@ -1535,7 +1535,7 @@ export function useTokenSwap(
                 if (isERC20PermitSignature(result)) {
                   return prepareTokenSwap(client, {
                     quoteId: quoteResult.quote.quoteId,
-                    permitSig: result.value, // TODO fix by passing entire ERC20PermitSignature object once API is updated
+                    permitSig: result,
                   });
                 }
                 if (PendingTransaction.isInstanceOf(result)) {

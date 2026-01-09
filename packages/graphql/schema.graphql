@@ -1040,7 +1040,7 @@ type PrepareSwapCancelResult {
 
 input PrepareTokenSwapRequest {
   quoteId: SwapQuoteId!
-  permitSig: Signature
+  permitSig: ERC20PermitSignature
 }
 
 union PrepareTokenSwapResult = SwapByIntent | InsufficientBalanceError
@@ -1130,8 +1130,8 @@ type Query {
   spokes(request: SpokesRequest!): [Spoke!]!
 
   """
-  Get the user balances for the protocol
-  This will only return assets that can be used on the protocol
+  Get the user balances.
+  This will only return assets that can be used on the protocol.
   """
   userBalances(request: UserBalancesRequest!): [UserBalance!]!
   userBorrows(request: UserBorrowsRequest!): [UserBorrowItem!]!
@@ -1581,7 +1581,7 @@ input SupplyRequest {
   amount: ReserveAmountInputWithPermit!
 
   """If you wish to enable collateral with it meaning you can borrow"""
-  enableCollateral: Boolean! = true
+  enableCollateral: AlwaysTrue
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
