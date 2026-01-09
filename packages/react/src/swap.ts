@@ -46,6 +46,10 @@ import {
   type ERC20PermitSignature,
   type Erc20Approval,
   isERC20PermitSignature,
+  type MarketDebtSwapQuoteInput,
+  type MarketRepayWithSupplyQuoteInput,
+  type MarketSupplySwapQuoteInput,
+  type MarketWithdrawSwapQuoteInput,
   type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
   RepayWithSupplyQuoteQuery,
@@ -533,6 +537,48 @@ export function useSupplySwapQuote({
   });
 }
 
+/**
+ * Low-level hook to execute a supply swap quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useSupplySwapQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   sellPosition: userSupplyItem.id,
+ *   buyReserve: reserve.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Supply swap quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useSupplySwapQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<MarketSupplySwapQuoteInput, SwapQuote, UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: MarketSupplySwapQuoteInput) =>
+      supplySwapQuote(
+        client,
+        { market: request },
+        { currency: options.currency },
+      ).map((data) => data.quote),
+    [client, options.currency],
+  );
+}
+
 // ------------------------------------------------------------
 
 export type UseBorrowSwapQuoteArgs = Prettify<
@@ -637,6 +683,48 @@ export function useBorrowSwapQuote({
     suspense,
     pause,
   });
+}
+
+/**
+ * Low-level hook to execute a borrow swap quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useBorrowSwapQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   debtPosition: userBorrowItem.id,
+ *   buyReserve: reserve.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Borrow swap quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useBorrowSwapQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<MarketDebtSwapQuoteInput, SwapQuote, UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: MarketDebtSwapQuoteInput) =>
+      borrowSwapQuote(
+        client,
+        { market: request },
+        { currency: options.currency },
+      ).map((data) => data.quote),
+    [client, options.currency],
+  );
 }
 
 // ------------------------------------------------------------
@@ -972,6 +1060,48 @@ export function useRepayWithSupplyQuote({
   });
 }
 
+/**
+ * Low-level hook to execute a repay with supply quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useRepayWithSupplyQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   repayWithReserve: reserve.id,
+ *   debtPosition: userBorrowItem.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Repay with supply quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useRepayWithSupplyQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<MarketRepayWithSupplyQuoteInput, SwapQuote, UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: MarketRepayWithSupplyQuoteInput) =>
+      repayWithSupplyQuote(
+        client,
+        { market: request },
+        { currency: options.currency },
+      ).map((data) => data.quote),
+    [client, options.currency],
+  );
+}
+
 // ------------------------------------------------------------
 
 /**
@@ -1153,6 +1283,54 @@ export function useWithdrawSwapQuote({
   });
 }
 
+/**
+ * Low-level hook to execute a withdraw swap quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useWithdrawSwapQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   position: userSupplyItem.id,
+ *   buyReserve: reserve.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Withdraw swap quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useWithdrawSwapQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<MarketWithdrawSwapQuoteInput, SwapQuote, UnexpectedError> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: MarketWithdrawSwapQuoteInput) =>
+      withdrawSwapQuote(
+        client,
+        { market: request },
+        { currency: options.currency },
+      ).map((data) => {
+        invariant(
+          data.__typename === 'PositionSwapByIntentApprovalsRequired',
+          `Unsupported swap plan: ${data.__typename}. Upgrade to a newer version of the @aave/react package.`,
+        );
+        return data.quote;
+      }),
+    [client, options.currency],
+  );
+}
+
 // ------------------------------------------------------------
 
 /**
@@ -1246,7 +1424,7 @@ export type TokenSwapHandler = (
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signSwapTypedData] = useSignSwapTypedDataWith(wallet);
+ * const [signSwapTypedData] = useSignSwapTypedData(wallet);
  *
  * const [swap, { loading, error }] = useTokenSwap((plan) => {
  *   switch (plan.__typename) {
@@ -1427,7 +1605,7 @@ export type CancelSwapError =
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signSwapTypedData] = useSignSwapTypedDataWith(wallet);
+ * const [signSwapTypedData] = useSignSwapTypedData(wallet);
  *
  * const [cancelSwap, { loading, error }] = useCancelSwap((plan) => {
  *   switch (plan.__typename) {

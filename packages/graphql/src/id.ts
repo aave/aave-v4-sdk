@@ -230,6 +230,47 @@ export function userPositionId(value: string): UserPositionId {
 }
 
 /**
+ * @internal
+ */
+export type UserPositionIdParts = {
+  chainId: ChainId;
+  spoke: EvmAddress;
+  user: EvmAddress;
+};
+
+/**
+ * @internal
+ */
+export function decodeUserPositionId(
+  value: UserPositionId,
+): UserPositionIdParts {
+  const decoded = decodeBase64(value as unknown as Base64EncodedCompositeId);
+  const [a, b, c] = decoded.split(COMPOSITE_ID_SEPARATOR) as [
+    string,
+    string,
+    string,
+  ];
+  return {
+    chainId: chainId(Number.parseInt(a, 10)),
+    spoke: evmAddress(b),
+    user: evmAddress(c),
+  };
+}
+
+/**
+ * @internal
+ */
+export function encodeUserPositionId(
+  parts: UserPositionIdParts,
+): UserPositionId {
+  return userPositionId(
+    encodeBase64(
+      `${parts.chainId}${COMPOSITE_ID_SEPARATOR}${parts.spoke}${COMPOSITE_ID_SEPARATOR}${parts.user}`,
+    ),
+  );
+}
+
+/**
  * A swap identifier.
  */
 export type SwapId = Tagged<string, 'SwapId'>;

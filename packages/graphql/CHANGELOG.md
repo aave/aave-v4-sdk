@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.14
+
+### Patch Changes
+
+- f31d016: **fix:** issue with decodeUserPositionId`.
+
 ## 1.0.0-next.13
 
 ### Patch Changes

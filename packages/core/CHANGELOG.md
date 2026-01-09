@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- 402281c: **feat:** expose tx hash from `TransactionError`.
+
 ## 1.0.0-next.8
 
 ### Patch Changes
