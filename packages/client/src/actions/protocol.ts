@@ -42,21 +42,18 @@ import {
 export function asset(
   client: AaveClient,
   request: AssetRequest,
-  options: CurrencyQueryOptions &
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
     TimeWindowQueryOptions &
     RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Asset | null, UnexpectedError> {
   return client.query(
     AssetQuery,
-    {
-      request,
-      currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
-      timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-    },
-    {
-      requestPolicy:
-        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
-    },
+    { request, currency, timeWindow },
+    { requestPolicy },
   );
 }
 

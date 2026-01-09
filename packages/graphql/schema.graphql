@@ -171,6 +171,19 @@ input BorrowRequest {
   sender: EvmAddress!
 }
 
+enum BorrowSwapKind {
+  CURRENT
+  NEW
+}
+
+input BorrowSwapQuoteRequest @oneOf {
+  market: MarketDebtSwapQuoteInput
+  limit: LimitDebtSwapQuoteInput
+  fromQuote: FromQuoteDebtSwapQuoteInput
+}
+
+union BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired
+
 input CancelIntentSwapInput {
   id: SwapId!
   signature: Signature!
@@ -291,10 +304,6 @@ input ERC20PermitSignature {
   deadline: Int!
 }
 
-enum EarningPeriod {
-  ANNUAL
-}
-
 type Erc20Amount {
   """The value"""
   amount: DecimalNumber!
@@ -306,6 +315,16 @@ type Erc20Amount {
   exchangeRate(currency: Currency! = USD): DecimalNumber!
   isWrappedNative: Boolean!
   token: Erc20Token!
+}
+
+type Erc20Approval {
+  """Transaction request for the approval"""
+  byTransaction: TransactionRequest!
+
+  """
+  Typed data response for the permit signature (if available for the given token)
+  """
+  bySignature: PermitTypedDataResponse
 }
 
 type Erc20ApprovalRequired {
@@ -428,6 +447,35 @@ type ForkTopUpResponse {
 
   """The tx hash of the newly created transaction"""
   txHash: String
+}
+
+input FromQuoteDebtSwapQuoteInput {
+  quoteId: SwapQuoteId!
+  newSlippage: BigDecimal
+  user: EvmAddress!
+}
+
+input FromQuoteRepayWithSupplyQuoteInput {
+  quoteId: SwapQuoteId!
+  newSlippage: BigDecimal
+  user: EvmAddress!
+}
+
+input FromQuoteSupplySwapQuoteInput {
+  quoteId: SwapQuoteId!
+  newSlippage: BigDecimal
+  user: EvmAddress!
+}
+
+input FromQuoteSwapQuoteInput {
+  quoteId: SwapQuoteId!
+  newSlippage: BigDecimal
+}
+
+input FromQuoteWithdrawSwapQuoteInput {
+  quoteId: SwapQuoteId!
+  newSlippage: BigDecimal
+  user: EvmAddress!
 }
 
 input HasProcessedKnownTransactionRequest {
@@ -662,6 +710,54 @@ type InsufficientBalanceError {
 """A scalar that can represent any JSON value."""
 scalar JSON
 
+input LimitDebtSwapQuoteInput {
+  quoteId: SwapQuoteId
+  currentPosition: UserBorrowItemId!
+  currentAmount: BigDecimal!
+  newReserve: ReserveId!
+  newAmount: BigDecimal!
+  user: EvmAddress!
+  kind: BorrowSwapKind
+}
+
+input LimitOrderTokenSwapQuoteInput {
+  quoteId: SwapQuoteId!
+  newSellAmount: BigDecimal
+  newBuyAmount: BigDecimal
+  newReceiver: EvmAddress
+  newKind: SwapKind
+}
+
+input LimitRepayWithSupplyQuoteInput {
+  quoteId: SwapQuoteId
+  repayPosition: UserBorrowItemId!
+  repayAmount: BigDecimal!
+  supplyPosition: UserSupplyItemId!
+  supplyAmount: BigDecimal!
+  user: EvmAddress!
+  kind: RepayWithSupplyKind
+}
+
+input LimitSupplySwapQuoteInput {
+  quoteId: SwapQuoteId
+  currentPosition: UserSupplyItemId!
+  currentAmount: BigDecimal!
+  newReserve: ReserveId!
+  newAmount: BigDecimal!
+  user: EvmAddress!
+  kind: SupplySwapKind
+}
+
+input LimitWithdrawSwapQuoteInput {
+  quoteId: SwapQuoteId
+  withdrawPosition: UserSupplyItemId!
+  withdrawAmount: BigDecimal!
+  buyToken: TokenInput!
+  buyAmount: BigDecimal!
+  user: EvmAddress!
+  kind: WithdrawSwapKind
+}
+
 input LiquidatePositionDebtAmount @oneOf {
   """Exact amount"""
   exact: BigDecimal
@@ -713,6 +809,44 @@ type LiquidationFeeVariation {
   after: PercentNumber!
 }
 
+input MarketDebtSwapQuoteInput {
+  debtPosition: UserBorrowItemId!
+  buyReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
+input MarketOrderTokenSwapQuoteInput {
+  chainId: ChainId!
+  buy: TokenInput!
+  sell: TokenInput!
+  amount: BigDecimal!
+  kind: SwapKind!
+  user: EvmAddress!
+  receiver: EvmAddress
+}
+
+input MarketRepayWithSupplyQuoteInput {
+  debtPosition: UserBorrowItemId!
+  repayWithReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
+input MarketSupplySwapQuoteInput {
+  sellPosition: UserSupplyItemId!
+  buyReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
+input MarketWithdrawSwapQuoteInput {
+  position: UserSupplyItemId!
+  buyReserve: ReserveId!
+  amount: BigDecimal!
+  user: EvmAddress!
+}
+
 type MaxLiquidationBonusVariation {
   reserveId: ReserveId!
   token: Erc20Token!
@@ -724,6 +858,7 @@ type Mutation {
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
   swap(request: SwapRequest!): SwapExecutionPlan!
+  cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
 }
 
 type NativeAmount {
@@ -857,7 +992,6 @@ type PositionAmount {
 }
 
 type PositionSwapAdapterContractApproval {
-  byTransaction: TransactionRequest!
   bySignature: SwapTypedData!
 }
 
@@ -884,129 +1018,6 @@ type PreContractActionRequired {
   originalTransaction: TransactionRequest!
 }
 
-input PrepareBorrowSwapRequest @oneOf {
-  market: PrepareMarketDebtSwapInput
-  limit: PrepareLimitDebtSwapInput
-  fromQuote: PrepareFromQuoteDebtSwapInput
-}
-
-union PrepareBorrowSwapResult = PositionSwapByIntentApprovalsRequired
-
-input PrepareFromQuoteDebtSwapInput {
-  quoteId: SwapQuoteId!
-  newSellAmount: BigDecimal
-  newBuyAmount: BigDecimal
-  newSlippage: BigDecimal
-  user: EvmAddress!
-}
-
-input PrepareFromQuoteRepayWithCollateralInput {
-  quoteId: SwapQuoteId!
-  newSellAmount: BigDecimal
-  newBuyAmount: BigDecimal
-  newSlippage: BigDecimal
-  user: EvmAddress!
-}
-
-input PrepareFromQuoteSupplySwapInput {
-  quoteId: SwapQuoteId!
-  newSellAmount: BigDecimal!
-  newBuyAmount: BigDecimal!
-  slippage: BigDecimal
-  user: EvmAddress!
-}
-
-input PrepareFromQuoteWithdrawAndSwapInput {
-  quoteId: SwapQuoteId!
-  newSellAmount: BigDecimal
-  newBuyAmount: BigDecimal
-  newSlippage: BigDecimal
-  user: EvmAddress!
-}
-
-input PrepareLimitDebtSwapInput {
-  quoteId: SwapQuoteId!
-  sellPosition: UserBorrowItemId!
-  newSellAmount: BigDecimal!
-  buyReserve: ReserveId!
-  newBuyAmount: BigDecimal!
-  user: EvmAddress!
-}
-
-input PrepareLimitOrderSwapInput {
-  quoteId: SwapQuoteId!
-  newSellAmount: BigDecimal
-  newBuyAmount: BigDecimal
-  newSlippage: BigDecimal
-  newReceiver: EvmAddress
-  newKind: SwapKind
-}
-
-input PrepareLimitRepayWithCollateralInput {
-  quoteId: SwapQuoteId!
-  repayPosition: UserBorrowItemId!
-  newSellAmount: BigDecimal!
-  supplyPosition: UserSupplyItemId!
-  newBuyAmount: BigDecimal!
-  user: EvmAddress!
-}
-
-input PrepareLimitSupplySwapInput {
-  quoteId: SwapQuoteId!
-  sellPosition: UserSupplyItemId!
-  newSellAmount: BigDecimal!
-  buyReserve: ReserveId!
-  newBuyAmount: BigDecimal!
-  user: EvmAddress!
-}
-
-input PrepareLimitWithdrawAndSwapInput {
-  quoteId: SwapQuoteId!
-  withdrawPosition: UserSupplyItemId!
-  newSellAmount: BigDecimal!
-  buyToken: TokenInput!
-  newBuyAmount: BigDecimal!
-  user: EvmAddress!
-}
-
-input PrepareMarketDebtSwapInput {
-  debtPosition: UserBorrowItemId!
-  buyReserve: ReserveId!
-  amount: BigDecimal!
-  user: EvmAddress!
-}
-
-input PrepareMarketOrderSwapInput {
-  chainId: ChainId!
-  buy: TokenInput!
-  sell: TokenInput!
-  amount: BigDecimal!
-  kind: SwapKind!
-  user: EvmAddress!
-  receiver: EvmAddress
-}
-
-input PrepareMarketRepayWithCollateralInput {
-  debtPosition: UserBorrowItemId!
-  RepayWithReserve: ReserveId!
-  amount: BigDecimal!
-  user: EvmAddress!
-}
-
-input PrepareMarketSupplySwapInput {
-  sellPosition: UserSupplyItemId!
-  buyReserve: ReserveId!
-  amount: BigDecimal!
-  user: EvmAddress!
-}
-
-input PrepareMarketWithdrawAndSwapInput {
-  position: UserSupplyItemId!
-  buyReserve: ReserveId!
-  amount: BigDecimal!
-  user: EvmAddress!
-}
-
 input PreparePositionSwapRequest {
   quoteId: SwapQuoteId!
 
@@ -1017,23 +1028,7 @@ input PreparePositionSwapRequest {
   positionManagerSignature: Signature
 }
 
-union PreparePositionSwapResult = SwapByIntent
-
-input PrepareRepayWithSupplyRequest @oneOf {
-  market: PrepareMarketRepayWithCollateralInput
-  limit: PrepareLimitRepayWithCollateralInput
-  fromQuote: PrepareFromQuoteRepayWithCollateralInput
-}
-
-union PrepareRepayWithSupplyResult = PositionSwapByIntentApprovalsRequired
-
-input PrepareSupplySwapRequest @oneOf {
-  market: PrepareMarketSupplySwapInput
-  limit: PrepareLimitSupplySwapInput
-  fromQuote: PrepareFromQuoteSupplySwapInput
-}
-
-union PrepareSupplySwapResult = PositionSwapByIntentApprovalsRequired
+union PreparePositionSwapResult = SwapByIntent | InsufficientBalanceError
 
 input PrepareSwapCancelRequest {
   id: SwapId!
@@ -1043,20 +1038,12 @@ type PrepareSwapCancelResult {
   data: SwapTypedData!
 }
 
-input PrepareTokenSwapRequest @oneOf {
-  market: PrepareMarketOrderSwapInput
-  limit: PrepareLimitOrderSwapInput
+input PrepareTokenSwapRequest {
+  quoteId: SwapQuoteId!
+  permitSig: ERC20PermitSignature
 }
 
-union PrepareTokenSwapResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientBalanceError
-
-input PrepareWithdrawSwapRequest @oneOf {
-  market: PrepareMarketWithdrawAndSwapInput
-  limit: PrepareLimitWithdrawAndSwapInput
-  fromQuote: PrepareFromQuoteWithdrawAndSwapInput
-}
-
-union PrepareWithdrawSwapResult = PositionSwapByIntentApprovalsRequired
+union PrepareTokenSwapResult = SwapByIntent | InsufficientBalanceError
 
 input PreviewAction @oneOf {
   supply: SupplyRequest
@@ -1065,10 +1052,10 @@ input PreviewAction @oneOf {
   withdraw: WithdrawRequest
   setUserSuppliesAsCollateral: SetUserSuppliesAsCollateralRequest
   updateUserPositionConditions: UpdateUserPositionConditionsRequest
-  supplySwap: PrepareSupplySwapRequest
-  borrowSwap: PrepareBorrowSwapRequest
-  repayWithSupply: PrepareRepayWithSupplyRequest
-  withdrawSwap: PrepareWithdrawSwapRequest
+  supplySwap: SupplySwapQuoteRequest
+  borrowSwap: BorrowSwapQuoteRequest
+  repayWithSupply: RepayWithSupplyQuoteRequest
+  withdrawSwap: WithdrawSwapQuoteRequest
 }
 
 input PreviewRequest {
@@ -1084,7 +1071,7 @@ type PreviewUserPosition {
   netApy: PercentNumberVariation!
   netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
   netBalance(currency: Currency! = USD): ExchangeAmountVariation!
-  projectedEarnings(period: EarningPeriod! = ANNUAL): ExchangeAmountVariation!
+  projectedEarnings: ExchangeAmountVariation!
   borrowingPower: ExchangeAmountVariation!
   otherConditions: [UserPositionConditionVariation!]!
 }
@@ -1143,8 +1130,8 @@ type Query {
   spokes(request: SpokesRequest!): [Spoke!]!
 
   """
-  Get the user balances for the protocol
-  This will only return assets that can be used on the protocol
+  Get the user balances.
+  This will only return assets that can be used on the protocol.
   """
   userBalances(request: UserBalancesRequest!): [UserBalance!]!
   userBorrows(request: UserBorrowsRequest!): [UserBorrowItem!]!
@@ -1164,17 +1151,16 @@ type Query {
   """
   hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
   activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
-  swapQuote(request: SwapQuoteRequest!): SwapQuote!
-  supplySwapQuote(request: PrepareSupplySwapRequest!): PrepareSupplySwapResult!
-  borrowSwapQuote(request: PrepareBorrowSwapRequest!): PrepareBorrowSwapResult!
-  repayWithSupplyQuote(request: PrepareRepayWithSupplyRequest!): PrepareRepayWithSupplyResult!
-  withdrawSwapQuote(request: PrepareWithdrawSwapRequest!): PrepareWithdrawSwapResult!
-  preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult!
+  tokenSwapQuote(request: TokenSwapQuoteRequest!): TokenSwapQuoteResult!
   prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult!
+  supplySwapQuote(request: SupplySwapQuoteRequest!): SupplySwapQuoteResult!
+  borrowSwapQuote(request: BorrowSwapQuoteRequest!): BorrowSwapQuoteResult!
+  repayWithSupplyQuote(request: RepayWithSupplyQuoteRequest!): RepayWithSupplyQuoteResult!
+  withdrawSwapQuote(request: WithdrawSwapQuoteRequest!): WithdrawSwapQuoteResult!
+  preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult!
   swapStatus(request: SwapStatusRequest!): SwapStatus!
   userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
-  cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
 }
 
@@ -1241,6 +1227,19 @@ input RepayRequest {
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
 }
+
+enum RepayWithSupplyKind {
+  REPAY
+  SUPPLY
+}
+
+input RepayWithSupplyQuoteRequest @oneOf {
+  market: MarketRepayWithSupplyQuoteInput
+  limit: LimitRepayWithSupplyQuoteInput
+  fromQuote: FromQuoteRepayWithSupplyQuoteInput
+}
+
+union RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired
 
 type Reserve {
   id: ReserveId!
@@ -1582,18 +1581,26 @@ input SupplyRequest {
   amount: ReserveAmountInputWithPermit!
 
   """If you wish to enable collateral with it meaning you can borrow"""
-  enableCollateral: Boolean! = true
+  enableCollateral: AlwaysTrue
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
 }
 
-union SwapAmount = PositionAmount | NativeAmount | Erc20Amount
-
-type SwapApprovalRequired {
-  approval: TransactionRequest!
-  originalTransaction: SwapTransactionRequest!
+enum SupplySwapKind {
+  CURRENT
+  NEW
 }
+
+input SupplySwapQuoteRequest @oneOf {
+  market: MarketSupplySwapQuoteInput
+  limit: LimitSupplySwapQuoteInput
+  fromQuote: FromQuoteSupplySwapQuoteInput
+}
+
+union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired
+
+union SwapAmount = PositionAmount | NativeAmount | Erc20Amount
 
 type SwapByIntent {
   quote: SwapQuote!
@@ -1607,8 +1614,7 @@ input SwapByIntentInput {
 
 type SwapByIntentWithApprovalRequired {
   quote: SwapQuote!
-  approval: TransactionRequest!
-  data: SwapTypedData!
+  approval: Erc20Approval!
 }
 
 type SwapByTransaction {
@@ -1621,7 +1627,7 @@ type SwapCancelled {
   explorerLink: String!
 }
 
-union SwapExecutionPlan = SwapTransactionRequest | SwapApprovalRequired | InsufficientBalanceError | SwapReceipt
+union SwapExecutionPlan = SwapTransactionRequest | SwapReceipt | InsufficientBalanceError
 
 type SwapExpired {
   createdAt: DateTime!
@@ -1666,12 +1672,15 @@ type SwapPendingSignature {
 type SwapQuote {
   quoteId: SwapQuoteId!
   suggestedSlippage: PercentNumber!
-  desiredSell: TokenAmount!
-  desiredBuy: TokenAmount!
+  spotSell: TokenAmount!
+  spotBuy: TokenAmount!
   costs: SwapQuoteCosts!
 
-  """Minimum received amount after all costs and slippage"""
-  minimumReceived: TokenAmount!
+  """Final buy amount after all fees and slippage"""
+  finalBuy: TokenAmount!
+
+  """Final sell amount after all fees and slippage"""
+  finalSell: TokenAmount!
 }
 
 type SwapQuoteCosts {
@@ -1680,19 +1689,15 @@ type SwapQuoteCosts {
 
   """Aave partner fee amount"""
   partnerFee: TokenAmount!
+
+  """Protocol fee"""
+  flashloanFee: TokenAmount
+
+  """Custom Swap Provider fee"""
+  providerFee: TokenAmount!
 }
 
 scalar SwapQuoteId
-
-input SwapQuoteRequest {
-  chainId: ChainId!
-  buy: TokenInput!
-  sell: TokenInput!
-  amount: BigDecimal!
-  kind: SwapKind
-  from: EvmAddress!
-  receiver: EvmAddress
-}
 
 type SwapReceipt {
   id: SwapId!
@@ -1803,6 +1808,14 @@ input TokenInput @oneOf {
   """The erc20 address"""
   erc20: EvmAddress
 }
+
+input TokenSwapQuoteRequest @oneOf {
+  market: MarketOrderTokenSwapQuoteInput
+  limit: LimitOrderTokenSwapQuoteInput
+  fromQuote: FromQuoteSwapQuoteInput
+}
+
+union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
 
 type TransactionRequest {
   to: EvmAddress!
@@ -2084,7 +2097,7 @@ type UserPosition {
   """Total debt which is the total amount borrowed plus the accrued premium"""
   totalDebt(currency: Currency! = USD): ExchangeAmountWithChange!
 
-  """The net balance which is `total_supplied` - `borrows`"""
+  """The net balance which is `totalSupplied` - `totalDebt`"""
   netBalance(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """The net collateral which is `totalCollateral` - `totalDebt`"""
@@ -2341,3 +2354,16 @@ input WithdrawReserveAmountInput @oneOf {
   """The erc20 amount input"""
   erc20: AmountInput
 }
+
+enum WithdrawSwapKind {
+  WITHDRAW
+  BUY
+}
+
+input WithdrawSwapQuoteRequest @oneOf {
+  market: MarketWithdrawSwapQuoteInput
+  limit: LimitWithdrawSwapQuoteInput
+  fromQuote: FromQuoteWithdrawSwapQuoteInput
+}
+
+union WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired

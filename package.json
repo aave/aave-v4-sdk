@@ -14,7 +14,7 @@
   "scripts": {
     "build": "turbo build",
     "clean": "rimraf .turbo packages/*/dist",
-    "check:graphql": "pnpm --filter graphql-next check",
+    "check:graphql": "pnpm --filter graphql check",
     "dev": "turbo watch build",
     "lint:fix": "biome check --write",
     "lint": "biome check",

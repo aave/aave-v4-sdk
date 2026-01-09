@@ -1,5 +1,44 @@
 # @aave/react
 
+## 4.0.0-next.17
+
+### Patch Changes
+
+- d5ba506: **chore:** support most recent GQL schema.
+- fffac6d: **feat:** implements `useSupplySwapQuoteAction`, `useBorrowSwapQuoteAction`, `useRepayWithSupplyQuoteAction`, `useWithdrawSwapQuoteAction` hooks.
+- Updated dependencies [d5ba506]
+  - @aave/graphql@1.0.0-next.15
+  - @aave/client@4.0.0-next.17
+
+## 4.0.0-next.16
+
+### Patch Changes
+
+- f31d016: **fix:** issue with decodeUserPositionId`.
+- Updated dependencies [f31d016]
+  - @aave/client@4.0.0-next.16
+  - @aave/graphql@1.0.0-next.14
+
+## 4.0.0-next.15
+
+### Patch Changes
+
+- 402281c: **feat:** expose tx hash from `TransactionError`.
+- 990608b: **feat:** support network fee estimation for `updateUserPositionConditions` preview action.
+- 41d5e4d: **fix:** renames `useSignSwapTypedDataWith` into `useSignSwapTypedData`.
+- Updated dependencies [402281c]
+  - @aave/core@1.0.0-next.9
+  - @aave/client@4.0.0-next.15
+
+## 4.0.0-next.14
+
+### Patch Changes
+
+- 40a234e: **feat:** support latest swap GQL changes.
+- Updated dependencies [40a234e]
+  - @aave/graphql@1.0.0-next.13
+  - @aave/client@4.0.0-next.14
+
 ## 4.0.0-next.13
 
 ### Patch Changes

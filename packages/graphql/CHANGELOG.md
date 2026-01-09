@@ -1,5 +1,23 @@
 # @aave/graphql
 
+## 1.0.0-next.15
+
+### Patch Changes
+
+- d5ba506: **chore:** support most recent GQL schema.
+
+## 1.0.0-next.14
+
+### Patch Changes
+
+- f31d016: **fix:** issue with decodeUserPositionId`.
+
+## 1.0.0-next.13
+
+### Patch Changes
+
+- 40a234e: **feat:** support latest swap GQL changes.
+
 ## 1.0.0-next.12
 
 ### Patch Changes

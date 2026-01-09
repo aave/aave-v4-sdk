@@ -1269,7 +1269,7 @@ export function useActivities({
  * @returns The user history.
  */
 export function useActivitiesAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ActivitiesRequest, PaginatedActivitiesResult, UnexpectedError> {
   const client = useAaveClient();
@@ -1277,7 +1277,7 @@ export function useActivitiesAction(
   return useAsyncTask(
     (request: ActivitiesRequest) =>
       activities(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
       }),
     [client, options.currency, options.timeWindow],

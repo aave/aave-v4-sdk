@@ -119,7 +119,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  *
  * ```ts
  * const { data: wallet } = useWalletClient(); // wagmi hook
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith(wallet);
+ * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData(wallet);
  *
  * const run = async () => {
  *   const result = await signSwapTypedData(swapTypedData);
@@ -133,7 +133,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * };
  * ```
  */
-export function useSignSwapTypedDataWith(
+export function useSignSwapTypedData(
   walletClient: WalletClient | null | undefined,
 ): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
   return useAsyncTask(

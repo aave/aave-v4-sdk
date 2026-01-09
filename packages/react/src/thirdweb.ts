@@ -188,7 +188,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * A hook that provides a way to sign swap typed data using a Thirdweb wallet.
  *
  * ```ts
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith();
+ * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData();
  *
  * const run = async () => {
  *   const result = await signSwapTypedData(swapTypedData);
@@ -202,7 +202,7 @@ export type SignSwapTypedDataError = SigningError | UnexpectedError;
  * };
  * ```
  */
-export function useSignSwapTypedDataWith(): UseAsyncTask<
+export function useSignSwapTypedData(): UseAsyncTask<
   SwapTypedData,
   Signature,
   SignSwapTypedDataError

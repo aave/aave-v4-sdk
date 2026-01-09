@@ -8,12 +8,14 @@ import {
   Currency,
   type Erc20Amount,
   encodeReserveId,
+  encodeUserPositionId,
   type ID,
   type OnChainReserveId,
   type PreviewAction,
   type ReserveInfo,
   type Spoke,
   tokenInfoId,
+  UserPositionConditionsUpdate,
 } from '@aave/graphql';
 import { bigDecimal, evmAddress, txHash } from '@aave/types';
 import { describe, expect, it, vi } from 'vitest';
@@ -191,6 +193,20 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
           },
         },
         expectedGasCost: 546894n,
+      },
+      {
+        requestType: 'UpdateUserPositionConditionsRequest',
+        estimate: {
+          updateUserPositionConditions: {
+            userPositionId: encodeUserPositionId({
+              chainId: ETHEREUM_FORK_ID,
+              spoke: evmAddress('0x385af1b8F0D5311Bf9dd736909CB5D211d8bb95F'),
+              user: evmAddress('0x7b610B279E5f818c01888743742748d2281aF6BD'),
+            }),
+            update: UserPositionConditionsUpdate.AllDynamicConfig,
+          },
+        },
+        expectedGasCost: 560000n,
       },
     ])(
       'Then it should return an estimated network fee for a $requestType',

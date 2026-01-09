@@ -146,7 +146,7 @@ export function useReserve({
  * ```
  */
 export function useReserveAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReserveRequest, Reserve | null, UnexpectedError> {
   const client = useAaveClient();
@@ -154,7 +154,7 @@ export function useReserveAction(
   return useAsyncTask(
     (request: ReserveRequest) =>
       reserve(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
       }),
     [client, options.currency, options.timeWindow],
@@ -399,7 +399,7 @@ export function useReserves<T = Reserve[]>({
  * ```
  */
 export function useReservesAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReservesRequest, Reserve[], UnexpectedError> {
   const client = useAaveClient();
@@ -407,7 +407,7 @@ export function useReservesAction(
   return useAsyncTask(
     (request: ReservesRequest) =>
       reserves(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
       }),
     [client, options.currency, options.timeWindow],
