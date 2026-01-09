@@ -1,5 +1,15 @@
 # @aave/react
 
+## 4.0.0-next.17
+
+### Patch Changes
+
+- d5ba506: **chore:** support most recent GQL schema.
+- fffac6d: **feat:** implements `useSupplySwapQuoteAction`, `useBorrowSwapQuoteAction`, `useRepayWithSupplyQuoteAction`, `useWithdrawSwapQuoteAction` hooks.
+- Updated dependencies [d5ba506]
+  - @aave/graphql@1.0.0-next.15
+  - @aave/client@4.0.0-next.17
+
 ## 4.0.0-next.16
 
 ### Patch Changes
