@@ -853,13 +853,20 @@ export function useSupplySwap(
           return processApprovals(result)
             .with(handler)
             .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).map(
+              preparePositionSwap(client, request, { currency }).andThen(
                 (result) => {
-                  invariant(
-                    result.__typename === 'SwapByIntent',
-                    `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                  );
-                  return result;
+                  switch (result.__typename) {
+                    case 'SwapByIntent':
+                      return okAsync(result);
+                    case 'InsufficientBalanceError':
+                      return ValidationError.fromGqlNode(
+                        result,
+                      ).asResultAsync();
+                    default:
+                      return new UnexpectedError(
+                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
+                      ).asResultAsync();
+                  }
                 },
               ),
             )
@@ -922,13 +929,20 @@ export function useBorrowSwap(
           return processApprovals(result)
             .with(handler)
             .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).map(
+              preparePositionSwap(client, request, { currency }).andThen(
                 (result) => {
-                  invariant(
-                    result.__typename === 'SwapByIntent',
-                    `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                  );
-                  return result;
+                  switch (result.__typename) {
+                    case 'SwapByIntent':
+                      return okAsync(result);
+                    case 'InsufficientBalanceError':
+                      return ValidationError.fromGqlNode(
+                        result,
+                      ).asResultAsync();
+                    default:
+                      return new UnexpectedError(
+                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
+                      ).asResultAsync();
+                  }
                 },
               ),
             )
@@ -1139,13 +1153,20 @@ export function useRepayWithSupply(
           return processApprovals(result)
             .with(handler)
             .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).map(
+              preparePositionSwap(client, request, { currency }).andThen(
                 (result) => {
-                  invariant(
-                    result.__typename === 'SwapByIntent',
-                    `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                  );
-                  return result;
+                  switch (result.__typename) {
+                    case 'SwapByIntent':
+                      return okAsync(result);
+                    case 'InsufficientBalanceError':
+                      return ValidationError.fromGqlNode(
+                        result,
+                      ).asResultAsync();
+                    default:
+                      return new UnexpectedError(
+                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
+                      ).asResultAsync();
+                  }
                 },
               ),
             )
@@ -1368,13 +1389,20 @@ export function useWithdrawSwap(
           return processApprovals(result)
             .with(handler)
             .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).map(
+              preparePositionSwap(client, request, { currency }).andThen(
                 (result) => {
-                  invariant(
-                    result.__typename === 'SwapByIntent',
-                    `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                  );
-                  return result;
+                  switch (result.__typename) {
+                    case 'SwapByIntent':
+                      return okAsync(result);
+                    case 'InsufficientBalanceError':
+                      return ValidationError.fromGqlNode(
+                        result,
+                      ).asResultAsync();
+                    default:
+                      return new UnexpectedError(
+                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
+                      ).asResultAsync();
+                  }
                 },
               ),
             )

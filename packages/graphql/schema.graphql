@@ -452,19 +452,16 @@ type ForkTopUpResponse {
 input FromQuoteDebtSwapQuoteInput {
   quoteId: SwapQuoteId!
   newSlippage: BigDecimal
-  user: EvmAddress!
 }
 
 input FromQuoteRepayWithSupplyQuoteInput {
   quoteId: SwapQuoteId!
   newSlippage: BigDecimal
-  user: EvmAddress!
 }
 
 input FromQuoteSupplySwapQuoteInput {
   quoteId: SwapQuoteId!
   newSlippage: BigDecimal
-  user: EvmAddress!
 }
 
 input FromQuoteSwapQuoteInput {
@@ -475,7 +472,6 @@ input FromQuoteSwapQuoteInput {
 input FromQuoteWithdrawSwapQuoteInput {
   quoteId: SwapQuoteId!
   newSlippage: BigDecimal
-  user: EvmAddress!
 }
 
 input HasProcessedKnownTransactionRequest {
@@ -746,6 +742,7 @@ input LimitSupplySwapQuoteInput {
   newAmount: BigDecimal!
   user: EvmAddress!
   kind: SupplySwapKind
+  setNewAsCollateral: Boolean!
 }
 
 input LimitWithdrawSwapQuoteInput {
@@ -838,6 +835,7 @@ input MarketSupplySwapQuoteInput {
   buyReserve: ReserveId!
   amount: BigDecimal!
   user: EvmAddress!
+  setNewAsCollateral: Boolean!
 }
 
 input MarketWithdrawSwapQuoteInput {
@@ -2107,6 +2105,11 @@ type UserPosition {
   netBorrowApy: PercentNumberWithChange!
   healthFactor: HealthFactorWithChange!
   riskPremium: UserPositionRiskPremium
+
+  """
+  ExchangeAmount liquidation price if you only have one collateral more then
+  1 collateral you should render health factor
+  """
   liquidationPrice(currency: Currency! = USD): ExchangeAmount
   borrowingPower(currency: Currency! = USD): ExchangeAmount!
   canUpdateDynamicConfig: Boolean!
