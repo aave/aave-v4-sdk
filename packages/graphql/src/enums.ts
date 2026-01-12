@@ -74,14 +74,6 @@ export enum HubAssetStatusType {
 }
 
 /**
- * The order by options for hub assets request.
- */
-export enum HubAssetsRequestOrderBy {
-  Balance = 'BALANCE',
-  Name = 'NAME',
-}
-
-/**
  * The activity type for user history.
  */
 export enum ActivityType {
