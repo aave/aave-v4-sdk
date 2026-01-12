@@ -1563,7 +1563,7 @@ export function useTokenSwap(
                 if (isERC20PermitSignature(result)) {
                   return prepareTokenSwap(client, {
                     quoteId: quoteResult.quote.quoteId,
-                    permitSig: result.value,
+                    permitSig: result,
                   });
                 }
                 if (PendingTransaction.isInstanceOf(result)) {
