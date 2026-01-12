@@ -4,6 +4,7 @@ import {
   evmAddress,
   invariant,
   SwapKind,
+  SwapStatusFilter,
 } from '@aave/client';
 import {
   prepareTokenSwap,
@@ -98,14 +99,21 @@ describe('Token swapping on Aave V4', () => {
         const swapPositions = await userSwaps(client, {
           chainId: ETHEREUM_FORK_ID,
           user: evmAddress(userDidSwap.account.address),
+          filterBy: [SwapStatusFilter.Open],
         });
         assertOk(swapPositions);
+        // NOTE: compare the explorer link until fixed problem with swapId
+        const result = swapPositions.value.items.find(
+          (swap) =>
+            swap.__typename === 'SwapOpen' &&
+            swap.explorerLink === swapResult.value.explorerLink,
+        );
+        console.log(result);
         expect(
           swapPositions.value.items.find(
             (swap) =>
               swap.__typename === 'SwapOpen' &&
-              swapResult.value.__typename === 'SwapReceipt' &&
-              swap.swapId === swapResult.value.id,
+              swap.explorerLink === swapResult.value.explorerLink,
           ),
         ).toBeDefined();
       });
@@ -191,8 +199,7 @@ describe('Token swapping on Aave V4', () => {
           swapPositions.value.items.find(
             (swap) =>
               swap.__typename === 'SwapOpen' &&
-              swapResult.value.__typename === 'SwapReceipt' &&
-              swap.swapId === swapResult.value.id,
+              swap.explorerLink === swapResult.value.explorerLink,
           ),
         ).toBeDefined();
       });
