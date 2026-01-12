@@ -189,3 +189,17 @@ export enum UserPositionConditionsUpdate {
   AllDynamicConfig = 'ALL_DYNAMIC_CONFIG',
   JustRiskPremium = 'JUST_RISK_PREMIUM',
 }
+
+/**
+ * Quote accuracy level for swap quotes.
+ */
+export enum QuoteAccuracy {
+  /**
+   * Fast price quality - faster response, potentially less accurate price
+   */
+  FAST = 'FAST',
+  /**
+   * Verified price quality - more accurate price, potentially slower response
+   */
+  ACCURATE = 'ACCURATE',
+}

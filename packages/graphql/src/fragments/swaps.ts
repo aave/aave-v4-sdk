@@ -56,14 +56,15 @@ export type SwapQuoteCosts = FragmentOf<typeof SwapQuoteCostsFragment>;
 export const SwapQuoteFragment = graphql(
   `fragment SwapQuote on SwapQuote {
     __typename
+    accuracy
     quoteId
     suggestedSlippage {
       ...PercentNumber
     }
-    spotBuy {
+    buy {
       ...TokenAmount
     }
-    spotSell {
+    sell {
       ...TokenAmount
     }
     costs {

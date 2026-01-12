@@ -5807,6 +5807,17 @@
         "name": "SwapQuote",
         "fields": [
           {
+            "name": "accuracy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "quoteId",
             "type": {
               "kind": "NON_NULL",
@@ -5830,7 +5841,7 @@
             "args": []
           },
           {
-            "name": "spotSell",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5842,7 +5853,7 @@
             "args": []
           },
           {
-            "name": "spotBuy",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

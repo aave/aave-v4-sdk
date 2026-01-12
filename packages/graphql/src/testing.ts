@@ -31,6 +31,7 @@ import type {
   TransactionRequest,
 } from './fragments';
 import { type SwapId, type SwapQuoteId, tokenInfoId } from './id';
+import { QuoteAccuracy } from './enums';
 import type {
   PermitMessageData,
   PermitTypedDataResponse,
@@ -243,10 +244,11 @@ function makeQuoteId(): SwapQuoteId {
 export function makeSwapQuote(): SwapQuote {
   return {
     __typename: 'SwapQuote',
+    accuracy: QuoteAccuracy.ACCURATE,
     quoteId: makeQuoteId(),
     suggestedSlippage: percentNumber(0.01),
-    spotBuy: makeErc20Amount(1000, 'USDC'),
-    spotSell: makeErc20Amount(1000, 'WETH'),
+    buy: makeErc20Amount(1000, 'USDC'),
+    sell: makeErc20Amount(1000, 'WETH'),
     costs: {
       __typename: 'SwapQuoteCosts',
       networkCosts: makeErc20Amount(1000, 'WETH'),

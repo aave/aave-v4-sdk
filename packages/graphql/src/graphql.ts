@@ -28,6 +28,7 @@ import type {
   OperationType,
   OrderDirection,
   PageSize,
+  QuoteAccuracy,
   RepayWithSupplyKind,
   ReservesRequestFilter,
   SupplySwapKind,
@@ -92,6 +93,7 @@ export const graphql = initGraphQLTada<{
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
+    QuoteAccuracy: QuoteAccuracy;
     ReserveId: ReserveId;
     ReservesRequestFilter: ReservesRequestFilter;
     Signature: Signature;

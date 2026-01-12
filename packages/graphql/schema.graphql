@@ -712,6 +712,10 @@ input LimitDebtSwapQuoteInput {
 }
 
 input LimitOrderTokenSwapQuoteInput {
+  """
+  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
+  """
+  accuracy: QuoteAccuracy! = ACCURATE
   chainId: ChainId!
   sell: SwapTokenInput!
   buy: SwapTokenInput!
@@ -804,6 +808,10 @@ type LiquidationFeeVariation {
 }
 
 input MarketDebtSwapQuoteInput {
+  """
+  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
+  """
+  accuracy: QuoteAccuracy! = ACCURATE
   debtPosition: UserBorrowItemId!
   buyReserve: ReserveId!
   amount: BigDecimal!
@@ -816,6 +824,10 @@ input MarketOrderTokenSwapFromQuoteInput {
 }
 
 input MarketOrderTokenSwapQuoteInput {
+  """
+  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
+  """
+  accuracy: QuoteAccuracy! = ACCURATE
   chainId: ChainId!
   buy: TokenInput!
   sell: TokenInput!
@@ -826,6 +838,10 @@ input MarketOrderTokenSwapQuoteInput {
 }
 
 input MarketRepayWithSupplyQuoteInput {
+  """
+  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
+  """
+  accuracy: QuoteAccuracy! = ACCURATE
   debtPosition: UserBorrowItemId!
   repayWithReserve: ReserveId!
   amount: BigDecimal!
@@ -833,6 +849,10 @@ input MarketRepayWithSupplyQuoteInput {
 }
 
 input MarketSupplySwapQuoteInput {
+  """
+  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
+  """
+  accuracy: QuoteAccuracy! = ACCURATE
   sellPosition: UserSupplyItemId!
   buyReserve: ReserveId!
   amount: BigDecimal!
@@ -841,6 +861,10 @@ input MarketSupplySwapQuoteInput {
 }
 
 input MarketWithdrawSwapQuoteInput {
+  """
+  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
+  """
+  accuracy: QuoteAccuracy! = ACCURATE
   position: UserSupplyItemId!
   buyReserve: ReserveId!
   amount: BigDecimal!
@@ -1167,6 +1191,15 @@ type Query {
   userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
+}
+
+"""Quote accuracy level for swap quotes"""
+enum QuoteAccuracy {
+  """Fast price quality - faster response, potentially less accurate price"""
+  FAST
+
+  """Verified price quality - more accurate price (default)"""
+  ACCURATE
 }
 
 input RenounceSpokeUserPositionManagerRequest {
@@ -1680,10 +1713,11 @@ type SwapPendingSignature {
 }
 
 type SwapQuote {
+  accuracy: QuoteAccuracy!
   quoteId: SwapQuoteId!
   suggestedSlippage: PercentNumber!
-  spotSell: TokenAmount!
-  spotBuy: TokenAmount!
+  sell: TokenAmount!
+  buy: TokenAmount!
   costs: SwapQuoteCosts!
 
   """Final buy amount after all fees and slippage"""
