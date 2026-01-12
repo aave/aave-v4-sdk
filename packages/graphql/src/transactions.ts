@@ -1,7 +1,6 @@
-import type { ExtendWithOpaqueType, TxHash } from '@aave/types';
+import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import {
-  type Chain,
   ChainFragment,
   Erc20AmountFragment,
   type Erc20ApprovalRequired,
@@ -21,7 +20,6 @@ import {
   TransactionRequestFragment,
 } from './fragments';
 import { type FragmentDocumentFor, graphql, type RequestOf } from './graphql';
-import type { ID } from './id';
 
 /**
  * @internal
@@ -598,13 +596,7 @@ export const ActivityItemFragment = graphql(
   ],
 );
 export type ActivityItem = ExtendWithOpaqueType<
-  FragmentOf<typeof ActivityItemFragment>,
-  {
-    id: ID;
-    timestamp: Date;
-    txHash: TxHash;
-    chain: Chain;
-  }
+  FragmentOf<typeof ActivityItemFragment>
 >;
 
 export const PaginatedActivitiesResultFragment = graphql(
