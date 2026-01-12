@@ -53,3 +53,25 @@ When updating the GraphQL schema in the SDK:
 
 4. **Validate:**
    - Use `pnpm check` from `packages/graphql` to check integrity of GraphQL documents
+
+## Commit guidelines
+
+- Use conventional commits format: `type: description` (e.g., `fix:`, `feat:`, `chore:`, `docs:`)
+- Do NOT include `Co-Authored-By` trailers
+- Keep commit messages concise and descriptive
+
+## Changesets
+
+When creating changesets, create the file manually in `.changeset/` directory since interactive prompts don't work in this environment:
+
+1. Create a new file in `.changeset/` with a random name like `adjective-noun-verb.md`
+2. Use this format:
+```
+---
+"@aave/graphql": patch
+---
+
+Description of the change
+```
+
+Bump types: `patch` for bug fixes, `minor` for new features, `major` for breaking changes.

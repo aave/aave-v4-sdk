@@ -107,10 +107,10 @@ input AssetRequestQuery @oneOf {
 }
 
 type AssetSummary {
-  totalSupplyCap: DecimalNumberWithChange!
+  totalSupplyCap: AssetAmountWithChange!
   totalSupplied: AssetAmountWithChange!
   totalSuppliable: AssetAmountWithChange!
-  totalBorrowCap: DecimalNumberWithChange!
+  totalBorrowCap: AssetAmountWithChange!
   totalBorrowed: AssetAmountWithChange!
   totalBorrowable: AssetAmountWithChange!
 

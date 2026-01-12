@@ -74,7 +74,7 @@ export const AssetSummaryFragment = graphql(
   `fragment AssetSummary on AssetSummary {
       __typename
       totalSupplyCap {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalSupplied {
         ...AssetAmountWithChange
@@ -83,7 +83,7 @@ export const AssetSummaryFragment = graphql(
         ...AssetAmountWithChange
       }
       totalBorrowCap {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalBorrowed {
         ...AssetAmountWithChange
@@ -98,11 +98,7 @@ export const AssetSummaryFragment = graphql(
         ...PercentNumber
       }
     }`,
-  [
-    AssetAmountWithChangeFragment,
-    DecimalNumberWithChangeFragment,
-    PercentNumberFragment,
-  ],
+  [AssetAmountWithChangeFragment, PercentNumberFragment],
 );
 export type AssetSummary = FragmentOf<typeof AssetSummaryFragment>;
 

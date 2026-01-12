@@ -278,7 +278,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
@@ -314,7 +314,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
