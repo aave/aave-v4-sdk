@@ -118,7 +118,7 @@ export function swappableTokens(
  *
  * ```ts
  * const result = await prepareTokenSwap(client, {
- *   quoteId: swapQuoteId('quote_123'),
+ *   quoteId: quote.quoteId,
  * }).andThen(order => {
  *   return signSwapTypedDataWith(wallet, order.data)
  *     .andThen((signature) =>
@@ -284,7 +284,7 @@ export function withdrawSwapQuote(
  *
  * ```ts
  * const result = await preparePositionSwap(client, {
- *   quoteId: swapQuoteId('quote_123'),
+ *   quoteId: quote.quoteId,
  *   adapterContractSignature: signature('0x456...'),
  *   positionManagerSignature: signature('0x789...'),
  * });
@@ -427,7 +427,7 @@ export function waitForSwapOutcome(
  * ```ts
  * const result = await swap(client, {
  *   intent: {
- *     quoteId: swapQuoteId('123...'),
+ *     quoteId: quote.quoteId,
  *     signature: signature('0x456...'),
  *   },
  * }).andThen((plan) => {
