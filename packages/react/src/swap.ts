@@ -835,12 +835,6 @@ export function useSupplySwap(
     }: UseSupplySwapRequest) => {
       return supplySwapQuote(client, request, { currency }).andThen(
         (result) => {
-          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
-            return UnexpectedError.upgradeRequired(
-              `Unsupported swap quote result: ${result.__typename}`,
-            ).asResultAsync();
-          }
-
           return processApprovals(result)
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
@@ -895,12 +889,6 @@ export function useBorrowSwap(
     }: UseBorrowSwapRequest) => {
       return borrowSwapQuote(client, request, { currency }).andThen(
         (result) => {
-          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
-            return UnexpectedError.upgradeRequired(
-              `Unsupported swap quote result: ${result.__typename}`,
-            ).asResultAsync();
-          }
-
           return processApprovals(result)
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
@@ -1101,12 +1089,6 @@ export function useRepayWithSupply(
     }: UseRepayWithSupplyRequest) => {
       return repayWithSupplyQuote(client, request, { currency }).andThen(
         (result) => {
-          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
-            return UnexpectedError.upgradeRequired(
-              `Unsupported swap quote result: ${result.__typename}`,
-            ).asResultAsync();
-          }
-
           return processApprovals(result)
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
@@ -1307,12 +1289,6 @@ export function useWithdrawSwap(
     }: UseWithdrawSwapRequest) => {
       return withdrawSwapQuote(client, request, { currency }).andThen(
         (result) => {
-          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
-            return UnexpectedError.upgradeRequired(
-              `Unsupported swap quote result: ${result.__typename}`,
-            ).asResultAsync();
-          }
-
           return processApprovals(result)
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))

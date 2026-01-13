@@ -2108,6 +2108,11 @@ type UserPosition {
   netApy: PercentNumber!
   netSupplyApy: PercentNumberWithChange!
   netBorrowApy: PercentNumberWithChange!
+
+  """
+  Net accrued interest earned (all supply interests - all borrow interests)
+  """
+  netAccruedInterest: ExchangeAmount!
   healthFactor: HealthFactorWithChange!
   riskPremium: UserPositionRiskPremium
 
@@ -2209,8 +2214,10 @@ type UserSummary {
   """
   netApy: PercentNumber!
 
-  """Interest earned (net fee earned)"""
-  netFeeEarned: ExchangeAmount!
+  """
+  Net accrued interest earned (all supply interests - all borrow interests)
+  """
+  netAccruedInterest: ExchangeAmount!
 
   """Lowest health factor across all positions"""
   lowestHealthFactor: BigDecimal

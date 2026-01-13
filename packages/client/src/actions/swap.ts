@@ -7,12 +7,12 @@ import {
 import {
   BorrowSwapQuoteQuery,
   type BorrowSwapQuoteRequest,
-  type BorrowSwapQuoteResult,
   type CancelSwapExecutionPlan,
   CancelSwapMutation,
   type CancelSwapRequest,
   type InsufficientBalanceError,
   type PaginatedUserSwapsResult,
+  type PositionSwapByIntentApprovalsRequired,
   PreparePositionSwapQuery,
   type PreparePositionSwapRequest,
   PrepareSwapCancelQuery,
@@ -23,10 +23,8 @@ import {
   type PrepareTokenSwapRequest,
   RepayWithSupplyQuoteQuery,
   type RepayWithSupplyQuoteRequest,
-  type RepayWithSupplyQuoteResult,
   SupplySwapQuoteQuery,
   type SupplySwapQuoteRequest,
-  type SupplySwapQuoteResult,
   type SwapCancelled,
   type SwapExpired,
   type SwapFulfilled,
@@ -47,7 +45,6 @@ import {
   type UserSwapsRequest,
   WithdrawSwapQuoteQuery,
   type WithdrawSwapQuoteRequest,
-  type WithdrawSwapQuoteResult,
 } from '@aave/graphql';
 import { extendWithOpaqueType, okAsync, ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
@@ -178,12 +175,24 @@ export function supplySwapQuote(
   client: AaveClient,
   request: SupplySwapQuoteRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<SupplySwapQuoteResult, UnexpectedError> {
-  return client.query(
-    SupplySwapQuoteQuery,
-    { request, currency: options.currency },
-    { batch: false },
-  );
+): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+  return client
+    .query(
+      SupplySwapQuoteQuery,
+      { request, currency: options.currency },
+      { batch: false },
+    )
+    .map(extendWithOpaqueType)
+    .andThen((result) => {
+      switch (result.__typename) {
+        case 'PositionSwapByIntentApprovalsRequired':
+          return okAsync(result);
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported result: ${result.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**
@@ -209,12 +218,24 @@ export function borrowSwapQuote(
   client: AaveClient,
   request: BorrowSwapQuoteRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<BorrowSwapQuoteResult, UnexpectedError> {
-  return client.query(
-    BorrowSwapQuoteQuery,
-    { request, currency: options.currency },
-    { batch: false },
-  );
+): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+  return client
+    .query(
+      BorrowSwapQuoteQuery,
+      { request, currency: options.currency },
+      { batch: false },
+    )
+    .map(extendWithOpaqueType)
+    .andThen((result) => {
+      switch (result.__typename) {
+        case 'PositionSwapByIntentApprovalsRequired':
+          return okAsync(result);
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported result: ${result.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**
@@ -240,12 +261,24 @@ export function repayWithSupplyQuote(
   client: AaveClient,
   request: RepayWithSupplyQuoteRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<RepayWithSupplyQuoteResult, UnexpectedError> {
-  return client.query(
-    RepayWithSupplyQuoteQuery,
-    { request, currency: options.currency },
-    { batch: false },
-  );
+): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+  return client
+    .query(
+      RepayWithSupplyQuoteQuery,
+      { request, currency: options.currency },
+      { batch: false },
+    )
+    .map(extendWithOpaqueType)
+    .andThen((result) => {
+      switch (result.__typename) {
+        case 'PositionSwapByIntentApprovalsRequired':
+          return okAsync(result);
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported result: ${result.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**
@@ -271,12 +304,25 @@ export function withdrawSwapQuote(
   client: AaveClient,
   request: WithdrawSwapQuoteRequest,
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<WithdrawSwapQuoteResult, UnexpectedError> {
-  return client.query(
-    WithdrawSwapQuoteQuery,
-    { request, currency: options.currency },
-    { batch: false },
-  );
+): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+  return client
+    .query(
+      WithdrawSwapQuoteQuery,
+      { request, currency: options.currency },
+      { batch: false },
+    )
+    .map(extendWithOpaqueType)
+    .andThen((result) => {
+      switch (result.__typename) {
+        case 'PositionSwapByIntentApprovalsRequired':
+          return okAsync(result);
+
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported result: ${result.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**

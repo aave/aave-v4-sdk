@@ -6988,6 +6988,18 @@
             "args": []
           },
           {
+            "name": "netAccruedInterest",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "healthFactor",
             "type": {
               "kind": "NON_NULL",
@@ -7354,7 +7366,7 @@
             "args": []
           },
           {
-            "name": "netFeeEarned",
+            "name": "netAccruedInterest",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
