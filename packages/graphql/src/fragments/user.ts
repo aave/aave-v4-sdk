@@ -151,6 +151,9 @@ export const UserPositionFragment = graphql(
     netBalance(currency: $currency) {
       ...ExchangeAmountWithChange
     }
+    netAccruedInterest {
+      ...ExchangeAmount
+    }
     totalCollateral(currency: $currency) {
       ...ExchangeAmountWithChange
     }
