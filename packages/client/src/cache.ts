@@ -324,6 +324,7 @@ export const exchange = cacheExchange({
     PermitMessageData: () => null,
     PermitTypedDataResponse: () => null,
     BorrowSwapQuoteResult: () => null,
+    PercentNumberChangeSnapshot: () => null,
     PositionSwapAdapterContractApproval: () => null,
     PositionSwapByIntentApprovalsRequired: () => null,
     PositionSwapPositionManagerApproval: () => null,
