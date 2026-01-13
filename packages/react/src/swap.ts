@@ -3,7 +3,7 @@ import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
   type TimeWindowQueryOptions,
-  ValidationError,
+  type ValidationError,
 } from '@aave/client';
 import {
   borrowSwapQuote,
@@ -33,7 +33,6 @@ import type {
   PrepareSwapCancelRequest,
   SupplySwapQuoteRequest,
   SwapCancelled,
-  SwapExecutionPlan,
   SwapQuote,
   SwapReceipt,
   SwapTransactionRequest,
@@ -46,19 +45,15 @@ import {
   type ERC20PermitSignature,
   type Erc20Approval,
   isERC20PermitSignature,
-  type MarketDebtSwapQuoteInput,
-  type MarketRepayWithSupplyQuoteInput,
-  type MarketSupplySwapQuoteInput,
-  type MarketWithdrawSwapQuoteInput,
   type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
   RepayWithSupplyQuoteQuery,
   type RepayWithSupplyQuoteRequest,
   SupplySwapQuoteQuery,
-  type SwapByIntent,
   type SwapByIntentInput,
   SwappableTokensQuery,
   type SwappableTokensRequest,
+  type SwapRequest,
   type SwapTypedData,
   type Token,
   TokenSwapQuoteQuery,
@@ -100,17 +95,16 @@ import {
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
+// TODO rethink this approach so that selector errors are not thrown but returned as UnexpectedError
 function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
   switch (data.__typename) {
     case 'SwapByIntent':
-      return data.quote;
     case 'SwapByIntentWithApprovalRequired':
-      return data.quote;
     case 'SwapByTransaction':
       return data.quote;
     default:
-      never(
-        `Unsupported swap quote result: ${data.__typename}. Upgrade to a newer version of the @aave/react package.`,
+      throw UnexpectedError.upgradeRequired(
+        `Unsupported swap quote result: ${data.__typename}`,
       );
   }
 }
@@ -565,16 +559,14 @@ export function useSupplySwapQuote({
  */
 export function useSupplySwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<MarketSupplySwapQuoteInput, SwapQuote, UnexpectedError> {
+): UseAsyncTask<SupplySwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: MarketSupplySwapQuoteInput) =>
-      supplySwapQuote(
-        client,
-        { market: request },
-        { currency: options.currency },
-      ).map((data) => data.quote),
+    (request: SupplySwapQuoteRequest) =>
+      supplySwapQuote(client, request, { currency: options.currency }).map(
+        (data) => data.quote,
+      ),
     [client, options.currency],
   );
 }
@@ -713,16 +705,14 @@ export function useBorrowSwapQuote({
  */
 export function useBorrowSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<MarketDebtSwapQuoteInput, SwapQuote, UnexpectedError> {
+): UseAsyncTask<BorrowSwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: MarketDebtSwapQuoteInput) =>
-      borrowSwapQuote(
-        client,
-        { market: request },
-        { currency: options.currency },
-      ).map((data) => data.quote),
+    (request: BorrowSwapQuoteRequest) =>
+      borrowSwapQuote(client, request, { currency: options.currency }).map(
+        (data) => data.quote,
+      ),
     [client, options.currency],
   );
 }
@@ -753,7 +743,7 @@ export type UseSwapSignerResult = UseAsyncTask<
 
 // ------------------------------------------------------------
 
-export type PositionSwapPlan = PositionSwapApproval | SwapByIntent;
+export type PositionSwapPlan = PositionSwapApproval | SwapTypedData;
 
 export type PositionSwapHandler = (
   plan: PositionSwapPlan,
@@ -845,33 +835,17 @@ export function useSupplySwap(
     }: UseSupplySwapRequest) => {
       return supplySwapQuote(client, request, { currency }).andThen(
         (result) => {
-          invariant(
-            result.__typename === 'PositionSwapByIntentApprovalsRequired',
-            `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-          );
+          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
+            return UnexpectedError.upgradeRequired(
+              `Unsupported swap quote result: ${result.__typename}`,
+            ).asResultAsync();
+          }
 
           return processApprovals(result)
             .with(handler)
-            .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).andThen(
-                (result) => {
-                  switch (result.__typename) {
-                    case 'SwapByIntent':
-                      return okAsync(result);
-                    case 'InsufficientBalanceError':
-                      return ValidationError.fromGqlNode(
-                        result,
-                      ).asResultAsync();
-                    default:
-                      return new UnexpectedError(
-                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                      ).asResultAsync();
-                  }
-                },
-              ),
-            )
-            .andThen((intent) =>
-              handler(intent, { cancel }).map((result) => {
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel }).map((result) => {
                 invariant(
                   isSignature(result),
                   'Expected signature, got an object instead.',
@@ -921,33 +895,17 @@ export function useBorrowSwap(
     }: UseBorrowSwapRequest) => {
       return borrowSwapQuote(client, request, { currency }).andThen(
         (result) => {
-          invariant(
-            result.__typename === 'PositionSwapByIntentApprovalsRequired',
-            `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-          );
+          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
+            return UnexpectedError.upgradeRequired(
+              `Unsupported swap quote result: ${result.__typename}`,
+            ).asResultAsync();
+          }
 
           return processApprovals(result)
             .with(handler)
-            .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).andThen(
-                (result) => {
-                  switch (result.__typename) {
-                    case 'SwapByIntent':
-                      return okAsync(result);
-                    case 'InsufficientBalanceError':
-                      return ValidationError.fromGqlNode(
-                        result,
-                      ).asResultAsync();
-                    default:
-                      return new UnexpectedError(
-                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                      ).asResultAsync();
-                  }
-                },
-              ),
-            )
-            .andThen((intent) =>
-              handler(intent, { cancel }).map((result) => {
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel }).map((result) => {
                 invariant(
                   isSignature(result),
                   'Expected signature, got an object instead.',
@@ -1102,16 +1060,14 @@ export function useRepayWithSupplyQuote({
  */
 export function useRepayWithSupplyQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<MarketRepayWithSupplyQuoteInput, SwapQuote, UnexpectedError> {
+): UseAsyncTask<RepayWithSupplyQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: MarketRepayWithSupplyQuoteInput) =>
-      repayWithSupplyQuote(
-        client,
-        { market: request },
-        { currency: options.currency },
-      ).map((data) => data.quote),
+    (request: RepayWithSupplyQuoteRequest) =>
+      repayWithSupplyQuote(client, request, { currency: options.currency }).map(
+        (data) => data.quote,
+      ),
     [client, options.currency],
   );
 }
@@ -1145,33 +1101,17 @@ export function useRepayWithSupply(
     }: UseRepayWithSupplyRequest) => {
       return repayWithSupplyQuote(client, request, { currency }).andThen(
         (result) => {
-          invariant(
-            result.__typename === 'PositionSwapByIntentApprovalsRequired',
-            `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-          );
+          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
+            return UnexpectedError.upgradeRequired(
+              `Unsupported swap quote result: ${result.__typename}`,
+            ).asResultAsync();
+          }
 
           return processApprovals(result)
             .with(handler)
-            .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).andThen(
-                (result) => {
-                  switch (result.__typename) {
-                    case 'SwapByIntent':
-                      return okAsync(result);
-                    case 'InsufficientBalanceError':
-                      return ValidationError.fromGqlNode(
-                        result,
-                      ).asResultAsync();
-                    default:
-                      return new UnexpectedError(
-                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                      ).asResultAsync();
-                  }
-                },
-              ),
-            )
-            .andThen((intent) =>
-              handler(intent, { cancel }).map((result) => {
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel }).map((result) => {
                 invariant(
                   isSignature(result),
                   'Expected signature, got an object instead.',
@@ -1292,13 +1232,7 @@ export function useWithdrawSwapQuote({
       request,
       currency,
     },
-    selector: (data) => {
-      invariant(
-        data.__typename === 'PositionSwapByIntentApprovalsRequired',
-        `Unsupported swap plan: ${data.__typename}. Upgrade to a newer version of the @aave/react package.`,
-      );
-      return data.quote;
-    },
+    selector: (data) => data.quote,
     suspense,
     pause,
   });
@@ -1332,22 +1266,14 @@ export function useWithdrawSwapQuote({
  */
 export function useWithdrawSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<MarketWithdrawSwapQuoteInput, SwapQuote, UnexpectedError> {
+): UseAsyncTask<WithdrawSwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: MarketWithdrawSwapQuoteInput) =>
-      withdrawSwapQuote(
-        client,
-        { market: request },
-        { currency: options.currency },
-      ).map((data) => {
-        invariant(
-          data.__typename === 'PositionSwapByIntentApprovalsRequired',
-          `Unsupported swap plan: ${data.__typename}. Upgrade to a newer version of the @aave/react package.`,
-        );
-        return data.quote;
-      }),
+    (request: WithdrawSwapQuoteRequest) =>
+      withdrawSwapQuote(client, request, { currency: options.currency }).map(
+        (data) => data.quote,
+      ),
     [client, options.currency],
   );
 }
@@ -1381,33 +1307,17 @@ export function useWithdrawSwap(
     }: UseWithdrawSwapRequest) => {
       return withdrawSwapQuote(client, request, { currency }).andThen(
         (result) => {
-          invariant(
-            result.__typename === 'PositionSwapByIntentApprovalsRequired',
-            `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-          );
+          if (result.__typename !== 'PositionSwapByIntentApprovalsRequired') {
+            return UnexpectedError.upgradeRequired(
+              `Unsupported swap quote result: ${result.__typename}`,
+            ).asResultAsync();
+          }
 
           return processApprovals(result)
             .with(handler)
-            .andThen((request) =>
-              preparePositionSwap(client, request, { currency }).andThen(
-                (result) => {
-                  switch (result.__typename) {
-                    case 'SwapByIntent':
-                      return okAsync(result);
-                    case 'InsufficientBalanceError':
-                      return ValidationError.fromGqlNode(
-                        result,
-                      ).asResultAsync();
-                    default:
-                      return new UnexpectedError(
-                        `Unsupported swap plan: ${result.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                      ).asResultAsync();
-                  }
-                },
-              ),
-            )
-            .andThen((intent) =>
-              handler(intent, { cancel }).map((result) => {
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel }).map((result) => {
                 invariant(
                   isSignature(result),
                   'Expected signature, got an object instead.',
@@ -1502,34 +1412,27 @@ export function useTokenSwap(
 
   const executeSwap = useCallback(
     (
-      plan: SwapExecutionPlan,
+      request: SwapRequest,
     ): ResultAsync<
       SwapReceipt,
       | SendTransactionError
       | PendingTransactionError
       | ValidationError<InsufficientBalanceError>
-      | UnexpectedError
     > => {
-      switch (plan.__typename) {
-        case 'SwapTransactionRequest':
-          return handler(plan, { cancel })
-            .map(PendingTransaction.ensure)
-            .andThen((pendingTransaction) => pendingTransaction.wait())
-            .andThen(() => okAsync(plan.orderReceipt));
+      return swap(client, request).andThen((plan) => {
+        switch (plan.__typename) {
+          case 'SwapTransactionRequest':
+            return handler(plan, { cancel })
+              .map(PendingTransaction.ensure)
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(() => okAsync(plan.orderReceipt));
 
-        case 'InsufficientBalanceError':
-          return ValidationError.fromGqlNode(plan).asResultAsync();
-
-        case 'SwapReceipt':
-          return okAsync(plan);
-
-        default:
-          return new UnexpectedError(
-            `Unsupported swap plan: ${plan.__typename}. Upgrade to a newer version of the @aave/react package.`,
-          ).asResultAsync();
-      }
+          case 'SwapReceipt':
+            return okAsync(plan);
+        }
+      });
     },
-    [handler],
+    [client, handler],
   );
 
   return useAsyncTask(
@@ -1540,22 +1443,25 @@ export function useTokenSwap(
       tokenSwapQuote(client, request, { currency }).andThen((quoteResult) => {
         switch (quoteResult.__typename) {
           case 'SwapByTransaction':
-            return swap(client, {
+            return executeSwap({
               transaction: { quoteId: quoteResult.quote.quoteId },
-            }).andThen(executeSwap);
+            });
 
           case 'SwapByIntent':
-            return handler(quoteResult.data, { cancel })
-              .map((handlerResult) => {
-                invariant(isSignature(handlerResult), 'Invalid signature');
-                return handlerResult;
-              })
-              .andThen((signature) =>
-                swap(client, {
-                  intent: { quoteId: quoteResult.quote.quoteId, signature },
-                }),
-              )
-              .andThen(executeSwap);
+            return prepareTokenSwap(client, {
+              quoteId: quoteResult.quote.quoteId,
+            }).andThen((order) =>
+              handler(order.data, { cancel })
+                .map((result) => {
+                  invariant(isSignature(result), 'Invalid signature');
+                  return result;
+                })
+                .andThen((signature) =>
+                  executeSwap({
+                    intent: { quoteId: order.newQuoteId, signature },
+                  }),
+                ),
+            );
 
           case 'SwapByIntentWithApprovalRequired':
             return handler(quoteResult.approval, { cancel })
@@ -1575,32 +1481,18 @@ export function useTokenSwap(
                 }
                 return UnexpectedError.from(result).asResultAsync();
               })
-              .andThen((prepareResult) => {
-                switch (prepareResult.__typename) {
-                  case 'SwapByIntent':
-                    return handler(prepareResult.data, { cancel });
-
-                  case 'InsufficientBalanceError':
-                    return ValidationError.fromGqlNode(
-                      prepareResult,
-                    ).asResultAsync();
-
-                  default:
-                    return new UnexpectedError(
-                      `Unsupported swap plan: ${prepareResult.__typename}. Upgrade to a newer version of the @aave/react package.`,
-                    ).asResultAsync();
-                }
-              })
-              .map((handlerResult) => {
-                invariant(isSignature(handlerResult), 'Invalid signature');
-                return handlerResult;
-              })
-              .andThen((signature) =>
-                swap(client, {
-                  intent: { quoteId: quoteResult.quote.quoteId, signature },
-                }),
-              )
-              .andThen(executeSwap);
+              .andThen((order) =>
+                handler(order.data, { cancel })
+                  .map((handlerResult) => {
+                    invariant(isSignature(handlerResult), 'Invalid signature');
+                    return handlerResult;
+                  })
+                  .andThen((signature) =>
+                    executeSwap({
+                      intent: { quoteId: quoteResult.quote.quoteId, signature },
+                    }),
+                  ),
+              );
           default:
             never(
               `Unsupported swap quote result: ${quoteResult.__typename}. To be removed from API soon.`,
@@ -1711,8 +1603,8 @@ export function useCancelSwap(
             ).asResultAsync();
 
           default:
-            return new UnexpectedError(
-              `Unsupported swap status: ${status.__typename}. Upgrade to a newer version of the @aave/react package.`,
+            return UnexpectedError.upgradeRequired(
+              `Unsupported swap status: ${status.__typename}`,
             ).asResultAsync();
         }
       }),

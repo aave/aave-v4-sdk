@@ -17,6 +17,7 @@ import type {
   PercentNumber,
   PositionSwapAdapterContractApproval,
   PositionSwapPositionManagerApproval,
+  PrepareSwapOrder,
   SwapByIntent,
   SwapByIntentWithApprovalRequired,
   SwapByTransaction,
@@ -232,13 +233,17 @@ export function makeSwapTypedData(): SwapTypedData {
   };
 }
 
+function makeQuoteId(): SwapQuoteId {
+  return randomBase64String() as SwapQuoteId;
+}
+
 /**
  * @internal
  */
 export function makeSwapQuote(): SwapQuote {
   return {
     __typename: 'SwapQuote',
-    quoteId: randomBase64String() as SwapQuoteId,
+    quoteId: makeQuoteId(),
     suggestedSlippage: percentNumber(0.01),
     spotBuy: makeErc20Amount(1000, 'USDC'),
     spotSell: makeErc20Amount(1000, 'WETH'),
@@ -357,6 +362,16 @@ export function makeSwapByIntent(): SwapByIntent {
   return {
     __typename: 'SwapByIntent',
     quote: makeSwapQuote(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makePrepareSwapOrder(): PrepareSwapOrder {
+  return {
+    __typename: 'PrepareSwapOrder',
+    newQuoteId: makeQuoteId(),
     data: makeSwapTypedData(),
   };
 }
