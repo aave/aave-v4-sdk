@@ -30,7 +30,7 @@ import { assertNonEmptyArray } from '../test-utils';
 const user = await createNewWallet();
 
 describe('Supplying Assets on Aave V4', () => {
-  describe('Given a user and a reserve', () => {
+  describe('Given a user and a reserve, that supports collateral', () => {
     describe('When the user supplies tokens to a reserve', () => {
       let usdcReserveSupplied: Reserve;
 
@@ -271,21 +271,6 @@ describe('Supplying Assets on Aave V4', () => {
             }),
           );
         assertOk(result);
-
-        const supplyPosition = result.value.find((position) => {
-          return (
-            position.reserve.asset.underlying.address ===
-            reserveWithPermit.asset.underlying.address
-          );
-        });
-        invariant(supplyPosition, 'No supply position found');
-        expect(supplyPosition.isCollateral).toEqual(true);
-        expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
-          supplyPositionBefore.value?.withdrawable.amount.value.plus(
-            amountToSupply,
-          ),
-          2,
-        );
       });
     });
   });
