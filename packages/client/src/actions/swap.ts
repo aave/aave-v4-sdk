@@ -1,52 +1,55 @@
-import { delay, TimeoutError, UnexpectedError } from '@aave/core';
-import type {
-  BorrowSwapQuoteRequest,
-  BorrowSwapQuoteResult,
-  CancelSwapExecutionPlan,
-  CancelSwapRequest,
-  PaginatedUserSwapsResult,
-  PreparePositionSwapRequest,
-  PreparePositionSwapResult,
-  PrepareSwapCancelRequest,
-  PrepareSwapCancelResult,
-  PrepareTokenSwapRequest,
-  PrepareTokenSwapResult,
-  RepayWithSupplyQuoteRequest,
-  RepayWithSupplyQuoteResult,
-  SupplySwapQuoteRequest,
-  SupplySwapQuoteResult,
-  SwapCancelled,
-  SwapExecutionPlan,
-  SwapExpired,
-  SwapFulfilled,
-  SwappableTokensRequest,
-  SwapReceipt,
-  SwapRequest,
-  SwapStatus,
-  SwapStatusRequest,
-  Token,
-  TokenSwapQuoteRequest,
-  TokenSwapQuoteResult,
-  UserSwapsRequest,
-  WithdrawSwapQuoteRequest,
-  WithdrawSwapQuoteResult,
-} from '@aave/graphql';
+import {
+  delay,
+  TimeoutError,
+  UnexpectedError,
+  ValidationError,
+} from '@aave/core';
 import {
   BorrowSwapQuoteQuery,
+  type BorrowSwapQuoteRequest,
+  type BorrowSwapQuoteResult,
+  type CancelSwapExecutionPlan,
   CancelSwapMutation,
+  type CancelSwapRequest,
+  type InsufficientBalanceError,
+  type PaginatedUserSwapsResult,
   PreparePositionSwapQuery,
+  type PreparePositionSwapRequest,
   PrepareSwapCancelQuery,
+  type PrepareSwapCancelRequest,
+  type PrepareSwapCancelResult,
+  type PrepareSwapOrder,
   PrepareTokenSwapQuery,
+  type PrepareTokenSwapRequest,
   RepayWithSupplyQuoteQuery,
+  type RepayWithSupplyQuoteRequest,
+  type RepayWithSupplyQuoteResult,
   SupplySwapQuoteQuery,
+  type SupplySwapQuoteRequest,
+  type SupplySwapQuoteResult,
+  type SwapCancelled,
+  type SwapExpired,
+  type SwapFulfilled,
   SwapMutation,
   SwappableTokensQuery,
+  type SwappableTokensRequest,
+  type SwapReceipt,
+  type SwapRequest,
+  type SwapStatus,
   SwapStatusQuery,
+  type SwapStatusRequest,
+  type SwapTransactionRequest,
+  type Token,
   TokenSwapQuoteQuery,
+  type TokenSwapQuoteRequest,
+  type TokenSwapQuoteResult,
   UserSwapsQuery,
+  type UserSwapsRequest,
   WithdrawSwapQuoteQuery,
+  type WithdrawSwapQuoteRequest,
+  type WithdrawSwapQuoteResult,
 } from '@aave/graphql';
-import { ResultAsync } from '@aave/types';
+import { extendWithOpaqueType, okAsync, ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
@@ -116,32 +119,40 @@ export function swappableTokens(
  * ```ts
  * const result = await prepareTokenSwap(client, {
  *   quoteId: swapQuoteId('quote_123'),
- * }).andThen(plan => {
- *   switch (plan.__typename) {
- *     case 'SwapByIntent':
- *       return signSwapTypedDataWith(wallet, plan.data)
- *         .andThen((signature) =>
- *           swap({ intent: { quoteId: plan.quote.quoteId, signature } }),
- *         );
- *     case 'InsufficientBalanceError':
- *       return errAsync(
- *         new Error(`Insufficient balance: ${plan.required.value} required.`)
- *       );
- *   }
+ * }).andThen(order => {
+ *   return signSwapTypedDataWith(wallet, order.data)
+ *     .andThen((signature) =>
+ *       swap({ intent: { quoteId: order.newQuoteId, signature } }),
+ *     );
  * });
  * ```
  *
  * @param client - Aave client.
  * @param request - The prepare swap request parameters.
- * @param options - The query options.
  * @returns The prepared swap result containing details of the swap.
  */
 export function prepareTokenSwap(
   client: AaveClient,
   request: PrepareTokenSwapRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PrepareTokenSwapResult, UnexpectedError> {
-  return client.query(PrepareTokenSwapQuery, { request, ...options });
+): ResultAsync<
+  PrepareSwapOrder,
+  ValidationError<InsufficientBalanceError> | UnexpectedError
+> {
+  return client
+    .query(PrepareTokenSwapQuery, { request }, { batch: false })
+    .map(extendWithOpaqueType)
+    .andThen((result) => {
+      switch (result.__typename) {
+        case 'PrepareSwapOrder':
+          return okAsync(result);
+        case 'InsufficientBalanceError':
+          return ValidationError.fromGqlNode(result).asResultAsync();
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported result: ${result.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**
@@ -281,19 +292,30 @@ export function withdrawSwapQuote(
  *
  * @param client - Aave client.
  * @param request - The position swap request with quote ID and signatures.
- * @param options - The query options.
  * @returns The position swap result with intent data for execution.
  */
 export function preparePositionSwap(
   client: AaveClient,
   request: PreparePositionSwapRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PreparePositionSwapResult, UnexpectedError> {
-  return client.query(
-    PreparePositionSwapQuery,
-    { request, currency: options.currency },
-    { batch: false },
-  );
+): ResultAsync<
+  PrepareSwapOrder,
+  ValidationError<InsufficientBalanceError> | UnexpectedError
+> {
+  return client
+    .query(PreparePositionSwapQuery, { request }, { batch: false })
+    .map(extendWithOpaqueType)
+    .andThen((result) => {
+      switch (result.__typename) {
+        case 'PrepareSwapOrder':
+          return okAsync(result);
+        case 'InsufficientBalanceError':
+          return ValidationError.fromGqlNode(result).asResultAsync();
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported result: ${result.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**
@@ -434,8 +456,27 @@ export function waitForSwapOutcome(
 export function swap(
   client: AaveClient,
   request: SwapRequest,
-): ResultAsync<SwapExecutionPlan, UnexpectedError> {
-  return client.mutation(SwapMutation, { request });
+): ResultAsync<
+  SwapTransactionRequest | SwapReceipt,
+  ValidationError<InsufficientBalanceError> | UnexpectedError
+> {
+  return client
+    .mutation(SwapMutation, { request })
+    .map(extendWithOpaqueType)
+    .andThen((plan) => {
+      switch (plan.__typename) {
+        case 'SwapTransactionRequest':
+          return okAsync(plan);
+        case 'SwapReceipt':
+          return okAsync(plan);
+        case 'InsufficientBalanceError':
+          return ValidationError.fromGqlNode(plan).asResultAsync();
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported swap plan: ${plan.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**
@@ -455,7 +496,7 @@ export function prepareSwapCancel(
   client: AaveClient,
   request: PrepareSwapCancelRequest,
 ): ResultAsync<PrepareSwapCancelResult, UnexpectedError> {
-  return client.query(PrepareSwapCancelQuery, { request });
+  return client.query(PrepareSwapCancelQuery, { request }, { batch: false });
 }
 
 /**

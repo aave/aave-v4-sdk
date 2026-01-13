@@ -28,6 +28,7 @@ import {
   makeErc20Approval,
   makePositionSwapAdapterContractApproval,
   makePositionSwapPositionManagerApproval,
+  makePrepareSwapOrder,
   makeSwapByIntent,
   makeSwapByIntentWithApprovalRequired,
   makeSwapByTransaction,
@@ -73,11 +74,7 @@ const server = setupServer(
   api.query(PreparePositionSwapQuery, () =>
     msw.HttpResponse.json({
       data: {
-        value: {
-          __typename: 'SwapByIntent',
-          quote: makeSwapQuote(),
-          data: makeSwapTypedData(),
-        },
+        value: makePrepareSwapOrder(),
       },
     }),
   ),
@@ -170,6 +167,13 @@ describe('Given the swap hooks', () => {
               },
             }),
           ),
+          api.query(PrepareTokenSwapQuery, () =>
+            msw.HttpResponse.json({
+              data: {
+                value: makePrepareSwapOrder(),
+              },
+            }),
+          ),
           api.mutation(SwapMutation, () =>
             msw.HttpResponse.json({
               data: { value: makeSwapReceipt() },
@@ -218,7 +222,7 @@ describe('Given the swap hooks', () => {
           api.query(PrepareTokenSwapQuery, () =>
             msw.HttpResponse.json({
               data: {
-                value: makeSwapByIntent(),
+                value: makePrepareSwapOrder(),
               },
             }),
           ),
@@ -433,8 +437,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         }),
       );
@@ -459,8 +463,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         });
       });
@@ -507,8 +511,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         }),
       );
@@ -533,8 +537,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         });
       });
@@ -581,8 +585,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         }),
       );
@@ -607,8 +611,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         });
       });
@@ -655,8 +659,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         }),
       );
@@ -681,8 +685,8 @@ describe('Given the swap hooks', () => {
             case 'PositionSwapAdapterContractApproval':
               return signSwapTypedDataWith(walletClient, plan.bySignature);
 
-            case 'SwapByIntent':
-              return signSwapTypedDataWith(walletClient, plan.data);
+            case 'SwapTypedData':
+              return signSwapTypedDataWith(walletClient, plan);
           }
         });
       });

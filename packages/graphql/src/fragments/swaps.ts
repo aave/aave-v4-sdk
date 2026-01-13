@@ -6,7 +6,6 @@ import {
   DomainDataFragment,
   type Erc20Amount,
   Erc20AmountFragment,
-  type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
   type NativeAmount,
   NativeAmountFragment,
@@ -95,17 +94,27 @@ export const SwapTypedDataFragment = graphql(
 );
 export type SwapTypedData = FragmentOf<typeof SwapTypedDataFragment>;
 
+export const PrepareSwapOrderFragment = graphql(
+  `fragment PrepareSwapOrder on PrepareSwapOrder {
+    __typename
+    newQuoteId
+    data {
+      ...SwapTypedData
+    }
+  }`,
+  [SwapTypedDataFragment],
+);
+export type PrepareSwapOrder = FragmentOf<typeof PrepareSwapOrderFragment>;
+
 export const SwapByIntentFragment = graphql(
   `fragment SwapByIntent on SwapByIntent {
     __typename
     quote {
       ...SwapQuote
     }
-    data {
-      ...SwapTypedData
-    }
+  
   }`,
-  [SwapQuoteFragment, SwapTypedDataFragment],
+  [SwapQuoteFragment],
 );
 export type SwapByIntent = FragmentOf<typeof SwapByIntentFragment>;
 
@@ -176,14 +185,14 @@ export const TokenSwapQuoteResultFragment: FragmentDocumentFor<
 export const PrepareTokenSwapResultFragment = graphql(
   `fragment PrepareTokenSwapResult on PrepareTokenSwapResult {
     __typename
-    ... on SwapByIntent {
-      ...SwapByIntent
+    ... on PrepareSwapOrder {
+      ...PrepareSwapOrder
     }
     ... on InsufficientBalanceError {
       ...InsufficientBalanceError
     }
   }`,
-  [SwapByIntentFragment, InsufficientBalanceErrorFragment],
+  [PrepareSwapOrderFragment, InsufficientBalanceErrorFragment],
 );
 export type PrepareTokenSwapResult = ExtendWithOpaqueType<
   FragmentOf<typeof PrepareTokenSwapResultFragment>
@@ -205,14 +214,7 @@ export type SwapTransactionRequest = FragmentOf<
   typeof SwapTransactionRequestFragment
 >;
 
-export type SwapExecutionPlan = ExtendWithOpaqueType<
-  SwapTransactionRequest | SwapReceipt | InsufficientBalanceError
->;
-
-export const SwapExecutionPlanFragment: FragmentDocumentFor<
-  SwapExecutionPlan,
-  'SwapExecutionPlan'
-> = graphql(
+export const SwapExecutionPlanFragment = graphql(
   `fragment SwapExecutionPlan on SwapExecutionPlan {
     __typename
     ... on SwapTransactionRequest {
@@ -231,6 +233,10 @@ export const SwapExecutionPlanFragment: FragmentDocumentFor<
     InsufficientBalanceErrorFragment,
   ],
 );
+
+export type SwapExecutionPlan = ExtendWithOpaqueType<
+  FragmentOf<typeof SwapExecutionPlanFragment>
+>;
 
 export const SwapCancelledFragment = graphql(
   `fragment SwapCancelled on SwapCancelled {
@@ -369,11 +375,7 @@ export const SwapStatusFragment = graphql(
 );
 
 export type SwapStatus = ExtendWithOpaqueType<
-  FragmentOf<typeof SwapStatusFragment>,
-  {
-    createdAt: Date;
-    explorerLink: string;
-  }
+  FragmentOf<typeof SwapStatusFragment>
 >;
 
 export const PrepareSwapCancelResultFragment = graphql(
@@ -487,12 +489,7 @@ export type PositionSwapByIntentApprovalsRequired = FragmentOf<
   typeof PositionSwapByIntentApprovalsRequiredFragment
 >;
 
-export type SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired;
-
-export const SupplySwapQuoteResultFragment: FragmentDocumentFor<
-  SupplySwapQuoteResult,
-  'SupplySwapQuoteResult'
-> = graphql(
+export const SupplySwapQuoteResultFragment = graphql(
   `fragment SupplySwapQuoteResult on SupplySwapQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
@@ -501,13 +498,11 @@ export const SupplySwapQuoteResultFragment: FragmentDocumentFor<
   }`,
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
+export type SupplySwapQuoteResult = ExtendWithOpaqueType<
+  FragmentOf<typeof SupplySwapQuoteResultFragment>
+>;
 
-export type BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired;
-
-export const BorrowSwapQuoteResultFragment: FragmentDocumentFor<
-  BorrowSwapQuoteResult,
-  'BorrowSwapQuoteResult'
-> = graphql(
+export const BorrowSwapQuoteResultFragment = graphql(
   `fragment BorrowSwapQuoteResult on BorrowSwapQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
@@ -516,13 +511,11 @@ export const BorrowSwapQuoteResultFragment: FragmentDocumentFor<
   }`,
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
+export type BorrowSwapQuoteResult = ExtendWithOpaqueType<
+  FragmentOf<typeof BorrowSwapQuoteResultFragment>
+>;
 
-export type RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired;
-
-export const RepayWithSupplyQuoteResultFragment: FragmentDocumentFor<
-  RepayWithSupplyQuoteResult,
-  'RepayWithSupplyQuoteResult'
-> = graphql(
+export const RepayWithSupplyQuoteResultFragment = graphql(
   `fragment RepayWithSupplyQuoteResult on RepayWithSupplyQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
@@ -531,13 +524,11 @@ export const RepayWithSupplyQuoteResultFragment: FragmentDocumentFor<
   }`,
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
+export type RepayWithSupplyQuoteResult = ExtendWithOpaqueType<
+  FragmentOf<typeof RepayWithSupplyQuoteResultFragment>
+>;
 
-export type WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired;
-
-export const WithdrawSwapQuoteResultFragment: FragmentDocumentFor<
-  WithdrawSwapQuoteResult,
-  'WithdrawSwapQuoteResult'
-> = graphql(
+export const WithdrawSwapQuoteResultFragment = graphql(
   `fragment WithdrawSwapQuoteResult on WithdrawSwapQuoteResult {
     __typename
     ... on PositionSwapByIntentApprovalsRequired {
@@ -546,23 +537,22 @@ export const WithdrawSwapQuoteResultFragment: FragmentDocumentFor<
   }`,
   [PositionSwapByIntentApprovalsRequiredFragment],
 );
-
-export type PreparePositionSwapResult = ExtendWithOpaqueType<
-  SwapByIntent | InsufficientBalanceError
+export type WithdrawSwapQuoteResult = ExtendWithOpaqueType<
+  FragmentOf<typeof WithdrawSwapQuoteResultFragment>
 >;
 
-export const PreparePositionSwapResultFragment: FragmentDocumentFor<
-  PreparePositionSwapResult,
-  'PreparePositionSwapResult'
-> = graphql(
+export const PreparePositionSwapResultFragment = graphql(
   `fragment PreparePositionSwapResult on PreparePositionSwapResult {
     __typename
-    ... on SwapByIntent {
-      ...SwapByIntent
+    ... on PrepareSwapOrder {
+      ...PrepareSwapOrder
     }
     ... on InsufficientBalanceError {
       ...InsufficientBalanceError
     }
   }`,
-  [SwapByIntentFragment, InsufficientBalanceErrorFragment],
+  [PrepareSwapOrderFragment, InsufficientBalanceErrorFragment],
 );
+export type PreparePositionSwapResult = ExtendWithOpaqueType<
+  FragmentOf<typeof PreparePositionSwapResultFragment>
+>;

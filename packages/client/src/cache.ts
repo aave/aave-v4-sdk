@@ -330,6 +330,7 @@ export const exchange = cacheExchange({
     PositionSwapPositionManagerApproval: () => null,
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
+    PrepareSwapOrder: () => null,
     PreviewUserPosition: () => null,
     RepayWithSupplyQuoteResult: () => null,
     ProtocolHistorySample: () => null,

@@ -53,6 +53,14 @@ export function assertTypename<Typename extends string>(
 }
 
 /**
+ * Non-distributive override. Replaces properties in T with those in U.
+ * Unlike `Omit<T, keyof U> & U`, does not distribute over unions.
+ *
+ * @internal
+ */
+type Override<T, U> = { [K in Exclude<keyof T, keyof U>]: T[K] } & U;
+
+/**
  * Given a union with a `__typename` discriminant,
  * add an extra "opaque" member so switches can't be exhaustive.
  *
@@ -62,9 +70,15 @@ export function assertTypename<Typename extends string>(
  *
  * @internal
  */
-export type ExtendWithOpaqueType<
-  T extends { __typename: string },
-  CommonProperties extends Record<string, unknown> = Record<string, unknown>,
-> =
-  | (T & CommonProperties)
-  | (CommonProperties & { __typename: OpaqueTypename });
+export type ExtendWithOpaqueType<T extends { __typename: string }> =
+  | T
+  | Override<T, { __typename: OpaqueTypename }>;
+
+/**
+ * @internal
+ */
+export function extendWithOpaqueType<T extends { __typename: string }>(
+  node: T,
+): ExtendWithOpaqueType<T> {
+  return node;
+}
