@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest';
-import type { ExtendWithOpaqueType, OpaqueTypename } from './graphql';
+import type { ExtendWithOpaqueType } from './graphql';
 
 describe('Given the graphql type utilities', () => {
   describe('When using ExtendWithOpaqueType<T> where T is a GQL union', () => {

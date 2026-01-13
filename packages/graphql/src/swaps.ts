@@ -55,7 +55,7 @@ export type SwappableTokensRequest = RequestOf<typeof SwappableTokensQuery>;
  * @internal
  */
 export const PrepareTokenSwapQuery = graphql(
-  `query PrepareTokenSwap($request: PrepareTokenSwapRequest!, $currency: Currency!) {
+  `query PrepareTokenSwap($request: PrepareTokenSwapRequest!) {
     value: prepareTokenSwap(request: $request) {
       ...PrepareTokenSwapResult
     }
@@ -227,7 +227,7 @@ export type FromQuoteWithdrawSwapQuoteInput = ReturnType<
  * @internal
  */
 export const PreparePositionSwapQuery = graphql(
-  `query PreparePositionSwap($request: PreparePositionSwapRequest!, $currency: Currency!) {
+  `query PreparePositionSwap($request: PreparePositionSwapRequest!) {
     value: preparePositionSwap(request: $request) {
       ...PreparePositionSwapResult
     }
