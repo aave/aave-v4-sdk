@@ -1,5 +1,21 @@
 # @aave/client
 
+## 4.0.0-next.18
+
+### Patch Changes
+
+- 7ac6dd9: **chore:** updates to recentl schema changes.
+- caf0bf3: **chore:** support recent swap related GQL changes.
+- daf3b0f: **chore:** support latest schema and better error handling.
+- cdab8e1: **fix:** error handling of unknown GQL typenames.
+- Updated dependencies [7ac6dd9]
+- Updated dependencies [caf0bf3]
+- Updated dependencies [daf3b0f]
+- Updated dependencies [cdab8e1]
+  - @aave/graphql@1.0.0-next.16
+  - @aave/types@1.0.0-next.7
+  - @aave/core@1.0.0-next.10
+
 ## 4.0.0-next.17
 
 ### Patch Changes
