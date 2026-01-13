@@ -79,7 +79,7 @@ export const UserSummaryFragment = graphql(
     netApy {
       ...PercentNumber
     }
-    netFeeEarned {
+    netAccruedInterest {
       ...ExchangeAmount
     }
     lowestHealthFactor
