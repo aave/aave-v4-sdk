@@ -39,7 +39,7 @@ describe('Token swapping on Aave V4', () => {
         assertOk(setup);
       });
 
-      it('Then they should be able to swap by signing 1 transaction', async ({
+      it('Then they should be able to swap by just the swap order typed dat', async ({
         annotate,
       }) => {
         const swapResult = await tokenSwapQuote(client, {
@@ -101,7 +101,7 @@ describe('Token swapping on Aave V4', () => {
       assertOk(setup);
     });
 
-    it('Then they should be able to swap by signing 2 transactions', async ({
+    it('Then they should be able to swap by sending the ERC20 approval transaction and by signing the swap order typed data', async ({
       annotate,
     }) => {
       const swapResult = await tokenSwapQuote(client, {
