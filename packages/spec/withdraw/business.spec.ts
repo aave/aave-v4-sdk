@@ -100,10 +100,8 @@ describe('Withdrawing Assets on Aave V4', () => {
         });
         assertOk(previewResult);
         expect(
-          previewResult.value.netCollateral.after.value,
-        ).toBeBigDecimalLessThan(
-          previewResult.value.netCollateral.current.value,
-        );
+          previewResult.value.netBalance.after.value,
+        ).toBeBigDecimalLessThan(previewResult.value.netBalance.current.value);
       });
     });
 
