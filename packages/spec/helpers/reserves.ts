@@ -48,7 +48,9 @@ export function findReservesToSupply(
     const reservesToSupply = listReserves.filter(
       (reserve) =>
         reserve.canSupply &&
-        (params.asCollateral ? reserve.canUseAsCollateral === true : true) &&
+        (params.asCollateral !== undefined
+          ? reserve.canUseAsCollateral === params.asCollateral
+          : true) &&
         (params.native
           ? reserve.asset.underlying.isWrappedNativeToken === true
           : true),

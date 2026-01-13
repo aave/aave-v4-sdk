@@ -21,12 +21,10 @@ const user = await createNewWallet();
 describe('Borrowing Assets on Aave V4', () => {
   describe('Given a user and a reserve with an active supply position used as collateral', () => {
     beforeAll(async () => {
-      const amountToSupply = bigDecimal('100');
-
       const setup = await findReserveAndSupply(client, user, {
         token: ETHEREUM_USDC_ADDRESS,
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        amount: amountToSupply,
+        amount: bigDecimal('100'),
         asCollateral: true,
       });
 

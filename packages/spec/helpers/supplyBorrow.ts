@@ -105,7 +105,7 @@ export function findReserveAndSupply(
           },
         },
         sender: evmAddress(user.account.address),
-        enableCollateral: asCollateral ?? true,
+        enableCollateral: asCollateral ? true : undefined,
       }).map(() => ({
         reserveInfo: reserves[0]!,
         amountSupplied:
