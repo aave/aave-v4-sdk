@@ -73,7 +73,7 @@ export const recreateUserActivities = async (
 
   // Supply/Withdraw activities: minimum 3 supply activities
   const listReservesToSupply = await findReservesToSupply(client, user, {
-    asCollateral: true,
+    canUseAsCollateral: true,
     spoke: params.spoke,
   });
   if (supplyActivities.length < 3 || withdrawActivities.length < 3) {
@@ -293,7 +293,7 @@ export const recreateUserPositions = async (
       user,
       {
         spoke: firstSpoke,
-        asCollateral: true,
+        canUseAsCollateral: true,
       },
     );
     assertOk(listReservesToSupplyCoreSpoke);
@@ -342,7 +342,7 @@ export const recreateUserPositions = async (
       user,
       {
         spoke: secondSpoke,
-        asCollateral: true,
+        canUseAsCollateral: true,
       },
     );
     assertOk(listReservesToSupplyEmodeSpoke);

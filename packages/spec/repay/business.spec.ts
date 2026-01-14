@@ -1,4 +1,4 @@
-import { assertOk, evmAddress, invariant } from '@aave/client';
+import { assertOk, evmAddress, invariant, okAsync } from '@aave/client';
 import {
   permitTypedData,
   preview,
@@ -253,7 +253,13 @@ describe('Repaying Loans on Aave V4', () => {
               },
             }),
           )
-          .andTee((tx) => expect(tx.__typename).toEqual('TransactionRequest'))
+          .andThen((tx) => {
+            invariant(
+              tx.__typename === 'TransactionRequest',
+              `Transaction request expected and got: ${tx.__typename}`,
+            );
+            return okAsync(tx);
+          })
           .andThen(sendWith(user))
           .andThen(client.waitForTransaction)
           .andThen(() =>

@@ -73,7 +73,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
 
         const setup = await findReservesToSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
-          asCollateral: true,
+          canUseAsCollateral: true,
         }).andThen((reservesToSupply) => {
           const amountToSupply = reservesToSupply[0].supplyCap
             .minus(reservesToSupply[0].summary.supplied.amount.value)

@@ -1,4 +1,4 @@
-import { assertOk, bigDecimal, evmAddress } from '@aave/client';
+import { assertOk, evmAddress } from '@aave/client';
 import {
   preview,
   setUserSuppliesAsCollateral,
@@ -8,51 +8,26 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_SPOKE_ETHENA_ID,
-  ETHEREUM_USDC_ADDRESS,
-  fundErc20Address,
 } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { findReservesToSupply } from '../helpers/reserves';
-import { supplyToReserve } from '../helpers/supplyBorrow';
+import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
 describe('Setting Supply as Collateral on Aave V4', () => {
-  describe('Given a user with a supply position disabled as collateral', () => {
+  describe('Given a user with a supply position as collateral', () => {
     beforeAll(async () => {
-      const setup = await fundErc20Address(evmAddress(user.account.address), {
-        address: ETHEREUM_USDC_ADDRESS,
-        amount: bigDecimal('100'),
-        decimals: 6,
-      })
-        .andThen(() =>
-          findReservesToSupply(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
-            spoke: ETHEREUM_SPOKE_ETHENA_ID,
-          }),
-        )
-        .andThen((listReserves) =>
-          supplyToReserve(client, user, {
-            reserve: listReserves[0].id,
-            amount: {
-              erc20: {
-                value: bigDecimal('100'),
-              },
-            },
-            sender: evmAddress(user.account.address),
-            enableCollateral: false,
-          }),
-        );
-
+      const setup = await findReserveAndSupply(client, user, {
+        asCollateral: true,
+      });
       assertOk(setup);
-    }, 60_000);
+    });
 
-    describe('When the user sets the position as collateral', () => {
-      it('Then the position should be enabled as collateral', async () => {
+    describe('When the user disables the position as collateral', () => {
+      it('Then the position should be disabled as collateral', async () => {
         const positions = await userSupplies(client, {
           query: {
             userChains: {
@@ -63,13 +38,13 @@ describe('Setting Supply as Collateral on Aave V4', () => {
         });
         assertOk(positions);
         assertNonEmptyArray(positions.value);
-        expect(positions.value[0].isCollateral).toBe(false);
+        expect(positions.value[0].isCollateral).toBe(true);
 
         const result = await setUserSuppliesAsCollateral(client, {
           changes: [
             {
               reserve: positions.value[0].reserve.id,
-              enableCollateral: true,
+              enableCollateral: false,
             },
           ],
           sender: evmAddress(user.account.address),
@@ -89,7 +64,7 @@ describe('Setting Supply as Collateral on Aave V4', () => {
         assertOk(result);
 
         assertNonEmptyArray(result.value);
-        expect(result.value[0].isCollateral).toBe(true);
+        expect(result.value[0].isCollateral).toBe(false);
       });
     });
 
