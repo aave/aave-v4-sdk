@@ -42,7 +42,7 @@ describe('Supplying Assets on Aave V4', () => {
         }).andThen(() =>
           findReservesToSupply(client, user, {
             token: ETHEREUM_USDC_ADDRESS,
-            asCollateral: true,
+            canUseAsCollateral: true,
           }),
         );
         assertOk(setup);
@@ -97,7 +97,7 @@ describe('Supplying Assets on Aave V4', () => {
       beforeAll(async () => {
         const setup = await findReservesToSupply(client, user, {
           token: ETHEREUM_1INCH_ADDRESS,
-          asCollateral: true,
+          canUseAsCollateral: true,
         }).andThen((reserves) => {
           reserveNotCollateral = reserves[0];
           return fundErc20Address(evmAddress(user.account.address), {
@@ -193,7 +193,7 @@ describe('Supplying Assets on Aave V4', () => {
 
       beforeAll(async () => {
         const result = await findReservesToSupply(client, user, {
-          asCollateral: true,
+          canUseAsCollateral: true,
         });
         assertOk(result);
         assertNonEmptyArray(result.value);
@@ -277,50 +277,11 @@ describe('Supplying Assets on Aave V4', () => {
 
   // TODO: Enable when we have a test fork that allow us to control
   describe.skip('Given a user and a reserve that supports native token deposits', () => {
-    describe('When the user wants to preview the supply action before performing it', () => {
-      it('Then the user can review the supply details before proceeding', async () => {
-        const amountToSupply = bigDecimal('0.01');
-        const nativeReserve = await findReservesToSupply(client, user, {
-          native: true,
-        });
-        assertOk(nativeReserve);
-        assertNonEmptyArray(nativeReserve.value);
-
-        const reservePreview = await preview(
-          client,
-          {
-            action: {
-              supply: {
-                reserve: nativeReserve.value[0].id,
-                amount: {
-                  native: amountToSupply,
-                },
-                sender: evmAddress(user.account.address),
-              },
-            },
-          },
-          { currency: Currency.Eur },
-        );
-
-        assertOk(reservePreview);
-        expect(reservePreview.value).toMatchSnapshot({
-          id: expect.any(String),
-          borrowingPower: expect.any(Object),
-          netBalance: expect.any(Object),
-          netCollateral: expect.any(Object),
-          netApy: expect.any(Object),
-          riskPremium: expect.any(Object),
-          otherConditions: expect.any(Array),
-          projectedEarnings: expect.any(Object),
-        });
-      });
-    });
-
-    describe('When the user supplies native tokens to a reserve without collateral enabled', () => {
+    describe('When the user supplies native tokens to a reserve but they do NOT enable the supply as collateral', () => {
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const nativeReserve = await findReservesToSupply(client, user, {
           native: true,
-          asCollateral: false,
+          canUseAsCollateral: true,
         });
         assertOk(nativeReserve);
         assertNonEmptyArray(nativeReserve.value);
@@ -353,10 +314,11 @@ describe('Supplying Assets on Aave V4', () => {
       });
     });
 
-    describe('When the user supplies native tokens', () => {
+    describe('When the user supplies native tokens enabling as collateral', () => {
       it('Then the supply position is updated and the tokens are enabled as collateral by default', async () => {
         const nativeReserve = await findReservesToSupply(client, user, {
           native: true,
+          canUseAsCollateral: true,
         });
         assertOk(nativeReserve);
         assertNonEmptyArray(nativeReserve.value);
@@ -367,6 +329,7 @@ describe('Supplying Assets on Aave V4', () => {
             native: bigDecimal('0.01'),
           },
           sender: evmAddress(user.account.address),
+          enableCollateral: true,
         }).andThen(() =>
           userSupplies(client, {
             query: {
@@ -385,6 +348,7 @@ describe('Supplying Assets on Aave V4', () => {
             nativeReserve.value[0].asset.underlying.address,
         );
         invariant(supplyPosition, 'No supply position found');
+        expect(supplyPosition.isCollateral).toEqual(true);
       });
     });
   });

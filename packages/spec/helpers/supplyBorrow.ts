@@ -82,7 +82,7 @@ export function findReserveAndSupply(
   return findReservesToSupply(client, user, {
     token: token,
     spoke: spoke,
-    asCollateral: asCollateral,
+    canUseAsCollateral: asCollateral,
   }).andThen((reserves) => {
     return fundErc20Address(evmAddress(user.account.address), {
       address: token ?? reserves[0]!.asset.underlying.address,
@@ -105,7 +105,7 @@ export function findReserveAndSupply(
           },
         },
         sender: evmAddress(user.account.address),
-        enableCollateral: asCollateral ? true : undefined,
+        enableCollateral: asCollateral ? true : null,
       }).map(() => ({
         reserveInfo: reserves[0]!,
         amountSupplied:
