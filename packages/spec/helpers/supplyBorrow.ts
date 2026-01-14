@@ -82,7 +82,7 @@ export function findReserveAndSupply(
   return findReservesToSupply(client, user, {
     token: token,
     spoke: spoke,
-    canUseAsCollateral: asCollateral,
+    canUseAsCollateral: true, // We want to supply to reserves that allow collateral
   }).andThen((reserves) => {
     return fundErc20Address(evmAddress(user.account.address), {
       address: token ?? reserves[0]!.asset.underlying.address,
