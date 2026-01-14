@@ -35,6 +35,13 @@ export function hasExtensionCode(
  */
 export class UnexpectedError extends ResultAwareError {
   name = 'UnexpectedError' as const;
+
+  /**
+   * @internal
+   */
+  static upgradeRequired(message: string): UnexpectedError {
+    return new UnexpectedError(`${message}. Check for SDK updates.`);
+  }
 }
 
 /**

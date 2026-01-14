@@ -1,5 +1,17 @@
 # @aave/core
 
+## 1.0.0-next.10
+
+### Patch Changes
+
+- caf0bf3: **chore:** support recent swap related GQL changes.
+- daf3b0f: **chore:** support latest schema and better error handling.
+- cdab8e1: **fix:** error handling of unknown GQL typenames.
+- Updated dependencies [caf0bf3]
+- Updated dependencies [daf3b0f]
+- Updated dependencies [cdab8e1]
+  - @aave/types@1.0.0-next.7
+
 ## 1.0.0-next.9
 
 ### Patch Changes

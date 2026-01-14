@@ -742,7 +742,7 @@ input LimitSupplySwapQuoteInput {
   newAmount: BigDecimal!
   user: EvmAddress!
   kind: SupplySwapKind
-  setNewAsCollateral: Boolean!
+  enableCollateral: Boolean!
 }
 
 input LimitWithdrawSwapQuoteInput {
@@ -835,7 +835,7 @@ input MarketSupplySwapQuoteInput {
   buyReserve: ReserveId!
   amount: BigDecimal!
   user: EvmAddress!
-  setNewAsCollateral: Boolean!
+  enableCollateral: Boolean!
 }
 
 input MarketWithdrawSwapQuoteInput {
@@ -1026,7 +1026,7 @@ input PreparePositionSwapRequest {
   positionManagerSignature: Signature
 }
 
-union PreparePositionSwapResult = SwapByIntent | InsufficientBalanceError
+union PreparePositionSwapResult = PrepareSwapOrder | InsufficientBalanceError
 
 input PrepareSwapCancelRequest {
   id: SwapId!
@@ -1036,12 +1036,17 @@ type PrepareSwapCancelResult {
   data: SwapTypedData!
 }
 
+type PrepareSwapOrder {
+  newQuoteId: SwapQuoteId!
+  data: SwapTypedData!
+}
+
 input PrepareTokenSwapRequest {
   quoteId: SwapQuoteId!
   permitSig: ERC20PermitSignature
 }
 
-union PrepareTokenSwapResult = SwapByIntent | InsufficientBalanceError
+union PrepareTokenSwapResult = PrepareSwapOrder | InsufficientBalanceError
 
 input PreviewAction @oneOf {
   supply: SupplyRequest
@@ -1251,6 +1256,7 @@ type Reserve {
   canBorrow: Boolean!
   canSupply: Boolean!
   canUseAsCollateral: Boolean!
+  canSwapFrom: Boolean!
   userState: ReserveUserState
   asset: HubAsset!
   spoke: Spoke!
@@ -1602,7 +1608,6 @@ union SwapAmount = PositionAmount | NativeAmount | Erc20Amount
 
 type SwapByIntent {
   quote: SwapQuote!
-  data: SwapTypedData!
 }
 
 input SwapByIntentInput {
@@ -2103,6 +2108,11 @@ type UserPosition {
   netApy: PercentNumber!
   netSupplyApy: PercentNumberWithChange!
   netBorrowApy: PercentNumberWithChange!
+
+  """
+  Net accrued interest earned (all supply interests - all borrow interests)
+  """
+  netAccruedInterest: ExchangeAmount!
   healthFactor: HealthFactorWithChange!
   riskPremium: UserPositionRiskPremium
 
@@ -2204,8 +2214,10 @@ type UserSummary {
   """
   netApy: PercentNumber!
 
-  """Interest earned (net fee earned)"""
-  netFeeEarned: ExchangeAmount!
+  """
+  Net accrued interest earned (all supply interests - all borrow interests)
+  """
+  netAccruedInterest: ExchangeAmount!
 
   """Lowest health factor across all positions"""
   lowestHealthFactor: BigDecimal

@@ -2971,7 +2971,7 @@
         "possibleTypes": [
           {
             "kind": "OBJECT",
-            "name": "SwapByIntent"
+            "name": "PrepareSwapOrder"
           },
           {
             "kind": "OBJECT",
@@ -2999,12 +2999,42 @@
         "interfaces": []
       },
       {
+        "kind": "OBJECT",
+        "name": "PrepareSwapOrder",
+        "fields": [
+          {
+            "name": "newQuoteId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "data",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapTypedData",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "UNION",
         "name": "PrepareTokenSwapResult",
         "possibleTypes": [
           {
             "kind": "OBJECT",
-            "name": "SwapByIntent"
+            "name": "PrepareSwapOrder"
           },
           {
             "kind": "OBJECT",
@@ -4744,6 +4774,17 @@
             "args": []
           },
           {
+            "name": "canSwapFrom",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "userState",
             "type": {
               "kind": "OBJECT",
@@ -5386,18 +5427,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "SwapQuote",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "data",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "SwapTypedData",
                 "ofType": null
               }
             },
@@ -6959,6 +6988,18 @@
             "args": []
           },
           {
+            "name": "netAccruedInterest",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "healthFactor",
             "type": {
               "kind": "NON_NULL",
@@ -7325,7 +7366,7 @@
             "args": []
           },
           {
-            "name": "netFeeEarned",
+            "name": "netAccruedInterest",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
