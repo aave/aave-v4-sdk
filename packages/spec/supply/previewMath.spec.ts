@@ -6,8 +6,9 @@ import {
   type PreviewUserPosition,
   type Reserve,
   type SupplyRequest,
+  type UserPosition,
 } from '@aave/client';
-import { preview } from '@aave/client/actions';
+import { preview, userPosition } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -20,6 +21,7 @@ import { findReservesToSupply } from '../helpers/reserves';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
+  fundAndSupplyToReserve,
 } from '../helpers/supplyBorrow';
 
 const user = await createNewWallet();
@@ -49,6 +51,7 @@ describe('Supply Preview Math', () => {
 
       describe('When the user previews a supply action adding more collateral to the same position', () => {
         let previewInfo: PreviewUserPosition;
+        let operationInfo: UserPosition;
 
         beforeAll(async () => {
           const supplyRequest: SupplyRequest = {
@@ -56,6 +59,7 @@ describe('Supply Preview Math', () => {
             amount: { erc20: { value: bigDecimal('10') } },
             sender: evmAddress(user.account.address),
           };
+
           const previewResult = await preview(client, {
             action: {
               supply: supplyRequest,
@@ -63,17 +67,44 @@ describe('Supply Preview Math', () => {
           });
           assertOk(previewResult);
           previewInfo = previewResult.value;
+
+          const result = await fundAndSupplyToReserve(
+            client,
+            user,
+            supplyReserve.id,
+            bigDecimal('10'),
+          ).andThen(() =>
+            userPosition(client, {
+              userSpoke: {
+                spoke: ETHEREUM_SPOKE_CORE_ID,
+                user: evmAddress(user.account.address),
+              },
+            }),
+          );
+          assertOk(result);
+          operationInfo = result.value!;
         });
 
         it('Then the healthFactor should increase', () => {
           expect(previewInfo.healthFactor.after).toBeBigDecimalGreaterThan(
             previewInfo.healthFactor.current,
           );
+
+          expect(previewInfo.healthFactor.after).toBeBigDecimalCloseTo(
+            operationInfo.healthFactor.current,
+            4,
+          );
         });
         it('Then the riskPremium should remain unchanged', () => {
-          expect(previewInfo.riskPremium.after).toEqual(
-            previewInfo.riskPremium.current,
+          expect(previewInfo.riskPremium.after.value).toEqual(
+            previewInfo.riskPremium.current.value,
           );
+
+          expect(
+            previewInfo.riskPremium.after.value.eq(
+              operationInfo.riskPremium?.current.value ?? 0,
+            ),
+          ).toBe(true);
         });
       });
 
