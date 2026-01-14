@@ -464,11 +464,6 @@ input FromQuoteSupplySwapQuoteInput {
   newSlippage: BigDecimal
 }
 
-input FromQuoteSwapQuoteInput {
-  quoteId: SwapQuoteId!
-  newSlippage: BigDecimal
-}
-
 input FromQuoteWithdrawSwapQuoteInput {
   quoteId: SwapQuoteId!
   newSlippage: BigDecimal
@@ -717,11 +712,13 @@ input LimitDebtSwapQuoteInput {
 }
 
 input LimitOrderTokenSwapQuoteInput {
-  quoteId: SwapQuoteId!
-  newSellAmount: BigDecimal
-  newBuyAmount: BigDecimal
-  newReceiver: EvmAddress
-  newKind: SwapKind
+  chainId: ChainId!
+  sell: SwapTokenInput!
+  buy: SwapTokenInput!
+  user: EvmAddress!
+  receiver: EvmAddress
+  kind: SwapKind! = SELL
+  previousQuoteId: SwapQuoteId
 }
 
 input LimitRepayWithSupplyQuoteInput {
@@ -811,6 +808,11 @@ input MarketDebtSwapQuoteInput {
   buyReserve: ReserveId!
   amount: BigDecimal!
   user: EvmAddress!
+}
+
+input MarketOrderTokenSwapFromQuoteInput {
+  quoteId: SwapQuoteId!
+  newSlippage: BigDecimal
 }
 
 input MarketOrderTokenSwapQuoteInput {
@@ -1630,6 +1632,11 @@ type SwapCancelled {
   explorerLink: String!
 }
 
+input SwapErc20Input {
+  address: EvmAddress!
+  value: BigDecimal!
+}
+
 union SwapExecutionPlan = SwapTransactionRequest | SwapReceipt | InsufficientBalanceError
 
 type SwapExpired {
@@ -1727,6 +1734,11 @@ input SwapStatusRequest {
   id: SwapId!
 }
 
+input SwapTokenInput @oneOf {
+  native: BigDecimal
+  erc20: SwapErc20Input
+}
+
 type SwapTransactionRequest {
   transaction: TransactionRequest!
   orderReceipt: SwapReceipt!
@@ -1815,7 +1827,7 @@ input TokenInput @oneOf {
 input TokenSwapQuoteRequest @oneOf {
   market: MarketOrderTokenSwapQuoteInput
   limit: LimitOrderTokenSwapQuoteInput
-  fromQuote: FromQuoteSwapQuoteInput
+  fromQuote: MarketOrderTokenSwapFromQuoteInput
 }
 
 union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
@@ -2112,7 +2124,7 @@ type UserPosition {
   """
   Net accrued interest earned (all supply interests - all borrow interests)
   """
-  netAccruedInterest: ExchangeAmount!
+  netAccruedInterest(currency: Currency! = USD): ExchangeAmount!
   healthFactor: HealthFactorWithChange!
   riskPremium: UserPositionRiskPremium
 
@@ -2217,7 +2229,7 @@ type UserSummary {
   """
   Net accrued interest earned (all supply interests - all borrow interests)
   """
-  netAccruedInterest: ExchangeAmount!
+  netAccruedInterest(currency: Currency! = USD): ExchangeAmount!
 
   """Lowest health factor across all positions"""
   lowestHealthFactor: BigDecimal
