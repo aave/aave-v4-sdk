@@ -2,6 +2,7 @@ import {
   assertOk,
   bigDecimal,
   evmAddress,
+  type HealthFactorError,
   invariant,
   type PreviewUserPosition,
   type Reserve,
@@ -271,13 +272,12 @@ describe('Borrow Preview Math', () => {
       });
 
       it('Then the healthFactor should be below 1 and flagged as an error', () => {
-        invariant(
-          previewInfo.healthFactor.__typename === 'HealthFactorError',
-          'HealthFactor should be an error',
+        expect(previewInfo.healthFactor.__typename).toEqual(
+          'HealthFactorError',
         );
         expect(previewInfo.healthFactor.after).toBeBigDecimalLessThan(1);
         expect(previewInfo.healthFactor.current).toBeNull();
-        expect(previewInfo.healthFactor.reason).toEqual(
+        expect((previewInfo.healthFactor as HealthFactorError).reason).toEqual(
           'Borrowing this amount would reduce the health factor below 1',
         );
       });
