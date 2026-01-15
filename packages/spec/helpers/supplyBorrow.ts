@@ -2,6 +2,7 @@ import type {
   AaveClient,
   BorrowRequest,
   Reserve,
+  ReserveId,
   SpokeId,
   SupplyRequest,
 } from '@aave/client';
@@ -31,6 +32,43 @@ export function supplyToReserve(
   return supply(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
+}
+
+export function fundAndSupplyToReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  reserveId: ReserveId,
+  amount?: BigDecimal,
+): ResultAsync<TxHash, Error> {
+  return reserve(client, {
+    query: { reserveId: reserveId },
+    user: evmAddress(user.account.address),
+  }).andThen((reserve) => {
+    return fundErc20Address(evmAddress(user.account.address), {
+      address: reserve!.asset.underlying.address,
+      amount:
+        amount ??
+        reserve!.supplyCap
+          .minus(reserve!.summary.supplied.amount.value)
+          .div(100000),
+      decimals: reserve!.asset.underlying.info.decimals,
+    }).andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: reserveId,
+        amount: {
+          erc20: {
+            value:
+              amount ??
+              reserve!.supplyCap
+                .minus(reserve!.summary.supplied.amount.value)
+                .div(100000),
+          },
+        },
+        sender: evmAddress(user.account.address),
+        enableCollateral: true,
+      }),
+    );
+  });
 }
 
 export function borrowFromReserve(
