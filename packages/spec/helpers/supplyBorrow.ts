@@ -120,7 +120,7 @@ export function findReserveAndSupply(
   return findReservesToSupply(client, user, {
     token: token,
     spoke: spoke,
-    canUseAsCollateral: true, // We want to supply to reserves that allow collateral
+    canUseAsCollateral: true, // Only consider reserves that support collateral; actual enabling is controlled by `asCollateral` / `enableCollateral` below
   }).andThen((reserves) => {
     return fundErc20Address(evmAddress(user.account.address), {
       address: token ?? reserves[0]!.asset.underlying.address,

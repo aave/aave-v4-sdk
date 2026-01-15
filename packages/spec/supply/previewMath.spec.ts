@@ -121,7 +121,7 @@ describe('Supply Preview Math', () => {
           invariant(newReserveToSupply.value, 'No new reserve to supply to');
 
           const supplyRequest: SupplyRequest = {
-            reserve: newReserveToSupply.value!.id,
+            reserve: newReserveToSupply.value.id,
             amount: { erc20: { value: bigDecimal('10') } },
             sender: evmAddress(user.account.address),
           };
