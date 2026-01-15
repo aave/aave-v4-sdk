@@ -14,6 +14,7 @@ import {
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDT_ADDRESS,
 } from '@aave/client/testing';
+import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
 import {
@@ -21,12 +22,13 @@ import {
   findReserveAndSupply,
 } from '../helpers/supplyBorrow';
 
-const user = await createNewWallet();
-
 describe('Borrow Preview Math', () => {
   describe('Given a user with 1 supply position enabled as collateral', () => {
     describe('And the collateral is a safe token with collateralRisk = 0', () => {
+      let user: WalletClient<Transport, Chain, Account>;
+
       beforeAll(async () => {
+        user = await createNewWallet();
         const setup = await findReserveAndSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
           token: ETHEREUM_USDT_ADDRESS, // Safe collateral
@@ -125,7 +127,10 @@ describe('Borrow Preview Math', () => {
     });
 
     describe('And the collateral is a risky token with collateralRisk > 0', () => {
+      let user: WalletClient<Transport, Chain, Account>;
+
       beforeAll(async () => {
+        user = await createNewWallet();
         const setup = await findReserveAndSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
           token: ETHEREUM_AAVE_ADDRESS, // Risky collateral
@@ -227,45 +232,54 @@ describe('Borrow Preview Math', () => {
           });
         });
       });
+    });
 
-      describe('When the user previews a borrow action that exceeds the borrowing power', () => {
-        let previewInfo: PreviewUserPosition;
+    describe('When the user previews a borrow action that exceeds the borrowing power', () => {
+      let user: WalletClient<Transport, Chain, Account>;
+      let previewInfo: PreviewUserPosition;
 
-        beforeAll(async () => {
-          const borrowReserve = await findReservesToBorrow(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-          });
-          assertOk(borrowReserve);
-          const amountToBorrow = bigDecimal('10000');
+      beforeAll(async () => {
+        user = await createNewWallet();
+        const setup = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_AAVE_ADDRESS,
+          asCollateral: true,
+        });
+        assertOk(setup);
 
-          const previewResult = await preview(client, {
-            action: {
-              borrow: {
-                reserve: borrowReserve.value[0].id,
-                amount: {
-                  erc20: {
-                    value: amountToBorrow,
-                  },
+        const borrowReserve = await findReservesToBorrow(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+        });
+        assertOk(borrowReserve);
+        const amountToBorrow = bigDecimal('10000');
+
+        const previewResult = await preview(client, {
+          action: {
+            borrow: {
+              reserve: borrowReserve.value[0].id,
+              amount: {
+                erc20: {
+                  value: amountToBorrow,
                 },
-                sender: evmAddress(user.account.address),
               },
+              sender: evmAddress(user.account.address),
             },
-          });
-          assertOk(previewResult);
-          previewInfo = previewResult.value;
+          },
         });
+        assertOk(previewResult);
+        previewInfo = previewResult.value;
+      });
 
-        it('Then the healthFactor should be below 1 and flagged as an error', () => {
-          invariant(
-            previewInfo.healthFactor.__typename === 'HealthFactorError',
-            'HealthFactor should be an error',
-          );
-          expect(previewInfo.healthFactor.after).toBeBigDecimalLessThan(1);
-          expect(previewInfo.healthFactor.current).toBeNull();
-          expect(previewInfo.healthFactor.reason).toEqual(
-            'Borrowing this amount would reduce the health factor below 1',
-          );
-        });
+      it('Then the healthFactor should be below 1 and flagged as an error', () => {
+        invariant(
+          previewInfo.healthFactor.__typename === 'HealthFactorError',
+          'HealthFactor should be an error',
+        );
+        expect(previewInfo.healthFactor.after).toBeBigDecimalLessThan(1);
+        expect(previewInfo.healthFactor.current).toBeNull();
+        expect(previewInfo.healthFactor.reason).toEqual(
+          'Borrowing this amount would reduce the health factor below 1',
+        );
       });
     });
   });
