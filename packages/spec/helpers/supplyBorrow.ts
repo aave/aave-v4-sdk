@@ -175,7 +175,7 @@ export function borrowFromRandomReserve(
     token?: EvmAddress;
     ratioToBorrow?: number;
   },
-): ResultAsync<Reserve, Error> {
+): ResultAsync<{ reserve: Reserve; amountBorrowed: BigDecimal }, Error> {
   return findReservesToBorrow(client, user, {
     spoke: params.spoke,
     token: params.token,
@@ -190,7 +190,12 @@ export function borrowFromRandomReserve(
         },
       },
       sender: evmAddress(user.account.address),
-    }).map(() => reserves[0]);
+    }).map(() => ({
+      reserve: reserves[0],
+      amountBorrowed: reserves[0].userState!.borrowable.amount.value.times(
+        params.ratioToBorrow ?? 0.1,
+      ),
+    }));
   });
 }
 
