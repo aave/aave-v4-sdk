@@ -25,7 +25,6 @@ import type {
   CollateralMetric,
   Currency,
   HubAssetStatusType,
-  HubAssetsRequestOrderBy,
   OperationType,
   OrderDirection,
   PageSize,
@@ -83,7 +82,6 @@ export const graphql = initGraphQLTada<{
     EvmAddress: EvmAddress;
     Float: number;
     HubAssetId: HubAssetId;
-    HubAssetsRequestOrderBy: HubAssetsRequestOrderBy;
     HubAssetStatusType: HubAssetStatusType;
     HubId: HubId;
     ID: ID;
