@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.20
+
+### Patch Changes
+
+- ec7fa5e: **fix:** update schema with `QuoteAccuracy` enum and `SwapQuote` field changes. Renamed `spotBuy`/`spotSell` to `buy`/`sell`, added `accuracy` field.
+- Updated dependencies [ec7fa5e]
+  - @aave/graphql@1.0.0-next.18
+  - @aave/client@4.0.0-next.20
+
 ## 4.0.0-next.19
 
 ### Patch Changes

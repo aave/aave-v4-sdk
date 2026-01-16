@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.18
+
+### Patch Changes
+
+- ec7fa5e: **fix:** update schema with `QuoteAccuracy` enum and `SwapQuote` field changes. Renamed `spotBuy`/`spotSell` to `buy`/`sell`, added `accuracy` field.
+
 ## 1.0.0-next.17
 
 ### Patch Changes
