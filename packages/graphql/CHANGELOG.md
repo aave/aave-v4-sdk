@@ -1,5 +1,15 @@
 # @aave/graphql
 
+## 1.0.0-next.17
+
+### Patch Changes
+
+- ebb671f: **fix:** missing `UserPosition.netAccruedInterest`.
+- dfafb5e: **fix:** pass `$currency` to `netAccruedInterest` fields.
+- 2dd17d2: **fix:** removes duplicate HubAssetsRequestOrderBy export.
+- 7b5995b: **fix:** updates `totalSupplyCap` and `totalBorrowCap` in `AssetSummary` to use `AssetAmountWithChange` type
+- c40b2d4: **fix:** adds missing TS types for updated GQL input types.
+
 ## 1.0.0-next.16
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # @aave/react
 
+## 4.0.0-next.19
+
+### Patch Changes
+
+- ebb671f: **fix:** missing `UserPosition.netAccruedInterest`.
+- dfafb5e: **fix:** pass `$currency` to `netAccruedInterest` fields.
+- 2dd17d2: **fix:** removes duplicate HubAssetsRequestOrderBy export.
+- c40b2d4: **fix:** adds missing TS types for updated GQL input types.
+- Updated dependencies [ebb671f]
+- Updated dependencies [dfafb5e]
+- Updated dependencies [2dd17d2]
+- Updated dependencies [7b5995b]
+- Updated dependencies [c40b2d4]
+  - @aave/graphql@1.0.0-next.17
+  - @aave/client@4.0.0-next.19
+
 ## 4.0.0-next.18
 
 ### Patch Changes
