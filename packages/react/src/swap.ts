@@ -27,7 +27,6 @@ import {
 } from '@aave/core';
 import type {
   InsufficientBalanceError,
-  MarketOrderTokenSwapQuoteInput,
   PaginatedUserSwapsResult,
   PositionSwapApproval,
   PrepareSwapCancelRequest,
@@ -47,6 +46,7 @@ import {
   isERC20PermitSignature,
   type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
+  QuoteAccuracy,
   RepayWithSupplyQuoteQuery,
   type RepayWithSupplyQuoteRequest,
   SupplySwapQuoteQuery,
@@ -109,8 +109,27 @@ function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
   }
 }
 
+function injectSwapQuoteAccuracy(
+  request: TokenSwapQuoteRequest,
+  accuracy: QuoteAccuracy,
+): TokenSwapQuoteRequest {
+  if ('market' in request && request.market) {
+    return {
+      ...request,
+      market: { ...request.market, accuracy },
+    };
+  }
+  if ('limit' in request && request.limit) {
+    return {
+      ...request,
+      limit: { ...request.limit, accuracy },
+    };
+  }
+  return request;
+}
+
 export type UseTokenSwapQuoteArgs = Prettify<
-  MarketOrderTokenSwapQuoteInput & CurrencyQueryOptions
+  TokenSwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
@@ -120,11 +139,14 @@ export type UseTokenSwapQuoteArgs = Prettify<
  *
  * ```tsx
  * const { data } = useTokenSwapQuote({
+ *   market: {
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
  *   suspense: true,
  * });
  * ```
@@ -139,12 +161,14 @@ export function useTokenSwapQuote(
  *
  * ```tsx
  * const { data } = useTokenSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
- *   from: evmAddress('0x742d35cc…'),
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   suspense: true,
  *   pause: true,
  * });
@@ -158,11 +182,14 @@ export function useTokenSwapQuote(
  *
  * ```tsx
  * const { data, error, loading } = useTokenSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  * });
  * ```
  */
@@ -176,12 +203,14 @@ export function useTokenSwapQuote(
  *
  * ```tsx
  * const { data, error, loading, paused } = useTokenSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
- *   from: evmAddress('0x742d35cc…'),
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   pause: true,
  * });
  * ```
@@ -199,18 +228,46 @@ export function useTokenSwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: {
-        market: request,
-      },
+      request: injectSwapQuoteAccuracy(
+        request as TokenSwapQuoteRequest,
+        QuoteAccuracy.Fast,
+      ),
       currency,
     },
     selector: extractTokenSwapQuote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: TokenSwapQuoteQuery,
+    variables: {
+      request: injectSwapQuoteAccuracy(
+        request as TokenSwapQuoteRequest,
+        QuoteAccuracy.Accurate,
+      ),
+      currency,
+    },
+    selector: extractTokenSwapQuote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -227,11 +284,13 @@ export function useTokenSwapQuote({
  * // …
  *
  * const result = await getQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *   },
  * });
  *
  * if (result.isOk()) {
@@ -243,16 +302,14 @@ export function useTokenSwapQuote({
  */
 export function useTokenSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<MarketOrderTokenSwapQuoteInput, SwapQuote, UnexpectedError> {
+): UseAsyncTask<TokenSwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: MarketOrderTokenSwapQuoteInput) =>
-      tokenSwapQuote(
-        client,
-        { market: request },
-        { currency: options.currency },
-      ).map(extractTokenSwapQuote),
+    (request: TokenSwapQuoteRequest) =>
+      tokenSwapQuote(client, request, { currency: options.currency }).map(
+        extractTokenSwapQuote,
+      ),
     [client, options.currency],
   );
 }

@@ -197,9 +197,9 @@ export enum QuoteAccuracy {
   /**
    * Fast price quality - faster response, potentially less accurate price
    */
-  FAST = 'FAST',
+  Fast = 'FAST',
   /**
    * Verified price quality - more accurate price, potentially slower response
    */
-  ACCURATE = 'ACCURATE',
+  Accurate = 'ACCURATE',
 }

@@ -6,6 +6,7 @@ import {
   evmAddress,
   chainId as toChainId,
 } from '@aave/types';
+import { QuoteAccuracy } from './enums';
 import type {
   Chain,
   DecimalNumber,
@@ -31,7 +32,6 @@ import type {
   TransactionRequest,
 } from './fragments';
 import { type SwapId, type SwapQuoteId, tokenInfoId } from './id';
-import { QuoteAccuracy } from './enums';
 import type {
   PermitMessageData,
   PermitTypedDataResponse,
@@ -241,13 +241,19 @@ function makeQuoteId(): SwapQuoteId {
 /**
  * @internal
  */
-export function makeSwapQuote(): SwapQuote {
+export function makeSwapQuote({
+  accuracy = QuoteAccuracy.Accurate,
+  buyAmount = 1000,
+}: {
+  accuracy?: QuoteAccuracy;
+  buyAmount?: number;
+} = {}): SwapQuote {
   return {
     __typename: 'SwapQuote',
-    accuracy: QuoteAccuracy.ACCURATE,
+    accuracy,
     quoteId: makeQuoteId(),
     suggestedSlippage: percentNumber(0.01),
-    buy: makeErc20Amount(1000, 'USDC'),
+    buy: makeErc20Amount(buyAmount, 'USDC'),
     sell: makeErc20Amount(1000, 'WETH'),
     costs: {
       __typename: 'SwapQuoteCosts',
@@ -256,7 +262,7 @@ export function makeSwapQuote(): SwapQuote {
       flashloanFee: makeErc20Amount(1000, 'WETH'),
       providerFee: makeErc20Amount(1000, 'USDC'),
     },
-    finalBuy: makeErc20Amount(1000, 'USDC'),
+    finalBuy: makeErc20Amount(buyAmount, 'USDC'),
     finalSell: makeErc20Amount(1000, 'WETH'),
   };
 }
@@ -360,10 +366,14 @@ export function makeSwapByTransaction(): SwapByTransaction {
 /**
  * @internal
  */
-export function makeSwapByIntent(): SwapByIntent {
+export function makeSwapByIntent({
+  quote = makeSwapQuote(),
+}: {
+  quote?: SwapQuote;
+} = {}): SwapByIntent {
   return {
     __typename: 'SwapByIntent',
-    quote: makeSwapQuote(),
+    quote,
   };
 }
 
