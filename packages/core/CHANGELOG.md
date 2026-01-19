@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.11
+
+### Patch Changes
+
+- 531b1f6: **feat:** dual-request strategy for `useTokenSwapQuote` with Fast and Accurate quotes
+
 ## 1.0.0-next.10
 
 ### Patch Changes

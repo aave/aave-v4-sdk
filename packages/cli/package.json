@@ -1,6 +1,6 @@
 {
   "name": "@aave/cli",
-  "version": "4.1.0-next.13",
+  "version": "4.1.0-next.14",
   "description": "CLI to interact with AaveKit API",
   "keywords": [
     "aave",

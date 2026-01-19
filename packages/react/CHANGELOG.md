@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.21
+
+### Patch Changes
+
+- 531b1f6: **feat:** dual-request strategy for `useTokenSwapQuote` with Fast and Accurate quotes
+- Updated dependencies [531b1f6]
+  - @aave/core@1.0.0-next.11
+  - @aave/client@4.0.0-next.21
+
 ## 4.0.0-next.20
 
 ### Patch Changes
