@@ -70,6 +70,7 @@ const context: Context = {
     backend: 'https://api.aave.com',
     indexingTimeout: 1000,
     pollingInterval: 1000,
+    swapQuoteInterval: 1000,
   },
   headers: {},
   cache: null,
