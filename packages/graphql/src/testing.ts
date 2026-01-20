@@ -16,6 +16,8 @@ import type {
   Erc20Token,
   ExchangeAmount,
   PercentNumber,
+  PermitMessageData,
+  PermitTypedData,
   PositionSwapAdapterContractApproval,
   PositionSwapPositionManagerApproval,
   PrepareSwapOrder,
@@ -30,14 +32,10 @@ import type {
   SwapTypedData,
   TokenInfo,
   TransactionRequest,
-} from './fragments';
-import { type SwapId, type SwapQuoteId, tokenInfoId } from './id';
-import type {
-  PermitMessageData,
-  PermitTypedDataResponse,
   TypeDefinition,
   TypeField,
-} from './permits';
+} from './fragments';
+import { type SwapId, type SwapQuoteId, tokenInfoId } from './id';
 
 function randomBase64String(): string {
   return btoa(crypto.randomUUID());
@@ -391,12 +389,12 @@ export function makePrepareSwapOrder(): PrepareSwapOrder {
 /**
  * @internal
  */
-export function makePermitTypedDataResponse(): PermitTypedDataResponse {
+export function makePermitTypedData(): PermitTypedData {
   // __typenames that you see and are normally not part of the fragment fieldset selection
   // are used here to allow the URQL cache to be able to normalize the data. Hence the need to
   // assert the type (as TypeField, TypeDefinition, etc.)
   return {
-    __typename: 'PermitTypedDataResponse',
+    __typename: 'PermitTypedData',
     types: {
       __typename: 'TypeDefinition',
       EIP712Domain: [
@@ -460,7 +458,7 @@ export function makeErc20Approval({
   return {
     __typename: 'Erc20Approval',
     byTransaction,
-    bySignature: makePermitTypedDataResponse(),
+    bySignature: makePermitTypedData(),
   };
 }
 

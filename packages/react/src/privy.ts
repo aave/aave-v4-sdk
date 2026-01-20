@@ -1,15 +1,15 @@
-import { SigningError, UnexpectedError } from '@aave/client';
+import {
+  SigningError,
+  type SignTypedDataError,
+  type TypedData,
+  UnexpectedError,
+} from '@aave/client';
 import {
   sendTransaction,
   supportedChains,
   waitForTransactionResult,
 } from '@aave/client/viem';
-import type {
-  ERC20PermitSignature,
-  PermitRequest,
-  SwapTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import {
   invariant,
   ResultAsync,
@@ -18,7 +18,7 @@ import {
 } from '@aave/types';
 import {
   type MessageTypes,
-  useSignTypedData,
+  useSignTypedData as usePrivySignTypedData,
   useWallets,
 } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
@@ -28,7 +28,6 @@ import {
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
-import { usePermitTypedDataAction } from './permits';
 
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
@@ -76,100 +75,25 @@ export function useSendTransaction(): UseSendTransactionResult {
   );
 }
 
-export type SignERC20PermitError = SigningError | UnexpectedError;
-
 /**
- * A hook that provides a way to sign ERC20 permits using a Privy wallet.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using a Privy wallet.
  *
  * ```ts
- * const { ready, authenticated, user } = usePrivy(); // privy hook
- * const [signERC20Permit, { loading, error, data }] = useERC20Permit();
- *
- * const run = async () => {
- *   const result = await signERC20Permit({
- *     supply: {
- *       sender: evmAddress(user!.wallet!.address), // User's address
- *       reserve: {
- *         reserveId: reserve.id,
- *         chainId: reserve.chain.chainId,
- *         spoke: reserve.spoke.address,
- *       },
- *       amount: {
- *         value: bigDecimal(42), // 42 USDC
- *       },
- *     },
- *   });
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('ERC20 Permit signature:', result.value);
- * };
+ * const [signTypedData, { loading, error, data }] = useSignTypedData();
  * ```
  */
-export function useERC20Permit(): UseAsyncTask<
-  PermitRequest,
-  ERC20PermitSignature,
-  SignERC20PermitError
-> {
-  const [permitTypedData] = usePermitTypedDataAction();
-  const { signTypedData } = useSignTypedData();
-
-  return useAsyncTask(
-    (request: PermitRequest) => {
-      return permitTypedData(request).andThen((response) =>
-        ResultAsync.fromPromise(
-          signTypedData({
-            types: response.types,
-            primaryType: response.primaryType,
-            domain: response.domain,
-            message: response.message,
-          }),
-          (error) => SigningError.from(error),
-        ).map(({ signature }) => ({
-          deadline: response.message.deadline,
-          value: signatureFrom(signature),
-        })),
-      );
-    },
-    [permitTypedData, signTypedData],
-  );
-}
-
-export type SignSwapTypedDataError = SigningError | UnexpectedError;
-
-/**
- * @internal
- * A hook that provides a way to sign swap typed data using a Privy wallet.
- *
- * ```ts
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData();
- *
- * const run = async () => {
- *   const result = await signSwapTypedData(swapTypedData);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Swap typed data signed:', result.value);
- * };
- * ```
- */
-export function useSignSwapTypedData(): UseAsyncTask<
-  SwapTypedData,
+export function useSignTypedData(): UseAsyncTask<
+  TypedData,
   Signature,
-  SignSwapTypedDataError
+  SignTypedDataError
 > {
-  const { signTypedData } = useSignTypedData();
+  const { signTypedData: privySignTypedData } = usePrivySignTypedData();
 
   return useAsyncTask(
-    (typedData: SwapTypedData) => {
+    (typedData: TypedData) => {
       return ResultAsync.fromPromise(
-        signTypedData({
+        privySignTypedData({
           domain: typedData.domain,
           types: typedData.types as MessageTypes,
           primaryType: typedData.primaryType,
@@ -178,6 +102,6 @@ export function useSignSwapTypedData(): UseAsyncTask<
         (error) => SigningError.from(error),
       ).map(({ signature }) => signatureFrom(signature));
     },
-    [signTypedData],
+    [privySignTypedData],
   );
 }

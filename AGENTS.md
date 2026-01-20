@@ -9,8 +9,41 @@
 
 ## Testing instructions
 
-- Use `pnpm test:react --run` to run `@aave/react` tests.
-- Use `pnpm vitest --run --project <project-name> <path-to-test-file> -t "<test-name>"` to focus on one single test.
+**Run all tests across the monorepo:**
+```bash
+pnpm test --run
+```
+
+**Run tests for a specific package** (pattern: `pnpm test:<package-name> --run`):
+```bash
+pnpm test:types --run      # @aave/types
+pnpm test:core --run       # @aave/core
+pnpm test:client --run     # @aave/client
+pnpm test:react --run      # @aave/react
+pnpm test:cli --run        # @aave/cli
+```
+
+**Run a specific test file:**
+```bash
+pnpm vitest --run --project <project-name> <path-to-test-file>
+```
+
+**Focus on a single test by name:**
+```bash
+pnpm vitest --run --project <project-name> <path-to-test-file> -t "<test-name>"
+```
+
+**Examples:**
+```bash
+# Run all React tests
+pnpm test:react --run
+
+# Run a specific test file in the client package
+pnpm vitest --run --project client packages/client/src/viem.test.ts
+
+# Run a specific test by name
+pnpm vitest --run --project react packages/react/src/swap.test.ts -t "should handle swap quote"
+```
 
 ## SDK Architecture & Terminology
 

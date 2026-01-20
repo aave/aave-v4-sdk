@@ -1,5 +1,6 @@
-import { DomainDataFragment } from './fragments';
-import { type FragmentOf, graphql, type RequestOf } from './graphql';
+import type { FragmentOf } from 'gql.tada';
+import { graphql } from '../graphql';
+import { DomainDataFragment } from './common';
 
 export const TypeFieldFragment = graphql(
   `fragment TypeField on TypeField {
@@ -33,8 +34,8 @@ export const PermitMessageDataFragment = graphql(
 );
 export type PermitMessageData = FragmentOf<typeof PermitMessageDataFragment>;
 
-export const PermitTypedDataResponseFragment = graphql(
-  `fragment PermitTypedDataResponse on PermitTypedDataResponse {
+export const PermitTypedDataFragment = graphql(
+  `fragment PermitTypedData on PermitTypedData {
     __typename
     types {
       ...TypeDefinition
@@ -49,9 +50,7 @@ export const PermitTypedDataResponseFragment = graphql(
   }`,
   [TypeDefinitionFragment, DomainDataFragment, PermitMessageDataFragment],
 );
-export type PermitTypedDataResponse = FragmentOf<
-  typeof PermitTypedDataResponseFragment
->;
+export type PermitTypedData = FragmentOf<typeof PermitTypedDataFragment>;
 
 export type ERC20PermitSignature = ReturnType<
   typeof graphql.scalar<'ERC20PermitSignature'>
@@ -70,24 +69,3 @@ export function isERC20PermitSignature(
     'value' in signature
   );
 }
-
-/**
- * @internal
- */
-export const PermitTypedDataQuery = graphql(
-  `query PermitTypedData($request: PermitRequest!) {
-    value: permitTypedData(request: $request) {
-      ...PermitTypedDataResponse
-    }
-  }`,
-  [PermitTypedDataResponseFragment],
-);
-export type PermitRequest = RequestOf<typeof PermitTypedDataQuery>;
-
-export type RepayPermitRequest = ReturnType<
-  typeof graphql.scalar<'RepayPermitRequest'>
->;
-
-export type SupplyPermitRequest = ReturnType<
-  typeof graphql.scalar<'SupplyPermitRequest'>
->;

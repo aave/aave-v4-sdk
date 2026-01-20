@@ -14,7 +14,7 @@ import {
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
-import { sendTransaction, signSwapTypedDataWith } from '@aave/client/viem';
+import { sendTransaction, signTypedDataWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { beforeAll, describe, it } from 'vitest';
 
@@ -60,16 +60,14 @@ describe('Token swapping on Aave V4', () => {
           return prepareTokenSwap(client, {
             quoteId: swapPlan.quote.quoteId,
           }).andThen((prepareResult) => {
-            return signSwapTypedDataWith(
-              userDidSwap,
-              prepareResult.data,
-            ).andThen((finalSignature) =>
-              swap(client, {
-                intent: {
-                  quoteId: swapPlan.quote.quoteId,
-                  signature: finalSignature,
-                },
-              }),
+            return signTypedDataWith(userDidSwap, prepareResult.data).andThen(
+              (finalSignature) =>
+                swap(client, {
+                  intent: {
+                    quoteId: swapPlan.quote.quoteId,
+                    signature: finalSignature,
+                  },
+                }),
             );
           });
         });
@@ -126,7 +124,7 @@ describe('Token swapping on Aave V4', () => {
           prepareTokenSwap(client, {
             quoteId: swapPlan.quote.quoteId,
           }).andThen((prepareResult) => {
-            return signSwapTypedDataWith(newUser, prepareResult.data).andThen(
+            return signTypedDataWith(newUser, prepareResult.data).andThen(
               (signature) => {
                 return swap(client, {
                   intent: {

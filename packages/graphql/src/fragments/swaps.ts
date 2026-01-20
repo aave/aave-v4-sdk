@@ -1,7 +1,6 @@
 import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import { PermitTypedDataResponseFragment } from '../permits';
 import {
   DomainDataFragment,
   type Erc20Amount,
@@ -15,23 +14,10 @@ import {
 } from './common';
 import { ReserveInfoFragment } from './reserve';
 import {
+  Erc20ApprovalFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './transactions';
-
-export const Erc20ApprovalFragment = graphql(
-  `fragment Erc20Approval on Erc20Approval {
-    __typename
-    byTransaction {
-      ...TransactionRequest
-    }
-    bySignature {
-      ...PermitTypedDataResponse
-    }
-  }`,
-  [TransactionRequestFragment, PermitTypedDataResponseFragment],
-);
-export type Erc20Approval = FragmentOf<typeof Erc20ApprovalFragment>;
 
 export const SwapQuoteCostsFragment = graphql(
   `fragment SwapQuoteCosts on SwapQuoteCosts {
