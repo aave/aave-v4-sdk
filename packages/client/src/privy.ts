@@ -1,11 +1,13 @@
 import {
+  type CancelError,
   SigningError,
   type TransactionError,
   ValidationError,
 } from '@aave/core';
 import type {
+  ERC20PermitSignature,
   ExecutionPlan,
-  PermitTypedDataResponse,
+  PermitTypedData,
   SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
@@ -96,6 +98,14 @@ function executePlan(
       return sendTransactionAndWait(privy, result, walletId);
 
     case 'Erc20ApprovalRequired':
+      return sendTransactionAndWait(
+        privy,
+        result.approval.byTransaction,
+        walletId,
+      ).andThen(() =>
+        sendTransactionAndWait(privy, result.originalTransaction, walletId),
+      );
+
     case 'PreContractActionRequired':
       return sendTransactionAndWait(
         privy,
@@ -135,78 +145,115 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
     : executePlan.bind(null, privy, walletId);
 }
 
-function signERC20Permit(
+export type PermitWithError = CancelError | SigningError;
+
+/**
+ * Handles ERC20 permit signing for actions that require token approval.
+ *
+ * Calls the action to get an initial execution plan. If the plan requires ERC20 approval
+ * and the token supports permit signatures, signs the permit and re-calls the action
+ * with the signature to get a new plan that can be sent directly.
+ *
+ * ```ts
+ * const result = await permitWith(privy, walletId, (permitSig) =>
+ *   supply(client, {
+ *     reserve: reserve.id,
+ *     amount: { erc20: { value: amount, permitSig } },
+ *     sender: evmAddress(walletAddress),
+ *   })
+ * )
+ *   .andThen(sendWith(privy, walletId))
+ *   .andThen(client.waitForTransaction);
+ * ```
+ *
+ * @param privy - The Privy client for signing permits.
+ * @param walletId - The ID of the Privy wallet to use.
+ * @param action - A function that returns an execution plan, accepting an optional permit signature.
+ * @returns A ResultAsync containing the resolved ExecutionPlan ready to be sent with `sendWith`.
+ */
+export function permitWith<E>(
   privy: PrivyClient,
   walletId: string,
-  result: PermitTypedDataResponse,
-): ReturnType<ERC20PermitHandler> {
+  action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
+): ResultAsync<ExecutionPlan, E | PermitWithError> {
+  return action().andThen((result) => {
+    if (
+      result.__typename === 'Erc20ApprovalRequired' &&
+      result.approval.bySignature
+    ) {
+      return signERC20Permit(
+        privy,
+        walletId,
+        result.approval.bySignature,
+      ).andThen((permitSig) => action(permitSig));
+    }
+    return okAsync(result);
+  });
+}
+
+type TypedDataLike = {
+  domain: Record<string, unknown>;
+  types: Record<string, unknown>;
+  message: Record<string, unknown>;
+  primaryType: string;
+};
+
+function signTypedData(
+  privy: PrivyClient,
+  walletId: string,
+  data: TypedDataLike,
+): ResultAsync<string, SigningError> {
   return ResultAsync.fromPromise(
     privy.walletApi.ethereum.signTypedData({
       walletId,
       typedData: {
-        domain: result.domain,
-        types: result.types,
-        message: result.message,
-        primaryType: result.primaryType,
+        domain: data.domain,
+        types: data.types,
+        message: data.message,
+        primaryType: data.primaryType,
       },
     }),
     (err) => SigningError.from(err),
-  ).map((response) => ({
-    deadline: result.message.deadline,
-    value: signatureFrom(response.signature),
+  ).map((response) => response.signature);
+}
+
+function signERC20Permit(
+  privy: PrivyClient,
+  walletId: string,
+  data: PermitTypedData,
+): ReturnType<ERC20PermitHandler> {
+  return signTypedData(privy, walletId, data).map((signature) => ({
+    deadline: data.message.deadline,
+    value: signatureFrom(signature),
   }));
 }
 
 /**
- * Creates an ERC20 permit handler that signs ERC20 permits using the specified Privy wallet.
+ * Signs ERC20 permit typed data using the specified Privy wallet.
  */
 export function signERC20PermitWith(
   privy: PrivyClient,
   walletId: string,
-): ERC20PermitHandler {
-  return signERC20Permit.bind(null, privy, walletId);
+  data: PermitTypedData,
+): ReturnType<ERC20PermitHandler> {
+  return signERC20Permit(privy, walletId, data);
 }
 
 function signSwapTypedData(
   privy: PrivyClient,
   walletId: string,
-  result: SwapTypedData,
+  data: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
-  return ResultAsync.fromPromise(
-    privy.walletApi.ethereum.signTypedData({
-      walletId,
-      typedData: {
-        domain: result.domain,
-        types: result.types,
-        message: result.message,
-        primaryType: result.primaryType,
-      },
-    }),
-    (err) => SigningError.from(err),
-  ).map(({ signature }) => signatureFrom(signature));
+  return signTypedData(privy, walletId, data).map(signatureFrom);
 }
 
-/**
- * Creates a swap signature handler that signs swap typed data using the specified Privy wallet.
- */
-export function signSwapTypedDataWith(
-  privy: PrivyClient,
-  walletId: string,
-): SwapSignatureHandler;
 /**
  * Signs swap typed data using the specified Privy wallet.
  */
 export function signSwapTypedDataWith(
   privy: PrivyClient,
   walletId: string,
-  result: SwapTypedData,
-): ReturnType<SwapSignatureHandler>;
-export function signSwapTypedDataWith(
-  privy: PrivyClient,
-  walletId: string,
-  result?: SwapTypedData,
-): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
-  return result
-    ? signSwapTypedData(privy, walletId, result)
-    : signSwapTypedData.bind(null, privy, walletId);
+  data: SwapTypedData,
+): ReturnType<SwapSignatureHandler> {
+  return signSwapTypedData(privy, walletId, data);
 }

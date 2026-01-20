@@ -7,8 +7,9 @@ import {
 } from '@aave/core';
 import type {
   Chain,
+  ERC20PermitSignature,
   ExecutionPlan,
-  PermitTypedDataResponse,
+  PermitTypedData,
   SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
@@ -20,6 +21,7 @@ import {
   isObject,
   okAsync,
   ResultAsync,
+  type Signature,
   signatureFrom,
   type TxHash,
   txHash,
@@ -32,8 +34,7 @@ import {
   SwitchChainError,
   TransactionExecutionError,
   type Transport,
-  type TypedData,
-  type TypedDataDomain,
+  type TypedDataDefinition,
   UserRejectedRequestError,
   type Chain as ViemChain,
   type WalletClient,
@@ -41,7 +42,6 @@ import {
 import {
   estimateGas as estimateGasWithViem,
   sendTransaction as sendTransactionWithViem,
-  signTypedData,
   waitForTransactionReceipt,
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
@@ -67,6 +67,32 @@ function isProviderRpcError(
     'originalError' in err
     ? isRpcError(err.originalError) && 'code' in err.originalError
     : true;
+}
+
+function signTypedData(
+  walletClient: WalletClient,
+  data: TypedDataDefinition<Record<string, unknown>>,
+): ResultAsync<Signature, CancelError | SigningError> {
+  invariant(
+    walletClient.account,
+    'Wallet account is required to sign typed data',
+  );
+
+  return ResultAsync.fromPromise(
+    walletClient.signTypedData({
+      account: walletClient.account,
+      domain: data.domain,
+      types: data.types,
+      primaryType: data.primaryType,
+      message: data.message,
+    }),
+    (err) => {
+      if (err instanceof UserRejectedRequestError) {
+        return CancelError.from(err);
+      }
+      return SigningError.from(err);
+    },
+  ).map(signatureFrom);
 }
 
 const devnetChain: ViemChain = defineChain({
@@ -329,6 +355,13 @@ function executePlan(
       return sendTransactionAndWait(walletClient, result);
 
     case 'Erc20ApprovalRequired':
+      return sendTransactionAndWait(
+        walletClient,
+        result.approval.byTransaction,
+      ).andThen(() =>
+        sendTransactionAndWait(walletClient, result.originalTransaction),
+      );
+
     case 'PreContractActionRequired':
       return sendTransactionAndWait(walletClient, result.transaction).andThen(
         () => sendTransactionAndWait(walletClient, result.originalTransaction),
@@ -359,85 +392,81 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
     : executePlan.bind(null, walletClient);
 }
 
+export type PermitWithError = CancelError | SigningError;
+
+/**
+ * Handles ERC20 permit signing for actions that require token approval.
+ *
+ * Calls the action to get an initial execution plan. If the plan requires ERC20 approval
+ * and the token supports permit signatures, signs the permit and re-calls the action
+ * with the signature to get a new plan that can be sent directly.
+ *
+ * ```ts
+ * const result = await permitWith(walletClient, (permitSig) =>
+ *   supply(client, {
+ *     reserve: reserve.id,
+ *     amount: { erc20: { value: amount, permitSig } },
+ *     sender: evmAddress(walletClient.account.address),
+ *   })
+ * )
+ *   .andThen(sendWith(walletClient))
+ *   .andThen(client.waitForTransaction);
+ * ```
+ *
+ * @param walletClient - The wallet client to use for signing permits.
+ * @param action - A function that returns an execution plan, accepting an optional permit signature.
+ * @returns A ResultAsync containing the resolved ExecutionPlan ready to be sent with `sendWith`.
+ */
+export function permitWith<E>(
+  walletClient: WalletClient,
+  action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
+): ResultAsync<ExecutionPlan, E | PermitWithError> {
+  return action().andThen((result) => {
+    if (
+      result.__typename === 'Erc20ApprovalRequired' &&
+      result.approval.bySignature
+    ) {
+      return signERC20Permit(walletClient, result.approval.bySignature).andThen(
+        (permitSig) => action(permitSig),
+      );
+    }
+    return okAsync(result);
+  });
+}
+
 function signERC20Permit(
   walletClient: WalletClient,
-  data: PermitTypedDataResponse,
+  data: PermitTypedData,
 ): ReturnType<ERC20PermitHandler> {
-  invariant(walletClient.account, 'Wallet account is required');
-
-  return ResultAsync.fromPromise(
-    signTypedData(walletClient, {
-      account: walletClient.account,
-      domain: data.domain as TypedDataDomain,
-      types: data.types as TypedData,
-      primaryType: data.primaryType as keyof typeof data.types,
-      message: data.message,
-    }),
-    (err) => SigningError.from(err),
-  ).map((hex) => ({
+  return signTypedData(walletClient, data).map((signature) => ({
     deadline: data.message.deadline,
-    value: signatureFrom(hex),
+    value: signature,
   }));
 }
 
 /**
- * Creates an ERC20 permit handler that signs ERC20 permits using the provided wallet client.
+ * Signs ERC20 permit typed data using the provided wallet client.
  */
 export function signERC20PermitWith(
   walletClient: WalletClient,
-): ERC20PermitHandler;
-/**
- * Signs ERC20 permits using the provided wallet client.
- */
-export function signERC20PermitWith(
-  walletClient: WalletClient,
-  data: PermitTypedDataResponse,
-): ReturnType<ERC20PermitHandler>;
-export function signERC20PermitWith(
-  walletClient: WalletClient,
-  data?: PermitTypedDataResponse,
-): ERC20PermitHandler | ReturnType<ERC20PermitHandler> {
-  return typeof data === 'undefined'
-    ? signERC20Permit.bind(null, walletClient)
-    : signERC20Permit(walletClient, data);
+  data: PermitTypedData,
+): ReturnType<ERC20PermitHandler> {
+  return signERC20Permit(walletClient, data);
 }
 
 function signSwapTypedData(
   walletClient: WalletClient,
-  result: SwapTypedData,
+  data: SwapTypedData,
 ): ReturnType<SwapSignatureHandler> {
-  invariant(walletClient.account, 'Wallet account is required');
-
-  return ResultAsync.fromPromise(
-    signTypedData(walletClient, {
-      account: walletClient.account,
-      domain: result.domain as TypedDataDomain,
-      types: result.types as TypedData,
-      primaryType: result.primaryType,
-      message: result.message,
-    }),
-    (err) => SigningError.from(err),
-  ).map(signatureFrom);
+  return signTypedData(walletClient, data);
 }
 
-/**
- * Creates a swap signature handler that signs swap typed data using the provided wallet client.
- */
-export function signSwapTypedDataWith(
-  walletClient: WalletClient,
-): SwapSignatureHandler;
 /**
  * Signs swap typed data using the provided wallet client.
  */
 export function signSwapTypedDataWith(
   walletClient: WalletClient,
-  result: SwapTypedData,
-): ReturnType<SwapSignatureHandler>;
-export function signSwapTypedDataWith(
-  walletClient: WalletClient,
-  result?: SwapTypedData,
-): SwapSignatureHandler | ReturnType<SwapSignatureHandler> {
-  return result
-    ? signSwapTypedData(walletClient, result)
-    : signSwapTypedData.bind(null, walletClient);
+  data: SwapTypedData,
+): ReturnType<SwapSignatureHandler> {
+  return signSwapTypedData(walletClient, data);
 }

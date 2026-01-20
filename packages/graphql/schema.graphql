@@ -324,12 +324,15 @@ type Erc20Approval {
   """
   Typed data response for the permit signature (if available for the given token)
   """
-  bySignature: PermitTypedDataResponse
+  bySignature: PermitTypedData
 }
 
 type Erc20ApprovalRequired {
   """The transaction requires an approval first"""
-  transaction: TransactionRequest!
+  transaction: TransactionRequest! @deprecated(reason: "Use approval instead - this is going to die soon")
+
+  """The erc20 approval"""
+  approval: Erc20Approval!
 
   """The reason for the approval"""
   reason: String!
@@ -998,12 +1001,7 @@ type PermitMessageData {
   deadline: Int!
 }
 
-input PermitRequest @oneOf {
-  supply: SupplyPermitRequest
-  repay: RepayPermitRequest
-}
-
-type PermitTypedDataResponse {
+type PermitTypedData {
   types: TypeDefinition!
   primaryType: String!
   domain: DomainData!
@@ -1120,9 +1118,6 @@ type Query {
   health: Boolean!
   chain(request: ChainRequest!): Chain
   chains(request: ChainsRequest!): [Chain!]!
-
-  """Generate EIP-712 typed data for EIP-2612 permit signature"""
-  permitTypedData(request: PermitRequest!): PermitTypedDataResponse!
 
   """Get the exchange rate of tokens > currency or currency > currency"""
   exchangeRate(request: ExchangeRateRequest!): ExchangeAmount!
@@ -1242,17 +1237,6 @@ input RepayErc20AmountInputWithPermit {
   The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
   """
   permitSig: ERC20PermitSignature
-}
-
-input RepayPermitRequest {
-  """The reserve id"""
-  reserve: ReserveId!
-
-  """The amount repaying"""
-  amount: AmountInput!
-
-  """The user sending the transaction (normally the user's wallet address)"""
-  sender: EvmAddress!
 }
 
 input RepayRequest {
@@ -1596,20 +1580,6 @@ type SupplyActivity {
 input SupplyApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
-}
-
-input SupplyPermitRequest {
-  """The reserve id"""
-  reserve: ReserveId!
-
-  """The amount supplying"""
-  amount: ReserveErc20AmountInput!
-
-  """If you wish to enable collateral with it meaning you can borrow"""
-  enableCollateral: Boolean! = true
-
-  """The user sending the transaction (normally the user's wallet address)"""
-  sender: EvmAddress!
 }
 
 input SupplyRequest {

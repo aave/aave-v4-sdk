@@ -4,7 +4,6 @@ import {
   environment,
   fundNativeAddress,
 } from '@aave/client/testing';
-import { signERC20PermitWith, signSwapTypedDataWith } from '@aave/client/viem';
 import {
   BorrowSwapQuoteQuery,
   type BorrowSwapQuoteRequest,
@@ -66,7 +65,11 @@ import {
   useWithdrawSwap,
 } from './swap';
 import { renderHookWithinContext } from './test-utils';
-import { useSendTransaction } from './viem';
+import {
+  useSendTransaction,
+  useSignERC20Permit,
+  useSignSwapTypedData,
+} from './viem';
 
 const walletClient = await createNewWallet();
 await fundNativeAddress(evmAddress(walletClient.account.address));
@@ -176,17 +179,19 @@ describe('Given the swap hooks', () => {
           result: {
             current: [swap],
           },
-        } = renderHookWithinContext(() =>
-          useTokenSwap((plan, { cancel }) => {
+        } = renderHookWithinContext(() => {
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
+          return useTokenSwap((plan, { cancel }) => {
             switch (plan.__typename) {
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
 
               default:
                 return cancel(`Unexpected in this test: ${plan.__typename}`);
             }
-          }),
-        );
+          });
+        });
 
         const result = await swap({} as TokenSwapQuoteRequest);
 
@@ -230,13 +235,15 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
           return useTokenSwap((plan, { cancel }) => {
             switch (plan.__typename) {
               case 'Erc20Approval':
                 return sendTransaction(plan.byTransaction);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
 
               default:
                 return cancel(`Unexpected in this test: ${plan.__typename}`);
@@ -254,20 +261,23 @@ describe('Given the swap hooks', () => {
           result: {
             current: [swap],
           },
-        } = renderHookWithinContext(() =>
-          useTokenSwap((plan, { cancel }) => {
+        } = renderHookWithinContext(() => {
+          const [signERC20Permit] = useSignERC20Permit(walletClient);
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
+          return useTokenSwap((plan, { cancel }) => {
             switch (plan.__typename) {
               case 'Erc20Approval':
-                return signERC20PermitWith(walletClient, plan.bySignature!);
+                return signERC20Permit(plan.bySignature!);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
 
               default:
                 return cancel(`Unexpected in this test: ${plan.__typename}`);
             }
-          }),
-        );
+          });
+        });
 
         const result = await swap({} as TokenSwapQuoteRequest);
 
@@ -310,17 +320,19 @@ describe('Given the swap hooks', () => {
           result: {
             current: [cancelSwap],
           },
-        } = renderHookWithinContext(() =>
-          useCancelSwap((plan, { cancel }) => {
+        } = renderHookWithinContext(() => {
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
+          return useCancelSwap((plan, { cancel }) => {
             switch (plan.__typename) {
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
 
               default:
                 return cancel(`Unexpected in this test: ${plan.__typename}`);
             }
-          }),
-        );
+          });
+        });
 
         const result = await cancelSwap({} as PrepareSwapCancelRequest);
 
@@ -372,10 +384,12 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
           return useCancelSwap((plan) => {
             switch (plan.__typename) {
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
 
               case 'TransactionRequest':
                 return sendTransaction(plan);
@@ -439,18 +453,20 @@ describe('Given the swap hooks', () => {
           result: {
             current: [swap],
           },
-        } = renderHookWithinContext(() =>
-          useSupplySwap((plan) => {
+        } = renderHookWithinContext(() => {
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
+          return useSupplySwap((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
-          }),
-        );
+          });
+        });
 
         const result = await swap({} as SupplySwapQuoteRequest);
 
@@ -464,16 +480,18 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
           return useSupplySwap((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
                 return sendTransaction(plan.byTransaction);
 
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
           });
         });
@@ -513,18 +531,20 @@ describe('Given the swap hooks', () => {
           result: {
             current: [swap],
           },
-        } = renderHookWithinContext(() =>
-          useBorrowSwap((plan) => {
+        } = renderHookWithinContext(() => {
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
+          return useBorrowSwap((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
-          }),
-        );
+          });
+        });
 
         const result = await swap({} as BorrowSwapQuoteRequest);
 
@@ -538,16 +558,18 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
           return useBorrowSwap((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
                 return sendTransaction(plan.byTransaction);
 
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
           });
         });
@@ -587,18 +609,20 @@ describe('Given the swap hooks', () => {
           result: {
             current: [swap],
           },
-        } = renderHookWithinContext(() =>
-          useRepayWithSupply((plan) => {
+        } = renderHookWithinContext(() => {
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
+          return useRepayWithSupply((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
-          }),
-        );
+          });
+        });
 
         const result = await swap({} as RepayWithSupplyQuoteRequest);
 
@@ -612,16 +636,18 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
           return useRepayWithSupply((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
                 return sendTransaction(plan.byTransaction);
 
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
           });
         });
@@ -661,18 +687,20 @@ describe('Given the swap hooks', () => {
           result: {
             current: [swap],
           },
-        } = renderHookWithinContext(() =>
-          useWithdrawSwap((plan) => {
+        } = renderHookWithinContext(() => {
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
+          return useWithdrawSwap((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
-          }),
-        );
+          });
+        });
 
         const result = await swap({} as WithdrawSwapQuoteRequest);
 
@@ -686,16 +714,18 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
+          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+
           return useWithdrawSwap((plan) => {
             switch (plan.__typename) {
               case 'PositionSwapPositionManagerApproval':
                 return sendTransaction(plan.byTransaction);
 
               case 'PositionSwapAdapterContractApproval':
-                return signSwapTypedDataWith(walletClient, plan.bySignature);
+                return signSwapTypedData(plan.bySignature);
 
               case 'SwapTypedData':
-                return signSwapTypedDataWith(walletClient, plan);
+                return signSwapTypedData(plan);
             }
           });
         });

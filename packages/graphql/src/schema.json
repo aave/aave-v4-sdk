@@ -994,7 +994,7 @@
             "name": "bySignature",
             "type": {
               "kind": "OBJECT",
-              "name": "PermitTypedDataResponse",
+              "name": "PermitTypedData",
               "ofType": null
             },
             "args": []
@@ -1013,6 +1013,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "approval",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Approval",
                 "ofType": null
               }
             },
@@ -2742,7 +2754,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PermitTypedDataResponse",
+        "name": "PermitTypedData",
         "fields": [
           {
             "name": "types",
@@ -3275,29 +3287,6 @@
                     "ofType": null
                   }
                 }
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "permitTypedData",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PermitTypedDataResponse",
-                "ofType": null
               }
             },
             "args": [

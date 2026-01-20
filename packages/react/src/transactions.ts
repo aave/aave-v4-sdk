@@ -1,12 +1,12 @@
-import type {
-  AaveClient,
-  ActivitiesRequest,
-  CurrencyQueryOptions,
-  PaginatedActivitiesResult,
-  TimeWindowQueryOptions,
+import {
+  type AaveClient,
+  type ActivitiesRequest,
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type PaginatedActivitiesResult,
+  type TimeWindowQueryOptions,
   UnexpectedError,
 } from '@aave/client';
-import { DEFAULT_QUERY_OPTIONS } from '@aave/client';
 import {
   activities,
   borrow,
@@ -26,13 +26,17 @@ import {
   type BorrowRequest,
   decodeHubId,
   decodeReserveId,
+  type ERC20PermitSignature,
+  type Erc20ApprovalRequired,
   HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
   isChainIdsVariant,
+  isERC20PermitSignature,
   isHubInputVariant,
   isSpokeInputVariant,
   type LiquidatePositionRequest,
+  type PreContractActionRequired,
   PreviewQuery,
   type PreviewRequest,
   type PreviewUserPosition,
@@ -44,6 +48,7 @@ import {
   SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
+  type TransactionRequest,
   type UpdateUserPositionConditionsRequest,
   UserBalancesQuery,
   UserPositionQuery,
@@ -53,7 +58,9 @@ import {
 } from '@aave/graphql';
 import {
   errAsync,
+  expectTypename,
   type NullishDeep,
+  okAsync,
   type Prettify,
   type TxHash,
 } from '@aave/types';
@@ -63,6 +70,7 @@ import {
   type Pausable,
   type PausableReadResult,
   type PausableSuspenseResult,
+  PendingTransaction,
   type PendingTransactionError,
   type ReadResult,
   type SendTransactionError,
@@ -150,7 +158,10 @@ function refreshQueriesForReserveChange(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
+ *
  *     case 'Erc20ApprovalRequired':
+ *       return sendTransaction(plan.approval.byTransaction);
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -195,7 +206,10 @@ function refreshQueriesForReserveChange(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useSupply(
-  handler: TransactionHandler,
+  handler: TransactionHandler<
+    TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
+    ERC20PermitSignature | PendingTransaction
+  >,
 ): UseAsyncTask<
   SupplyRequest,
   TxHash,
@@ -212,14 +226,36 @@ export function useSupply(
           switch (plan.__typename) {
             case 'TransactionRequest':
               return handler(plan, { cancel })
+                .map(PendingTransaction.ensure)
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
             case 'Erc20ApprovalRequired':
+              return handler(plan, { cancel })
+                .andThen((result) => {
+                  if (isERC20PermitSignature(result)) {
+                    return supply(
+                      client,
+                      injectSupplyPermitSignature(request, result),
+                    )
+                      .map(expectTypename('TransactionRequest'))
+                      .andThen((transaction) =>
+                        handler(transaction, { cancel }),
+                      )
+                      .map(PendingTransaction.ensure);
+                  }
+                  return okAsync(result);
+                })
+
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
+
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
+                .map(PendingTransaction.ensure)
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(() => handler(plan.originalTransaction, { cancel }))
+                .map(PendingTransaction.ensure)
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
@@ -232,6 +268,24 @@ export function useSupply(
   );
 }
 
+function injectSupplyPermitSignature(
+  request: SupplyRequest,
+  permitSig: ERC20PermitSignature,
+): SupplyRequest {
+  if ('erc20' in request.amount) {
+    return {
+      ...request,
+      amount: {
+        erc20: {
+          ...request.amount.erc20,
+          permitSig,
+        },
+      },
+    };
+  }
+  return request;
+}
+
 /**
  * A hook that provides a way to borrow assets from an Aave reserve.
  *
@@ -241,7 +295,7 @@ export function useSupply(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'Erc20ApprovalRequired':
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -286,7 +340,10 @@ export function useSupply(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useBorrow(
-  handler: TransactionHandler,
+  handler: TransactionHandler<
+    TransactionRequest | PreContractActionRequired,
+    PendingTransaction
+  >,
 ): UseAsyncTask<
   BorrowRequest,
   TxHash,
@@ -306,16 +363,19 @@ export function useBorrow(
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
-            case 'Erc20ApprovalRequired':
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(() => handler(plan.originalTransaction, { cancel }))
+                .map(PendingTransaction.ensure)
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
+
+            case 'Erc20ApprovalRequired':
+              return UnexpectedError.from(plan).asResultAsync();
           }
         })
         .andTee(refreshQueriesForReserveChange(client, request)),
@@ -332,7 +392,10 @@ export function useBorrow(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
+ *
  *     case 'Erc20ApprovalRequired':
+ *       return sendTransaction(plan.approval.byTransaction);
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -377,7 +440,10 @@ export function useBorrow(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useRepay(
-  handler: TransactionHandler,
+  handler: TransactionHandler<
+    TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
+    ERC20PermitSignature | PendingTransaction
+  >,
 ): UseAsyncTask<
   RepayRequest,
   TxHash,
@@ -394,14 +460,36 @@ export function useRepay(
           switch (plan.__typename) {
             case 'TransactionRequest':
               return handler(plan, { cancel })
+                .map(PendingTransaction.ensure)
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
             case 'Erc20ApprovalRequired':
+              return handler(plan, { cancel })
+                .andThen((result) => {
+                  if (isERC20PermitSignature(result)) {
+                    return repay(
+                      client,
+                      injectRepayPermitSignature(request, result),
+                    )
+                      .map(expectTypename('TransactionRequest'))
+                      .andThen((transaction) =>
+                        handler(transaction, { cancel }),
+                      )
+                      .map(PendingTransaction.ensure);
+                  }
+                  return okAsync(result);
+                })
+
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(client.waitForTransaction);
+
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
+                .map(PendingTransaction.ensure)
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(() => handler(plan.originalTransaction, { cancel }))
+                .map(PendingTransaction.ensure)
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
@@ -414,6 +502,24 @@ export function useRepay(
   );
 }
 
+function injectRepayPermitSignature(
+  request: RepayRequest,
+  permitSig: ERC20PermitSignature,
+): RepayRequest {
+  if ('erc20' in request.amount) {
+    return {
+      ...request,
+      amount: {
+        erc20: {
+          ...request.amount.erc20,
+          permitSig,
+        },
+      },
+    };
+  }
+  return request;
+}
+
 /**
  * A hook that provides a way to withdraw supplied assets from an Aave reserve.
  *
@@ -423,7 +529,7 @@ export function useRepay(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'Erc20ApprovalRequired':
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -468,7 +574,10 @@ export function useRepay(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useWithdraw(
-  handler: TransactionHandler,
+  handler: TransactionHandler<
+    TransactionRequest | PreContractActionRequired,
+    PendingTransaction
+  >,
 ): UseAsyncTask<
   WithdrawRequest,
   TxHash,
@@ -488,7 +597,6 @@ export function useWithdraw(
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
-            case 'Erc20ApprovalRequired':
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
                 .andThen((pendingTransaction) => pendingTransaction.wait())
@@ -498,6 +606,9 @@ export function useWithdraw(
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
+
+            case 'Erc20ApprovalRequired':
+              return UnexpectedError.from(plan).asResultAsync();
           }
         })
         .andTee(refreshQueriesForReserveChange(client, request)),
@@ -548,7 +659,7 @@ export function useWithdraw(
  */
 
 export function useRenounceSpokeUserPositionManager(
-  handler: TransactionHandler,
+  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   RenounceSpokeUserPositionManagerRequest,
   TxHash,
@@ -620,7 +731,7 @@ export function useRenounceSpokeUserPositionManager(
  */
 
 export function useUpdateUserPositionConditions(
-  handler: TransactionHandler,
+  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   UpdateUserPositionConditionsRequest,
   TxHash,
@@ -700,7 +811,7 @@ export function useUpdateUserPositionConditions(
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetUserSuppliesAsCollateral(
-  handler: TransactionHandler,
+  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetUserSuppliesAsCollateralRequest,
   TxHash,
@@ -809,7 +920,10 @@ export function useSetUserSuppliesAsCollateral(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
+ *
  *     case 'Erc20ApprovalRequired':
+ *       return sendTransaction(plan.approval.byTransaction);
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -860,7 +974,10 @@ export function useSetUserSuppliesAsCollateral(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useLiquidatePosition(
-  handler: TransactionHandler,
+  handler: TransactionHandler<
+    TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
+    PendingTransaction
+  >,
 ): UseAsyncTask<
   LiquidatePositionRequest,
   TxHash,
@@ -958,7 +1075,7 @@ export function useLiquidatePosition(
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetSpokeUserPositionManager(
-  handler: TransactionHandler,
+  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetSpokeUserPositionManagerRequest,
   TxHash,

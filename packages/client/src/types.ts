@@ -11,7 +11,7 @@ import type {
   HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
   OperationType,
-  PermitTypedDataResponse,
+  PermitTypedData,
   SwapTypedData,
 } from '@aave/graphql';
 import type { ResultAsync, Signature, TxHash } from '@aave/types';
@@ -44,10 +44,14 @@ export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
   result: T,
 ) => ResultAsync<TransactionResult, SendWithError>;
 
+export type SignERC20PermitError = CancelError | SigningError;
+
 export type ERC20PermitHandler = (
-  data: PermitTypedDataResponse,
-) => ResultAsync<ERC20PermitSignature, SigningError>;
+  data: PermitTypedData,
+) => ResultAsync<ERC20PermitSignature, SignERC20PermitError>;
+
+export type SignSwapTypedDataError = CancelError | SigningError;
 
 export type SwapSignatureHandler = (
-  result: SwapTypedData,
-) => ResultAsync<Signature, SigningError>;
+  data: SwapTypedData,
+) => ResultAsync<Signature, SignSwapTypedDataError>;

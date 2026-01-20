@@ -1406,7 +1406,7 @@ export type TokenSwapHandler = (
  *       return sendTransaction(plan.transaction);
  *
  *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.approval.byTransaction);
  *
  *     case 'SwapTransactionRequest':
  *       return sendTransaction(plan.transaction);
