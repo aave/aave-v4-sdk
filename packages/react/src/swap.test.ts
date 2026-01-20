@@ -65,11 +65,7 @@ import {
   useWithdrawSwap,
 } from './swap';
 import { renderHookWithinContext } from './test-utils';
-import {
-  useSendTransaction,
-  useSignERC20Permit,
-  useSignSwapTypedData,
-} from './viem';
+import { useSendTransaction, useSignTypedData } from './viem';
 
 const walletClient = await createNewWallet();
 await fundNativeAddress(evmAddress(walletClient.account.address));
@@ -180,7 +176,7 @@ describe('Given the swap hooks', () => {
             current: [swap],
           },
         } = renderHookWithinContext(() => {
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useTokenSwap((plan, { cancel }) => {
             switch (plan.__typename) {
@@ -235,7 +231,7 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useTokenSwap((plan, { cancel }) => {
             switch (plan.__typename) {
@@ -262,16 +258,15 @@ describe('Given the swap hooks', () => {
             current: [swap],
           },
         } = renderHookWithinContext(() => {
-          const [signERC20Permit] = useSignERC20Permit(walletClient);
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signTypedData] = useSignTypedData(walletClient);
 
           return useTokenSwap((plan, { cancel }) => {
             switch (plan.__typename) {
               case 'Erc20Approval':
-                return signERC20Permit(plan.bySignature!);
+                return signTypedData(plan.bySignature!);
 
               case 'SwapTypedData':
-                return signSwapTypedData(plan);
+                return signTypedData(plan);
 
               default:
                 return cancel(`Unexpected in this test: ${plan.__typename}`);
@@ -321,7 +316,7 @@ describe('Given the swap hooks', () => {
             current: [cancelSwap],
           },
         } = renderHookWithinContext(() => {
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useCancelSwap((plan, { cancel }) => {
             switch (plan.__typename) {
@@ -384,7 +379,7 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useCancelSwap((plan) => {
             switch (plan.__typename) {
@@ -454,7 +449,7 @@ describe('Given the swap hooks', () => {
             current: [swap],
           },
         } = renderHookWithinContext(() => {
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useSupplySwap((plan) => {
             switch (plan.__typename) {
@@ -480,7 +475,7 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useSupplySwap((plan) => {
             switch (plan.__typename) {
@@ -532,7 +527,7 @@ describe('Given the swap hooks', () => {
             current: [swap],
           },
         } = renderHookWithinContext(() => {
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useBorrowSwap((plan) => {
             switch (plan.__typename) {
@@ -558,7 +553,7 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useBorrowSwap((plan) => {
             switch (plan.__typename) {
@@ -610,7 +605,7 @@ describe('Given the swap hooks', () => {
             current: [swap],
           },
         } = renderHookWithinContext(() => {
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useRepayWithSupply((plan) => {
             switch (plan.__typename) {
@@ -636,7 +631,7 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useRepayWithSupply((plan) => {
             switch (plan.__typename) {
@@ -688,7 +683,7 @@ describe('Given the swap hooks', () => {
             current: [swap],
           },
         } = renderHookWithinContext(() => {
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useWithdrawSwap((plan) => {
             switch (plan.__typename) {
@@ -714,7 +709,7 @@ describe('Given the swap hooks', () => {
           },
         } = renderHookWithinContext(() => {
           const [sendTransaction] = useSendTransaction(walletClient);
-          const [signSwapTypedData] = useSignSwapTypedData(walletClient);
+          const [signSwapTypedData] = useSignTypedData(walletClient);
 
           return useWithdrawSwap((plan) => {
             switch (plan.__typename) {

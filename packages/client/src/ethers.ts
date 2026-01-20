@@ -8,8 +8,6 @@ import {
 import type {
   ERC20PermitSignature,
   ExecutionPlan,
-  PermitTypedData,
-  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
@@ -19,6 +17,7 @@ import {
   nonNullable,
   okAsync,
   ResultAsync,
+  type Signature,
   signatureFrom,
   txHash,
 } from '@aave/types';
@@ -30,10 +29,10 @@ import {
   type TypedDataField,
 } from 'ethers';
 import type {
-  ERC20PermitHandler,
   ExecutionPlanHandler,
-  SwapSignatureHandler,
+  SignTypedDataError,
   TransactionResult,
+  TypedData,
 } from './types';
 
 function ensureChain(
@@ -179,7 +178,40 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   return result ? executePlan(signer, result) : executePlan.bind(null, signer);
 }
 
-export type PermitWithError = CancelError | SigningError;
+function signTypedData(
+  signer: Signer,
+  data: TypedData,
+): ResultAsync<string, CancelError | SigningError> {
+  // Cast to ethers types since TypedData uses JsonObject for types/domain/message
+  const domain = data.domain as unknown as TypedDataDomain;
+  const types = data.types as unknown as Record<string, TypedDataField[]>;
+  const message = data.message as unknown as Record<string, unknown>;
+
+  return ResultAsync.fromPromise(
+    signer.signTypedData(domain, types, message),
+    (err) => {
+      if (isError(err, 'ACTION_REJECTED')) {
+        return CancelError.from(err);
+      }
+      return SigningError.from(err);
+    },
+  );
+}
+
+/**
+ * Signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided ethers signer.
+ * Returns the raw signature without any wrapping. Deadline encapsulation is handled by consumer code.
+ *
+ * @param signer - The ethers signer to use for signing.
+ * @param data - The typed data to sign.
+ * @returns A ResultAsync containing the raw signature.
+ */
+export function signTypedDataWith(
+  signer: Signer,
+  data: TypedData,
+): ResultAsync<Signature, SignTypedDataError> {
+  return signTypedData(signer, data).map(signatureFrom);
+}
 
 /**
  * Handles ERC20 permit signing for actions that require token approval.
@@ -207,86 +239,21 @@ export type PermitWithError = CancelError | SigningError;
 export function permitWith<E>(
   signer: Signer,
   action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
-): ResultAsync<ExecutionPlan, E | PermitWithError> {
+): ResultAsync<ExecutionPlan, E | SignTypedDataError> {
   return action().andThen((result) => {
     if (
       result.__typename === 'Erc20ApprovalRequired' &&
       result.approval.bySignature
     ) {
-      return signERC20Permit(signer, result.approval.bySignature).andThen(
-        (permitSig) => action(permitSig),
-      );
+      const permitTypedData = result.approval.bySignature;
+      // Sign and wrap with deadline
+      return signTypedDataWith(signer, permitTypedData)
+        .map((signature) => ({
+          deadline: permitTypedData.message.deadline,
+          value: signatureFrom(signature),
+        }))
+        .andThen((permitSig) => action(permitSig));
     }
     return okAsync(result);
   });
-}
-
-interface TypedDataLike {
-  domain: TypedDataDomain;
-  types: Record<string, TypedDataField[]>;
-  message: Record<string, unknown>;
-}
-
-function signTypedData(
-  signer: Signer,
-  data: TypedDataLike,
-): ResultAsync<string, CancelError | SigningError> {
-  return ResultAsync.fromPromise(
-    signer.signTypedData(data.domain, data.types, data.message),
-    (err) => {
-      if (isError(err, 'ACTION_REJECTED')) {
-        return CancelError.from(err);
-      }
-      return SigningError.from(err);
-    },
-  );
-}
-
-function signERC20Permit(
-  signer: Signer,
-  data: PermitTypedData,
-): ReturnType<ERC20PermitHandler> {
-  return signTypedData(signer, data).map((signature) => ({
-    deadline: data.message.deadline,
-    value: signatureFrom(signature),
-  }));
-}
-
-/**
- * Signs ERC20 permit typed data using the provided ethers signer.
- */
-export function signERC20PermitWith(
-  signer: Signer,
-  data: PermitTypedData,
-): ReturnType<ERC20PermitHandler> {
-  return signERC20Permit(signer, data);
-}
-
-function isTypedDataTypesField(
-  value: unknown,
-): value is Record<string, TypedDataField[]> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function signSwapTypedData(
-  signer: Signer,
-  data: SwapTypedData,
-): ReturnType<SwapSignatureHandler> {
-  invariant(isTypedDataTypesField(data.types), 'Invalid types');
-
-  return signTypedData(signer, {
-    domain: data.domain,
-    types: data.types,
-    message: data.message,
-  }).map(signatureFrom);
-}
-
-/**
- * Signs swap typed data using the provided ethers signer.
- */
-export function signSwapTypedDataWith(
-  signer: Signer,
-  data: SwapTypedData,
-): ReturnType<SwapSignatureHandler> {
-  return signSwapTypedData(signer, data);
 }

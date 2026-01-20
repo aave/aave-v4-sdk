@@ -32,7 +32,6 @@ import {
   HubsQuery,
   type InsufficientBalanceError,
   isChainIdsVariant,
-  isERC20PermitSignature,
   isHubInputVariant,
   isSpokeInputVariant,
   type LiquidatePositionRequest,
@@ -59,9 +58,11 @@ import {
 import {
   errAsync,
   expectTypename,
+  isSignature,
   type NullishDeep,
   okAsync,
   type Prettify,
+  type Signature,
   type TxHash,
 } from '@aave/types';
 import { useAaveClient } from './context';
@@ -208,7 +209,7 @@ function refreshQueriesForReserveChange(
 export function useSupply(
   handler: TransactionHandler<
     TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
-    ERC20PermitSignature | PendingTransaction
+    Signature | PendingTransaction
   >,
 ): UseAsyncTask<
   SupplyRequest,
@@ -233,10 +234,20 @@ export function useSupply(
             case 'Erc20ApprovalRequired':
               return handler(plan, { cancel })
                 .andThen((result) => {
-                  if (isERC20PermitSignature(result)) {
+                  if (isSignature(result)) {
+                    const permitTypedData = plan.approval.bySignature;
+                    if (!permitTypedData) {
+                      return UnexpectedError.from(
+                        'Expected bySignature to be present in Erc20ApprovalRequired',
+                      ).asResultAsync();
+                    }
+                    const permitSig: ERC20PermitSignature = {
+                      deadline: permitTypedData.message.deadline,
+                      value: result,
+                    };
                     return supply(
                       client,
-                      injectSupplyPermitSignature(request, result),
+                      injectSupplyPermitSignature(request, permitSig),
                     )
                       .map(expectTypename('TransactionRequest'))
                       .andThen((transaction) =>
@@ -246,7 +257,6 @@ export function useSupply(
                   }
                   return okAsync(result);
                 })
-
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 
@@ -442,7 +452,7 @@ export function useBorrow(
 export function useRepay(
   handler: TransactionHandler<
     TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
-    ERC20PermitSignature | PendingTransaction
+    Signature | PendingTransaction
   >,
 ): UseAsyncTask<
   RepayRequest,
@@ -467,10 +477,20 @@ export function useRepay(
             case 'Erc20ApprovalRequired':
               return handler(plan, { cancel })
                 .andThen((result) => {
-                  if (isERC20PermitSignature(result)) {
+                  if (isSignature(result)) {
+                    const permitTypedData = plan.approval.bySignature;
+                    if (!permitTypedData) {
+                      return UnexpectedError.from(
+                        'Expected bySignature to be present in Erc20ApprovalRequired',
+                      ).asResultAsync();
+                    }
+                    const permitSig: ERC20PermitSignature = {
+                      deadline: permitTypedData.message.deadline,
+                      value: result,
+                    };
                     return repay(
                       client,
-                      injectRepayPermitSignature(request, result),
+                      injectRepayPermitSignature(request, permitSig),
                     )
                       .map(expectTypename('TransactionRequest'))
                       .andThen((transaction) =>
@@ -480,7 +500,6 @@ export function useRepay(
                   }
                   return okAsync(result);
                 })
-
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
 

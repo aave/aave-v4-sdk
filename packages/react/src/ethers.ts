@@ -1,19 +1,10 @@
-import type {
-  SignERC20PermitError,
-  SignSwapTypedDataError,
-} from '@aave/client';
+import type { SignTypedDataError, TypedData } from '@aave/client';
 import {
   sendTransaction,
-  signERC20PermitWith,
-  signSwapTypedDataWith,
+  signTypedDataWith,
   waitForTransactionResult,
 } from '@aave/client/ethers';
-import type {
-  ERC20PermitSignature,
-  PermitTypedData,
-  SwapTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import { invariant, type Signature } from '@aave/types';
 import type { Signer } from 'ethers';
 import {
@@ -54,42 +45,23 @@ export function useSendTransaction(signer: Signer): UseSendTransactionResult {
 }
 
 /**
- * A hook that provides a way to sign ERC20 permits using an ethers Signer instance.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using an ethers Signer instance.
  *
  * ```ts
- * const [signERC20Permit, { loading, error, data }] = useSignERC20Permit(signer);
+ * const [signTypedData, { loading, error, data }] = useSignTypedData(signer);
  * ```
  *
- * @param signer - The ethers Signer to use for signing ERC20 permits.
+ * @param signer - The ethers Signer to use for signing typed data.
  */
-export function useSignERC20Permit(
-  signer: Signer,
-): UseAsyncTask<PermitTypedData, ERC20PermitSignature, SignERC20PermitError> {
-  return useAsyncTask(
-    (data: PermitTypedData) => {
-      return signERC20PermitWith(signer, data);
-    },
-    [signer],
-  );
-}
-
-/**
- * A hook that provides a way to sign swap typed data using an ethers Signer instance.
- *
- * ```ts
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData(signer);
- * ```
- *
- * @param signer - The ethers Signer to use for signing swap typed data.
- */
-export function useSignSwapTypedData(
+export function useSignTypedData(
   signer: Signer | undefined,
-): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
+): UseAsyncTask<TypedData, Signature, SignTypedDataError> {
   return useAsyncTask(
-    (typedData: SwapTypedData) => {
-      invariant(signer, 'Expected a Signer to sign swap typed data');
+    (typedData: TypedData) => {
+      invariant(signer, 'Expected a Signer to sign typed data');
 
-      return signSwapTypedDataWith(signer, typedData);
+      return signTypedDataWith(signer, typedData);
     },
     [signer],
   );

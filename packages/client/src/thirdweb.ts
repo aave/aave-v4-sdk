@@ -1,5 +1,4 @@
 import {
-  type CancelError,
   SigningError,
   TransactionError,
   type UnexpectedError,
@@ -9,8 +8,6 @@ import type {
   Chain,
   ERC20PermitSignature,
   ExecutionPlan,
-  PermitTypedData,
-  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
@@ -36,10 +33,10 @@ import { mainnet, sepolia } from 'thirdweb/chains';
 import type { AaveClient } from './AaveClient';
 import { chain as fetchChain } from './actions';
 import type {
-  ERC20PermitHandler,
   ExecutionPlanHandler,
-  SwapSignatureHandler,
+  SignTypedDataError,
   TransactionResult,
+  TypedData,
 } from './types';
 
 /**
@@ -218,8 +215,6 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
     : executePlan.bind(null, aaveClient, thirdwebClient);
 }
 
-export type PermitWithError = CancelError | SigningError;
-
 /**
  * Handles ERC20 permit signing for actions that require token approval.
  *
@@ -246,30 +241,27 @@ export type PermitWithError = CancelError | SigningError;
 export function permitWith<E>(
   wallet: Engine.ServerWallet,
   action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
-): ResultAsync<ExecutionPlan, E | PermitWithError> {
+): ResultAsync<ExecutionPlan, E | SignTypedDataError> {
   return action().andThen((result) => {
     if (
       result.__typename === 'Erc20ApprovalRequired' &&
       result.approval.bySignature
     ) {
-      return signERC20Permit(wallet, result.approval.bySignature).andThen(
-        (permitSig) => action(permitSig),
-      );
+      const permitTypedData = result.approval.bySignature;
+      return signTypedDataWith(wallet, permitTypedData)
+        .map((signature) => ({
+          deadline: permitTypedData.message.deadline,
+          value: signature,
+        }))
+        .andThen((permitSig) => action(permitSig));
     }
     return okAsync(result);
   });
 }
 
-interface TypedDataLike {
-  domain: PermitTypedData['domain'];
-  types: Record<string, unknown>;
-  primaryType: string;
-  message: Record<string, unknown>;
-}
-
 function signTypedData(
   wallet: Engine.ServerWallet,
-  data: TypedDataLike,
+  data: TypedData,
 ): ResultAsync<Signature, SigningError> {
   return ResultAsync.fromPromise(
     wallet.signTypedData({
@@ -282,39 +274,17 @@ function signTypedData(
   ).map(signatureFrom);
 }
 
-function signERC20Permit(
-  wallet: Engine.ServerWallet,
-  data: PermitTypedData,
-): ReturnType<ERC20PermitHandler> {
-  return signTypedData(wallet, data).map((signature) => ({
-    deadline: data.message.deadline,
-    value: signature,
-  }));
-}
-
 /**
- * Signs ERC20 permit typed data using the provided Thirdweb wallet.
+ * Signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided Thirdweb wallet.
+ * Returns the raw signature without any wrapping. Deadline encapsulation is handled by consumer code.
+ *
+ * @param wallet - The Thirdweb server wallet to use for signing.
+ * @param data - The typed data to sign.
+ * @returns A ResultAsync containing the raw signature.
  */
-export function signERC20PermitWith(
+export function signTypedDataWith(
   wallet: Engine.ServerWallet,
-  data: PermitTypedData,
-): ReturnType<ERC20PermitHandler> {
-  return signERC20Permit(wallet, data);
-}
-
-function signSwapTypedData(
-  wallet: Engine.ServerWallet,
-  data: SwapTypedData,
-): ReturnType<SwapSignatureHandler> {
+  data: TypedData,
+): ResultAsync<Signature, SignTypedDataError> {
   return signTypedData(wallet, data);
-}
-
-/**
- * Signs swap typed data using the provided Thirdweb wallet.
- */
-export function signSwapTypedDataWith(
-  wallet: Engine.ServerWallet,
-  data: SwapTypedData,
-): ReturnType<SwapSignatureHandler> {
-  return signSwapTypedData(wallet, data);
 }

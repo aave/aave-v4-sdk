@@ -1,7 +1,7 @@
 import {
-  type SignERC20PermitError,
   SigningError,
-  type SignSwapTypedDataError,
+  type SignTypedDataError,
+  type TypedData,
   UnexpectedError,
 } from '@aave/client';
 import {
@@ -9,12 +9,7 @@ import {
   supportedChains,
   waitForTransactionResult,
 } from '@aave/client/viem';
-import type {
-  ERC20PermitSignature,
-  PermitTypedData,
-  SwapTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import {
   invariant,
   ResultAsync,
@@ -23,7 +18,7 @@ import {
 } from '@aave/types';
 import {
   type MessageTypes,
-  useSignTypedData,
+  useSignTypedData as usePrivySignTypedData,
   useWallets,
 } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
@@ -81,56 +76,24 @@ export function useSendTransaction(): UseSendTransactionResult {
 }
 
 /**
- * A hook that provides a way to sign ERC20 permits using a Privy wallet.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using a Privy wallet.
  *
  * ```ts
- * const [signERC20Permit, { loading, error, data }] = useSignERC20Permit();
+ * const [signTypedData, { loading, error, data }] = useSignTypedData();
  * ```
  */
-export function useSignERC20Permit(): UseAsyncTask<
-  PermitTypedData,
-  ERC20PermitSignature,
-  SignERC20PermitError
-> {
-  const { signTypedData } = useSignTypedData();
-
-  return useAsyncTask(
-    (data: PermitTypedData) => {
-      return ResultAsync.fromPromise(
-        signTypedData({
-          types: data.types,
-          primaryType: data.primaryType,
-          domain: data.domain,
-          message: data.message,
-        }),
-        (error) => SigningError.from(error),
-      ).map(({ signature }) => ({
-        deadline: data.message.deadline,
-        value: signatureFrom(signature),
-      }));
-    },
-    [signTypedData],
-  );
-}
-
-/**
- * A hook that provides a way to sign swap typed data using a Privy wallet.
- *
- * ```ts
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData();
- * ```
- */
-export function useSignSwapTypedData(): UseAsyncTask<
-  SwapTypedData,
+export function useSignTypedData(): UseAsyncTask<
+  TypedData,
   Signature,
-  SignSwapTypedDataError
+  SignTypedDataError
 > {
-  const { signTypedData } = useSignTypedData();
+  const { signTypedData: privySignTypedData } = usePrivySignTypedData();
 
   return useAsyncTask(
-    (typedData: SwapTypedData) => {
+    (typedData: TypedData) => {
       return ResultAsync.fromPromise(
-        signTypedData({
+        privySignTypedData({
           domain: typedData.domain,
           types: typedData.types as MessageTypes,
           primaryType: typedData.primaryType,
@@ -139,6 +102,6 @@ export function useSignSwapTypedData(): UseAsyncTask<
         (error) => SigningError.from(error),
       ).map(({ signature }) => signatureFrom(signature));
     },
-    [signTypedData],
+    [privySignTypedData],
   );
 }

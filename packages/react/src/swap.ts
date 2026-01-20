@@ -43,7 +43,6 @@ import {
   type BorrowSwapQuoteRequest,
   type ERC20PermitSignature,
   type Erc20Approval,
-  isERC20PermitSignature,
   type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
   QuoteAccuracy,
@@ -1499,10 +1498,20 @@ export function useTokenSwap(
           case 'SwapByIntentWithApprovalRequired':
             return handler(quoteResult.approval, { cancel })
               .andThen((result) => {
-                if (isERC20PermitSignature(result)) {
+                if (isSignature(result)) {
+                  const permitTypedData = quoteResult.approval.bySignature;
+                  if (!permitTypedData) {
+                    return UnexpectedError.from(
+                      'Expected bySignature to be present in SwapByIntentWithApprovalRequired',
+                    ).asResultAsync();
+                  }
+                  const permitSig: ERC20PermitSignature = {
+                    deadline: permitTypedData.message.deadline,
+                    value: result,
+                  };
                   return prepareTokenSwap(client, {
                     quoteId: quoteResult.quote.quoteId,
-                    permitSig: result,
+                    permitSig,
                   });
                 }
                 if (PendingTransaction.isInstanceOf(result)) {

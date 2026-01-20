@@ -1,18 +1,13 @@
 import {
-  type SignERC20PermitError,
   SigningError,
-  type SignSwapTypedDataError,
+  type SignTypedDataError,
   TransactionError,
+  type TypedData,
   UnexpectedError,
 } from '@aave/client';
 import { chain as fetchChain } from '@aave/client/actions';
 import { toThirdwebChain } from '@aave/client/thirdweb';
-import type {
-  ERC20PermitSignature,
-  PermitTypedData,
-  SwapTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import {
   invariant,
   okAsync,
@@ -117,63 +112,23 @@ export function useSendTransaction(
 }
 
 /**
- * A hook that provides a way to sign ERC20 permits using a Thirdweb wallet.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using a Thirdweb wallet.
  *
  * ```ts
- * const [signERC20Permit, { loading, error, data }] = useSignERC20Permit();
+ * const [signTypedData, { loading, error, data }] = useSignTypedData();
  * ```
  */
-export function useSignERC20Permit(): UseAsyncTask<
-  PermitTypedData,
-  ERC20PermitSignature,
-  SignERC20PermitError
-> {
-  const account = useActiveAccount();
-
-  return useAsyncTask(
-    (data: PermitTypedData) => {
-      invariant(
-        account,
-        'No Account found. Ensure you have connected your wallet.',
-      );
-
-      return ResultAsync.fromPromise(
-        account.signTypedData({
-          // silence the rest of the type inference
-          types: data.types as Record<string, unknown>,
-          domain: data.domain,
-          primaryType: data.primaryType,
-          message: data.message,
-        }),
-        (err) => SigningError.from(err),
-      ).map((signature) => {
-        return {
-          deadline: data.message.deadline,
-          value: signatureFrom(signature),
-        };
-      });
-    },
-    [account],
-  );
-}
-
-/**
- * A hook that provides a way to sign swap typed data using a Thirdweb wallet.
- *
- * ```ts
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData();
- * ```
- */
-export function useSignSwapTypedData(): UseAsyncTask<
-  SwapTypedData,
+export function useSignTypedData(): UseAsyncTask<
+  TypedData,
   Signature,
-  SignSwapTypedDataError
+  SignTypedDataError
 > {
   const account = useActiveAccount();
 
   return useAsyncTask(
-    (typedData: SwapTypedData) => {
-      invariant(account, 'Expected an active account to sign swap typed data');
+    (typedData: TypedData) => {
+      invariant(account, 'Expected an active account to sign typed data');
 
       return ResultAsync.fromPromise(
         account.signTypedData({

@@ -1,5 +1,4 @@
 import {
-  type CancelError,
   SigningError,
   type TransactionError,
   ValidationError,
@@ -7,14 +6,13 @@ import {
 import type {
   ERC20PermitSignature,
   ExecutionPlan,
-  PermitTypedData,
-  SwapTypedData,
   TransactionRequest,
 } from '@aave/graphql';
 import {
   errAsync,
   okAsync,
   ResultAsync,
+  type Signature,
   signatureFrom,
   type TxHash,
   txHash,
@@ -23,10 +21,10 @@ import type { PrivyClient } from '@privy-io/server-auth';
 import { createPublicClient, http } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
 import type {
-  ERC20PermitHandler,
   ExecutionPlanHandler,
-  SwapSignatureHandler,
+  SignTypedDataError,
   TransactionResult,
+  TypedData,
 } from './types';
 import { supportedChains, transactionError } from './viem';
 
@@ -145,8 +143,6 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
     : executePlan.bind(null, privy, walletId);
 }
 
-export type PermitWithError = CancelError | SigningError;
-
 /**
  * Handles ERC20 permit signing for actions that require token approval.
  *
@@ -175,33 +171,28 @@ export function permitWith<E>(
   privy: PrivyClient,
   walletId: string,
   action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
-): ResultAsync<ExecutionPlan, E | PermitWithError> {
+): ResultAsync<ExecutionPlan, E | SignTypedDataError> {
   return action().andThen((result) => {
     if (
       result.__typename === 'Erc20ApprovalRequired' &&
       result.approval.bySignature
     ) {
-      return signERC20Permit(
-        privy,
-        walletId,
-        result.approval.bySignature,
-      ).andThen((permitSig) => action(permitSig));
+      const permitTypedData = result.approval.bySignature;
+      return signTypedDataWith(privy, walletId, permitTypedData)
+        .map((signature) => ({
+          deadline: permitTypedData.message.deadline,
+          value: signature,
+        }))
+        .andThen((permitSig) => action(permitSig));
     }
     return okAsync(result);
   });
 }
 
-type TypedDataLike = {
-  domain: Record<string, unknown>;
-  types: Record<string, unknown>;
-  message: Record<string, unknown>;
-  primaryType: string;
-};
-
 function signTypedData(
   privy: PrivyClient,
   walletId: string,
-  data: TypedDataLike,
+  data: TypedData,
 ): ResultAsync<string, SigningError> {
   return ResultAsync.fromPromise(
     privy.walletApi.ethereum.signTypedData({
@@ -217,43 +208,19 @@ function signTypedData(
   ).map((response) => response.signature);
 }
 
-function signERC20Permit(
-  privy: PrivyClient,
-  walletId: string,
-  data: PermitTypedData,
-): ReturnType<ERC20PermitHandler> {
-  return signTypedData(privy, walletId, data).map((signature) => ({
-    deadline: data.message.deadline,
-    value: signatureFrom(signature),
-  }));
-}
-
 /**
- * Signs ERC20 permit typed data using the specified Privy wallet.
+ * Signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the specified Privy wallet.
+ * Returns the raw signature without any wrapping. Deadline encapsulation is handled by consumer code.
+ *
+ * @param privy - The Privy client instance.
+ * @param walletId - The wallet ID to use for signing.
+ * @param data - The typed data to sign.
+ * @returns A ResultAsync containing the raw signature.
  */
-export function signERC20PermitWith(
+export function signTypedDataWith(
   privy: PrivyClient,
   walletId: string,
-  data: PermitTypedData,
-): ReturnType<ERC20PermitHandler> {
-  return signERC20Permit(privy, walletId, data);
-}
-
-function signSwapTypedData(
-  privy: PrivyClient,
-  walletId: string,
-  data: SwapTypedData,
-): ReturnType<SwapSignatureHandler> {
+  data: TypedData,
+): ResultAsync<Signature, SignTypedDataError> {
   return signTypedData(privy, walletId, data).map(signatureFrom);
-}
-
-/**
- * Signs swap typed data using the specified Privy wallet.
- */
-export function signSwapTypedDataWith(
-  privy: PrivyClient,
-  walletId: string,
-  data: SwapTypedData,
-): ReturnType<SwapSignatureHandler> {
-  return signSwapTypedData(privy, walletId, data);
 }

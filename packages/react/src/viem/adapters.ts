@@ -1,20 +1,11 @@
-import type {
-  SignERC20PermitError,
-  SignSwapTypedDataError,
-} from '@aave/client';
+import type { SignTypedDataError, TypedData } from '@aave/client';
 import {
   ensureChain,
   sendTransaction,
-  signERC20PermitWith,
-  signSwapTypedDataWith,
+  signTypedDataWith,
   waitForTransactionResult,
 } from '@aave/client/viem';
-import type {
-  ERC20PermitSignature,
-  PermitTypedData,
-  SwapTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import { invariant, type Signature } from '@aave/types';
 import type { WalletClient } from 'viem';
 import { useAaveClient } from '../context';
@@ -64,45 +55,22 @@ export function useSendTransaction(
 }
 
 /**
- * A hook that provides a way to sign ERC20 permits using a viem WalletClient instance.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using a viem WalletClient instance.
  *
  * ```ts
  * const { data: wallet } = useWalletClient(); // wagmi hook
- * const [signERC20Permit, { loading, error, data }] = useSignERC20Permit(wallet);
+ * const [signTypedData, { loading, error, data }] = useSignTypedData(wallet);
  * ```
  */
-export function useSignERC20Permit(
+export function useSignTypedData(
   walletClient: WalletClient | null | undefined,
-): UseAsyncTask<PermitTypedData, ERC20PermitSignature, SignERC20PermitError> {
+): UseAsyncTask<TypedData, Signature, SignTypedDataError> {
   return useAsyncTask(
-    (data: PermitTypedData) => {
-      invariant(walletClient, 'Expected a WalletClient to sign ERC20 permits');
+    (typedData: TypedData) => {
+      invariant(walletClient, 'Expected a WalletClient to sign typed data');
 
-      return signERC20PermitWith(walletClient, data);
-    },
-    [walletClient],
-  );
-}
-
-/**
- * A hook that provides a way to sign swap typed data using a viem WalletClient instance.
- *
- * ```ts
- * const { data: wallet } = useWalletClient(); // wagmi hook
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData(wallet);
- * ```
- */
-export function useSignSwapTypedData(
-  walletClient: WalletClient | null | undefined,
-): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
-  return useAsyncTask(
-    (typedData: SwapTypedData) => {
-      invariant(
-        walletClient,
-        'Expected a WalletClient to sign swap typed data',
-      );
-
-      return signSwapTypedDataWith(walletClient, typedData);
+      return signTypedDataWith(walletClient, typedData);
     },
     [walletClient],
   );
