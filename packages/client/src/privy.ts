@@ -12,7 +12,6 @@ import {
   errAsync,
   okAsync,
   ResultAsync,
-  type Signature,
   signatureFrom,
   type TxHash,
   txHash,
@@ -25,6 +24,7 @@ import type {
   SignTypedDataError,
   TransactionResult,
   TypedData,
+  TypedDataHandler,
 } from './types';
 import { supportedChains, transactionError } from './viem';
 
@@ -209,18 +209,48 @@ function signTypedData(
 }
 
 /**
+ * Creates a function that signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the specified Privy wallet.
+ *
+ * @param privy - The Privy client instance.
+ * @param walletId - The wallet ID to use for signing.
+ * @returns A function that takes typed data and returns a ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await prepareSwapCancel(client, request)
+ *   .andThen(signTypedDataWith(privy, walletId));
+ * ```
+ */
+export function signTypedDataWith(
+  privy: PrivyClient,
+  walletId: string,
+): TypedDataHandler;
+
+/**
  * Signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the specified Privy wallet.
- * Returns the raw signature without any wrapping. Deadline encapsulation is handled by consumer code.
  *
  * @param privy - The Privy client instance.
  * @param walletId - The wallet ID to use for signing.
  * @param data - The typed data to sign.
  * @returns A ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await signTypedDataWith(privy, walletId, typedData);
+ * ```
  */
 export function signTypedDataWith(
   privy: PrivyClient,
   walletId: string,
   data: TypedData,
-): ResultAsync<Signature, SignTypedDataError> {
+): ReturnType<TypedDataHandler>;
+
+export function signTypedDataWith(
+  privy: PrivyClient,
+  walletId: string,
+  data?: TypedData,
+): TypedDataHandler | ReturnType<TypedDataHandler> {
+  if (data === undefined) {
+    return (typedData: TypedData) =>
+      signTypedData(privy, walletId, typedData).map(signatureFrom);
+  }
   return signTypedData(privy, walletId, data).map(signatureFrom);
 }

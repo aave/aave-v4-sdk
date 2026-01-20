@@ -17,7 +17,6 @@ import {
   nonNullable,
   okAsync,
   ResultAsync,
-  type Signature,
   signatureFrom,
   txHash,
 } from '@aave/types';
@@ -33,6 +32,7 @@ import type {
   SignTypedDataError,
   TransactionResult,
   TypedData,
+  TypedDataHandler,
 } from './types';
 
 function ensureChain(
@@ -199,17 +199,42 @@ function signTypedData(
 }
 
 /**
+ * Creates a function that signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided ethers signer.
+ *
+ * @param signer - The ethers signer to use for signing.
+ * @returns A function that takes typed data and returns a ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await prepareSwapCancel(client, request)
+ *   .andThen(signTypedDataWith(signer));
+ * ```
+ */
+export function signTypedDataWith(signer: Signer): TypedDataHandler;
+
+/**
  * Signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided ethers signer.
- * Returns the raw signature without any wrapping. Deadline encapsulation is handled by consumer code.
  *
  * @param signer - The ethers signer to use for signing.
  * @param data - The typed data to sign.
  * @returns A ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await signTypedDataWith(signer, typedData);
+ * ```
  */
 export function signTypedDataWith(
   signer: Signer,
   data: TypedData,
-): ResultAsync<Signature, SignTypedDataError> {
+): ReturnType<TypedDataHandler>;
+
+export function signTypedDataWith(
+  signer: Signer,
+  data?: TypedData,
+): TypedDataHandler | ReturnType<TypedDataHandler> {
+  if (data === undefined) {
+    return (typedData: TypedData) =>
+      signTypedData(signer, typedData).map(signatureFrom);
+  }
   return signTypedData(signer, data).map(signatureFrom);
 }
 
