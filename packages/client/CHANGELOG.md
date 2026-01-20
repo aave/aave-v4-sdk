@@ -1,5 +1,13 @@
 # @aave/client
 
+## 4.0.0-next.22
+
+### Patch Changes
+
+- 45e1145: **feat:** simplify supply and repay with ERC-20 permit signing hooks and helpers
+- Updated dependencies [45e1145]
+  - @aave/graphql@1.0.0-next.19
+
 ## 4.0.0-next.21
 
 ### Patch Changes
