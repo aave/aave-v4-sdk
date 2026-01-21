@@ -60,7 +60,7 @@
           },
           {
             "kind": "OBJECT",
-            "name": "RepayWithCollateralSwapActivity"
+            "name": "RepayWithSupplyActivity"
           },
           {
             "kind": "OBJECT",
@@ -651,7 +651,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4732,7 +4732,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "RepayWithCollateralSwapActivity",
+        "name": "RepayWithSupplyActivity",
         "fields": [
           {
             "name": "swapId",
@@ -4815,7 +4815,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5667,7 +5667,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5812,7 +5812,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5881,7 +5881,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5991,7 +5991,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6050,7 +6050,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6125,7 +6125,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6318,7 +6318,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6632,7 +6632,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -8317,7 +8317,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

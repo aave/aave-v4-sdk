@@ -272,7 +272,7 @@ export function makeSwapReceipt(): SwapReceipt {
     __typename: 'SwapReceipt',
     id: randomBase64String() as SwapId,
     createdAt: new Date(),
-    explorerLink: 'https://example.com/explorer.json',
+    explorerUrl: 'https://example.com/explorer.json',
   };
 }
 
@@ -285,7 +285,7 @@ export function makeSwapOpen(): SwapOpen {
     swapId: randomBase64String() as SwapId,
     createdAt: new Date(),
     deadline: new Date(Date.now() + 3600_000), // 1 hour from now
-    explorerLink: 'https://example.com/explorer.json',
+    explorerUrl: 'https://example.com/explorer.json',
     desiredSell: makeErc20Amount(1000, 'WETH'),
     desiredBuy: makeErc20Amount(1000, 'USDC'),
   };
@@ -300,7 +300,7 @@ export function makeSwapCancelled(): SwapCancelled {
     swapId: randomBase64String() as SwapId,
     createdAt: new Date(),
     cancelledAt: new Date(),
-    explorerLink: 'https://example.com/explorer.json',
+    explorerUrl: 'https://example.com/explorer.json',
   };
 }
 

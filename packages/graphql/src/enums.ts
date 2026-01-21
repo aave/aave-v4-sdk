@@ -85,6 +85,11 @@ export enum ActivityType {
   SetAsCollateral = 'SET_AS_COLLATERAL',
   UpdatedDynamicConfig = 'UPDATED_DYNAMIC_CONFIG',
   UpdatedRiskPremium = 'UPDATED_RISK_PREMIUM',
+  TokenToTokenSwap = 'TOKEN_TO_TOKEN_SWAP',
+  SupplySwap = 'SUPPLY_SWAP',
+  BorrowSwap = 'BORROW_SWAP',
+  RepayWithSupply = 'REPAY_WITH_SUPPLY',
+  WithdrawSwap = 'WITHDRAW_SWAP',
 }
 
 /**

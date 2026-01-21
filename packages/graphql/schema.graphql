@@ -1,7 +1,7 @@
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM, TOKEN_TO_TOKEN_SWAP, SUPPLY_SWAP, BORROW_SWAP, REPAY_WITH_COLLATERAL, WITHDRAW_SWAP]
+  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM, TOKEN_TO_TOKEN_SWAP, SUPPLY_SWAP, BORROW_SWAP, REPAY_WITH_SUPPLY, WITHDRAW_SWAP]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -16,7 +16,7 @@ input ActivitiesRequestQuery @oneOf {
   userPositionId: UserPositionId
 }
 
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithCollateralSwapActivity | WithdrawSwapActivity
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity
 
 enum ActivityType {
   SUPPLY
@@ -30,7 +30,7 @@ enum ActivityType {
   TOKEN_TO_TOKEN_SWAP
   SUPPLY_SWAP
   BORROW_SWAP
-  REPAY_WITH_COLLATERAL
+  REPAY_WITH_SUPPLY
   WITHDRAW_SWAP
 }
 
@@ -180,11 +180,11 @@ type BorrowSwapActivity {
   swapId: SwapId!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: String!
+  txHash: TxHash!
   chain: Chain!
   sold: SwapAmount!
   bought: SwapAmount!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 enum BorrowSwapKind {
@@ -1263,15 +1263,15 @@ input RepayRequest {
   sender: EvmAddress!
 }
 
-type RepayWithCollateralSwapActivity {
+type RepayWithSupplyActivity {
   swapId: SwapId!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: String!
+  txHash: TxHash!
   chain: Chain!
   debtRepaid: SwapAmount!
   collateralUsed: SwapAmount!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 enum RepayWithSupplyKind {
@@ -1624,11 +1624,11 @@ type SupplySwapActivity {
   swapId: SwapId!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: String!
+  txHash: TxHash!
   chain: Chain!
   sold: SwapAmount!
   bought: SwapAmount!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 enum SupplySwapKind {
@@ -1668,7 +1668,7 @@ type SwapCancelled {
   swapId: SwapId!
   createdAt: DateTime!
   cancelledAt: DateTime
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 input SwapErc20Input {
@@ -1682,7 +1682,7 @@ type SwapExpired {
   swapId: SwapId!
   createdAt: DateTime!
   expiredAt: DateTime!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 type SwapFulfilled {
@@ -1694,7 +1694,7 @@ type SwapFulfilled {
   bought: SwapAmount!
   createdAt: DateTime!
   fulfilledAt: DateTime!
-  explorerLink: String!
+  explorerUrl: String!
   refundTxHash: TxHash
 }
 
@@ -1709,7 +1709,7 @@ type SwapOpen {
   swapId: SwapId!
   createdAt: DateTime!
   deadline: DateTime!
-  explorerLink: String!
+  explorerUrl: String!
   desiredSell: SwapAmount!
   desiredBuy: SwapAmount!
 }
@@ -1718,7 +1718,7 @@ type SwapPendingSignature {
   swapId: SwapId!
   createdAt: DateTime!
   deadline: DateTime!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 type SwapQuote {
@@ -1755,7 +1755,7 @@ scalar SwapQuoteId
 type SwapReceipt {
   id: SwapId!
   createdAt: DateTime!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 input SwapRequest @oneOf {
@@ -1871,11 +1871,11 @@ type TokenSwapActivity {
   swapId: SwapId!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: String!
+  txHash: TxHash!
   chain: Chain!
   sold: SwapAmount!
   bought: SwapAmount!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 input TokenSwapQuoteRequest @oneOf {
@@ -2440,11 +2440,11 @@ type WithdrawSwapActivity {
   swapId: SwapId!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: String!
+  txHash: TxHash!
   chain: Chain!
   withdrawn: SwapAmount!
   bought: SwapAmount!
-  explorerLink: String!
+  explorerUrl: String!
 }
 
 enum WithdrawSwapKind {

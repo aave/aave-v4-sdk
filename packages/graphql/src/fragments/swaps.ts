@@ -136,7 +136,7 @@ export const SwapReceiptFragment = graphql(
   `fragment SwapReceipt on SwapReceipt {
     __typename
     id
-    explorerLink
+    explorerUrl
     createdAt
   }`,
 );
@@ -231,7 +231,7 @@ export const SwapCancelledFragment = graphql(
     swapId
     createdAt
     cancelledAt
-    explorerLink
+    explorerUrl
   }`,
 );
 export type SwapCancelled = FragmentOf<typeof SwapCancelledFragment>;
@@ -242,7 +242,7 @@ export const SwapExpiredFragment = graphql(
     swapId
     createdAt
     expiredAt
-    explorerLink
+    explorerUrl
   }`,
 );
 export type SwapExpired = FragmentOf<typeof SwapExpiredFragment>;
@@ -286,7 +286,7 @@ export const SwapOpenFragment = graphql(
     swapId
     createdAt
     deadline
-    explorerLink
+    explorerUrl
     desiredSell {
       ...SwapAmount
     }
@@ -304,7 +304,7 @@ export const SwapPendingSignatureFragment = graphql(
     swapId
     createdAt
     deadline
-    explorerLink
+    explorerUrl
   }`,
 );
 export type SwapPendingSignature = FragmentOf<
@@ -330,7 +330,7 @@ export const SwapFulfilledFragment = graphql(
     }
     createdAt
     fulfilledAt
-    explorerLink
+    explorerUrl
     refundTxHash
   }`,
   [SwapAmountFragment],
