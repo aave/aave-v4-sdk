@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.26
+
+### Patch Changes
+
+- b588966: **chore:** support latest activity types.
+- Updated dependencies [b588966]
+  - @aave/graphql@1.0.0-next.22
+  - @aave/client@4.0.0-next.26
+
 ## 4.0.0-next.25
 
 ### Patch Changes

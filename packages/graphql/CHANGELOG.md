@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.22
+
+### Patch Changes
+
+- b588966: **chore:** support latest activity types.
+
 ## 1.0.0-next.21
 
 ### Patch Changes
