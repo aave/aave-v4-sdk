@@ -129,20 +129,6 @@ When updating the GraphQL schema in the SDK:
 - Do NOT include `Co-Authored-By` trailers
 - Keep commit messages concise and descriptive
 
-## Manually Publishing
-
-- Checkout latest `main` branch
-- Run `pnpm install` to ensure dependencies are up to date
-- Run `pnpm build` to build all packages
-- Run `pnpm changeset version` to bump versions based on changesets
-- When in pre-release mode, verify that none of the changes is a major bump
-- Add and commit with `chore: bumps up versions`
-- Ensure `pnpm` is authenticated, if not prompt the user
-- Run `pnpm changeset publish`
-- Run `git push --follow-tags`
-- Include the CLI `README.md` file and include commit it with `chore: update CLI README`
-- DONE!
-
 ## Changesets
 
 When creating changesets, create the file manually in `.changeset/` directory since interactive prompts don't work in this environment:
