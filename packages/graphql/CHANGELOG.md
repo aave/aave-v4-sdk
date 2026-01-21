@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.20
+
+### Patch Changes
+
+- 92c2d8f: **fix:** removes extra SwapTypedData fragment from query.
+
 ## 1.0.0-next.19
 
 ### Patch Changes

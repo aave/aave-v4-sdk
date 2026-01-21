@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.24
+
+### Patch Changes
+
+- 92c2d8f: **fix:** removes extra SwapTypedData fragment from query.
+- Updated dependencies [92c2d8f]
+  - @aave/graphql@1.0.0-next.20
+  - @aave/client@4.0.0-next.24
+
 ## 4.0.0-next.23
 
 ### Minor Changes
