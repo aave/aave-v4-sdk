@@ -10,6 +10,7 @@ export const production: EnvironmentConfig = {
   pollingInterval: 100,
   exchangeRateInterval: 10_000,
   swapQuoteInterval: 30_000,
+  swapStatusInterval: 5_000,
 };
 
 /**
@@ -22,6 +23,7 @@ export const staging: EnvironmentConfig = {
   pollingInterval: 500,
   exchangeRateInterval: 10_000,
   swapQuoteInterval: 30_000,
+  swapStatusInterval: 5_000,
 };
 
 /**
@@ -34,4 +36,5 @@ export const local: EnvironmentConfig = {
   pollingInterval: 1000,
   exchangeRateInterval: 10_000,
   swapQuoteInterval: 30_000,
+  swapStatusInterval: 5_000,
 };
