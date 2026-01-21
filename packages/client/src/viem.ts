@@ -32,7 +32,6 @@ import {
   SwitchChainError,
   TransactionExecutionError,
   type Transport,
-  type TypedDataDefinition,
   UserRejectedRequestError,
   type Chain as ViemChain,
   type WalletClient,
@@ -50,6 +49,7 @@ import type {
   SignTypedDataError,
   TransactionResult,
   TypedData,
+  TypedDataHandler,
 } from './types';
 
 function isRpcError(err: unknown): err is RpcError {
@@ -69,8 +69,8 @@ function isProviderRpcError(
 
 function signTypedData(
   walletClient: WalletClient,
-  data: TypedDataDefinition<Record<string, unknown>>,
-): ResultAsync<Signature, CancelError | SigningError> {
+  data: TypedData,
+): ResultAsync<Signature, SignTypedDataError> {
   invariant(
     walletClient.account,
     'Wallet account is required to sign typed data',
@@ -391,17 +391,41 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
 }
 
 /**
+ * Creates a function that signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided wallet client.
+ *
+ * @param walletClient - The wallet client to use for signing.
+ * @returns A function that takes typed data and returns a ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await prepareSwapCancel(client, request)
+ *   .andThen(signTypedDataWith(wallet));
+ * ```
+ */
+export function signTypedDataWith(walletClient: WalletClient): TypedDataHandler;
+
+/**
  * Signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided wallet client.
- * Returns the raw signature without any wrapping. Deadline encapsulation is handled by consumer code.
  *
  * @param walletClient - The wallet client to use for signing.
  * @param data - The typed data to sign.
  * @returns A ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await signTypedDataWith(wallet, typedData);
+ * ```
  */
 export function signTypedDataWith(
   walletClient: WalletClient,
   data: TypedData,
-): ResultAsync<Signature, SignTypedDataError> {
+): ReturnType<TypedDataHandler>;
+
+export function signTypedDataWith(
+  walletClient: WalletClient,
+  data?: TypedData,
+): TypedDataHandler | ReturnType<TypedDataHandler> {
+  if (data === undefined) {
+    return signTypedData.bind(null, walletClient);
+  }
   return signTypedData(walletClient, data);
 }
 

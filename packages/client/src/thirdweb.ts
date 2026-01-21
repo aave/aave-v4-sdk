@@ -37,6 +37,7 @@ import type {
   SignTypedDataError,
   TransactionResult,
   TypedData,
+  TypedDataHandler,
 } from './types';
 
 /**
@@ -275,16 +276,42 @@ function signTypedData(
 }
 
 /**
+ * Creates a function that signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided Thirdweb wallet.
+ *
+ * @param wallet - The Thirdweb server wallet to use for signing.
+ * @returns A function that takes typed data and returns a ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await prepareSwapCancel(client, request)
+ *   .andThen(signTypedDataWith(wallet));
+ * ```
+ */
+export function signTypedDataWith(
+  wallet: Engine.ServerWallet,
+): TypedDataHandler;
+
+/**
  * Signs EIP-712 typed data (ERC-20 permits, swap intents, etc.) using the provided Thirdweb wallet.
- * Returns the raw signature without any wrapping. Deadline encapsulation is handled by consumer code.
  *
  * @param wallet - The Thirdweb server wallet to use for signing.
  * @param data - The typed data to sign.
  * @returns A ResultAsync containing the raw signature.
+ *
+ * ```ts
+ * const result = await signTypedDataWith(wallet, typedData);
+ * ```
  */
 export function signTypedDataWith(
   wallet: Engine.ServerWallet,
   data: TypedData,
-): ResultAsync<Signature, SignTypedDataError> {
+): ReturnType<TypedDataHandler>;
+
+export function signTypedDataWith(
+  wallet: Engine.ServerWallet,
+  data?: TypedData,
+): TypedDataHandler | ReturnType<TypedDataHandler> {
+  if (data === undefined) {
+    return (typedData: TypedData) => signTypedData(wallet, typedData);
+  }
   return signTypedData(wallet, data);
 }
