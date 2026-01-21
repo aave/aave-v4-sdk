@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.21
+
+### Patch Changes
+
+- c959acc: **fix:** removes `Erc20Token.permitSupported`
+
 ## 1.0.0-next.20
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.25
+
+### Patch Changes
+
+- c959acc: **fix:** removes `Erc20Token.permitSupported`
+- Updated dependencies [c959acc]
+  - @aave/graphql@1.0.0-next.21
+  - @aave/client@4.0.0-next.25
+
 ## 4.0.0-next.24
 
 ### Patch Changes
