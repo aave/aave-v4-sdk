@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.12
+
+### Minor Changes
+
+- 7ddec84: **feat:** implement `useSwapStatus` hook and makes `useUserSwaps` poll for status updates until terminal state.
+
 ## 1.0.0-next.11
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @aave/client
 
+## 4.0.0-next.23
+
+### Minor Changes
+
+- 7ddec84: **feat:** implement `useSwapStatus` hook and makes `useUserSwaps` poll for status updates until terminal state.
+
+### Patch Changes
+
+- 5a52991: **feat:** add curried variant of `signTypedDataWith` for Result chaining patterns
+- Updated dependencies [7ddec84]
+  - @aave/core@1.0.0-next.12
+
 ## 4.0.0-next.22
 
 ### Patch Changes

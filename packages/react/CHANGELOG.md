@@ -1,5 +1,18 @@
 # @aave/react
 
+## 4.0.0-next.23
+
+### Minor Changes
+
+- 7ddec84: **feat:** implement `useSwapStatus` hook and makes `useUserSwaps` poll for status updates until terminal state.
+
+### Patch Changes
+
+- Updated dependencies [5a52991]
+- Updated dependencies [7ddec84]
+  - @aave/client@4.0.0-next.23
+  - @aave/core@1.0.0-next.12
+
 ## 4.0.0-next.22
 
 ### Patch Changes
