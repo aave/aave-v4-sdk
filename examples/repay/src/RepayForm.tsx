@@ -14,7 +14,7 @@ interface RepayFormProps {
 }
 
 export function RepayForm({ borrow, walletClient }: RepayFormProps) {
-  const [status, setStatus] = useState<string>('');
+  const [status, setStatus] = useState('');
 
   const [sendTransaction] = useSendTransaction(walletClient);
   const [repay, { loading, error }] = useRepay((plan) => {
