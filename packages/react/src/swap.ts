@@ -34,6 +34,8 @@ import type {
   SwapCancelled,
   SwapQuote,
   SwapReceipt,
+  SwapStatus,
+  SwapStatusRequest,
   SwapTransactionRequest,
   TokenSwapQuoteRequest,
   UserSwapsRequest,
@@ -53,6 +55,7 @@ import {
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type SwapRequest,
+  SwapStatusQuery,
   type SwapTypedData,
   type Token,
   TokenSwapQuoteQuery,
@@ -75,7 +78,7 @@ import {
   okAsync,
   ResultAwareError,
 } from '@aave/types';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAaveClient } from './context';
 import {
   type CancelOperation,
@@ -473,12 +476,134 @@ export function useUserSwaps({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> {
-  return useSuspendableQuery({
-    document: UserSwapsQuery,
-    variables: { request, currency, timeWindow },
-    suspense,
-    pause,
-  });
+  const client = useAaveClient();
+  const [allTerminal, setAllTerminal] = useState(false);
+
+  const result: SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> =
+    useSuspendableQuery({
+      document: UserSwapsQuery,
+      variables: { request, currency, timeWindow },
+      suspense,
+      pause: pause || allTerminal,
+      pollInterval: client.context.environment.swapStatusInterval,
+    });
+
+  useEffect(() => {
+    if (result.data && result.data.items.length > 0) {
+      const allItemsTerminal = result.data.items.every(isTerminalSwapStatus);
+      if (allItemsTerminal) {
+        setAllTerminal(true);
+      }
+    }
+  }, [result.data]);
+
+  return result;
+}
+
+// ------------------------------------------------------------
+
+function isTerminalSwapStatus(data: SwapStatus): boolean {
+  return (
+    data.__typename === 'SwapFulfilled' ||
+    data.__typename === 'SwapCancelled' ||
+    data.__typename === 'SwapExpired'
+  );
+}
+
+export type UseSwapStatusArgs = Prettify<
+  SwapStatusRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
+
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Polls automatically until the swap reaches a terminal state (fulfilled, cancelled, or expired).
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: UseSwapStatusArgs & Suspendable,
+): SuspenseResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   suspense: true,
+ *   pause: shouldPause,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: Pausable<UseSwapStatusArgs> & Suspendable,
+): PausableSuspenseResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Polls automatically until the swap reaches a terminal state (fulfilled, cancelled, or expired).
+ *
+ * ```tsx
+ * const { data, error, loading } = useSwapStatus({
+ *   id: swapReceipt.id,
+ * });
+ * ```
+ */
+export function useSwapStatus(args: UseSwapStatusArgs): ReadResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   pause: shouldPause,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: Pausable<UseSwapStatusArgs>,
+): PausableReadResult<SwapStatus>;
+
+export function useSwapStatus({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  ...request
+}: NullishDeep<UseSwapStatusArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SwapStatus, UnexpectedError> {
+  const client = useAaveClient();
+  const [isTerminal, setIsTerminal] = useState(false);
+
+  const result: SuspendableResult<SwapStatus, UnexpectedError> =
+    useSuspendableQuery({
+      document: SwapStatusQuery,
+      variables: { request, currency, timeWindow },
+      suspense,
+      pause: pause || isTerminal,
+      pollInterval: client.context.environment.swapStatusInterval,
+    });
+
+  useEffect(() => {
+    if (result.data && isTerminalSwapStatus(result.data)) {
+      setIsTerminal(true);
+    }
+  }, [result.data]);
+
+  return result;
 }
 
 // ------------------------------------------------------------

@@ -8,6 +8,7 @@ export type EnvironmentConfig = {
   pollingInterval: number;
   exchangeRateInterval?: number;
   swapQuoteInterval: number;
+  swapStatusInterval: number;
 };
 
 /**
