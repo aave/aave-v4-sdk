@@ -228,6 +228,7 @@ export type SwapExecutionPlan = ExtendWithOpaqueType<
 export const SwapCancelledFragment = graphql(
   `fragment SwapCancelled on SwapCancelled {
     __typename
+    swapId
     createdAt
     cancelledAt
     explorerLink
@@ -238,6 +239,7 @@ export type SwapCancelled = FragmentOf<typeof SwapCancelledFragment>;
 export const SwapExpiredFragment = graphql(
   `fragment SwapExpired on SwapExpired {
     __typename
+    swapId
     createdAt
     expiredAt
     explorerLink
@@ -299,6 +301,7 @@ export type SwapOpen = FragmentOf<typeof SwapOpenFragment>;
 export const SwapPendingSignatureFragment = graphql(
   `fragment SwapPendingSignature on SwapPendingSignature {
     __typename
+    swapId
     createdAt
     deadline
     explorerLink
@@ -311,6 +314,7 @@ export type SwapPendingSignature = FragmentOf<
 export const SwapFulfilledFragment = graphql(
   `fragment SwapFulfilled on SwapFulfilled {
     __typename
+    swapId
     txHash
     desiredSell {
       ...SwapAmount

@@ -1,7 +1,7 @@
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM]
+  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM, TOKEN_TO_TOKEN_SWAP, SUPPLY_SWAP, BORROW_SWAP, REPAY_WITH_COLLATERAL, WITHDRAW_SWAP]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -16,7 +16,7 @@ input ActivitiesRequestQuery @oneOf {
   userPositionId: UserPositionId
 }
 
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithCollateralSwapActivity | WithdrawSwapActivity
 
 enum ActivityType {
   SUPPLY
@@ -27,6 +27,11 @@ enum ActivityType {
   SET_AS_COLLATERAL
   UPDATED_DYNAMIC_CONFIG
   UPDATED_RISK_PREMIUM
+  TOKEN_TO_TOKEN_SWAP
+  SUPPLY_SWAP
+  BORROW_SWAP
+  REPAY_WITH_COLLATERAL
+  WITHDRAW_SWAP
 }
 
 scalar AlwaysTrue
@@ -169,6 +174,17 @@ input BorrowRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
+}
+
+type BorrowSwapActivity {
+  swapId: SwapId!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: String!
+  chain: Chain!
+  sold: SwapAmount!
+  bought: SwapAmount!
+  explorerLink: String!
 }
 
 enum BorrowSwapKind {
@@ -371,9 +387,6 @@ type Erc20Token {
   on the display screen, or whatever you decide makes sense
   """
   isWrappedNativeToken: Boolean!
-
-  """If permit is supported for the ERC20 token"""
-  permitSupported: Boolean!
 }
 
 scalar EvmAddress
@@ -1250,6 +1263,17 @@ input RepayRequest {
   sender: EvmAddress!
 }
 
+type RepayWithCollateralSwapActivity {
+  swapId: SwapId!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: String!
+  chain: Chain!
+  debtRepaid: SwapAmount!
+  collateralUsed: SwapAmount!
+  explorerLink: String!
+}
+
 enum RepayWithSupplyKind {
   REPAY
   SUPPLY
@@ -1596,6 +1620,17 @@ input SupplyRequest {
   sender: EvmAddress!
 }
 
+type SupplySwapActivity {
+  swapId: SwapId!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: String!
+  chain: Chain!
+  sold: SwapAmount!
+  bought: SwapAmount!
+  explorerLink: String!
+}
+
 enum SupplySwapKind {
   CURRENT
   NEW
@@ -1630,6 +1665,7 @@ type SwapByTransaction {
 }
 
 type SwapCancelled {
+  swapId: SwapId!
   createdAt: DateTime!
   cancelledAt: DateTime
   explorerLink: String!
@@ -1643,12 +1679,14 @@ input SwapErc20Input {
 union SwapExecutionPlan = SwapTransactionRequest | SwapReceipt | InsufficientBalanceError
 
 type SwapExpired {
+  swapId: SwapId!
   createdAt: DateTime!
   expiredAt: DateTime!
   explorerLink: String!
 }
 
 type SwapFulfilled {
+  swapId: SwapId!
   txHash: String!
   desiredSell: SwapAmount!
   desiredBuy: SwapAmount!
@@ -1677,6 +1715,7 @@ type SwapOpen {
 }
 
 type SwapPendingSignature {
+  swapId: SwapId!
   createdAt: DateTime!
   deadline: DateTime!
   explorerLink: String!
@@ -1826,6 +1865,17 @@ input TokenInput @oneOf {
 
   """The erc20 address"""
   erc20: EvmAddress
+}
+
+type TokenSwapActivity {
+  swapId: SwapId!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: String!
+  chain: Chain!
+  sold: SwapAmount!
+  bought: SwapAmount!
+  explorerLink: String!
 }
 
 input TokenSwapQuoteRequest @oneOf {
@@ -2384,6 +2434,17 @@ input WithdrawReserveAmountInput @oneOf {
 
   """The erc20 amount input"""
   erc20: AmountInput
+}
+
+type WithdrawSwapActivity {
+  swapId: SwapId!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: String!
+  chain: Chain!
+  withdrawn: SwapAmount!
+  bought: SwapAmount!
+  explorerLink: String!
 }
 
 enum WithdrawSwapKind {

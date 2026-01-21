@@ -150,7 +150,6 @@ export function makeErc20Token(symbol: keyof typeof TestTokens): Erc20Token {
     chain: makeChain(),
     info: makeTokenInfo(symbol),
     isWrappedNativeToken,
-    permitSupported: false,
   };
 }
 
@@ -298,6 +297,7 @@ export function makeSwapOpen(): SwapOpen {
 export function makeSwapCancelled(): SwapCancelled {
   return {
     __typename: 'SwapCancelled',
+    swapId: randomBase64String() as SwapId,
     createdAt: new Date(),
     cancelledAt: new Date(),
     explorerLink: 'https://example.com/explorer.json',
