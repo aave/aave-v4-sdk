@@ -187,21 +187,16 @@ describe('Supplying Assets on Aave V4', () => {
       let reserveWithPermit: Reserve;
 
       beforeAll(async () => {
-        const setup = await findReservesToSupply(client, user)
-          .map(
-            (reserves) =>
-              reserves.find(
-                (reserve) => reserve.asset.underlying.permitSupported === true,
-              ) ?? never('No permit supported reserve found'),
-          )
-          .andThen((reserve) => {
-            reserveWithPermit = reserve;
-            return fundErc20Address(evmAddress(user.account.address), {
-              address: reserve.asset.underlying.address,
-              amount: bigDecimal('10'),
-              decimals: reserve.asset.underlying.info.decimals,
-            });
+        const setup = await findReservesToSupply(client, user, {
+          permitSupported: true,
+        }).andThen(([reserve]) => {
+          reserveWithPermit = reserve;
+          return fundErc20Address(evmAddress(user.account.address), {
+            address: reserve.asset.underlying.address,
+            amount: bigDecimal('10'),
+            decimals: reserve.asset.underlying.info.decimals,
           });
+        });
         assertOk(setup);
       });
 

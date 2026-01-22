@@ -8,10 +8,27 @@ import {
   type SpokeId,
 } from '@aave/client';
 import { reserves } from '@aave/client/actions';
-import { ETHEREUM_FORK_ID } from '@aave/client/testing';
+import {
+  ETHEREUM_1INCH_ADDRESS,
+  ETHEREUM_AAVE_ADDRESS,
+  ETHEREUM_FORK_ID,
+  ETHEREUM_GHO_ADDRESS,
+  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
+} from '@aave/client/testing';
 import type { NonEmptyTuple } from 'type-fest';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { assertNonEmptyArray } from '../test-utils';
+
+const PERMIT_SUPPORTED_TOKENS_SHORTLIST: EvmAddress[] = [
+  ETHEREUM_1INCH_ADDRESS,
+  ETHEREUM_AAVE_ADDRESS,
+  ETHEREUM_GHO_ADDRESS,
+  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDS_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
+];
 
 export function findReservesToSupply(
   client: AaveClient,
@@ -21,6 +38,7 @@ export function findReservesToSupply(
     token?: EvmAddress;
     canUseAsCollateral?: boolean;
     native?: boolean;
+    permitSupported?: boolean;
   } = {},
 ): ResultAsync<NonEmptyTuple<Reserve>, Error> {
   return reserves(client, {
@@ -53,6 +71,11 @@ export function findReservesToSupply(
           : true) &&
         (params.native
           ? reserve.asset.underlying.isWrappedNativeToken === true
+          : true) &&
+        (params.permitSupported
+          ? PERMIT_SUPPORTED_TOKENS_SHORTLIST.includes(
+              reserve.asset.underlying.address,
+            )
           : true),
     );
     assertNonEmptyArray(reservesToSupply);
@@ -66,6 +89,7 @@ export function findReservesToBorrow(
   params: {
     spoke?: SpokeId;
     token?: EvmAddress;
+    permitSupported?: boolean;
   } = {},
 ): ResultAsync<NonEmptyTuple<Reserve>, Error> {
   return reserves(client, {
@@ -87,7 +111,13 @@ export function findReservesToBorrow(
   }).map((listReserves) => {
     assertNonEmptyArray(listReserves);
     const reservesToBorrow = listReserves.filter(
-      (reserve) => reserve.canBorrow === true,
+      (reserve) =>
+        reserve.canBorrow === true &&
+        (params.permitSupported
+          ? PERMIT_SUPPORTED_TOKENS_SHORTLIST.includes(
+              reserve.asset.underlying.address,
+            )
+          : true),
     );
     assertNonEmptyArray(reservesToBorrow);
     return reservesToBorrow;

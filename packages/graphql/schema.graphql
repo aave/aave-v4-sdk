@@ -177,7 +177,7 @@ input BorrowRequest {
 }
 
 type BorrowSwapActivity {
-  swapId: SwapId!
+  id: ID!
   user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
@@ -1264,13 +1264,13 @@ input RepayRequest {
 }
 
 type RepayWithSupplyActivity {
-  swapId: SwapId!
+  id: ID!
   user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
   chain: Chain!
   debtRepaid: SwapAmount!
-  collateralUsed: SwapAmount!
+  supplyUsed: SwapAmount!
   explorerUrl: String!
 }
 
@@ -1621,7 +1621,7 @@ input SupplyRequest {
 }
 
 type SupplySwapActivity {
-  swapId: SwapId!
+  id: ID!
   user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
@@ -1868,7 +1868,7 @@ input TokenInput @oneOf {
 }
 
 type TokenSwapActivity {
-  swapId: SwapId!
+  id: ID!
   user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!
@@ -2437,7 +2437,7 @@ input WithdrawReserveAmountInput @oneOf {
 }
 
 type WithdrawSwapActivity {
-  swapId: SwapId!
+  id: ID!
   user: EvmAddress!
   timestamp: DateTime!
   txHash: TxHash!

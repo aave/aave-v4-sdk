@@ -571,7 +571,7 @@
         "name": "BorrowSwapActivity",
         "fields": [
           {
-            "name": "swapId",
+            "name": "id",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4735,7 +4735,7 @@
         "name": "RepayWithSupplyActivity",
         "fields": [
           {
-            "name": "swapId",
+            "name": "id",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4803,7 +4803,7 @@
             "args": []
           },
           {
-            "name": "collateralUsed",
+            "name": "supplyUsed",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5587,7 +5587,7 @@
         "name": "SupplySwapActivity",
         "fields": [
           {
-            "name": "swapId",
+            "name": "id",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6552,7 +6552,7 @@
         "name": "TokenSwapActivity",
         "fields": [
           {
-            "name": "swapId",
+            "name": "id",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -8237,7 +8237,7 @@
         "name": "WithdrawSwapActivity",
         "fields": [
           {
-            "name": "swapId",
+            "name": "id",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

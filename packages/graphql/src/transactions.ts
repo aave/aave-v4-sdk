@@ -560,7 +560,7 @@ export type UpdatedRiskPremiumActivity = FragmentOf<
 export const TokenSwapActivityFragment = graphql(
   `fragment TokenSwapActivity on TokenSwapActivity {
     __typename
-    swapId
+    id
     user
     timestamp
     txHash
@@ -582,7 +582,7 @@ export type TokenSwapActivity = FragmentOf<typeof TokenSwapActivityFragment>;
 export const SupplySwapActivityFragment = graphql(
   `fragment SupplySwapActivity on SupplySwapActivity {
     __typename
-    swapId
+    id
     user
     timestamp
     txHash
@@ -604,7 +604,7 @@ export type SupplySwapActivity = FragmentOf<typeof SupplySwapActivityFragment>;
 export const BorrowSwapActivityFragment = graphql(
   `fragment BorrowSwapActivity on BorrowSwapActivity {
     __typename
-    swapId
+    id
     user
     timestamp
     txHash
@@ -626,7 +626,7 @@ export type BorrowSwapActivity = FragmentOf<typeof BorrowSwapActivityFragment>;
 export const RepayWithSupplyActivityFragment = graphql(
   `fragment RepayWithSupplyActivity on RepayWithSupplyActivity {
     __typename
-    swapId
+    id
     user
     timestamp
     txHash
@@ -636,7 +636,7 @@ export const RepayWithSupplyActivityFragment = graphql(
     debtRepaid {
       ...SwapAmount
     }
-    collateralUsed {
+    supplyUsed {
       ...SwapAmount
     }
     explorerUrl
@@ -650,7 +650,7 @@ export type RepayWithSupplyActivity = FragmentOf<
 export const WithdrawSwapActivityFragment = graphql(
   `fragment WithdrawSwapActivity on WithdrawSwapActivity {
     __typename
-    swapId
+    id
     user
     timestamp
     txHash

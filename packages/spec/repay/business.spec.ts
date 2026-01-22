@@ -35,23 +35,17 @@ describe('Repaying Loans on Aave V4', () => {
 
       const borrowSetup = await findReservesToBorrow(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-      }).andThen((borrowReserves) => {
-        const reserveWithPermit = borrowReserves.find(
-          (reserve) => reserve.asset.underlying.permitSupported,
-        );
-        if (!reserveWithPermit) {
-          throw new Error('No reserve with permit support found');
-        }
+        permitSupported: true,
+      }).andThen(([borrowReserve]) => {
         return borrowFromReserve(client, user, {
           sender: evmAddress(user.account.address),
-          reserve: reserveWithPermit.id,
+          reserve: borrowReserve.id,
           amount: {
             erc20: {
-              value:
-                reserveWithPermit.userState!.borrowable.amount.value.div(10),
+              value: borrowReserve.userState!.borrowable.amount.value.div(10),
             },
           },
-        }).map(() => reserveWithPermit);
+        }).map(() => borrowReserve);
       });
       assertOk(borrowSetup);
       reserve = borrowSetup.value;
