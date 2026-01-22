@@ -2,53 +2,17 @@ import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
 import { DomainDataFragment } from './common';
 
-export const TypeFieldFragment = graphql(
-  `fragment TypeField on TypeField {
-    name
-    type
-  }`,
-);
-export type TypeField = FragmentOf<typeof TypeFieldFragment>;
-
-export const TypeDefinitionFragment = graphql(
-  `fragment TypeDefinition on TypeDefinition {
-    EIP712Domain {
-      ...TypeField
-    }
-    Permit {
-      ...TypeField
-    }
-  }`,
-  [TypeFieldFragment],
-);
-export type TypeDefinition = FragmentOf<typeof TypeDefinitionFragment>;
-
-export const PermitMessageDataFragment = graphql(
-  `fragment PermitMessageData on PermitMessageData {
-    owner
-    spender
-    value
-    nonce
-    deadline
-  }`,
-);
-export type PermitMessageData = FragmentOf<typeof PermitMessageDataFragment>;
-
 export const PermitTypedDataFragment = graphql(
   `fragment PermitTypedData on PermitTypedData {
     __typename
-    types {
-      ...TypeDefinition
-    }
+    types
     primaryType
     domain {
       ...DomainData
     }
-    message {
-      ...PermitMessageData
-    }
+    message
   }`,
-  [TypeDefinitionFragment, DomainDataFragment, PermitMessageDataFragment],
+  [DomainDataFragment],
 );
 export type PermitTypedData = FragmentOf<typeof PermitTypedDataFragment>;
 
