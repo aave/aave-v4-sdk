@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.23
+
+### Patch Changes
+
+- 3e336b1: **chore:** rename `swapId` to `id` in swap activity types and `collateralUsed` to `supplyUsed` in `RepayWithSupplyActivity`
+
 ## 1.0.0-next.22
 
 ### Patch Changes
