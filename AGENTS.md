@@ -65,63 +65,7 @@ When updating GraphQL queries, update corresponding actions. Only update hooks i
 
 ## Schema updates
 
-When updating the GraphQL schema in the SDK:
-
-1. **Download schema:**
-   - Use `pnpm gql:download:local` from `packages/graphql` to download from local server
-   - Use `pnpm gql:download:staging` from `packages/graphql` to download from staging server
-   - Run `pnpm gql:generate:introspection` to generate GraphQL documents from schema
-
-2. **Update documents:**
-   - Cross reference `packages/graphql/schema.graphql` with GQL documents
-   - Add missing fields and introduce new fragments if necessary
-   - DO NOT add documents for new queries or mutations unless explicitly asked
-
-3. **Check for new or updated enums:**
-   - Search for new `enum` definitions in `packages/graphql/schema.graphql`
-   - For each new or updated enum:
-     - Add the enum definition to `packages/graphql/src/enums.ts` with JSDoc comments
-     - Import the enum type in `packages/graphql/src/graphql.ts`
-     - Add the scalar binding in the `graphql` configuration object (alphabetically ordered)
-     - **Note:** Do NOT create a separate type export using `ReturnType<typeof graphql.scalar<'EnumName'>>` for enums - the enum definition itself serves as both the runtime value and the type
-   - Example enum definition in `enums.ts`:
-     ```typescript
-     /**
-      * Quote accuracy level for swap quotes.
-      */
-     export enum QuoteAccuracy {
-       /**
-        * Fast price quality - faster response, potentially less accurate price
-        */
-       FAST = 'FAST',
-       /**
-        * Verified price quality - more accurate price (default)
-        */
-       ACCURATE = 'ACCURATE',
-     }
-     ```
-   - Example scalar binding in `graphql.ts`:
-     ```typescript
-     // Add to imports
-     import type { ..., QuoteAccuracy } from './enums';
-
-     // Add to scalars config (alphabetically)
-     scalars: {
-       ...
-       QuoteAccuracy: QuoteAccuracy,
-       ...
-     }
-     ```
-
-4. **Export input types:**
-   - **Common types** (used across multiple queries): export from `packages/graphql/src/inputs.ts`
-   - **Query-specific types**: colocate with their corresponding query files (permits.ts, transactions.ts, swaps.ts, user.ts, reserve.ts, hub.ts, misc.ts)
-   - Use pattern: `export type InputName = ReturnType<typeof graphql.scalar<'InputName'>>;`
-   - Exclude fork-related input types unless explicitly needed
-   - Ensure for all usage of `ReturnType<typeof graphql.scalar<'<input-name>'>>` there is a corresponding input type in `packages/graphql/src/graphql.ts`
-
-5. **Validate:**
-   - Use `pnpm check` from `packages/graphql` to check integrity of GraphQL documents
+Use the `/schema-update` skill to update the GraphQL schema. See `.claude/skills/schema-update/SKILL.md` for detailed instructions.
 
 ## Commit guidelines
 

@@ -102,6 +102,7 @@ This project includes [Claude Code](https://docs.anthropic.com/en/docs/claude-co
 Skills are workflows that Claude Code can execute when invoked:
 
 - `/publish` - Manually publishes SDK packages to npm. Handles version bumping, authentication, and git tags.
+- `/schema-update` - Updates GraphQL schema from local or staging API server. Handles document updates, enum definitions, and input types.
 
 ### Agents (WIP) <!-- omit in toc -->
 
