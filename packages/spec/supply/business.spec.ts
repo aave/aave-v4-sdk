@@ -4,7 +4,6 @@ import {
   Currency,
   evmAddress,
   invariant,
-  never,
   okAsync,
   type Reserve,
 } from '@aave/client';
