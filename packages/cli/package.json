@@ -28,8 +28,8 @@
   "scripts": {
     "build": "rimraf dist && tsc -b",
     "postpack": "rimraf oclif.manifest.json",
-    "prepack": "oclif manifest && oclif readme",
-    "version": "oclif readme && git add README.md"
+    "prepack": "oclif manifest",
+    "readme": "oclif readme"
   },
   "dependencies": {
     "@aave/client": "workspace:*",
