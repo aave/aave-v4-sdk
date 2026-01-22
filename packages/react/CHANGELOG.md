@@ -1,5 +1,13 @@
 # @aave/react
 
+## 4.0.0-next.28
+
+### Patch Changes
+
+- 65b96f7: **fix:** wait for approval transactions before executing main transaction in `useSupply` and `useRepay` hooks
+- Updated dependencies [65b96f7]
+  - @aave/client@4.0.0-next.28
+
 ## 4.0.0-next.27
 
 ### Patch Changes
