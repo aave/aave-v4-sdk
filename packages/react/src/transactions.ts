@@ -60,7 +60,6 @@ import {
   expectTypename,
   isSignature,
   type NullishDeep,
-  okAsync,
   type Prettify,
   type Signature,
   type TxHash,
@@ -255,7 +254,12 @@ export function useSupply(
                       )
                       .map(PendingTransaction.ensure);
                   }
-                  return okAsync(result);
+                  return result
+                    .wait()
+                    .andThen(() =>
+                      handler(plan.originalTransaction, { cancel }),
+                    )
+                    .map(PendingTransaction.ensure);
                 })
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
@@ -498,7 +502,12 @@ export function useRepay(
                       )
                       .map(PendingTransaction.ensure);
                   }
-                  return okAsync(result);
+                  return result
+                    .wait()
+                    .andThen(() =>
+                      handler(plan.originalTransaction, { cancel }),
+                    )
+                    .map(PendingTransaction.ensure);
                 })
                 .andThen((pendingTransaction) => pendingTransaction.wait())
                 .andThen(client.waitForTransaction);
