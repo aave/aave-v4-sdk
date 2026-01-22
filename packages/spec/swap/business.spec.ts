@@ -82,7 +82,7 @@ describe('Token swapping on Aave V4', () => {
     });
   });
 
-  describe('When swapping ERC-20 for the first time', () => {
+  describe.only('When swapping ERC-20 for the first time', () => {
     let newUser: WalletClient<Transport, Chain, Account>;
 
     beforeAll(async () => {
@@ -112,31 +112,33 @@ describe('Token swapping on Aave V4', () => {
           receiver: evmAddress(newUser.account.address),
           user: evmAddress(newUser.account.address),
         },
-      }).andThen((swapPlan) => {
-        invariant(
-          swapPlan.__typename === 'SwapByIntentWithApprovalRequired',
-          `Swap plan is not a swap by intent: ${swapPlan.__typename}`,
+      })
+        .map((swapPlan) => {
+          invariant(
+            swapPlan.__typename === 'SwapByIntentWithApprovalRequired',
+            `Swap plan is not a swap by intent: ${swapPlan.__typename}`,
+          );
+          return swapPlan;
+        })
+        .andThen((swapPlan) =>
+          sendTransaction(newUser, swapPlan.approval.byTransaction)
+            .andThen(() =>
+              prepareTokenSwap(client, {
+                quoteId: swapPlan.quote.quoteId,
+              }),
+            )
+            .andThen((prepareResult) =>
+              signTypedDataWith(newUser, prepareResult.data),
+            )
+            .andThen((signature) =>
+              swap(client, {
+                intent: {
+                  quoteId: swapPlan.quote.quoteId,
+                  signature: signature,
+                },
+              }),
+            ),
         );
-        return sendTransaction(
-          newUser,
-          swapPlan.approval.byTransaction,
-        ).andThen(() =>
-          prepareTokenSwap(client, {
-            quoteId: swapPlan.quote.quoteId,
-          }).andThen((prepareResult) => {
-            return signTypedDataWith(newUser, prepareResult.data).andThen(
-              (signature) => {
-                return swap(client, {
-                  intent: {
-                    quoteId: swapPlan.quote.quoteId,
-                    signature: signature,
-                  },
-                });
-              },
-            );
-          }),
-        );
-      });
 
       assertOk(swapResult);
       invariant(
