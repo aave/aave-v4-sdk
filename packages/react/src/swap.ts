@@ -1631,7 +1631,7 @@ export function useTokenSwap(
                     ).asResultAsync();
                   }
                   const permitSig: ERC20PermitSignature = {
-                    deadline: permitTypedData.message.deadline,
+                    deadline: permitTypedData.message.deadline as number,
                     value: result,
                   };
                   return prepareTokenSwap(client, {

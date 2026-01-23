@@ -274,7 +274,7 @@ export function permitWith<E>(
       // Sign and wrap with deadline
       return signTypedDataWith(signer, permitTypedData)
         .map((signature) => ({
-          deadline: permitTypedData.message.deadline,
+          deadline: permitTypedData.message.deadline as number,
           value: signatureFrom(signature),
         }))
         .andThen((permitSig) => action(permitSig));

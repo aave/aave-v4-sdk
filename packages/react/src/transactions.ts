@@ -241,7 +241,7 @@ export function useSupply(
                       ).asResultAsync();
                     }
                     const permitSig: ERC20PermitSignature = {
-                      deadline: permitTypedData.message.deadline,
+                      deadline: permitTypedData.message.deadline as number,
                       value: result,
                     };
                     return supply(
@@ -489,7 +489,7 @@ export function useRepay(
                       ).asResultAsync();
                     }
                     const permitSig: ERC20PermitSignature = {
-                      deadline: permitTypedData.message.deadline,
+                      deadline: permitTypedData.message.deadline as number,
                       value: result,
                     };
                     return repay(

@@ -184,7 +184,7 @@ export function permitWith<E>(
       const permitTypedData = result.approval.bySignature;
       return signTypedDataWith(privy, walletId, permitTypedData)
         .map((signature) => ({
-          deadline: permitTypedData.message.deadline,
+          deadline: permitTypedData.message.deadline as number,
           value: signature,
         }))
         .andThen((permitSig) => action(permitSig));

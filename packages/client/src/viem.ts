@@ -440,7 +440,7 @@ export function permitWith<E>(
       // Sign and wrap with deadline
       return signTypedDataWith(walletClient, permitTypedData)
         .map((signature) => ({
-          deadline: permitTypedData.message.deadline,
+          deadline: permitTypedData.message.deadline as number,
           value: signature,
         }))
         .andThen((permitSig) => action(permitSig));
