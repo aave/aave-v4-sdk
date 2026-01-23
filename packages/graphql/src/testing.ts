@@ -16,7 +16,6 @@ import type {
   Erc20Token,
   ExchangeAmount,
   PercentNumber,
-  PermitMessageData,
   PermitTypedData,
   PositionSwapAdapterContractApproval,
   PositionSwapPositionManagerApproval,
@@ -32,8 +31,6 @@ import type {
   SwapTypedData,
   TokenInfo,
   TransactionRequest,
-  TypeDefinition,
-  TypeField,
 } from './fragments';
 import { type SwapId, type SwapQuoteId, tokenInfoId } from './id';
 
@@ -392,42 +389,19 @@ export function makePrepareSwapOrder(): PrepareSwapOrder {
 export function makePermitTypedData(): PermitTypedData {
   // __typenames that you see and are normally not part of the fragment fieldset selection
   // are used here to allow the URQL cache to be able to normalize the data. Hence the need to
-  // assert the type (as TypeField, TypeDefinition, etc.)
+  // assert the type as DomainData
   return {
     __typename: 'PermitTypedData',
     types: {
-      __typename: 'TypeDefinition',
-      EIP712Domain: [
-        { __typename: 'TypeField', name: 'name', type: 'string' } as TypeField,
-      ],
+      EIP712Domain: [{ name: 'name', type: 'string' }],
       Permit: [
-        {
-          __typename: 'TypeField',
-          name: 'owner',
-          type: 'address',
-        } as TypeField,
-        {
-          __typename: 'TypeField',
-          name: 'spender',
-          type: 'address',
-        } as TypeField,
-        {
-          __typename: 'TypeField',
-          name: 'value',
-          type: 'uint256',
-        } as TypeField,
-        {
-          __typename: 'TypeField',
-          name: 'nonce',
-          type: 'uint256',
-        } as TypeField,
-        {
-          __typename: 'TypeField',
-          name: 'deadline',
-          type: 'uint256',
-        } as TypeField,
+        { name: 'owner', type: 'address' },
+        { name: 'spender', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'deadline', type: 'uint256' },
       ],
-    } as TypeDefinition,
+    },
     primaryType: 'Permit',
     domain: {
       __typename: 'DomainData',
@@ -437,13 +411,12 @@ export function makePermitTypedData(): PermitTypedData {
       verifyingContract: randomEvmAddress(),
     } as DomainData,
     message: {
-      __typename: 'PermitMessageData',
       owner: randomEvmAddress(),
       spender: randomEvmAddress(),
-      value: 1000000000000000000n,
-      nonce: 0n,
+      value: '1000000000000000000',
+      nonce: '0',
       deadline: 1234567890,
-    } as PermitMessageData,
+    },
   };
 }
 

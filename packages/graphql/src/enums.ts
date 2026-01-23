@@ -65,15 +65,6 @@ export enum ChainsFilter {
 }
 
 /**
- * The status type for hub assets.
- */
-export enum HubAssetStatusType {
-  Active = 'ACTIVE',
-  Frozen = 'FROZEN',
-  Paused = 'PAUSED',
-}
-
-/**
  * The activity type for user history.
  */
 export enum ActivityType {

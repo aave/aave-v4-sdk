@@ -714,7 +714,6 @@ type InsufficientBalanceError {
   available: DecimalNumber!
 }
 
-"""A scalar that can represent any JSON value."""
 scalar JSON
 
 input LimitDebtSwapQuoteInput {
@@ -1006,19 +1005,11 @@ type PercentNumberWithChange {
   change(window: TimeWindow! = LAST_DAY): PercentNumber!
 }
 
-type PermitMessageData {
-  owner: EvmAddress!
-  spender: EvmAddress!
-  value: BigInt!
-  nonce: BigInt!
-  deadline: Int!
-}
-
 type PermitTypedData {
-  types: TypeDefinition!
+  types: JSON!
   primaryType: String!
   domain: DomainData!
-  message: PermitMessageData!
+  message: JSON!
 }
 
 type PositionAmount {
@@ -1900,16 +1891,6 @@ scalar TxHash
 input TxHashInput {
   txHash: TxHash!
   chainId: ChainId!
-}
-
-type TypeDefinition {
-  EIP712Domain: [TypeField!]!
-  Permit: [TypeField!]!
-}
-
-type TypeField {
-  name: String!
-  type: String!
 }
 
 input UpdateUserPositionConditionsRequest {
