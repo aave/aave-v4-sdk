@@ -12,7 +12,6 @@ import type {
   TransactionRequest,
 } from '@aave/graphql';
 import {
-  type ChainId,
   chainId,
   errAsync,
   invariant,
@@ -92,30 +91,6 @@ function signTypedData(
     },
   ).map(signatureFrom);
 }
-
-const devnetChain: ViemChain = defineChain({
-  id: Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
-  name: 'Devnet',
-  network: 'ethereum-fork',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: { http: [import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC] },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Devnet Explorer',
-      url: import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
-    },
-  },
-});
-
-/**
- * @internal
- * @deprecated
- */
-export const supportedChains: Record<ChainId, ViemChain> = {
-  [chainId(devnetChain.id)]: devnetChain,
-};
 
 /**
  * @internal

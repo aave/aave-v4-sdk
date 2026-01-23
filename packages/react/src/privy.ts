@@ -6,7 +6,7 @@ import {
 } from '@aave/client';
 import {
   sendTransaction,
-  supportedChains,
+  toViemChain,
   waitForTransactionResult,
 } from '@aave/client/viem';
 import type { TransactionRequest } from '@aave/graphql';
@@ -28,6 +28,7 @@ import {
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
+import { useChainAction } from './misc';
 
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
@@ -40,6 +41,7 @@ import {
  */
 export function useSendTransaction(): UseSendTransactionResult {
   const { wallets } = useWallets();
+  const [fetchChain] = useChainAction();
 
   return useAsyncTask(
     (request: TransactionRequest) => {
@@ -50,28 +52,35 @@ export function useSendTransaction(): UseSendTransactionResult {
         `Expected a connected wallet with address ${request.from} to be found.`,
       );
 
-      return ResultAsync.fromPromise(
-        wallet.switchChain(request.chainId),
-        (error) => UnexpectedError.from(error),
-      )
-        .map(() => wallet.getEthereumProvider())
-        .map((provider) =>
-          createWalletClient({
-            account: request.from,
-            chain: supportedChains[request.chainId],
-            transport: custom(provider),
-          }),
-        )
-        .andThen((walletClient) =>
-          sendTransaction(walletClient, request).map(
-            (hash) =>
-              new PendingTransaction(() =>
-                waitForTransactionResult(walletClient, request, hash),
+      return fetchChain({ chainId: request.chainId })
+        .map((chain) => {
+          invariant(chain, `Chain ${request.chainId} is not supported`);
+          return toViemChain(chain);
+        })
+        .andThen((chain) =>
+          ResultAsync.fromPromise(
+            wallet.switchChain(request.chainId),
+            (error) => UnexpectedError.from(error),
+          )
+            .map(() => wallet.getEthereumProvider())
+            .map((provider) =>
+              createWalletClient({
+                account: request.from,
+                chain,
+                transport: custom(provider),
+              }),
+            )
+            .andThen((walletClient) =>
+              sendTransaction(walletClient, request).map(
+                (hash) =>
+                  new PendingTransaction(() =>
+                    waitForTransactionResult(walletClient, request, hash),
+                  ),
               ),
-          ),
+            ),
         );
     },
-    [wallets],
+    [wallets, fetchChain],
   );
 }
 
