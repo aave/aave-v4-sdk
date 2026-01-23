@@ -17,8 +17,9 @@ import {
   txHash,
 } from '@aave/types';
 import type { PrivyClient } from '@privy-io/server-auth';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, extractChain, http } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
+import * as viemChains from 'viem/chains';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -26,7 +27,9 @@ import type {
   TypedData,
   TypedDataHandler,
 } from './types';
-import { supportedChains, transactionError } from './viem';
+import { transactionError } from './viem';
+
+const allChains = Object.values(viemChains);
 
 async function sendTransaction(
   privy: PrivyClient,
@@ -52,10 +55,13 @@ function sendTransactionAndWait(
   request: TransactionRequest,
   walletId: string,
 ): ResultAsync<TransactionResult, SigningError | TransactionError> {
-  // TODO: verify it's on the correct chain, ask to switch if possible
-  // TODO: verify if wallet account is correct, switch if possible
+  const chain = extractChain({
+    chains: allChains,
+    id: request.chainId as (typeof allChains)[number]['id'],
+  });
+
   const publicClient = createPublicClient({
-    chain: supportedChains[request.chainId],
+    chain,
     transport: http(),
   });
 
@@ -75,9 +81,7 @@ function sendTransactionAndWait(
       const hash = txHash(receipt.transactionHash);
 
       if (receipt.status === 'reverted') {
-        return errAsync(
-          transactionError(supportedChains[request.chainId], hash, request),
-        );
+        return errAsync(transactionError(chain, hash, request));
       }
       return okAsync({
         txHash: hash,
