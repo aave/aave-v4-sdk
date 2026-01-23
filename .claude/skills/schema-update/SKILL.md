@@ -52,6 +52,55 @@ Updates the SDK's GraphQL schema and related types from an API server instance.
 - [ ] Exclude fork-related input types unless explicitly needed
 - [ ] Ensure scalar bindings exist in `graphql.ts` for all input types
 
+### Update URQL Cache Configuration
+
+Update `packages/client/src/cache.ts` to handle new/removed types:
+
+#### Keys Section
+
+- [ ] **Add new types with `id` field**: These should be normalized (cached by id)
+  ```typescript
+  NewTypeName: (data: NewTypeName) => data.id,
+  ```
+- [ ] **Add ephemeral types** (value objects without stable identity): Return `null` to disable normalization
+  ```typescript
+  NewValueObject: () => null,
+  ```
+- [ ] **Remove deleted types**: Remove any types that no longer exist in the schema
+- [ ] **When unsure**: If you're uncertain whether it needs normalization, ask the user
+
+#### Resolvers Section
+
+Add field transformers for enhanced client-side types:
+
+- [ ] **DateTime fields**: Transform to JavaScript `Date` objects
+  ```typescript
+  TypeName: {
+    dateField: transformToDate,           // for non-nullable DateTime
+    nullableDateField: transformToNullableDate,  // for nullable DateTime
+  },
+  ```
+- [ ] **BigDecimal fields**: Transform to `BigDecimal` class instances
+  ```typescript
+  TypeName: {
+    decimalField: transformToBigDecimal,           // for non-nullable BigDecimal
+    nullableDecimalField: transformToNullableBigDecimal,  // for nullable BigDecimal
+  },
+  ```
+- [ ] **BigInt fields**: Transform to native BigInt
+  ```typescript
+  TypeName: {
+    bigIntField: transformToBigInt,
+  },
+  ```
+
+#### Common Patterns
+
+- Activity types (`*Activity`) typically have `timestamp: DateTime!` → use `transformToDate`
+- Types with `createdAt: DateTime` (nullable) → use `transformToNullableDate`
+- Types with `createdAt: DateTime!` (non-nullable) → use `transformToDate`
+- Health factor types have nullable `BigDecimal` fields → use `transformToNullableBigDecimal`
+
 ### Validate
 
 - [ ] Run `pnpm check` from `packages/graphql` to verify document integrity
@@ -115,3 +164,6 @@ export type InputName = ReturnType<typeof graphql.scalar<'InputName'>>;
 3. **Forgetting scalar bindings** - Every input type needs a corresponding entry in `graphql.ts`
 4. **Non-alphabetical ordering** - Scalar bindings should be alphabetically ordered
 5. **Missing JSDoc comments** - All enums should have documentation
+6. **Forgetting cache.ts updates** - New types need keys configuration; types with DateTime/BigDecimal/BigInt need resolvers
+7. **Wrong nullable transformer** - Use `transformToNullableDate`/`transformToNullableBigDecimal` for nullable fields, non-nullable variants for required fields
+8. **Missing type imports in cache.ts** - Add imports for any new types used in the keys section

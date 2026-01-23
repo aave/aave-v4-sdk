@@ -2,6 +2,7 @@ import {
   type ActivitiesQuery,
   type Asset,
   type BorrowActivity,
+  type BorrowSwapActivity,
   type Chain,
   type Erc20Token,
   encodeHubId,
@@ -13,17 +14,21 @@ import {
   type LiquidatedActivity,
   type NativeToken,
   type RepayActivity,
+  type RepayWithSupplyActivity,
   type Reserve,
   type ReserveInfo,
   type Spoke,
   type SupplyActivity,
+  type SupplySwapActivity,
   type TokenInfo,
+  type TokenSwapActivity,
   type UpdatedDynamicConfigActivity,
   type UpdatedRiskPremiumActivity,
   type UserPosition,
   type UsingAsCollateralActivity,
   type VariablesOf,
   type WithdrawActivity,
+  type WithdrawSwapActivity,
 } from '@aave/graphql';
 import introspectedSchema from '@aave/graphql/schema';
 import { BigDecimal, type TxHash } from '@aave/types';
@@ -148,6 +153,30 @@ export const exchange = cacheExchange({
     },
     UpdatedRiskPremiumActivity: {
       timestamp: transformToDate,
+    },
+    TokenSwapActivity: {
+      timestamp: transformToDate,
+    },
+    SupplySwapActivity: {
+      timestamp: transformToDate,
+    },
+    BorrowSwapActivity: {
+      timestamp: transformToDate,
+    },
+    RepayWithSupplyActivity: {
+      timestamp: transformToDate,
+    },
+    WithdrawSwapActivity: {
+      timestamp: transformToDate,
+    },
+    UserPosition: {
+      createdAt: transformToDate,
+    },
+    UserBorrowItem: {
+      createdAt: transformToNullableDate,
+    },
+    UserSupplyItem: {
+      createdAt: transformToNullableDate,
     },
     SpokeUserPositionManager: {
       approvedOn: transformToDate,
@@ -278,6 +307,11 @@ export const exchange = cacheExchange({
     UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
       data.id,
     UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
+    TokenSwapActivity: (data: TokenSwapActivity) => data.id,
+    SupplySwapActivity: (data: SupplySwapActivity) => data.id,
+    BorrowSwapActivity: (data: BorrowSwapActivity) => data.id,
+    RepayWithSupplyActivity: (data: RepayWithSupplyActivity) => data.id,
+    WithdrawSwapActivity: (data: WithdrawSwapActivity) => data.id,
 
     // Entities with address field as key
     Erc20Token: (data: Erc20Token) => data.address,
@@ -294,6 +328,7 @@ export const exchange = cacheExchange({
     AssetSummary: () => null,
     AssetSupplySample: () => null,
     DecimalNumber: () => null,
+    CollateralFactorVariation: () => null,
     DecimalNumberWithChange: () => null,
     DomainData: () => null,
     Erc20Amount: () => null,
@@ -312,6 +347,8 @@ export const exchange = cacheExchange({
     HubSummary: () => null,
     HubSummarySample: () => null,
     InsufficientBalanceError: () => null,
+    LiquidationFeeVariation: () => null,
+    MaxLiquidationBonusVariation: () => null,
     NativeAmount: () => null,
     PaginatedActivitiesResult: () => null,
     PaginatedResultInfo: () => null,
@@ -325,6 +362,7 @@ export const exchange = cacheExchange({
     PermitTypedData: () => null,
     BorrowSwapQuoteResult: () => null,
     PercentNumberChangeSnapshot: () => null,
+    PositionAmount: () => null,
     PositionSwapAdapterContractApproval: () => null,
     PositionSwapByIntentApprovalsRequired: () => null,
     PositionSwapPositionManagerApproval: () => null,
