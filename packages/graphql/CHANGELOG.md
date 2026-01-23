@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 1.0.0-next.24
+
+### Patch Changes
+
+- 644ed9c: **chore:** removes deprecated `Erc20ApprovalRequired.transaction`.
+- 3554361: **chore:** support new `PermiTypeData` GQL definition.
+
 ## 1.0.0-next.23
 
 ### Patch Changes

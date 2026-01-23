@@ -1,5 +1,22 @@
 # @aave/react
 
+## 4.0.0-next.29
+
+### Patch Changes
+
+- 644ed9c: **chore:** removes deprecated `Erc20ApprovalRequired.transaction`.
+- a96356a: **fix:** cast `PermitTypedData.message.deadline` to `number` to align with `ERC20PermitSignature` input type after GraphQL schema update
+- 83c0dc7: **fix:** add missing URQL cache configuration for swap activity types and date transformers
+- 3554361: **chore:** support new `PermiTypeData` GQL definition.
+- 2bbf48f: **fix:** remove `supportedChains` dependency from Privy transaction receipt handling
+- Updated dependencies [644ed9c]
+- Updated dependencies [a96356a]
+- Updated dependencies [83c0dc7]
+- Updated dependencies [3554361]
+- Updated dependencies [2bbf48f]
+  - @aave/graphql@1.0.0-next.24
+  - @aave/client@4.0.0-next.29
+
 ## 4.0.0-next.28
 
 ### Patch Changes
