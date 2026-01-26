@@ -112,20 +112,14 @@ function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
 }
 
 function injectSwapQuoteAccuracy(
-  request: TokenSwapQuoteRequest,
+  request: NullishDeep<TokenSwapQuoteRequest>,
   accuracy: QuoteAccuracy,
-): TokenSwapQuoteRequest {
+): NullishDeep<TokenSwapQuoteRequest> {
   if ('market' in request && request.market) {
-    return {
-      ...request,
-      market: { ...request.market, accuracy },
-    };
+    return { market: { ...request.market, accuracy } };
   }
   if ('limit' in request && request.limit) {
-    return {
-      ...request,
-      limit: { ...request.limit, accuracy },
-    };
+    return { limit: { ...request.limit, accuracy } };
   }
   return request;
 }
@@ -236,10 +230,7 @@ export function useTokenSwapQuote({
   const fastResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(
-        request as TokenSwapQuoteRequest,
-        QuoteAccuracy.Fast,
-      ),
+      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: extractTokenSwapQuote,
@@ -252,10 +243,7 @@ export function useTokenSwapQuote({
   const accurateResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(
-        request as TokenSwapQuoteRequest,
-        QuoteAccuracy.Accurate,
-      ),
+      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
       currency,
     },
     selector: extractTokenSwapQuote,
