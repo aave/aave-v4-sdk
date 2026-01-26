@@ -156,6 +156,7 @@ export function useReserveAction(
       reserve(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
@@ -409,6 +410,7 @@ export function useReservesAction(
       reserves(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );

@@ -61,6 +61,14 @@ The SDK is organized into packages:
 - **Hooks** (`packages/react/src/`): React hooks that wrap actions with reactive state management. Only update when explicitly requested.
 - **Queries/Documents** (`packages/graphql/src/`): GraphQL query definitions and fragments.
 
+**Imperative Read Hooks:**
+React hooks in `@aave/react` that wrap read actions from `@aave/client/actions`. They follow the naming pattern `use[Something]Action` (e.g., `useReservesAction`, `useChainAction`). These hooks use `UseAsyncTask` for async state management and provide an imperative API for executing GraphQL queries. They are distinct from subscription-based or mutation hooks.
+
+Most imperative read hooks default to `cache-first` request policy. **Exceptions** that use `network-only`:
+- `usePreviewAction` - previews must always reflect current on-chain state
+- `useExchangeRateAction` - exchange rates must always be fresh
+- `useTokenSwapQuoteAction`, `useSupplySwapQuoteAction`, `useBorrowSwapQuoteAction`, `useRepayWithSupplyQuoteAction`, `useWithdrawSwapQuoteAction` - swap quotes must reflect current market conditions
+
 When updating GraphQL queries, update corresponding actions. Only update hooks if explicitly requested.
 
 ## Schema updates
@@ -94,5 +102,5 @@ When creating changesets, create the file manually in `.changeset/` directory si
 - **Always include primary packages** (`@aave/client` and `@aave/react`) when creating changesets for sub-dependencies like `@aave/graphql`, `@aave/types`, or `@aave/core`, since they depend on these packages
 - For changes only to `@aave/cli`, you can omit the primary packages
 - **Changelog description format:** Follow the same conventional commits format as commit messages (e.g., `fix:`, `feat:`, `chore:`, `docs:`), but use **bold** formatting (e.g., `**fix:**`, `**feat:**`, `**chore:**`)
-- **Keep it concise:** One line description only - just the essential change summary
+- **Keep it concise:** One line description only - just the essential change summary. Never use bullet points or multi-line descriptions
 - **Code references:** Use backticks for type names, field names, function names, and other code identifiers (e.g., `` `QuoteAccuracy` ``, `` `spotBuy` ``, `` `SwapQuote` ``)

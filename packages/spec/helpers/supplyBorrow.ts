@@ -2,6 +2,7 @@ import type {
   AaveClient,
   BorrowRequest,
   Reserve,
+  ReserveId,
   SpokeId,
   SupplyRequest,
 } from '@aave/client';
@@ -31,6 +32,34 @@ export function supplyToReserve(
   return supply(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
+}
+
+export function fundAndSupplyToReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  { reserveId, amount }: { reserveId: ReserveId; amount: BigDecimal },
+): ResultAsync<TxHash, Error> {
+  return reserve(client, {
+    query: { reserveId: reserveId },
+    user: evmAddress(user.account.address),
+  }).andThen((reserve) => {
+    return fundErc20Address(evmAddress(user.account.address), {
+      address: reserve!.asset.underlying.address,
+      amount: amount,
+      decimals: reserve!.asset.underlying.info.decimals,
+    }).andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: reserveId,
+        amount: {
+          erc20: {
+            value: amount,
+          },
+        },
+        sender: evmAddress(user.account.address),
+        enableCollateral: true,
+      }),
+    );
+  });
 }
 
 export function borrowFromReserve(
@@ -82,7 +111,7 @@ export function findReserveAndSupply(
   return findReservesToSupply(client, user, {
     token: token,
     spoke: spoke,
-    canUseAsCollateral: asCollateral,
+    canUseAsCollateral: true, // Only consider reserves that support collateral; actual enabling is controlled by `asCollateral` / `enableCollateral` below
   }).andThen((reserves) => {
     return fundErc20Address(evmAddress(user.account.address), {
       address: token ?? reserves[0]!.asset.underlying.address,
@@ -175,7 +204,7 @@ export function borrowFromRandomReserve(
     token?: EvmAddress;
     ratioToBorrow?: number;
   },
-): ResultAsync<Reserve, Error> {
+): ResultAsync<{ reserve: Reserve; amountBorrowed: BigDecimal }, Error> {
   return findReservesToBorrow(client, user, {
     spoke: params.spoke,
     token: params.token,
@@ -190,7 +219,12 @@ export function borrowFromRandomReserve(
         },
       },
       sender: evmAddress(user.account.address),
-    }).map(() => reserves[0]);
+    }).map(() => ({
+      reserve: reserves[0],
+      amountBorrowed: reserves[0].userState!.borrowable.amount.value.times(
+        params.ratioToBorrow ?? 0.1,
+      ),
+    }));
   });
 }
 

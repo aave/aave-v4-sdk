@@ -16,6 +16,7 @@ import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
   type TimeWindowQueryOptions,
 } from '../options';
 
@@ -40,9 +41,16 @@ export function reserve(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve | null, UnexpectedError> {
-  return client.query(ReserveQuery, { request, currency, timeWindow });
+  return client.query(
+    ReserveQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -72,9 +80,16 @@ export function reserves(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Reserve[], UnexpectedError> {
-  return client.query(ReservesQuery, { request, currency, timeWindow });
+  return client.query(
+    ReservesQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -89,13 +104,17 @@ export function reserves(
  *
  * @param client - Aave client.
  * @param request - The borrow APY history request parameters.
+ * @param options - The query options.
  * @returns The borrow APY history samples.
  */
 export function borrowApyHistory(
   client: AaveClient,
   request: BorrowApyHistoryRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<ApySample[], UnexpectedError> {
-  return client.query(BorrowApyHistoryQuery, { request });
+  return client.query(BorrowApyHistoryQuery, { request }, { requestPolicy });
 }
 
 /**
@@ -110,11 +129,15 @@ export function borrowApyHistory(
  *
  * @param client - Aave client.
  * @param request - The supply APY history request parameters.
+ * @param options - The query options.
  * @returns The supply APY history samples.
  */
 export function supplyApyHistory(
   client: AaveClient,
   request: SupplyApyHistoryRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<ApySample[], UnexpectedError> {
-  return client.query(SupplyApyHistoryQuery, { request });
+  return client.query(SupplyApyHistoryQuery, { request }, { requestPolicy });
 }
