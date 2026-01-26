@@ -86,7 +86,7 @@ describe('Borrow Preview Math', () => {
             ratioToBorrow: 0.4,
           });
           assertOk(borrowResult);
-          borrowReserve = borrowResult.value;
+          borrowReserve = borrowResult.value.reserve;
         });
         describe('When the user previews a borrow action adding more debt', () => {
           let previewInfo: PreviewUserPosition;
@@ -191,7 +191,7 @@ describe('Borrow Preview Math', () => {
             ratioToBorrow: 0.4,
           });
           assertOk(borrowResult);
-          borrowReserve = borrowResult.value;
+          borrowReserve = borrowResult.value.reserve;
         });
         describe('When the user previews a borrow action adding more debt', () => {
           let previewInfo: PreviewUserPosition;
