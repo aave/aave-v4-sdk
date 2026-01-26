@@ -51,6 +51,7 @@ import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
   type TimeWindowQueryOptions,
 } from '../options';
 
@@ -78,15 +79,18 @@ import {
 export function tokenSwapQuote(
   client: AaveClient,
   request: TokenSwapQuoteRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<TokenSwapQuoteResult, UnexpectedError> {
   return client.query(
     TokenSwapQuoteQuery,
     {
       request,
-      currency: options.currency,
+      currency,
     },
-    { batch: false },
+    { batch: false, requestPolicy },
   );
 }
 
@@ -101,13 +105,17 @@ export function tokenSwapQuote(
  *
  * @param client - Aave client.
  * @param request - The swappable tokens request parameters.
+ * @param options - The query options.
  * @returns The list of tokens available for swapping.
  */
 export function swappableTokens(
   client: AaveClient,
   request: SwappableTokensRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Token[], UnexpectedError> {
-  return client.query(SwappableTokensQuery, { request });
+  return client.query(SwappableTokensQuery, { request }, { requestPolicy });
 }
 
 /**
@@ -174,13 +182,16 @@ export function prepareTokenSwap(
 export function supplySwapQuote(
   client: AaveClient,
   request: SupplySwapQuoteRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
   return client
     .query(
       SupplySwapQuoteQuery,
-      { request, currency: options.currency },
-      { batch: false },
+      { request, currency },
+      { batch: false, requestPolicy },
     )
     .map(extendWithOpaqueType)
     .andThen((result) => {
@@ -217,13 +228,16 @@ export function supplySwapQuote(
 export function borrowSwapQuote(
   client: AaveClient,
   request: BorrowSwapQuoteRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
   return client
     .query(
       BorrowSwapQuoteQuery,
-      { request, currency: options.currency },
-      { batch: false },
+      { request, currency },
+      { batch: false, requestPolicy },
     )
     .map(extendWithOpaqueType)
     .andThen((result) => {
@@ -260,13 +274,16 @@ export function borrowSwapQuote(
 export function repayWithSupplyQuote(
   client: AaveClient,
   request: RepayWithSupplyQuoteRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
   return client
     .query(
       RepayWithSupplyQuoteQuery,
-      { request, currency: options.currency },
-      { batch: false },
+      { request, currency },
+      { batch: false, requestPolicy },
     )
     .map(extendWithOpaqueType)
     .andThen((result) => {
@@ -303,13 +320,16 @@ export function repayWithSupplyQuote(
 export function withdrawSwapQuote(
   client: AaveClient,
   request: WithdrawSwapQuoteRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
   return client
     .query(
       WithdrawSwapQuoteQuery,
-      { request, currency: options.currency },
-      { batch: false },
+      { request, currency },
+      { batch: false, requestPolicy },
     )
     .map(extendWithOpaqueType)
     .andThen((result) => {
@@ -384,9 +404,16 @@ export function swapStatus(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<SwapStatus, UnexpectedError> {
-  return client.query(SwapStatusQuery, { request, currency, timeWindow });
+  return client.query(
+    SwapStatusQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 export type SwapOutcome = SwapCancelled | SwapExpired | SwapFulfilled;
@@ -601,7 +628,14 @@ export function userSwaps(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedUserSwapsResult, UnexpectedError> {
-  return client.query(UserSwapsQuery, { request, currency, timeWindow });
+  return client.query(
+    UserSwapsQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }

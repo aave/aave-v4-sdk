@@ -37,6 +37,17 @@ export type AmountInput = ReturnType<typeof graphql.scalar<'AmountInput'>>;
 export type Erc20Input = ReturnType<typeof graphql.scalar<'Erc20Input'>>;
 export type TokenInput = ReturnType<typeof graphql.scalar<'TokenInput'>>;
 export type ReserveInput = ReturnType<typeof graphql.scalar<'ReserveInput'>>;
+
+/**
+ * @internal
+ */
+export function isReserveInputVariant<T>(
+  input: T,
+): input is T & { reserveInput: ReserveInput } {
+  return (
+    isObject(input) && 'reserveInput' in input && input.reserveInput != null
+  );
+}
 export type ReserveAmountInput = ReturnType<
   typeof graphql.scalar<'ReserveAmountInput'>
 >;

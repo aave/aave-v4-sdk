@@ -112,20 +112,14 @@ function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
 }
 
 function injectSwapQuoteAccuracy(
-  request: TokenSwapQuoteRequest,
+  request: NullishDeep<TokenSwapQuoteRequest>,
   accuracy: QuoteAccuracy,
-): TokenSwapQuoteRequest {
+): NullishDeep<TokenSwapQuoteRequest> {
   if ('market' in request && request.market) {
-    return {
-      ...request,
-      market: { ...request.market, accuracy },
-    };
+    return { market: { ...request.market, accuracy } };
   }
   if ('limit' in request && request.limit) {
-    return {
-      ...request,
-      limit: { ...request.limit, accuracy },
-    };
+    return { limit: { ...request.limit, accuracy } };
   }
   return request;
 }
@@ -236,10 +230,7 @@ export function useTokenSwapQuote({
   const fastResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(
-        request as TokenSwapQuoteRequest,
-        QuoteAccuracy.Fast,
-      ),
+      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: extractTokenSwapQuote,
@@ -252,10 +243,7 @@ export function useTokenSwapQuote({
   const accurateResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(
-        request as TokenSwapQuoteRequest,
-        QuoteAccuracy.Accurate,
-      ),
+      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
       currency,
     },
     selector: extractTokenSwapQuote,
@@ -309,9 +297,10 @@ export function useTokenSwapQuoteAction(
 
   return useAsyncTask(
     (request: TokenSwapQuoteRequest) =>
-      tokenSwapQuote(client, request, { currency: options.currency }).map(
-        extractTokenSwapQuote,
-      ),
+      tokenSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map(extractTokenSwapQuote),
     [client, options.currency],
   );
 }
@@ -745,9 +734,10 @@ export function useSupplySwapQuoteAction(
 
   return useAsyncTask(
     (request: SupplySwapQuoteRequest) =>
-      supplySwapQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      supplySwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }
@@ -891,9 +881,10 @@ export function useBorrowSwapQuoteAction(
 
   return useAsyncTask(
     (request: BorrowSwapQuoteRequest) =>
-      borrowSwapQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      borrowSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }
@@ -1234,9 +1225,10 @@ export function useRepayWithSupplyQuoteAction(
 
   return useAsyncTask(
     (request: RepayWithSupplyQuoteRequest) =>
-      repayWithSupplyQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      repayWithSupplyQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }
@@ -1434,9 +1426,10 @@ export function useWithdrawSwapQuoteAction(
 
   return useAsyncTask(
     (request: WithdrawSwapQuoteRequest) =>
-      withdrawSwapQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      withdrawSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }

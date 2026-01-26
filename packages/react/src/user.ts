@@ -209,6 +209,7 @@ export function useUserSuppliesAction(
       userSupplies(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
@@ -365,6 +366,7 @@ export function useUserBorrowsAction(
       userBorrows(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
@@ -599,6 +601,7 @@ export function useUserPositionsAction(
       userPositions(client, request, {
         currency: options.currency,
         timeWindow: options.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
@@ -907,7 +910,10 @@ export function useUserBalancesAction(
 
   return useAsyncTask(
     (request: UserBalancesRequest) =>
-      userBalances(client, request, { currency: options.currency }),
+      userBalances(client, request, {
+        currency: options.currency,
+        requestPolicy: 'cache-first',
+      }),
     [client, options.currency],
   );
 }
