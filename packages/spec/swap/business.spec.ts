@@ -82,7 +82,7 @@ describe('Token swapping on Aave V4', () => {
     });
   });
 
-  describe.only('When swapping ERC-20 for the first time', () => {
+  describe('When swapping ERC-20 for the first time', () => {
     let newUser: WalletClient<Transport, Chain, Account>;
 
     beforeAll(async () => {
