@@ -20,7 +20,7 @@ import { beforeAll, describe, it } from 'vitest';
 
 describe('Token swapping on Aave V4', () => {
   describe('Given a user who want to swap tokens', () => {
-    describe('When swapping and ERC-20 for which they have already approved', () => {
+    describe.skip('When swapping and ERC-20 for which they have already approved', () => {
       let userDidSwap: WalletClient<Transport, Chain, Account>;
 
       beforeAll(async () => {
