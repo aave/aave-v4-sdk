@@ -1,5 +1,90 @@
 # @aave/cli
 
+## 4.1.0-next.22
+
+### Patch Changes
+
+- Updated dependencies [644ed9c]
+- Updated dependencies [a96356a]
+- Updated dependencies [83c0dc7]
+- Updated dependencies [3554361]
+- Updated dependencies [2bbf48f]
+  - @aave/client@4.0.0-next.29
+
+## 4.1.0-next.21
+
+### Patch Changes
+
+- Updated dependencies [65b96f7]
+  - @aave/client@4.0.0-next.28
+
+## 4.1.0-next.20
+
+### Patch Changes
+
+- Updated dependencies [3e336b1]
+  - @aave/client@4.0.0-next.27
+
+## 4.1.0-next.19
+
+### Patch Changes
+
+- Updated dependencies [b588966]
+  - @aave/client@4.0.0-next.26
+
+## 4.1.0-next.18
+
+### Patch Changes
+
+- Updated dependencies [c959acc]
+  - @aave/client@4.0.0-next.25
+
+## 4.1.0-next.17
+
+### Patch Changes
+
+- Updated dependencies [92c2d8f]
+  - @aave/client@4.0.0-next.24
+
+## 4.1.0-next.16
+
+### Patch Changes
+
+- Updated dependencies [5a52991]
+- Updated dependencies [7ddec84]
+  - @aave/client@4.0.0-next.23
+
+## 4.1.0-next.15
+
+### Patch Changes
+
+- Updated dependencies [45e1145]
+  - @aave/client@4.0.0-next.22
+
+## 4.1.0-next.14
+
+### Patch Changes
+
+- Updated dependencies [531b1f6]
+  - @aave/client@4.0.0-next.21
+
+## 4.1.0-next.13
+
+### Patch Changes
+
+- Updated dependencies [ec7fa5e]
+  - @aave/client@4.0.0-next.20
+
+## 4.1.0-next.12
+
+### Patch Changes
+
+- Updated dependencies [ebb671f]
+- Updated dependencies [dfafb5e]
+- Updated dependencies [2dd17d2]
+- Updated dependencies [c40b2d4]
+  - @aave/client@4.0.0-next.19
+
 ## 4.1.0-next.11
 
 ### Patch Changes

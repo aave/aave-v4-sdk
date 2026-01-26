@@ -4,7 +4,7 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 {
   "__typename": "ExchangeAmount",
   "decimals": Any<Number>,
-  "icon": "",
+  "icon": "https://assets.aave.com/united-states.png",
   "name": "USD",
   "symbol": "$",
   "value": Any<t>,
@@ -15,7 +15,7 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 {
   "__typename": "ExchangeAmount",
   "decimals": Any<Number>,
-  "icon": "",
+  "icon": "https://assets.aave.com/european-union.png",
   "name": "EUR",
   "symbol": "€",
   "value": Any<t>,
@@ -26,7 +26,7 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 {
   "__typename": "ExchangeAmount",
   "decimals": Any<Number>,
-  "icon": "",
+  "icon": "https://assets.aave.com/united-states.png",
   "name": "USD",
   "symbol": "$",
   "value": Any<t>,
@@ -37,7 +37,7 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 {
   "__typename": "ExchangeAmount",
   "decimals": Any<Number>,
-  "icon": "",
+  "icon": "https://assets.aave.com/european-union.png",
   "name": "EUR",
   "symbol": "€",
   "value": Any<t>,
@@ -48,7 +48,7 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 {
   "__typename": "ExchangeAmount",
   "decimals": Any<Number>,
-  "icon": "",
+  "icon": "https://assets.aave.com/united-kingdom.png",
   "name": "GBP",
   "symbol": "£",
   "value": Any<t>,
@@ -59,7 +59,7 @@ exports[`Querying Exchange Rates on Aave V4 > Given a user who wants to get exch
 {
   "__typename": "ExchangeAmount",
   "decimals": Any<Number>,
-  "icon": "",
+  "icon": "https://assets.aave.com/united-states.png",
   "name": "USD",
   "symbol": "$",
   "value": Any<t>,

@@ -1,16 +1,10 @@
-import type { SigningError, UnexpectedError } from '@aave/client';
+import type { SignTypedDataError, TypedData } from '@aave/client';
 import {
   sendTransaction,
-  signERC20PermitWith,
-  signSwapTypedDataWith,
+  signTypedDataWith,
   waitForTransactionResult,
 } from '@aave/client/ethers';
-import type {
-  ERC20PermitSignature,
-  PermitRequest,
-  SwapTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import { invariant, type Signature } from '@aave/types';
 import type { Signer } from 'ethers';
 import {
@@ -19,7 +13,6 @@ import {
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
-import { usePermitTypedDataAction } from './permits';
 
 /**
  * A hook that provides a way to send Aave transactions using an ethers Signer instance.
@@ -51,94 +44,24 @@ export function useSendTransaction(signer: Signer): UseSendTransactionResult {
   );
 }
 
-export type SignERC20PermitError = SigningError | UnexpectedError;
-
 /**
- * A hook that provides a way to sign ERC20 permits using an ethers Signer instance.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using an ethers Signer instance.
  *
  * ```ts
- * const provider = new ethers.providers.Web3Provider(window.ethereum);
- * const signer = provider.getSigner();
- *
- * // …
- *
- * const [signERC20Permit, { loading, error, data }] = useERC20Permit(signer);
- *
- * const run = async () => {
- *   const result = await signERC20Permit({
- *     supply: {
- *       sender: evmAddress(await signer.getAddress()), // User's address
- *       reserve: {
- *         reserveId: reserve.id,
- *         chainId: reserve.chain.chainId,
- *         spoke: reserve.spoke.address,
- *       },
- *       amount: {
- *         value: bigDecimal(42), // 42 USDC
- *       },
- *     },
- *   });
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('ERC20 Permit signature:', result.value);
- * };
+ * const [signTypedData, { loading, error, data }] = useSignTypedData(signer);
  * ```
  *
- * @param signer - The ethers Signer to use for signing ERC20 permits.
+ * @param signer - The ethers Signer to use for signing typed data.
  */
-export function useERC20Permit(
-  signer: Signer,
-): UseAsyncTask<PermitRequest, ERC20PermitSignature, SignERC20PermitError> {
-  const [permitTypedData] = usePermitTypedDataAction();
-
-  return useAsyncTask(
-    (request: PermitRequest) => {
-      return permitTypedData(request).andThen(signERC20PermitWith(signer));
-    },
-    [permitTypedData, signer],
-  );
-}
-
-export type SignSwapTypedDataError = SigningError | UnexpectedError;
-
-/**
- * @internal
- * A hook that provides a way to sign swap typed data using an ethers Signer instance.
- *
- * ```ts
- * const provider = new ethers.providers.Web3Provider(window.ethereum);
- * const signer = provider.getSigner();
- *
- * // …
- *
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData(signer);
- *
- * const run = async () => {
- *   const result = await signSwapTypedData(swapTypedData);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Swap typed data signed:', result.value);
- * };
- * ```
- *
- * @param signer - The ethers Signer to use for signing swap typed data.
- */
-export function useSignSwapTypedData(
+export function useSignTypedData(
   signer: Signer | undefined,
-): UseAsyncTask<SwapTypedData, Signature, SignSwapTypedDataError> {
+): UseAsyncTask<TypedData, Signature, SignTypedDataError> {
   return useAsyncTask(
-    (typedData: SwapTypedData) => {
-      invariant(signer, 'Expected a Signer to sign swap typed data');
+    (typedData: TypedData) => {
+      invariant(signer, 'Expected a Signer to sign typed data');
 
-      return signSwapTypedDataWith(signer)(typedData);
+      return signTypedDataWith(signer, typedData);
     },
     [signer],
   );

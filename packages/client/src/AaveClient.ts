@@ -51,7 +51,7 @@ export class AaveClient extends GqlClient {
   ): ResultAsync<TxHash, TimeoutError | UnexpectedError> => {
     invariant(
       isHasProcessedKnownTransactionRequest(result),
-      `Received a transaction result for an untracked operation. Make sure you're following the instructions in the docs.`,
+      'AaveClient.waitForTransaction called with an non-tracked operation. See the documentation for correct tracking setup.',
     );
 
     return ResultAsync.fromPromise(

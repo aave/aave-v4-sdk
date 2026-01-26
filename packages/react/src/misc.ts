@@ -1,5 +1,5 @@
 import type { CurrencyQueryOptions } from '@aave/client';
-import { exchangeRate } from '@aave/client/actions';
+import { exchangeRate, chain as fetchChain } from '@aave/client/actions';
 import type { UnexpectedError } from '@aave/core';
 import type { Chain, ExchangeAmount, ExchangeRateRequest } from '@aave/graphql';
 import {
@@ -104,6 +104,44 @@ export function useChain({
     suspense,
     pause,
   });
+}
+
+/**
+ * Low-level hook to execute a {@link chain} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on the chain.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler in order to move to the next step).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useChainAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   chainId: chainId(1),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // Chain | null
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useChainAction(): UseAsyncTask<
+  ChainRequest,
+  Chain | null,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: ChainRequest) => fetchChain(client, request, { batch: false }),
+    [client],
+  );
 }
 
 export type UseChainsArgs = ChainsRequest;

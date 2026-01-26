@@ -1,10 +1,19 @@
-import type { BigDecimal } from '@aave/types';
+import type { BigDecimal, BigDecimalSource } from '@aave/types';
 import * as matchers from 'jest-extended';
 import { expect } from 'vitest';
 
 expect.extend(matchers);
 
 expect.extend({
+  toBeBigDecimalEqualTo(received: BigDecimal, expected: BigDecimalSource) {
+    const pass = received.eq(expected);
+
+    return {
+      pass,
+      message: () => `expected ${received} to be equal to ${expected}`,
+    };
+  },
+
   toBeBigDecimalCloseTo(
     received: BigDecimal,
     expected: BigDecimal,

@@ -5,6 +5,7 @@ The official SDK for Aave V4 👻.
 ## Table of Contents <!-- omit in toc -->
 
 - [Development Workflow](#development-workflow)
+- [Claude Code Integration](#claude-code-integration)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -91,6 +92,28 @@ pnpm new:package
 ### IDE Setup <!-- omit in toc -->
 
 The project uses [Biome](https://biomejs.dev/) to format and lint the code. You can install the Biome extension for your IDE: https://biomejs.dev/guides/editors/first-party-extensions/
+
+## Claude Code Integration
+
+This project includes [Claude Code](https://docs.anthropic.com/en/docs/claude-code) configuration for AI-assisted development.
+
+### Skills <!-- omit in toc -->
+
+Skills are workflows that Claude Code can execute when invoked:
+
+- `/publish` - Manually publishes SDK packages to npm. Handles version bumping, authentication, and git tags.
+- `/schema-update` - Updates GraphQL schema from local or staging API server. Handles document updates, enum definitions, and input types.
+
+### Agents (WIP) <!-- omit in toc -->
+
+> [!WARNING]
+> These agents are experimental and under active development.
+
+Custom agents are specialized Claude configurations for specific tasks:
+
+- **reviewer** - Reviews SDK code for quality, DX, and API design. Evaluates React hooks, TypeScript utilities, and GraphQL fragments.
+- **engineer** - Implements SDK features with focus on DX and API ergonomics. Handles client actions, React hooks, and type-safe interfaces.
+
 
 ## Contributing
 
