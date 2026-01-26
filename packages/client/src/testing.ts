@@ -69,6 +69,9 @@ export const ETHEREUM_1INCH_ADDRESS = evmAddress(
 export const ETHEREUM_AAVE_ADDRESS = evmAddress(
   '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
 );
+export const ETHEREUM_USDT_ADDRESS = evmAddress(
+  '0xdac17f958d2ee523a2206206994597c13d831ec7',
+);
 
 // Spoke addresses and ids
 export const ETHEREUM_SPOKE_CORE_ADDRESS = evmAddress(

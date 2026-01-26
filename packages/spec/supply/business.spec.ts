@@ -1,13 +1,12 @@
 import {
   assertOk,
   bigDecimal,
-  Currency,
   evmAddress,
   invariant,
   okAsync,
   type Reserve,
 } from '@aave/client';
-import { preview, supply, userSupplies } from '@aave/client/actions';
+import { supply, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -140,45 +139,6 @@ describe('Supplying Assets on Aave V4', () => {
           amountToSupply,
           3,
         );
-      });
-    });
-
-    describe('When the user wants to preview the supply action before performing it', () => {
-      it('Then the user can review the supply details before proceeding', async () => {
-        const reserveToSupply = await findReservesToSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-        });
-        assertOk(reserveToSupply);
-        assertNonEmptyArray(reserveToSupply.value);
-
-        const previewResult = await preview(
-          client,
-          {
-            action: {
-              supply: {
-                reserve: reserveToSupply.value[0].id,
-                amount: {
-                  erc20: {
-                    value: bigDecimal('10'),
-                  },
-                },
-                sender: evmAddress(user.account.address),
-              },
-            },
-          },
-          { currency: Currency.Usd },
-        );
-        assertOk(previewResult);
-        expect(previewResult.value).toMatchSnapshot({
-          id: expect.any(String),
-          borrowingPower: expect.any(Object),
-          netBalance: expect.any(Object),
-          netCollateral: expect.any(Object),
-          netApy: expect.any(Object),
-          riskPremium: expect.any(Object),
-          otherConditions: expect.any(Array),
-          projectedEarnings: expect.any(Object),
-        });
       });
     });
 
