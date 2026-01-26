@@ -82,6 +82,8 @@ type AssetBorrowSample {
   amount: DecimalNumber!
   highestApy: PercentNumber!
   lowestApy: PercentNumber!
+  averageApy: PercentNumber!
+  breakdown: [AssetSampleBreakdown!]!
 }
 
 scalar AssetId
@@ -109,6 +111,12 @@ input AssetRequest {
 input AssetRequestQuery @oneOf {
   token: Erc20Input
   assetId: AssetId
+}
+
+type AssetSampleBreakdown {
+  amount: DecimalNumber!
+  apy: PercentNumber!
+  hub: Hub!
 }
 
 type AssetSummary {
@@ -141,6 +149,8 @@ type AssetSupplySample {
   amount: DecimalNumber!
   highestApy: PercentNumber!
   lowestApy: PercentNumber!
+  averageApy: PercentNumber!
+  breakdown: [AssetSampleBreakdown!]!
 }
 
 scalar BigDecimal
@@ -701,6 +711,9 @@ input HubsRequestOrderBy @oneOf {
 input HubsRequestQuery @oneOf {
   """Get back all the hubs which have one of the underlying tokens supplied"""
   tokens: [Erc20Input!]
+
+  """Get back all the hubs for the given asset IDs"""
+  assetIds: [AssetId!]
 
   """Get back all the hubs based on the chain ids passed in"""
   chainIds: [ChainId!]

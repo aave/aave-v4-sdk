@@ -34,6 +34,7 @@ import {
   isChainIdsVariant,
   isHubInputVariant,
   isSpokeInputVariant,
+  isTokensVariant,
   type LiquidatePositionRequest,
   type PreContractActionRequired,
   PreviewQuery,
@@ -875,14 +876,18 @@ export function useSetUserSuppliesAsCollateral(
 
             // update hubs
             ...reserveDetails.map(({ chainId }) =>
-              client.refreshQueryWhere(HubsQuery, (variables) =>
-                isChainIdsVariant(variables.request.query)
-                  ? variables.request.query.chainIds.some(
-                      (id) => id === chainId,
-                    )
-                  : variables.request.query.tokens.some(
-                      (token) => token.chainId === chainId,
-                    ),
+              client.refreshQueryWhere(
+                HubsQuery,
+                (variables) =>
+                  isChainIdsVariant(variables.request.query)
+                    ? variables.request.query.chainIds.some(
+                        (id) => id === chainId,
+                      )
+                    : isTokensVariant(variables.request.query)
+                      ? variables.request.query.tokens.some(
+                          (token) => token.chainId === chainId,
+                        )
+                      : true, // assetIds variant - refresh all
               ),
             ),
             ...reserveDetails.map(({ chainId }) =>
