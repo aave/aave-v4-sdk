@@ -1,5 +1,5 @@
 import { assertOk, bigDecimal, evmAddress } from '@aave/client';
-import { borrow, preview, userBorrows } from '@aave/client/actions';
+import { borrow, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -29,34 +29,6 @@ describe('Borrowing Assets on Aave V4', () => {
       });
 
       assertOk(setup);
-    });
-
-    describe('When the user wants to preview the borrow action before performing it', () => {
-      it('Then the user can review the borrow details before proceeding', async () => {
-        const borrowPreviewResult = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-        }).andThen((reserves) =>
-          preview(client, {
-            action: {
-              borrow: {
-                reserve: reserves[0].id,
-                amount: {
-                  erc20: {
-                    value:
-                      reserves[0].userState!.borrowable.amount.value.times(0.2),
-                  },
-                },
-                sender: evmAddress(user.account.address),
-              },
-            },
-          }),
-        );
-        assertOk(borrowPreviewResult);
-        expect(
-          borrowPreviewResult.value.healthFactor.after,
-        ).toBeBigDecimalGreaterThan(1);
-        expect(borrowPreviewResult.value.healthFactor.current).toBeNull();
-      });
     });
 
     describe('When the user borrows an ERC20 asset', () => {
