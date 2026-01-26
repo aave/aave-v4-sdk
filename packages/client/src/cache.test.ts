@@ -1,4 +1,4 @@
-import { Currency, ReservesRequestFilter } from '@aave/graphql';
+import { Currency, encodeSpokeId, ReservesRequestFilter } from '@aave/graphql';
 import {
   assertOk,
   BigDecimal,
@@ -13,8 +13,11 @@ import {
   exchangeRate,
   hub,
   hubs,
+  reserve,
   reserves,
   supply,
+  userPosition,
+  userPositions,
 } from './actions';
 import {
   client,
@@ -103,6 +106,129 @@ describe('Given the Aave SDK normalized graph cache', () => {
       );
       assertOk(result);
       expect(result.value).toEqual(primed.value[0]);
+    });
+  });
+
+  describe(`When fetching a single 'Reserve' by reserveId`, () => {
+    it('Then it should leverage cached data whenever possible', async () => {
+      const primed = await reserves(client, {
+        query: {
+          chainIds: [ETHEREUM_FORK_ID],
+        },
+      });
+      assertOk(primed);
+
+      const result = await reserve(
+        client,
+        {
+          query: {
+            reserveId: primed.value[0]!.id,
+          },
+        },
+        {
+          requestPolicy: 'cache-only',
+        },
+      );
+
+      assertOk(result);
+      expect(result.value).toEqual(primed.value[0]);
+    });
+  });
+
+  describe(`When fetching a single 'Reserve' by reserveInput`, () => {
+    it('Then it should leverage cached data whenever possible', async () => {
+      const primed = await reserves(client, {
+        query: {
+          chainIds: [ETHEREUM_FORK_ID],
+        },
+      });
+      assertOk(primed);
+
+      const result = await reserve(
+        client,
+        {
+          query: {
+            reserveInput: {
+              chainId: primed.value[0]!.spoke.chain.chainId,
+              spoke: primed.value[0]!.spoke.address,
+              onChainId: primed.value[0]!.onChainId,
+            },
+          },
+        },
+        {
+          requestPolicy: 'cache-only',
+        },
+      );
+
+      assertOk(result);
+      expect(result.value).toEqual(primed.value[0]);
+    });
+  });
+
+  describe(`When fetching a single 'UserPosition' by id`, () => {
+    it('Then it should leverage cached data whenever possible', async () => {
+      const primed = await userPositions(client, {
+        user: evmAddress(user.account.address),
+        filter: {
+          chainIds: [ETHEREUM_FORK_ID],
+        },
+      });
+      assertOk(primed);
+
+      // Skip if no positions exist (need to supply first)
+      if (primed.value.length === 0) {
+        return;
+      }
+
+      const result = await userPosition(
+        client,
+        {
+          id: primed.value[0]!.id,
+        },
+        {
+          requestPolicy: 'cache-only',
+        },
+      );
+
+      assertOk(result);
+      expect(result.value).toEqual(primed.value[0]);
+    });
+  });
+
+  describe(`When fetching a single 'UserPosition' by userSpoke`, () => {
+    it('Then it should leverage cached data whenever possible', async () => {
+      const primed = await userPositions(client, {
+        user: evmAddress(user.account.address),
+        filter: {
+          chainIds: [ETHEREUM_FORK_ID],
+        },
+      });
+      assertOk(primed);
+
+      // Skip if no positions exist (need to supply first)
+      if (primed.value.length === 0) {
+        return;
+      }
+
+      const position = primed.value[0]!;
+      const result = await userPosition(
+        client,
+        {
+          userSpoke: {
+            spoke: encodeSpokeId({
+              chainId: position.spoke.chain.chainId,
+              address: position.spoke.address,
+            }),
+            user: position.user,
+          },
+        },
+        {
+          requestPolicy: 'cache-only',
+        },
+      );
+
+      assertOk(result);
+      expect(result.value).toEqual(position);
     });
   });
 

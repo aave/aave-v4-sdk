@@ -102,5 +102,5 @@ When creating changesets, create the file manually in `.changeset/` directory si
 - **Always include primary packages** (`@aave/client` and `@aave/react`) when creating changesets for sub-dependencies like `@aave/graphql`, `@aave/types`, or `@aave/core`, since they depend on these packages
 - For changes only to `@aave/cli`, you can omit the primary packages
 - **Changelog description format:** Follow the same conventional commits format as commit messages (e.g., `fix:`, `feat:`, `chore:`, `docs:`), but use **bold** formatting (e.g., `**fix:**`, `**feat:**`, `**chore:**`)
-- **Keep it concise:** One line description only - just the essential change summary
+- **Keep it concise:** One line description only - just the essential change summary. Never use bullet points or multi-line descriptions
 - **Code references:** Use backticks for type names, field names, function names, and other code identifiers (e.g., `` `QuoteAccuracy` ``, `` `spotBuy` ``, `` `SwapQuote` ``)

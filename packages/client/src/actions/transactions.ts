@@ -369,11 +369,7 @@ export function preview(
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PreviewUserPosition, UnexpectedError> {
-  return client.query(
-    PreviewQuery,
-    { request, currency },
-    { requestPolicy },
-  );
+  return client.query(PreviewQuery, { request, currency }, { requestPolicy });
 }
 
 /**

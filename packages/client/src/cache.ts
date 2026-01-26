@@ -4,12 +4,16 @@ import {
   type BorrowActivity,
   type BorrowSwapActivity,
   type Chain,
+  decodeSpokeId,
   type Erc20Token,
   encodeHubId,
+  encodeReserveId,
+  encodeUserPositionId,
   type Hub,
   type HubAsset,
   type HubQuery,
   isHubInputVariant,
+  isReserveInputVariant,
   isTxHashInputVariant,
   type LiquidatedActivity,
   type NativeToken,
@@ -17,6 +21,7 @@ import {
   type RepayWithSupplyActivity,
   type Reserve,
   type ReserveInfo,
+  type ReserveQuery,
   type Spoke,
   type SupplyActivity,
   type SupplySwapActivity,
@@ -25,6 +30,7 @@ import {
   type UpdatedDynamicConfigActivity,
   type UpdatedRiskPremiumActivity,
   type UserPosition,
+  type UserPositionQuery,
   type UsingAsCollateralActivity,
   type VariablesOf,
   type WithdrawActivity,
@@ -204,12 +210,6 @@ export const exchange = cacheExchange({
     SwapReceipt: {
       createdAt: transformToDate,
     },
-    // Intentionally omitted to keep it as BigIntString
-    // PermitMessageData: {
-    //   value: transformToBigInt,
-    //   nonce: transformToBigInt,
-    // },
-
     Query: {
       hub: (_, { request }: VariablesOf<typeof HubQuery>) => {
         if (isHubInputVariant(request.query)) {
@@ -222,6 +222,40 @@ export const exchange = cacheExchange({
           __typename: 'Hub',
           id: request.query.hubId,
         };
+      },
+
+      reserve: (_, { request }: VariablesOf<typeof ReserveQuery>) => {
+        if (isReserveInputVariant(request.query)) {
+          return {
+            __typename: 'Reserve',
+            id: encodeReserveId(request.query.reserveInput),
+          };
+        }
+        return {
+          __typename: 'Reserve',
+          id: request.query.reserveId,
+        };
+      },
+
+      userPosition: (_, { request }: VariablesOf<typeof UserPositionQuery>) => {
+        if ('userSpoke' in request && request.userSpoke) {
+          const { chainId, address } = decodeSpokeId(request.userSpoke.spoke);
+          return {
+            __typename: 'UserPosition',
+            id: encodeUserPositionId({
+              chainId,
+              spoke: address,
+              user: request.userSpoke.user,
+            }),
+          };
+        }
+        if ('id' in request && request.id) {
+          return {
+            __typename: 'UserPosition',
+            id: request.id,
+          };
+        }
+        return undefined;
       },
 
       activities: (
