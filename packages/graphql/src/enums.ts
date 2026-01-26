@@ -65,23 +65,6 @@ export enum ChainsFilter {
 }
 
 /**
- * The status type for hub assets.
- */
-export enum HubAssetStatusType {
-  Active = 'ACTIVE',
-  Frozen = 'FROZEN',
-  Paused = 'PAUSED',
-}
-
-/**
- * The order by options for hub assets request.
- */
-export enum HubAssetsRequestOrderBy {
-  Balance = 'BALANCE',
-  Name = 'NAME',
-}
-
-/**
  * The activity type for user history.
  */
 export enum ActivityType {
@@ -93,6 +76,11 @@ export enum ActivityType {
   SetAsCollateral = 'SET_AS_COLLATERAL',
   UpdatedDynamicConfig = 'UPDATED_DYNAMIC_CONFIG',
   UpdatedRiskPremium = 'UPDATED_RISK_PREMIUM',
+  TokenToTokenSwap = 'TOKEN_TO_TOKEN_SWAP',
+  SupplySwap = 'SUPPLY_SWAP',
+  BorrowSwap = 'BORROW_SWAP',
+  RepayWithSupply = 'REPAY_WITH_SUPPLY',
+  WithdrawSwap = 'WITHDRAW_SWAP',
 }
 
 /**
@@ -196,4 +184,18 @@ export enum TokenCategory {
 export enum UserPositionConditionsUpdate {
   AllDynamicConfig = 'ALL_DYNAMIC_CONFIG',
   JustRiskPremium = 'JUST_RISK_PREMIUM',
+}
+
+/**
+ * Quote accuracy level for swap quotes.
+ */
+export enum QuoteAccuracy {
+  /**
+   * Fast price quality - faster response, potentially less accurate price
+   */
+  Fast = 'FAST',
+  /**
+   * Verified price quality - more accurate price, potentially slower response
+   */
+  Accurate = 'ACCURATE',
 }

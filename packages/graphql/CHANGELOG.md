@@ -1,5 +1,58 @@
 # @aave/graphql
 
+## 1.0.0-next.24
+
+### Patch Changes
+
+- 644ed9c: **chore:** removes deprecated `Erc20ApprovalRequired.transaction`.
+- 3554361: **chore:** support new `PermiTypeData` GQL definition.
+
+## 1.0.0-next.23
+
+### Patch Changes
+
+- 3e336b1: **chore:** rename `swapId` to `id` in swap activity types and `collateralUsed` to `supplyUsed` in `RepayWithSupplyActivity`
+
+## 1.0.0-next.22
+
+### Patch Changes
+
+- b588966: **chore:** support latest activity types.
+
+## 1.0.0-next.21
+
+### Patch Changes
+
+- c959acc: **fix:** removes `Erc20Token.permitSupported`
+
+## 1.0.0-next.20
+
+### Patch Changes
+
+- 92c2d8f: **fix:** removes extra SwapTypedData fragment from query.
+
+## 1.0.0-next.19
+
+### Patch Changes
+
+- 45e1145: **feat:** simplify supply and repay with ERC-20 permit signing hooks and helpers
+
+## 1.0.0-next.18
+
+### Patch Changes
+
+- ec7fa5e: **fix:** update schema with `QuoteAccuracy` enum and `SwapQuote` field changes. Renamed `spotBuy`/`spotSell` to `buy`/`sell`, added `accuracy` field.
+
+## 1.0.0-next.17
+
+### Patch Changes
+
+- ebb671f: **fix:** missing `UserPosition.netAccruedInterest`.
+- dfafb5e: **fix:** pass `$currency` to `netAccruedInterest` fields.
+- 2dd17d2: **fix:** removes duplicate HubAssetsRequestOrderBy export.
+- 7b5995b: **fix:** updates `totalSupplyCap` and `totalBorrowCap` in `AssetSummary` to use `AssetAmountWithChange` type
+- c40b2d4: **fix:** adds missing TS types for updated GQL input types.
+
 ## 1.0.0-next.16
 
 ### Patch Changes

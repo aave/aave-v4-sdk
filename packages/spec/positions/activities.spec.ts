@@ -37,6 +37,11 @@ describe('Querying User Activities on Aave V4', () => {
     [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
     [ActivityType.UpdatedDynamicConfig]: 'UpdatedDynamicConfigActivity',
     [ActivityType.UpdatedRiskPremium]: 'UpdatedRiskPremiumActivity',
+    [ActivityType.TokenToTokenSwap]: 'TokenSwapActivity',
+    [ActivityType.SupplySwap]: 'SupplySwapActivity',
+    [ActivityType.BorrowSwap]: 'BorrowSwapActivity',
+    [ActivityType.RepayWithSupply]: 'RepayWithSupplyActivity',
+    [ActivityType.WithdrawSwap]: 'WithdrawSwapActivity',
   };
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
@@ -203,7 +208,8 @@ describe('Querying User Activities on Aave V4', () => {
 
         expect(firstPage.value.items.length).toBe(10);
         expect(firstPage.value.pageInfo.next).not.toBeNull();
-        const firstPageItemIds = firstPage.value.items.map((item) => item.id);
+        const getActivityId = (item: ActivityItem) => item.id;
+        const firstPageItemIds = firstPage.value.items.map(getActivityId);
 
         const secondPage = await activities(client, {
           user: evmAddress(user.account.address),
@@ -216,7 +222,7 @@ describe('Querying User Activities on Aave V4', () => {
         assertOk(secondPage);
 
         expect(secondPage.value.items.length).toBeLessThanOrEqual(10);
-        const secondPageItemIds = secondPage.value.items.map((item) => item.id);
+        const secondPageItemIds = secondPage.value.items.map(getActivityId);
         // Elements in the second page should not be in the first page
         expect(
           secondPageItemIds.some((id) => firstPageItemIds.includes(id)),
