@@ -1,7 +1,6 @@
 import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import { PermitTypedDataResponseFragment } from '../permits';
 import {
   DomainDataFragment,
   type Erc20Amount,
@@ -15,23 +14,10 @@ import {
 } from './common';
 import { ReserveInfoFragment } from './reserve';
 import {
+  Erc20ApprovalFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './transactions';
-
-export const Erc20ApprovalFragment = graphql(
-  `fragment Erc20Approval on Erc20Approval {
-    __typename
-    byTransaction {
-      ...TransactionRequest
-    }
-    bySignature {
-      ...PermitTypedDataResponse
-    }
-  }`,
-  [TransactionRequestFragment, PermitTypedDataResponseFragment],
-);
-export type Erc20Approval = FragmentOf<typeof Erc20ApprovalFragment>;
 
 export const SwapQuoteCostsFragment = graphql(
   `fragment SwapQuoteCosts on SwapQuoteCosts {
@@ -56,14 +42,15 @@ export type SwapQuoteCosts = FragmentOf<typeof SwapQuoteCostsFragment>;
 export const SwapQuoteFragment = graphql(
   `fragment SwapQuote on SwapQuote {
     __typename
+    accuracy
     quoteId
     suggestedSlippage {
       ...PercentNumber
     }
-    spotBuy {
+    buy {
       ...TokenAmount
     }
-    spotSell {
+    sell {
       ...TokenAmount
     }
     costs {
@@ -128,7 +115,7 @@ export const SwapByIntentWithApprovalRequiredFragment = graphql(
       ...SwapQuote
     }
   }`,
-  [Erc20ApprovalFragment, SwapQuoteFragment, SwapTypedDataFragment],
+  [Erc20ApprovalFragment, SwapQuoteFragment],
 );
 export type SwapByIntentWithApprovalRequired = FragmentOf<
   typeof SwapByIntentWithApprovalRequiredFragment
@@ -149,7 +136,7 @@ export const SwapReceiptFragment = graphql(
   `fragment SwapReceipt on SwapReceipt {
     __typename
     id
-    explorerLink
+    explorerUrl
     createdAt
   }`,
 );
@@ -241,9 +228,10 @@ export type SwapExecutionPlan = ExtendWithOpaqueType<
 export const SwapCancelledFragment = graphql(
   `fragment SwapCancelled on SwapCancelled {
     __typename
+    swapId
     createdAt
     cancelledAt
-    explorerLink
+    explorerUrl
   }`,
 );
 export type SwapCancelled = FragmentOf<typeof SwapCancelledFragment>;
@@ -251,9 +239,10 @@ export type SwapCancelled = FragmentOf<typeof SwapCancelledFragment>;
 export const SwapExpiredFragment = graphql(
   `fragment SwapExpired on SwapExpired {
     __typename
+    swapId
     createdAt
     expiredAt
-    explorerLink
+    explorerUrl
   }`,
 );
 export type SwapExpired = FragmentOf<typeof SwapExpiredFragment>;
@@ -297,7 +286,7 @@ export const SwapOpenFragment = graphql(
     swapId
     createdAt
     deadline
-    explorerLink
+    explorerUrl
     desiredSell {
       ...SwapAmount
     }
@@ -312,9 +301,10 @@ export type SwapOpen = FragmentOf<typeof SwapOpenFragment>;
 export const SwapPendingSignatureFragment = graphql(
   `fragment SwapPendingSignature on SwapPendingSignature {
     __typename
+    swapId
     createdAt
     deadline
-    explorerLink
+    explorerUrl
   }`,
 );
 export type SwapPendingSignature = FragmentOf<
@@ -324,6 +314,7 @@ export type SwapPendingSignature = FragmentOf<
 export const SwapFulfilledFragment = graphql(
   `fragment SwapFulfilled on SwapFulfilled {
     __typename
+    swapId
     txHash
     desiredSell {
       ...SwapAmount
@@ -339,7 +330,7 @@ export const SwapFulfilledFragment = graphql(
     }
     createdAt
     fulfilledAt
-    explorerLink
+    explorerUrl
     refundTxHash
   }`,
   [SwapAmountFragment],

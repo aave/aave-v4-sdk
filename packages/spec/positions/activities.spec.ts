@@ -37,7 +37,26 @@ describe('Querying User Activities on Aave V4', () => {
     [ActivityType.SetAsCollateral]: 'UsingAsCollateralActivity',
     [ActivityType.UpdatedDynamicConfig]: 'UpdatedDynamicConfigActivity',
     [ActivityType.UpdatedRiskPremium]: 'UpdatedRiskPremiumActivity',
+    [ActivityType.TokenToTokenSwap]: 'TokenSwapActivity',
+    [ActivityType.SupplySwap]: 'SupplySwapActivity',
+    [ActivityType.BorrowSwap]: 'BorrowSwapActivity',
+    [ActivityType.RepayWithSupply]: 'RepayWithSupplyActivity',
+    [ActivityType.WithdrawSwap]: 'WithdrawSwapActivity',
   };
+
+  // Liquidated activities are not easily reproducible, so we skip them
+  // New activity types are not yet supported in tests
+  const skipActivityTypes = [
+    ActivityType.Liquidated,
+    ActivityType.UpdatedDynamicConfig,
+    ActivityType.UpdatedRiskPremium,
+    ActivityType.TokenToTokenSwap,
+    ActivityType.SupplySwap,
+    ActivityType.BorrowSwap,
+    ActivityType.RepayWithSupply,
+    ActivityType.WithdrawSwap,
+  ];
+
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
@@ -59,15 +78,7 @@ describe('Querying User Activities on Aave V4', () => {
           });
           assertOk(result);
 
-          if (
-            [
-              ActivityType.Liquidated,
-              ActivityType.UpdatedDynamicConfig,
-              ActivityType.UpdatedRiskPremium,
-            ].includes(activityType)
-          ) {
-            // Liquidated activities are not easily reproducible, so we skip them
-            // New activity types are not yet supported in tests
+          if (skipActivityTypes.includes(activityType)) {
             return;
           }
 
@@ -203,7 +214,8 @@ describe('Querying User Activities on Aave V4', () => {
 
         expect(firstPage.value.items.length).toBe(10);
         expect(firstPage.value.pageInfo.next).not.toBeNull();
-        const firstPageItemIds = firstPage.value.items.map((item) => item.id);
+        const getActivityId = (item: ActivityItem) => item.id;
+        const firstPageItemIds = firstPage.value.items.map(getActivityId);
 
         const secondPage = await activities(client, {
           user: evmAddress(user.account.address),
@@ -216,7 +228,7 @@ describe('Querying User Activities on Aave V4', () => {
         assertOk(secondPage);
 
         expect(secondPage.value.items.length).toBeLessThanOrEqual(10);
-        const secondPageItemIds = secondPage.value.items.map((item) => item.id);
+        const secondPageItemIds = secondPage.value.items.map(getActivityId);
         // Elements in the second page should not be in the first page
         expect(
           secondPageItemIds.some((id) => firstPageItemIds.includes(id)),
@@ -258,17 +270,11 @@ describe('Querying User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if (
-            [
-              ActivityType.Liquidated,
-              ActivityType.UpdatedDynamicConfig,
-              ActivityType.UpdatedRiskPremium,
-            ].includes(activityType)
-          ) {
-            // Liquidated activities are not easily reproducible, so we skip them
-            // New activity types are not yet supported in tests
+
+          if (skipActivityTypes.includes(activityType)) {
             return;
           }
+
           expect(result.value.items).toBeArrayWithElements(
             expect.objectContaining({
               __typename: expect.toEqualCaseInsensitive(

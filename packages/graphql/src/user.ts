@@ -171,3 +171,8 @@ export type UserRiskPremiumBreakdownRequest = RequestOf<
 export type UserRiskPremiumBreakdownRequestQuery = ReturnType<
   typeof graphql.scalar<'UserRiskPremiumBreakdownRequestQuery'>
 >;
+export type UserHub = ReturnType<typeof graphql.scalar<'UserHub'>>;
+export type UserHubInput = ReturnType<typeof graphql.scalar<'UserHubInput'>>;
+export type ChainTokenInput = ReturnType<
+  typeof graphql.scalar<'ChainTokenInput'>
+>;

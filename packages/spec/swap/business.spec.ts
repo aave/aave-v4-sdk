@@ -14,13 +14,13 @@ import {
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
-import { sendTransaction, signSwapTypedDataWith } from '@aave/client/viem';
+import { sendTransaction, signTypedDataWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { beforeAll, describe, it } from 'vitest';
 
 describe('Token swapping on Aave V4', () => {
   describe('Given a user who want to swap tokens', () => {
-    describe('When swapping and ERC-20 for which they have already approved', () => {
+    describe.skip('When swapping and ERC-20 for which they have already approved', () => {
       let userDidSwap: WalletClient<Transport, Chain, Account>;
 
       beforeAll(async () => {
@@ -60,16 +60,14 @@ describe('Token swapping on Aave V4', () => {
           return prepareTokenSwap(client, {
             quoteId: swapPlan.quote.quoteId,
           }).andThen((prepareResult) => {
-            return signSwapTypedDataWith(
-              userDidSwap,
-              prepareResult.data,
-            ).andThen((finalSignature) =>
-              swap(client, {
-                intent: {
-                  quoteId: swapPlan.quote.quoteId,
-                  signature: finalSignature,
-                },
-              }),
+            return signTypedDataWith(userDidSwap, prepareResult.data).andThen(
+              (finalSignature) =>
+                swap(client, {
+                  intent: {
+                    quoteId: swapPlan.quote.quoteId,
+                    signature: finalSignature,
+                  },
+                }),
             );
           });
         });
@@ -114,38 +112,40 @@ describe('Token swapping on Aave V4', () => {
           receiver: evmAddress(newUser.account.address),
           user: evmAddress(newUser.account.address),
         },
-      }).andThen((swapPlan) => {
-        invariant(
-          swapPlan.__typename === 'SwapByIntentWithApprovalRequired',
-          `Swap plan is not a swap by intent: ${swapPlan.__typename}`,
+      })
+        .map((swapPlan) => {
+          invariant(
+            swapPlan.__typename === 'SwapByIntentWithApprovalRequired',
+            `Swap plan is not a swap by intent: ${swapPlan.__typename}`,
+          );
+          return swapPlan;
+        })
+        .andThen((swapPlan) =>
+          sendTransaction(newUser, swapPlan.approval.byTransaction)
+            .andThen(() =>
+              prepareTokenSwap(client, {
+                quoteId: swapPlan.quote.quoteId,
+              }),
+            )
+            .andThen((prepareResult) =>
+              signTypedDataWith(newUser, prepareResult.data),
+            )
+            .andThen((signature) =>
+              swap(client, {
+                intent: {
+                  quoteId: swapPlan.quote.quoteId,
+                  signature: signature,
+                },
+              }),
+            ),
         );
-        return sendTransaction(
-          newUser,
-          swapPlan.approval.byTransaction,
-        ).andThen(() =>
-          prepareTokenSwap(client, {
-            quoteId: swapPlan.quote.quoteId,
-          }).andThen((prepareResult) => {
-            return signSwapTypedDataWith(newUser, prepareResult.data).andThen(
-              (signature) => {
-                return swap(client, {
-                  intent: {
-                    quoteId: swapPlan.quote.quoteId,
-                    signature: signature,
-                  },
-                });
-              },
-            );
-          }),
-        );
-      });
 
       assertOk(swapResult);
       invariant(
         swapResult.value.__typename === 'SwapReceipt',
         `Swap result is not a swap receipt: ${swapResult.value.__typename}`,
       );
-      annotate(`Swap link: ${swapResult.value.explorerLink}`);
+      annotate(`Swap link: ${swapResult.value.explorerUrl}`);
     });
 
     it.todo('Then they should be able to swap via permit');

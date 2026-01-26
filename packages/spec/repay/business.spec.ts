@@ -1,10 +1,5 @@
-import { assertOk, evmAddress, invariant, okAsync } from '@aave/client';
-import {
-  permitTypedData,
-  preview,
-  repay,
-  userBorrows,
-} from '@aave/client/actions';
+import { assertOk, evmAddress, invariant, never, okAsync } from '@aave/client';
+import { preview, repay, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -13,8 +8,8 @@ import {
   fundErc20Address,
   getNativeBalance,
 } from '@aave/client/testing';
-import { sendWith, signERC20PermitWith } from '@aave/client/viem';
-import type { Reserve } from '@aave/graphql';
+import { permitWith, sendWith } from '@aave/client/viem';
+import type { Reserve, UserBorrowItem } from '@aave/graphql';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';
@@ -40,23 +35,17 @@ describe('Repaying Loans on Aave V4', () => {
 
       const borrowSetup = await findReservesToBorrow(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-      }).andThen((borrowReserves) => {
-        const reserveWithPermit = borrowReserves.find(
-          (reserve) => reserve.asset.underlying.permitSupported,
-        );
-        if (!reserveWithPermit) {
-          throw new Error('No reserve with permit support found');
-        }
+        permitSupported: true,
+      }).andThen(([borrowReserve]) => {
         return borrowFromReserve(client, user, {
           sender: evmAddress(user.account.address),
-          reserve: reserveWithPermit.id,
+          reserve: borrowReserve.id,
           amount: {
             erc20: {
-              value:
-                reserveWithPermit.userState!.borrowable.amount.value.div(10),
+              value: borrowReserve.userState!.borrowable.amount.value.div(10),
             },
           },
-        }).map(() => reserveWithPermit);
+        }).map(() => borrowReserve);
       });
       assertOk(borrowSetup);
       reserve = borrowSetup.value;
@@ -201,58 +190,53 @@ describe('Repaying Loans on Aave V4', () => {
     });
 
     describe('When the user repays a partial amount of the loan using a valid permit signature', () => {
-      it('Then the repayment is processed without requiring prior ERC20 approval', async () => {
-        const borrowBefore = await userBorrows(client, {
+      let borrowBefore: UserBorrowItem;
+
+      beforeAll(async () => {
+        const setup = await userBorrows(client, {
           query: {
             userSpoke: {
               spoke: reserve.spoke.id,
               user: evmAddress(user.account.address),
             },
           },
-        });
-        assertOk(borrowBefore);
-        const positionBefore = borrowBefore.value.find((position) => {
-          return (
-            position.reserve.asset.underlying.address ===
-            reserve.asset.underlying.address
-          );
-        });
-        invariant(positionBefore, 'No position found');
-        const amountToRepay = positionBefore.debt.amount.value.div(2);
+        })
+          .map(
+            (borrows) =>
+              borrows.find(
+                (position) =>
+                  position.reserve.asset.underlying.address ===
+                  reserve.asset.underlying.address,
+              ) ?? never('No borrow position found'),
+          )
+          .andThen((borrow) => {
+            borrowBefore = borrow;
+            return fundErc20Address(evmAddress(user.account.address), {
+              address: reserve.asset.underlying.address,
+              amount: borrowBefore.debt.amount.value, // overfund
+              decimals: reserve.asset.underlying.info.decimals,
+            });
+          });
+        assertOk(setup);
+      });
 
-        const signature = await permitTypedData(client, {
-          repay: {
-            amount: {
-              exact: amountToRepay,
-            },
+      it('Then the repayment is processed without requiring prior ERC20 approval', async () => {
+        const amountToRepay = borrowBefore.debt.amount.value.div(2);
+
+        const repayResult = await permitWith(user, (permitSig) =>
+          repay(client, {
             reserve: reserve.id,
             sender: evmAddress(user.account.address),
-          },
-        }).andThen(signERC20PermitWith(user));
-        assertOk(signature);
-
-        const repayResult = await fundErc20Address(
-          evmAddress(user.account.address),
-          {
-            address: reserve.asset.underlying.address,
-            amount: amountToRepay,
-            decimals: reserve.asset.underlying.info.decimals,
-          },
-        )
-          .andThen(() =>
-            repay(client, {
-              reserve: reserve.id,
-              sender: evmAddress(user.account.address),
-              amount: {
-                erc20: {
-                  permitSig: signature.value,
-                  value: {
-                    exact: amountToRepay,
-                  },
+            amount: {
+              erc20: {
+                permitSig,
+                value: {
+                  exact: amountToRepay,
                 },
               },
-            }),
-          )
+            },
+          }),
+        )
           .andThen((tx) => {
             invariant(
               tx.__typename === 'TransactionRequest',
@@ -261,27 +245,24 @@ describe('Repaying Loans on Aave V4', () => {
             return okAsync(tx);
           })
           .andThen(sendWith(user))
-          .andThen(client.waitForTransaction)
-          .andThen(() =>
-            userBorrows(client, {
-              query: {
-                userSpoke: {
-                  spoke: reserve.spoke.id,
-                  user: evmAddress(user.account.address),
-                },
-              },
-            }),
-          );
+          .andThen(client.waitForTransaction);
+
         assertOk(repayResult);
-        const positionAfter = repayResult.value.find((position) => {
-          return (
-            position.reserve.asset.underlying.address ===
-            borrowBefore.value[0]!.reserve.asset.underlying.address
-          );
-        });
-        invariant(positionAfter, 'No position found');
-        expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
-          positionBefore.debt.amount.value.minus(amountToRepay),
+        const after = await userBorrows(client, {
+          query: {
+            userSpoke: {
+              spoke: reserve.spoke.id,
+              user: evmAddress(user.account.address),
+            },
+          },
+        }).map(
+          (borrows) =>
+            borrows.find(({ id }) => id === borrowBefore.id) ??
+            never('No borrow position found'),
+        );
+        assertOk(after);
+        expect(after.value.debt.amount.value).toBeBigDecimalCloseTo(
+          borrowBefore.debt.amount.value.minus(amountToRepay),
           2,
         );
       });

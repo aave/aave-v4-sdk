@@ -5,6 +5,7 @@ import {
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
 } from './common';
+import { PermitTypedDataFragment } from './permits';
 
 export const TransactionRequestFragment = graphql(
   `fragment TransactionRequest on TransactionRequest {
@@ -19,11 +20,25 @@ export const TransactionRequestFragment = graphql(
 );
 export type TransactionRequest = FragmentOf<typeof TransactionRequestFragment>;
 
+export const Erc20ApprovalFragment = graphql(
+  `fragment Erc20Approval on Erc20Approval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    bySignature {
+      ...PermitTypedData
+    }
+  }`,
+  [TransactionRequestFragment, PermitTypedDataFragment],
+);
+export type Erc20Approval = FragmentOf<typeof Erc20ApprovalFragment>;
+
 export const Erc20ApprovalRequiredFragment = graphql(
   `fragment Erc20ApprovalRequired on Erc20ApprovalRequired {
     __typename
-    transaction {
-      ...TransactionRequest
+    approval {
+      ...Erc20Approval
     }
     reason
     requiredAmount {
@@ -36,7 +51,7 @@ export const Erc20ApprovalRequiredFragment = graphql(
       ...TransactionRequest
     }
   }`,
-  [TransactionRequestFragment, DecimalNumberFragment],
+  [TransactionRequestFragment, Erc20ApprovalFragment, DecimalNumberFragment],
 );
 export type Erc20ApprovalRequired = FragmentOf<
   typeof Erc20ApprovalRequiredFragment

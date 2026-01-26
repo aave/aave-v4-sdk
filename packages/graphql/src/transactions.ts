@@ -16,6 +16,7 @@ import {
   PercentNumberVariationFragment,
   ReserveInfoFragment,
   SpokeFragment,
+  SwapAmountFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './fragments';
@@ -556,6 +557,120 @@ export type UpdatedRiskPremiumActivity = FragmentOf<
   typeof UpdatedRiskPremiumActivityFragment
 >;
 
+export const TokenSwapActivityFragment = graphql(
+  `fragment TokenSwapActivity on TokenSwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    sold {
+      ...SwapAmount
+    }
+    bought {
+      ...SwapAmount
+    }
+    explorerUrl
+  }`,
+  [ChainFragment, SwapAmountFragment],
+);
+export type TokenSwapActivity = FragmentOf<typeof TokenSwapActivityFragment>;
+
+export const SupplySwapActivityFragment = graphql(
+  `fragment SupplySwapActivity on SupplySwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    sold {
+      ...SwapAmount
+    }
+    bought {
+      ...SwapAmount
+    }
+    explorerUrl
+  }`,
+  [ChainFragment, SwapAmountFragment],
+);
+export type SupplySwapActivity = FragmentOf<typeof SupplySwapActivityFragment>;
+
+export const BorrowSwapActivityFragment = graphql(
+  `fragment BorrowSwapActivity on BorrowSwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    sold {
+      ...SwapAmount
+    }
+    bought {
+      ...SwapAmount
+    }
+    explorerUrl
+  }`,
+  [ChainFragment, SwapAmountFragment],
+);
+export type BorrowSwapActivity = FragmentOf<typeof BorrowSwapActivityFragment>;
+
+export const RepayWithSupplyActivityFragment = graphql(
+  `fragment RepayWithSupplyActivity on RepayWithSupplyActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    debtRepaid {
+      ...SwapAmount
+    }
+    supplyUsed {
+      ...SwapAmount
+    }
+    explorerUrl
+  }`,
+  [ChainFragment, SwapAmountFragment],
+);
+export type RepayWithSupplyActivity = FragmentOf<
+  typeof RepayWithSupplyActivityFragment
+>;
+
+export const WithdrawSwapActivityFragment = graphql(
+  `fragment WithdrawSwapActivity on WithdrawSwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    withdrawn {
+      ...SwapAmount
+    }
+    bought {
+      ...SwapAmount
+    }
+    explorerUrl
+  }`,
+  [ChainFragment, SwapAmountFragment],
+);
+export type WithdrawSwapActivity = FragmentOf<
+  typeof WithdrawSwapActivityFragment
+>;
+
 export const ActivityItemFragment = graphql(
   `fragment ActivityItem on ActivityItem {
     __typename
@@ -583,6 +698,21 @@ export const ActivityItemFragment = graphql(
     ... on UpdatedRiskPremiumActivity {
       ...UpdatedRiskPremiumActivity
     }
+    ... on TokenSwapActivity {
+      ...TokenSwapActivity
+    }
+    ... on SupplySwapActivity {
+      ...SupplySwapActivity
+    }
+    ... on BorrowSwapActivity {
+      ...BorrowSwapActivity
+    }
+    ... on RepayWithSupplyActivity {
+      ...RepayWithSupplyActivity
+    }
+    ... on WithdrawSwapActivity {
+      ...WithdrawSwapActivity
+    }
   }`,
   [
     BorrowActivityFragment,
@@ -593,6 +723,11 @@ export const ActivityItemFragment = graphql(
     UsingAsCollateralActivityFragment,
     UpdatedDynamicConfigActivityFragment,
     UpdatedRiskPremiumActivityFragment,
+    TokenSwapActivityFragment,
+    SupplySwapActivityFragment,
+    BorrowSwapActivityFragment,
+    RepayWithSupplyActivityFragment,
+    WithdrawSwapActivityFragment,
   ],
 );
 export type ActivityItem = ExtendWithOpaqueType<
