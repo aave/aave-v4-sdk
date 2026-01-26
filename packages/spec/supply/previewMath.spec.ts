@@ -68,12 +68,10 @@ describe('Supply Preview Math', () => {
           assertOk(previewResult);
           previewInfo = previewResult.value;
 
-          const result = await fundAndSupplyToReserve(
-            client,
-            user,
-            supplyReserve.id,
-            bigDecimal('10'),
-          ).andThen(() =>
+          const result = await fundAndSupplyToReserve(client, user, {
+            reserveId: supplyReserve.id,
+            amount: bigDecimal('10'),
+          }).andThen(() =>
             userPosition(client, {
               userSpoke: {
                 spoke: ETHEREUM_SPOKE_CORE_ID,

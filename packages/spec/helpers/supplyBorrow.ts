@@ -37,8 +37,7 @@ export function supplyToReserve(
 export function fundAndSupplyToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
-  reserveId: ReserveId,
-  amount: BigDecimal,
+  { reserveId, amount }: { reserveId: ReserveId; amount: BigDecimal },
 ): ResultAsync<TxHash, Error> {
   return reserve(client, {
     query: { reserveId: reserveId },
