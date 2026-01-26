@@ -309,9 +309,10 @@ export function useTokenSwapQuoteAction(
 
   return useAsyncTask(
     (request: TokenSwapQuoteRequest) =>
-      tokenSwapQuote(client, request, { currency: options.currency }).map(
-        extractTokenSwapQuote,
-      ),
+      tokenSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map(extractTokenSwapQuote),
     [client, options.currency],
   );
 }
@@ -745,9 +746,10 @@ export function useSupplySwapQuoteAction(
 
   return useAsyncTask(
     (request: SupplySwapQuoteRequest) =>
-      supplySwapQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      supplySwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }
@@ -891,9 +893,10 @@ export function useBorrowSwapQuoteAction(
 
   return useAsyncTask(
     (request: BorrowSwapQuoteRequest) =>
-      borrowSwapQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      borrowSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }
@@ -1234,9 +1237,10 @@ export function useRepayWithSupplyQuoteAction(
 
   return useAsyncTask(
     (request: RepayWithSupplyQuoteRequest) =>
-      repayWithSupplyQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      repayWithSupplyQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }
@@ -1434,9 +1438,10 @@ export function useWithdrawSwapQuoteAction(
 
   return useAsyncTask(
     (request: WithdrawSwapQuoteRequest) =>
-      withdrawSwapQuote(client, request, { currency: options.currency }).map(
-        (data) => data.quote,
-      ),
+      withdrawSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).map((data) => data.quote),
     [client, options.currency],
   );
 }

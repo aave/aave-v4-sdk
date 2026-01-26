@@ -327,6 +327,18 @@ export function encodeSpokeId(spoke: SpokeIdParts): SpokeId {
 }
 
 /**
+ * @internal
+ */
+export function decodeSpokeId(value: SpokeId): SpokeIdParts {
+  const decoded = decodeBase64(value);
+  const [a, b] = decoded.split(COMPOSITE_ID_SEPARATOR) as [string, string];
+  return {
+    chainId: chainId(Number.parseInt(a, 10)),
+    address: evmAddress(b),
+  };
+}
+
+/**
  * Creates a spoke identifier from a given base64 value.
  *
  * @remarks

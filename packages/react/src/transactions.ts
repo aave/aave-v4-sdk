@@ -44,12 +44,12 @@ import {
   ReservesQuery,
   type SetSpokeUserPositionManagerRequest,
   type SetUserSuppliesAsCollateralRequest,
+  type SpokeInput,
   SpokePositionManagersQuery,
   SpokesQuery,
   type SupplyRequest,
   type TransactionRequest,
   type UpdateUserPositionConditionsRequest,
-  UserBalancesQuery,
   UserPositionQuery,
   UserPositionsQuery,
   UserSummaryQuery,
@@ -73,6 +73,14 @@ import {
   PendingTransaction,
   type PendingTransactionError,
   type ReadResult,
+  refreshHubs,
+  refreshReserves,
+  refreshSpokes,
+  refreshUserBalances,
+  refreshUserBorrows,
+  refreshUserPositions,
+  refreshUserSummary,
+  refreshUserSupplies,
   type SendTransactionError,
   type Suspendable,
   type SuspendableResult,
@@ -87,65 +95,18 @@ function refreshQueriesForReserveChange(
   client: AaveClient,
   request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
 ) {
-  const { chainId, spoke } = decodeReserveId(request.reserve);
+  const { chainId, spoke: address } = decodeReserveId(request.reserve);
+  const spoke: SpokeInput = { chainId, address };
   return async () =>
     Promise.all([
-      // update user positions
-      await client.refreshQueryWhere(
-        UserPositionsQuery,
-        (variables, data) =>
-          variables.request.user === request.sender &&
-          data.some(
-            (position) =>
-              position.spoke.chain.chainId === chainId &&
-              position.spoke.address === spoke,
-          ),
-      ),
-      await client.refreshQueryWhere(
-        UserPositionQuery,
-        (_, data) =>
-          data?.spoke.chain.chainId === chainId &&
-          data?.spoke.address === spoke &&
-          data.user === request.sender,
-      ),
-
-      // update user summary
-      await client.refreshQueryWhere(UserSummaryQuery, (variables) =>
-        variables.request.user === request.sender &&
-        isSpokeInputVariant(variables.request.filter)
-          ? variables.request.filter.spoke.chainId === chainId &&
-            variables.request.filter.spoke.address === spoke
-          : isChainIdsVariant(variables.request.filter)
-            ? variables.request.filter.chainIds.some((id) => id === chainId)
-            : false,
-      ),
-
-      // update reserves
-      await client.refreshQueryWhere(ReservesQuery, (_, data) =>
-        data.some((reserve) => reserve.id === request.reserve),
-      ),
-
-      // update spokes
-      await client.refreshQueryWhere(SpokesQuery, (_, data) =>
-        data.some(
-          (item) => item.chain.chainId === chainId && item.address === spoke,
-        ),
-      ),
-
-      // update user balances
-      await client.refreshQueryWhere(
-        UserBalancesQuery,
-        // update any user balances for the given user
-        (variables) => variables.request.user === request.sender,
-      ),
-
-      // update hubs
-      await client.refreshQueryWhere(
-        HubsQuery,
-        (variables) =>
-          isChainIdsVariant(variables.request) &&
-          variables.request.chainIds.some((id) => id === chainId),
-      ),
+      refreshUserPositions(client, request.sender, spoke),
+      refreshUserSummary(client, request.sender, spoke),
+      refreshReserves(client, request.reserve),
+      refreshSpokes(client, spoke),
+      refreshUserBalances(client, request.sender),
+      refreshUserSupplies(client, request.sender),
+      refreshUserBorrows(client, request.sender),
+      refreshHubs(client, chainId),
     ]);
 }
 
@@ -1167,7 +1128,10 @@ export function usePreviewAction(
 
   return useAsyncTask(
     (request: PreviewRequest) =>
-      preview(client, request, { currency: options.currency }),
+      preview(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }),
     [client, options.currency],
   );
 }
@@ -1424,6 +1388,7 @@ export function useActivitiesAction(
       activities(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );

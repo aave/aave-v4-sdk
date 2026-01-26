@@ -78,9 +78,16 @@ export function hubs(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Hub[], UnexpectedError> {
-  return client.query(HubsQuery, { request, currency, timeWindow });
+  return client.query(
+    HubsQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -103,9 +110,16 @@ export function hubAssets(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubAsset[], UnexpectedError> {
-  return client.query(HubAssetsQuery, { request, currency, timeWindow });
+  return client.query(
+    HubAssetsQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -121,11 +135,15 @@ export function hubAssets(
  *
  * @param client - Aave client.
  * @param request - The hub summary history request parameters.
+ * @param options - The query options.
  * @returns Array of hub summary samples over time.
  */
 export function hubSummaryHistory(
   client: AaveClient,
   request: HubSummaryHistoryRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubSummarySample[], UnexpectedError> {
-  return client.query(HubSummaryHistoryQuery, { request });
+  return client.query(HubSummaryHistoryQuery, { request }, { requestPolicy });
 }

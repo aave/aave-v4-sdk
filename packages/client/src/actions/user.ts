@@ -29,6 +29,7 @@ import type { AaveClient } from '../AaveClient';
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
   type TimeWindowQueryOptions,
 } from '../options';
 
@@ -58,9 +59,16 @@ export function userSupplies(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSupplyItem[], UnexpectedError> {
-  return client.query(UserSuppliesQuery, { request, currency, timeWindow });
+  return client.query(
+    UserSuppliesQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -89,13 +97,20 @@ export function userBorrows(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  }: CurrencyQueryOptions & TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBorrowItem[], UnexpectedError> {
-  return client.query(UserBorrowsQuery, { request, currency, timeWindow });
+  return client.query(
+    UserBorrowsQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 export type UserSummaryQueryOptions = Prettify<
-  CurrencyQueryOptions & TimeWindowQueryOptions
+  CurrencyQueryOptions & TimeWindowQueryOptions & RequestPolicyOptions
 >;
 
 /**
@@ -121,17 +136,23 @@ export function userSummary(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: UserSummaryQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummary, UnexpectedError> {
-  return client.query(UserSummaryQuery, {
-    request,
-    currency,
-    timeWindow,
-  });
+  return client.query(
+    UserSummaryQuery,
+    {
+      request,
+      currency,
+      timeWindow,
+    },
+    { requestPolicy },
+  );
 }
 
 export type UserPositionQueryOptions = CurrencyQueryOptions &
-  TimeWindowQueryOptions;
+  TimeWindowQueryOptions &
+  RequestPolicyOptions;
 
 /**
  * Fetches all user positions across specified chains.
@@ -157,9 +178,14 @@ export function userPositions(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: UserPositionQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition[], UnexpectedError> {
-  return client.query(UserPositionsQuery, { request, currency, timeWindow });
+  return client.query(
+    UserPositionsQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -182,9 +208,14 @@ export function userPosition(
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: UserPositionQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserPosition | null, UnexpectedError> {
-  return client.query(UserPositionQuery, { request, currency, timeWindow });
+  return client.query(
+    UserPositionQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -207,9 +238,16 @@ export function userPosition(
 export function userBalances(
   client: AaveClient,
   request: UserBalancesRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserBalance[], UnexpectedError> {
-  return client.query(UserBalancesQuery, { request, ...options });
+  return client.query(
+    UserBalancesQuery,
+    { request, currency },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -233,9 +271,16 @@ export function userBalances(
 export function userSummaryHistory(
   client: AaveClient,
   request: UserSummaryHistoryRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserSummaryHistoryItem[], UnexpectedError> {
-  return client.query(UserSummaryHistoryQuery, { request, ...options });
+  return client.query(
+    UserSummaryHistoryQuery,
+    { request, currency },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -252,11 +297,19 @@ export function userSummaryHistory(
  *
  * @param client - Aave client.
  * @param request - The user risk premium breakdown request parameters.
+ * @param options - The query options.
  * @returns Array of risk premium breakdown items.
  */
 export function userRiskPremiumBreakdown(
   client: AaveClient,
   request: UserRiskPremiumBreakdownRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<UserRiskPremiumBreakdownItem[], UnexpectedError> {
-  return client.query(UserRiskPremiumBreakdownQuery, { request });
+  return client.query(
+    UserRiskPremiumBreakdownQuery,
+    { request },
+    { requestPolicy },
+  );
 }
