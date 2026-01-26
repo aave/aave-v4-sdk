@@ -6,7 +6,7 @@ import {
   okAsync,
   type Reserve,
 } from '@aave/client';
-import { permitTypedData, preview, supply, userSupplies } from '@aave/client/actions';
+import { supply, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
