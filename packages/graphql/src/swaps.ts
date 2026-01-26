@@ -34,8 +34,8 @@ export type MarketOrderTokenSwapQuoteInput = ReturnType<
 export type LimitOrderTokenSwapQuoteInput = ReturnType<
   typeof graphql.scalar<'LimitOrderTokenSwapQuoteInput'>
 >;
-export type FromQuoteSwapQuoteInput = ReturnType<
-  typeof graphql.scalar<'FromQuoteSwapQuoteInput'>
+export type MarketOrderTokenSwapFromQuoteInput = ReturnType<
+  typeof graphql.scalar<'MarketOrderTokenSwapFromQuoteInput'>
 >;
 
 /**
@@ -241,12 +241,6 @@ export type PreparePositionSwapRequest = RequestOf<
 export type CancelIntentSwapInput = ReturnType<
   typeof graphql.scalar<'CancelIntentSwapInput'>
 >;
-export type PrepareLimitOrderSwapInput = ReturnType<
-  typeof graphql.scalar<'PrepareLimitOrderSwapInput'>
->;
-export type PrepareMarketOrderSwapInput = ReturnType<
-  typeof graphql.scalar<'PrepareMarketOrderSwapInput'>
->;
 export type SwapByIntentInput = ReturnType<
   typeof graphql.scalar<'SwapByIntentInput'>
 >;
@@ -255,4 +249,13 @@ export type SwapWithTransactionInput = ReturnType<
 >;
 export type SwappableTokensRequestQuery = ReturnType<
   typeof graphql.scalar<'SwappableTokensRequestQuery'>
+>;
+export type SwapTokenInput = ReturnType<
+  typeof graphql.scalar<'SwapTokenInput'>
+>;
+export type SwapErc20Input = ReturnType<
+  typeof graphql.scalar<'SwapErc20Input'>
+>;
+export type SwappableTokenInput = ReturnType<
+  typeof graphql.scalar<'SwappableTokenInput'>
 >;

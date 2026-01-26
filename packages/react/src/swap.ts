@@ -27,7 +27,6 @@ import {
 } from '@aave/core';
 import type {
   InsufficientBalanceError,
-  MarketOrderTokenSwapQuoteInput,
   PaginatedUserSwapsResult,
   PositionSwapApproval,
   PrepareSwapCancelRequest,
@@ -35,6 +34,8 @@ import type {
   SwapCancelled,
   SwapQuote,
   SwapReceipt,
+  SwapStatus,
+  SwapStatusRequest,
   SwapTransactionRequest,
   TokenSwapQuoteRequest,
   UserSwapsRequest,
@@ -44,9 +45,9 @@ import {
   type BorrowSwapQuoteRequest,
   type ERC20PermitSignature,
   type Erc20Approval,
-  isERC20PermitSignature,
   type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
+  QuoteAccuracy,
   RepayWithSupplyQuoteQuery,
   type RepayWithSupplyQuoteRequest,
   SupplySwapQuoteQuery,
@@ -54,6 +55,7 @@ import {
   SwappableTokensQuery,
   type SwappableTokensRequest,
   type SwapRequest,
+  SwapStatusQuery,
   type SwapTypedData,
   type Token,
   TokenSwapQuoteQuery,
@@ -76,7 +78,7 @@ import {
   okAsync,
   ResultAwareError,
 } from '@aave/types';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAaveClient } from './context';
 import {
   type CancelOperation,
@@ -109,8 +111,27 @@ function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
   }
 }
 
+function injectSwapQuoteAccuracy(
+  request: TokenSwapQuoteRequest,
+  accuracy: QuoteAccuracy,
+): TokenSwapQuoteRequest {
+  if ('market' in request && request.market) {
+    return {
+      ...request,
+      market: { ...request.market, accuracy },
+    };
+  }
+  if ('limit' in request && request.limit) {
+    return {
+      ...request,
+      limit: { ...request.limit, accuracy },
+    };
+  }
+  return request;
+}
+
 export type UseTokenSwapQuoteArgs = Prettify<
-  MarketOrderTokenSwapQuoteInput & CurrencyQueryOptions
+  TokenSwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
@@ -120,11 +141,14 @@ export type UseTokenSwapQuoteArgs = Prettify<
  *
  * ```tsx
  * const { data } = useTokenSwapQuote({
+ *   market: {
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
  *   suspense: true,
  * });
  * ```
@@ -139,12 +163,14 @@ export function useTokenSwapQuote(
  *
  * ```tsx
  * const { data } = useTokenSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
- *   from: evmAddress('0x742d35cc…'),
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   suspense: true,
  *   pause: true,
  * });
@@ -158,11 +184,14 @@ export function useTokenSwapQuote(
  *
  * ```tsx
  * const { data, error, loading } = useTokenSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  * });
  * ```
  */
@@ -176,12 +205,14 @@ export function useTokenSwapQuote(
  *
  * ```tsx
  * const { data, error, loading, paused } = useTokenSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
- *   from: evmAddress('0x742d35cc…'),
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   pause: true,
  * });
  * ```
@@ -199,18 +230,46 @@ export function useTokenSwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: {
-        market: request,
-      },
+      request: injectSwapQuoteAccuracy(
+        request as TokenSwapQuoteRequest,
+        QuoteAccuracy.Fast,
+      ),
       currency,
     },
     selector: extractTokenSwapQuote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: TokenSwapQuoteQuery,
+    variables: {
+      request: injectSwapQuoteAccuracy(
+        request as TokenSwapQuoteRequest,
+        QuoteAccuracy.Accurate,
+      ),
+      currency,
+    },
+    selector: extractTokenSwapQuote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -227,11 +286,13 @@ export function useTokenSwapQuote({
  * // …
  *
  * const result = await getQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *   sell: { erc20: evmAddress('0x6B175474E…') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.Sell,
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *   },
  * });
  *
  * if (result.isOk()) {
@@ -243,16 +304,14 @@ export function useTokenSwapQuote({
  */
 export function useTokenSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<MarketOrderTokenSwapQuoteInput, SwapQuote, UnexpectedError> {
+): UseAsyncTask<TokenSwapQuoteRequest, SwapQuote, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: MarketOrderTokenSwapQuoteInput) =>
-      tokenSwapQuote(
-        client,
-        { market: request },
-        { currency: options.currency },
-      ).map(extractTokenSwapQuote),
+    (request: TokenSwapQuoteRequest) =>
+      tokenSwapQuote(client, request, { currency: options.currency }).map(
+        extractTokenSwapQuote,
+      ),
     [client, options.currency],
   );
 }
@@ -417,12 +476,134 @@ export function useUserSwaps({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> {
-  return useSuspendableQuery({
-    document: UserSwapsQuery,
-    variables: { request, currency, timeWindow },
-    suspense,
-    pause,
-  });
+  const client = useAaveClient();
+  const [allTerminal, setAllTerminal] = useState(false);
+
+  const result: SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> =
+    useSuspendableQuery({
+      document: UserSwapsQuery,
+      variables: { request, currency, timeWindow },
+      suspense,
+      pause: pause || allTerminal,
+      pollInterval: client.context.environment.swapStatusInterval,
+    });
+
+  useEffect(() => {
+    if (result.data && result.data.items.length > 0) {
+      const allItemsTerminal = result.data.items.every(isTerminalSwapStatus);
+      if (allItemsTerminal) {
+        setAllTerminal(true);
+      }
+    }
+  }, [result.data]);
+
+  return result;
+}
+
+// ------------------------------------------------------------
+
+function isTerminalSwapStatus(data: SwapStatus): boolean {
+  return (
+    data.__typename === 'SwapFulfilled' ||
+    data.__typename === 'SwapCancelled' ||
+    data.__typename === 'SwapExpired'
+  );
+}
+
+export type UseSwapStatusArgs = Prettify<
+  SwapStatusRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
+
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Polls automatically until the swap reaches a terminal state (fulfilled, cancelled, or expired).
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: UseSwapStatusArgs & Suspendable,
+): SuspenseResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   suspense: true,
+ *   pause: shouldPause,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: Pausable<UseSwapStatusArgs> & Suspendable,
+): PausableSuspenseResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Polls automatically until the swap reaches a terminal state (fulfilled, cancelled, or expired).
+ *
+ * ```tsx
+ * const { data, error, loading } = useSwapStatus({
+ *   id: swapReceipt.id,
+ * });
+ * ```
+ */
+export function useSwapStatus(args: UseSwapStatusArgs): ReadResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   pause: shouldPause,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: Pausable<UseSwapStatusArgs>,
+): PausableReadResult<SwapStatus>;
+
+export function useSwapStatus({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  ...request
+}: NullishDeep<UseSwapStatusArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SwapStatus, UnexpectedError> {
+  const client = useAaveClient();
+  const [isTerminal, setIsTerminal] = useState(false);
+
+  const result: SuspendableResult<SwapStatus, UnexpectedError> =
+    useSuspendableQuery({
+      document: SwapStatusQuery,
+      variables: { request, currency, timeWindow },
+      suspense,
+      pause: pause || isTerminal,
+      pollInterval: client.context.environment.swapStatusInterval,
+    });
+
+  useEffect(() => {
+    if (result.data && isTerminalSwapStatus(result.data)) {
+      setIsTerminal(true);
+    }
+  }, [result.data]);
+
+  return result;
 }
 
 // ------------------------------------------------------------
@@ -1349,7 +1530,7 @@ export type TokenSwapHandler = (
  *       return sendTransaction(plan.transaction);
  *
  *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(plan.approval);
+ *       return sendTransaction(plan.approval.byTransaction);
  *
  *     case 'SwapTransactionRequest':
  *       return sendTransaction(plan.transaction);
@@ -1442,10 +1623,20 @@ export function useTokenSwap(
           case 'SwapByIntentWithApprovalRequired':
             return handler(quoteResult.approval, { cancel })
               .andThen((result) => {
-                if (isERC20PermitSignature(result)) {
+                if (isSignature(result)) {
+                  const permitTypedData = quoteResult.approval.bySignature;
+                  if (!permitTypedData) {
+                    return UnexpectedError.from(
+                      'Expected bySignature to be present in SwapByIntentWithApprovalRequired',
+                    ).asResultAsync();
+                  }
+                  const permitSig: ERC20PermitSignature = {
+                    deadline: permitTypedData.message.deadline as number,
+                    value: result,
+                  };
                   return prepareTokenSwap(client, {
                     quoteId: quoteResult.quote.quoteId,
-                    permitSig: result,
+                    permitSig,
                   });
                 }
                 if (PendingTransaction.isInstanceOf(result)) {

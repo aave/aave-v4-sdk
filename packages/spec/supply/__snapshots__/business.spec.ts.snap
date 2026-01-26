@@ -18,3 +18,22 @@ exports[`Supplying Assets on Aave V4 > Given a user and a reserve > When the use
   "riskPremium": Any<Object>,
 }
 `;
+
+exports[`Supplying Assets on Aave V4 > Given a user and a reserve, that supports collateral > When the user wants to preview the supply action before performing it > Then the user can review the supply details before proceeding 1`] = `
+{
+  "__typename": "PreviewUserPosition",
+  "borrowingPower": Any<Object>,
+  "healthFactor": {
+    "__typename": "HealthFactorVariation",
+    "after": null,
+    "current": null,
+  },
+  "id": Any<String>,
+  "netApy": Any<Object>,
+  "netBalance": Any<Object>,
+  "netCollateral": Any<Object>,
+  "otherConditions": Any<Array>,
+  "projectedEarnings": Any<Object>,
+  "riskPremium": Any<Object>,
+}
+`;

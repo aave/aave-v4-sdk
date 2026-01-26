@@ -1,12 +1,13 @@
-import { SigningError, TransactionError, UnexpectedError } from '@aave/client';
+import {
+  SigningError,
+  type SignTypedDataError,
+  TransactionError,
+  type TypedData,
+  UnexpectedError,
+} from '@aave/client';
 import { chain as fetchChain } from '@aave/client/actions';
 import { toThirdwebChain } from '@aave/client/thirdweb';
-import type {
-  ERC20PermitSignature,
-  PermitRequest,
-  SwapTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import {
   invariant,
   okAsync,
@@ -29,7 +30,6 @@ import {
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
-import { usePermitTypedDataAction } from './permits';
 
 /**
  * A hook that provides a way to send Aave transactions using a Thirdweb wallet.
@@ -111,107 +111,24 @@ export function useSendTransaction(
   );
 }
 
-export type SignERC20PermitError = SigningError | UnexpectedError;
-
 /**
- * A hook that provides a way to sign ERC20 permits using a Thirdweb wallet.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using a Thirdweb wallet.
  *
  * ```ts
- * const account = useActiveAccount(); // thirdweb hook
- * const [signERC20Permit, { loading, error, data }] = useERC20Permit();
- *
- * const run = async () => {
- *   const result = await signERC20Permit({
- *     supply: {
- *       sender: evmAddress(account.address), // User's address
- *       reserve: {
- *         reserveId: reserve.id,
- *         chainId: reserve.chain.chainId,
- *         spoke: reserve.spoke.address,
- *       },
- *       amount: {
- *         value: bigDecimal(42), // 42 USDC
- *       },
- *     },
- *   });
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('ERC20 Permit signature:', result.value);
- * };
+ * const [signTypedData, { loading, error, data }] = useSignTypedData();
  * ```
  */
-export function useERC20Permit(): UseAsyncTask<
-  PermitRequest,
-  ERC20PermitSignature,
-  SignERC20PermitError
-> {
-  const [permitTypedData] = usePermitTypedDataAction();
-  const account = useActiveAccount();
-
-  return useAsyncTask(
-    (request: PermitRequest) => {
-      invariant(
-        account,
-        'No Account found. Ensure you have connected your wallet.',
-      );
-
-      return permitTypedData(request).andThen((result) =>
-        ResultAsync.fromPromise(
-          account.signTypedData({
-            // silence the rest of the type inference
-            types: result.types as Record<string, unknown>,
-            domain: result.domain,
-            primaryType: result.primaryType,
-            message: result.message,
-          }),
-          (err) => SigningError.from(err),
-        ).map((signature) => {
-          return {
-            deadline: result.message.deadline,
-            value: signatureFrom(signature),
-          };
-        }),
-      );
-    },
-    [account, permitTypedData],
-  );
-}
-
-export type SignSwapTypedDataError = SigningError | UnexpectedError;
-
-/**
- * @internal
- * A hook that provides a way to sign swap typed data using a Thirdweb wallet.
- *
- * ```ts
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedData();
- *
- * const run = async () => {
- *   const result = await signSwapTypedData(swapTypedData);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Swap typed data signed:', result.value);
- * };
- * ```
- */
-export function useSignSwapTypedData(): UseAsyncTask<
-  SwapTypedData,
+export function useSignTypedData(): UseAsyncTask<
+  TypedData,
   Signature,
-  SignSwapTypedDataError
+  SignTypedDataError
 > {
   const account = useActiveAccount();
 
   return useAsyncTask(
-    (typedData: SwapTypedData) => {
-      invariant(account, 'Expected an active account to sign swap typed data');
+    (typedData: TypedData) => {
+      invariant(account, 'Expected an active account to sign typed data');
 
       return ResultAsync.fromPromise(
         account.signTypedData({

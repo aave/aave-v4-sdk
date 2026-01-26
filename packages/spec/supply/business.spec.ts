@@ -1,18 +1,12 @@
 import {
   assertOk,
   bigDecimal,
-  Currency,
   evmAddress,
   invariant,
   okAsync,
   type Reserve,
 } from '@aave/client';
-import {
-  permitTypedData,
-  preview,
-  supply,
-  userSupplies,
-} from '@aave/client/actions';
+import { supply, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -20,9 +14,8 @@ import {
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
-import { sendWith, signERC20PermitWith } from '@aave/client/viem';
+import { permitWith, sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-
 import { findReservesToSupply } from '../helpers/reserves';
 import { supplyToReserve } from '../helpers/supplyBorrow';
 import { assertNonEmptyArray } from '../test-utils';
@@ -149,108 +142,38 @@ describe('Supplying Assets on Aave V4', () => {
       });
     });
 
-    describe('When the user wants to preview the supply action before performing it', () => {
-      it('Then the user can review the supply details before proceeding', async () => {
-        const reserveToSupply = await findReservesToSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
-        });
-        assertOk(reserveToSupply);
-        assertNonEmptyArray(reserveToSupply.value);
-
-        const previewResult = await preview(
-          client,
-          {
-            action: {
-              supply: {
-                reserve: reserveToSupply.value[0].id,
-                amount: {
-                  erc20: {
-                    value: bigDecimal('10'),
-                  },
-                },
-                sender: evmAddress(user.account.address),
-              },
-            },
-          },
-          { currency: Currency.Usd },
-        );
-        assertOk(previewResult);
-        expect(previewResult.value).toMatchSnapshot({
-          id: expect.any(String),
-          borrowingPower: expect.any(Object),
-          netBalance: expect.any(Object),
-          netCollateral: expect.any(Object),
-          netApy: expect.any(Object),
-          riskPremium: expect.any(Object),
-          otherConditions: expect.any(Array),
-          projectedEarnings: expect.any(Object),
-        });
-      });
-    });
-
     describe('When the user supplies tokens using a valid permit signature', () => {
       let reserveWithPermit: Reserve;
 
       beforeAll(async () => {
-        const result = await findReservesToSupply(client, user, {
-          canUseAsCollateral: true,
+        const setup = await findReservesToSupply(client, user, {
+          permitSupported: true,
+        }).andThen(([reserve]) => {
+          reserveWithPermit = reserve;
+          return fundErc20Address(evmAddress(user.account.address), {
+            address: reserve.asset.underlying.address,
+            amount: bigDecimal('10'),
+            decimals: reserve.asset.underlying.info.decimals,
+          });
         });
-        assertOk(result);
-        assertNonEmptyArray(result.value);
-        reserveWithPermit = result.value.find(
-          (reserve) => reserve.asset.underlying.permitSupported === true,
-        )!;
-
-        const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: reserveWithPermit.asset.underlying.address,
-          amount: bigDecimal('1'),
-          decimals: reserveWithPermit.asset.underlying.info.decimals,
-        });
-
         assertOk(setup);
       });
 
       it('Then the supply is processed without requiring prior ERC20 approval', async () => {
         const amountToSupply = bigDecimal('0.9');
 
-        const signature = await permitTypedData(client, {
-          supply: {
-            amount: {
-              value: amountToSupply,
-            },
+        const result = await permitWith(user, (permitSig) =>
+          supply(client, {
             reserve: reserveWithPermit.id,
+            amount: {
+              erc20: {
+                value: amountToSupply,
+                permitSig,
+              },
+            },
             sender: evmAddress(user.account.address),
-            enableCollateral: true,
-          },
-        }).andThen(signERC20PermitWith(user));
-        assertOk(signature);
-
-        const supplyPositionBefore = await userSupplies(client, {
-          query: {
-            userSpoke: {
-              spoke: reserveWithPermit.spoke.id,
-              user: evmAddress(user.account.address),
-            },
-          },
-        }).map((positions) => {
-          return positions.find(
-            (position) =>
-              position.reserve.asset.underlying.address ===
-              reserveWithPermit.asset.underlying.address,
-          );
-        });
-        assertOk(supplyPositionBefore);
-
-        const result = await supply(client, {
-          reserve: reserveWithPermit.id,
-          amount: {
-            erc20: {
-              value: amountToSupply,
-              permitSig: signature.value,
-            },
-          },
-          sender: evmAddress(user.account.address),
-        })
+          }),
+        )
           .andThen((tx) => {
             invariant(
               tx.__typename === 'TransactionRequest',
@@ -259,17 +182,8 @@ describe('Supplying Assets on Aave V4', () => {
             return okAsync(tx);
           })
           .andThen(sendWith(user))
-          .andThen(client.waitForTransaction)
-          .andThen(() =>
-            userSupplies(client, {
-              query: {
-                userSpoke: {
-                  spoke: reserveWithPermit.spoke.id,
-                  user: evmAddress(user.account.address),
-                },
-              },
-            }),
-          );
+          .andThen(client.waitForTransaction);
+
         assertOk(result);
       });
     });

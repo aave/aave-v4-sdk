@@ -24,11 +24,10 @@ import type {
   ChainsFilter,
   CollateralMetric,
   Currency,
-  HubAssetStatusType,
-  HubAssetsRequestOrderBy,
   OperationType,
   OrderDirection,
   PageSize,
+  QuoteAccuracy,
   RepayWithSupplyKind,
   ReservesRequestFilter,
   SupplySwapKind,
@@ -83,8 +82,6 @@ export const graphql = initGraphQLTada<{
     EvmAddress: EvmAddress;
     Float: number;
     HubAssetId: HubAssetId;
-    HubAssetsRequestOrderBy: HubAssetsRequestOrderBy;
-    HubAssetStatusType: HubAssetStatusType;
     HubId: HubId;
     ID: ID;
     Int: number;
@@ -94,6 +91,7 @@ export const graphql = initGraphQLTada<{
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
+    QuoteAccuracy: QuoteAccuracy;
     ReserveId: ReserveId;
     ReservesRequestFilter: ReservesRequestFilter;
     Signature: Signature;

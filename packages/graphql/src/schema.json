@@ -45,6 +45,26 @@
           {
             "kind": "OBJECT",
             "name": "UpdatedRiskPremiumActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "TokenSwapActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SupplySwapActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "BorrowSwapActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "RepayWithSupplyActivity"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "WithdrawSwapActivity"
           }
         ]
       },
@@ -278,7 +298,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
@@ -314,7 +334,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DecimalNumberWithChange",
+                "name": "AssetAmountWithChange",
                 "ofType": null
               }
             },
@@ -539,6 +559,104 @@
                 "kind": "OBJECT",
                 "name": "Chain",
                 "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "BorrowSwapActivity",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "sold",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "bought",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "explorerUrl",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -994,7 +1112,7 @@
             "name": "bySignature",
             "type": {
               "kind": "OBJECT",
-              "name": "PermitTypedDataResponse",
+              "name": "PermitTypedData",
               "ofType": null
             },
             "args": []
@@ -1013,6 +1131,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "approval",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Approval",
                 "ofType": null
               }
             },
@@ -1109,17 +1239,6 @@
           },
           {
             "name": "isWrappedNativeToken",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "permitSupported",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -2680,78 +2799,15 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PermitMessageData",
-        "fields": [
-          {
-            "name": "owner",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "spender",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "value",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "nonce",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "deadline",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "PermitTypedDataResponse",
+        "name": "PermitTypedData",
         "fields": [
           {
             "name": "types",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "TypeDefinition",
-                "ofType": null
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -2784,9 +2840,8 @@
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "PermitMessageData",
-                "ofType": null
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -3275,29 +3330,6 @@
                     "ofType": null
                   }
                 }
-              }
-            },
-            "args": [
-              {
-                "name": "request",
-                "type": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Any"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "permitTypedData",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PermitTypedDataResponse",
-                "ofType": null
               }
             },
             "args": [
@@ -4635,6 +4667,104 @@
         "interfaces": []
       },
       {
+        "kind": "OBJECT",
+        "name": "RepayWithSupplyActivity",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "debtRepaid",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "supplyUsed",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "explorerUrl",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "UNION",
         "name": "RepayWithSupplyQuoteResult",
         "possibleTypes": [
@@ -5389,6 +5519,104 @@
         "interfaces": []
       },
       {
+        "kind": "OBJECT",
+        "name": "SupplySwapActivity",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "sold",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "bought",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "explorerUrl",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "UNION",
         "name": "SupplySwapQuoteResult",
         "possibleTypes": [
@@ -5490,6 +5718,17 @@
         "name": "SwapCancelled",
         "fields": [
           {
+            "name": "swapId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "createdAt",
             "type": {
               "kind": "NON_NULL",
@@ -5509,7 +5748,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5545,6 +5784,17 @@
         "name": "SwapExpired",
         "fields": [
           {
+            "name": "swapId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "createdAt",
             "type": {
               "kind": "NON_NULL",
@@ -5567,7 +5817,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5584,6 +5834,17 @@
         "kind": "OBJECT",
         "name": "SwapFulfilled",
         "fields": [
+          {
+            "name": "swapId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "txHash",
             "type": {
@@ -5666,7 +5927,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5725,7 +5986,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5767,6 +6028,17 @@
         "name": "SwapPendingSignature",
         "fields": [
           {
+            "name": "swapId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "createdAt",
             "type": {
               "kind": "NON_NULL",
@@ -5789,7 +6061,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5806,6 +6078,17 @@
         "kind": "OBJECT",
         "name": "SwapQuote",
         "fields": [
+          {
+            "name": "accuracy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
           {
             "name": "quoteId",
             "type": {
@@ -5830,7 +6113,7 @@
             "args": []
           },
           {
-            "name": "spotSell",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5842,7 +6125,7 @@
             "args": []
           },
           {
-            "name": "spotBuy",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5971,7 +6254,7 @@
             "args": []
           },
           {
-            "name": "explorerLink",
+            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6201,6 +6484,104 @@
         "interfaces": []
       },
       {
+        "kind": "OBJECT",
+        "name": "TokenSwapActivity",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "sold",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "bought",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "explorerUrl",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "UNION",
         "name": "TokenSwapQuoteResult",
         "possibleTypes": [
@@ -6287,78 +6668,6 @@
                   "kind": "SCALAR",
                   "name": "Any"
                 }
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "TypeDefinition",
-        "fields": [
-          {
-            "name": "EIP712Domain",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "TypeField",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "Permit",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "TypeField",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "TypeField",
-        "fields": [
-          {
-            "name": "name",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "type",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
               }
             },
             "args": []
@@ -6997,7 +7306,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "healthFactor",
@@ -7375,7 +7695,18 @@
                 "ofType": null
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           },
           {
             "name": "lowestHealthFactor",
@@ -7758,6 +8089,104 @@
                 "kind": "OBJECT",
                 "name": "Chain",
                 "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "WithdrawSwapActivity",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "withdrawn",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "bought",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "explorerUrl",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []

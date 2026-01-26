@@ -79,7 +79,7 @@ export const UserSummaryFragment = graphql(
     netApy {
       ...PercentNumber
     }
-    netAccruedInterest {
+    netAccruedInterest(currency: $currency) {
       ...ExchangeAmount
     }
     lowestHealthFactor
@@ -151,7 +151,7 @@ export const UserPositionFragment = graphql(
     netBalance(currency: $currency) {
       ...ExchangeAmountWithChange
     }
-    netAccruedInterest {
+    netAccruedInterest(currency: $currency) {
       ...ExchangeAmount
     }
     totalCollateral(currency: $currency) {
