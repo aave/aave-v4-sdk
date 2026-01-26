@@ -359,6 +359,7 @@ export const exchange = cacheExchange({
     AssetAmountWithChange: () => null,
     AssetBorrowSample: () => null,
     AssetPriceSample: () => null,
+    AssetSampleBreakdown: () => null,
     AssetSummary: () => null,
     AssetSupplySample: () => null,
     DecimalNumber: () => null,
