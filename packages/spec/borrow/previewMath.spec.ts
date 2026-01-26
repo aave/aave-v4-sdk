@@ -3,7 +3,6 @@ import {
   bigDecimal,
   evmAddress,
   type HealthFactorError,
-  invariant,
   type PreviewUserPosition,
   type Reserve,
 } from '@aave/client';
