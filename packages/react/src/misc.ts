@@ -139,7 +139,11 @@ export function useChainAction(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: ChainRequest) => fetchChain(client, request, { batch: false }),
+    (request: ChainRequest) =>
+      fetchChain(client, request, {
+        batch: false,
+        requestPolicy: 'cache-first',
+      }),
     [client],
   );
 }
@@ -252,7 +256,8 @@ export function useExchangeRateAction(): UseAsyncTask<
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: ExchangeRateRequest) => exchangeRate(client, request),
+    (request: ExchangeRateRequest) =>
+      exchangeRate(client, request, { requestPolicy: 'network-only' }),
     [client],
   );
 }

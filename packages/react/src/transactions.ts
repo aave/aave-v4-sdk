@@ -1167,7 +1167,10 @@ export function usePreviewAction(
 
   return useAsyncTask(
     (request: PreviewRequest) =>
-      preview(client, request, { currency: options.currency }),
+      preview(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }),
     [client, options.currency],
   );
 }
@@ -1424,6 +1427,7 @@ export function useActivitiesAction(
       activities(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );

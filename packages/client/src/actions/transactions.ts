@@ -364,9 +364,16 @@ export function setSpokeUserPositionManager(
 export function preview(
   client: AaveClient,
   request: PreviewRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PreviewUserPosition, UnexpectedError> {
-  return client.query(PreviewQuery, { request, ...options });
+  return client.query(
+    PreviewQuery,
+    { request, currency },
+    { requestPolicy },
+  );
 }
 
 /**

@@ -61,6 +61,14 @@ The SDK is organized into packages:
 - **Hooks** (`packages/react/src/`): React hooks that wrap actions with reactive state management. Only update when explicitly requested.
 - **Queries/Documents** (`packages/graphql/src/`): GraphQL query definitions and fragments.
 
+**Imperative Read Hooks:**
+React hooks in `@aave/react` that wrap read actions from `@aave/client/actions`. They follow the naming pattern `use[Something]Action` (e.g., `useReservesAction`, `useChainAction`). These hooks use `UseAsyncTask` for async state management and provide an imperative API for executing GraphQL queries. They are distinct from subscription-based or mutation hooks.
+
+Most imperative read hooks default to `cache-first` request policy. **Exceptions** that use `network-only`:
+- `usePreviewAction` - previews must always reflect current on-chain state
+- `useExchangeRateAction` - exchange rates must always be fresh
+- `useTokenSwapQuoteAction`, `useSupplySwapQuoteAction`, `useBorrowSwapQuoteAction`, `useRepayWithSupplyQuoteAction`, `useWithdrawSwapQuoteAction` - swap quotes must reflect current market conditions
+
 When updating GraphQL queries, update corresponding actions. Only update hooks if explicitly requested.
 
 ## Schema updates
