@@ -247,6 +247,7 @@ export function makeSwapQuote({
     accuracy,
     quoteId: makeQuoteId(),
     suggestedSlippage: percentNumber(0.01),
+    selectedSlippage: null,
     buy: makeErc20Amount(buyAmount, 'USDC'),
     sell: makeErc20Amount(1000, 'WETH'),
     costs: {

@@ -6216,6 +6216,15 @@
             "args": []
           },
           {
+            "name": "selectedSlippage",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "sell",
             "type": {
               "kind": "NON_NULL",
