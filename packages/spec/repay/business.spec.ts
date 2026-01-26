@@ -117,7 +117,7 @@ describe('Repaying Loans on Aave V4', () => {
           previewResult.value.netCollateral.after.value,
         ).toBeBigDecimalCloseTo(
           previewResult.value.netCollateral.current.value,
-          2,
+          { precision: 2 },
         );
       });
     });
@@ -184,7 +184,7 @@ describe('Repaying Loans on Aave V4', () => {
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
           positionBefore.debt.amount.value.minus(amountToRepay),
-          4,
+          { precision: 4 },
         );
       });
     });
@@ -263,7 +263,7 @@ describe('Repaying Loans on Aave V4', () => {
         assertOk(after);
         expect(after.value.debt.amount.value).toBeBigDecimalCloseTo(
           borrowBefore.debt.amount.value.minus(amountToRepay),
-          2,
+          { precision: 2 },
         );
       });
     });
@@ -337,7 +337,7 @@ describe('Repaying Loans on Aave V4', () => {
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
           amountToRepay,
-          2,
+          { precision: 2 },
         );
 
         const balanceAfter = await getNativeBalance(
@@ -345,7 +345,7 @@ describe('Repaying Loans on Aave V4', () => {
         );
         expect(balanceAfter).toBeBigDecimalCloseTo(
           balanceBefore.minus(amountToRepay),
-          4,
+          { precision: 4 },
         );
       });
     });

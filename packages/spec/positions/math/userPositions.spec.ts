@@ -152,14 +152,14 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
           expect(totalSupplied).toBeBigDecimalCloseTo(
             position.totalSupplied.current.value,
-            2,
+            { precision: 2 },
           );
         });
 
         it('Then it should return the correct totalCollateral value', async () => {
           expect(position.totalCollateral.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalCollateralValue,
-            1,
+            { precision: 1 },
           );
         });
 
@@ -186,7 +186,7 @@ describe('Given a user with a User Position on a Spoke', () => {
 
           expect(totalCollateral.minus(totalDebt)).toBeBigDecimalCloseTo(
             position.netCollateral.current.value,
-            1,
+            { percent: 0.05 },
           );
         });
 
@@ -194,7 +194,7 @@ describe('Given a user with a User Position on a Spoke', () => {
           // total debt is the sum of the principal and interest for all positions in the spoke
           expect(position.totalDebt.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalDebtValue,
-            1,
+            { precision: 1 },
           );
         });
 
@@ -220,28 +220,28 @@ describe('Given a user with a User Position on a Spoke', () => {
 
           expect(totalSupplied.minus(totalDebt)).toBeBigDecimalCloseTo(
             position.netBalance.current.value,
-            1,
+            { percent: 0.05 },
           );
         });
 
         it('Then it should return the correct healthFactor', async () => {
           expect(position.healthFactor.current).toBeBigDecimalCloseTo(
             accountDataOnChain.healthFactor,
-            2,
+            { precision: 2 },
           );
         });
 
         it('Then it should return the correct averageCollateralFactor value', async () => {
           expect(position.averageCollateralFactor.value).toBeBigDecimalCloseTo(
             accountDataOnChain.avgCollateralFactor,
-            2,
+            { precision: 2 },
           );
         });
 
         it('Then it should return the correct riskPremium value', async () => {
           expect(position.riskPremium?.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.riskPremium,
-            2,
+            { precision: 2 },
           );
         });
 

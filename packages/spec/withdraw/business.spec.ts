@@ -68,7 +68,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         assertSingleElementArray(withdrawResult.value);
         expect(
           withdrawResult.value[0].withdrawable.amount.value,
-        ).toBeBigDecimalCloseTo(amountToSupply.minus(amountToWithdraw), 2);
+        ).toBeBigDecimalCloseTo(amountToSupply.minus(amountToWithdraw), { precision: 2 });
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),
@@ -76,7 +76,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         );
         expect(balanceBefore.plus(amountToWithdraw)).toBeBigDecimalCloseTo(
           balanceAfter,
-          4,
+          { precision: 4 },
         );
       });
     });
@@ -194,7 +194,7 @@ describe('Withdrawing Assets on Aave V4', () => {
         );
         expect(balanceAfter).toBeBigDecimalCloseTo(
           balanceBefore.plus(amountToWithdraw),
-          4,
+          { precision: 4 },
         );
       });
     });

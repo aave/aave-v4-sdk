@@ -90,7 +90,7 @@ describe('Supply Preview Math', () => {
 
           expect(previewInfo.healthFactor.after).toBeBigDecimalCloseTo(
             operationInfo.healthFactor.current,
-            4,
+            { precision: 4 },
           );
         });
         it('Then the riskPremium should remain unchanged', () => {

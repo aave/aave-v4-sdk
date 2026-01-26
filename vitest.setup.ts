@@ -17,16 +17,30 @@ expect.extend({
   toBeBigDecimalCloseTo(
     received: BigDecimal,
     expected: BigDecimal,
-    precision: number,
+    config: { precision: number } | { percent: number },
   ) {
-    const pass = received.round(precision).eq(expected.round(precision));
+    let pass: boolean;
+    let configDescription: string;
+
+    if ('precision' in config) {
+      pass = received
+        .round(config.precision)
+        .eq(expected.round(config.precision));
+      configDescription = `precision ${config.precision}`;
+    } else {
+      // Calculate percent tolerance: abs(received - expected) <= abs(expected * percent / 100)
+      const difference = received.minus(expected).abs();
+      const tolerance = expected.abs().times(config.percent).div(100);
+      pass = difference.lte(tolerance);
+      configDescription = `${config.percent}% tolerance`;
+    }
 
     return {
       pass,
       message: () =>
         pass
-          ? `expected "${received}" not to be close to ${expected}`
-          : `expected "${received}" to be close to ${expected}, but got difference of ${received.minus(expected)}`,
+          ? `expected "${received}" not to be close to ${expected} (${configDescription})`
+          : `expected "${received}" to be close to ${expected} (${configDescription}), but got difference of ${received.minus(expected)}`,
     };
   },
 
