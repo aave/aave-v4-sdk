@@ -146,7 +146,7 @@ describe('Borrowing Assets on Aave V4', () => {
           debt: expect.any(Object),
           interest: expect.any(Object),
           principal: expect.any(Object),
-          createdAt: expect.any(String),
+          createdAt: expect.any(Date),
         });
 
         const balanceAfter = await getNativeBalance(
