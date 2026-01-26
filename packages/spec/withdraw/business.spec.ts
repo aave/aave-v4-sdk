@@ -68,7 +68,9 @@ describe('Withdrawing Assets on Aave V4', () => {
         assertSingleElementArray(withdrawResult.value);
         expect(
           withdrawResult.value[0].withdrawable.amount.value,
-        ).toBeBigDecimalCloseTo(amountToSupply.minus(amountToWithdraw), { precision: 2 });
+        ).toBeBigDecimalCloseTo(amountToSupply.minus(amountToWithdraw), {
+          precision: 2,
+        });
 
         const balanceAfter = await getBalance(
           evmAddress(user.account.address),
