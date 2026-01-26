@@ -43,6 +43,20 @@ describe('Querying User Activities on Aave V4', () => {
     [ActivityType.RepayWithSupply]: 'RepayWithSupplyActivity',
     [ActivityType.WithdrawSwap]: 'WithdrawSwapActivity',
   };
+
+  // Liquidated activities are not easily reproducible, so we skip them
+  // New activity types are not yet supported in tests
+  const skipActivityTypes = [
+    ActivityType.Liquidated,
+    ActivityType.UpdatedDynamicConfig,
+    ActivityType.UpdatedRiskPremium,
+    ActivityType.TokenToTokenSwap,
+    ActivityType.SupplySwap,
+    ActivityType.BorrowSwap,
+    ActivityType.RepayWithSupply,
+    ActivityType.WithdrawSwap,
+  ];
+
   describe('Given a user with prior history of activities', () => {
     beforeAll(async () => {
       // NOTE: Recreate user activities if needed
@@ -64,15 +78,7 @@ describe('Querying User Activities on Aave V4', () => {
           });
           assertOk(result);
 
-          if (
-            [
-              ActivityType.Liquidated,
-              ActivityType.UpdatedDynamicConfig,
-              ActivityType.UpdatedRiskPremium,
-            ].includes(activityType)
-          ) {
-            // Liquidated activities are not easily reproducible, so we skip them
-            // New activity types are not yet supported in tests
+          if (skipActivityTypes.includes(activityType)) {
             return;
           }
 
@@ -264,17 +270,11 @@ describe('Querying User Activities on Aave V4', () => {
           });
 
           assertOk(result);
-          if (
-            [
-              ActivityType.Liquidated,
-              ActivityType.UpdatedDynamicConfig,
-              ActivityType.UpdatedRiskPremium,
-            ].includes(activityType)
-          ) {
-            // Liquidated activities are not easily reproducible, so we skip them
-            // New activity types are not yet supported in tests
+
+          if (skipActivityTypes.includes(activityType)) {
             return;
           }
+
           expect(result.value.items).toBeArrayWithElements(
             expect.objectContaining({
               __typename: expect.toEqualCaseInsensitive(
