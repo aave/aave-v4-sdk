@@ -38,7 +38,7 @@ export function fundAndSupplyToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   reserveId: ReserveId,
-  amount?: BigDecimal,
+  amount: BigDecimal,
 ): ResultAsync<TxHash, Error> {
   return reserve(client, {
     query: { reserveId: reserveId },
@@ -46,22 +46,14 @@ export function fundAndSupplyToReserve(
   }).andThen((reserve) => {
     return fundErc20Address(evmAddress(user.account.address), {
       address: reserve!.asset.underlying.address,
-      amount:
-        amount ??
-        reserve!.supplyCap
-          .minus(reserve!.summary.supplied.amount.value)
-          .div(100000),
+      amount: amount,
       decimals: reserve!.asset.underlying.info.decimals,
     }).andThen(() =>
       supplyToReserve(client, user, {
         reserve: reserveId,
         amount: {
           erc20: {
-            value:
-              amount ??
-              reserve!.supplyCap
-                .minus(reserve!.summary.supplied.amount.value)
-                .div(100000),
+            value: amount,
           },
         },
         sender: evmAddress(user.account.address),
