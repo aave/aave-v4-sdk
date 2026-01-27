@@ -117,6 +117,7 @@ export const ReserveFragment = graphql(
     canBorrow
     canSupply
     canUseAsCollateral
+    canSwapFrom
     userState {
       ...ReserveUserState
     }
