@@ -1011,19 +1011,20 @@ export function useSupplySwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .map((result) => {
+                  invariant(
+                    isSignature(result),
+                    'Expected signature, got an object instead.',
+                  );
+                  return result;
+                })
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1065,19 +1066,20 @@ export function useBorrowSwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .map((result) => {
+                  invariant(
+                    isSignature(result),
+                    'Expected signature, got an object instead.',
+                  );
+                  return result;
+                })
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1266,19 +1268,20 @@ export function useRepayWithSupply(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .map((result) => {
+                  invariant(
+                    isSignature(result),
+                    'Expected signature, got an object instead.',
+                  );
+                  return result;
+                })
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1467,19 +1470,20 @@ export function useWithdrawSwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .map((result) => {
+                  invariant(
+                    isSignature(result),
+                    'Expected signature, got an object instead.',
+                  );
+                  return result;
+                })
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
