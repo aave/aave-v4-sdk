@@ -1,5 +1,12 @@
 # @aave/react
 
+## 4.0.0-next.31
+
+### Patch Changes
+
+- cbe67f9: **fix:** shift approval from Erc20ApprovalRequire to Erc20Approval.
+  - @aave/client@4.0.0-next.31
+
 ## 4.0.0-next.30
 
 ### Minor Changes
