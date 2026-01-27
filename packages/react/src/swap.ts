@@ -1644,7 +1644,7 @@ export function useTokenSwap(
                   })
                   .andThen((signature) =>
                     executeSwap({
-                      intent: { quoteId: quoteResult.quote.quoteId, signature },
+                      intent: { quoteId: order.newQuoteId, signature },
                     }),
                   ),
               );
