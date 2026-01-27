@@ -21,6 +21,15 @@ export function isChainIdsVariant<T>(
   return isObject(input) && 'chainIds' in input && input.chainIds != null;
 }
 
+/**
+ * @internal
+ */
+export function isTokensVariant<T>(
+  input: T,
+): input is T & { tokens: Erc20Input[] } {
+  return isObject(input) && 'tokens' in input && input.tokens != null;
+}
+
 export type SpokeInput = ReturnType<typeof graphql.scalar<'SpokeInput'>>;
 
 /**

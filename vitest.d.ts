@@ -4,7 +4,10 @@ import 'vitest';
 declare module 'vitest' {
   interface AsymmetricMatchersContaining extends JestExtendedMatchers {
     toBeBigDecimalEqualTo: (expected: BigDecimalSource) => R;
-    toBeBigDecimalCloseTo: (expected: number | string, precision: number) => R;
+    toBeBigDecimalCloseTo: (
+      expected: number | string,
+      config: { precision: number } | { percent: number },
+    ) => R;
     toBeBigDecimalGreaterThan: (expected: number | string) => R;
     toBeBigDecimalLessThan: (expected: number | string) => R;
     toBeBetweenDates: (start: Date, end: Date) => R;

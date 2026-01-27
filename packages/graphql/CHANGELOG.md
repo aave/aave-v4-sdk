@@ -1,5 +1,15 @@
 # @aave/graphql
 
+## 1.0.0-next.25
+
+### Minor Changes
+
+- c3ae5d8: **feat:** add `selectedSlippage` field to `SwapQuote` fragment and `deadline` field to limit order input types
+
+### Patch Changes
+
+- 87e0889: **feat:** support `AssetSampleBreakdown`.
+
 ## 1.0.0-next.24
 
 ### Patch Changes

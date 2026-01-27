@@ -76,7 +76,7 @@ describe('Repay Preview Math', () => {
           it('Then the riskPremium should remain unchanged', () => {
             expect(previewInfo.riskPremium.current.value).toBeBigDecimalCloseTo(
               previewInfo.riskPremium.after.value,
-              4,
+              { precision: 4 },
             );
           });
         });
@@ -175,7 +175,7 @@ describe('Repay Preview Math', () => {
           it('Then the riskPremium should remain unchanged', () => {
             expect(previewInfo.riskPremium.current.value).toBeBigDecimalCloseTo(
               previewInfo.riskPremium.after.value,
-              4,
+              { precision: 4 },
             );
           });
         });

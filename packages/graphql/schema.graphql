@@ -82,6 +82,8 @@ type AssetBorrowSample {
   amount: DecimalNumber!
   highestApy: PercentNumber!
   lowestApy: PercentNumber!
+  averageApy: PercentNumber!
+  breakdown: [AssetSampleBreakdown!]!
 }
 
 scalar AssetId
@@ -109,6 +111,12 @@ input AssetRequest {
 input AssetRequestQuery @oneOf {
   token: Erc20Input
   assetId: AssetId
+}
+
+type AssetSampleBreakdown {
+  amount: DecimalNumber!
+  apy: PercentNumber!
+  hub: Hub!
 }
 
 type AssetSummary {
@@ -141,6 +149,8 @@ type AssetSupplySample {
   amount: DecimalNumber!
   highestApy: PercentNumber!
   lowestApy: PercentNumber!
+  averageApy: PercentNumber!
+  breakdown: [AssetSampleBreakdown!]!
 }
 
 scalar BigDecimal
@@ -467,22 +477,18 @@ type ForkTopUpResponse {
 
 input FromQuoteDebtSwapQuoteInput {
   quoteId: SwapQuoteId!
-  newSlippage: BigDecimal
 }
 
 input FromQuoteRepayWithSupplyQuoteInput {
   quoteId: SwapQuoteId!
-  newSlippage: BigDecimal
 }
 
 input FromQuoteSupplySwapQuoteInput {
   quoteId: SwapQuoteId!
-  newSlippage: BigDecimal
 }
 
 input FromQuoteWithdrawSwapQuoteInput {
   quoteId: SwapQuoteId!
-  newSlippage: BigDecimal
 }
 
 input HasProcessedKnownTransactionRequest {
@@ -702,6 +708,9 @@ input HubsRequestQuery @oneOf {
   """Get back all the hubs which have one of the underlying tokens supplied"""
   tokens: [Erc20Input!]
 
+  """Get back all the hubs for the given asset IDs"""
+  assetIds: [AssetId!]
+
   """Get back all the hubs based on the chain ids passed in"""
   chainIds: [ChainId!]
 }
@@ -724,6 +733,9 @@ input LimitDebtSwapQuoteInput {
   newAmount: BigDecimal!
   user: EvmAddress!
   kind: BorrowSwapKind
+
+  """Optional deadline as DateTime. If not provided, uses default expiry."""
+  deadline: DateTime
 }
 
 input LimitOrderTokenSwapQuoteInput {
@@ -738,6 +750,9 @@ input LimitOrderTokenSwapQuoteInput {
   receiver: EvmAddress
   kind: SwapKind! = SELL
   previousQuoteId: SwapQuoteId
+
+  """Optional deadline as DateTime. If not provided, uses default expiry."""
+  deadline: DateTime
 }
 
 input LimitRepayWithSupplyQuoteInput {
@@ -748,6 +763,9 @@ input LimitRepayWithSupplyQuoteInput {
   supplyAmount: BigDecimal!
   user: EvmAddress!
   kind: RepayWithSupplyKind
+
+  """Optional deadline as DateTime. If not provided, uses default expiry."""
+  deadline: DateTime
 }
 
 input LimitSupplySwapQuoteInput {
@@ -759,6 +777,9 @@ input LimitSupplySwapQuoteInput {
   user: EvmAddress!
   kind: SupplySwapKind
   enableCollateral: Boolean!
+
+  """Optional deadline as DateTime. If not provided, uses default expiry."""
+  deadline: DateTime
 }
 
 input LimitWithdrawSwapQuoteInput {
@@ -769,6 +790,9 @@ input LimitWithdrawSwapQuoteInput {
   buyAmount: BigDecimal!
   user: EvmAddress!
   kind: WithdrawSwapKind
+
+  """Optional deadline as DateTime. If not provided, uses default expiry."""
+  deadline: DateTime
 }
 
 input LiquidatePositionDebtAmount @oneOf {
@@ -831,11 +855,11 @@ input MarketDebtSwapQuoteInput {
   buyReserve: ReserveId!
   amount: BigDecimal!
   user: EvmAddress!
+  selectedSlippage: BigDecimal
 }
 
 input MarketOrderTokenSwapFromQuoteInput {
   quoteId: SwapQuoteId!
-  newSlippage: BigDecimal
 }
 
 input MarketOrderTokenSwapQuoteInput {
@@ -850,6 +874,7 @@ input MarketOrderTokenSwapQuoteInput {
   kind: SwapKind!
   user: EvmAddress!
   receiver: EvmAddress
+  selectedSlippage: BigDecimal
 }
 
 input MarketRepayWithSupplyQuoteInput {
@@ -861,6 +886,7 @@ input MarketRepayWithSupplyQuoteInput {
   repayWithReserve: ReserveId!
   amount: BigDecimal!
   user: EvmAddress!
+  selectedSlippage: BigDecimal
 }
 
 input MarketSupplySwapQuoteInput {
@@ -873,6 +899,7 @@ input MarketSupplySwapQuoteInput {
   amount: BigDecimal!
   user: EvmAddress!
   enableCollateral: Boolean!
+  selectedSlippage: BigDecimal
 }
 
 input MarketWithdrawSwapQuoteInput {
@@ -884,6 +911,7 @@ input MarketWithdrawSwapQuoteInput {
   buyReserve: ReserveId!
   amount: BigDecimal!
   user: EvmAddress!
+  selectedSlippage: BigDecimal
 }
 
 type MaxLiquidationBonusVariation {
@@ -1716,6 +1744,7 @@ type SwapQuote {
   accuracy: QuoteAccuracy!
   quoteId: SwapQuoteId!
   suggestedSlippage: PercentNumber!
+  selectedSlippage: PercentNumber
   sell: TokenAmount!
   buy: TokenAmount!
   costs: SwapQuoteCosts!

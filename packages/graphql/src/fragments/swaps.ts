@@ -47,6 +47,9 @@ export const SwapQuoteFragment = graphql(
     suggestedSlippage {
       ...PercentNumber
     }
+    selectedSlippage {
+      ...PercentNumber
+    }
     buy {
       ...TokenAmount
     }
