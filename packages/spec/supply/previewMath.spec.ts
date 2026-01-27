@@ -225,6 +225,16 @@ describe('Supply Preview Math', () => {
           });
         });
       });
+
+      describe('When the user previews a supply swap action to a reserve with a higher collateralRisk', () => {
+        it.todo('Then the healthFactor should decrease');
+        it.todo('Then the riskPremium should increase');
+      });
+
+      describe('When the user previews a supply swap action to a reserve with a lower collateralRisk', () => {
+        it.todo('Then the healthFactor should increase');
+        it.todo('Then the riskPremium should remain unchanged');
+      });
     });
   });
 });
