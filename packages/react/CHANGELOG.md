@@ -1,5 +1,31 @@
 # @aave/react
 
+## 4.0.0-next.31
+
+### Patch Changes
+
+- cbe67f9: **fix:** shift approval from Erc20ApprovalRequire to Erc20Approval.
+  - @aave/client@4.0.0-next.31
+
+## 4.0.0-next.30
+
+### Minor Changes
+
+- c3ae5d8: **feat:** add `selectedSlippage` field to `SwapQuote` fragment and `deadline` field to limit order input types
+
+### Patch Changes
+
+- 3a9cc5f: **fix:** ensure cache updates after transactions for cache-first hooks
+- 9fa182b: **feat:** imperative read hooks now default to `cache-first` request policy
+- 87e0889: **feat:** support `AssetSampleBreakdown`.
+- ce7a7c9: **fix:** removes unnecessary TS assertions.
+- Updated dependencies [3a9cc5f]
+- Updated dependencies [9fa182b]
+- Updated dependencies [c3ae5d8]
+- Updated dependencies [87e0889]
+  - @aave/client@4.0.0-next.30
+  - @aave/graphql@1.0.0-next.25
+
 ## 4.0.0-next.29
 
 ### Patch Changes

@@ -27,7 +27,7 @@ import {
   decodeHubId,
   decodeReserveId,
   type ERC20PermitSignature,
-  type Erc20ApprovalRequired,
+  type Erc20Approval,
   HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
@@ -68,6 +68,7 @@ import {
 import { useAaveClient } from './context';
 import {
   cancel,
+  type ExecutionPlanHandler,
   type Pausable,
   type PausableReadResult,
   type PausableSuspenseResult,
@@ -86,7 +87,6 @@ import {
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
-  type TransactionHandler,
   type UseAsyncTask,
   useAsyncTask,
   useSuspendableQuery,
@@ -121,8 +121,8 @@ function refreshQueriesForReserveChange(
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *
- *     case 'Erc20ApprovalRequired':
- *       return sendTransaction(plan.approval.byTransaction);
+ *     case 'Erc20Approval':
+ *       return sendTransaction(plan.byTransaction);
  *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
@@ -168,8 +168,8 @@ function refreshQueriesForReserveChange(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useSupply(
-  handler: TransactionHandler<
-    TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | Erc20Approval | PreContractActionRequired,
     Signature | PendingTransaction
   >,
 ): UseAsyncTask<
@@ -193,13 +193,13 @@ export function useSupply(
                 .andThen(client.waitForTransaction);
 
             case 'Erc20ApprovalRequired':
-              return handler(plan, { cancel })
+              return handler(plan.approval, { cancel })
                 .andThen((result) => {
                   if (isSignature(result)) {
                     const permitTypedData = plan.approval.bySignature;
                     if (!permitTypedData) {
                       return UnexpectedError.from(
-                        'Expected bySignature to be present in Erc20ApprovalRequired',
+                        'A signature was returned but the ERC-20 involve does not support permit',
                       ).asResultAsync();
                     }
                     const permitSig: ERC20PermitSignature = {
@@ -316,7 +316,7 @@ function injectSupplyPermitSignature(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useBorrow(
-  handler: TransactionHandler<
+  handler: ExecutionPlanHandler<
     TransactionRequest | PreContractActionRequired,
     PendingTransaction
   >,
@@ -369,8 +369,8 @@ export function useBorrow(
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *
- *     case 'Erc20ApprovalRequired':
- *       return sendTransaction(plan.approval.byTransaction);
+ *     case 'Erc20Approval':
+ *       return sendTransaction(plan.byTransaction);
  *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
@@ -416,8 +416,8 @@ export function useBorrow(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useRepay(
-  handler: TransactionHandler<
-    TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | Erc20Approval | PreContractActionRequired,
     Signature | PendingTransaction
   >,
 ): UseAsyncTask<
@@ -441,13 +441,13 @@ export function useRepay(
                 .andThen(client.waitForTransaction);
 
             case 'Erc20ApprovalRequired':
-              return handler(plan, { cancel })
+              return handler(plan.approval, { cancel })
                 .andThen((result) => {
                   if (isSignature(result)) {
                     const permitTypedData = plan.approval.bySignature;
                     if (!permitTypedData) {
                       return UnexpectedError.from(
-                        'Expected bySignature to be present in Erc20ApprovalRequired',
+                        'A signature was returned but the ERC-20 involve does not support permit',
                       ).asResultAsync();
                     }
                     const permitSig: ERC20PermitSignature = {
@@ -564,7 +564,7 @@ function injectRepayPermitSignature(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useWithdraw(
-  handler: TransactionHandler<
+  handler: ExecutionPlanHandler<
     TransactionRequest | PreContractActionRequired,
     PendingTransaction
   >,
@@ -649,7 +649,7 @@ export function useWithdraw(
  */
 
 export function useRenounceSpokeUserPositionManager(
-  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   RenounceSpokeUserPositionManagerRequest,
   TxHash,
@@ -721,7 +721,7 @@ export function useRenounceSpokeUserPositionManager(
  */
 
 export function useUpdateUserPositionConditions(
-  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   UpdateUserPositionConditionsRequest,
   TxHash,
@@ -801,7 +801,7 @@ export function useUpdateUserPositionConditions(
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetUserSuppliesAsCollateral(
-  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetUserSuppliesAsCollateralRequest,
   TxHash,
@@ -915,8 +915,8 @@ export function useSetUserSuppliesAsCollateral(
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *
- *     case 'Erc20ApprovalRequired':
- *       return sendTransaction(plan.approval.byTransaction);
+ *     case 'Erc20Approval':
+ *       return sendTransaction(plan.byTransaction);
  *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
@@ -968,8 +968,8 @@ export function useSetUserSuppliesAsCollateral(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useLiquidatePosition(
-  handler: TransactionHandler<
-    TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | Erc20Approval | PreContractActionRequired,
     PendingTransaction
   >,
 ): UseAsyncTask<
@@ -992,6 +992,35 @@ export function useLiquidatePosition(
               .andThen(client.waitForTransaction);
 
           case 'Erc20ApprovalRequired':
+            return handler(plan.approval, { cancel })
+              .andThen((result) => {
+                if (isSignature(result)) {
+                  const permitTypedData = plan.approval.bySignature;
+                  if (!permitTypedData) {
+                    return UnexpectedError.from(
+                      'A signature was returned but the ERC-20 involve does not support permit',
+                    ).asResultAsync();
+                  }
+                  const permitSig: ERC20PermitSignature = {
+                    deadline: permitTypedData.message.deadline as number,
+                    value: result,
+                  };
+                  return liquidatePosition(
+                    client,
+                    injectLiquidatePermitSignature(request, permitSig),
+                  )
+                    .map(expectTypename('TransactionRequest'))
+                    .andThen((transaction) => handler(transaction, { cancel }))
+                    .map(PendingTransaction.ensure);
+                }
+                return result
+                  .wait()
+                  .andThen(() => handler(plan.originalTransaction, { cancel }))
+                  .map(PendingTransaction.ensure);
+              })
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(client.waitForTransaction);
+
           case 'PreContractActionRequired':
             return handler(plan, { cancel })
               .andThen((pendingTransaction) => pendingTransaction.wait())
@@ -1005,6 +1034,14 @@ export function useLiquidatePosition(
       }),
     [client, handler],
   );
+}
+
+function injectLiquidatePermitSignature(
+  request: LiquidatePositionRequest,
+  _permitSig: ERC20PermitSignature,
+): LiquidatePositionRequest {
+  // TODO inject permitSig in the appropriate place once supported in the GQL schema
+  return request;
 }
 
 /**
@@ -1069,7 +1106,7 @@ export function useLiquidatePosition(
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetSpokeUserPositionManager(
-  handler: TransactionHandler<TransactionRequest, PendingTransaction>,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetSpokeUserPositionManagerRequest,
   TxHash,

@@ -6,7 +6,7 @@ import {
   type TransactionError,
   type UnexpectedError,
 } from '@aave/core';
-import type { ExecutionPlan, TransactionRequest } from '@aave/graphql';
+import type { TransactionRequest } from '@aave/graphql';
 import type { ResultAsync, Signature } from '@aave/types';
 import { invariant } from '@aave/types';
 import type { UseAsyncTask } from './tasks';
@@ -78,8 +78,8 @@ export type UseSendTransactionResult = UseAsyncTask<
 /**
  * The Aave execution plan handler
  */
-export type TransactionHandler<
-  T extends ExecutionPlan,
+export type ExecutionPlanHandler<
+  T,
   R extends Signature | PendingTransaction,
 > = (
   plan: T,
