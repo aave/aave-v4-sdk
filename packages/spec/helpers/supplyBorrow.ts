@@ -101,11 +101,13 @@ export function findReserveAndSupply(
     amount,
     spoke,
     asCollateral,
+    swappable,
   }: {
     token?: EvmAddress;
     amount?: BigDecimal;
     spoke?: SpokeId;
     asCollateral?: boolean;
+    swappable?: boolean;
   },
 ): ResultAsync<{ reserveInfo: Reserve; amountSupplied: BigDecimal }, Error> {
   return findReservesToSupply(client, user, {
@@ -113,35 +115,33 @@ export function findReserveAndSupply(
     spoke: spoke,
     canUseAsCollateral: true, // Only consider reserves that support collateral; actual enabling is controlled by `asCollateral` / `enableCollateral` below
   }).andThen((reserves) => {
+    const targetReserve = swappable
+      ? reserves.find((reserve) => reserve.canSwapFrom === true)
+      : reserves[0]!;
+    invariant(targetReserve, 'Target reserve not found');
+    const amountToSupply =
+      amount ??
+      targetReserve.supplyCap
+        .minus(targetReserve.summary.supplied.amount.value)
+        .div(100000);
+
     return fundErc20Address(evmAddress(user.account.address), {
-      address: token ?? reserves[0]!.asset.underlying.address,
-      amount:
-        amount ??
-        reserves[0]!.supplyCap
-          .minus(reserves[0]!.summary.supplied.amount.value)
-          .div(100000),
-      decimals: reserves[0]!.asset.underlying.info.decimals,
+      address: token ?? targetReserve.asset.underlying.address,
+      amount: amountToSupply,
+      decimals: targetReserve.asset.underlying.info.decimals,
     }).andThen(() =>
       supplyToReserve(client, user, {
-        reserve: reserves[0]!.id,
+        reserve: targetReserve.id,
         amount: {
           erc20: {
-            value:
-              amount ??
-              reserves[0]!.supplyCap
-                .minus(reserves[0]!.summary.supplied.amount.value)
-                .div(100000),
+            value: amountToSupply,
           },
         },
         sender: evmAddress(user.account.address),
         enableCollateral: asCollateral ? true : null,
       }).map(() => ({
-        reserveInfo: reserves[0]!,
-        amountSupplied:
-          amount ??
-          reserves[0]!.supplyCap
-            .minus(reserves[0]!.summary.supplied.amount.value)
-            .div(100000),
+        reserveInfo: targetReserve,
+        amountSupplied: amountToSupply,
       })),
     );
   });
