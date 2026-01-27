@@ -43,7 +43,6 @@ import type {
 import {
   BorrowSwapQuoteQuery,
   type BorrowSwapQuoteRequest,
-  type ERC20PermitSignature,
   type Erc20Approval,
   type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
@@ -1502,42 +1501,34 @@ export type TokenSwapPlan =
 export type TokenSwapHandler = (
   plan: TokenSwapPlan,
   options: SwapHandlerOptions,
-) => ResultAsync<
-  ERC20PermitSignature | PendingTransaction | Signature,
-  SwapSignerError
->;
+) => ResultAsync<PendingTransaction | Signature, SwapSignerError>;
 
 /**
  * Orchestrate the swap execution plan.
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signSwapTypedData] = useSignSwapTypedData(wallet);
+ * const [signTypedData] = useSignTypedData(wallet);
  *
  * const [swap, { loading, error }] = useTokenSwap((plan) => {
  *   switch (plan.__typename) {
- *     case 'SwapTypedData':
- *       return signSwapTypedData(plan);
- *
- *     case 'SwapApprovalRequired':
- *       return sendTransaction(plan.transaction);
- *
- *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(plan.approval.byTransaction);
+ *     case 'Erc20Approval':
+ *       if (plan.bySignature) {
+ *         return signTypedData(plan.bySignature);
+ *       }
+ *       return sendTransaction(plan.byTransaction);
  *
  *     case 'SwapTransactionRequest':
  *       return sendTransaction(plan.transaction);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
  *   }
  * });
  *
  * const result = await swap({
- *   market: {
- *     chainId: chainId(1),
- *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
- *     sell: { erc20: evmAddress('0x6B175474E…') },
- *     amount: bigDecimal('1000'),
- *     kind: SwapKind.Sell,
- *     user: evmAddress('0x742d35cc…'),
+ *   fromQuote: {
+ *     quoteId: quote.quoteId,
  *   },
  * });
  *
@@ -1623,13 +1614,13 @@ export function useTokenSwap(
                       'Expected bySignature to be present in SwapByIntentWithApprovalRequired',
                     ).asResultAsync();
                   }
-                  const permitSig: ERC20PermitSignature = {
-                    deadline: permitTypedData.message.deadline as number,
-                    value: result,
-                  };
+
                   return prepareTokenSwap(client, {
                     quoteId: quoteResult.quote.quoteId,
-                    permitSig,
+                    permitSig: {
+                      deadline: permitTypedData.message.deadline as number,
+                      value: result,
+                    },
                   });
                 }
                 if (PendingTransaction.isInstanceOf(result)) {
@@ -1685,7 +1676,7 @@ export type CancelSwapError =
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signSwapTypedData] = useSignSwapTypedData(wallet);
+ * const [signTypedData] = useSignTypedData(wallet);
  *
  * const [cancelSwap, { loading, error }] = useCancelSwap((plan) => {
  *   switch (plan.__typename) {
@@ -1693,7 +1684,7 @@ export type CancelSwapError =
  *       return sendTransaction(plan);
  *
  *     case 'SwapTypedData':
- *       return signSwapTypedData(plan);
+ *       return signTypedData(plan);
  *   }
  * });
  *
