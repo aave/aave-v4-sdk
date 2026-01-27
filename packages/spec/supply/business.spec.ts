@@ -79,7 +79,7 @@ describe('Supplying Assets on Aave V4', () => {
         expect(supplyPosition.isCollateral).toEqual(false);
         expect(supplyPosition.principal.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
-          2,
+          { precision: 2 },
         );
       });
     });
@@ -137,7 +137,7 @@ describe('Supplying Assets on Aave V4', () => {
         expect(supplyPosition.isCollateral).toEqual(true);
         expect(supplyPosition.withdrawable.amount.value).toBeBigDecimalCloseTo(
           amountToSupply,
-          3,
+          { precision: 3 },
         );
       });
     });
