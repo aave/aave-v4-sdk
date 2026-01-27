@@ -1,4 +1,5 @@
 import { InvariantError } from './helpers';
+import type { Override } from './misc';
 
 /**
  * @internal
@@ -51,14 +52,6 @@ export function assertTypename<Typename extends string>(
     );
   }
 }
-
-/**
- * Non-distributive override. Replaces properties in T with those in U.
- * Unlike `Omit<T, keyof U> & U`, does not distribute over unions.
- *
- * @internal
- */
-type Override<T, U> = { [K in Exclude<keyof T, keyof U>]: T[K] } & U;
 
 /**
  * Given a union with a `__typename` discriminant,

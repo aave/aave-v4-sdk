@@ -358,7 +358,12 @@ type Erc20ApprovalRequired {
   transaction: TransactionRequest! @deprecated(reason: "Use approval instead - this is going to die soon")
 
   """The erc20 approval"""
-  approval: Erc20Approval!
+  approval: Erc20Approval! @deprecated(reason: "Use approvals instead - this is going to die soon")
+
+  """
+  All required approvals (may contain reset + actual for USDT on mainnet)
+  """
+  approvals: [Erc20Approval!]!
 
   """The reason for the approval"""
   reason: String!
@@ -1676,7 +1681,12 @@ input SwapByIntentInput {
 
 type SwapByIntentWithApprovalRequired {
   quote: SwapQuote!
-  approval: Erc20Approval!
+  approval: Erc20Approval! @deprecated(reason: "Use approvals instead - this is going to die soon")
+
+  """
+  All required approvals (may contain reset + actual for USDT on mainnet)
+  """
+  approvals: [Erc20Approval!]!
 }
 
 type SwapByTransaction {
