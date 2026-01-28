@@ -94,7 +94,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           debt: expect.any(Object),
           interest: expect.any(Object),
           principal: expect.any(Object),
-          createdAt: expect.any(String),
+          createdAt: expect.any(Date),
         });
         expect(usdcPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[0]!.userState!.borrowable.amount.value.times(
@@ -115,7 +115,7 @@ describe('Borrowing from Multiple Reserves on Aave V4', () => {
           debt: expect.any(Object),
           interest: expect.any(Object),
           principal: expect.any(Object),
-          createdAt: expect.any(String),
+          createdAt: expect.any(Date),
         });
         expect(usdsPosition!.debt.amount.value).toBeBigDecimalCloseTo(
           reservesToBorrow.value[1]!.userState!.borrowable.amount.value.times(
