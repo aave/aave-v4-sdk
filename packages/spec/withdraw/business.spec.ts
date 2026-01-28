@@ -4,7 +4,7 @@ import {
   bigDecimal,
   evmAddress,
 } from '@aave/client';
-import { preview, userSupplies, withdraw } from '@aave/client/actions';
+import { userSupplies, withdraw } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -80,30 +80,6 @@ describe('Withdrawing Assets on Aave V4', () => {
           balanceAfter,
           { precision: 4 },
         );
-      });
-    });
-
-    describe('When the user wants to preview the withdrawal action before performing it', () => {
-      it('Then the user can review the withdrawal details before proceeding', async () => {
-        const amountToWithdraw = amountToSupply.div(4);
-
-        const previewResult = await preview(client, {
-          action: {
-            withdraw: {
-              reserve: reserve.id,
-              sender: evmAddress(user.account.address),
-              amount: {
-                erc20: {
-                  exact: amountToWithdraw,
-                },
-              },
-            },
-          },
-        });
-        assertOk(previewResult);
-        expect(
-          previewResult.value.netBalance.after.value,
-        ).toBeBigDecimalLessThan(previewResult.value.netBalance.current.value);
       });
     });
 

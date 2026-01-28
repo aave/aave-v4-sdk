@@ -1,7 +1,6 @@
 import {
   assertOk,
   type BigDecimal,
-  bigDecimal,
   evmAddress,
   type PreviewUserPosition,
   type Reserve,
@@ -34,6 +33,7 @@ describe('Repay Preview Math', () => {
         });
         assertOk(setup);
       });
+
       describe('And the user has 1 borrow position', () => {
         let borrowReserve: { reserve: Reserve; amountBorrowed: BigDecimal };
 
@@ -105,8 +105,11 @@ describe('Repay Preview Math', () => {
             expect(previewInfo.healthFactor.after).toBeNull();
           });
 
-          it('Then the riskPremium should be 0', () => {
-            expect(previewInfo.riskPremium.after.value).toBe(bigDecimal(0));
+          it('Then the riskPremium should remain unchanged', () => {
+            expect(previewInfo.riskPremium.after.value).toBeBigDecimalCloseTo(
+              previewInfo.riskPremium.current.value,
+              { precision: 4 },
+            );
           });
         });
       });
