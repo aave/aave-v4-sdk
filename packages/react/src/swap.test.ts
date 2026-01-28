@@ -30,6 +30,7 @@ import {
   makePositionSwapAdapterContractApproval,
   makePositionSwapPositionManagerApproval,
   makePrepareSwapOrder,
+  makeReserveId,
   makeSwapByIntent,
   makeSwapByIntentWithApprovalRequired,
   makeSwapByTransaction,
@@ -40,6 +41,8 @@ import {
   makeSwapTransactionRequest,
   makeSwapTypedData,
   makeTransactionRequest,
+  makeUserBorrowItemId,
+  makeUserSupplyItemId,
 } from '@aave/graphql/testing';
 import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types';
 import { act } from '@testing-library/react';
@@ -57,12 +60,16 @@ import {
 } from 'vitest';
 import {
   useBorrowSwap,
+  useBorrowSwapQuote,
   useCancelSwap,
   useRepayWithSupply,
+  useRepayWithSupplyQuote,
   useSupplySwap,
+  useSupplySwapQuote,
   useTokenSwap,
   useTokenSwapQuote,
   useWithdrawSwap,
+  useWithdrawSwapQuote,
 } from './swap';
 import { renderHookWithinContext } from './test-utils';
 import { useSendTransaction, useSignTypedData } from './viem';
@@ -854,6 +861,440 @@ describe('Given the swap hooks', () => {
         it('Then it should poll for fresh Accurate quotes every 30 seconds', async () => {
           const { result } = renderHookWithinContext(() =>
             useTokenSwapQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          act(() => releaseAccurateQuote(1));
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+
+          await act(() => vi.advanceTimersToNextTimerAsync());
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitFor(() =>
+            expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+              42,
+            ),
+          );
+        });
+      });
+    });
+  });
+
+  describe(`And using the '${useSupplySwapQuote.name}' hook`, () => {
+    let releaseAccurateQuote: (value: number) => void;
+
+    beforeEach(() => {
+      server.use(
+        api.query(SupplySwapQuoteQuery, async ({ variables }) => {
+          const accuracy =
+            'market' in variables.request
+              ? variables.request.market?.accuracy
+              : undefined;
+
+          if (accuracy === QuoteAccuracy.Fast) {
+            return msw.HttpResponse.json({
+              data: {
+                value: {
+                  __typename: 'PositionSwapByIntentApprovalsRequired',
+                  approvals: [],
+                  quote: makeSwapQuote({
+                    accuracy: QuoteAccuracy.Fast,
+                  }),
+                },
+              },
+            });
+          }
+
+          // Track Accurate requests and return different values for each call
+          const buyAmount = await new Promise<number>((r) => {
+            releaseAccurateQuote = r;
+          });
+
+          return msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PositionSwapByIntentApprovalsRequired',
+                approvals: [],
+                quote: makeSwapQuote({
+                  accuracy: QuoteAccuracy.Accurate,
+                  buyAmount,
+                }),
+              },
+            },
+          });
+        }),
+      );
+    });
+
+    describe('And a supply swap quote request', () => {
+      const request: SupplySwapQuoteRequest = {
+        market: {
+          sellPosition: makeUserSupplyItemId(),
+          buyReserve: makeReserveId(),
+          amount: bigDecimal(1000),
+          user: evmAddress(walletClient.account.address),
+          enableCollateral: true,
+        },
+      };
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      describe('When rendered for the first time', () => {
+        it('Then it should return a Fast quote and eventually update it with an Accurate one', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useSupplySwapQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          expect(result.current.data?.accuracy).toEqual(QuoteAccuracy.Fast);
+
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+          expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+            42,
+          );
+        });
+      });
+
+      describe('When the first Accurate quote is received', () => {
+        it('Then it should poll for fresh Accurate quotes every 30 seconds', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useSupplySwapQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          act(() => releaseAccurateQuote(1));
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+
+          await act(() => vi.advanceTimersToNextTimerAsync());
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitFor(() =>
+            expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+              42,
+            ),
+          );
+        });
+      });
+    });
+  });
+
+  describe(`And using the '${useBorrowSwapQuote.name}' hook`, () => {
+    let releaseAccurateQuote: (value: number) => void;
+
+    beforeEach(() => {
+      server.use(
+        api.query(BorrowSwapQuoteQuery, async ({ variables }) => {
+          const accuracy =
+            'market' in variables.request
+              ? variables.request.market?.accuracy
+              : undefined;
+
+          if (accuracy === QuoteAccuracy.Fast) {
+            return msw.HttpResponse.json({
+              data: {
+                value: {
+                  __typename: 'PositionSwapByIntentApprovalsRequired',
+                  approvals: [],
+                  quote: makeSwapQuote({
+                    accuracy: QuoteAccuracy.Fast,
+                  }),
+                },
+              },
+            });
+          }
+
+          const buyAmount = await new Promise<number>((r) => {
+            releaseAccurateQuote = r;
+          });
+
+          return msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PositionSwapByIntentApprovalsRequired',
+                approvals: [],
+                quote: makeSwapQuote({
+                  accuracy: QuoteAccuracy.Accurate,
+                  buyAmount,
+                }),
+              },
+            },
+          });
+        }),
+      );
+    });
+
+    describe('And a borrow swap quote request', () => {
+      const request: BorrowSwapQuoteRequest = {
+        market: {
+          debtPosition: makeUserBorrowItemId(),
+          buyReserve: makeReserveId(),
+          amount: bigDecimal(1000),
+          user: evmAddress(walletClient.account.address),
+        },
+      };
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      describe('When rendered for the first time', () => {
+        it('Then it should return a Fast quote and eventually update it with an Accurate one', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useBorrowSwapQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          expect(result.current.data?.accuracy).toEqual(QuoteAccuracy.Fast);
+
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+          expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+            42,
+          );
+        });
+      });
+
+      describe('When the first Accurate quote is received', () => {
+        it('Then it should poll for fresh Accurate quotes every 30 seconds', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useBorrowSwapQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          act(() => releaseAccurateQuote(1));
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+
+          await act(() => vi.advanceTimersToNextTimerAsync());
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitFor(() =>
+            expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+              42,
+            ),
+          );
+        });
+      });
+    });
+  });
+
+  describe(`And using the '${useRepayWithSupplyQuote.name}' hook`, () => {
+    let releaseAccurateQuote: (value: number) => void;
+
+    beforeEach(() => {
+      server.use(
+        api.query(RepayWithSupplyQuoteQuery, async ({ variables }) => {
+          const accuracy =
+            'market' in variables.request
+              ? variables.request.market?.accuracy
+              : undefined;
+
+          if (accuracy === QuoteAccuracy.Fast) {
+            return msw.HttpResponse.json({
+              data: {
+                value: {
+                  __typename: 'PositionSwapByIntentApprovalsRequired',
+                  approvals: [],
+                  quote: makeSwapQuote({
+                    accuracy: QuoteAccuracy.Fast,
+                  }),
+                },
+              },
+            });
+          }
+
+          const buyAmount = await new Promise<number>((r) => {
+            releaseAccurateQuote = r;
+          });
+
+          return msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PositionSwapByIntentApprovalsRequired',
+                approvals: [],
+                quote: makeSwapQuote({
+                  accuracy: QuoteAccuracy.Accurate,
+                  buyAmount,
+                }),
+              },
+            },
+          });
+        }),
+      );
+    });
+
+    describe('And a repay with supply quote request', () => {
+      const request: RepayWithSupplyQuoteRequest = {
+        market: {
+          debtPosition: makeUserBorrowItemId(),
+          repayWithReserve: makeReserveId(),
+          amount: bigDecimal(1000),
+          user: evmAddress(walletClient.account.address),
+        },
+      };
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      describe('When rendered for the first time', () => {
+        it('Then it should return a Fast quote and eventually update it with an Accurate one', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useRepayWithSupplyQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          expect(result.current.data?.accuracy).toEqual(QuoteAccuracy.Fast);
+
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+          expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+            42,
+          );
+        });
+      });
+
+      describe('When the first Accurate quote is received', () => {
+        it('Then it should poll for fresh Accurate quotes every 30 seconds', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useRepayWithSupplyQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          act(() => releaseAccurateQuote(1));
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+
+          await act(() => vi.advanceTimersToNextTimerAsync());
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitFor(() =>
+            expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+              42,
+            ),
+          );
+        });
+      });
+    });
+  });
+
+  describe(`And using the '${useWithdrawSwapQuote.name}' hook`, () => {
+    let releaseAccurateQuote: (value: number) => void;
+
+    beforeEach(() => {
+      server.use(
+        api.query(WithdrawSwapQuoteQuery, async ({ variables }) => {
+          const accuracy =
+            'market' in variables.request
+              ? variables.request.market?.accuracy
+              : undefined;
+
+          if (accuracy === QuoteAccuracy.Fast) {
+            return msw.HttpResponse.json({
+              data: {
+                value: {
+                  __typename: 'PositionSwapByIntentApprovalsRequired',
+                  approvals: [],
+                  quote: makeSwapQuote({
+                    accuracy: QuoteAccuracy.Fast,
+                  }),
+                },
+              },
+            });
+          }
+
+          const buyAmount = await new Promise<number>((r) => {
+            releaseAccurateQuote = r;
+          });
+
+          return msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PositionSwapByIntentApprovalsRequired',
+                approvals: [],
+                quote: makeSwapQuote({
+                  accuracy: QuoteAccuracy.Accurate,
+                  buyAmount,
+                }),
+              },
+            },
+          });
+        }),
+      );
+    });
+
+    describe('And a withdraw swap quote request', () => {
+      const request: WithdrawSwapQuoteRequest = {
+        market: {
+          position: makeUserSupplyItemId(),
+          buyReserve: makeReserveId(),
+          amount: bigDecimal(1000),
+          user: evmAddress(walletClient.account.address),
+        },
+      };
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      describe('When rendered for the first time', () => {
+        it('Then it should return a Fast quote and eventually update it with an Accurate one', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useWithdrawSwapQuote(request),
+          );
+
+          await vi.waitUntil(() => result.current.loading === false);
+          expect(result.current.data?.accuracy).toEqual(QuoteAccuracy.Fast);
+
+          act(() => releaseAccurateQuote(42));
+
+          await vi.waitUntil(
+            () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+          );
+          expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+            42,
+          );
+        });
+      });
+
+      describe('When the first Accurate quote is received', () => {
+        it('Then it should poll for fresh Accurate quotes every 30 seconds', async () => {
+          const { result } = renderHookWithinContext(() =>
+            useWithdrawSwapQuote(request),
           );
 
           await vi.waitUntil(() => result.current.loading === false);

@@ -106,7 +106,7 @@ function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
   }
 }
 
-function injectSwapQuoteAccuracy(
+function injectTokenSwapQuoteAccuracy(
   request: NullishDeep<TokenSwapQuoteRequest>,
   accuracy: QuoteAccuracy,
 ): NullishDeep<TokenSwapQuoteRequest> {
@@ -115,6 +115,46 @@ function injectSwapQuoteAccuracy(
   }
   if ('limit' in request && request.limit) {
     return { limit: { ...request.limit, accuracy } };
+  }
+  return request;
+}
+
+function injectSupplySwapQuoteAccuracy(
+  request: NullishDeep<SupplySwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<SupplySwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectBorrowSwapQuoteAccuracy(
+  request: NullishDeep<BorrowSwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<BorrowSwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectRepayWithSupplyQuoteAccuracy(
+  request: NullishDeep<RepayWithSupplyQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<RepayWithSupplyQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectWithdrawSwapQuoteAccuracy(
+  request: NullishDeep<WithdrawSwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<WithdrawSwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
   }
   return request;
 }
@@ -225,7 +265,7 @@ export function useTokenSwapQuote({
   const fastResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
+      request: injectTokenSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: extractTokenSwapQuote,
@@ -238,7 +278,7 @@ export function useTokenSwapQuote({
   const accurateResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      request: injectTokenSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
       currency,
     },
     selector: extractTokenSwapQuote,
@@ -684,16 +724,40 @@ export function useSupplySwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: SupplySwapQuoteQuery,
     variables: {
-      request,
+      request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: SupplySwapQuoteQuery,
+    variables: {
+      request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -831,16 +895,40 @@ export function useBorrowSwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: BorrowSwapQuoteQuery,
     variables: {
-      request,
+      request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: BorrowSwapQuoteQuery,
+    variables: {
+      request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -1165,16 +1253,43 @@ export function useRepayWithSupplyQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: RepayWithSupplyQuoteQuery,
     variables: {
-      request,
+      request: injectRepayWithSupplyQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: RepayWithSupplyQuoteQuery,
+    variables: {
+      request: injectRepayWithSupplyQuoteAccuracy(
+        request,
+        QuoteAccuracy.Accurate,
+      ),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -1361,16 +1476,40 @@ export function useWithdrawSwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: WithdrawSwapQuoteQuery,
     variables: {
-      request,
+      request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: WithdrawSwapQuoteQuery,
+    variables: {
+      request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
