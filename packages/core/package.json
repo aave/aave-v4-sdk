@@ -1,6 +1,6 @@
 {
   "name": "@aave/core",
-  "version": "1.0.0-next.12",
+  "version": "1.0.0-next.13",
   "description": "The shared core across Aave SDKs.",
   "repository": {
     "directory": "packages/core",
