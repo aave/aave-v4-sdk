@@ -67,3 +67,11 @@ export type NullishDeep<T> = T extends ReadonlyArray<infer U>
       : T extends object
         ? { [K in keyof T]: NullishDeep<T[K]> | null | undefined }
         : T | null | undefined;
+
+/**
+ * Non-distributive override. Replaces properties in T with those in U.
+ * Unlike `Omit<T, keyof U> & U`, does not distribute over unions.
+ *
+ * @internal
+ */
+export type Override<T, U> = { [K in Exclude<keyof T, keyof U>]: T[K] } & U;

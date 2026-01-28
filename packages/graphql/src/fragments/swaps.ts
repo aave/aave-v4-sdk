@@ -111,7 +111,7 @@ export type SwapByIntent = FragmentOf<typeof SwapByIntentFragment>;
 export const SwapByIntentWithApprovalRequiredFragment = graphql(
   `fragment SwapByIntentWithApprovalRequired on SwapByIntentWithApprovalRequired {
     __typename
-    approval {
+    approvals {
       ...Erc20Approval
     }
     quote {

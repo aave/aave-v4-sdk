@@ -447,6 +447,6 @@ export function makeSwapByIntentWithApprovalRequired({
   return {
     __typename: 'SwapByIntentWithApprovalRequired',
     quote: makeSwapQuote(),
-    approval,
+    approvals: [approval],
   };
 }

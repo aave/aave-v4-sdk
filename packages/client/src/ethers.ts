@@ -27,6 +27,7 @@ import {
   type TypedDataDomain,
   type TypedDataField,
 } from 'ethers';
+import { supportsPermit } from './adapters';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -141,12 +142,17 @@ function executePlan(
       return sendTransactionAndWait(signer, result);
 
     case 'Erc20ApprovalRequired':
-      return sendTransactionAndWait(
-        signer,
-        result.approval.byTransaction,
-      ).andThen(() =>
-        sendTransactionAndWait(signer, result.originalTransaction),
-      );
+      return result.approvals
+        .reduce<ReturnType<typeof sendTransactionAndWait>>(
+          (chain, approval) =>
+            chain.andThen(() =>
+              sendTransactionAndWait(signer, approval.byTransaction),
+            ),
+          okAsync(undefined as never),
+        )
+        .andThen(() =>
+          sendTransactionAndWait(signer, result.originalTransaction),
+        );
 
     case 'PreContractActionRequired':
       return sendTransactionAndWait(signer, result.transaction).andThen(() =>
@@ -266,11 +272,8 @@ export function permitWith<E>(
   action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
 ): ResultAsync<ExecutionPlan, E | SignTypedDataError> {
   return action().andThen((result) => {
-    if (
-      result.__typename === 'Erc20ApprovalRequired' &&
-      result.approval.bySignature
-    ) {
-      const permitTypedData = result.approval.bySignature;
+    if (supportsPermit(result)) {
+      const permitTypedData = result.approvals[0].bySignature;
       // Sign and wrap with deadline
       return signTypedDataWith(signer, permitTypedData)
         .map((signature) => ({
