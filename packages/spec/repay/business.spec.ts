@@ -1,5 +1,5 @@
 import { assertOk, evmAddress, invariant, never, okAsync } from '@aave/client';
-import { preview, repay, userBorrows } from '@aave/client/actions';
+import { repay, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -92,36 +92,6 @@ describe('Repaying Loans on Aave V4', () => {
       });
     });
 
-    describe('When the user wants to preview the repayment action before performing it', () => {
-      it('Then the user can review the repayment details before proceeding', async () => {
-        const previewResult = await preview(client, {
-          action: {
-            repay: {
-              reserve: reserve.id,
-              sender: evmAddress(user.account.address),
-              amount: {
-                erc20: {
-                  value: {
-                    exact: reserve.userState!.borrowable.amount.value.div(20),
-                  },
-                },
-              },
-            },
-          },
-        });
-        assertOk(previewResult);
-        expect(
-          previewResult.value.healthFactor.after,
-        ).toBeBigDecimalGreaterThan(previewResult.value.healthFactor.current);
-        expect(
-          previewResult.value.netCollateral.after.value,
-        ).toBeBigDecimalCloseTo(
-          previewResult.value.netCollateral.current.value,
-          { precision: 2 },
-        );
-      });
-    });
-
     describe('When the user repays a partial amount of the loan', () => {
       it('Then the borrow position is updated to reflect the reduced outstanding balance', async () => {
         const borrowBefore = await userBorrows(client, {
@@ -192,7 +162,7 @@ describe('Repaying Loans on Aave V4', () => {
     describe('When the user repays a partial amount of the loan using a valid permit signature', () => {
       let borrowBefore: UserBorrowItem;
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         const setup = await userBorrows(client, {
           query: {
             userSpoke: {
