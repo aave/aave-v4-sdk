@@ -2,6 +2,7 @@ import {
   type AaveClient,
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  supportsPermit,
   type TimeWindowQueryOptions,
   type ValidationError,
 } from '@aave/client';
@@ -70,13 +71,7 @@ import type {
   ResultAsync,
   Signature,
 } from '@aave/types';
-import {
-  invariant,
-  isSignature,
-  never,
-  okAsync,
-  ResultAwareError,
-} from '@aave/types';
+import { isSignature, never, okAsync, ResultAwareError } from '@aave/types';
 import { useCallback, useEffect, useState } from 'react';
 import { useAaveClient } from './context';
 import {
@@ -92,6 +87,7 @@ import {
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
+  trySignatureFrom,
   useSuspendableQuery,
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
@@ -1010,19 +1006,14 @@ export function useSupplySwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1064,19 +1055,14 @@ export function useBorrowSwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1265,19 +1251,14 @@ export function useRepayWithSupply(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1466,19 +1447,14 @@ export function useWithdrawSwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1564,7 +1540,7 @@ export function useTokenSwap(
         switch (plan.__typename) {
           case 'SwapTransactionRequest':
             return handler(plan, { cancel })
-              .map(PendingTransaction.ensure)
+              .andThen(PendingTransaction.tryFrom)
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(() => okAsync(plan.orderReceipt));
 
@@ -1593,10 +1569,7 @@ export function useTokenSwap(
               quoteId: quoteResult.quote.quoteId,
             }).andThen((order) =>
               handler(order.data, { cancel })
-                .map((result) => {
-                  invariant(isSignature(result), 'Invalid signature');
-                  return result;
-                })
+                .andThen(trySignatureFrom)
                 .andThen((signature) =>
                   executeSwap({
                     intent: { quoteId: order.newQuoteId, signature },
@@ -1605,44 +1578,69 @@ export function useTokenSwap(
             );
 
           case 'SwapByIntentWithApprovalRequired':
-            return handler(quoteResult.approval, { cancel })
-              .andThen((result) => {
-                if (isSignature(result)) {
-                  const permitTypedData = quoteResult.approval.bySignature;
-                  if (!permitTypedData) {
-                    return UnexpectedError.from(
-                      'Expected bySignature to be present in SwapByIntentWithApprovalRequired',
-                    ).asResultAsync();
-                  }
-
-                  return prepareTokenSwap(client, {
-                    quoteId: quoteResult.quote.quoteId,
-                    permitSig: {
-                      deadline: permitTypedData.message.deadline as number,
-                      value: result,
-                    },
-                  });
-                }
-                if (PendingTransaction.isInstanceOf(result)) {
-                  return result.wait().andThen(() =>
-                    prepareTokenSwap(client, {
+            if (supportsPermit(quoteResult)) {
+              const approval = quoteResult.approvals[0];
+              return handler(approval, { cancel })
+                .andThen((result) => {
+                  if (isSignature(result)) {
+                    return prepareTokenSwap(client, {
                       quoteId: quoteResult.quote.quoteId,
-                    }),
-                  );
-                }
-                return UnexpectedError.from(result).asResultAsync();
-              })
-              .andThen((order) =>
-                handler(order.data, { cancel })
-                  .map((handlerResult) => {
-                    invariant(isSignature(handlerResult), 'Invalid signature');
-                    return handlerResult;
-                  })
-                  .andThen((signature) =>
-                    executeSwap({
-                      intent: { quoteId: quoteResult.quote.quoteId, signature },
-                    }),
+                      permitSig: {
+                        deadline: approval.bySignature.message
+                          .deadline as number,
+                        value: result,
+                      },
+                    });
+                  }
+                  if (PendingTransaction.isInstanceOf(result)) {
+                    return result.wait().andThen(() =>
+                      prepareTokenSwap(client, {
+                        quoteId: quoteResult.quote.quoteId,
+                      }),
+                    );
+                  }
+                  return UnexpectedError.from(result).asResultAsync();
+                })
+                .andThen((order) =>
+                  handler(order.data, { cancel })
+                    .andThen(trySignatureFrom)
+                    .andThen((signature) =>
+                      executeSwap({
+                        intent: {
+                          quoteId: order.newQuoteId,
+                          signature,
+                        },
+                      }),
+                    ),
+                );
+            }
+
+            return quoteResult.approvals
+              .reduce(
+                (chain, approval) =>
+                  chain.andThen(() =>
+                    handler({ ...approval, bySignature: null }, { cancel })
+                      .andThen(PendingTransaction.tryFrom)
+                      .andThen((pendingTransaction) =>
+                        pendingTransaction.wait(),
+                      ),
                   ),
+                okAsync(undefined) as ResultAsync<
+                  unknown,
+                  SendTransactionError | PendingTransactionError
+                >,
+              )
+              .andThen(() =>
+                prepareTokenSwap(client, {
+                  quoteId: quoteResult.quote.quoteId,
+                }),
+              )
+              .andThen((order) => handler(order.data, { cancel }))
+              .andThen(trySignatureFrom)
+              .andThen((signature) =>
+                executeSwap({
+                  intent: { quoteId: quoteResult.quote.quoteId, signature },
+                }),
               );
           default:
             never(
@@ -1714,10 +1712,7 @@ export function useCancelSwap(
           case 'SwapPendingSignature':
             return prepareSwapCancel(client, request)
               .andThen((result) => handler(result.data, { cancel }))
-              .map((result) => {
-                invariant(isSignature(result), 'Invalid signature');
-                return result;
-              })
+              .andThen(trySignatureFrom)
               .andThen((signature) =>
                 cancelSwap(client, {
                   intent: { id: request.id, signature },
@@ -1730,7 +1725,7 @@ export function useCancelSwap(
 
                 return (
                   handler(plan, { cancel })
-                    .map(PendingTransaction.ensure)
+                    .andThen(PendingTransaction.tryFrom)
                     .andThen((pendingTransaction) => pendingTransaction.wait())
                     // TODO: verify that if fails cause too early, we need to waitForSwapOutcome(client)({ id: request.id })
                     .andThen(() => swapStatus(client, { id: request.id }))

@@ -4,6 +4,7 @@ import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
   type PaginatedActivitiesResult,
+  supportsPermit,
   type TimeWindowQueryOptions,
   UnexpectedError,
 } from '@aave/client';
@@ -28,6 +29,8 @@ import {
   decodeReserveId,
   type ERC20PermitSignature,
   type Erc20Approval,
+  type Erc20ApprovalRequired,
+  type ExecutionPlan,
   HubQuery,
   HubsQuery,
   type InsufficientBalanceError,
@@ -36,6 +39,7 @@ import {
   isSpokeInputVariant,
   isTokensVariant,
   type LiquidatePositionRequest,
+  type PermitTypedData,
   type PreContractActionRequired,
   PreviewQuery,
   type PreviewRequest,
@@ -61,7 +65,9 @@ import {
   expectTypename,
   isSignature,
   type NullishDeep,
+  okAsync,
   type Prettify,
+  type ResultAsync,
   type Signature,
   type TxHash,
 } from '@aave/types';
@@ -110,6 +116,79 @@ function refreshQueriesForReserveChange(
       refreshHubs(client, chainId),
     ]);
 }
+
+function toPermitSignature(
+  signature: Signature,
+  permitTypedData: PermitTypedData,
+): ERC20PermitSignature {
+  return {
+    deadline: permitTypedData.message.deadline as number,
+    value: signature,
+  };
+}
+
+type ApprovalHandler = ExecutionPlanHandler<
+  TransactionRequest | Erc20Approval,
+  Signature | PendingTransaction
+>;
+
+/**
+ * Sends all approvals sequentially via transactions (no permit).
+ */
+function sendApprovalTransactions(
+  plan: Erc20ApprovalRequired,
+  handler: ApprovalHandler,
+): ResultAsync<
+  TransactionRequest,
+  SendTransactionError | PendingTransactionError
+> {
+  return plan.approvals
+    .reduce<
+      ResultAsync<unknown, SendTransactionError | PendingTransactionError>
+    >(
+      (chain, approval) =>
+        chain.andThen(() =>
+          handler({ ...approval, bySignature: null }, { cancel })
+            .andThen(PendingTransaction.tryFrom)
+            .andThen((pending) => pending.wait()),
+        ),
+      okAsync(undefined),
+    )
+    .map(() => plan.originalTransaction);
+}
+
+type SingleApprovalPlan = Erc20ApprovalRequired & {
+  approvals: [Erc20Approval & { bySignature: PermitTypedData }];
+};
+
+/**
+ * Processes a single approval that supports permit.
+ * The handler decides whether to use a permit signature or a transaction.
+ * Returns either a new TransactionRequest (from permit callback) or the plan's original transaction.
+ */
+function handleSingleApproval(
+  plan: SingleApprovalPlan,
+  handler: ApprovalHandler,
+  onPermit: (
+    permitSig: ERC20PermitSignature,
+  ) => ResultAsync<ExecutionPlan, UnexpectedError>,
+): ResultAsync<
+  TransactionRequest,
+  SendTransactionError | PendingTransactionError | UnexpectedError
+> {
+  const approval = plan.approvals[0];
+
+  return handler(approval, { cancel }).andThen((result) => {
+    if (isSignature(result)) {
+      return onPermit(toPermitSignature(result, approval.bySignature)).map(
+        expectTypename('TransactionRequest'),
+      );
+    }
+    return result.wait().map(() => plan.originalTransaction);
+  });
+}
+
+// ------------------------------------------------------------
 
 /**
  * A hook that provides a way to supply assets to an Aave reserve.
@@ -187,58 +266,34 @@ export function useSupply(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .map(PendingTransaction.ensure)
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
             case 'Erc20ApprovalRequired':
-              return handler(plan.approval, { cancel })
-                .andThen((result) => {
-                  if (isSignature(result)) {
-                    const permitTypedData = plan.approval.bySignature;
-                    if (!permitTypedData) {
-                      return UnexpectedError.from(
-                        'A signature was returned but the ERC-20 involve does not support permit',
-                      ).asResultAsync();
-                    }
-                    const permitSig: ERC20PermitSignature = {
-                      deadline: permitTypedData.message.deadline as number,
-                      value: result,
-                    };
-                    return supply(
-                      client,
-                      injectSupplyPermitSignature(request, permitSig),
-                    )
-                      .map(expectTypename('TransactionRequest'))
-                      .andThen((transaction) =>
-                        handler(transaction, { cancel }),
-                      )
-                      .map(PendingTransaction.ensure);
-                  }
-                  return result
-                    .wait()
-                    .andThen(() =>
-                      handler(plan.originalTransaction, { cancel }),
-                    )
-                    .map(PendingTransaction.ensure);
-                })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              if (supportsPermit(plan)) {
+                return handleSingleApproval(plan, handler, (permitSig) =>
+                  supply(
+                    client,
+                    injectSupplyPermitSignature(request, permitSig),
+                  ),
+                ).andThen((transaction) => handler(transaction, { cancel }));
+              }
+              return sendApprovalTransactions(plan, handler).andThen(
+                (transaction) => handler(transaction, { cancel }),
+              );
 
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .map(PendingTransaction.ensure)
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .map(PendingTransaction.ensure)
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen(PendingTransaction.tryFrom)
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
           }
         })
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -335,17 +390,12 @@ export function useBorrow(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .map(PendingTransaction.ensure)
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
@@ -354,6 +404,8 @@ export function useBorrow(
               return UnexpectedError.from(plan).asResultAsync();
           }
         })
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -435,58 +487,31 @@ export function useRepay(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .map(PendingTransaction.ensure)
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
             case 'Erc20ApprovalRequired':
-              return handler(plan.approval, { cancel })
-                .andThen((result) => {
-                  if (isSignature(result)) {
-                    const permitTypedData = plan.approval.bySignature;
-                    if (!permitTypedData) {
-                      return UnexpectedError.from(
-                        'A signature was returned but the ERC-20 involve does not support permit',
-                      ).asResultAsync();
-                    }
-                    const permitSig: ERC20PermitSignature = {
-                      deadline: permitTypedData.message.deadline as number,
-                      value: result,
-                    };
-                    return repay(
-                      client,
-                      injectRepayPermitSignature(request, permitSig),
-                    )
-                      .map(expectTypename('TransactionRequest'))
-                      .andThen((transaction) =>
-                        handler(transaction, { cancel }),
-                      )
-                      .map(PendingTransaction.ensure);
-                  }
-                  return result
-                    .wait()
-                    .andThen(() =>
-                      handler(plan.originalTransaction, { cancel }),
-                    )
-                    .map(PendingTransaction.ensure);
-                })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              if (supportsPermit(plan)) {
+                return handleSingleApproval(plan, handler, (permitSig) =>
+                  repay(client, injectRepayPermitSignature(request, permitSig)),
+                ).andThen((transaction) => handler(transaction, { cancel }));
+              }
+              return sendApprovalTransactions(plan, handler).andThen(
+                (transaction) => handler(transaction, { cancel }),
+              );
 
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .map(PendingTransaction.ensure)
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .map(PendingTransaction.ensure)
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen(PendingTransaction.tryFrom)
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
           }
         })
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -583,16 +608,12 @@ export function useWithdraw(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
@@ -601,6 +622,8 @@ export function useWithdraw(
               return UnexpectedError.from(plan).asResultAsync();
           }
         })
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
         .andTee(refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
@@ -661,7 +684,7 @@ export function useRenounceSpokeUserPositionManager(
     (request: RenounceSpokeUserPositionManagerRequest) =>
       renounceSpokeUserPositionManager(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andTee(() =>
           client.refreshQueryWhere(
@@ -733,7 +756,7 @@ export function useUpdateUserPositionConditions(
     (request: UpdateUserPositionConditionsRequest) =>
       updateUserPositionConditions(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andTee(async () => {
           const { userPositionId } = request;
@@ -817,7 +840,7 @@ export function useSetUserSuppliesAsCollateral(
       );
       return setUserSuppliesAsCollateral(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andTee(() =>
           Promise.all([
@@ -970,7 +993,7 @@ export function useSetUserSuppliesAsCollateral(
 export function useLiquidatePosition(
   handler: ExecutionPlanHandler<
     TransactionRequest | Erc20Approval | PreContractActionRequired,
-    PendingTransaction
+    PendingTransaction | Signature
   >,
 ): UseAsyncTask<
   LiquidatePositionRequest,
@@ -984,54 +1007,38 @@ export function useLiquidatePosition(
   return useAsyncTask(
     (request: LiquidatePositionRequest) =>
       // TODO: update the relevant read queries
-      liquidatePosition(client, request).andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+      liquidatePosition(client, request)
+        .andThen((plan) => {
+          switch (plan.__typename) {
+            case 'TransactionRequest':
+              return handler(plan, { cancel });
 
-          case 'Erc20ApprovalRequired':
-            return handler(plan.approval, { cancel })
-              .andThen((result) => {
-                if (isSignature(result)) {
-                  const permitTypedData = plan.approval.bySignature;
-                  if (!permitTypedData) {
-                    return UnexpectedError.from(
-                      'A signature was returned but the ERC-20 involve does not support permit',
-                    ).asResultAsync();
-                  }
-                  const permitSig: ERC20PermitSignature = {
-                    deadline: permitTypedData.message.deadline as number,
-                    value: result,
-                  };
-                  return liquidatePosition(
+            case 'Erc20ApprovalRequired':
+              if (supportsPermit(plan)) {
+                return handleSingleApproval(plan, handler, (permitSig) =>
+                  liquidatePosition(
                     client,
                     injectLiquidatePermitSignature(request, permitSig),
-                  )
-                    .map(expectTypename('TransactionRequest'))
-                    .andThen((transaction) => handler(transaction, { cancel }))
-                    .map(PendingTransaction.ensure);
-                }
-                return result
-                  .wait()
-                  .andThen(() => handler(plan.originalTransaction, { cancel }))
-                  .map(PendingTransaction.ensure);
-              })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+                  ),
+                ).andThen((transaction) => handler(transaction, { cancel }));
+              }
+              return sendApprovalTransactions(plan, handler).andThen(
+                (transaction) => handler(transaction, { cancel }),
+              );
 
-          case 'PreContractActionRequired':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(plan.originalTransaction, { cancel }))
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+            case 'PreContractActionRequired':
+              return handler(plan, { cancel })
+                .andThen(PendingTransaction.tryFrom)
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      }),
+            case 'InsufficientBalanceError':
+              return errAsync(ValidationError.fromGqlNode(plan));
+          }
+        })
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction),
     [client, handler],
   );
 }
@@ -1118,7 +1125,7 @@ export function useSetSpokeUserPositionManager(
     (request: SetSpokeUserPositionManagerRequest) =>
       setSpokeUserPositionManager(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andTee(() =>
           client.refreshQueryWhere(

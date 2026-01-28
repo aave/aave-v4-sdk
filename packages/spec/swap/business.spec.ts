@@ -121,7 +121,7 @@ describe('Token swapping on Aave V4', () => {
           return swapPlan;
         })
         .andThen((swapPlan) =>
-          sendTransaction(newUser, swapPlan.approval.byTransaction)
+          sendTransaction(newUser, swapPlan.approvals[0]!.byTransaction)
             .andThen(() =>
               prepareTokenSwap(client, {
                 quoteId: swapPlan.quote.quoteId,
