@@ -1,5 +1,17 @@
 # @aave/react
 
+## 4.0.0-next.32
+
+### Patch Changes
+
+- b65232e: **feat:** support USDT-like approval reset flow in React hooks.
+- Updated dependencies [b65232e]
+- Updated dependencies [05f1e7e]
+  - @aave/graphql@1.0.0-next.26
+  - @aave/client@4.0.0-next.32
+  - @aave/types@1.0.0-next.8
+  - @aave/core@1.0.0-next.13
+
 ## 4.0.0-next.31
 
 ### Patch Changes
