@@ -1,92 +1,46 @@
 # AGENTS.md
 
-## Dev environment tips
+## Dev Environment
 
-- Use `nvm use` to use the correct Node.js version.
-- Use `corepack enable` to install the correct version of pnpm.
-- Use `pnpm install` to install the dependencies.
-- Use `pnpm build` to build the project.
-
-## Testing instructions
-
-**Run all tests across the monorepo:**
 ```bash
-pnpm test --run
+nvm use && corepack enable && pnpm install && pnpm build
 ```
 
-**Run tests for a specific package** (pattern: `pnpm test:<package-name> --run`):
+## Testing
+
 ```bash
-pnpm test:types --run      # @aave/types
-pnpm test:core --run       # @aave/core
-pnpm test:client --run     # @aave/client
-pnpm test:react --run      # @aave/react
-pnpm test:cli --run        # @aave/cli
+pnpm test --run                    # All tests
+pnpm test:<package> --run          # Package: types, core, client, react, cli
+pnpm vitest --run --project <project> <file> -t "<test-name>"  # Specific test
 ```
 
-**Run a specific test file:**
-```bash
-pnpm vitest --run --project <project-name> <path-to-test-file>
-```
+## SDK Architecture
 
-**Focus on a single test by name:**
-```bash
-pnpm vitest --run --project <project-name> <path-to-test-file> -t "<test-name>"
-```
+| Package | Purpose |
+|---------|---------|
+| `@aave/graphql` | GraphQL queries, fragments, types |
+| `@aave/client` | TypeScript client actions (imperative API) |
+| `@aave/react` | React hooks (declarative API) |
+| `@aave/types` | Shared TypeScript types |
+| `@aave/core` | Core SDK functionality |
+| `@aave/cli` | Command-line tools |
 
-**Examples:**
-```bash
-# Run all React tests
-pnpm test:react --run
-
-# Run a specific test file in the client package
-pnpm vitest --run --project client packages/client/src/viem.test.ts
-
-# Run a specific test by name
-pnpm vitest --run --project react packages/react/src/swap.test.ts -t "should handle swap quote"
-```
-
-## SDK Architecture & Terminology
-
-The SDK is organized into packages:
-
-- **`@aave/graphql`**: GraphQL queries, fragments, and type definitions
-- **`@aave/client`**: TypeScript client actions (imperative API)
-- **`@aave/react`**: React hooks (declarative API)
-- **`@aave/types`**: Shared TypeScript types and utilities
-- **`@aave/core`**: Core SDK functionality and shared code
-- **`@aave/cli`**: Command-line tools
-
-**Terminology:**
-- **Actions** (`packages/client/src/actions/`): Imperative functions that execute GraphQL queries. Use when asked to update "actions" or "client actions".
-- **Hooks** (`packages/react/src/`): React hooks that wrap actions with reactive state management. Only update when explicitly requested.
-- **Queries/Documents** (`packages/graphql/src/`): GraphQL query definitions and fragments.
-
-**Imperative Read Hooks:**
-React hooks in `@aave/react` that wrap read actions from `@aave/client/actions`. They follow the naming pattern `use[Something]Action` (e.g., `useReservesAction`, `useChainAction`). These hooks use `UseAsyncTask` for async state management and provide an imperative API for executing GraphQL queries. They are distinct from subscription-based or mutation hooks.
-
-Most imperative read hooks default to `cache-first` request policy. **Exceptions** that use `network-only`:
-- `usePreviewAction` - previews must always reflect current on-chain state
-- `useExchangeRateAction` - exchange rates must always be fresh
-- `useTokenSwapQuoteAction`, `useSupplySwapQuoteAction`, `useBorrowSwapQuoteAction`, `useRepayWithSupplyQuoteAction`, `useWithdrawSwapQuoteAction` - swap quotes must reflect current market conditions
+**Key concepts:**
+- **Actions** (`packages/client/src/actions/`): Imperative functions for GraphQL queries
+- **Hooks** (`packages/react/src/`): React hooks wrapping actions with state management
+- **Imperative read hooks** (`use[X]Action`): Use `cache-first` policy, except `usePreviewAction`, `useExchangeRateAction`, and swap quote hooks which use `network-only`
 
 When updating GraphQL queries, update corresponding actions. Only update hooks if explicitly requested.
 
-## Schema updates
+## Schema Updates
 
-Use the `/schema-update` skill to update the GraphQL schema. See `.claude/skills/schema-update/SKILL.md` for detailed instructions.
+Use Claude `/schema-update` skill. See `.claude/skills/schema-update/SKILL.md`.
 
-## Commit guidelines
+## Commits & Changesets
 
-- Use conventional commits format: `type: description` (e.g., `fix:`, `feat:`, `chore:`, `docs:`)
-- Do NOT include `Co-Authored-By` trailers
-- Keep commit messages concise and descriptive
+**Commits:** conventional format (`fix:`, `feat:`, `chore:`), no `Co-Authored-By` trailers.
 
-## Changesets
-
-When creating changesets, create the file manually in `.changeset/` directory since interactive prompts don't work in this environment:
-
-1. Create a new file in `.changeset/` with a random name like `adjective-noun-verb.md`
-2. Use this format:
+**Changesets:** Create manually in `.changeset/` (e.g., `adjective-noun-verb.md`):
 ```
 ---
 "@aave/graphql": patch
@@ -94,13 +48,9 @@ When creating changesets, create the file manually in `.changeset/` directory si
 "@aave/react": patch
 ---
 
-**fix:** description of the change
+**fix:** description using `backticks` for code references
 ```
 
-**Important notes:**
-- Bump types: `patch` for bug fixes, `minor` for new features, `major` for breaking changes
-- **Always include primary packages** (`@aave/client` and `@aave/react`) when creating changesets for sub-dependencies like `@aave/graphql`, `@aave/types`, or `@aave/core`, since they depend on these packages
-- For changes only to `@aave/cli`, you can omit the primary packages
-- **Changelog description format:** Follow the same conventional commits format as commit messages (e.g., `fix:`, `feat:`, `chore:`, `docs:`), but use **bold** formatting (e.g., `**fix:**`, `**feat:**`, `**chore:**`)
-- **Keep it concise:** One line description only - just the essential change summary. Never use bullet points or multi-line descriptions
-- **Code references:** Use backticks for type names, field names, function names, and other code identifiers (e.g., `` `QuoteAccuracy` ``, `` `spotBuy` ``, `` `SwapQuote` ``)
+- `patch` = bug fix, `minor` = feature, `major` = breaking change
+- Always include `@aave/client` and `@aave/react` when changing their dependencies (`@aave/graphql`, `@aave/types`, `@aave/core`)
+- One-line description only, bold type prefix (`**fix:**`)

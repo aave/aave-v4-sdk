@@ -18,7 +18,7 @@ export const SpokeFragment = graphql(
 export type Spoke = FragmentOf<typeof SpokeFragment>;
 
 export const SpokePositionManagerFragment = graphql(
-  `fragment SpokePositionManager on SpokePositionManger {
+  `fragment SpokePositionManager on SpokePositionManager {
     __typename
     address
     active
