@@ -2,6 +2,7 @@ import {
   assertOk,
   bigDecimal,
   evmAddress,
+  ResultAsync,
   type UserBorrowItem,
   type UserPosition,
   type UserSupplyItem,
@@ -35,8 +36,6 @@ const user = await createNewWallet(
 
 describe('Given a user with a User Position on a Spoke', () => {
   describe('With 3 supply positions, 2 of which set as collateral', () => {
-    let suppliesPositions: UserSupplyItem[];
-
     beforeAll(async () => {
       const resultSupplies = await userSupplies(client, {
         query: {
@@ -47,42 +46,33 @@ describe('Given a user with a User Position on a Spoke', () => {
         },
       });
       assertOk(resultSupplies);
-      suppliesPositions = resultSupplies.value;
 
-      if (suppliesPositions.length < 3) {
-        const supplyGHOCollateral = await findReserveAndSupply(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-          token: ETHEREUM_GHO_ADDRESS,
-          asCollateral: true,
-          amount: bigDecimal('100'),
-        });
-        assertOk(supplyGHOCollateral);
-
-        const supplyUSDCDNoCollateral = await findReserveAndSupply(
-          client,
-          user,
-          {
+      if (resultSupplies.value.length < 3) {
+        const result = await ResultAsync.combine([
+          findReserveAndSupply(client, user, {
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            token: ETHEREUM_GHO_ADDRESS,
+            asCollateral: true,
+            amount: bigDecimal('100'),
+          }),
+          findReserveAndSupply(client, user, {
             spoke: ETHEREUM_SPOKE_CORE_ID,
             token: ETHEREUM_USDC_ADDRESS,
             asCollateral: true,
             amount: bigDecimal('100'),
-          },
-        );
-        assertOk(supplyUSDCDNoCollateral);
-
-        const supplyWETHCollateral = await findReserveAndSupply(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-          token: ETHEREUM_AAVE_ADDRESS,
-          asCollateral: false,
-          amount: bigDecimal('0.5'),
-        });
-        assertOk(supplyWETHCollateral);
+          }),
+          findReserveAndSupply(client, user, {
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            token: ETHEREUM_AAVE_ADDRESS,
+            asCollateral: false,
+            amount: bigDecimal('0.5'),
+          }),
+        ]);
+        assertOk(result);
       }
     }, 100_000);
 
     describe('And 2 borrow positions', () => {
-      let borrowPositions: UserBorrowItem[];
-
       beforeAll(async () => {
         const borrows = await userBorrows(client, {
           query: {
@@ -93,31 +83,33 @@ describe('Given a user with a User Position on a Spoke', () => {
           },
         });
         assertOk(borrows);
-        borrowPositions = borrows.value;
 
         if (borrows.value.length < 2) {
-          const borrowAAVE = await borrowFromRandomReserve(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_AAVE_ADDRESS,
-            ratioToBorrow: 0.1,
-          });
-          assertOk(borrowAAVE);
-
-          const borrowWETH = await borrowFromRandomReserve(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_WETH_ADDRESS,
-            ratioToBorrow: 0.1,
-          });
-          assertOk(borrowWETH);
+          const result = await ResultAsync.combine([
+            borrowFromRandomReserve(client, user, {
+              spoke: ETHEREUM_SPOKE_CORE_ID,
+              token: ETHEREUM_AAVE_ADDRESS,
+              ratioToBorrow: 0.1,
+            }),
+            borrowFromRandomReserve(client, user, {
+              spoke: ETHEREUM_SPOKE_CORE_ID,
+              token: ETHEREUM_WETH_ADDRESS,
+              ratioToBorrow: 0.1,
+            }),
+          ]);
+          assertOk(result);
         }
       }, 180_000);
 
       describe('When fetching the User Position data', () => {
         let position: UserPosition;
         let accountDataOnChain: UserAccountData;
+        let suppliesPositions: UserSupplyItem[];
+        let borrowPositions: UserBorrowItem[];
 
         beforeAll(async () => {
-          const [positionsResult, accountDataResult] = await Promise.all([
+          let positions: UserPosition[];
+          const result = await ResultAsync.combine([
             userPositions(client, {
               user: evmAddress(user.account.address),
               filter: {
@@ -128,19 +120,34 @@ describe('Given a user with a User Position on a Spoke', () => {
               evmAddress(user.account.address),
               ETHEREUM_SPOKE_CORE_ADDRESS,
             ),
+            userSupplies(client, {
+              query: {
+                userSpoke: {
+                  spoke: ETHEREUM_SPOKE_CORE_ID,
+                  user: evmAddress(user.account.address),
+                },
+              },
+            }),
+            userBorrows(client, {
+              query: {
+                userSpoke: {
+                  spoke: ETHEREUM_SPOKE_CORE_ID,
+                  user: evmAddress(user.account.address),
+                },
+              },
+            }),
           ]);
 
-          assertOk(positionsResult);
-          assertNonEmptyArray(positionsResult.value);
-          // We only operate on one spoke, so we expect a single element array
-          assertSingleElementArray(positionsResult.value);
-          position = positionsResult.value[0];
+          assertOk(result);
+          [positions, accountDataOnChain, suppliesPositions, borrowPositions] =
+            result.value;
 
-          accountDataOnChain = accountDataResult;
+          assertNonEmptyArray(positions);
+          assertSingleElementArray(positions);
+          position = positions[0];
         }, 180_000);
 
-        it('Then it should return the correct totalSupplied value', async () => {
-          // total supplied is the sum of the principal and interest for all positions in the spoke
+        it('Then the totalSupplied value is the sum of the principal and interest for all positions in the spoke', async () => {
           const totalSupplied = suppliesPositions.reduce(
             (acc, supply) =>
               acc.plus(
@@ -156,15 +163,16 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then it should return the correct totalCollateral value', async () => {
+        it('Then the totalCollateral value is the sum of the collateral values from the spoke', async () => {
           expect(position.totalCollateral.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalCollateralValue,
-            { precision: 1 },
+            {
+              precision: 1,
+            },
           );
         });
 
-        it('Then it should return the correct netCollateral value', async () => {
-          // net collateral is the sum of the total collateral minus the total debt
+        it('Then the netCollateral value is the sum of the total collateral minus the total debt', async () => {
           const totalCollateral = suppliesPositions
             .filter((supply) => supply.isCollateral)
             .reduce(
@@ -190,16 +198,14 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then it should return the correct totalDebt value', async () => {
-          // total debt is the sum of the principal and interest for all positions in the spoke
+        it('Then the totalDebt value is the sum of the principal and interest for all positions in the spoke', async () => {
           expect(position.totalDebt.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalDebtValue,
             { precision: 1 },
           );
         });
 
-        it('Then it should return the correct netBalance value', async () => {
-          // net balance is the sum of the total supplied minus the borrows (debt)
+        it('Then the netBalance value is the sum of the total supplied minus the borrows (debt)', async () => {
           const totalSupplied = suppliesPositions.reduce(
             (acc, supply) =>
               acc.plus(
@@ -224,21 +230,21 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then it should return the correct healthFactor', async () => {
+        it('Then the healthFactor value is the health factor from the spoke', async () => {
           expect(position.healthFactor.current).toBeBigDecimalCloseTo(
             accountDataOnChain.healthFactor,
             { precision: 2 },
           );
         });
 
-        it('Then it should return the correct averageCollateralFactor value', async () => {
+        it('Then the averageCollateralFactor value is the average collateral factor from the spoke', async () => {
           expect(position.averageCollateralFactor.value).toBeBigDecimalCloseTo(
             accountDataOnChain.avgCollateralFactor,
             { precision: 2 },
           );
         });
 
-        it('Then it should return the correct riskPremium value', async () => {
+        it('Then the riskPremium value is the risk premium from the spoke', async () => {
           expect(position.riskPremium?.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.riskPremium,
             { precision: 2 },
