@@ -2666,7 +2666,7 @@
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "SpokePositionManger",
+                    "name": "SpokePositionManager",
                     "ofType": null
                   }
                 }
@@ -5451,7 +5451,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SpokePositionManger",
+        "name": "SpokePositionManager",
         "fields": [
           {
             "name": "name",
