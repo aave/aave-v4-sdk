@@ -32,6 +32,7 @@ import {
 import { mainnet, sepolia } from 'thirdweb/chains';
 import type { AaveClient } from './AaveClient';
 import { chain as fetchChain } from './actions';
+import { supportsPermit } from './adapters';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -161,17 +162,25 @@ function executePlan(
       return sendTransactionAndWait(aaveClient, thirdwebClient, result);
 
     case 'Erc20ApprovalRequired':
-      return sendTransactionAndWait(
-        aaveClient,
-        thirdwebClient,
-        result.approval.byTransaction,
-      ).andThen(() =>
-        sendTransactionAndWait(
-          aaveClient,
-          thirdwebClient,
-          result.originalTransaction,
-        ),
-      );
+      return result.approvals
+        .reduce<ReturnType<typeof sendTransactionAndWait>>(
+          (chain, approval) =>
+            chain.andThen(() =>
+              sendTransactionAndWait(
+                aaveClient,
+                thirdwebClient,
+                approval.byTransaction,
+              ),
+            ),
+          okAsync(undefined as never),
+        )
+        .andThen(() =>
+          sendTransactionAndWait(
+            aaveClient,
+            thirdwebClient,
+            result.originalTransaction,
+          ),
+        );
 
     case 'PreContractActionRequired':
       return sendTransactionAndWait(
@@ -244,11 +253,8 @@ export function permitWith<E>(
   action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
 ): ResultAsync<ExecutionPlan, E | SignTypedDataError> {
   return action().andThen((result) => {
-    if (
-      result.__typename === 'Erc20ApprovalRequired' &&
-      result.approval.bySignature
-    ) {
-      const permitTypedData = result.approval.bySignature;
+    if (supportsPermit(result)) {
+      const permitTypedData = result.approvals[0].bySignature;
       return signTypedDataWith(wallet, permitTypedData)
         .map((signature) => ({
           deadline: permitTypedData.message.deadline as number,

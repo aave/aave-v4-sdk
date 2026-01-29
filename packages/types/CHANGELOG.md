@@ -1,5 +1,11 @@
 # @aave/types
 
+## 1.0.0-next.8
+
+### Patch Changes
+
+- b65232e: **feat:** support USDT-like approval reset flow in React hooks.
+
 ## 1.0.0-next.7
 
 ### Patch Changes

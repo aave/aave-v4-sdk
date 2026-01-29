@@ -37,7 +37,7 @@ export type Erc20Approval = FragmentOf<typeof Erc20ApprovalFragment>;
 export const Erc20ApprovalRequiredFragment = graphql(
   `fragment Erc20ApprovalRequired on Erc20ApprovalRequired {
     __typename
-    approval {
+    approvals {
       ...Erc20Approval
     }
     reason

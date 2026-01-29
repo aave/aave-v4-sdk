@@ -4,11 +4,11 @@ import {
   type SigningError,
   type TimeoutError,
   type TransactionError,
-  type UnexpectedError,
+  UnexpectedError,
 } from '@aave/core';
 import type { TransactionRequest } from '@aave/graphql';
 import type { ResultAsync, Signature } from '@aave/types';
-import { invariant } from '@aave/types';
+import { isSignature, okAsync } from '@aave/types';
 import type { UseAsyncTask } from './tasks';
 
 /**
@@ -58,14 +58,18 @@ export class PendingTransaction {
   }
 
   /**
+   * Narrows a value to PendingTransaction.
+   * Only accepts types that include PendingTransaction in the union.
+   *
    * @internal
    */
-  static ensure<T>(value: T): PendingTransaction & T {
-    invariant(
-      PendingTransaction.isInstanceOf(value),
-      'Expected PendingTransaction',
-    );
-    return value as PendingTransaction & T;
+  static tryFrom<T>(
+    value: PendingTransaction extends T ? T : never,
+  ): ResultAsync<PendingTransaction, UnexpectedError> {
+    if (PendingTransaction.isInstanceOf(value)) {
+      return okAsync(value);
+    }
+    return UnexpectedError.from(value).asResultAsync();
   }
 }
 
@@ -85,3 +89,19 @@ export type ExecutionPlanHandler<
   plan: T,
   options: TransactionHandlerOptions,
 ) => ResultAsync<R, SendTransactionError>;
+
+/**
+ * Tries to create a Signature from an unknown value.
+ *
+ * @internal
+ */
+export function trySignatureFrom(
+  value: unknown,
+): ResultAsync<Signature, UnexpectedError> {
+  if (isSignature(value)) {
+    return okAsync(value);
+  }
+  return UnexpectedError.from(
+    `Expected Signature, but got ${String(value)}`,
+  ).asResultAsync();
+}

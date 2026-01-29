@@ -1,5 +1,14 @@
 # @aave/graphql
 
+## 1.0.0-next.26
+
+### Patch Changes
+
+- b65232e: **feat:** support USDT-like approval reset flow in React hooks.
+- 05f1e7e: Add field canSwapFrom into ReserveFragment.
+- Updated dependencies [b65232e]
+  - @aave/types@1.0.0-next.8
+
 ## 1.0.0-next.25
 
 ### Minor Changes

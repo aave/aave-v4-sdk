@@ -32,10 +32,41 @@ import type {
   TokenInfo,
   TransactionRequest,
 } from './fragments';
-import { type SwapId, type SwapQuoteId, tokenInfoId } from './id';
+import {
+  type ReserveId,
+  reserveId,
+  type SwapId,
+  type SwapQuoteId,
+  tokenInfoId,
+  type UserBorrowItemId,
+  type UserSupplyItemId,
+  userBorrowItemId,
+  userSupplyItemId,
+} from './id';
 
 function randomBase64String(): string {
   return btoa(crypto.randomUUID());
+}
+
+/**
+ * @internal
+ */
+export function makeUserBorrowItemId(): UserBorrowItemId {
+  return userBorrowItemId(randomBase64String());
+}
+
+/**
+ * @internal
+ */
+export function makeUserSupplyItemId(): UserSupplyItemId {
+  return userSupplyItemId(randomBase64String());
+}
+
+/**
+ * @internal
+ */
+export function makeReserveId(): ReserveId {
+  return reserveId(randomBase64String());
 }
 
 /**
@@ -447,6 +478,6 @@ export function makeSwapByIntentWithApprovalRequired({
   return {
     __typename: 'SwapByIntentWithApprovalRequired',
     quote: makeSwapQuote(),
-    approval,
+    approvals: [approval],
   };
 }

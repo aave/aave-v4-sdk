@@ -1252,6 +1252,24 @@
             "args": []
           },
           {
+            "name": "approvals",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Approval",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
             "name": "reason",
             "type": {
               "kind": "NON_NULL",
@@ -5790,6 +5808,24 @@
                 "kind": "OBJECT",
                 "name": "Erc20Approval",
                 "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "approvals",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Approval",
+                    "ofType": null
+                  }
+                }
               }
             },
             "args": []

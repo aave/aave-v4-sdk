@@ -125,7 +125,7 @@ export function swappableTokens(
  * const result = await prepareTokenSwap(client, {
  *   quoteId: quote.quoteId,
  * }).andThen(order => {
- *   return signSwapTypedDataWith(wallet, order.data)
+ *   return signTypedDataWith(wallet, order.data)
  *     .andThen((signature) =>
  *       swap({ intent: { quoteId: order.newQuoteId, signature } }),
  *     );

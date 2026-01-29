@@ -2,6 +2,7 @@ import {
   type AaveClient,
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  supportsPermit,
   type TimeWindowQueryOptions,
   type ValidationError,
 } from '@aave/client';
@@ -70,13 +71,7 @@ import type {
   ResultAsync,
   Signature,
 } from '@aave/types';
-import {
-  invariant,
-  isSignature,
-  never,
-  okAsync,
-  ResultAwareError,
-} from '@aave/types';
+import { isSignature, never, okAsync, ResultAwareError } from '@aave/types';
 import { useCallback, useEffect, useState } from 'react';
 import { useAaveClient } from './context';
 import {
@@ -92,6 +87,7 @@ import {
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
+  trySignatureFrom,
   useSuspendableQuery,
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
@@ -110,7 +106,7 @@ function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
   }
 }
 
-function injectSwapQuoteAccuracy(
+function injectTokenSwapQuoteAccuracy(
   request: NullishDeep<TokenSwapQuoteRequest>,
   accuracy: QuoteAccuracy,
 ): NullishDeep<TokenSwapQuoteRequest> {
@@ -119,6 +115,46 @@ function injectSwapQuoteAccuracy(
   }
   if ('limit' in request && request.limit) {
     return { limit: { ...request.limit, accuracy } };
+  }
+  return request;
+}
+
+function injectSupplySwapQuoteAccuracy(
+  request: NullishDeep<SupplySwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<SupplySwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectBorrowSwapQuoteAccuracy(
+  request: NullishDeep<BorrowSwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<BorrowSwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectRepayWithSupplyQuoteAccuracy(
+  request: NullishDeep<RepayWithSupplyQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<RepayWithSupplyQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectWithdrawSwapQuoteAccuracy(
+  request: NullishDeep<WithdrawSwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<WithdrawSwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
   }
   return request;
 }
@@ -229,7 +265,7 @@ export function useTokenSwapQuote({
   const fastResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
+      request: injectTokenSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: extractTokenSwapQuote,
@@ -242,7 +278,7 @@ export function useTokenSwapQuote({
   const accurateResult = useSuspendableQuery({
     document: TokenSwapQuoteQuery,
     variables: {
-      request: injectSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      request: injectTokenSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
       currency,
     },
     selector: extractTokenSwapQuote,
@@ -688,16 +724,40 @@ export function useSupplySwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: SupplySwapQuoteQuery,
     variables: {
-      request,
+      request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: SupplySwapQuoteQuery,
+    variables: {
+      request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -835,16 +895,40 @@ export function useBorrowSwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: BorrowSwapQuoteQuery,
     variables: {
-      request,
+      request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: BorrowSwapQuoteQuery,
+    variables: {
+      request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -1010,19 +1094,14 @@ export function useSupplySwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1064,19 +1143,14 @@ export function useBorrowSwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1179,16 +1253,43 @@ export function useRepayWithSupplyQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: RepayWithSupplyQuoteQuery,
     variables: {
-      request,
+      request: injectRepayWithSupplyQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: RepayWithSupplyQuoteQuery,
+    variables: {
+      request: injectRepayWithSupplyQuoteAccuracy(
+        request,
+        QuoteAccuracy.Accurate,
+      ),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -1265,19 +1366,14 @@ export function useRepayWithSupply(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1380,16 +1476,40 @@ export function useWithdrawSwapQuote({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
     document: WithdrawSwapQuoteQuery,
     variables: {
-      request,
+      request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
     selector: (data) => data.quote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: WithdrawSwapQuoteQuery,
+    variables: {
+      request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: (data) => data.quote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
@@ -1466,19 +1586,14 @@ export function useWithdrawSwap(
             .with(handler)
             .andThen((request) => preparePositionSwap(client, request))
             .andThen((order) =>
-              handler(order.data, { cancel }).map((result) => {
-                invariant(
-                  isSignature(result),
-                  'Expected signature, got an object instead.',
-                );
-                return result;
-              }),
-            )
-            .andThen((signature) =>
-              swapPosition(client, {
-                quoteId: result.quote.quoteId,
-                signature,
-              }),
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
             );
         },
       );
@@ -1564,7 +1679,7 @@ export function useTokenSwap(
         switch (plan.__typename) {
           case 'SwapTransactionRequest':
             return handler(plan, { cancel })
-              .map(PendingTransaction.ensure)
+              .andThen(PendingTransaction.tryFrom)
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(() => okAsync(plan.orderReceipt));
 
@@ -1593,10 +1708,7 @@ export function useTokenSwap(
               quoteId: quoteResult.quote.quoteId,
             }).andThen((order) =>
               handler(order.data, { cancel })
-                .map((result) => {
-                  invariant(isSignature(result), 'Invalid signature');
-                  return result;
-                })
+                .andThen(trySignatureFrom)
                 .andThen((signature) =>
                   executeSwap({
                     intent: { quoteId: order.newQuoteId, signature },
@@ -1605,44 +1717,69 @@ export function useTokenSwap(
             );
 
           case 'SwapByIntentWithApprovalRequired':
-            return handler(quoteResult.approval, { cancel })
-              .andThen((result) => {
-                if (isSignature(result)) {
-                  const permitTypedData = quoteResult.approval.bySignature;
-                  if (!permitTypedData) {
-                    return UnexpectedError.from(
-                      'Expected bySignature to be present in SwapByIntentWithApprovalRequired',
-                    ).asResultAsync();
-                  }
-
-                  return prepareTokenSwap(client, {
-                    quoteId: quoteResult.quote.quoteId,
-                    permitSig: {
-                      deadline: permitTypedData.message.deadline as number,
-                      value: result,
-                    },
-                  });
-                }
-                if (PendingTransaction.isInstanceOf(result)) {
-                  return result.wait().andThen(() =>
-                    prepareTokenSwap(client, {
+            if (supportsPermit(quoteResult)) {
+              const approval = quoteResult.approvals[0];
+              return handler(approval, { cancel })
+                .andThen((result) => {
+                  if (isSignature(result)) {
+                    return prepareTokenSwap(client, {
                       quoteId: quoteResult.quote.quoteId,
-                    }),
-                  );
-                }
-                return UnexpectedError.from(result).asResultAsync();
-              })
-              .andThen((order) =>
-                handler(order.data, { cancel })
-                  .map((handlerResult) => {
-                    invariant(isSignature(handlerResult), 'Invalid signature');
-                    return handlerResult;
-                  })
-                  .andThen((signature) =>
-                    executeSwap({
-                      intent: { quoteId: quoteResult.quote.quoteId, signature },
-                    }),
+                      permitSig: {
+                        deadline: approval.bySignature.message
+                          .deadline as number,
+                        value: result,
+                      },
+                    });
+                  }
+                  if (PendingTransaction.isInstanceOf(result)) {
+                    return result.wait().andThen(() =>
+                      prepareTokenSwap(client, {
+                        quoteId: quoteResult.quote.quoteId,
+                      }),
+                    );
+                  }
+                  return UnexpectedError.from(result).asResultAsync();
+                })
+                .andThen((order) =>
+                  handler(order.data, { cancel })
+                    .andThen(trySignatureFrom)
+                    .andThen((signature) =>
+                      executeSwap({
+                        intent: {
+                          quoteId: order.newQuoteId,
+                          signature,
+                        },
+                      }),
+                    ),
+                );
+            }
+
+            return quoteResult.approvals
+              .reduce(
+                (chain, approval) =>
+                  chain.andThen(() =>
+                    handler({ ...approval, bySignature: null }, { cancel })
+                      .andThen(PendingTransaction.tryFrom)
+                      .andThen((pendingTransaction) =>
+                        pendingTransaction.wait(),
+                      ),
                   ),
+                okAsync(undefined) as ResultAsync<
+                  unknown,
+                  SendTransactionError | PendingTransactionError
+                >,
+              )
+              .andThen(() =>
+                prepareTokenSwap(client, {
+                  quoteId: quoteResult.quote.quoteId,
+                }),
+              )
+              .andThen((order) => handler(order.data, { cancel }))
+              .andThen(trySignatureFrom)
+              .andThen((signature) =>
+                executeSwap({
+                  intent: { quoteId: quoteResult.quote.quoteId, signature },
+                }),
               );
           default:
             never(
@@ -1714,10 +1851,7 @@ export function useCancelSwap(
           case 'SwapPendingSignature':
             return prepareSwapCancel(client, request)
               .andThen((result) => handler(result.data, { cancel }))
-              .map((result) => {
-                invariant(isSignature(result), 'Invalid signature');
-                return result;
-              })
+              .andThen(trySignatureFrom)
               .andThen((signature) =>
                 cancelSwap(client, {
                   intent: { id: request.id, signature },
@@ -1730,7 +1864,7 @@ export function useCancelSwap(
 
                 return (
                   handler(plan, { cancel })
-                    .map(PendingTransaction.ensure)
+                    .andThen(PendingTransaction.tryFrom)
                     .andThen((pendingTransaction) => pendingTransaction.wait())
                     // TODO: verify that if fails cause too early, we need to waitForSwapOutcome(client)({ id: request.id })
                     .andThen(() => swapStatus(client, { id: request.id }))

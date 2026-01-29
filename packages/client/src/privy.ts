@@ -20,6 +20,7 @@ import type { PrivyClient } from '@privy-io/server-auth';
 import { createPublicClient, extractChain, http } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
 import * as viemChains from 'viem/chains';
+import { supportsPermit } from './adapters';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -100,13 +101,17 @@ function executePlan(
       return sendTransactionAndWait(privy, result, walletId);
 
     case 'Erc20ApprovalRequired':
-      return sendTransactionAndWait(
-        privy,
-        result.approval.byTransaction,
-        walletId,
-      ).andThen(() =>
-        sendTransactionAndWait(privy, result.originalTransaction, walletId),
-      );
+      return result.approvals
+        .reduce<ReturnType<typeof sendTransactionAndWait>>(
+          (chain, approval) =>
+            chain.andThen(() =>
+              sendTransactionAndWait(privy, approval.byTransaction, walletId),
+            ),
+          okAsync(undefined as never),
+        )
+        .andThen(() =>
+          sendTransactionAndWait(privy, result.originalTransaction, walletId),
+        );
 
     case 'PreContractActionRequired':
       return sendTransactionAndWait(
@@ -177,11 +182,8 @@ export function permitWith<E>(
   action: (permitSig?: ERC20PermitSignature) => ResultAsync<ExecutionPlan, E>,
 ): ResultAsync<ExecutionPlan, E | SignTypedDataError> {
   return action().andThen((result) => {
-    if (
-      result.__typename === 'Erc20ApprovalRequired' &&
-      result.approval.bySignature
-    ) {
-      const permitTypedData = result.approval.bySignature;
+    if (supportsPermit(result)) {
+      const permitTypedData = result.approvals[0].bySignature;
       return signTypedDataWith(privy, walletId, permitTypedData)
         .map((signature) => ({
           deadline: permitTypedData.message.deadline as number,
