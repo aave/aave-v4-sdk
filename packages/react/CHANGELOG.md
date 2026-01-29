@@ -1,5 +1,12 @@
 # @aave/react
 
+## 4.0.0-next.33
+
+### Patch Changes
+
+- 34b8692: **feat:** dual-quote strategy in `useSupplySwap`, `useBorrowSwap`, `useRepayWithSupply`, and `useWithdrawSwap` hooks.
+  - @aave/client@4.0.0-next.33
+
 ## 4.0.0-next.32
 
 ### Patch Changes
