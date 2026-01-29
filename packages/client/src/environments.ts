@@ -5,7 +5,7 @@ import type { EnvironmentConfig } from '@aave/core';
  */
 export const production: EnvironmentConfig = {
   name: 'production',
-  backend: 'https://api.v4.aave.com/graphql',
+  backend: 'https://api.aave.com/graphql',
   indexingTimeout: 60_000,
   pollingInterval: 100,
   exchangeRateInterval: 10_000,
@@ -18,7 +18,7 @@ export const production: EnvironmentConfig = {
  */
 export const staging: EnvironmentConfig = {
   name: 'staging',
-  backend: 'https://api.v4.staging.aave.com/graphql',
+  backend: 'https://api.staging.aave.com/graphql',
   indexingTimeout: 60_000,
   pollingInterval: 500,
   exchangeRateInterval: 10_000,
