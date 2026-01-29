@@ -20,6 +20,7 @@ export default defineConfig(() => ({
   dts: true,
   platform: 'neutral',
   format: ['esm', 'cjs'],
+  noExternal: ['@aave/client'],
   banner: {
     js: '"use client"',
   },

@@ -491,3 +491,7 @@ export function setupEip1193Interceptor(
     },
   };
 }
+
+// Re-export testing utilities from internal packages
+export * from '@aave/core/testing';
+export * from '@aave/graphql/testing';

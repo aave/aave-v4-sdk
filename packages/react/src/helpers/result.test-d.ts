@@ -1,4 +1,4 @@
-import type { UnexpectedError } from '@aave/core';
+import type { UnexpectedError } from '@aave/client';
 import { describe, expectTypeOf, it } from 'vitest';
 import type { PausableReadResult } from './results';
 

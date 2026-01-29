@@ -93,15 +93,6 @@ importers:
 
   packages/client:
     dependencies:
-      '@aave/core':
-        specifier: workspace:*
-        version: link:../core
-      '@aave/graphql':
-        specifier: workspace:*
-        version: link:../graphql
-      '@aave/types':
-        specifier: workspace:*
-        version: link:../types
       '@urql/core':
         specifier: ^6.0.1
         version: 6.0.1(graphql@16.11.0)
@@ -112,6 +103,15 @@ importers:
         specifier: ^16.11.0
         version: 16.11.0
     devDependencies:
+      '@aave/core':
+        specifier: workspace:*
+        version: link:../core
+      '@aave/graphql':
+        specifier: workspace:*
+        version: link:../graphql
+      '@aave/types':
+        specifier: workspace:*
+        version: link:../types
       '@bgd-labs/aave-address-book':
         specifier: ^4.25.3
         version: 4.25.3
@@ -201,15 +201,6 @@ importers:
       '@aave/client':
         specifier: workspace:*
         version: link:../client
-      '@aave/core':
-        specifier: workspace:*
-        version: link:../core
-      '@aave/graphql':
-        specifier: workspace:*
-        version: link:../graphql
-      '@aave/types':
-        specifier: workspace:*
-        version: link:../types
       urql:
         specifier: ^5.0.1
         version: 5.0.1(graphql@16.11.0)(react@19.1.0)

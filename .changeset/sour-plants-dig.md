@@ -1,6 +1,5 @@
 ---
-"@aave/graphql": patch
-"@aave/types": patch
+"@aave/client": patch
 ---
 
 **feat:** support latest GQL schema.

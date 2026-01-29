@@ -1,16 +1,17 @@
 import {
+  assertErr,
+  assertOk,
+  type BlockchainData,
+  CancelError,
+  evmAddress,
+  SigningError,
+  type TransactionRequest,
+} from '@aave/client';
+import {
   ETHEREUM_FORK_ID,
   fundNativeAddress,
   setupEip1193Interceptor,
 } from '@aave/client/testing';
-import { CancelError, SigningError } from '@aave/core';
-import type { TransactionRequest } from '@aave/graphql';
-import {
-  assertErr,
-  assertOk,
-  type BlockchainData,
-  evmAddress,
-} from '@aave/types';
 import {
   createWalletClient,
   custom,

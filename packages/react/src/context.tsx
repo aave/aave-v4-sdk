@@ -1,5 +1,4 @@
-import type { AaveClient } from '@aave/client';
-import { invariant } from '@aave/types';
+import { type AaveClient, invariant } from '@aave/client';
 import React, { type ReactNode, useContext } from 'react';
 import { Provider as UrqlProvider } from 'urql';
 
