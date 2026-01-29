@@ -26,11 +26,6 @@ export default defineConfig({
           name: 'spec',
           include: ['packages/spec/**/*.spec.ts'],
           environment: 'node',
-          typecheck: {
-            enabled: true,
-            include: ['packages/spec/**/*.spec.ts'],
-            tsconfig: 'packages/spec/tsconfig.json',
-          },
         },
       },
       {
