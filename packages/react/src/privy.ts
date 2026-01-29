@@ -1,4 +1,5 @@
 import {
+  CancelError,
   SigningError,
   type SignTypedDataError,
   type TypedData,
@@ -29,6 +30,21 @@ import {
   useAsyncTask,
 } from './helpers';
 import { useChainAction } from './misc';
+
+function isUserRejection(err: unknown): boolean {
+  if (err && typeof err === 'object') {
+    if ('code' in err && err.code === 4001) return true;
+    if ('message' in err && typeof err.message === 'string') {
+      const msg = err.message.toLowerCase();
+      return (
+        msg.includes('user rejected') ||
+        msg.includes('user denied') ||
+        msg.includes('rejected the request')
+      );
+    }
+  }
+  return false;
+}
 
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
@@ -108,7 +124,12 @@ export function useSignTypedData(): UseAsyncTask<
           primaryType: typedData.primaryType,
           message: typedData.message,
         }),
-        (error) => SigningError.from(error),
+        (error) => {
+          if (isUserRejection(error)) {
+            return CancelError.from(error);
+          }
+          return SigningError.from(error);
+        },
       ).map(({ signature }) => signatureFrom(signature));
     },
     [privySignTypedData],

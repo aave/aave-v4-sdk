@@ -1,4 +1,5 @@
 import {
+  CancelError,
   SigningError,
   type SignTypedDataError,
   TransactionError,
@@ -30,6 +31,21 @@ import {
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
+
+function isUserRejection(err: unknown): boolean {
+  if (err && typeof err === 'object') {
+    if ('code' in err && err.code === 4001) return true;
+    if ('message' in err && typeof err.message === 'string') {
+      const msg = err.message.toLowerCase();
+      return (
+        msg.includes('user rejected') ||
+        msg.includes('user denied') ||
+        msg.includes('rejected the request')
+      );
+    }
+  }
+  return false;
+}
 
 /**
  * A hook that provides a way to send Aave transactions using a Thirdweb wallet.
@@ -78,7 +94,12 @@ export function useSendTransaction(
                     client: thirdwebClient,
                   }),
                 }),
-                (err) => SigningError.from(err),
+                (err) => {
+                  if (isUserRejection(err)) {
+                    return CancelError.from(err);
+                  }
+                  return SigningError.from(err);
+                },
               ),
             )
             .map(
@@ -138,7 +159,12 @@ export function useSignTypedData(): UseAsyncTask<
           primaryType: typedData.primaryType,
           message: typedData.message,
         }),
-        (err) => SigningError.from(err),
+        (err) => {
+          if (isUserRejection(err)) {
+            return CancelError.from(err);
+          }
+          return SigningError.from(err);
+        },
       ).map(signatureFrom);
     },
     [account],

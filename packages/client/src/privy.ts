@@ -1,6 +1,7 @@
 import {
   SigningError,
   type TransactionError,
+  UnexpectedError,
   ValidationError,
 } from '@aave/core';
 import type {
@@ -55,7 +56,10 @@ function sendTransactionAndWait(
   privy: PrivyClient,
   request: TransactionRequest,
   walletId: string,
-): ResultAsync<TransactionResult, SigningError | TransactionError> {
+): ResultAsync<
+  TransactionResult,
+  SigningError | TransactionError | UnexpectedError
+> {
   const chain = extractChain({
     chains: allChains,
     id: request.chainId as (typeof allChains)[number]['id'],
@@ -70,13 +74,16 @@ function sendTransactionAndWait(
     sendTransaction(privy, request, walletId),
     (err) => SigningError.from(err),
   )
-    .map(async (hash) =>
-      waitForTransactionReceipt(publicClient, {
-        hash,
-        pollingInterval: 100,
-        retryCount: 20,
-        retryDelay: 50,
-      }),
+    .andThen((hash) =>
+      ResultAsync.fromPromise(
+        waitForTransactionReceipt(publicClient, {
+          hash,
+          pollingInterval: 100,
+          retryCount: 20,
+          retryDelay: 50,
+        }),
+        (err) => UnexpectedError.from(err),
+      ),
     )
     .andThen((receipt) => {
       const hash = txHash(receipt.transactionHash);
