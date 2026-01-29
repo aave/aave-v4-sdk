@@ -57,6 +57,10 @@ jobs:
         shell: bash
         run: pnpm build
 
+      - name: Typecheck Spec
+        shell: bash
+        run: pnpm typecheck:spec
+
       - name: Run Tests
         shell: bash
         run: pnpm test
