@@ -1,7 +1,7 @@
 import {
   SigningError,
   TransactionError,
-  type UnexpectedError,
+  UnexpectedError,
   ValidationError,
 } from '@aave/core';
 import type {
@@ -126,12 +126,15 @@ function sendTransactionAndWait(
       sendTransaction(thirdwebClient, chain, request),
       (err) => SigningError.from(err),
     )
-      .map(async (hash) =>
-        waitForReceipt({
-          client: thirdwebClient,
-          chain,
-          transactionHash: hash,
-        }),
+      .andThen((hash) =>
+        ResultAsync.fromPromise(
+          waitForReceipt({
+            client: thirdwebClient,
+            chain,
+            transactionHash: hash,
+          }),
+          (err) => UnexpectedError.from(err),
+        ),
       )
       .andThen((receipt) => {
         const hash = txHash(receipt.transactionHash);
