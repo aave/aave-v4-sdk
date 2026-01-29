@@ -147,7 +147,7 @@ describe('Given a user with a User Position on a Spoke', () => {
           position = positions[0];
         }, 180_000);
 
-        it('Then the totalSupplied value is the sum of the principal and interest for all positions in the spoke', async () => {
+        it('Then the totalSupplied value should be the sum of the principal and interest for all positions in the spoke', async () => {
           const totalSupplied = suppliesPositions.reduce(
             (acc, supply) =>
               acc.plus(
@@ -163,7 +163,7 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then the totalCollateral value is the sum of the collateral values from the spoke', async () => {
+        it('Then the totalCollateral value should be the sum of the collateral values from the spoke', async () => {
           expect(position.totalCollateral.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalCollateralValue,
             {
@@ -172,7 +172,7 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then the netCollateral value is the sum of the total collateral minus the total debt', async () => {
+        it('Then the netCollateral value should be the sum of the total collateral minus the total debt', async () => {
           const totalCollateral = suppliesPositions
             .filter((supply) => supply.isCollateral)
             .reduce(
@@ -198,14 +198,14 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then the totalDebt value is the sum of the principal and interest for all positions in the spoke', async () => {
+        it('Then the totalDebt value should be the sum of the principal and interest for all positions in the spoke', async () => {
           expect(position.totalDebt.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalDebtValue,
             { precision: 1 },
           );
         });
 
-        it('Then the netBalance value is the sum of the total supplied minus the borrows (debt)', async () => {
+        it('Then the netBalance value should be the sum of the total supplied minus the borrows (debt)', async () => {
           const totalSupplied = suppliesPositions.reduce(
             (acc, supply) =>
               acc.plus(
@@ -230,21 +230,21 @@ describe('Given a user with a User Position on a Spoke', () => {
           );
         });
 
-        it('Then the healthFactor value is the health factor from the spoke', async () => {
+        it('Then the healthFactor value should be the health factor from the spoke', async () => {
           expect(position.healthFactor.current).toBeBigDecimalCloseTo(
             accountDataOnChain.healthFactor,
             { precision: 2 },
           );
         });
 
-        it('Then the averageCollateralFactor value is the average collateral factor from the spoke', async () => {
+        it('Then the averageCollateralFactor value should be the average collateral factor from the spoke', async () => {
           expect(position.averageCollateralFactor.value).toBeBigDecimalCloseTo(
             accountDataOnChain.avgCollateralFactor,
             { precision: 2 },
           );
         });
 
-        it('Then the riskPremium value is the risk premium from the spoke', async () => {
+        it('Then the riskPremium value should be the risk premium from the spoke', async () => {
           expect(position.riskPremium?.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.riskPremium,
             { precision: 2 },

@@ -190,7 +190,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               ] = result.value;
             }, 180_000);
 
-            it('Then the netBalance value is the sum of the total supplied minus the borrows (debt)', async () => {
+            it('Then the netBalance value should be the sum of the total supplied minus the borrows (debt)', async () => {
               const totalSupplied = userSuppliesItems.reduce(
                 (acc, supply) =>
                   acc.plus(
@@ -217,7 +217,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               );
             });
 
-            it('Then the totalCollateral value is the sum of the collateral values from both spokes', async () => {
+            it('Then the totalCollateral value should be the sum of the collateral values from both spokes', async () => {
               const expectedTotalCollateral =
                 accountDataCoreSpoke.totalCollateralValue.plus(
                   accountDataIsoStableSpoke.totalCollateralValue,
@@ -228,7 +228,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               );
             });
 
-            it('Then the totalDebt value is the sum of the debt values from both spokes', async () => {
+            it('Then the totalDebt value should be the sum of the debt values from both spokes', async () => {
               const expectedTotalDebt =
                 accountDataCoreSpoke.totalDebtValue.plus(
                   accountDataIsoStableSpoke.totalDebtValue,
@@ -239,7 +239,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               );
             });
 
-            it('Then the netApy value is the weighted average of the supply and borrow APYs', async () => {
+            it('Then the netApy value should be the weighted average of the supply and borrow APYs', async () => {
               // netApy = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
               const totalSupplied = userSuppliesItems.reduce(
                 (acc, supply) =>
@@ -283,7 +283,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               );
             });
 
-            it('Then the netAccruedInterest value is the sum of the supply interests minus the borrow interests', async () => {
+            it('Then the netAccruedInterest value should be the sum of the supply interests minus the borrow interests', async () => {
               const totalSupplyInterest = userSuppliesItems.reduce(
                 (acc, supply) => acc.plus(supply.interest.exchange.value),
                 bigDecimal('0'),
@@ -304,7 +304,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               });
             });
 
-            it('Then the lowestHealthFactor value is the minimum of the health factors from both spokes', async () => {
+            it('Then the lowestHealthFactor value should be the minimum of the health factors from both spokes', async () => {
               const expectedLowestHealthFactor =
                 accountDataCoreSpoke.healthFactor.lt(
                   accountDataIsoStableSpoke.healthFactor,
