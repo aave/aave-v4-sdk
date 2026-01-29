@@ -3,16 +3,22 @@
 exports[`Querying Position Managers on Aave V4 > Given a user who wants to fetch position managers for a specific spoke > When fetching position managers with default settings > Then it should return active position managers 1`] = `
 [
   {
-    "__typename": "SpokePositionManger",
+    "__typename": "SpokePositionManager",
     "active": true,
     "address": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
     "name": "Aave Native Gateway",
   },
   {
-    "__typename": "SpokePositionManger",
+    "__typename": "SpokePositionManager",
     "active": true,
     "address": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
     "name": "Aave Signature Gateway",
+  },
+  {
+    "__typename": "SpokePositionManager",
+    "active": true,
+    "address": "0xB798BF4015979a58397f882449b7cdFFe4f20278",
+    "name": "Unknown",
   },
 ]
 `;
