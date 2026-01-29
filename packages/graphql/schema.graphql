@@ -993,7 +993,7 @@ type PaginatedResultInfo {
 }
 
 type PaginatedSpokePositionManagerResult {
-  items: [SpokePositionManger!]!
+  items: [SpokePositionManager!]!
   pageInfo: PaginatedResultInfo!
 }
 
@@ -1545,17 +1545,17 @@ input SpokeInput {
   chainId: ChainId!
 }
 
+type SpokePositionManager {
+  name: String!
+  address: EvmAddress!
+  active: Boolean!
+}
+
 input SpokePositionManagersRequest {
   spoke: SpokeId!
   includeInactive: Boolean
   pageSize: PageSize!
   cursor: Cursor
-}
-
-type SpokePositionManger {
-  name: String!
-  address: EvmAddress!
-  active: Boolean!
 }
 
 input SpokeRequest {
