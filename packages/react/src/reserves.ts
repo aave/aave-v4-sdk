@@ -1,6 +1,7 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  RequestPolicyOptions,
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
@@ -147,7 +148,8 @@ export function useReserve({
  */
 export function useReserveAction(
   options: CurrencyQueryOptions &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReserveRequest, Reserve | null, UnexpectedError> {
   const client = useAaveClient();
 
@@ -156,9 +158,9 @@ export function useReserveAction(
       reserve(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-        requestPolicy: 'cache-first',
+        requestPolicy: options.requestPolicy ?? 'cache-first',
       }),
-    [client, options.currency, options.timeWindow],
+    [client, options.currency, options.timeWindow, options.requestPolicy],
   );
 }
 

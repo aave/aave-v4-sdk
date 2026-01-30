@@ -897,6 +897,9 @@ export function useSetUserSuppliesAsCollateral(
               ),
             ),
 
+            // update user supplies
+            refreshUserSupplies(client, request.sender),
+
             // update hubs
             ...reserveDetails.map(({ chainId }) =>
               client.refreshQueryWhere(

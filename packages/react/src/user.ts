@@ -3,6 +3,7 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type TimeWindowQueryOptions,
   type UnexpectedError,
+  RequestPolicyOptions,
 } from '@aave/client';
 import type { UserPositionQueryOptions } from '@aave/client/actions';
 import {
@@ -200,7 +201,8 @@ export function useUserSupplies({
  */
 export function useUserSuppliesAction(
   options: CurrencyQueryOptions &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserSuppliesRequest, UserSupplyItem[], UnexpectedError> {
   const client = useAaveClient();
 
@@ -209,9 +211,9 @@ export function useUserSuppliesAction(
       userSupplies(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-        requestPolicy: 'cache-first',
+        requestPolicy: options.requestPolicy ?? 'cache-first',
       }),
-    [client, options.currency, options.timeWindow],
+    [client, options.currency, options.timeWindow, options.requestPolicy],
   );
 }
 
@@ -592,7 +594,8 @@ export function useUserPositions({
  * ```
  */
 export function useUserPositionsAction(
-  options: UserPositionQueryOptions = DEFAULT_QUERY_OPTIONS,
+  options: UserPositionQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserPositionsRequest, UserPosition[], UnexpectedError> {
   const client = useAaveClient();
 
@@ -601,9 +604,9 @@ export function useUserPositionsAction(
       userPositions(client, request, {
         currency: options.currency,
         timeWindow: options.timeWindow,
-        requestPolicy: 'cache-first',
+        requestPolicy: options.requestPolicy ?? 'cache-first',
       }),
-    [client, options.currency, options.timeWindow],
+    [client, options.currency, options.timeWindow, options.requestPolicy],
   );
 }
 
