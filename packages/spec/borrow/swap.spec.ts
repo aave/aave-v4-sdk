@@ -1,5 +1,6 @@
 import {
   assertOk,
+  bigDecimal,
   evmAddress,
   type Reserve,
   type UserBorrowItem,
@@ -84,6 +85,7 @@ describe('Borrow Position swapping on Aave V4', () => {
               buyReserve: reserveToSwap.id,
               amount: borrowedPosition.principal.amount.value.div(2),
               user: evmAddress(user.account.address),
+              selectedSlippage: bigDecimal('50'),
             },
           })
             .andThen(signApprovalsWith(user))

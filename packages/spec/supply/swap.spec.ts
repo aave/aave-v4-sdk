@@ -1,5 +1,6 @@
 import {
   assertOk,
+  bigDecimal,
   evmAddress,
   type Reserve,
   type UserSupplyItem,
@@ -93,6 +94,7 @@ describe('Supply Position swapping on Aave V4', () => {
             amount: supplyPosition.principal.amount.value.div(2),
             user: evmAddress(user.account.address),
             enableCollateral: false,
+            selectedSlippage: bigDecimal('50'),
           },
         })
           .andThen(signApprovalsWith(user))
@@ -103,6 +105,8 @@ describe('Supply Position swapping on Aave V4', () => {
             ),
           );
         assertOk(result);
+        // TODO: Create a helper function to wait until the swap is complete
+        // After that check the userSupplies to see if the new position is created
       });
     });
 
