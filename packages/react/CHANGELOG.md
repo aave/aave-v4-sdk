@@ -1,5 +1,19 @@
 # @aave/react
 
+## 4.0.0-next.33
+
+### Patch Changes
+
+- f4c8623: **fix:** correct typo `SpokePositionManger` to `SpokePositionManager` in GraphQL schema and cache
+- c6fc0f7: **chore:** updates environments config
+- dcf74e8: **fix:** consistent `CancelError` and `UnexpectedError` handling in thirdweb and privy implementations
+- 34b8692: **feat:** dual-quote strategy in `useSupplySwap`, `useBorrowSwap`, `useRepayWithSupply`, and `useWithdrawSwap` hooks.
+- Updated dependencies [f4c8623]
+- Updated dependencies [c6fc0f7]
+- Updated dependencies [dcf74e8]
+  - @aave/graphql@1.0.0-next.27
+  - @aave/client@4.0.0-next.33
+
 ## 4.0.0-next.32
 
 ### Patch Changes
