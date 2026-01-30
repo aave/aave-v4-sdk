@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.27
+
+### Patch Changes
+
+- f4c8623: **fix:** correct typo `SpokePositionManger` to `SpokePositionManager` in GraphQL schema and cache
+
 ## 1.0.0-next.26
 
 ### Patch Changes
