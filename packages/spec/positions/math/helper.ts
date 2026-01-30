@@ -1,4 +1,4 @@
-import { type BigDecimal, bigDecimal } from '@aave/client';
+import { type BigDecimal, bigDecimal, ResultAsync } from '@aave/client';
 import { createForkPublicClient } from '@aave/client/testing';
 import type { Address } from 'viem';
 
@@ -56,25 +56,30 @@ function formatBPS(value: bigint): BigDecimal {
  * @param spoke - The Spoke contract address
  * @returns User account data
  */
-export async function getAccountData(
+export function getAccountData(
   address: Address,
   spoke: Address,
-): Promise<UserAccountData> {
-  const forkPublicClient = await createForkPublicClient();
-  const result = await forkPublicClient.readContract({
-    address: spoke,
-    abi: userAccountDataABI,
-    functionName: 'getUserAccountData',
-    args: [address],
-  });
+): ResultAsync<UserAccountData, Error> {
+  return ResultAsync.fromPromise(
+    (async () => {
+      const forkPublicClient = await createForkPublicClient();
+      const result = await forkPublicClient.readContract({
+        address: spoke,
+        abi: userAccountDataABI,
+        functionName: 'getUserAccountData',
+        args: [address],
+      });
 
-  return {
-    riskPremium: formatBPS(result.riskPremium),
-    avgCollateralFactor: formatWAD(result.avgCollateralFactor),
-    healthFactor: formatWAD(result.healthFactor),
-    totalCollateralValue: formatUSD(result.totalCollateralValue),
-    totalDebtValue: formatUSD(result.totalDebtValue),
-    activeCollateralCount: Number(result.activeCollateralCount),
-    borrowedCount: Number(result.borrowedCount),
-  };
+      return {
+        riskPremium: formatBPS(result.riskPremium),
+        avgCollateralFactor: formatWAD(result.avgCollateralFactor),
+        healthFactor: formatWAD(result.healthFactor),
+        totalCollateralValue: formatUSD(result.totalCollateralValue),
+        totalDebtValue: formatUSD(result.totalDebtValue),
+        activeCollateralCount: Number(result.activeCollateralCount),
+        borrowedCount: Number(result.borrowedCount),
+      };
+    })(),
+    (error) => (error instanceof Error ? error : new Error(String(error))),
+  );
 }
