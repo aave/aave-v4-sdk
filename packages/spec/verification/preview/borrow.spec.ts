@@ -16,11 +16,11 @@ import {
 } from '@aave/client/testing';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { findReservesToBorrow } from '../helpers/reserves';
+import { findReservesToBorrow } from '../../helpers/reserves';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
-} from '../helpers/supplyBorrow';
+} from '../../helpers/supplyBorrow';
 
 describe('Borrow Preview Math', () => {
   describe('Given a user with 1 supply position enabled as collateral', () => {

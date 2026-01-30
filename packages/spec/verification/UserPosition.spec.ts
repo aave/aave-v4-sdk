@@ -20,15 +20,12 @@ import {
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { getAccountData, type UserAccountData } from '../helpers/on-chain';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
-} from '../../helpers/supplyBorrow';
-import {
-  assertNonEmptyArray,
-  assertSingleElementArray,
-} from '../../test-utils';
-import { getAccountData, type UserAccountData } from './helper';
+} from '../helpers/supplyBorrow';
+import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet(
   '0xbae6035617e696766fc0a0739508200144f6e785600cc155496ddfc1d78a6a14',
