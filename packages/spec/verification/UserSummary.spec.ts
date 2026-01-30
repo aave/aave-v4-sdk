@@ -16,11 +16,11 @@ import {
 } from '@aave/client/testing';
 
 import { beforeAll, describe, expect, it } from 'vitest';
+import { getAccountData, type UserAccountData } from '../helpers/on-chain';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
-} from '../../helpers/supplyBorrow';
-import { getAccountData, type UserAccountData } from './helper';
+} from '../helpers/supplyBorrow';
 
 const user = await createNewWallet(
   '0x6225076f88cd85d88be09773d417df6819f2f9c2b7885fe8c75b898c4b23c5fd',

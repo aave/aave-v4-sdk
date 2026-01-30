@@ -19,8 +19,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
-} from '../helpers/supplyBorrow';
-import { repayAllExistingBorrows } from '../helpers/withdrawRepay';
+} from '../../helpers/supplyBorrow';
+import { repayAllExistingBorrows } from '../../helpers/withdrawRepay';
 
 describe('Withdraw Preview Math', () => {
   describe('Given a user with 1 supply position enabled as collateral', () => {

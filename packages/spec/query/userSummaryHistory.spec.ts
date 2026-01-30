@@ -10,7 +10,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import { getTimeWindowDates } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';
-import { recreateUserPositions } from './helper';
+import { recreateUserPositions } from './helpers';
 
 const user = await createNewWallet(
   '0x3bbb745c15f3b0daf1be54fb7b8281cc8eaac0249a28a4442052ebb0061e660d',
