@@ -24,7 +24,9 @@ export default defineConfig(() => [
     tsconfig: 'tsconfig.build.json',
     bundle: true,
     minify: true,
-    dts: true,
+    dts: {
+      resolve: true,
+    },
     platform: 'neutral',
     format: ['esm', 'cjs'],
     noExternal: ['@aave/types', '@aave/graphql', '@aave/core'],
