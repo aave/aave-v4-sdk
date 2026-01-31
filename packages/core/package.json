@@ -1,6 +1,7 @@
 {
   "name": "@aave/core",
   "version": "1.0.0-next.13",
+  "private": true,
   "description": "The shared core across Aave SDKs.",
   "repository": {
     "directory": "packages/core",
@@ -50,8 +51,5 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.2"
   },
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  }
+  "license": "MIT"
 }

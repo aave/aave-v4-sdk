@@ -1,11 +1,12 @@
-import { type StandardData, UnexpectedError } from '@aave/client';
 import {
   type AnyVariables,
   identity,
   invariant,
   type NullishDeep,
   type Prettify,
-} from '@aave/types';
+  type StandardData,
+  UnexpectedError,
+} from '@aave/client';
 import { useEffect, useMemo, useState } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
 import {

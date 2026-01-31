@@ -1,7 +1,12 @@
 import {
   CancelError,
+  invariant,
+  ResultAsync,
+  type Signature,
   SigningError,
   type SignTypedDataError,
+  signatureFrom,
+  type TransactionRequest,
   type TypedData,
   UnexpectedError,
 } from '@aave/client';
@@ -10,13 +15,6 @@ import {
   toViemChain,
   waitForTransactionResult,
 } from '@aave/client/viem';
-import type { TransactionRequest } from '@aave/graphql';
-import {
-  invariant,
-  ResultAsync,
-  type Signature,
-  signatureFrom,
-} from '@aave/types';
 import {
   type MessageTypes,
   useSignTypedData as usePrivySignTypedData,

@@ -24,9 +24,12 @@ export default defineConfig(() => [
     tsconfig: 'tsconfig.build.json',
     bundle: true,
     minify: true,
-    dts: true,
+    dts: {
+      resolve: true,
+    },
     platform: 'neutral',
     format: ['esm', 'cjs'],
+    noExternal: ['@aave/types', '@aave/graphql', '@aave/core'],
     define: {
       'import.meta.env.ETHEREUM_TENDERLY_FORK_ID': JSON.stringify(
         process.env.ETHEREUM_TENDERLY_FORK_ID,
@@ -53,6 +56,7 @@ export default defineConfig(() => [
     dts: true,
     platform: 'node',
     format: ['esm'],
+    noExternal: ['@aave/types', '@aave/graphql', '@aave/core'],
     define: {
       'import.meta.env.ETHEREUM_TENDERLY_FORK_ID': JSON.stringify(
         process.env.ETHEREUM_TENDERLY_FORK_ID,

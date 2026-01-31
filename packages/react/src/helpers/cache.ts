@@ -1,6 +1,8 @@
-import type { AaveClient } from '@aave/client';
 import {
+  type AaveClient,
+  type ChainId,
   decodeUserPositionId,
+  type EvmAddress,
   HubsQuery,
   isChainIdsVariant,
   isSpokeInputVariant,
@@ -18,8 +20,7 @@ import {
   UserSummaryQuery,
   UserSuppliesQuery,
   type UserSuppliesRequestQuery,
-} from '@aave/graphql';
-import type { ChainId, EvmAddress } from '@aave/types';
+} from '@aave/client';
 
 function extractUserSuppliesRequestUser(
   query: UserSuppliesRequestQuery,

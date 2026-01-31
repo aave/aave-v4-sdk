@@ -1,5 +1,4 @@
 ---
-"@aave/core": minor
 "@aave/client": minor
 "@aave/react": minor
 ---

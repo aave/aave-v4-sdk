@@ -1,5 +1,4 @@
 ---
-"@aave/graphql": patch
 "@aave/react": patch
 "@aave/client": patch
 ---

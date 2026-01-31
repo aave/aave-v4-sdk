@@ -1,4 +1,4 @@
-import { errAsync, InvariantError, okAsync } from '@aave/types';
+import { errAsync, InvariantError, okAsync } from '@aave/client';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {

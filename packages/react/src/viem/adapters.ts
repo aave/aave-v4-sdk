@@ -1,12 +1,16 @@
-import type { SignTypedDataError, TypedData } from '@aave/client';
+import {
+  invariant,
+  type Signature,
+  type SignTypedDataError,
+  type TransactionRequest,
+  type TypedData,
+} from '@aave/client';
 import {
   ensureChain,
   sendTransaction,
   signTypedDataWith,
   waitForTransactionResult,
 } from '@aave/client/viem';
-import type { TransactionRequest } from '@aave/graphql';
-import { invariant, type Signature } from '@aave/types';
 import type { WalletClient } from 'viem';
 import { useAaveClient } from '../context';
 import {

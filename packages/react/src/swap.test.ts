@@ -1,13 +1,11 @@
 import {
-  createNewWallet,
-  ETHEREUM_FORK_ID,
-  environment,
-  fundNativeAddress,
-} from '@aave/client/testing';
-import {
+  assertOk,
   BorrowSwapQuoteQuery,
   type BorrowSwapQuoteRequest,
+  bigDecimal,
   CancelSwapMutation,
+  chainId,
+  evmAddress,
   PreparePositionSwapQuery,
   PrepareSwapCancelQuery,
   type PrepareSwapCancelRequest,
@@ -24,8 +22,12 @@ import {
   type TokenSwapQuoteRequest,
   WithdrawSwapQuoteQuery,
   type WithdrawSwapQuoteRequest,
-} from '@aave/graphql';
+} from '@aave/client';
 import {
+  createNewWallet,
+  ETHEREUM_FORK_ID,
+  environment,
+  fundNativeAddress,
   makeErc20Approval,
   makePositionSwapAdapterContractApproval,
   makePositionSwapPositionManagerApproval,
@@ -43,8 +45,7 @@ import {
   makeTransactionRequest,
   makeUserBorrowItemId,
   makeUserSupplyItemId,
-} from '@aave/graphql/testing';
-import { assertOk, bigDecimal, chainId, evmAddress } from '@aave/types';
+} from '@aave/client/testing';
 import { act } from '@testing-library/react';
 import * as msw from 'msw';
 import { setupServer } from 'msw/node';

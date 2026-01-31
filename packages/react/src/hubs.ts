@@ -1,11 +1,6 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
-  type TimeWindowQueryOptions,
-  type UnexpectedError,
-} from '@aave/client';
-import { hubs } from '@aave/client/actions';
-import {
   type Hub,
   type HubAsset,
   HubAssetsQuery,
@@ -17,8 +12,12 @@ import {
   type HubSummarySample,
   HubsQuery,
   type HubsRequest,
-} from '@aave/graphql';
-import type { NullishDeep, Prettify } from '@aave/types';
+  type NullishDeep,
+  type Prettify,
+  type TimeWindowQueryOptions,
+  type UnexpectedError,
+} from '@aave/client';
+import { hubs } from '@aave/client/actions';
 import { useAaveClient } from './context';
 import {
   type Pausable,

@@ -1,14 +1,11 @@
 import {
-  type CurrencyQueryOptions,
-  DEFAULT_QUERY_OPTIONS,
-  type TimeWindowQueryOptions,
-  type UnexpectedError,
-} from '@aave/client';
-import { reserve, reserves } from '@aave/client/actions';
-import {
   type ApySample,
   BorrowApyHistoryQuery,
   type BorrowApyHistoryRequest,
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type NullishDeep,
+  type Prettify,
   type Reserve,
   ReserveQuery,
   type ReserveRequest,
@@ -16,8 +13,10 @@ import {
   type ReservesRequest,
   SupplyApyHistoryQuery,
   type SupplyApyHistoryRequest,
-} from '@aave/graphql';
-import type { NullishDeep, Prettify } from '@aave/types';
+  type TimeWindowQueryOptions,
+  type UnexpectedError,
+} from '@aave/client';
+import { reserve, reserves } from '@aave/client/actions';
 import { useAaveClient } from './context';
 import {
   type Pausable,

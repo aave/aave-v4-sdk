@@ -1,22 +1,20 @@
 import {
   CancelError,
-  SigningError,
-  type SignTypedDataError,
-  TransactionError,
-  type TypedData,
-  UnexpectedError,
-} from '@aave/client';
-import { chain as fetchChain } from '@aave/client/actions';
-import { toThirdwebChain } from '@aave/client/thirdweb';
-import type { TransactionRequest } from '@aave/graphql';
-import {
   invariant,
   okAsync,
   ResultAsync,
   type Signature,
+  SigningError,
+  type SignTypedDataError,
   signatureFrom,
+  TransactionError,
+  type TransactionRequest,
+  type TypedData,
   txHash,
-} from '@aave/types';
+  UnexpectedError,
+} from '@aave/client';
+import { chain as fetchChain } from '@aave/client/actions';
+import { toThirdwebChain } from '@aave/client/thirdweb';
 import {
   prepareTransaction,
   sendTransaction,

@@ -1,23 +1,25 @@
 import {
-  ETHEREUM_FORK_ID,
-  ETHEREUM_FORK_RPC_URL,
-  ETHEREUM_WETH_ADDRESS,
-} from '@aave/client/testing';
-import type { SupplyActivity } from '@aave/graphql';
-import {
+  bigDecimal,
   Currency,
   type Erc20Amount,
   encodeReserveId,
   encodeUserPositionId,
+  evmAddress,
   type ID,
   type OnChainReserveId,
   type PreviewAction,
   type ReserveInfo,
   type Spoke,
+  type SupplyActivity,
   tokenInfoId,
+  txHash,
   UserPositionConditionsUpdate,
-} from '@aave/graphql';
-import { bigDecimal, evmAddress, txHash } from '@aave/types';
+} from '@aave/client';
+import {
+  ETHEREUM_FORK_ID,
+  ETHEREUM_FORK_RPC_URL,
+  ETHEREUM_WETH_ADDRESS,
+} from '@aave/client/testing';
 import { describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useNetworkFee } from './useNetworkFee';

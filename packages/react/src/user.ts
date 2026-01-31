@@ -1,17 +1,10 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type NullishDeep,
+  type Prettify,
   type TimeWindowQueryOptions,
   type UnexpectedError,
-} from '@aave/client';
-import type { UserPositionQueryOptions } from '@aave/client/actions';
-import {
-  userBalances,
-  userBorrows,
-  userPositions,
-  userSupplies,
-} from '@aave/client/actions';
-import {
   type UserBalance,
   UserBalancesQuery,
   type UserBalancesRequest,
@@ -35,8 +28,14 @@ import {
   UserSuppliesQuery,
   type UserSuppliesRequest,
   type UserSupplyItem,
-} from '@aave/graphql';
-import type { NullishDeep, Prettify } from '@aave/types';
+} from '@aave/client';
+import type { UserPositionQueryOptions } from '@aave/client/actions';
+import {
+  userBalances,
+  userBorrows,
+  userPositions,
+  userSupplies,
+} from '@aave/client/actions';
 import { useAaveClient } from './context';
 import {
   type Pausable,

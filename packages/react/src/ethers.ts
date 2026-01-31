@@ -1,11 +1,15 @@
-import type { SignTypedDataError, TypedData } from '@aave/client';
+import {
+  invariant,
+  type Signature,
+  type SignTypedDataError,
+  type TransactionRequest,
+  type TypedData,
+} from '@aave/client';
 import {
   sendTransaction,
   signTypedDataWith,
   waitForTransactionResult,
 } from '@aave/client/ethers';
-import type { TransactionRequest } from '@aave/graphql';
-import { invariant, type Signature } from '@aave/types';
 import type { Signer } from 'ethers';
 import {
   PendingTransaction,

@@ -1,10 +1,4 @@
 import {
-  type CurrencyQueryOptions,
-  DEFAULT_QUERY_OPTIONS,
-  type TimeWindowQueryOptions,
-  type UnexpectedError,
-} from '@aave/client';
-import {
   type Asset,
   AssetBorrowHistoryQuery,
   type AssetBorrowHistoryRequest,
@@ -17,11 +11,16 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type NullishDeep,
+  type Prettify,
   ProtocolHistoryQuery,
   type ProtocolHistoryRequest,
   type ProtocolHistorySample,
-} from '@aave/graphql';
-import type { NullishDeep, Prettify } from '@aave/types';
+  type TimeWindowQueryOptions,
+  type UnexpectedError,
+} from '@aave/client';
 import {
   type Pausable,
   type PausableReadResult,

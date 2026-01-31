@@ -1,5 +1,5 @@
 import { GraphQLErrorCode, UnexpectedError } from '@aave/client';
-import { createGraphQLErrorObject } from '@aave/core/testing';
+import { createGraphQLErrorObject } from '@aave/client/testing';
 import { act } from '@testing-library/react';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
