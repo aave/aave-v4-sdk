@@ -94,7 +94,7 @@ describe('Supply Position swapping on Aave V4', () => {
             amount: supplyPosition.principal.amount.value.div(2),
             user: evmAddress(user.account.address),
             enableCollateral: false,
-            selectedSlippage: bigDecimal('50'),
+            // selectedSlippage: bigDecimal('50'),
           },
         })
           .andThen(signApprovalsWith(user))
