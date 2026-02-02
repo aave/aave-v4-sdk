@@ -10,7 +10,7 @@ import {
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { assertNonEmptyArray } from '../test-utils';
-import { recreateUserBorrows } from './helper';
+import { recreateUserBorrows } from './helpers';
 
 const user = await createNewWallet(
   '0x40e7024d48c43beb83f2328465b31b0d8e38835688cd7d9e24301f1aa1961d4b',

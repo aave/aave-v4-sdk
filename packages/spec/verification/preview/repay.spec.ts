@@ -18,7 +18,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
-} from '../helpers/supplyBorrow';
+} from '../../helpers/supplyBorrow';
 
 const user = await createNewWallet();
 

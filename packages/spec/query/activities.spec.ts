@@ -16,7 +16,7 @@ import {
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { recreateUserActivities } from './helper';
+import { recreateUserActivities } from './helpers';
 
 const user = await createNewWallet(
   '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',

@@ -17,12 +17,12 @@ import {
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { findReservesToSupply } from '../helpers/reserves';
+import { findReservesToSupply } from '../../helpers/reserves';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
   fundAndSupplyToReserve,
-} from '../helpers/supplyBorrow';
+} from '../../helpers/supplyBorrow';
 
 const user = await createNewWallet();
 

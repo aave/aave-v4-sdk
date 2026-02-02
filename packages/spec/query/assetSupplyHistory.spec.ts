@@ -6,7 +6,7 @@ import {
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
-import { getTimeWindowDates } from '../../helpers/tools';
+import { getTimeWindowDates } from '../helpers/tools';
 
 describe('Querying Asset Supply Apy History on Aave V4', () => {
   describe('Given an asset/token available on the protocol', () => {
