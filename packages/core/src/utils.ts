@@ -17,17 +17,3 @@ export function extractOperationName(op: Operation): string | null {
   ) as OperationDefinitionNode | undefined;
   return def?.name?.value ?? null;
 }
-
-/**
- * @internal
- */
-export function isActiveQueryOperation(op: Operation): boolean {
-  return op.kind === 'query' && !op.context.pause;
-}
-
-/**
- * @internal
- */
-export function isTeardownOperation(op: Operation): boolean {
-  return op.kind === 'teardown';
-}
