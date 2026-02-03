@@ -12,16 +12,19 @@ export type ReadResult<T, E extends UnexpectedError = UnexpectedError> =
       data: undefined;
       error: undefined;
       loading: true;
+      reloading: false;
     }
   | {
       data: T;
       error: undefined;
       loading: false;
+      reloading: boolean;
     }
   | {
       data: undefined;
       error: E;
       loading: false;
+      reloading: boolean;
     };
 
 /**
@@ -33,24 +36,28 @@ export type PausableReadResult<T, E extends UnexpectedError = UnexpectedError> =
       error: E | undefined;
       loading: false;
       paused: true;
+      reloading: false;
     }
   | {
       data: undefined;
       error: undefined;
       loading: true;
       paused: false;
+      reloading: false;
     }
   | {
       data: T;
       error: undefined;
       loading: false;
       paused: false;
+      reloading: boolean;
     }
   | {
       data: undefined;
       error: E;
       loading: false;
       paused: false;
+      reloading: boolean;
     };
 
 /**
@@ -65,22 +72,27 @@ export const ReadResult = {
     error: undefined,
     loading: true,
     paused: false,
+    reloading: false,
   }),
   Success: <T, E extends UnexpectedError = UnexpectedError>(
     data: T,
+    reloading = false,
   ): PausableReadResult<T, E> => ({
     data,
     error: undefined,
     loading: false,
     paused: false,
+    reloading,
   }),
   Failure: <T, E extends UnexpectedError = UnexpectedError>(
     error: E,
+    reloading = false,
   ): PausableReadResult<T, E> => ({
     data: undefined,
     error,
     loading: false,
     paused: false,
+    reloading,
   }),
   Paused: <T, E extends UnexpectedError = UnexpectedError>(
     data: T | undefined,
@@ -90,6 +102,7 @@ export const ReadResult = {
     error,
     loading: false,
     paused: true,
+    reloading: false,
   }),
 };
 
