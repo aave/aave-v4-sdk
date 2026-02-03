@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 1.0.0-next.27
+
+### Patch Changes
+
+- f4c8623: **fix:** correct typo `SpokePositionManger` to `SpokePositionManager` in GraphQL schema and cache
+- 64b6596: **feat:** add `SwapOperation` union to `SwapStatus` entries. Support `InsufficientLiquidityError`. Add `orderClass` and `kind` to `SwapStatus` and ActivityItem` union entries.
+
 ## 1.0.0-next.26
 
 ### Patch Changes

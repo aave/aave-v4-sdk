@@ -1,5 +1,12 @@
 # @aave/core
 
+## 1.0.0-next.14
+
+### Patch Changes
+
+- 64b6596: **feat:** add `SwapOperation` union to `SwapStatus` entries. Support `InsufficientLiquidityError`. Add `orderClass` and `kind` to `SwapStatus` and ActivityItem` union entries.
+- ece7453: **fix:** extends cache refresh mechanism to account for past queries that left a presence in the cache but are no longer watched.
+
 ## 1.0.0-next.13
 
 ### Patch Changes
