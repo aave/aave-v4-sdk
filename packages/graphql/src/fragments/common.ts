@@ -339,3 +339,13 @@ export const InsufficientBalanceErrorFragment = graphql(
 export type InsufficientBalanceError = FragmentOf<
   typeof InsufficientBalanceErrorFragment
 >;
+
+export const InsufficientLiquidityErrorFragment = graphql(
+  `fragment InsufficientLiquidityError on InsufficientLiquidityError {
+    __typename
+    reason
+  }`,
+);
+export type InsufficientLiquidityError = FragmentOf<
+  typeof InsufficientLiquidityErrorFragment
+>;

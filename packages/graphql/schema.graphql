@@ -186,6 +186,13 @@ input BorrowRequest {
   sender: EvmAddress!
 }
 
+type BorrowSwap {
+  sellPosition: PositionAmount!
+  buyPosition: PositionAmount!
+  kind: BorrowSwapKind!
+  orderClass: SwapOrderClass!
+}
+
 type BorrowSwapActivity {
   id: ID!
   user: EvmAddress!
@@ -195,6 +202,8 @@ type BorrowSwapActivity {
   sold: SwapAmount!
   bought: SwapAmount!
   explorerUrl: String!
+  orderClass: SwapOrderClass!
+  kind: BorrowSwapKind!
 }
 
 enum BorrowSwapKind {
@@ -208,14 +217,14 @@ input BorrowSwapQuoteRequest @oneOf {
   fromQuote: FromQuoteDebtSwapQuoteInput
 }
 
-union BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired
+union BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
 
 input CancelIntentSwapInput {
   id: SwapId!
   signature: Signature!
 }
 
-union CancelSwapExecutionPlan = TransactionRequest | SwapCancelled
+union CancelSwapExecutionPlan = TransactionRequest | SwapCancelledResult
 
 input CancelSwapRequest @oneOf {
   intent: CancelIntentSwapInput
@@ -728,6 +737,10 @@ type InsufficientBalanceError {
   available: DecimalNumber!
 }
 
+type InsufficientLiquidityError {
+  reason: String!
+}
+
 scalar JSON
 
 input LimitDebtSwapQuoteInput {
@@ -744,16 +757,12 @@ input LimitDebtSwapQuoteInput {
 }
 
 input LimitOrderTokenSwapQuoteInput {
-  """
-  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
-  """
-  accuracy: QuoteAccuracy! = ACCURATE
   chainId: ChainId!
   sell: SwapTokenInput!
   buy: SwapTokenInput!
   user: EvmAddress!
   receiver: EvmAddress
-  kind: SwapKind! = SELL
+  kind: TokenSwapKind! = SELL
   previousQuoteId: SwapQuoteId
 
   """Optional deadline as DateTime. If not provided, uses default expiry."""
@@ -876,7 +885,7 @@ input MarketOrderTokenSwapQuoteInput {
   buy: TokenInput!
   sell: TokenInput!
   amount: BigDecimal!
-  kind: SwapKind!
+  kind: TokenSwapKind!
   user: EvmAddress!
   receiver: EvmAddress
   selectedSlippage: BigDecimal
@@ -912,8 +921,8 @@ input MarketWithdrawSwapQuoteInput {
   Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
   """
   accuracy: QuoteAccuracy! = ACCURATE
-  position: UserSupplyItemId!
-  buyReserve: ReserveId!
+  sellPosition: UserSupplyItemId!
+  buyToken: TokenInput!
   amount: BigDecimal!
   user: EvmAddress!
   selectedSlippage: BigDecimal
@@ -1287,6 +1296,13 @@ input RepayRequest {
   sender: EvmAddress!
 }
 
+type RepayWithSupply {
+  sellPosition: PositionAmount!
+  buyPosition: PositionAmount!
+  kind: RepayWithSupplyKind!
+  orderClass: SwapOrderClass!
+}
+
 type RepayWithSupplyActivity {
   id: ID!
   user: EvmAddress!
@@ -1296,6 +1312,8 @@ type RepayWithSupplyActivity {
   debtRepaid: SwapAmount!
   supplyUsed: SwapAmount!
   explorerUrl: String!
+  orderClass: SwapOrderClass!
+  kind: RepayWithSupplyKind!
 }
 
 enum RepayWithSupplyKind {
@@ -1309,7 +1327,7 @@ input RepayWithSupplyQuoteRequest @oneOf {
   fromQuote: FromQuoteRepayWithSupplyQuoteInput
 }
 
-union RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired
+union RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
 
 type Reserve {
   id: ReserveId!
@@ -1644,6 +1662,13 @@ input SupplyRequest {
   sender: EvmAddress!
 }
 
+type SupplySwap {
+  sellPosition: PositionAmount!
+  buyPosition: PositionAmount!
+  kind: SupplySwapKind!
+  orderClass: SwapOrderClass!
+}
+
 type SupplySwapActivity {
   id: ID!
   user: EvmAddress!
@@ -1653,6 +1678,8 @@ type SupplySwapActivity {
   sold: SwapAmount!
   bought: SwapAmount!
   explorerUrl: String!
+  orderClass: SwapOrderClass!
+  kind: SupplySwapKind!
 }
 
 enum SupplySwapKind {
@@ -1666,7 +1693,7 @@ input SupplySwapQuoteRequest @oneOf {
   fromQuote: FromQuoteSupplySwapQuoteInput
 }
 
-union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired
+union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
 
 union SwapAmount = PositionAmount | NativeAmount | Erc20Amount
 
@@ -1698,6 +1725,14 @@ type SwapCancelled {
   createdAt: DateTime!
   cancelledAt: DateTime
   explorerUrl: String!
+  operation: SwapOperation!
+}
+
+type SwapCancelledResult {
+  swapId: SwapId!
+  createdAt: DateTime!
+  cancelledAt: DateTime
+  explorerUrl: String!
 }
 
 input SwapErc20Input {
@@ -1712,35 +1747,37 @@ type SwapExpired {
   createdAt: DateTime!
   expiredAt: DateTime!
   explorerUrl: String!
+  operation: SwapOperation!
 }
 
 type SwapFulfilled {
   swapId: SwapId!
   txHash: String!
-  desiredSell: SwapAmount!
-  desiredBuy: SwapAmount!
-  sold: SwapAmount!
-  bought: SwapAmount!
   createdAt: DateTime!
   fulfilledAt: DateTime!
   explorerUrl: String!
   refundTxHash: TxHash
+  operation: SwapOperation!
 }
 
 scalar SwapId
-
-enum SwapKind {
-  BUY
-  SELL
-}
 
 type SwapOpen {
   swapId: SwapId!
   createdAt: DateTime!
   deadline: DateTime!
   explorerUrl: String!
-  desiredSell: SwapAmount!
-  desiredBuy: SwapAmount!
+  operation: SwapOperation!
+}
+
+union SwapOperation = SupplySwap | BorrowSwap | RepayWithSupply | WithdrawSwap | TokenSwap
+
+"""
+Order class indicating market or limit order type (mirrors types::swap_quote_id::OrderClass)
+"""
+enum SwapOrderClass {
+  MARKET
+  LIMIT
 }
 
 type SwapPendingSignature {
@@ -1748,6 +1785,7 @@ type SwapPendingSignature {
   createdAt: DateTime!
   deadline: DateTime!
   explorerUrl: String!
+  operation: SwapOperation!
 }
 
 type SwapQuote {
@@ -1897,6 +1935,13 @@ input TokenInput @oneOf {
   erc20: EvmAddress
 }
 
+type TokenSwap {
+  sold: TokenAmount!
+  bought: TokenAmount!
+  kind: TokenSwapKind!
+  orderClass: SwapOrderClass!
+}
+
 type TokenSwapActivity {
   id: ID!
   user: EvmAddress!
@@ -1906,6 +1951,13 @@ type TokenSwapActivity {
   sold: SwapAmount!
   bought: SwapAmount!
   explorerUrl: String!
+  orderClass: SwapOrderClass!
+  kind: TokenSwapKind!
+}
+
+enum TokenSwapKind {
+  BUY
+  SELL
 }
 
 input TokenSwapQuoteRequest @oneOf {
@@ -1914,7 +1966,7 @@ input TokenSwapQuoteRequest @oneOf {
   fromQuote: MarketOrderTokenSwapFromQuoteInput
 }
 
-union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction
+union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientLiquidityError
 
 type TransactionRequest {
   to: EvmAddress!
@@ -2456,6 +2508,13 @@ input WithdrawReserveAmountInput @oneOf {
   erc20: AmountInput
 }
 
+type WithdrawSwap {
+  sellPosition: PositionAmount!
+  buyToken: TokenAmount!
+  kind: WithdrawSwapKind!
+  orderClass: SwapOrderClass!
+}
+
 type WithdrawSwapActivity {
   id: ID!
   user: EvmAddress!
@@ -2465,6 +2524,8 @@ type WithdrawSwapActivity {
   withdrawn: SwapAmount!
   bought: SwapAmount!
   explorerUrl: String!
+  orderClass: SwapOrderClass!
+  kind: WithdrawSwapKind!
 }
 
 enum WithdrawSwapKind {
@@ -2478,4 +2539,4 @@ input WithdrawSwapQuoteRequest @oneOf {
   fromQuote: FromQuoteWithdrawSwapQuoteInput
 }
 
-union WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired
+union WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
