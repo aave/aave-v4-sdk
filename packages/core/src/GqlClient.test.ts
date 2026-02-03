@@ -1,5 +1,6 @@
 import { assertErr, assertOk, ResultAsync } from '@aave/types';
 import { gql, stringifyDocument } from '@urql/core';
+import { cacheExchange } from '@urql/exchange-graphcache';
 import * as msw from 'msw';
 import { setupServer } from 'msw/node';
 import {
@@ -10,54 +11,17 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from 'vitest';
+import type { Subscription } from 'wonka';
 import type { Context } from './context';
 import { GraphQLErrorCode } from './errors';
 import { GqlClient } from './GqlClient';
+import { batched } from './msw';
 import { createGraphQLErrorObject } from './testing';
 import { delay } from './utils';
 
-// see: https://mswjs.io/docs/graphql/mocking-responses/query-batching
-function batched(url: string, handlers: Array<msw.RequestHandler>) {
-  return msw.http.post(url, async ({ request }) => {
-    const requestClone = request.clone();
-    const payload = await request.clone().json();
-
-    // Ignore non-batched GraphQL queries.
-    if (!Array.isArray(payload)) {
-      return;
-    }
-
-    const responses = await Promise.all(
-      payload.map(async (query) => {
-        // Construct an individual query request
-        // to the same URL but with an unwrapped query body.
-        const queryRequest = new Request(requestClone, {
-          body: JSON.stringify(query),
-        });
-
-        // Resolve the individual query request
-        // against the list of request handlers you provide.
-        const response = await msw.getResponse(handlers, queryRequest);
-
-        // Return the mocked response, if found.
-        // Otherwise, perform the individual query as-is,
-        // so it can be resolved against an original server.
-        return response || fetch(msw.bypass(queryRequest));
-      }),
-    );
-
-    // Read the mocked response JSON bodies to use
-    // in the response to the entire batched query.
-    const queryData = await Promise.all(
-      responses.map((response) => response?.json()),
-    );
-
-    return msw.HttpResponse.json(queryData);
-  });
-}
-
-export const TestQuery = gql`
+const TestQuery = gql`
   query TestQuery($id: Int!) {
     value(id: $id)
   }
@@ -74,34 +38,17 @@ const context: Context = {
     swapStatusInterval: 1000,
   },
   headers: {},
-  cache: null,
+  cache: cacheExchange(),
   debug: false,
   fragments: [],
 };
 
 const api = msw.graphql.link(context.environment.backend);
 
-const server = setupServer(
-  batched(context.environment.backend, [
-    api.query(TestQuery, ({ variables }) =>
-      msw.HttpResponse.json({
-        data: {
-          value: variables.id,
-        },
-      }),
-    ),
-  ]),
-  api.query(TestQuery, ({ variables }) =>
-    msw.HttpResponse.json({
-      data: {
-        value: variables.id,
-      },
-    }),
-  ),
-);
+const server = setupServer();
 
 describe(`Given an instance of the ${GqlClient.name}`, () => {
-  let requests: Request[];
+  let requests: Request[] = [];
 
   beforeAll(() => {
     server.events.on('request:start', ({ request }) => {
@@ -112,6 +59,24 @@ describe(`Given an instance of the ${GqlClient.name}`, () => {
   });
 
   beforeEach(() => {
+    server.use(
+      batched(context.environment.backend, [
+        api.query(TestQuery, ({ variables }) =>
+          msw.HttpResponse.json({
+            data: {
+              value: variables.id,
+            },
+          }),
+        ),
+      ]),
+      api.query(TestQuery, ({ variables }) =>
+        msw.HttpResponse.json({
+          data: {
+            value: variables.id,
+          },
+        }),
+      ),
+    );
     requests = [];
   });
 
@@ -123,84 +88,161 @@ describe(`Given an instance of the ${GqlClient.name}`, () => {
     server.close();
   });
 
-  describe('When executing a single isolated query', () => {
-    it('Then it should execute it in its own HTTP request', async () => {
+  describe('And an active query', () => {
+    describe('When the query is marked for refresh', () => {
+      let subscription: Subscription;
       const client = new GqlClient(context);
 
-      const result = await client.query(TestQuery, { id: 1 });
+      beforeEach(async () => {
+        subscription = client.urql
+          .query(TestQuery, { id: 1 })
+          .subscribe(() => {});
 
-      assertOk(result);
-      expect(await requests[0]!.json()).toEqual({
-        operationName: 'TestQuery',
-        query: stringifyDocument(TestQuery),
-        variables: { id: 1 },
+        await vi.waitUntil(() => requests.length === 1, { timeout: 1000 });
+      });
+
+      it('Then it should refetch the query automatically', async () => {
+        await client.refreshQueryWhere(TestQuery, () => true);
+
+        await vi.waitFor(
+          () => {
+            expect(requests).toHaveLength(2);
+          },
+          { timeout: 1000 },
+        );
+
+        subscription.unsubscribe();
       });
     });
   });
 
-  describe('When executing concurrent queries', () => {
-    it('Then it should batch queries fired in the same event-loop tick into a single HTTP request', async () => {
-      const client = new GqlClient(context);
+  describe('And a query that was executed and cached, then marked for refresh', () => {
+    describe('When refetching the same query', () => {
+      it('Then it should always refetch the query from the network', async () => {
+        const client = new GqlClient(context);
+        const setup = await client.query(TestQuery, { id: 1 });
+        assertOk(setup);
 
-      const resul = await ResultAsync.combine([
-        client.query(TestQuery, { id: 1 }),
-        client.query(TestQuery, { id: 2 }),
-        // on a separate tick, fire the third query
-        ResultAsync.fromSafePromise(delay(1)).andThen(() =>
-          client.query(TestQuery, { id: 3 }),
-        ),
-      ]);
+        await client.refreshQueryWhere(TestQuery, () => true);
 
-      assertOk(resul);
-      expect(requests).toHaveLength(2); // 2 HTTP requests were made
+        const result = await client.query(
+          TestQuery,
+          { id: 1 },
+          { requestPolicy: 'cache-first' },
+        );
+        assertOk(result);
+
+        expect(requests).toHaveLength(2); // 2 HTTP requests were made
+      });
+
+      it('Then it should also refetch in case the original query was initially part of a GQL batch request', async () => {
+        const client = new GqlClient(context);
+        const resul = await ResultAsync.combine([
+          client.query(TestQuery, { id: 1 }),
+          client.query(TestQuery, { id: 2 }),
+        ]);
+        assertOk(resul);
+
+        await client.refreshQueryWhere(
+          TestQuery,
+          (variables) => variables.id === 1,
+        );
+
+        const result = await client.query(
+          TestQuery,
+          { id: 1 },
+          { requestPolicy: 'cache-first' },
+        );
+        assertOk(result);
+        expect(await requests[1]!.json()).toEqual({
+          operationName: 'TestQuery',
+          query: stringifyDocument(TestQuery),
+          variables: { id: 1 },
+        });
+      });
     });
   });
 
-  describe('When executing a query that fails with GraphQL errors', () => {
-    beforeAll(() => {
-      server.use(
-        api.query(TestQuery, () => {
-          return msw.HttpResponse.json({
-            errors: [createGraphQLErrorObject(GraphQLErrorCode.BAD_REQUEST)],
-          });
-        }),
-      );
+  describe('And observing the requests made by the client', () => {
+    describe('When executing a single isolated query', () => {
+      it('Then it should execute it in its own HTTP request', async () => {
+        const client = new GqlClient(context);
+
+        const result = await client.query(TestQuery, { id: 1 });
+
+        assertOk(result);
+        expect(await requests[0]!.json()).toEqual({
+          operationName: 'TestQuery',
+          query: stringifyDocument(TestQuery),
+          variables: { id: 1 },
+        });
+      });
     });
 
-    it('Then it should fail with an `UnexpectedError`', async () => {
-      const client = new GqlClient(context);
+    describe('When executing concurrent queries', () => {
+      it('Then it should batch queries fired in the same event-loop tick into a single HTTP request', async () => {
+        const client = new GqlClient(context);
 
-      const result = await client.query(TestQuery, { id: 1 });
+        const result = await ResultAsync.combine([
+          client.query(TestQuery, { id: 1 }),
+          client.query(TestQuery, { id: 2 }),
+          // on a separate tick, fire the third query
+          ResultAsync.fromSafePromise(delay(1)).andThen(() =>
+            client.query(TestQuery, { id: 3 }),
+          ),
+        ]);
 
-      assertErr(result);
-    });
-  });
-
-  describe('When batching concurrent queries', () => {
-    it('Then it should limit batching to a maximum of 10 queries', async () => {
-      const client = new GqlClient(context);
-
-      const result = await ResultAsync.combine(
-        Array.from({ length: 15 }, (_, i) =>
-          client.query(TestQuery, { id: String(i + 1) }),
-        ),
-      );
-
-      assertOk(result);
-      expect(requests).toHaveLength(2); // 2 HTTP requests were made
+        assertOk(result);
+        expect(requests).toHaveLength(2); // 2 HTTP requests were made
+      });
     });
 
-    it('Then it should allow single queries to skip the batching', async () => {
-      const client = new GqlClient(context);
+    describe('When executing a query that fails with GraphQL errors', () => {
+      beforeEach(() => {
+        server.use(
+          api.query(TestQuery, () => {
+            return msw.HttpResponse.json({
+              errors: [createGraphQLErrorObject(GraphQLErrorCode.BAD_REQUEST)],
+            });
+          }),
+        );
+      });
 
-      const result = await ResultAsync.combine([
-        client.query(TestQuery, { id: 1 }),
-        client.query(TestQuery, { id: 2 }),
-        client.query(TestQuery, { id: 3 }, { batch: false }),
-      ]);
+      it('Then it should fail with an `UnexpectedError`', async () => {
+        const client = new GqlClient(context);
 
-      assertOk(result);
-      expect(requests).toHaveLength(2); // 2 HTTP requests were made (one batched, one not)
+        const result = await client.query(TestQuery, { id: 1 });
+
+        assertErr(result);
+      });
+    });
+
+    describe('When batching concurrent queries', () => {
+      it('Then it should limit batching to a maximum of 10 queries', async () => {
+        const client = new GqlClient(context);
+
+        const result = await ResultAsync.combine(
+          Array.from({ length: 15 }, (_, i) =>
+            client.query(TestQuery, { id: String(i + 1) }),
+          ),
+        );
+
+        assertOk(result);
+        expect(requests).toHaveLength(2); // 2 HTTP requests were made
+      });
+
+      it('Then it should allow single queries to skip the batching', async () => {
+        const client = new GqlClient(context);
+
+        const result = await ResultAsync.combine([
+          client.query(TestQuery, { id: 1 }),
+          client.query(TestQuery, { id: 2 }),
+          client.query(TestQuery, { id: 3 }, { batch: false }),
+        ]);
+
+        assertOk(result);
+        expect(requests).toHaveLength(2); // 2 HTTP requests were made (one batched, one not)
+      });
     });
   });
 });

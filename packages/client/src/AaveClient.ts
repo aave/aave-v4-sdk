@@ -1,18 +1,6 @@
-import {
-  delay,
-  GqlClient,
-  type StandardData,
-  TimeoutError,
-  UnexpectedError,
-} from '@aave/core';
+import { delay, GqlClient, TimeoutError, UnexpectedError } from '@aave/core';
 import type { HasProcessedKnownTransactionRequest } from '@aave/graphql';
-import {
-  type AnyVariables,
-  invariant,
-  ResultAsync,
-  type TxHash,
-} from '@aave/types';
-import type { TypedDocumentNode } from '@urql/core';
+import { invariant, ResultAsync, type TxHash } from '@aave/types';
 import { hasProcessedKnownTransaction } from './actions';
 import { type ClientConfig, configureContext } from './config';
 import {
@@ -64,32 +52,6 @@ export class AaveClient extends GqlClient {
       },
     );
   };
-
-  /**
-   * @internal
-   */
-  async refreshQueryWhere<TValue, TVariables extends AnyVariables>(
-    document: TypedDocumentNode<StandardData<TValue>, TVariables>,
-    predicate: (
-      variables: TVariables,
-      data: TValue,
-    ) => boolean | Promise<boolean>,
-  ): Promise<void> {
-    await this.refreshWhere(async (op) => {
-      if (op.query === document) {
-        const result = await this.query(document, op.variables as TVariables, {
-          requestPolicy: 'cache-only',
-        });
-
-        if (result.isErr()) {
-          return false;
-        }
-
-        return predicate(op.variables as TVariables, result.value as TValue);
-      }
-      return false;
-    });
-  }
 
   protected async pollTransactionStatus(
     request: HasProcessedKnownTransactionRequest,
