@@ -11,6 +11,7 @@ import {
   CancelSwapMutation,
   type CancelSwapRequest,
   type InsufficientBalanceError,
+  type InsufficientLiquidityError,
   type PaginatedUserSwapsResult,
   type PositionSwapByIntentApprovalsRequired,
   PreparePositionSwapQuery,
@@ -83,15 +84,33 @@ export function tokenSwapQuote(
     currency = DEFAULT_QUERY_OPTIONS.currency,
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<TokenSwapQuoteResult, UnexpectedError> {
-  return client.query(
-    TokenSwapQuoteQuery,
-    {
-      request,
-      currency,
-    },
-    { batch: false, requestPolicy },
-  );
+): ResultAsync<
+  TokenSwapQuoteResult,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  return client
+    .query(
+      TokenSwapQuoteQuery,
+      { request, currency },
+      { batch: false, requestPolicy },
+    )
+    .map(extendWithOpaqueType)
+    .andThen((result) => {
+      switch (result.__typename) {
+        case 'SwapByIntent':
+        case 'SwapByIntentWithApprovalRequired':
+        case 'SwapByTransaction':
+          return okAsync(result);
+
+        case 'InsufficientLiquidityError':
+          return ValidationError.fromGqlNode(result).asResultAsync();
+
+        default:
+          return UnexpectedError.upgradeRequired(
+            `Unsupported result: ${result.__typename}`,
+          ).asResultAsync();
+      }
+    });
 }
 
 /**
@@ -186,7 +205,10 @@ export function supplySwapQuote(
     currency = DEFAULT_QUERY_OPTIONS.currency,
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+): ResultAsync<
+  PositionSwapByIntentApprovalsRequired,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   return client
     .query(
       SupplySwapQuoteQuery,
@@ -198,6 +220,10 @@ export function supplySwapQuote(
       switch (result.__typename) {
         case 'PositionSwapByIntentApprovalsRequired':
           return okAsync(result);
+
+        case 'InsufficientLiquidityError':
+          return ValidationError.fromGqlNode(result).asResultAsync();
+
         default:
           return UnexpectedError.upgradeRequired(
             `Unsupported result: ${result.__typename}`,
@@ -232,7 +258,10 @@ export function borrowSwapQuote(
     currency = DEFAULT_QUERY_OPTIONS.currency,
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+): ResultAsync<
+  PositionSwapByIntentApprovalsRequired,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   return client
     .query(
       BorrowSwapQuoteQuery,
@@ -244,6 +273,10 @@ export function borrowSwapQuote(
       switch (result.__typename) {
         case 'PositionSwapByIntentApprovalsRequired':
           return okAsync(result);
+
+        case 'InsufficientLiquidityError':
+          return ValidationError.fromGqlNode(result).asResultAsync();
+
         default:
           return UnexpectedError.upgradeRequired(
             `Unsupported result: ${result.__typename}`,
@@ -278,7 +311,10 @@ export function repayWithSupplyQuote(
     currency = DEFAULT_QUERY_OPTIONS.currency,
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+): ResultAsync<
+  PositionSwapByIntentApprovalsRequired,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   return client
     .query(
       RepayWithSupplyQuoteQuery,
@@ -290,6 +326,10 @@ export function repayWithSupplyQuote(
       switch (result.__typename) {
         case 'PositionSwapByIntentApprovalsRequired':
           return okAsync(result);
+
+        case 'InsufficientLiquidityError':
+          return ValidationError.fromGqlNode(result).asResultAsync();
+
         default:
           return UnexpectedError.upgradeRequired(
             `Unsupported result: ${result.__typename}`,
@@ -324,7 +364,10 @@ export function withdrawSwapQuote(
     currency = DEFAULT_QUERY_OPTIONS.currency,
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PositionSwapByIntentApprovalsRequired, UnexpectedError> {
+): ResultAsync<
+  PositionSwapByIntentApprovalsRequired,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   return client
     .query(
       WithdrawSwapQuoteQuery,
@@ -336,6 +379,9 @@ export function withdrawSwapQuote(
       switch (result.__typename) {
         case 'PositionSwapByIntentApprovalsRequired':
           return okAsync(result);
+
+        case 'InsufficientLiquidityError':
+          return ValidationError.fromGqlNode(result).asResultAsync();
 
         default:
           return UnexpectedError.upgradeRequired(

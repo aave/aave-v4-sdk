@@ -4,7 +4,6 @@ import {
   DEFAULT_QUERY_OPTIONS,
   supportsPermit,
   type TimeWindowQueryOptions,
-  type ValidationError,
 } from '@aave/client';
 import {
   borrowSwapQuote,
@@ -25,14 +24,17 @@ import {
   type TimeoutError,
   type TransactionError,
   UnexpectedError,
+  ValidationError,
 } from '@aave/core';
 import type {
   InsufficientBalanceError,
+  InsufficientLiquidityError,
   PaginatedUserSwapsResult,
   PositionSwapApproval,
   PrepareSwapCancelRequest,
   SupplySwapQuoteRequest,
   SwapCancelled,
+  SwapCancelledResult,
   SwapQuote,
   SwapReceipt,
   SwapStatus,
@@ -99,9 +101,36 @@ function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
     case 'SwapByIntentWithApprovalRequired':
     case 'SwapByTransaction':
       return data.quote;
+    case 'InsufficientLiquidityError':
+      throw ValidationError.fromGqlNode(data);
     default:
       throw UnexpectedError.upgradeRequired(
         `Unsupported swap quote result: ${data.__typename}`,
+      );
+  }
+}
+
+function toSwapCancelledResult(cancelled: SwapCancelled): SwapCancelledResult {
+  return {
+    __typename: 'SwapCancelledResult',
+    swapId: cancelled.swapId,
+    createdAt: cancelled.createdAt,
+    cancelledAt: cancelled.cancelledAt,
+    explorerUrl: cancelled.explorerUrl,
+  };
+}
+
+function extractPositionSwapQuote(
+  data: PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError,
+): SwapQuote {
+  switch (data.__typename) {
+    case 'PositionSwapByIntentApprovalsRequired':
+      return data.quote;
+    case 'InsufficientLiquidityError':
+      throw ValidationError.fromGqlNode(data);
+    default:
+      throw UnexpectedError.upgradeRequired(
+        `Unsupported position swap quote result: ${(data as { __typename: string }).__typename}`,
       );
   }
 }
@@ -113,9 +142,7 @@ function injectTokenSwapQuoteAccuracy(
   if ('market' in request && request.market) {
     return { market: { ...request.market, accuracy } };
   }
-  if ('limit' in request && request.limit) {
-    return { limit: { ...request.limit, accuracy } };
-  }
+  // Limit orders don't have an accuracy field
   return request;
 }
 
@@ -327,7 +354,11 @@ export function useTokenSwapQuote({
  */
 export function useTokenSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<TokenSwapQuoteRequest, SwapQuote, UnexpectedError> {
+): UseAsyncTask<
+  TokenSwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
@@ -733,7 +764,7 @@ export function useSupplySwapQuote({
       request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense,
     pause,
     batch: false, // Don't batch with Accurate query
@@ -746,7 +777,7 @@ export function useSupplySwapQuote({
       request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense: false, // Never suspend on Accurate (would cause re-suspend)
     pause: pause || (suspense && !fastResult.data),
     pollInterval: client.context.environment.swapQuoteInterval,
@@ -788,7 +819,11 @@ export function useSupplySwapQuote({
  */
 export function useSupplySwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<SupplySwapQuoteRequest, SwapQuote, UnexpectedError> {
+): UseAsyncTask<
+  SupplySwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
@@ -796,7 +831,7 @@ export function useSupplySwapQuoteAction(
       supplySwapQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map((data) => data.quote),
+      }).map(extractPositionSwapQuote),
     [client, options.currency],
   );
 }
@@ -904,7 +939,7 @@ export function useBorrowSwapQuote({
       request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense,
     pause,
     batch: false, // Don't batch with Accurate query
@@ -917,7 +952,7 @@ export function useBorrowSwapQuote({
       request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense: false, // Never suspend on Accurate (would cause re-suspend)
     pause: pause || (suspense && !fastResult.data),
     pollInterval: client.context.environment.swapQuoteInterval,
@@ -959,7 +994,11 @@ export function useBorrowSwapQuote({
  */
 export function useBorrowSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<BorrowSwapQuoteRequest, SwapQuote, UnexpectedError> {
+): UseAsyncTask<
+  BorrowSwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
@@ -967,7 +1006,7 @@ export function useBorrowSwapQuoteAction(
       borrowSwapQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map((data) => data.quote),
+      }).map(extractPositionSwapQuote),
     [client, options.currency],
   );
 }
@@ -978,23 +1017,7 @@ export type SwapHandlerOptions = {
   cancel: CancelOperation;
 };
 
-// ------------------------------------------------------------
-
-/**
- */
-export type UseSwapSignerRequest = TransactionRequest; // TODO add other types to this union
-
-/**
- */
 export type SwapSignerError = CancelError | SigningError | UnexpectedError;
-
-/**
- */
-export type UseSwapSignerResult = UseAsyncTask<
-  UseSwapSignerRequest,
-  PendingTransaction | Signature,
-  SwapSignerError
->;
 
 // ------------------------------------------------------------
 
@@ -1063,13 +1086,44 @@ function swapPosition(
 
 // ------------------------------------------------------------
 
-/**
- */
 export type UseSupplySwapRequest = Prettify<
   SupplySwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
+ * Orchestrate the supply swap execution plan.
+ *
+ * ```tsx
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [swapSupply, { loading, error }] = useSupplySwap((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await swapSupply({
+ *   market: {
+ *     sellPosition: supplyPosition.id,
+ *     buyReserve: targetReserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *     enableCollateral: true,
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
  */
 export function useSupplySwap(
   handler: PositionSwapHandler,
@@ -1079,7 +1133,7 @@ export function useSupplySwap(
   | SwapSignerError
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
 > {
   const client = useAaveClient();
 
@@ -1112,13 +1166,43 @@ export function useSupplySwap(
 
 // ------------------------------------------------------------
 
-/**
- */
 export type UseBorrowSwapRequest = Prettify<
   BorrowSwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
+ * Orchestrate the borrow swap execution plan.
+ *
+ * ```tsx
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [swapBorrow, { loading, error }] = useBorrowSwap((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await swapBorrow({
+ *   market: {
+ *     debtPosition: userBorrowItem.id,
+ *     buyReserve: targetReserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
  */
 export function useBorrowSwap(
   handler: PositionSwapHandler,
@@ -1128,7 +1212,7 @@ export function useBorrowSwap(
   | SwapSignerError
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
 > {
   const client = useAaveClient();
 
@@ -1262,7 +1346,7 @@ export function useRepayWithSupplyQuote({
       request: injectRepayWithSupplyQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense,
     pause,
     batch: false, // Don't batch with Accurate query
@@ -1278,7 +1362,7 @@ export function useRepayWithSupplyQuote({
       ),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense: false, // Never suspend on Accurate (would cause re-suspend)
     pause: pause || (suspense && !fastResult.data),
     pollInterval: client.context.environment.swapQuoteInterval,
@@ -1320,7 +1404,11 @@ export function useRepayWithSupplyQuote({
  */
 export function useRepayWithSupplyQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<RepayWithSupplyQuoteRequest, SwapQuote, UnexpectedError> {
+): UseAsyncTask<
+  RepayWithSupplyQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
@@ -1328,20 +1416,50 @@ export function useRepayWithSupplyQuoteAction(
       repayWithSupplyQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map((data) => data.quote),
+      }).map(extractPositionSwapQuote),
     [client, options.currency],
   );
 }
 
 // ------------------------------------------------------------
 
-/**
- */
 export type UseRepayWithSupplyRequest = Prettify<
   RepayWithSupplyQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
+ * Orchestrate the repay with supply execution plan.
+ *
+ * ```tsx
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [repayWithSupply, { loading, error }] = useRepayWithSupply((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await repayWithSupply({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyPosition: userBorrowItem.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
  */
 export function useRepayWithSupply(
   handler: PositionSwapHandler,
@@ -1351,7 +1469,7 @@ export function useRepayWithSupply(
   | SwapSignerError
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
 > {
   const client = useAaveClient();
 
@@ -1485,7 +1603,7 @@ export function useWithdrawSwapQuote({
       request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense,
     pause,
     batch: false, // Don't batch with Accurate query
@@ -1498,7 +1616,7 @@ export function useWithdrawSwapQuote({
       request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
       currency,
     },
-    selector: (data) => data.quote,
+    selector: extractPositionSwapQuote,
     suspense: false, // Never suspend on Accurate (would cause re-suspend)
     pause: pause || (suspense && !fastResult.data),
     pollInterval: client.context.environment.swapQuoteInterval,
@@ -1540,7 +1658,11 @@ export function useWithdrawSwapQuote({
  */
 export function useWithdrawSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<WithdrawSwapQuoteRequest, SwapQuote, UnexpectedError> {
+): UseAsyncTask<
+  WithdrawSwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
@@ -1548,20 +1670,50 @@ export function useWithdrawSwapQuoteAction(
       withdrawSwapQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map((data) => data.quote),
+      }).map(extractPositionSwapQuote),
     [client, options.currency],
   );
 }
 
 // ------------------------------------------------------------
 
-/**
- */
 export type UseWithdrawSwapRequest = Prettify<
   WithdrawSwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
+ * Orchestrate the withdraw swap execution plan.
+ *
+ * ```tsx
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [withdrawSwap, { loading, error }] = useWithdrawSwap((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await withdrawSwap({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyToken: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
  */
 export function useWithdrawSwap(
   handler: PositionSwapHandler,
@@ -1571,7 +1723,7 @@ export function useWithdrawSwap(
   | SwapSignerError
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
 > {
   const client = useAaveClient();
 
@@ -1619,7 +1771,7 @@ export type TokenSwapHandler = (
 ) => ResultAsync<PendingTransaction | Signature, SwapSignerError>;
 
 /**
- * Orchestrate the swap execution plan.
+ * Orchestrate the token swap execution plan.
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
@@ -1662,7 +1814,7 @@ export function useTokenSwap(
   SwapReceipt,
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
 > {
   const client = useAaveClient();
 
@@ -1834,13 +1986,17 @@ export type CancelSwapError =
  *   return;
  * }
  *
- * // result.value: SwapCancelled
+ * // result.value: SwapCancelledResult
  * console.log('Swap cancelled:', result.value);
  * ```
  */
 export function useCancelSwap(
   handler: CancelSwapHandler,
-): UseAsyncTask<PrepareSwapCancelRequest, SwapCancelled, CancelSwapError> {
+): UseAsyncTask<
+  PrepareSwapCancelRequest,
+  SwapCancelledResult,
+  CancelSwapError
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
@@ -1858,7 +2014,7 @@ export function useCancelSwap(
                 }),
               )
               .andThen((plan) => {
-                if (plan.__typename === 'SwapCancelled') {
+                if (plan.__typename === 'SwapCancelledResult') {
                   return okAsync(plan);
                 }
 
@@ -1870,7 +2026,7 @@ export function useCancelSwap(
                     .andThen(() => swapStatus(client, { id: request.id }))
                     .andThen((status) => {
                       if (status.__typename === 'SwapCancelled') {
-                        return okAsync(status);
+                        return okAsync(toSwapCancelledResult(status));
                       }
                       return new CannotCancelSwapError(
                         'Failed to cancel swap',
@@ -1880,7 +2036,7 @@ export function useCancelSwap(
               });
 
           case 'SwapCancelled':
-            return okAsync(status);
+            return okAsync(toSwapCancelledResult(status));
 
           case 'SwapExpired':
             return new CannotCancelSwapError(

@@ -574,6 +574,8 @@ export const TokenSwapActivityFragment = graphql(
       ...SwapAmount
     }
     explorerUrl
+    orderClass
+    kind
   }`,
   [ChainFragment, SwapAmountFragment],
 );
@@ -596,6 +598,8 @@ export const SupplySwapActivityFragment = graphql(
       ...SwapAmount
     }
     explorerUrl
+    orderClass
+    kind
   }`,
   [ChainFragment, SwapAmountFragment],
 );
@@ -618,6 +622,8 @@ export const BorrowSwapActivityFragment = graphql(
       ...SwapAmount
     }
     explorerUrl
+    orderClass
+    kind
   }`,
   [ChainFragment, SwapAmountFragment],
 );
@@ -640,6 +646,8 @@ export const RepayWithSupplyActivityFragment = graphql(
       ...SwapAmount
     }
     explorerUrl
+    orderClass
+    kind
   }`,
   [ChainFragment, SwapAmountFragment],
 );
@@ -664,6 +672,8 @@ export const WithdrawSwapActivityFragment = graphql(
       ...SwapAmount
     }
     explorerUrl
+    orderClass
+    kind
   }`,
   [ChainFragment, SwapAmountFragment],
 );

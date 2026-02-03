@@ -17,9 +17,9 @@ import {
   type RepayWithSupplyQuoteRequest,
   SupplySwapQuoteQuery,
   type SupplySwapQuoteRequest,
-  SwapKind,
   SwapMutation,
   SwapStatusQuery,
+  TokenSwapKind,
   TokenSwapQuoteQuery,
   type TokenSwapQuoteRequest,
   WithdrawSwapQuoteQuery,
@@ -35,6 +35,7 @@ import {
   makeSwapByIntentWithApprovalRequired,
   makeSwapByTransaction,
   makeSwapCancelled,
+  makeSwapCancelledResult,
   makeSwapOpen,
   makeSwapQuote,
   makeSwapReceipt,
@@ -310,7 +311,7 @@ describe('Given the swap hooks', () => {
           api.mutation(CancelSwapMutation, () =>
             msw.HttpResponse.json({
               data: {
-                value: makeSwapCancelled(),
+                value: makeSwapCancelledResult(),
               },
             }),
           ),
@@ -748,9 +749,7 @@ describe('Given the swap hooks', () => {
           const accuracy =
             'market' in variables.request
               ? variables.request.market?.accuracy
-              : 'limit' in variables.request
-                ? variables.request.limit?.accuracy
-                : undefined;
+              : undefined;
 
           if (accuracy === QuoteAccuracy.Fast) {
             return msw.HttpResponse.json({
@@ -784,51 +783,24 @@ describe('Given the swap hooks', () => {
       );
     });
 
-    describe.each([
-      {
-        description: 'Market order',
-        request: {
-          market: {
-            chainId: chainId(1),
-            buy: {
-              erc20: evmAddress('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'),
-            },
-            sell: {
-              erc20: evmAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
-            },
-            amount: bigDecimal(1000),
-            kind: SwapKind.Sell,
-            user: evmAddress(walletClient.account.address),
+    // Note: Only testing Market orders for Fast/Accurate quote behavior
+    // Limit orders no longer have an accuracy field in the schema
+    describe('And a token swap quote request', () => {
+      const request: TokenSwapQuoteRequest = {
+        market: {
+          chainId: chainId(1),
+          buy: {
+            erc20: evmAddress('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'),
           },
-        },
-      },
-      {
-        description: 'Limit order',
-        request: {
-          limit: {
-            chainId: chainId(1),
-            buy: {
-              erc20: {
-                address: evmAddress(
-                  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-                ),
-                value: bigDecimal(990), // Buy 990 USDC
-              },
-            },
-            sell: {
-              erc20: {
-                address: evmAddress(
-                  '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-                ),
-                value: bigDecimal(1000), // Sell 1000 WETH
-              },
-            },
-            kind: SwapKind.Sell,
-            user: evmAddress(walletClient.account.address),
+          sell: {
+            erc20: evmAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
           },
+          amount: bigDecimal(1000),
+          kind: TokenSwapKind.Sell,
+          user: evmAddress(walletClient.account.address),
         },
-      },
-    ])('And a $description request', ({ request }) => {
+      };
+
       beforeEach(() => {
         vi.useFakeTimers();
       });
@@ -1256,8 +1228,8 @@ describe('Given the swap hooks', () => {
     describe('And a withdraw swap quote request', () => {
       const request: WithdrawSwapQuoteRequest = {
         market: {
-          position: makeUserSupplyItemId(),
-          buyReserve: makeReserveId(),
+          sellPosition: makeUserSupplyItemId(),
+          buyToken: { native: true },
           amount: bigDecimal(1000),
           user: evmAddress(walletClient.account.address),
         },
