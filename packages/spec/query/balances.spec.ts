@@ -92,8 +92,7 @@ describe('Querying User Balances on Aave V4', () => {
     });
 
     describe('When the user queries balances by swappable tokens on a specific chainId', () => {
-      // TODO: this query needs to be fixed as it can take even 20 seconds to complete
-      it.skip('Then the balances of assets that can be swapped are returned', async () => {
+      it('Then the balances of assets that can be swapped are returned', async () => {
         const balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {

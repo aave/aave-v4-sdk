@@ -29,32 +29,5 @@ describe('Querying Position Managers on Aave V4', () => {
         // TODO: add assertions when we have some position manager in stage with inactive status
       });
     });
-
-    // TODO: not enough positions managers to perform pagination
-    describe.skip('When fetching position managers with pagination', () => {
-      it('Then it should support pagination with cursor when there are more results', async () => {
-        // First page
-        const firstPage = await spokePositionManagers(client, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-          pageSize: PageSize.Ten,
-        });
-
-        assertOk(firstPage);
-        expect(firstPage.value.items.length).toEqual(10);
-
-        const secondPage = await spokePositionManagers(client, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-          pageSize: PageSize.Ten,
-          cursor: firstPage.value.pageInfo.next,
-        });
-
-        assertOk(secondPage);
-        expect(secondPage.value.items.length).toBeGreaterThan(0);
-
-        expect(firstPage.value.items[0]!.address).not.toBe(
-          secondPage.value.items[0]!.address,
-        );
-      });
-    });
   });
 });
