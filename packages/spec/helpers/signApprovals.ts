@@ -1,9 +1,9 @@
 import {
   okAsync,
+  type PositionSwapByIntentApprovalsRequired,
   type PreparePositionSwapRequest,
   type ResultAsync,
   SigningError,
-  type SupplySwapQuoteResult,
 } from '@aave/client';
 import { signTypedDataWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
@@ -11,9 +11,9 @@ import type { Account, Chain, Transport, WalletClient } from 'viem';
 export function signApprovalsWith(
   wallet: WalletClient<Transport, Chain, Account>,
 ): (
-  result: SupplySwapQuoteResult,
+  result: PositionSwapByIntentApprovalsRequired,
 ) => ResultAsync<PreparePositionSwapRequest, SigningError> {
-  return ({ approvals, quote }: SupplySwapQuoteResult) => {
+  return ({ approvals, quote }: PositionSwapByIntentApprovalsRequired) => {
     let result: ResultAsync<PreparePositionSwapRequest, SigningError> = okAsync(
       {
         quoteId: quote.quoteId,

@@ -1,6 +1,5 @@
 import {
   assertOk,
-  bigDecimal,
   evmAddress,
   type Reserve,
   type UserSupplyItem,
