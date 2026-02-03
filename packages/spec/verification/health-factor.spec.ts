@@ -3,19 +3,19 @@ import {
   type BigDecimal,
   bigDecimal,
   evmAddress,
+  nonNullable,
   type Reserve,
 } from '@aave/client';
 import {
   borrow,
   repay,
-  userSummary,
+  userPosition,
   userSupplies,
   withdraw,
 } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
@@ -51,14 +51,14 @@ describe('Health Factor Scenarios on Aave V4', () => {
       });
 
       it('Then the health factor should be null', async () => {
-        const summary = await userSummary(client, {
-          user: evmAddress(user.account.address),
-          filter: {
-            chainIds: [ETHEREUM_FORK_ID],
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
           },
-        });
-        assertOk(summary);
-        expect(summary.value.lowestHealthFactor).toBeNull();
+        }).map(nonNullable);
+        assertOk(position);
+        expect(position.value.healthFactor.current).toBeNull();
       });
     });
 
@@ -103,29 +103,31 @@ describe('Health Factor Scenarios on Aave V4', () => {
 
       describe('When the user checks the health factor', () => {
         it('Then the health factor should be a number greater than 1', async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          expect(summary.value.lowestHealthFactor).toBeBigDecimalGreaterThan(1);
+          }).map(nonNullable);
+          assertOk(position);
+          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
+            1,
+          );
         });
       });
 
       describe('When the user supplies more collateral', () => {
-        let HFBeforeSupply: BigDecimal;
+        let HFBeforeSupply: BigDecimal | null;
 
         beforeAll(async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          HFBeforeSupply = summary.value.lowestHealthFactor!;
+          }).map(nonNullable);
+          assertOk(position);
+          HFBeforeSupply = position.value.healthFactor.current;
 
           const amountToSupply = usedReserves.supplyReserve.supplyCap
             .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
@@ -152,31 +154,31 @@ describe('Health Factor Scenarios on Aave V4', () => {
         });
 
         it('Then the health factor should be greater than before supplying more collateral', async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
           });
-          assertOk(summary);
-          expect(summary.value.lowestHealthFactor).toBeBigDecimalGreaterThan(
-            HFBeforeSupply,
-          );
+          assertOk(position);
+          expect(
+            position.value!.healthFactor.current,
+          ).toBeBigDecimalGreaterThan(HFBeforeSupply);
         });
       });
 
       describe('When the user repays partially the borrow position', () => {
-        let HFBeforeRepay: BigDecimal;
+        let HFBeforeRepay: BigDecimal | null;
 
         beforeAll(async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          HFBeforeRepay = summary.value.lowestHealthFactor!;
+          }).map(nonNullable);
+          assertOk(position);
+          HFBeforeRepay = position.value.healthFactor.current;
 
           const setup = await fundErc20Address(
             evmAddress(user.account.address),
@@ -213,31 +215,31 @@ describe('Health Factor Scenarios on Aave V4', () => {
         });
 
         it('Then the health factor should be greater than before repaying partially', async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          expect(summary.value.lowestHealthFactor).toBeBigDecimalGreaterThan(
+          }).map(nonNullable);
+          assertOk(position);
+          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
             HFBeforeRepay,
           );
         });
       });
 
       describe('When the user borrows more money', () => {
-        let HFBeforeBorrow: BigDecimal;
+        let HFBeforeBorrow: BigDecimal | null;
 
         beforeAll(async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          HFBeforeBorrow = summary.value.lowestHealthFactor!;
+          }).map(nonNullable);
+          assertOk(position);
+          HFBeforeBorrow = position.value.healthFactor.current;
 
           const setup = await borrow(client, {
             sender: evmAddress(user.account.address),
@@ -258,31 +260,31 @@ describe('Health Factor Scenarios on Aave V4', () => {
         });
 
         it('Then the health factor should be less than before borrowing more money', async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          expect(HFBeforeBorrow).toBeBigDecimalGreaterThan(
-            summary.value.lowestHealthFactor,
+          }).map(nonNullable);
+          assertOk(position);
+          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
+            HFBeforeBorrow,
           );
         });
       });
 
       describe('When the user withdraws collateral', () => {
-        let HFBeforeWithdraw: BigDecimal;
+        let HFBeforeWithdraw: BigDecimal | null;
 
         beforeAll(async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          HFBeforeWithdraw = summary.value.lowestHealthFactor!;
+          }).map(nonNullable);
+          assertOk(position);
+          HFBeforeWithdraw = position.value.healthFactor.current;
 
           const supplies = await userSupplies(client, {
             query: {
@@ -315,15 +317,15 @@ describe('Health Factor Scenarios on Aave V4', () => {
         }, 60_000);
 
         it('Then the health factor should be less than before withdrawing collateral', async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          expect(HFBeforeWithdraw).toBeBigDecimalGreaterThan(
-            summary.value.lowestHealthFactor,
+          }).map(nonNullable);
+          assertOk(position);
+          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
+            HFBeforeWithdraw,
           );
         });
       });
@@ -362,14 +364,14 @@ describe('Health Factor Scenarios on Aave V4', () => {
         });
 
         it('Then the health factor should be null', async () => {
-          const summary = await userSummary(client, {
-            user: evmAddress(user.account.address),
-            filter: {
-              chainIds: [ETHEREUM_FORK_ID],
+          const position = await userPosition(client, {
+            userSpoke: {
+              user: evmAddress(user.account.address),
+              spoke: ETHEREUM_SPOKE_CORE_ID,
             },
-          });
-          assertOk(summary);
-          expect(summary.value.lowestHealthFactor).toBeNull();
+          }).map(nonNullable);
+          assertOk(position);
+          expect(position.value.healthFactor.current).toBeNull();
         });
       });
     });
