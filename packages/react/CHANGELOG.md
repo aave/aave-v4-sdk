@@ -1,5 +1,24 @@
 # @aave/react
 
+## 4.0.0-next.34
+
+### Patch Changes
+
+- f4c8623: **fix:** correct typo `SpokePositionManger` to `SpokePositionManager` in GraphQL schema and cache
+- 64b6596: **feat:** add `SwapOperation` union to `SwapStatus` entries. Support `InsufficientLiquidityError`. Add `orderClass` and `kind` to `SwapStatus` and ActivityItem` union entries.
+- ece7453: **fix:** extends cache refresh mechanism to account for past queries that left a presence in the cache but are no longer watched.
+- c6fc0f7: **chore:** updates environments config
+- dcf74e8: **fix:** consistent `CancelError` and `UnexpectedError` handling in thirdweb and privy implementations
+- 34b8692: **feat:** dual-quote strategy in `useSupplySwap`, `useBorrowSwap`, `useRepayWithSupply`, and `useWithdrawSwap` hooks.
+- Updated dependencies [f4c8623]
+- Updated dependencies [64b6596]
+- Updated dependencies [ece7453]
+- Updated dependencies [c6fc0f7]
+- Updated dependencies [dcf74e8]
+  - @aave/graphql@1.0.0-next.27
+  - @aave/client@4.0.0-next.33
+  - @aave/core@1.0.0-next.14
+
 ## 4.0.0-next.32
 
 ### Patch Changes
