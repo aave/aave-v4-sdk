@@ -10,18 +10,14 @@ import {
   type TypedDocumentNode,
   type Client as UrqlClient,
 } from '@urql/core';
-import { pipe, tap } from 'wonka';
+import { map, pipe } from 'wonka';
 import { batchFetchExchange } from './batching';
 import type { Context } from './context';
 import { UnexpectedError } from './errors';
 import { FragmentResolver } from './fragments';
 import { Logger, LogLevel } from './logger';
 import type { StandardData } from './types';
-import {
-  extractOperationName,
-  isActiveQueryOperation,
-  isTeardownOperation,
-} from './utils';
+import { extractOperationName } from './utils';
 
 /**
  * @internal
@@ -37,13 +33,20 @@ export type QueryOptions = {
   batch?: boolean;
 };
 
+const skipTracking = Symbol('skipTracking');
+
 export class GqlClient {
   /**
    * @internal
    */
   public readonly urql: UrqlClient;
 
-  private readonly activeQueries = new Map<number, Operation>();
+  private readonly queryRegistry = new Map<
+    number,
+    { operation: Operation; watching: number }
+  >();
+
+  private readonly staleQueries = new Set<number>();
 
   private readonly logger: Logger;
 
@@ -115,38 +118,77 @@ export class GqlClient {
     return this.resultFrom(this.urql.mutation(document, variables));
   }
 
+  /**
+   * Refresh active queries matching the predicate, or mark the query as stale
+   * if no active queries match (so it refreshes when next activated).
+   *
+   * @internal
+   */
+  async refreshQueryWhere<TValue, TVariables extends AnyVariables>(
+    document: TypedDocumentNode<StandardData<TValue>, TVariables>,
+    predicate: (
+      variables: TVariables,
+      data: TValue,
+    ) => boolean | Promise<boolean>,
+  ): Promise<void> {
+    await this.refreshWhere(async (op) => {
+      if (op.query === document) {
+        const result = this.urql.readQuery(
+          document,
+          op.variables as TVariables,
+          { requestPolicy: 'cache-only' },
+        );
+
+        if (!result?.data?.value) {
+          return false;
+        }
+
+        return predicate(
+          op.variables as TVariables,
+          result.data.value as TValue,
+        );
+      }
+      return false;
+    });
+  }
+
   protected async refreshWhere(
     predicate: (op: Operation) => boolean | Promise<boolean>,
   ): Promise<void> {
-    const allOps = Array.from(this.activeQueries.values());
     const predicateResults = await Promise.all(
-      allOps.map(async (op) => ({
-        op,
-        matches: await predicate(op),
+      Array.from(this.queryRegistry.values()).map(async (entry) => ({
+        entry,
+        matches: await predicate(entry.operation),
       })),
     );
 
-    const ops = predicateResults
-      .filter(({ matches }) => matches)
-      .map(({ op }) => op);
-    this.logger.debug(`Refreshing ${ops.length} matching queries`);
-    for (const op of ops) {
-      this.urql.reexecuteOperation(
-        makeOperation(op.kind, op, {
-          ...op.context,
-          requestPolicy: 'network-only',
-          batch: false, // never batch, run ASAP!
-        }),
-      );
+    const matchingEntries = predicateResults.filter(({ matches }) => matches);
+
+    for (const { entry } of matchingEntries) {
+      if (entry.watching > 0) {
+        // Active query: reexecute immediately
+        this.urql.reexecuteOperation(
+          makeOperation(entry.operation.kind, entry.operation, {
+            ...entry.operation.context,
+            requestPolicy: 'network-only',
+            batch: false, // never batch, run ASAP!
+            [skipTracking]: true,
+          }),
+        );
+      } else {
+        // Flag as stale for next activation
+        this.staleQueries.add(entry.operation.key);
+      }
     }
   }
 
   private exchanges(): Exchange[] {
-    const exchanges: Exchange[] = [this.activeQueryRegistry()];
+    const exchanges: Exchange[] = [this.queryTrackingExchange()];
 
     if (this.context.cache) {
       exchanges.push(this.context.cache);
     }
+
     exchanges.push(
       batchFetchExchange({
         batchInterval: 1,
@@ -166,31 +208,61 @@ export class GqlClient {
     };
   }
 
-  private registerQuery(op: Operation): void {
-    this.activeQueries.set(op.key, op);
-    this.logger.debug(
-      `Registered query: ${extractOperationName(op)} (key: ${op.key})`,
-    );
-  }
+  private addQueryReference(op: Operation): void {
+    const existing = this.queryRegistry.get(op.key);
 
-  private unregisterQuery(key: number): void {
-    const op = this.activeQueries.get(key);
-    if (op) {
-      this.activeQueries.delete(key);
+    if (existing) {
+      existing.watching++;
       this.logger.debug(
-        `Unregistered query: ${extractOperationName(op)} (key: ${key})`,
+        `Added query reference: ${extractOperationName(op)} (key: ${op.key}, count: ${existing.watching})`,
+      );
+    } else {
+      this.queryRegistry.set(op.key, { operation: op, watching: 1 });
+      this.logger.debug(
+        `Added first query reference: ${extractOperationName(op)} (key: ${op.key}, count: 1)`,
       );
     }
   }
 
-  private activeQueryRegistry(): Exchange {
+  private releaseQueryReference(key: number): void {
+    const entry = this.queryRegistry.get(key);
+    if (entry && entry.watching > 0) {
+      entry.watching--;
+      this.logger.debug(
+        `Released query reference: ${extractOperationName(entry.operation)} (key: ${key}, count: ${entry.watching})`,
+      );
+    }
+  }
+
+  private queryTrackingExchange(): Exchange {
     return ({ forward }) =>
       (ops$) =>
         pipe(
           ops$,
-          tap((op: Operation) => {
-            if (isActiveQueryOperation(op)) this.registerQuery(op);
-            else if (isTeardownOperation(op)) this.unregisterQuery(op.key);
+          map((op: Operation) => {
+            switch (op.kind) {
+              case 'query':
+                if (op.context.pause || skipTracking in op.context) {
+                  break;
+                }
+
+                this.addQueryReference(op);
+
+                if (this.staleQueries.has(op.key)) {
+                  this.staleQueries.delete(op.key);
+                  return makeOperation(op.kind, op, {
+                    ...op.context,
+                    requestPolicy: 'network-only',
+                  });
+                }
+                break;
+
+              case 'teardown':
+                this.releaseQueryReference(op.key);
+                break;
+            }
+
+            return op;
           }),
           forward,
         );
