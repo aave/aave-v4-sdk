@@ -26,6 +26,7 @@ import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
+// TODO: Enable when contracts are deployed
 describe('Withdraw Position swapping on Aave V4', () => {
   describe('Given a user with a supply position', () => {
     let supplyPosition: UserSupplyItem;
