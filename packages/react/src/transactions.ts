@@ -36,7 +36,6 @@ import {
   type InsufficientBalanceError,
   isChainIdsVariant,
   isHubInputVariant,
-  isSpokeInputVariant,
   isTokensVariant,
   type LiquidatePositionRequest,
   type PermitTypedData,
@@ -51,13 +50,11 @@ import {
   type SetUserSuppliesAsCollateralRequest,
   type SpokeInput,
   SpokePositionManagersQuery,
-  SpokesQuery,
   type SupplyRequest,
   type TransactionRequest,
   type UpdateUserPositionConditionsRequest,
   UserPositionQuery,
   UserPositionsQuery,
-  UserSummaryQuery,
   type WithdrawRequest,
 } from '@aave/graphql';
 import {
@@ -108,7 +105,7 @@ function refreshQueriesForReserveChange(
     Promise.all([
       refreshUserPositions(client, request.sender, spoke),
       refreshUserSummary(client, request.sender, spoke),
-      refreshReserves(client, request.reserve),
+      refreshReserves(client, [request.reserve]),
       refreshSpokes(client, spoke),
       refreshUserBalances(client, request.sender),
       refreshUserSupplies(client, request.sender),
@@ -844,82 +841,32 @@ export function useSetUserSuppliesAsCollateral(
         .andThen(client.waitForTransaction)
         .andTee(() =>
           Promise.all([
-            // update user positions
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(
-                UserPositionsQuery,
-                (variables, data) =>
-                  variables.request.user === request.sender &&
-                  data.some(
-                    (position) =>
-                      position.spoke.chain.chainId === chainId &&
-                      position.spoke.address === spoke,
-                  ),
-              ),
-            ),
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(
-                UserPositionQuery,
-                (_, data) =>
-                  data?.spoke.chain.chainId === chainId &&
-                  data?.spoke.address === spoke &&
-                  data.user === request.sender,
-              ),
-            ),
+            // update user supplies
+            refreshUserSupplies(client, request.sender),
 
-            // update user summary
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(UserSummaryQuery, (variables) =>
-                variables.request.user === request.sender &&
-                isSpokeInputVariant(variables.request.filter)
-                  ? variables.request.filter.spoke.chainId === chainId &&
-                    variables.request.filter.spoke.address === spoke
-                  : isChainIdsVariant(variables.request.filter)
-                    ? variables.request.filter.chainIds.some(
-                        (id) => id === chainId,
-                      )
-                    : false,
-              ),
-            ),
+            ...reserveDetails.flatMap(({ chainId, spoke }) => [
+              // update user positions
+              refreshUserPositions(client, request.sender, {
+                chainId,
+                address: spoke,
+              }),
+
+              // update user summary
+              refreshUserSummary(client, request.sender, {
+                chainId,
+                address: spoke,
+              }),
+
+              // update spokes
+              refreshSpokes(client, { chainId, address: spoke }),
+            ]),
 
             // update reserves
-            client.refreshQueryWhere(ReservesQuery, (_, data) =>
-              data.some((reserve) => reserveIds.includes(reserve.id)),
-            ),
-
-            // update spokes
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(SpokesQuery, (_, data) =>
-                data.some(
-                  (item) =>
-                    item.chain.chainId === chainId && item.address === spoke,
-                ),
-              ),
-            ),
+            refreshReserves(client, reserveIds),
 
             // update hubs
             ...reserveDetails.map(({ chainId }) =>
-              client.refreshQueryWhere(
-                HubsQuery,
-                (variables) =>
-                  isChainIdsVariant(variables.request.query)
-                    ? variables.request.query.chainIds.some(
-                        (id) => id === chainId,
-                      )
-                    : isTokensVariant(variables.request.query)
-                      ? variables.request.query.tokens.some(
-                          (token) => token.chainId === chainId,
-                        )
-                      : true, // assetIds variant - refresh all
-              ),
-            ),
-            ...reserveDetails.map(({ chainId }) =>
-              client.refreshQueryWhere(HubQuery, (variables) =>
-                isHubInputVariant(variables.request.query)
-                  ? variables.request.query.hubInput.chainId === chainId
-                  : decodeHubId(variables.request.query.hubId).chainId ===
-                    chainId,
-              ),
+              refreshHubs(client, chainId),
             ),
           ]),
         );
