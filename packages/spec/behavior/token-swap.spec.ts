@@ -3,7 +3,7 @@ import {
   bigDecimal,
   evmAddress,
   invariant,
-  SwapKind,
+  TokenSwapKind,
 } from '@aave/client';
 import { prepareTokenSwap, swap, tokenSwapQuote } from '@aave/client/actions';
 import {
@@ -48,7 +48,7 @@ describe('Token swapping on Aave V4', () => {
             sell: { erc20: ETHEREUM_USDC_ADDRESS },
             buy: { erc20: ETHEREUM_WETH_ADDRESS },
             chainId: ETHEREUM_FORK_ID,
-            kind: SwapKind.Sell,
+            kind: TokenSwapKind.Sell,
             receiver: evmAddress(userDidSwap.account.address),
             user: evmAddress(userDidSwap.account.address),
           },
@@ -108,7 +108,7 @@ describe('Token swapping on Aave V4', () => {
           sell: { erc20: ETHEREUM_USDC_ADDRESS },
           buy: { erc20: ETHEREUM_WETH_ADDRESS },
           chainId: ETHEREUM_FORK_ID,
-          kind: SwapKind.Sell,
+          kind: TokenSwapKind.Sell,
           receiver: evmAddress(newUser.account.address),
           user: evmAddress(newUser.account.address),
         },

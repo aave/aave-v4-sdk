@@ -31,10 +31,11 @@ import type {
   RepayWithSupplyKind,
   ReservesRequestFilter,
   SupplySwapKind,
-  SwapKind,
+  SwapOrderClass,
   SwapStatusFilter,
   TimeWindow,
   TokenCategory,
+  TokenSwapKind,
   UserPositionConditionsUpdate,
   WithdrawSwapKind,
 } from './enums';
@@ -99,12 +100,13 @@ export const graphql = initGraphQLTada<{
     String: string;
     SupplySwapKind: SupplySwapKind;
     SwapId: SwapId;
-    SwapKind: SwapKind;
+    SwapOrderClass: SwapOrderClass;
     SwapQuoteId: SwapQuoteId;
     SwapStatusFilter: SwapStatusFilter;
     TimeWindow: TimeWindow;
     TokenCategory: TokenCategory;
     TokenInfoId: TokenInfoId;
+    TokenSwapKind: TokenSwapKind;
     TxHash: TxHash;
     UserBalanceId: UserBalanceId;
     UserBorrowItemId: UserBorrowItemId;

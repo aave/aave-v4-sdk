@@ -6,7 +6,7 @@ import {
   evmAddress,
   chainId as toChainId,
 } from '@aave/types';
-import { QuoteAccuracy } from './enums';
+import { QuoteAccuracy, SwapOrderClass, TokenSwapKind } from './enums';
 import type {
   Chain,
   DecimalNumber,
@@ -24,12 +24,14 @@ import type {
   SwapByIntentWithApprovalRequired,
   SwapByTransaction,
   SwapCancelled,
+  SwapCancelledResult,
   SwapOpen,
   SwapQuote,
   SwapReceipt,
   SwapTransactionRequest,
   SwapTypedData,
   TokenInfo,
+  TokenSwap,
   TransactionRequest,
 } from './fragments';
 import {
@@ -308,6 +310,19 @@ export function makeSwapReceipt(): SwapReceipt {
 /**
  * @internal
  */
+export function makeTokenSwap(): TokenSwap {
+  return {
+    __typename: 'TokenSwap',
+    sold: makeErc20Amount(1000, 'WETH'),
+    bought: makeErc20Amount(1000, 'USDC'),
+    kind: TokenSwapKind.Sell,
+    orderClass: SwapOrderClass.Market,
+  };
+}
+
+/**
+ * @internal
+ */
 export function makeSwapOpen(): SwapOpen {
   return {
     __typename: 'SwapOpen',
@@ -315,8 +330,7 @@ export function makeSwapOpen(): SwapOpen {
     createdAt: new Date(),
     deadline: new Date(Date.now() + 3600_000), // 1 hour from now
     explorerUrl: 'https://example.com/explorer.json',
-    desiredSell: makeErc20Amount(1000, 'WETH'),
-    desiredBuy: makeErc20Amount(1000, 'USDC'),
+    operation: makeTokenSwap(),
   };
 }
 
@@ -326,6 +340,20 @@ export function makeSwapOpen(): SwapOpen {
 export function makeSwapCancelled(): SwapCancelled {
   return {
     __typename: 'SwapCancelled',
+    swapId: randomBase64String() as SwapId,
+    createdAt: new Date(),
+    cancelledAt: new Date(),
+    explorerUrl: 'https://example.com/explorer.json',
+    operation: makeTokenSwap(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapCancelledResult(): SwapCancelledResult {
+  return {
+    __typename: 'SwapCancelledResult',
     swapId: randomBase64String() as SwapId,
     createdAt: new Date(),
     cancelledAt: new Date(),

@@ -120,14 +120,6 @@ export enum ReservesRequestFilter {
 }
 
 /**
- * The swap kind for swapping tokens.
- */
-export enum SwapKind {
-  Buy = 'BUY',
-  Sell = 'SELL',
-}
-
-/**
  * The borrow swap kind for debt swaps.
  */
 export enum BorrowSwapKind {
@@ -198,4 +190,32 @@ export enum QuoteAccuracy {
    * Verified price quality - more accurate price, potentially slower response
    */
   Accurate = 'ACCURATE',
+}
+
+/**
+ * Order class indicating market or limit order type.
+ */
+export enum SwapOrderClass {
+  /**
+   * Market order - executed immediately at current market price
+   */
+  Market = 'MARKET',
+  /**
+   * Limit order - executed at specified price or better
+   */
+  Limit = 'LIMIT',
+}
+
+/**
+ * The swap kind for token swaps.
+ */
+export enum TokenSwapKind {
+  /**
+   * Buy a specific amount of the target token
+   */
+  Buy = 'BUY',
+  /**
+   * Sell a specific amount of the source token
+   */
+  Sell = 'SELL',
 }

@@ -671,6 +671,59 @@
       },
       {
         "kind": "OBJECT",
+        "name": "BorrowSwap",
+        "fields": [
+          {
+            "name": "sellPosition",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PositionAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "buyPosition",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PositionAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "BorrowSwapActivity",
         "fields": [
           {
@@ -763,6 +816,28 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -774,6 +849,10 @@
           {
             "kind": "OBJECT",
             "name": "PositionSwapByIntentApprovalsRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientLiquidityError"
           }
         ]
       },
@@ -787,7 +866,7 @@
           },
           {
             "kind": "OBJECT",
-            "name": "SwapCancelled"
+            "name": "SwapCancelledResult"
           }
         ]
       },
@@ -2141,6 +2220,24 @@
                 "kind": "OBJECT",
                 "name": "DecimalNumber",
                 "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InsufficientLiquidityError",
+        "fields": [
+          {
+            "name": "reason",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -4789,6 +4886,59 @@
       },
       {
         "kind": "OBJECT",
+        "name": "RepayWithSupply",
+        "fields": [
+          {
+            "name": "sellPosition",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PositionAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "buyPosition",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PositionAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "RepayWithSupplyActivity",
         "fields": [
           {
@@ -4881,6 +5031,28 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -4892,6 +5064,10 @@
           {
             "kind": "OBJECT",
             "name": "PositionSwapByIntentApprovalsRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientLiquidityError"
           }
         ]
       },
@@ -5641,6 +5817,59 @@
       },
       {
         "kind": "OBJECT",
+        "name": "SupplySwap",
+        "fields": [
+          {
+            "name": "sellPosition",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PositionAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "buyPosition",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PositionAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "SupplySwapActivity",
         "fields": [
           {
@@ -5733,6 +5962,28 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -5744,6 +5995,10 @@
           {
             "kind": "OBJECT",
             "name": "PositionSwapByIntentApprovalsRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientLiquidityError"
           }
         ]
       },
@@ -5896,6 +6151,66 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "operation",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapOperation",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SwapCancelledResult",
+        "fields": [
+          {
+            "name": "swapId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "createdAt",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "cancelledAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "explorerUrl",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -5965,6 +6280,18 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "operation",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapOperation",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -5991,54 +6318,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "desiredSell",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "desiredBuy",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "sold",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "bought",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
-                "ofType": null
               }
             },
             "args": []
@@ -6081,6 +6360,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "operation",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapOperation",
+                "ofType": null
+              }
             },
             "args": []
           }
@@ -6136,24 +6427,12 @@
             "args": []
           },
           {
-            "name": "desiredSell",
+            "name": "operation",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "SwapAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "desiredBuy",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "name": "SwapOperation",
                 "ofType": null
               }
             },
@@ -6161,6 +6440,32 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "SwapOperation",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "SupplySwap"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "BorrowSwap"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "RepayWithSupply"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "WithdrawSwap"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "TokenSwap"
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -6206,6 +6511,18 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "operation",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "SwapOperation",
+                "ofType": null
               }
             },
             "args": []
@@ -6633,6 +6950,59 @@
       },
       {
         "kind": "OBJECT",
+        "name": "TokenSwap",
+        "fields": [
+          {
+            "name": "sold",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "TokenAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "bought",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "TokenAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "TokenSwapActivity",
         "fields": [
           {
@@ -6725,6 +7095,28 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -6744,6 +7136,10 @@
           {
             "kind": "OBJECT",
             "name": "SwapByTransaction"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientLiquidityError"
           }
         ]
       },
@@ -8246,6 +8642,59 @@
       },
       {
         "kind": "OBJECT",
+        "name": "WithdrawSwap",
+        "fields": [
+          {
+            "name": "sellPosition",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PositionAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "buyToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "TokenAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "WithdrawSwapActivity",
         "fields": [
           {
@@ -8338,6 +8787,28 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "orderClass",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -8349,6 +8820,10 @@
           {
             "kind": "OBJECT",
             "name": "PositionSwapByIntentApprovalsRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientLiquidityError"
           }
         ]
       },
