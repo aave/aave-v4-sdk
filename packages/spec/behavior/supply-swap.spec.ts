@@ -2,6 +2,7 @@ import {
   assertOk,
   evmAddress,
   type Reserve,
+  type SwapReceipt,
   type UserSupplyItem,
 } from '@aave/client';
 import {
@@ -17,10 +18,11 @@ import {
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client/testing';
 import { signTypedDataWith } from '@aave/client/viem';
-import { beforeAll, describe, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToSupply } from '../helpers/reserves';
 import { signApprovalsWith } from '../helpers/signApprovals';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
+import { waitForSwap } from '../helpers/swaps';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -85,7 +87,9 @@ describe('Supply Position swapping on Aave V4', () => {
         }
       });
 
-      it('Then the swap should succeed and the position should be updated', async () => {
+      it('Then the swap should succeed and the position should be updated', async ({
+        annotate,
+      }) => {
         const result = await supplySwapQuote(client, {
           market: {
             sellPosition: supplyPosition.id,
@@ -93,7 +97,7 @@ describe('Supply Position swapping on Aave V4', () => {
             amount: supplyPosition.principal.amount.value.div(2),
             user: evmAddress(user.account.address),
             enableCollateral: false,
-            // selectedSlippage: bigDecimal('50'),
+            // selectedSlippage: bigDecimal('50'), // TODO: Add slippage when fixed the bug
           },
         })
           .andThen(signApprovalsWith(user))
@@ -104,8 +108,12 @@ describe('Supply Position swapping on Aave V4', () => {
             ),
           );
         assertOk(result);
-        // TODO: Create a helper function to wait until the swap is complete
-        // After that check the userSupplies to see if the new position is created
+        const orderReceipt = result.value as SwapReceipt;
+        annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
+        const swapStatus = await waitForSwap(orderReceipt.id, 2 * 60 * 1000); // 3 minutes
+
+        expect(swapStatus.__typename).toEqual('SwapFulfilled');
+        // TODO: Add assertions for the new supply position
       });
     });
 

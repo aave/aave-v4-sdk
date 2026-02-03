@@ -2,6 +2,7 @@ import {
   assertOk,
   evmAddress,
   type Reserve,
+  type SwapReceipt,
   type UserBorrowItem,
 } from '@aave/client';
 import {
@@ -16,17 +17,17 @@ import {
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDT_ADDRESS,
 } from '@aave/client/testing';
 import { signTypedDataWith } from '@aave/client/viem';
-import { beforeAll, describe, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToBorrow } from '../helpers/reserves';
 import { signApprovalsWith } from '../helpers/signApprovals';
 import {
   borrowFromRandomReserve,
   findReserveAndSupply,
 } from '../helpers/supplyBorrow';
-import { assertSingleElementArray } from '../test-utils';
+import { waitForSwap } from '../helpers/swaps';
+import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
@@ -71,20 +72,42 @@ describe('Borrow Position swapping on Aave V4', () => {
         beforeAll(async () => {
           const setup = await findReservesToBorrow(client, user, {
             spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_USDT_ADDRESS,
           });
           assertOk(setup);
-          reserveToSwap = setup.value[0];
+          assertNonEmptyArray(setup.value);
+          const reservesToSwap = setup.value;
+
+          // Find a reserve with liquidity to swap into
+          for (const reserve of reservesToSwap) {
+            const result = await borrowSwapQuote(client, {
+              market: {
+                debtPosition: borrowedPosition.id,
+                buyReserve: reserveToSwap.id,
+                amount: borrowedPosition.principal.amount.value.div(2),
+                user: evmAddress(user.account.address),
+              },
+            });
+            if (result.isOk()) {
+              reserveToSwap = reserve;
+              break;
+            }
+          }
+
+          if (!reserveToSwap) {
+            throw new Error('No reserve to swap found');
+          }
         });
 
-        it('Then the user should be able to swap and the position should be updated', async () => {
+        it('Then the user should be able to swap and the position should be updated', async ({
+          annotate,
+        }) => {
           const result = await borrowSwapQuote(client, {
             market: {
               debtPosition: borrowedPosition.id,
               buyReserve: reserveToSwap.id,
               amount: borrowedPosition.principal.amount.value.div(2),
               user: evmAddress(user.account.address),
-              // selectedSlippage: bigDecimal('50'),
+              // selectedSlippage: bigDecimal('50'), // TODO: Add slippage when fixed the bug
             },
           })
             .andThen(signApprovalsWith(user))
@@ -95,6 +118,11 @@ describe('Borrow Position swapping on Aave V4', () => {
               ),
             );
           assertOk(result);
+          const orderReceipt = result.value as SwapReceipt;
+          annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
+          const swapStatus = await waitForSwap(orderReceipt.id, 2 * 60 * 1000); // 2 minutes
+          expect(swapStatus.__typename).toEqual('SwapFulfilled');
+          // TODO: Add assertions for the new borrow position
         });
       });
 
