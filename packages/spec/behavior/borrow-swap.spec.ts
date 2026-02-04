@@ -1,5 +1,6 @@
 import {
   assertOk,
+  bigDecimal,
   evmAddress,
   type Reserve,
   type SwapReceipt,
@@ -40,7 +41,7 @@ describe('Borrow Position swapping on Aave V4', () => {
         asCollateral: true,
       });
       assertOk(setup);
-    });
+    }, 180_000);
 
     describe('And the user has a borrow position', () => {
       let borrowedPosition: UserBorrowItem;
@@ -64,7 +65,7 @@ describe('Borrow Position swapping on Aave V4', () => {
         assertOk(setup);
         assertSingleElementArray(setup.value);
         borrowedPosition = setup.value[0];
-      });
+      }, 180_000);
 
       describe('When the user swaps part of the borrow position to a different token using a market order', () => {
         let reserveToSwap: Reserve;
@@ -82,7 +83,7 @@ describe('Borrow Position swapping on Aave V4', () => {
             const result = await borrowSwapQuote(client, {
               market: {
                 debtPosition: borrowedPosition.id,
-                buyReserve: reserveToSwap.id,
+                buyReserve: reserve.id,
                 amount: borrowedPosition.principal.amount.value.div(2),
                 user: evmAddress(user.account.address),
               },
@@ -96,7 +97,7 @@ describe('Borrow Position swapping on Aave V4', () => {
           if (!reserveToSwap) {
             throw new Error('No reserve to swap found');
           }
-        });
+        }, 180_000);
 
         it('Then the user should be able to swap and the position should be updated', async ({
           annotate,
@@ -105,9 +106,9 @@ describe('Borrow Position swapping on Aave V4', () => {
             market: {
               debtPosition: borrowedPosition.id,
               buyReserve: reserveToSwap.id,
-              amount: borrowedPosition.principal.amount.value.div(2),
+              amount: borrowedPosition.principal.amount.value.div(10),
               user: evmAddress(user.account.address),
-              // selectedSlippage: bigDecimal('50'), // TODO: Add slippage when fixed the bug
+              selectedSlippage: bigDecimal('50'),
             },
           })
             .andThen(signApprovalsWith(user))

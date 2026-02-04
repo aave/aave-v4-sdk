@@ -1,5 +1,6 @@
 import {
   assertOk,
+  bigDecimal,
   evmAddress,
   type Reserve,
   type SwapReceipt,
@@ -97,7 +98,7 @@ describe('Supply Position swapping on Aave V4', () => {
             amount: supplyPosition.principal.amount.value.div(2),
             user: evmAddress(user.account.address),
             enableCollateral: false,
-            // selectedSlippage: bigDecimal('50'), // TODO: Add slippage when fixed the bug
+            selectedSlippage: bigDecimal('50'),
           },
         })
           .andThen(signApprovalsWith(user))

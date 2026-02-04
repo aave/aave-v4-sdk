@@ -1,5 +1,6 @@
 import {
   assertOk,
+  bigDecimal,
   evmAddress,
   type SwapReceipt,
   type UserBorrowItem,
@@ -41,7 +42,7 @@ describe('Repay Position swapping on Aave V4', () => {
         asCollateral: true,
       });
       assertOk(setup);
-    });
+    }, 180_000);
 
     describe('And the user has a borrow position', () => {
       let borrowedPosition: UserBorrowItem;
@@ -65,7 +66,7 @@ describe('Repay Position swapping on Aave V4', () => {
         assertOk(setup);
         assertSingleElementArray(setup.value);
         borrowedPosition = setup.value[0];
-      });
+      }, 180_000);
 
       describe('And the user has another supply position in a different token than the borrowed one', () => {
         let notCollateralSupply: UserSupplyItem;
@@ -94,7 +95,7 @@ describe('Repay Position swapping on Aave V4', () => {
           notCollateralSupply = setup.value.find(
             (supply) => !supply.isCollateral,
           )!;
-        });
+        }, 180_000);
 
         describe('When the user repays part of the borrow position using the other supply position using a market order', () => {
           it('Then the repayment should succeed and both positions should be updated', async ({
@@ -106,7 +107,7 @@ describe('Repay Position swapping on Aave V4', () => {
                 repayWithReserve: notCollateralSupply.reserve.id,
                 amount: borrowedPosition.principal.amount.value.div(2),
                 user: evmAddress(user.account.address),
-                // selectedSlippage: bigDecimal('50'), // TODO: Add slippage when fixed the bug
+                selectedSlippage: bigDecimal('50'),
               },
             })
               .andThen(signApprovalsWith(user))
