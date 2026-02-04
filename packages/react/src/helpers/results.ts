@@ -7,7 +7,7 @@ import type { UnexpectedError } from '@aave/client';
  * - Rely on the `loading` value to determine if the `data` or `error` can be evaluated.
  * - If `error` is `undefined`, then `data` value will be available.
  */
-export type ReadResult<T, E extends UnexpectedError = UnexpectedError> =
+export type ReadResult<T, E = UnexpectedError> =
   | {
       data: undefined;
       error: undefined;
@@ -30,7 +30,7 @@ export type ReadResult<T, E extends UnexpectedError = UnexpectedError> =
 /**
  * A read hook result that supports pausing.
  */
-export type PausableReadResult<T, E extends UnexpectedError = UnexpectedError> =
+export type PausableReadResult<T, E = UnexpectedError> =
   | {
       data: T | undefined;
       error: E | undefined;
@@ -64,17 +64,14 @@ export type PausableReadResult<T, E extends UnexpectedError = UnexpectedError> =
  * @internal
  */
 export const ReadResult = {
-  Loading: <
-    T,
-    E extends UnexpectedError = UnexpectedError,
-  >(): PausableReadResult<T, E> => ({
+  Loading: <T, E = UnexpectedError>(): PausableReadResult<T, E> => ({
     data: undefined,
     error: undefined,
     loading: true,
     paused: false,
     reloading: false,
   }),
-  Success: <T, E extends UnexpectedError = UnexpectedError>(
+  Success: <T, E = UnexpectedError>(
     data: T,
     reloading = false,
   ): PausableReadResult<T, E> => ({
@@ -84,7 +81,7 @@ export const ReadResult = {
     paused: false,
     reloading,
   }),
-  Failure: <T, E extends UnexpectedError = UnexpectedError>(
+  Failure: <T, E = UnexpectedError>(
     error: E,
     reloading = false,
   ): PausableReadResult<T, E> => ({
@@ -94,7 +91,7 @@ export const ReadResult = {
     paused: false,
     reloading,
   }),
-  Paused: <T, E extends UnexpectedError = UnexpectedError>(
+  Paused: <T, E = UnexpectedError>(
     data: T | undefined,
     error: E | undefined,
   ): PausableReadResult<T, E> => ({
@@ -126,7 +123,7 @@ export type PausableSuspenseResult<T> =
       data: T;
     };
 
-export type SuspendableResult<T, E extends UnexpectedError = UnexpectedError> =
+export type SuspendableResult<T, E = UnexpectedError> =
   | ReadResult<T, E>
   | SuspenseResult<T>
   | PausableReadResult<T, E>

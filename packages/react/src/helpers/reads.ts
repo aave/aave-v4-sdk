@@ -1,10 +1,11 @@
 import { type StandardData, UnexpectedError } from '@aave/client';
 import {
   type AnyVariables,
-  identity,
   invariant,
   type NullishDeep,
+  ok,
   type Prettify,
+  type Result,
 } from '@aave/types';
 import { useEffect, useMemo, useState } from 'react';
 import { type TypedDocumentNode, useQuery } from 'urql';
@@ -16,7 +17,9 @@ import {
   type SuspenseResult,
 } from './results';
 
-export type Selector<T, V> = (data: T) => V;
+export type Selector<ResponseValue, SelectorData, SelectorError> = (
+  data: ResponseValue,
+) => Result<SelectorData, SelectorError>;
 
 export type Pausable<T, WhenPaused = NullishDeep<T>> = Prettify<
   WhenPaused & {
@@ -27,8 +30,8 @@ export type Pausable<T, WhenPaused = NullishDeep<T>> = Prettify<
      *
      * @remarks
      * `pause` may be set to `true` to stop the query operation from executing
-     * automatically. The hook will stop receiving updates and won’t execute the query
-     * operation until it’s set to `false`.
+     * automatically. The hook will stop receiving updates and won't execute the query
+     * operation until it's set to `false`.
      */
     pause: boolean;
   }
@@ -40,16 +43,17 @@ export type Suspendable = { suspense: true };
  * @internal
  */
 export type UseSuspendableQueryArgs<
-  Value,
-  Output,
+  ResponseValue,
+  SelectorData,
+  SelectorError,
   Variables extends AnyVariables,
   Suspense extends boolean,
   Pause extends boolean = never,
 > = {
-  document: TypedDocumentNode<StandardData<Value>, Variables>;
+  document: TypedDocumentNode<StandardData<ResponseValue>, Variables>;
   variables?: Pause extends boolean ? NullishDeep<Variables> : Variables;
   suspense: Suspense;
-  selector?: Selector<Value, Output>;
+  selector?: Selector<ResponseValue, SelectorData, SelectorError>;
   pollInterval?: number;
   batch?: boolean;
   pause?: Pause;
@@ -59,40 +63,9 @@ export type UseSuspendableQueryArgs<
  * @internal
  */
 export function useSuspendableQuery<
-  Value,
-  Output,
-  Variables extends AnyVariables,
-  Pausable extends boolean = never,
->({
-  document,
-  variables,
-  suspense,
-  pause,
-}: UseSuspendableQueryArgs<Value, Output, Variables, false, Pausable>):
-  | ReadResult<Output>
-  | PausableReadResult<Output>;
-/**
- * @internal
- */
-export function useSuspendableQuery<
-  Value,
-  Output,
-  Variables extends AnyVariables,
-  Pausable extends boolean = never,
->({
-  document,
-  variables,
-  suspense,
-  pause,
-}: UseSuspendableQueryArgs<Value, Output, Variables, true, Pausable>):
-  | SuspenseResult<Output>
-  | PausableSuspenseResult<Output>;
-/**
- * @internal
- */
-export function useSuspendableQuery<
-  Value,
-  Output,
+  ResponseValue,
+  SelectorData,
+  SelectorError,
   Variables extends AnyVariables,
   Pausable extends boolean = never,
 >({
@@ -101,34 +74,83 @@ export function useSuspendableQuery<
   suspense,
   pause,
 }: UseSuspendableQueryArgs<
-  Value,
-  Output,
+  ResponseValue,
+  SelectorData,
+  SelectorError,
+  Variables,
+  false,
+  Pausable
+>):
+  | ReadResult<SelectorData, SelectorError | UnexpectedError>
+  | PausableReadResult<SelectorData, SelectorError | UnexpectedError>;
+/**
+ * @internal
+ */
+export function useSuspendableQuery<
+  ResponseValue,
+  SelectorData,
+  SelectorError,
+  Variables extends AnyVariables,
+  Pausable extends boolean = never,
+>({
+  document,
+  variables,
+  suspense,
+  pause,
+}: UseSuspendableQueryArgs<
+  ResponseValue,
+  SelectorData,
+  SelectorError,
+  Variables,
+  true,
+  Pausable
+>): SuspenseResult<SelectorData> | PausableSuspenseResult<SelectorData>;
+/**
+ * @internal
+ */
+export function useSuspendableQuery<
+  ResponseValue,
+  SelectorData,
+  SelectorError,
+  Variables extends AnyVariables,
+  Pausable extends boolean = never,
+>({
+  document,
+  variables,
+  suspense,
+  pause,
+}: UseSuspendableQueryArgs<
+  ResponseValue,
+  SelectorData,
+  SelectorError,
   Variables,
   boolean,
   Pausable
->): SuspendableResult<Output, UnexpectedError>;
+>): SuspendableResult<SelectorData, SelectorError | UnexpectedError>;
 /**
  * Implementation.
  */
 export function useSuspendableQuery<
-  Value,
-  Output,
+  ResponseValue,
+  SelectorData,
+  SelectorError,
   Variables extends AnyVariables,
 >({
   document,
   variables,
   suspense,
   pause,
-  selector = identity as Selector<Value, Output>,
+  selector = ok as Selector<ResponseValue, SelectorData, SelectorError>,
   pollInterval = 0,
   batch = true,
 }: UseSuspendableQueryArgs<
-  Value,
-  Output,
+  ResponseValue,
+  SelectorData,
+  SelectorError,
   Variables,
   boolean,
   boolean
->): SuspendableResult<Output, UnexpectedError> {
+>): SuspendableResult<SelectorData, SelectorError | UnexpectedError> {
   const [loading, setLoading] = useState(true);
   const [{ fetching, data, error, stale }, executeQuery] = useQuery({
     query: document,
@@ -165,9 +187,27 @@ export function useSuspendableQuery<
   }, [fetching, executeQuery, pollInterval, pause]);
 
   if (pause) {
-    return ReadResult.Paused(
-      data ? selector(data.value) : undefined,
-      error ? UnexpectedError.from(error) : undefined,
+    const unexpectedError = error ? UnexpectedError.from(error) : undefined;
+
+    if (!data) {
+      return ReadResult.Paused<SelectorData, SelectorError | UnexpectedError>(
+        undefined,
+        unexpectedError,
+      );
+    }
+
+    const selected = selector(data.value);
+
+    if (selected.isErr()) {
+      return ReadResult.Paused<SelectorData, SelectorError>(
+        undefined,
+        selected.error,
+      );
+    }
+
+    return ReadResult.Paused<SelectorData, UnexpectedError>(
+      selected.value,
+      unexpectedError,
     );
   }
 
@@ -190,5 +230,14 @@ export function useSuspendableQuery<
 
   invariant(data, 'No data returned');
 
-  return ReadResult.Success(selector(data.value), reloading);
+  const selected = selector(data.value);
+
+  if (selected.isErr()) {
+    if (suspense) {
+      throw selected.error;
+    }
+    return ReadResult.Failure(selected.error, reloading);
+  }
+
+  return ReadResult.Success(selected.value, reloading);
 }
