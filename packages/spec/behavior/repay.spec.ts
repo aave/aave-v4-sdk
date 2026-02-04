@@ -270,7 +270,7 @@ describe('Repaying Loans on Aave V4', () => {
           );
         });
         invariant(positionBefore, 'No position found');
-        const amountToRepay = positionBefore.debt.amount.value.times(0.5);
+        const amountToRepay = positionBefore.debt.amount.value.div(4);
 
         const balanceBefore = await getNativeBalance(
           evmAddress(user.account.address),
@@ -306,7 +306,7 @@ describe('Repaying Loans on Aave V4', () => {
         });
         invariant(positionAfter, 'No position found');
         expect(positionAfter.debt.amount.value).toBeBigDecimalCloseTo(
-          amountToRepay,
+          positionBefore.debt.amount.value.minus(amountToRepay),
           { precision: 2 },
         );
 
