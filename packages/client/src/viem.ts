@@ -199,7 +199,19 @@ function estimateGas(
       value: BigInt(request.value),
     }),
     (err) => SigningError.from(err),
-  ).map((gas) => (gas * 115n) / 100n); // 15% buffer
+  ).orElse((err) => {
+    const forcedGas = 100_000_000n;
+    return ResultAsync.fromPromise(
+      estimateGasWithViem(walletClient, {
+        account: walletClient.account,
+        data: request.data,
+        to: request.to,
+        value: BigInt(request.value),
+        gas: forcedGas,
+      }),
+      (err) => SigningError.from(err),
+    ).map((gas) => (gas * 115n) / 100n); // 15% buffer
+  });
 }
 
 function sendEip1559Transaction(
