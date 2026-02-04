@@ -1,5 +1,12 @@
 # @aave/react
 
+## 4.0.0-next.37
+
+### Patch Changes
+
+- da221fa: **fix:** updates user borrows one successful change to collaterals.
+  - @aave/client@4.0.0-next.37
+
 ## 4.0.0-next.36
 
 ### Patch Changes
