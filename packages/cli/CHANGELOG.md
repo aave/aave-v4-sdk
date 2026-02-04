@@ -1,5 +1,12 @@
 # @aave/cli
 
+## 4.1.0-next.27
+
+### Patch Changes
+
+- 1b1895b: **chore:** updates oclif dev dependency.
+  - @aave/client@4.0.0-next.35
+
 ## 4.1.0-next.26
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@aave/cli",
-  "version": "4.1.0-next.26",
+  "version": "4.1.0-next.27",
   "description": "CLI to interact with AaveKit API",
   "keywords": [
     "aave",
@@ -41,7 +41,7 @@
   "devDependencies": {
     "@oclif/test": "^4",
     "@types/node": "^24",
-    "oclif": "^4",
+    "oclif": "^4.22.73",
     "rimraf": "^6.1.2",
     "tsx": "^4.20.3",
     "typescript": "^5"

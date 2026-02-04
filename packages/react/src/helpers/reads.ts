@@ -130,7 +130,7 @@ export function useSuspendableQuery<
   boolean
 >): SuspendableResult<Output, UnexpectedError> {
   const [loading, setLoading] = useState(true);
-  const [{ fetching, data, error }, executeQuery] = useQuery({
+  const [{ fetching, data, error, stale }, executeQuery] = useQuery({
     query: document,
     variables: variables as Variables,
     pause,
@@ -175,16 +175,20 @@ export function useSuspendableQuery<
     return ReadResult.Loading();
   }
 
+  // stale indicates that the useQuery is fetching new data because the variables changed
+  // !loading && fetching indicates that a re-fetch is happening as consequence of calling executeQuery (e.g., polling)
+  const reloading = stale || (!loading && fetching);
+
   if (error) {
     const unexpected = UnexpectedError.from(error);
     if (suspense) {
       throw unexpected;
     }
 
-    return ReadResult.Failure(unexpected);
+    return ReadResult.Failure(unexpected, reloading);
   }
 
   invariant(data, 'No data returned');
 
-  return ReadResult.Success(selector(data.value));
+  return ReadResult.Success(selector(data.value), reloading);
 }
