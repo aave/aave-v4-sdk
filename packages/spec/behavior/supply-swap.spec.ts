@@ -16,14 +16,14 @@ import {
   client,
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
 } from '@aave/client/testing';
 import { signTypedDataWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToSupply } from '../helpers/reserves';
 import { signApprovalsWith } from '../helpers/signApprovals';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { waitForSwap } from '../helpers/swaps';
+import { availableSwappableTokens, waitForSwap } from '../helpers/swaps';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -35,7 +35,7 @@ describe('Supply Position swapping on Aave V4', () => {
     beforeAll(async () => {
       const setup = await findReserveAndSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_USDC_ADDRESS,
+        token: ETHEREUM_USDT_ADDRESS,
         swappable: true,
       }).andThen((reserve) =>
         userSupplies(client, {
@@ -62,8 +62,11 @@ describe('Supply Position swapping on Aave V4', () => {
         assertOk(setup);
         const reservesToSwap = setup.value.filter(
           (reserve) =>
+            availableSwappableTokens.includes(
+              reserve.asset.underlying.address,
+            ) &&
             reserve.asset.underlying.address !==
-            supplyPosition.reserve.asset.underlying.address,
+              supplyPosition.reserve.asset.underlying.address,
         );
 
         // Find a reserve with liquidity to swap into

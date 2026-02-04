@@ -1,6 +1,17 @@
 import { assertOk, type SwapId, TimeoutError } from '@aave/client';
 import { swapStatus } from '@aave/client/actions';
-import { client } from '@aave/client/testing';
+import {
+  client,
+  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
+} from '@aave/client/testing';
+
+export const availableSwappableTokens = [
+  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
+];
 
 export async function waitForSwap(swapId: SwapId, timeout: number) {
   const startedAt = Date.now();
@@ -23,6 +34,5 @@ export async function waitForSwap(swapId: SwapId, timeout: number) {
 
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-
   throw TimeoutError.from(`Timeout waiting for swap ${swapId} to complete.`);
 }

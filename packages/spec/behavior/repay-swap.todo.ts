@@ -50,7 +50,7 @@ describe('Repay Position swapping on Aave V4', () => {
       beforeAll(async () => {
         const setup = await borrowFromRandomReserve(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
-          token: ETHEREUM_USDC_ADDRESS,
+          token: ETHEREUM_USDT_ADDRESS,
           ratioToBorrow: 0.3,
         }).andThen((info) =>
           userBorrows(client, {
@@ -75,7 +75,7 @@ describe('Repay Position swapping on Aave V4', () => {
           // Supply a different token (USDT) that can be used to repay the USDC borrow
           const setup = await findReserveAndSupply(client, user, {
             spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_USDT_ADDRESS,
+            token: ETHEREUM_USDC_ADDRESS,
             asCollateral: false,
             swappable: true,
           }).andThen(() =>
