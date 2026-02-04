@@ -200,6 +200,7 @@ function estimateGas(
     }),
     (err) => SigningError.from(err),
   ).orElse((err) => {
+    console.log('Gas estimation failed:', err.message);
     const forcedGas = 100_000_000n;
     return ResultAsync.fromPromise(
       estimateGasWithViem(walletClient, {
@@ -209,8 +210,15 @@ function estimateGas(
         value: BigInt(request.value),
         gas: forcedGas,
       }),
-      (err) => SigningError.from(err),
-    ).map((gas) => (gas * 115n) / 100n); // 15% buffer
+      (err) => {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.log('Gas estimation failed:', errorMessage);
+        return SigningError.from(err);
+      },
+    ).map((gas) => {
+      console.log('Gas estimation successful:', gas);
+      return (gas * 115n) / 100n; // 15% buffer
+    });
   });
 }
 
