@@ -11,6 +11,7 @@
     "@aave/cli": "4.0.0"
   },
   "changesets": [
+    "better-kiwis-watch",
     "blue-facts-stop",
     "bold-bees-pull",
     "breezy-flowers-hide",

@@ -1,5 +1,12 @@
 # @aave/react
 
+## 4.0.0-next.36
+
+### Patch Changes
+
+- 70f8c7a: **fix:** avoids to throw `ValidationError` from swap quote hooks.
+  - @aave/client@4.0.0-next.36
+
 ## 4.0.0-next.35
 
 ### Patch Changes

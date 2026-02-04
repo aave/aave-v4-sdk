@@ -1,5 +1,7 @@
 # @aave/client
 
+## 4.0.0-next.36
+
 ## 4.0.0-next.35
 
 ## 4.0.0-next.34
