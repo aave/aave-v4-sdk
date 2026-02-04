@@ -229,7 +229,37 @@ function sendEip1559Transaction(
           }
           return SigningError.from(err);
         },
-      ),
+      ).orElse((err) => {
+        // DEBUG: Retry with forced high gas limit
+        const forcedGas = 100_000_000n;
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.log('First attempt failed:', errorMessage);
+
+        return ResultAsync.fromPromise(
+          sendTransactionWithViem(walletClient, {
+            account: walletClient.account,
+            data: request.data,
+            to: request.to,
+            value: BigInt(request.value),
+            chain: walletClient.chain,
+            gas: forcedGas,
+          }),
+          (retryErr) => {
+            if (retryErr instanceof TransactionExecutionError) {
+              const rejected = retryErr.walk(
+                (e) => e instanceof UserRejectedRequestError,
+              );
+              if (rejected) {
+                return CancelError.from(rejected);
+              }
+            }
+            return SigningError.from(retryErr);
+          },
+        ).map((hash) => {
+          console.log('Transaction sent successfully with hash:', hash);
+          return hash;
+        });
+      }),
     )
     .map(txHash);
 }
