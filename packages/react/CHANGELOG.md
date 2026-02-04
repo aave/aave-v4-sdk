@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.35
+
+### Patch Changes
+
+- 94286b1: **fix:** `useSetUserSuppliesAsCollateral` updates `UserSupplyItem` in cache.
+- 1e44d46: **feat:** add `reloading` flag to `ReadResult` and `PausableReadResult` types
+- a390b16: **fix:** removes unused imports.
+  - @aave/client@4.0.0-next.35
+
 ## 4.0.0-next.34
 
 ### Patch Changes

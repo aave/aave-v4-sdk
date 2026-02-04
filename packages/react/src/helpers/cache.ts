@@ -1,9 +1,13 @@
 import type { AaveClient } from '@aave/client';
 import {
+  decodeHubId,
   decodeUserPositionId,
+  HubQuery,
   HubsQuery,
   isChainIdsVariant,
+  isHubInputVariant,
   isSpokeInputVariant,
+  isTokensVariant,
   type ReserveId,
   ReserveQuery,
   ReservesQuery,
@@ -107,11 +111,14 @@ export function refreshUserPositions(
 /**
  * @internal
  */
-export function refreshReserves(client: AaveClient, id: ReserveId) {
+export function refreshReserves(client: AaveClient, ids: ReserveId[]) {
   return Promise.all([
-    client.refreshQueryWhere(ReserveQuery, (_, data) => data?.id === id),
+    client.refreshQueryWhere(
+      ReserveQuery,
+      (_, data) => data !== null && ids.includes(data.id),
+    ),
     client.refreshQueryWhere(ReservesQuery, (_, data) =>
-      data.some((reserve) => reserve.id === id),
+      data.some((reserve) => ids.includes(reserve.id)),
     ),
   ]);
 }
@@ -160,10 +167,22 @@ export function refreshSpokes(client: AaveClient, spoke: SpokeInput) {
  * @internal
  */
 export function refreshHubs(client: AaveClient, chainId: ChainId) {
-  return client.refreshQueryWhere(
-    HubsQuery,
-    (variables) =>
-      isChainIdsVariant(variables.request) &&
-      variables.request.chainIds.some((id) => id === chainId),
-  );
+  return Promise.all([
+    client.refreshQueryWhere(HubQuery, (variables) =>
+      isHubInputVariant(variables.request.query)
+        ? variables.request.query.hubInput.chainId === chainId
+        : decodeHubId(variables.request.query.hubId).chainId === chainId,
+    ),
+    client.refreshQueryWhere(
+      HubsQuery,
+      (variables) =>
+        isChainIdsVariant(variables.request)
+          ? variables.request.chainIds.some((id) => id === chainId)
+          : isTokensVariant(variables.request.query)
+            ? variables.request.query.tokens.some(
+                (token) => token.chainId === chainId,
+              )
+            : true, // assetIds variant - refresh all
+    ),
+  ]);
 }
