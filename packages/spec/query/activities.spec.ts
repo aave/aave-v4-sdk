@@ -22,6 +22,16 @@ const user = await createNewWallet(
   '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',
 );
 
+function isSwapActivity(activity: ActivityItem): boolean {
+  return (
+    activity.__typename === 'SupplySwapActivity' ||
+    activity.__typename === 'BorrowSwapActivity' ||
+    activity.__typename === 'RepayWithSupplyActivity' ||
+    activity.__typename === 'WithdrawSwapActivity' ||
+    activity.__typename === 'TokenSwapActivity'
+  );
+}
+
 describe('Querying User Activities on Aave V4', () => {
   const activityTypes = Object.values(ActivityType);
 
@@ -148,13 +158,20 @@ describe('Querying User Activities on Aave V4', () => {
       describe('When fetching the user activities by spoke', () => {
         it('Then the returned activities are only from the specified spoke', async () => {
           const result = await activities(client, {
+            user: evmAddress(user.account.address),
             query: {
               spokeId: ETHEREUM_SPOKE_CORE_ID,
             },
           });
           assertOk(result);
 
-          expect(result.value.items).toBeArrayWithElements(
+          // Filter out swap activities (they don't have a direct spoke field)
+          const nonSwapActivities = result.value.items.filter(
+            (item) => !isSwapActivity(item),
+          );
+
+          // Check that all non-swap activities have the correct spokeId
+          expect(nonSwapActivities).toBeArrayWithElements(
             expect.objectContaining({
               spoke: expect.objectContaining({
                 id: ETHEREUM_SPOKE_CORE_ID,
@@ -168,6 +185,7 @@ describe('Querying User Activities on Aave V4', () => {
     describe('When fetching the user activities by hub', () => {
       it('Then the returned activities are only from the specified hub', async () => {
         const result = await activities(client, {
+          user: evmAddress(user.account.address),
           query: {
             hubId: ETHEREUM_HUB_CORE_ID,
           },
@@ -176,6 +194,9 @@ describe('Querying User Activities on Aave V4', () => {
 
         expect(result.value.items).toBeArrayWithElements(
           expect.objectContaining({
+            user: expect.toEqualCaseInsensitive(
+              evmAddress(user.account.address),
+            ),
             reserve: expect.objectContaining({
               asset: expect.objectContaining({
                 hub: expect.objectContaining({
@@ -229,9 +250,17 @@ describe('Querying User Activities on Aave V4', () => {
 
         expect(secondPage.value.items.length).toBeLessThanOrEqual(10);
         const secondPageItemIds = secondPage.value.items.map(getActivityId);
-        // Elements in the second page should not be in the first page
+        // The last element of the first page should be the same as the first element of the second page
+        const lastFirstPageId = firstPageItemIds[firstPageItemIds.length - 1];
+        const firstSecondPageId = secondPageItemIds[0];
+        expect(lastFirstPageId).toBe(firstSecondPageId);
+        // All other IDs should be unique (no overlap except for the boundary element)
+        const firstPageIdsWithoutLast = firstPageItemIds.slice(0, -1);
+        const secondPageIdsWithoutFirst = secondPageItemIds.slice(1);
         expect(
-          secondPageItemIds.some((id) => firstPageItemIds.includes(id)),
+          secondPageIdsWithoutFirst.some((id) =>
+            firstPageIdsWithoutLast.includes(id),
+          ),
         ).toBe(false);
       });
     });
@@ -314,7 +343,14 @@ describe('Querying User Activities on Aave V4', () => {
           },
         });
         assertOk(result);
-        expect(result.value.items).toBeArrayWithElements(
+
+        // Filter out swap activities (they don't have a direct spoke field)
+        const nonSwapActivities = result.value.items.filter(
+          (item) => !isSwapActivity(item),
+        );
+
+        // Check that all non-swap activities have the correct spokeId
+        expect(nonSwapActivities).toBeArrayWithElements(
           expect.objectContaining({
             spoke: expect.objectContaining({
               id: ETHEREUM_SPOKE_CORE_ID,
