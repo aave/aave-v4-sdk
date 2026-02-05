@@ -180,16 +180,23 @@ expect.extend({
     const pass =
       isArray && received.every((item) => this.equals(item, expected));
 
+    const nonMatchingItems = isArray
+      ? received.filter((item) => !this.equals(item, expected))
+      : [];
+    const matchingItems = isArray
+      ? received.filter((item) => this.equals(item, expected))
+      : [];
+
     return {
       pass,
       message: () =>
         pass
           ? `Expected array not to have all items matching:\n  ${printExpected(
               expected,
-            )}\nBut it does.\n\nReceived:\n  ${printReceived(received)}`
+            )}\nBut it does.\n\nReceived:\n  ${printReceived(received)}\n\nItems matching (should not all match):\n  ${printReceived(matchingItems)}\n\nItems not matching:\n  ${printReceived(nonMatchingItems)}`
           : `Expected all array items to match:\n  ${printExpected(
               expected,
-            )}\nBut received:\n  ${printReceived(received)}`,
+            )}\nBut received:\n  ${printReceived(received)}\n\nItems not matching:\n  ${printReceived(nonMatchingItems)}`,
     };
   },
 });
