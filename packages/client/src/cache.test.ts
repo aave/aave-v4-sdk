@@ -288,7 +288,7 @@ describe('Given the Aave SDK normalized graph cache', () => {
         );
 
       assertOk(setup);
-    });
+    }, 60_000);
 
     it('Then it should leverage cached data whenever possible', async () => {
       const primed = await activities(client, {

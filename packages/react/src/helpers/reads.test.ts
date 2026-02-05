@@ -1,6 +1,7 @@
 import { GraphQLErrorCode, UnexpectedError } from '@aave/client';
 import type { StandardData } from '@aave/core';
 import { createGraphQLErrorObject } from '@aave/core/testing';
+import { err, ok, type Result } from '@aave/types';
 import { act } from '@testing-library/react';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -183,6 +184,55 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
         });
       });
     });
+
+    describe('When using a selector that returns Ok', () => {
+      it('Then it should return the selected data', async () => {
+        const { result } = renderHookWithinContext(() =>
+          useSuspendableQuery({
+            document: TestQuery,
+            // biome-ignore lint/suspicious/noExplicitAny: testing internal API
+            variables: { id: 42 } as any,
+            suspense: false,
+            selector: (data: number) => ok(data * 2),
+          }),
+        );
+
+        await vi.waitUntil(() => !result.current.loading);
+
+        expect(result.current).toMatchObject({
+          data: 84,
+          error: undefined,
+          loading: false,
+        });
+      });
+    });
+
+    describe('When using a selector that returns Err', () => {
+      class CustomSelectorError extends Error {
+        name = 'CustomSelectorError' as const;
+      }
+
+      it('Then it should return the selector error', async () => {
+        const { result } = renderHookWithinContext(() =>
+          useSuspendableQuery({
+            document: TestQuery,
+            // biome-ignore lint/suspicious/noExplicitAny: testing internal API
+            variables: { id: 1 } as any,
+            suspense: false,
+            selector: (_data: number): Result<number, CustomSelectorError> =>
+              err(new CustomSelectorError('Selector failed')),
+          }),
+        );
+
+        await vi.waitUntil(() => !result.current.loading);
+
+        expect(result.current).toMatchObject({
+          data: undefined,
+          error: expect.any(CustomSelectorError),
+          loading: false,
+        });
+      });
+    });
   });
 
   describe('And suspense is enabled', () => {
@@ -233,6 +283,38 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
         );
 
         expect(result.current.data).toBeUndefined();
+      });
+    });
+
+    describe('When using a selector that returns Err', () => {
+      class CustomSelectorError extends Error {
+        name = 'CustomSelectorError' as const;
+      }
+
+      it('Then it should throw the error for Error Boundary', async () => {
+        const onError = vi.fn();
+        renderHookWithinContext(
+          () =>
+            useSuspendableQuery({
+              document: TestQuery,
+              // biome-ignore lint/suspicious/noExplicitAny: testing internal API
+              variables: { id: 1 } as any,
+              suspense: true,
+              selector: (_data: number): Result<number, CustomSelectorError> =>
+                err(new CustomSelectorError('Selector failed')),
+            }),
+          {
+            // biome-ignore lint/suspicious/noExplicitAny: not worth the effort
+            onCaughtError: onError as any,
+          },
+        );
+
+        await vi.waitUntil(() => onError.mock.calls.length);
+
+        expect(onError).toHaveBeenCalledWith(
+          expect.any(CustomSelectorError),
+          expect.any(Object),
+        );
       });
     });
   });

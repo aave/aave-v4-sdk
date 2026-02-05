@@ -837,6 +837,9 @@ export function useSetUserSuppliesAsCollateral(
             // update user supplies
             refreshUserSupplies(client, request.sender),
 
+            // update user borrows
+            refreshUserBorrows(client, request.sender),
+
             ...reserveDetails.flatMap(({ chainId, spoke }) => [
               // update user positions
               refreshUserPositions(client, request.sender, {

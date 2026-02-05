@@ -70,10 +70,18 @@ import {
 import type {
   NullishDeep,
   Prettify,
+  Result,
   ResultAsync,
   Signature,
 } from '@aave/types';
-import { isSignature, never, okAsync, ResultAwareError } from '@aave/types';
+import {
+  err,
+  isSignature,
+  never,
+  ok,
+  okAsync,
+  ResultAwareError,
+} from '@aave/types';
 import { useCallback, useEffect, useState } from 'react';
 import { useAaveClient } from './context';
 import {
@@ -94,18 +102,24 @@ import {
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
-// TODO rethink this approach so that selector errors are not thrown but returned as UnexpectedError
-function extractTokenSwapQuote(data: TokenSwapQuoteResult): SwapQuote {
+function extractTokenSwapQuote(
+  data: TokenSwapQuoteResult,
+): Result<
+  SwapQuote,
+  ValidationError<InsufficientLiquidityError> | UnexpectedError
+> {
   switch (data.__typename) {
     case 'SwapByIntent':
     case 'SwapByIntentWithApprovalRequired':
     case 'SwapByTransaction':
-      return data.quote;
+      return ok(data.quote);
     case 'InsufficientLiquidityError':
-      throw ValidationError.fromGqlNode(data);
+      return err(ValidationError.fromGqlNode(data));
     default:
-      throw UnexpectedError.upgradeRequired(
-        `Unsupported swap quote result: ${data.__typename}`,
+      return err(
+        UnexpectedError.upgradeRequired(
+          `Unsupported swap quote result: ${data.__typename}`,
+        ),
       );
   }
 }
@@ -122,15 +136,20 @@ function toSwapCancelledResult(cancelled: SwapCancelled): SwapCancelledResult {
 
 function extractPositionSwapQuote(
   data: PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError,
-): SwapQuote {
+): Result<
+  SwapQuote,
+  ValidationError<InsufficientLiquidityError> | UnexpectedError
+> {
   switch (data.__typename) {
     case 'PositionSwapByIntentApprovalsRequired':
-      return data.quote;
+      return ok(data.quote);
     case 'InsufficientLiquidityError':
-      throw ValidationError.fromGqlNode(data);
+      return err(ValidationError.fromGqlNode(data));
     default:
-      throw UnexpectedError.upgradeRequired(
-        `Unsupported position swap quote result: ${(data as { __typename: string }).__typename}`,
+      return err(
+        UnexpectedError.upgradeRequired(
+          `Unsupported position swap quote result: ${(data as { __typename: string }).__typename}`,
+        ),
       );
   }
 }
@@ -285,7 +304,10 @@ export function useTokenSwapQuote({
 }: NullishDeep<UseTokenSwapQuoteArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<SwapQuote, UnexpectedError> {
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   // Fast query - no polling, suspends in suspense mode for quick initial render
@@ -366,7 +388,7 @@ export function useTokenSwapQuoteAction(
       tokenSwapQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map(extractTokenSwapQuote),
+      }).andThen(extractTokenSwapQuote),
     [client, options.currency],
   );
 }
@@ -754,7 +776,10 @@ export function useSupplySwapQuote({
 }: NullishDeep<UseSupplySwapQuoteArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<SwapQuote, UnexpectedError> {
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   // Fast query - no polling, suspends in suspense mode for quick initial render
@@ -831,7 +856,7 @@ export function useSupplySwapQuoteAction(
       supplySwapQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map(extractPositionSwapQuote),
+      }).andThen(extractPositionSwapQuote),
     [client, options.currency],
   );
 }
@@ -929,7 +954,10 @@ export function useBorrowSwapQuote({
 }: NullishDeep<UseBorrowSwapQuoteArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<SwapQuote, UnexpectedError> {
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   // Fast query - no polling, suspends in suspense mode for quick initial render
@@ -1006,7 +1034,7 @@ export function useBorrowSwapQuoteAction(
       borrowSwapQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map(extractPositionSwapQuote),
+      }).andThen(extractPositionSwapQuote),
     [client, options.currency],
   );
 }
@@ -1336,7 +1364,10 @@ export function useRepayWithSupplyQuote({
 }: NullishDeep<UseRepayWithSupplyQuoteArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<SwapQuote, UnexpectedError> {
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   // Fast query - no polling, suspends in suspense mode for quick initial render
@@ -1416,7 +1447,7 @@ export function useRepayWithSupplyQuoteAction(
       repayWithSupplyQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map(extractPositionSwapQuote),
+      }).andThen(extractPositionSwapQuote),
     [client, options.currency],
   );
 }
@@ -1593,7 +1624,10 @@ export function useWithdrawSwapQuote({
 }: NullishDeep<UseWithdrawSwapQuoteArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<SwapQuote, UnexpectedError> {
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   // Fast query - no polling, suspends in suspense mode for quick initial render
@@ -1670,7 +1704,7 @@ export function useWithdrawSwapQuoteAction(
       withdrawSwapQuote(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
-      }).map(extractPositionSwapQuote),
+      }).andThen(extractPositionSwapQuote),
     [client, options.currency],
   );
 }

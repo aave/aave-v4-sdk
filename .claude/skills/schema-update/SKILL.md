@@ -103,10 +103,18 @@ Add field transformers for enhanced client-side types:
 
 ### Validate
 
+**IMPORTANT: Do not mark the schema update complete until build and all tests pass.**
+
 - [ ] Run `pnpm check` from `packages/graphql` to verify document integrity
 - [ ] Run `pnpm build` to ensure TypeScript compilation succeeds
+  - If build fails, fix the errors and re-run `pnpm build`
+  - Repeat until build succeeds with zero errors
 - [ ] Run `pnpm test --run` to verify tests pass
+  - If tests fail, analyze failures, fix the code, and re-run tests
+  - If the fix was in a sub-package compared to where the tests failed, re-run `pnpm build` first
+  - Repeat until all tests pass
 - [ ] Run `pnpm lint:fix` to format code
+- [ ] Confirm both build and tests pass before marking complete
 
 ## Code Patterns
 
@@ -154,8 +162,10 @@ export type InputName = ReturnType<typeof graphql.scalar<'InputName'>>;
 |-----------|--------|
 | Schema download fails | Check if server is running, verify URL |
 | `pnpm check` fails | Fix document errors before proceeding |
-| Build fails | Fix TypeScript errors |
-| Tests fail | Investigate and fix failing tests |
+| Build fails | Fix TypeScript errors, re-run build until it passes |
+| Tests fail | Investigate and fix failing tests, re-run until all pass |
+
+**Never mark the schema update as complete while build errors or test failures exist.** The iterative fix-and-verify loop is mandatory.
 
 ## Common Mistakes
 
@@ -167,3 +177,4 @@ export type InputName = ReturnType<typeof graphql.scalar<'InputName'>>;
 6. **Forgetting cache.ts updates** - New types need keys configuration; types with DateTime/BigDecimal/BigInt need resolvers
 7. **Wrong nullable transformer** - Use `transformToNullableDate`/`transformToNullableBigDecimal` for nullable fields, non-nullable variants for required fields
 8. **Missing type imports in cache.ts** - Add imports for any new types used in the keys section
+9. **Marking complete with failing build/tests** - Always run `pnpm build` and `pnpm test --run` and fix all errors before marking complete

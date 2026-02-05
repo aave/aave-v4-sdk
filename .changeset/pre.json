@@ -11,6 +11,7 @@
     "@aave/cli": "4.0.0"
   },
   "changesets": [
+    "better-kiwis-watch",
     "blue-facts-stop",
     "bold-bees-pull",
     "breezy-flowers-hide",
@@ -101,6 +102,7 @@
     "sweet-planets-hunt",
     "swift-bears-swim",
     "swift-shoes-fly",
+    "swift-windows-rhyme",
     "ten-bags-bake",
     "ten-melons-dress",
     "thirty-wolves-hammer",
