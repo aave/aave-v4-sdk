@@ -2,9 +2,11 @@ import {
   type ActivityItem,
   ActivityType,
   assertOk,
+  decodeReserveId,
   evmAddress,
   type OpaqueTypename,
   PageSize,
+  type PositionAmount,
 } from '@aave/client';
 import { activities } from '@aave/client/actions';
 import {
@@ -12,25 +14,16 @@ import {
   createNewWallet,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ID,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
-
+import { assertNonEmptyArray } from '../test-utils';
 import { recreateUserActivities } from './helpers';
 
 const user = await createNewWallet(
   '0x03f9dd1b3e99ec75cdacdeb397121d50751b87dde022f007406e6faefb14b3dc',
 );
-
-function isSwapActivity(activity: ActivityItem): boolean {
-  return (
-    activity.__typename === 'SupplySwapActivity' ||
-    activity.__typename === 'BorrowSwapActivity' ||
-    activity.__typename === 'RepayWithSupplyActivity' ||
-    activity.__typename === 'WithdrawSwapActivity' ||
-    activity.__typename === 'TokenSwapActivity'
-  );
-}
 
 describe('Querying User Activities on Aave V4', () => {
   const activityTypes = Object.values(ActivityType);
@@ -65,6 +58,13 @@ describe('Querying User Activities on Aave V4', () => {
     ActivityType.BorrowSwap,
     ActivityType.RepayWithSupply,
     ActivityType.WithdrawSwap,
+  ];
+
+  const swapActivityTypes = [
+    'SupplySwapActivity',
+    'BorrowSwapActivity',
+    'RepayWithSupplyActivity',
+    'WithdrawSwapActivity',
   ];
 
   describe('Given a user with prior history of activities', () => {
@@ -165,12 +165,43 @@ describe('Querying User Activities on Aave V4', () => {
           });
           assertOk(result);
 
-          // Filter out swap activities (they don't have a direct spoke field)
-          const nonSwapActivities = result.value.items.filter(
-            (item) => !isSwapActivity(item),
+          const swapActivities = result.value.items.filter((item) =>
+            swapActivityTypes.includes(item.__typename),
           );
-
-          // Check that all non-swap activities have the correct spokeId
+          expect(swapActivities).toBeArrayWithElements(
+            expect.objectContaining({
+              user: expect.toEqualCaseInsensitive(
+                evmAddress(user.account.address),
+              ),
+            }),
+          );
+          swapActivities.forEach((item) => {
+            switch (item.__typename) {
+              case 'SupplySwapActivity':
+                expect(
+                  decodeReserveId((item.sold as PositionAmount).reserve!.id)
+                    .spoke,
+                ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+                break;
+              case 'BorrowSwapActivity':
+              case 'WithdrawSwapActivity':
+                expect(
+                  decodeReserveId((item.bought as PositionAmount).reserve!.id)
+                    .spoke,
+                ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+                break;
+              case 'RepayWithSupplyActivity':
+                expect(
+                  decodeReserveId(
+                    (item.supplyUsed as PositionAmount).reserve!.id,
+                  ).spoke,
+                ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+                break;
+            }
+          });
+          const nonSwapActivities = result.value.items.filter(
+            (item) => !swapActivityTypes.includes(item.__typename),
+          );
           expect(nonSwapActivities).toBeArrayWithElements(
             expect.objectContaining({
               user: expect.toEqualCaseInsensitive(
@@ -195,7 +226,41 @@ describe('Querying User Activities on Aave V4', () => {
         });
         assertOk(result);
 
-        expect(result.value.items).toBeArrayWithElements(
+        const swapActivities = result.value.items.filter((item) =>
+          swapActivityTypes.includes(item.__typename),
+        );
+        expect(swapActivities).toBeArrayWithElements(
+          expect.objectContaining({
+            user: expect.toEqualCaseInsensitive(
+              evmAddress(user.account.address),
+            ),
+          }),
+        );
+        swapActivities.forEach((item) => {
+          switch (item.__typename) {
+            case 'SupplySwapActivity':
+              expect(
+                (item.sold as PositionAmount).reserve!.asset.hub.id,
+              ).toEqual(ETHEREUM_HUB_CORE_ID);
+              break;
+            case 'BorrowSwapActivity':
+            case 'WithdrawSwapActivity':
+              expect(
+                (item.bought as PositionAmount).reserve!.asset.hub.id,
+              ).toEqual(ETHEREUM_HUB_CORE_ID);
+              break;
+            case 'RepayWithSupplyActivity':
+              expect(
+                (item.supplyUsed as PositionAmount).reserve!.asset.hub.id,
+              ).toEqual(ETHEREUM_HUB_CORE_ID);
+              break;
+          }
+        });
+        const nonSwapActivities = result.value.items.filter(
+          (item) => !swapActivityTypes.includes(item.__typename),
+        );
+
+        expect(nonSwapActivities).toBeArrayWithElements(
           expect.objectContaining({
             user: expect.toEqualCaseInsensitive(
               evmAddress(user.account.address),
@@ -253,17 +318,8 @@ describe('Querying User Activities on Aave V4', () => {
 
         expect(secondPage.value.items.length).toBeLessThanOrEqual(10);
         const secondPageItemIds = secondPage.value.items.map(getActivityId);
-        // The last element of the first page should be the same as the first element of the second page
-        const lastFirstPageId = firstPageItemIds[firstPageItemIds.length - 1];
-        const firstSecondPageId = secondPageItemIds[0];
-        expect(lastFirstPageId).toBe(firstSecondPageId);
-        // All other IDs should be unique (no overlap except for the boundary element)
-        const firstPageIdsWithoutLast = firstPageItemIds.slice(0, -1);
-        const secondPageIdsWithoutFirst = secondPageItemIds.slice(1);
         expect(
-          secondPageIdsWithoutFirst.some((id) =>
-            firstPageIdsWithoutLast.includes(id),
-          ),
+          secondPageItemIds.some((id) => firstPageItemIds.includes(id)),
         ).toBe(false);
       });
     });
@@ -341,18 +397,42 @@ describe('Querying User Activities on Aave V4', () => {
     describe('When fetching all activities by a spoke', () => {
       it('Then the returned activities are only from the specified spoke', async () => {
         const result = await activities(client, {
+          types: [ActivityType.SupplySwap],
           query: {
             spokeId: ETHEREUM_SPOKE_CORE_ID,
           },
         });
         assertOk(result);
-
-        // Filter out swap activities (they don't have a direct spoke field)
-        const nonSwapActivities = result.value.items.filter(
-          (item) => !isSwapActivity(item),
+        const swapActivities = result.value.items.filter((item) =>
+          swapActivityTypes.includes(item.__typename),
         );
+        swapActivities.forEach((item) => {
+          switch (item.__typename) {
+            case 'SupplySwapActivity':
+              expect(
+                decodeReserveId((item.sold as PositionAmount).reserve!.id)
+                  .spoke,
+              ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+              break;
+            case 'BorrowSwapActivity':
+            case 'WithdrawSwapActivity':
+              expect(
+                decodeReserveId((item.bought as PositionAmount).reserve!.id)
+                  .spoke,
+              ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+              break;
+            case 'RepayWithSupplyActivity':
+              expect(
+                decodeReserveId((item.supplyUsed as PositionAmount).reserve!.id)
+                  .spoke,
+              ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
+              break;
+          }
+        });
 
-        // Check that all non-swap activities have the correct spokeId
+        const nonSwapActivities = result.value.items.filter(
+          (item) => !swapActivityTypes.includes(item.__typename),
+        );
         expect(nonSwapActivities).toBeArrayWithElements(
           expect.objectContaining({
             spoke: expect.objectContaining({
@@ -371,7 +451,34 @@ describe('Querying User Activities on Aave V4', () => {
           },
         });
         assertOk(result);
-        expect(result.value.items).toBeArrayWithElements(
+
+        const swapActivities = result.value.items.filter((item) =>
+          swapActivityTypes.includes(item.__typename),
+        );
+        swapActivities.forEach((item) => {
+          switch (item.__typename) {
+            case 'SupplySwapActivity':
+              expect(
+                (item.sold as PositionAmount).reserve!.asset.hub.id,
+              ).toEqual(ETHEREUM_HUB_CORE_ID);
+              break;
+            case 'BorrowSwapActivity':
+            case 'WithdrawSwapActivity':
+              expect(
+                (item.bought as PositionAmount).reserve!.asset.hub.id,
+              ).toEqual(ETHEREUM_HUB_CORE_ID);
+              break;
+            case 'RepayWithSupplyActivity':
+              expect(
+                (item.supplyUsed as PositionAmount).reserve!.asset.hub.id,
+              ).toEqual(ETHEREUM_HUB_CORE_ID);
+              break;
+          }
+        });
+        const nonSwapActivities = result.value.items.filter(
+          (item) => !swapActivityTypes.includes(item.__typename),
+        );
+        expect(nonSwapActivities).toBeArrayWithElements(
           expect.objectContaining({
             reserve: expect.objectContaining({
               asset: expect.objectContaining({
