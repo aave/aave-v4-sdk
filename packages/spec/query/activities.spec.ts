@@ -173,6 +173,9 @@ describe('Querying User Activities on Aave V4', () => {
           // Check that all non-swap activities have the correct spokeId
           expect(nonSwapActivities).toBeArrayWithElements(
             expect.objectContaining({
+              user: expect.toEqualCaseInsensitive(
+                evmAddress(user.account.address),
+              ),
               spoke: expect.objectContaining({
                 id: ETHEREUM_SPOKE_CORE_ID,
               }),
