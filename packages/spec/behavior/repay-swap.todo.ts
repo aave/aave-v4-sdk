@@ -28,7 +28,7 @@ import {
   borrowFromRandomReserve,
   findReserveAndSupply,
 } from '../helpers/supplyBorrow';
-import { waitForSwap } from '../helpers/swaps';
+import { waitForSwapToFulfill } from '../helpers/swaps';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -120,7 +120,7 @@ describe('Repay Position swapping on Aave V4', () => {
             assertOk(result);
             const orderReceipt = result.value as SwapReceipt;
             annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
-            const swapStatus = await waitForSwap(
+            const swapStatus = await waitForSwapToFulfill(
               orderReceipt.id,
               2 * 60 * 1000,
             ); // 2 minutes

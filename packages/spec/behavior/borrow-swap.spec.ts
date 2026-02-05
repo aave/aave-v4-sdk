@@ -1,5 +1,6 @@
 import {
   assertOk,
+  type BorrowSwap,
   bigDecimal,
   evmAddress,
   type Reserve,
@@ -27,7 +28,10 @@ import {
   borrowFromRandomReserve,
   findReserveAndSupply,
 } from '../helpers/supplyBorrow';
-import { availableSwappableTokens, waitForSwap } from '../helpers/swaps';
+import {
+  availableSwappableTokens,
+  waitForSwapToFulfill,
+} from '../helpers/swaps';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -109,13 +113,14 @@ describe('Borrow Position swapping on Aave V4', () => {
         it('Then the user should be able to swap and the position should be updated', async ({
           annotate,
         }) => {
+          const amountToSell = borrowedPosition.principal.amount.value.div(2);
           const result = await borrowSwapQuote(client, {
             market: {
               debtPosition: borrowedPosition.id,
               buyReserve: reserveToSwap.id,
-              amount: borrowedPosition.principal.amount.value.div(2),
+              amount: amountToSell,
               user: evmAddress(user.account.address),
-              selectedSlippage: bigDecimal('50'),
+              selectedSlippage: bigDecimal('90'),
             },
           })
             .andThen(signApprovalsWith(user))
@@ -128,9 +133,42 @@ describe('Borrow Position swapping on Aave V4', () => {
           assertOk(result);
           const orderReceipt = result.value as SwapReceipt;
           annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
-          const swapStatus = await waitForSwap(orderReceipt.id, 2 * 60 * 1000); // 2 minutes
+          const swapStatus = await waitForSwapToFulfill(
+            orderReceipt.id,
+            3 * 60 * 1000,
+          ); // 3 minutes
           expect(swapStatus.__typename).toEqual('SwapFulfilled');
-          // TODO: Add assertions for the new borrow position
+          const borrowsResult = await userBorrows(client, {
+            query: {
+              userSpoke: {
+                spoke: reserveToSwap.spoke.id,
+                user: evmAddress(user.account.address),
+              },
+            },
+          });
+          assertOk(borrowsResult);
+
+          // Check the updated borrow position
+          const updatedPosition = borrowsResult.value.find(
+            (pos) => pos.id === borrowedPosition.id,
+          );
+          expect(updatedPosition).not.toBeUndefined();
+          expect(updatedPosition!.principal.amount.value).toBeBigDecimalCloseTo(
+            borrowedPosition.principal.amount.value.minus(amountToSell),
+            { precision: 2 },
+          );
+
+          // Check the new borrow position
+          const newPosition = borrowsResult.value.find(
+            (pos) => pos.reserve.id === reserveToSwap.id,
+          );
+          expect(newPosition).not.toBeUndefined();
+          // NOTE: We don't know the exact amount of the new position
+          // because the swap is done at market price, so the amount is not guaranteed but at least greater than the bought amount.
+          expect(newPosition!.principal.amount.value).toBeBigDecimalGreaterThan(
+            (swapStatus.operation as BorrowSwap).buyPosition.amount.amount
+              .value,
+          );
         });
       });
 

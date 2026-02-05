@@ -3,6 +3,7 @@ import {
   bigDecimal,
   evmAddress,
   type Reserve,
+  type SupplySwap,
   type SwapReceipt,
   type UserSupplyItem,
 } from '@aave/client';
@@ -23,7 +24,10 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToSupply } from '../helpers/reserves';
 import { signApprovalsWith } from '../helpers/signApprovals';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { availableSwappableTokens, waitForSwap } from '../helpers/swaps';
+import {
+  availableSwappableTokens,
+  waitForSwapToFulfill,
+} from '../helpers/swaps';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -94,14 +98,15 @@ describe('Supply Position swapping on Aave V4', () => {
       it('Then the swap should succeed and the position should be updated', async ({
         annotate,
       }) => {
+        const amountToSell = supplyPosition.principal.amount.value.div(2);
         const result = await supplySwapQuote(client, {
           market: {
             sellPosition: supplyPosition.id,
             buyReserve: reserveToSwap.id,
-            amount: supplyPosition.principal.amount.value.div(2),
+            amount: amountToSell,
             user: evmAddress(user.account.address),
             enableCollateral: false,
-            selectedSlippage: bigDecimal('50'),
+            selectedSlippage: bigDecimal('90'),
           },
         })
           .andThen(signApprovalsWith(user))
@@ -112,12 +117,44 @@ describe('Supply Position swapping on Aave V4', () => {
             ),
           );
         assertOk(result);
+
         const orderReceipt = result.value as SwapReceipt;
         annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
-        const swapStatus = await waitForSwap(orderReceipt.id, 2 * 60 * 1000); // 3 minutes
+        const swapStatus = await waitForSwapToFulfill(
+          orderReceipt.id,
+          3 * 60 * 1000,
+        ); // 3 minutes
 
-        expect(swapStatus.__typename).toEqual('SwapFulfilled');
-        // TODO: Add assertions for the new supply position
+        const suppliesResult = await userSupplies(client, {
+          query: {
+            userSpoke: {
+              spoke: reserveToSwap.spoke.id,
+              user: evmAddress(user.account.address),
+            },
+          },
+        });
+        assertOk(suppliesResult);
+
+        // Check the updated supply position
+        const updatedPosition = suppliesResult.value.find(
+          (pos) => pos.id === supplyPosition.id,
+        );
+        expect(updatedPosition).not.toBeUndefined();
+        expect(updatedPosition!.principal.amount.value).toBeBigDecimalCloseTo(
+          supplyPosition.principal.amount.value.minus(amountToSell),
+          { precision: 2 },
+        );
+
+        // Check the updated supply position
+        const newPosition = suppliesResult.value.find(
+          (pos) => pos.reserve.id === reserveToSwap.id,
+        );
+        expect(newPosition).not.toBeUndefined();
+        // NOTE: We don't know the exact amount of the new position
+        // because the swap is done at market price, so the amount is not guaranteed but at least greater than the bought amount.
+        expect(newPosition!.principal.amount.value).toBeBigDecimalGreaterThan(
+          (swapStatus.operation as SupplySwap).buyPosition.amount.amount.value,
+        );
       });
     });
 

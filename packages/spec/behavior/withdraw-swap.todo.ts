@@ -21,7 +21,7 @@ import { signTypedDataWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { signApprovalsWith } from '../helpers/signApprovals';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { waitForSwap } from '../helpers/swaps';
+import { waitForSwapToFulfill } from '../helpers/swaps';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
@@ -74,7 +74,10 @@ describe('Withdraw Position swapping on Aave V4', () => {
         assertOk(result);
         const orderReceipt = result.value as SwapReceipt;
         annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
-        const swapStatus = await waitForSwap(orderReceipt.id, 2 * 60 * 1000); // 2 minutes
+        const swapStatus = await waitForSwapToFulfill(
+          orderReceipt.id,
+          2 * 60 * 1000,
+        ); // 2 minutes
         expect(swapStatus.__typename).toEqual('SwapFulfilled');
         // TODO: Add assertions for the new supply position
       });

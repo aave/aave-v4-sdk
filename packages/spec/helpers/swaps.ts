@@ -1,4 +1,10 @@
-import { assertOk, type SwapId, TimeoutError } from '@aave/client';
+import {
+  assertOk,
+  delay,
+  type SwapFulfilled,
+  type SwapId,
+  TimeoutError,
+} from '@aave/client';
 import { swapStatus } from '@aave/client/actions';
 import {
   client,
@@ -13,7 +19,10 @@ export const availableSwappableTokens = [
   ETHEREUM_WETH_ADDRESS,
 ];
 
-export async function waitForSwap(swapId: SwapId, timeout: number) {
+export async function waitForSwapToFulfill(
+  swapId: SwapId,
+  timeout: number,
+): Promise<SwapFulfilled> {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeout) {
@@ -24,15 +33,17 @@ export async function waitForSwap(swapId: SwapId, timeout: number) {
     );
     assertOk(result);
 
-    if (
-      ['SwapCancelled', 'SwapExpired', 'SwapFulfilled'].includes(
-        result.value.__typename as string,
-      )
-    ) {
+    if (result.value.__typename === 'SwapFulfilled') {
       return result.value;
     }
+    if (
+      result.value.__typename === 'SwapCancelled' ||
+      result.value.__typename === 'SwapExpired'
+    ) {
+      throw new Error(`Swap ${result.value.__typename} - ${swapId}`);
+    }
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await delay(client.context.environment.pollingInterval);
   }
-  throw TimeoutError.from(`Timeout waiting for swap ${swapId} to complete.`);
+  throw TimeoutError.from(`Timeout waiting for swap ${swapId} to fulfill.`);
 }
