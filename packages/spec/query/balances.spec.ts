@@ -92,7 +92,7 @@ describe('Querying User Balances on Aave V4', () => {
     });
 
     describe('When the user queries balances by tokens', () => {
-      it('Then the balances of assets that can be used on the tokens are returned', async () => {
+      it('Then only the balances of the tokens are returned', async () => {
         const balances = await userBalances(client, {
           user: evmAddress(user.account.address),
           filter: {
