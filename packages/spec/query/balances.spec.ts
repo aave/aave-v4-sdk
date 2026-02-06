@@ -11,7 +11,7 @@ import {
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
+import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet(
   '0xb648cc3d9bdad37b60bcd7177b783a9c7ddfb36b6c7699f74f8dd27d4d150503',
