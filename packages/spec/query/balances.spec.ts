@@ -104,13 +104,22 @@ describe('Querying User Balances on Aave V4', () => {
                     erc20: ETHEREUM_USDC_ADDRESS,
                   },
                 },
+                {
+                  chainId: ETHEREUM_FORK_ID,
+                  token: {
+                    erc20: ETHEREUM_1INCH_ADDRESS,
+                  },
+                },
               ],
             },
           },
         });
         assertOk(balances);
-        assertSingleElementArray(balances.value);
-        expect(balances.value[0].info.symbol).toBe('USDC');
+        assertNonEmptyArray(balances.value);
+        expect(balances.value.length).toBe(2);
+        const symbols = balances.value.map((elem) => elem.info.symbol);
+        expect(symbols).toContain('USDC');
+        expect(symbols).toContain('1INCH');
       });
     });
 
