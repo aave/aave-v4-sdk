@@ -11,7 +11,7 @@ import {
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { assertNonEmptyArray } from '../test-utils';
+import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet(
   '0xb648cc3d9bdad37b60bcd7177b783a9c7ddfb36b6c7699f74f8dd27d4d150503',
@@ -88,6 +88,29 @@ describe('Querying User Balances on Aave V4', () => {
         assertOk(balances);
         // NOTE: One less because 1INCH is not supported on the spoke
         expect(balances.value.length).toBe(2);
+      });
+    });
+
+    describe('When the user queries balances by tokens', () => {
+      it('Then the balances of assets that can be used on the tokens are returned', async () => {
+        const balances = await userBalances(client, {
+          user: evmAddress(user.account.address),
+          filter: {
+            tokens: {
+              chainTokens: [
+                {
+                  chainId: ETHEREUM_FORK_ID,
+                  token: {
+                    erc20: ETHEREUM_USDC_ADDRESS,
+                  },
+                },
+              ],
+            },
+          },
+        });
+        assertOk(balances);
+        assertSingleElementArray(balances.value);
+        expect(balances.value[0].info.symbol).toBe('USDC');
       });
     });
 
