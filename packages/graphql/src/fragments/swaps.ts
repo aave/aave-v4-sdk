@@ -3,12 +3,9 @@ import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 import {
   DomainDataFragment,
-  type Erc20Amount,
   Erc20AmountFragment,
   InsufficientBalanceErrorFragment,
   InsufficientLiquidityErrorFragment,
-  type NativeAmount,
-  NativeAmountFragment,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   TokenAmountFragment,
@@ -246,10 +243,10 @@ export type PositionAmount = FragmentOf<typeof PositionAmountFragment>;
 export const SupplySwapFragment = graphql(
   `fragment SupplySwap on SupplySwap {
     __typename
-    sellPosition {
+    sell {
       ...PositionAmount
     }
-    buyPosition {
+    buy {
       ...PositionAmount
     }
     kind
@@ -262,10 +259,10 @@ export type SupplySwap = FragmentOf<typeof SupplySwapFragment>;
 export const BorrowSwapFragment = graphql(
   `fragment BorrowSwap on BorrowSwap {
     __typename
-    sellPosition {
+    sell {
       ...PositionAmount
     }
-    buyPosition {
+    buy {
       ...PositionAmount
     }
     kind
@@ -278,10 +275,10 @@ export type BorrowSwap = FragmentOf<typeof BorrowSwapFragment>;
 export const RepayWithSupplyFragment = graphql(
   `fragment RepayWithSupply on RepayWithSupply {
     __typename
-    sellPosition {
+    repay {
       ...PositionAmount
     }
-    buyPosition {
+    supply {
       ...PositionAmount
     }
     kind
@@ -294,10 +291,10 @@ export type RepayWithSupply = FragmentOf<typeof RepayWithSupplyFragment>;
 export const WithdrawSwapFragment = graphql(
   `fragment WithdrawSwap on WithdrawSwap {
     __typename
-    sellPosition {
+    withdraw {
       ...PositionAmount
     }
-    buyToken {
+    buy {
       ...TokenAmount
     }
     kind
@@ -310,10 +307,10 @@ export type WithdrawSwap = FragmentOf<typeof WithdrawSwapFragment>;
 export const TokenSwapFragment = graphql(
   `fragment TokenSwap on TokenSwap {
     __typename
-    sold {
+    sell {
       ...TokenAmount
     }
-    bought {
+    buy {
       ...TokenAmount
     }
     kind
@@ -390,25 +387,6 @@ export const SwapExpiredFragment = graphql(
   [SwapOperationFragment],
 );
 export type SwapExpired = FragmentOf<typeof SwapExpiredFragment>;
-
-export type SwapAmount = PositionAmount | NativeAmount | Erc20Amount;
-
-export const SwapAmountFragment: FragmentDocumentFor<SwapAmount, 'SwapAmount'> =
-  graphql(
-    `fragment SwapAmount on SwapAmount {
-    __typename
-    ... on PositionAmount {
-      ...PositionAmount
-    }
-    ... on NativeAmount {
-      ...NativeAmount
-    }
-    ... on Erc20Amount {
-      ...Erc20Amount
-    }
-  }`,
-    [PositionAmountFragment, NativeAmountFragment, Erc20AmountFragment],
-  );
 
 export const SwapOpenFragment = graphql(
   `fragment SwapOpen on SwapOpen {

@@ -207,6 +207,24 @@ export enum SwapOrderClass {
 }
 
 /**
+ * The status of a swap activity.
+ */
+export enum SwapActivityStatus {
+  /**
+   * The swap was fulfilled successfully
+   */
+  Fulfilled = 'FULFILLED',
+  /**
+   * The swap was cancelled
+   */
+  Cancelled = 'CANCELLED',
+  /**
+   * The swap expired before being fulfilled
+   */
+  Expired = 'EXPIRED',
+}
+
+/**
  * The swap kind for token swaps.
  */
 export enum TokenSwapKind {

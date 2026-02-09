@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.28
+
+### Patch Changes
+
+- e012b95: **feat:** supports `SwapOperation` and `ActivityItem` nodes changes.
+
 ## 1.0.0-next.27
 
 ### Patch Changes

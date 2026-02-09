@@ -114,9 +114,9 @@ input AssetRequestQuery @oneOf {
 }
 
 type AssetSampleBreakdown {
+  hub: Hub!
   amount: DecimalNumber!
   apy: PercentNumber!
-  hub: Hub!
 }
 
 type AssetSummary {
@@ -187,8 +187,8 @@ input BorrowRequest {
 }
 
 type BorrowSwap {
-  sellPosition: PositionAmount!
-  buyPosition: PositionAmount!
+  sell: PositionAmount!
+  buy: PositionAmount!
   kind: BorrowSwapKind!
   orderClass: SwapOrderClass!
 }
@@ -197,13 +197,14 @@ type BorrowSwapActivity {
   id: ID!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: TxHash!
+  txHash: TxHash
   chain: Chain!
-  sold: SwapAmount!
-  bought: SwapAmount!
+  sell: PositionAmount!
+  buy: PositionAmount!
   explorerUrl: String!
   orderClass: SwapOrderClass!
   kind: BorrowSwapKind!
+  status: SwapActivityStatus!
 }
 
 enum BorrowSwapKind {
@@ -901,6 +902,7 @@ input MarketRepayWithSupplyQuoteInput {
   amount: BigDecimal!
   user: EvmAddress!
   selectedSlippage: BigDecimal
+  kind: RepayWithSupplyKind
 }
 
 input MarketSupplySwapQuoteInput {
@@ -1297,8 +1299,8 @@ input RepayRequest {
 }
 
 type RepayWithSupply {
-  sellPosition: PositionAmount!
-  buyPosition: PositionAmount!
+  repay: PositionAmount!
+  supply: PositionAmount!
   kind: RepayWithSupplyKind!
   orderClass: SwapOrderClass!
 }
@@ -1307,13 +1309,14 @@ type RepayWithSupplyActivity {
   id: ID!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: TxHash!
+  txHash: TxHash
   chain: Chain!
-  debtRepaid: SwapAmount!
-  supplyUsed: SwapAmount!
+  repay: PositionAmount!
+  supply: PositionAmount!
   explorerUrl: String!
   orderClass: SwapOrderClass!
   kind: RepayWithSupplyKind!
+  status: SwapActivityStatus!
 }
 
 enum RepayWithSupplyKind {
@@ -1663,8 +1666,8 @@ input SupplyRequest {
 }
 
 type SupplySwap {
-  sellPosition: PositionAmount!
-  buyPosition: PositionAmount!
+  sell: PositionAmount!
+  buy: PositionAmount!
   kind: SupplySwapKind!
   orderClass: SwapOrderClass!
 }
@@ -1673,13 +1676,14 @@ type SupplySwapActivity {
   id: ID!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: TxHash!
+  txHash: TxHash
   chain: Chain!
-  sold: SwapAmount!
-  bought: SwapAmount!
+  sell: PositionAmount!
+  buy: PositionAmount!
   explorerUrl: String!
   orderClass: SwapOrderClass!
   kind: SupplySwapKind!
+  status: SwapActivityStatus!
 }
 
 enum SupplySwapKind {
@@ -1695,7 +1699,11 @@ input SupplySwapQuoteRequest @oneOf {
 
 union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
 
-union SwapAmount = PositionAmount | NativeAmount | Erc20Amount
+enum SwapActivityStatus {
+  FULFILLED
+  CANCELLED
+  EXPIRED
+}
 
 type SwapByIntent {
   quote: SwapQuote!
@@ -1936,8 +1944,8 @@ input TokenInput @oneOf {
 }
 
 type TokenSwap {
-  sold: TokenAmount!
-  bought: TokenAmount!
+  sell: TokenAmount!
+  buy: TokenAmount!
   kind: TokenSwapKind!
   orderClass: SwapOrderClass!
 }
@@ -1946,13 +1954,14 @@ type TokenSwapActivity {
   id: ID!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: TxHash!
+  txHash: TxHash
   chain: Chain!
-  sold: SwapAmount!
-  bought: SwapAmount!
+  sell: TokenAmount!
+  buy: TokenAmount!
   explorerUrl: String!
   orderClass: SwapOrderClass!
   kind: TokenSwapKind!
+  status: SwapActivityStatus!
 }
 
 enum TokenSwapKind {
@@ -2509,8 +2518,8 @@ input WithdrawReserveAmountInput @oneOf {
 }
 
 type WithdrawSwap {
-  sellPosition: PositionAmount!
-  buyToken: TokenAmount!
+  withdraw: PositionAmount!
+  buy: TokenAmount!
   kind: WithdrawSwapKind!
   orderClass: SwapOrderClass!
 }
@@ -2519,13 +2528,14 @@ type WithdrawSwapActivity {
   id: ID!
   user: EvmAddress!
   timestamp: DateTime!
-  txHash: TxHash!
+  txHash: TxHash
   chain: Chain!
-  withdrawn: SwapAmount!
-  bought: SwapAmount!
+  withdraw: PositionAmount!
+  buy: TokenAmount!
   explorerUrl: String!
   orderClass: SwapOrderClass!
   kind: WithdrawSwapKind!
+  status: SwapActivityStatus!
 }
 
 enum WithdrawSwapKind {

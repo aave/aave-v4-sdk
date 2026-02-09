@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.38
+
+### Patch Changes
+
+- e012b95: **feat:** supports `SwapOperation` and `ActivityItem` nodes changes.
+- Updated dependencies [e012b95]
+  - @aave/graphql@1.0.0-next.28
+  - @aave/client@4.0.0-next.38
+
 ## 4.0.0-next.37
 
 ### Patch Changes

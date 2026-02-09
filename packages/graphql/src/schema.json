@@ -323,6 +323,18 @@
         "name": "AssetSampleBreakdown",
         "fields": [
           {
+            "name": "hub",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Hub",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "amount",
             "type": {
               "kind": "NON_NULL",
@@ -341,18 +353,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "hub",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Hub",
                 "ofType": null
               }
             },
@@ -674,7 +674,7 @@
         "name": "BorrowSwap",
         "fields": [
           {
-            "name": "sellPosition",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -686,7 +686,7 @@
             "args": []
           },
           {
-            "name": "buyPosition",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -762,11 +762,8 @@
           {
             "name": "txHash",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           },
@@ -783,24 +780,24 @@
             "args": []
           },
           {
-            "name": "sold",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "kind": "OBJECT",
+                "name": "PositionAmount",
                 "ofType": null
               }
             },
             "args": []
           },
           {
-            "name": "bought",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "kind": "OBJECT",
+                "name": "PositionAmount",
                 "ofType": null
               }
             },
@@ -830,6 +827,17 @@
           },
           {
             "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "status",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4889,7 +4897,7 @@
         "name": "RepayWithSupply",
         "fields": [
           {
-            "name": "sellPosition",
+            "name": "repay",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4901,7 +4909,7 @@
             "args": []
           },
           {
-            "name": "buyPosition",
+            "name": "supply",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4977,11 +4985,8 @@
           {
             "name": "txHash",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           },
@@ -4998,24 +5003,24 @@
             "args": []
           },
           {
-            "name": "debtRepaid",
+            "name": "repay",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "kind": "OBJECT",
+                "name": "PositionAmount",
                 "ofType": null
               }
             },
             "args": []
           },
           {
-            "name": "supplyUsed",
+            "name": "supply",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "kind": "OBJECT",
+                "name": "PositionAmount",
                 "ofType": null
               }
             },
@@ -5045,6 +5050,17 @@
           },
           {
             "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "status",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5820,7 +5836,7 @@
         "name": "SupplySwap",
         "fields": [
           {
-            "name": "sellPosition",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5832,7 +5848,7 @@
             "args": []
           },
           {
-            "name": "buyPosition",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5908,11 +5924,8 @@
           {
             "name": "txHash",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           },
@@ -5929,24 +5942,24 @@
             "args": []
           },
           {
-            "name": "sold",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "kind": "OBJECT",
+                "name": "PositionAmount",
                 "ofType": null
               }
             },
             "args": []
           },
           {
-            "name": "bought",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "kind": "OBJECT",
+                "name": "PositionAmount",
                 "ofType": null
               }
             },
@@ -5984,6 +5997,17 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "status",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -5999,24 +6023,6 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientLiquidityError"
-          }
-        ]
-      },
-      {
-        "kind": "UNION",
-        "name": "SwapAmount",
-        "possibleTypes": [
-          {
-            "kind": "OBJECT",
-            "name": "PositionAmount"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "NativeAmount"
-          },
-          {
-            "kind": "OBJECT",
-            "name": "Erc20Amount"
           }
         ]
       },
@@ -6953,7 +6959,7 @@
         "name": "TokenSwap",
         "fields": [
           {
-            "name": "sold",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6965,7 +6971,7 @@
             "args": []
           },
           {
-            "name": "bought",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -7041,11 +7047,8 @@
           {
             "name": "txHash",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           },
@@ -7062,24 +7065,24 @@
             "args": []
           },
           {
-            "name": "sold",
+            "name": "sell",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "SwapAmount",
+                "name": "TokenAmount",
                 "ofType": null
               }
             },
             "args": []
           },
           {
-            "name": "bought",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "SwapAmount",
+                "name": "TokenAmount",
                 "ofType": null
               }
             },
@@ -7109,6 +7112,17 @@
           },
           {
             "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "status",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -8645,7 +8659,7 @@
         "name": "WithdrawSwap",
         "fields": [
           {
-            "name": "sellPosition",
+            "name": "withdraw",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -8657,7 +8671,7 @@
             "args": []
           },
           {
-            "name": "buyToken",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -8733,11 +8747,8 @@
           {
             "name": "txHash",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           },
@@ -8754,24 +8765,24 @@
             "args": []
           },
           {
-            "name": "withdrawn",
+            "name": "withdraw",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "UNION",
-                "name": "SwapAmount",
+                "kind": "OBJECT",
+                "name": "PositionAmount",
                 "ofType": null
               }
             },
             "args": []
           },
           {
-            "name": "bought",
+            "name": "buy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "UNION",
-                "name": "SwapAmount",
+                "name": "TokenAmount",
                 "ofType": null
               }
             },
@@ -8801,6 +8812,17 @@
           },
           {
             "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "status",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
