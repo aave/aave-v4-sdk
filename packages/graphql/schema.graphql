@@ -1890,6 +1890,7 @@ input SwappableTokensRequest {
 }
 
 input SwappableTokensRequestQuery @oneOf {
+  tokens: [Erc20Input!]
   chainIds: [ChainId!]
   from: SwappableTokenInput
   to: SwappableTokenInput
