@@ -120,7 +120,7 @@ describe('Borrow Position swapping on Aave V4', () => {
               buyReserve: reserveToSwap.id,
               amount: amountToSell,
               user: evmAddress(user.account.address),
-              selectedSlippage: bigDecimal('90'),
+              selectedSlippage: bigDecimal('50'),
             },
           })
             .andThen(signApprovalsWith(user))
