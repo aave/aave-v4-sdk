@@ -97,7 +97,7 @@ describe('Repay Position swapping on Aave V4', () => {
         }, 180_000);
 
         describe('When the user repays part of the borrow position using the other supply position using a market order', () => {
-          it('Then the repayment should succeed and both positions should be updated', async ({
+          it('Then the swap to repay the borrow position should succeed', async ({
             annotate,
           }) => {
             const result = await repayWithSupplyQuote(client, {

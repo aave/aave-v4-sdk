@@ -106,9 +106,7 @@ describe('Borrow Position swapping on Aave V4', () => {
           }
         });
 
-        it('Then the user should be able to swap and the position should be updated', async ({
-          annotate,
-        }) => {
+        it('Then the user should be able to swap', async ({ annotate }) => {
           const amountToSell = borrowedPosition.principal.amount.value.div(2);
           const result = await borrowSwapQuote(client, {
             market: {
