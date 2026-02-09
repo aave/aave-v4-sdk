@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.29
+
+### Patch Changes
+
+- a8716b1: **feat:** support `SwappableTokensRequestQuery.tokens`.
+
 ## 1.0.0-next.28
 
 ### Patch Changes
