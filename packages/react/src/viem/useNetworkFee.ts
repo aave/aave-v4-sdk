@@ -149,7 +149,7 @@ function useExecutionDetails(): UseAsyncTask<
           transport: http(),
         });
 
-        if ('activity' in query) {
+        if ('activity' in query && query.activity.txHash) {
           return ResultAsync.fromPromise(
             publicClient.getTransactionReceipt({ hash: query.activity.txHash }),
             (error) => UnexpectedError.from(error),

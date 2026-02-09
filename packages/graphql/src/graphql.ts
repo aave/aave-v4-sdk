@@ -31,6 +31,7 @@ import type {
   RepayWithSupplyKind,
   ReservesRequestFilter,
   SupplySwapKind,
+  SwapActivityStatus,
   SwapOrderClass,
   SwapStatusFilter,
   TimeWindow,
@@ -99,6 +100,7 @@ export const graphql = initGraphQLTada<{
     SpokeId: SpokeId;
     String: string;
     SupplySwapKind: SupplySwapKind;
+    SwapActivityStatus: SwapActivityStatus;
     SwapId: SwapId;
     SwapOrderClass: SwapOrderClass;
     SwapQuoteId: SwapQuoteId;
