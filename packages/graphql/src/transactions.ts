@@ -14,9 +14,10 @@ import {
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   PercentNumberVariationFragment,
+  PositionAmountFragment,
   ReserveInfoFragment,
   SpokeFragment,
-  SwapAmountFragment,
+  TokenAmountFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './fragments';
@@ -567,17 +568,18 @@ export const TokenSwapActivityFragment = graphql(
     chain {
       ...Chain
     }
-    sold {
-      ...SwapAmount
+    sell {
+      ...TokenAmount
     }
-    bought {
-      ...SwapAmount
+    buy {
+      ...TokenAmount
     }
     explorerUrl
     orderClass
     kind
+    status
   }`,
-  [ChainFragment, SwapAmountFragment],
+  [ChainFragment, TokenAmountFragment],
 );
 export type TokenSwapActivity = FragmentOf<typeof TokenSwapActivityFragment>;
 
@@ -591,17 +593,18 @@ export const SupplySwapActivityFragment = graphql(
     chain {
       ...Chain
     }
-    sold {
-      ...SwapAmount
+    sell {
+      ...PositionAmount
     }
-    bought {
-      ...SwapAmount
+    buy {
+      ...PositionAmount
     }
     explorerUrl
     orderClass
     kind
+    status
   }`,
-  [ChainFragment, SwapAmountFragment],
+  [ChainFragment, PositionAmountFragment],
 );
 export type SupplySwapActivity = FragmentOf<typeof SupplySwapActivityFragment>;
 
@@ -615,17 +618,18 @@ export const BorrowSwapActivityFragment = graphql(
     chain {
       ...Chain
     }
-    sold {
-      ...SwapAmount
+    sell {
+      ...PositionAmount
     }
-    bought {
-      ...SwapAmount
+    buy {
+      ...PositionAmount
     }
     explorerUrl
     orderClass
     kind
+    status
   }`,
-  [ChainFragment, SwapAmountFragment],
+  [ChainFragment, PositionAmountFragment],
 );
 export type BorrowSwapActivity = FragmentOf<typeof BorrowSwapActivityFragment>;
 
@@ -639,17 +643,18 @@ export const RepayWithSupplyActivityFragment = graphql(
     chain {
       ...Chain
     }
-    debtRepaid {
-      ...SwapAmount
+    repay {
+      ...PositionAmount
     }
-    supplyUsed {
-      ...SwapAmount
+    supply {
+      ...PositionAmount
     }
     explorerUrl
     orderClass
     kind
+    status
   }`,
-  [ChainFragment, SwapAmountFragment],
+  [ChainFragment, PositionAmountFragment],
 );
 export type RepayWithSupplyActivity = FragmentOf<
   typeof RepayWithSupplyActivityFragment
@@ -665,17 +670,18 @@ export const WithdrawSwapActivityFragment = graphql(
     chain {
       ...Chain
     }
-    withdrawn {
-      ...SwapAmount
+    withdraw {
+      ...PositionAmount
     }
-    bought {
-      ...SwapAmount
+    buy {
+      ...TokenAmount
     }
     explorerUrl
     orderClass
     kind
+    status
   }`,
-  [ChainFragment, SwapAmountFragment],
+  [ChainFragment, PositionAmountFragment, TokenAmountFragment],
 );
 export type WithdrawSwapActivity = FragmentOf<
   typeof WithdrawSwapActivityFragment

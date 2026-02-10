@@ -313,8 +313,8 @@ export function makeSwapReceipt(): SwapReceipt {
 export function makeTokenSwap(): TokenSwap {
   return {
     __typename: 'TokenSwap',
-    sold: makeErc20Amount(1000, 'WETH'),
-    bought: makeErc20Amount(1000, 'USDC'),
+    sell: makeErc20Amount(1000, 'WETH'),
+    buy: makeErc20Amount(1000, 'USDC'),
     kind: TokenSwapKind.Sell,
     orderClass: SwapOrderClass.Market,
   };
