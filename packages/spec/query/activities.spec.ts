@@ -339,20 +339,19 @@ describe('Querying User Activities on Aave V4', () => {
           switch (item.__typename) {
             case 'SupplySwapActivity':
               expect(
-                decodeReserveId((item.sold as PositionAmount).reserve!.id)
+                decodeReserveId((item.sell as PositionAmount).reserve!.id)
                   .spoke,
               ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
               break;
             case 'BorrowSwapActivity':
             case 'WithdrawSwapActivity':
               expect(
-                decodeReserveId((item.bought as PositionAmount).reserve!.id)
-                  .spoke,
+                decodeReserveId((item.buy as PositionAmount).reserve!.id).spoke,
               ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
               break;
             case 'RepayWithSupplyActivity':
               expect(
-                decodeReserveId((item.supplyUsed as PositionAmount).reserve!.id)
+                decodeReserveId((item.supply as PositionAmount).reserve!.id)
                   .spoke,
               ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
               break;
@@ -388,18 +387,18 @@ describe('Querying User Activities on Aave V4', () => {
           switch (item.__typename) {
             case 'SupplySwapActivity':
               expect(
-                (item.sold as PositionAmount).reserve!.asset.hub.id,
+                (item.sell as PositionAmount).reserve!.asset.hub.id,
               ).toEqual(ETHEREUM_HUB_CORE_ID);
               break;
             case 'BorrowSwapActivity':
             case 'WithdrawSwapActivity':
               expect(
-                (item.bought as PositionAmount).reserve!.asset.hub.id,
+                (item.buy as PositionAmount).reserve!.asset.hub.id,
               ).toEqual(ETHEREUM_HUB_CORE_ID);
               break;
             case 'RepayWithSupplyActivity':
               expect(
-                (item.supplyUsed as PositionAmount).reserve!.asset.hub.id,
+                (item.supply as PositionAmount).reserve!.asset.hub.id,
               ).toEqual(ETHEREUM_HUB_CORE_ID);
               break;
           }
