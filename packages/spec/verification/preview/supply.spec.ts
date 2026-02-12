@@ -98,9 +98,7 @@ describe('Supply Preview Math', () => {
             previewInfo.riskPremium.current.value,
           );
 
-          expect(
-            previewInfo.riskPremium.after.value,
-          ).toBeBigDecimalEqualTo(
+          expect(previewInfo.riskPremium.after.value).toBeBigDecimalEqualTo(
             operationInfo.riskPremium?.current.value ?? 0,
           );
         });

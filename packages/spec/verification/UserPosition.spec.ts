@@ -213,15 +213,15 @@ describe('Given a user with a User Position on a Spoke', () => {
         });
 
         it('Then the averageCollateralFactor value should be the average collateral factor from the spoke', async () => {
-          expect(
-            position.averageCollateralFactor.value,
-          ).toBeBigDecimalEqualTo(accountDataOnChain.avgCollateralFactor);
+          expect(position.averageCollateralFactor.value).toBeBigDecimalEqualTo(
+            accountDataOnChain.avgCollateralFactor,
+          );
         });
 
         it('Then the riskPremium value should be the risk premium from the spoke', async () => {
-          expect(
-            position.riskPremium?.current.value,
-          ).toBeBigDecimalEqualTo(accountDataOnChain.riskPremium);
+          expect(position.riskPremium?.current.value).toBeBigDecimalEqualTo(
+            accountDataOnChain.riskPremium,
+          );
         });
 
         it.todo('Then it should return the correct netApy value');
