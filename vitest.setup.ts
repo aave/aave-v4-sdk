@@ -10,7 +10,9 @@ expect.extend({
 
     return {
       pass,
-      message: () => `expected ${received} to be equal to ${expected}`,
+      message: pass
+        ? () => `expected ${received} to be equal to ${expected}`
+        : () => `expected ${received} not to be equal to ${expected}`,
     };
   },
 
