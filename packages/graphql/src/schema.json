@@ -5191,12 +5191,9 @@
           {
             "name": "swapStatus",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "UNION",
-                "name": "SwapStatus",
-                "ofType": null
-              }
+              "kind": "UNION",
+              "name": "SwapStatus",
+              "ofType": null
             },
             "args": [
               {
@@ -7295,17 +7292,6 @@
           },
           {
             "name": "createdAt",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "explorerUrl",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

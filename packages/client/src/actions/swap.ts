@@ -454,7 +454,7 @@ export function swapStatus(
   }: CurrencyQueryOptions &
     TimeWindowQueryOptions &
     RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<SwapStatus, UnexpectedError> {
+): ResultAsync<SwapStatus | null, UnexpectedError> {
   return client.query(
     SwapStatusQuery,
     { request, currency, timeWindow },
@@ -511,7 +511,7 @@ export function waitForSwapOutcome(
           },
         );
 
-        switch (status.__typename) {
+        switch (status?.__typename) {
           case 'SwapCancelled':
           case 'SwapExpired':
           case 'SwapFulfilled':
