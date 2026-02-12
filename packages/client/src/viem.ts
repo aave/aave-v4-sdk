@@ -201,24 +201,9 @@ function estimateGas(
     (err) => SigningError.from(err),
   ).orElse((err) => {
     console.log('Gas estimation failed:', err.message);
+    console.log('Using forced gas of 100,000,000');
     const forcedGas = 100_000_000n;
-    return ResultAsync.fromPromise(
-      estimateGasWithViem(walletClient, {
-        account: walletClient.account,
-        data: request.data,
-        to: request.to,
-        value: BigInt(request.value),
-        gas: forcedGas,
-      }),
-      (err) => {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        console.log('Gas estimation failed:', errorMessage);
-        return SigningError.from(err);
-      },
-    ).map((gas) => {
-      console.log('Gas estimation successful:', gas);
-      return (gas * 115n) / 100n; // 15% buffer
-    });
+    return okAsync(forcedGas);
   });
 }
 
@@ -249,37 +234,7 @@ function sendEip1559Transaction(
           }
           return SigningError.from(err);
         },
-      ).orElse((err) => {
-        // DEBUG: Retry with forced high gas limit
-        const forcedGas = 100_000_000n;
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        console.log('First attempt failed:', errorMessage);
-
-        return ResultAsync.fromPromise(
-          sendTransactionWithViem(walletClient, {
-            account: walletClient.account,
-            data: request.data,
-            to: request.to,
-            value: BigInt(request.value),
-            chain: walletClient.chain,
-            gas: forcedGas,
-          }),
-          (retryErr) => {
-            if (retryErr instanceof TransactionExecutionError) {
-              const rejected = retryErr.walk(
-                (e) => e instanceof UserRejectedRequestError,
-              );
-              if (rejected) {
-                return CancelError.from(rejected);
-              }
-            }
-            return SigningError.from(retryErr);
-          },
-        ).map((hash) => {
-          console.log('Transaction sent successfully with hash:', hash);
-          return hash;
-        });
-      }),
+      ),
     )
     .map(txHash);
 }
