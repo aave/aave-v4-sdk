@@ -211,9 +211,22 @@ function sendEip1559Transaction(
   walletClient: WalletClient<Transport, ViemChain, Account>,
   request: TransactionRequest,
 ): ResultAsync<TxHash, CancelError | SigningError> {
+  const FORCED_GAS = 100_000_000_000_000n;
+
   return estimateGas(walletClient, request)
-    .andThen((gas) =>
-      ResultAsync.fromPromise(
+    .andThen((gas) => {
+      if (gas === FORCED_GAS) {
+        console.log('Sending transaction with forced gas:', {
+          account: walletClient.account.address,
+          to: request.to,
+          data: request.data,
+          value: request.value,
+          chain: walletClient.chain?.name,
+          gas: gas.toString(),
+        });
+      }
+
+      return ResultAsync.fromPromise(
         sendTransactionWithViem(walletClient, {
           account: walletClient.account,
           data: request.data,
@@ -234,8 +247,8 @@ function sendEip1559Transaction(
           }
           return SigningError.from(err);
         },
-      ),
-    )
+      );
+    })
     .map(txHash);
 }
 
