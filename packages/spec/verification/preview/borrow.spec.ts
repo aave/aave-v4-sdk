@@ -72,8 +72,10 @@ describe('Borrow Preview Math', () => {
         });
 
         it('Then the riskPremium should be 0', () => {
-          expect(previewInfo.riskPremium.current.value.eq(0)).toBeTrue();
-          expect(previewInfo.riskPremium.after.value.eq(0)).toBeTrue();
+          expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(
+            0,
+          );
+          expect(previewInfo.riskPremium.after.value).toBeBigDecimalEqualTo(0);
         });
       });
 
@@ -119,8 +121,12 @@ describe('Borrow Preview Math', () => {
           });
 
           it('Then the riskPremium should be 0', () => {
-            expect(previewInfo.riskPremium.current.value.eq(0)).toBeTrue();
-            expect(previewInfo.riskPremium.after.value.eq(0)).toBeTrue();
+            expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(
+              0,
+            );
+            expect(previewInfo.riskPremium.after.value).toBeBigDecimalEqualTo(
+              0,
+            );
           });
         });
       });
@@ -175,7 +181,9 @@ describe('Borrow Preview Math', () => {
         });
 
         it('Then the riskPremium should be greater than 0', () => {
-          expect(previewInfo.riskPremium.current.value.eq(0)).toBeTrue();
+          expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(
+            0,
+          );
           expect(previewInfo.riskPremium.after.value).toBeBigDecimalGreaterThan(
             0,
           );

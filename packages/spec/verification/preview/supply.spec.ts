@@ -99,10 +99,10 @@ describe('Supply Preview Math', () => {
           );
 
           expect(
-            previewInfo.riskPremium.after.value.eq(
-              operationInfo.riskPremium?.current.value ?? 0,
-            ),
-          ).toBe(true);
+            previewInfo.riskPremium.after.value,
+          ).toBeBigDecimalEqualTo(
+            operationInfo.riskPremium?.current.value ?? 0,
+          );
         });
       });
 
