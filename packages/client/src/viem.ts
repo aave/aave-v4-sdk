@@ -201,8 +201,8 @@ function estimateGas(
     (err) => SigningError.from(err),
   ).orElse((err) => {
     console.log('Gas estimation failed:', err.message);
-    console.log('Using forced gas of 100,000,000');
-    const forcedGas = 100_000_000n;
+    console.log('Using forced HIGH gas of 100,000,000,000,000');
+    const forcedGas = 100_000_000_000_000n;
     return okAsync(forcedGas);
   });
 }
