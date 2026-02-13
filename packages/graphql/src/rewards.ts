@@ -21,7 +21,7 @@ export type ClaimRewardsRequest = RequestOf<typeof ClaimRewardsQuery>;
  * @internal
  */
 export const UserClaimableRewardsQuery = graphql(
-  `query UserClaimableRewards($request: UserClaimableRewardsRequest!) {
+  `query UserClaimableRewards($request: UserClaimableRewardsRequest!, $currency: Currency! = USD) {
     value: userClaimableRewards(request: $request) {
       ...UserClaimableReward
     }

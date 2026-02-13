@@ -8272,12 +8272,12 @@
             "args": []
           },
           {
-            "name": "amount",
+            "name": "claimable",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Erc20Token",
+                "name": "Erc20Amount",
                 "ofType": null
               }
             },
