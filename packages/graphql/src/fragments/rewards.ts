@@ -1,7 +1,11 @@
 import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import { Erc20TokenFragment, PercentNumberFragment } from './common';
+import {
+  Erc20AmountFragment,
+  Erc20TokenFragment,
+  PercentNumberFragment,
+} from './common';
 
 export const MerklGenericCriteriaFragment = graphql(
   `fragment MerklGenericCriteria on MerklGenericCriteria {
@@ -93,14 +97,14 @@ export const UserMerklClaimableRewardFragment = graphql(
   `fragment UserMerklClaimableReward on UserMerklClaimableReward {
     __typename
     id
-    amount {
-      ...Erc20Token
+    claimable {
+      ...Erc20Amount
     }
     startDate
     endDate
     claimUntil
   }`,
-  [Erc20TokenFragment],
+  [Erc20AmountFragment],
 );
 export type UserMerklClaimableReward = FragmentOf<
   typeof UserMerklClaimableRewardFragment

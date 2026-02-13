@@ -2311,7 +2311,7 @@ input UserHubInput @oneOf {
 
 type UserMerklClaimableReward {
   id: RewardId!
-  amount: Erc20Token!
+  claimable: Erc20Amount!
   startDate: DateTime!
   endDate: DateTime!
   claimUntil: DateTime!
