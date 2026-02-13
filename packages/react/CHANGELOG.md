@@ -1,5 +1,19 @@
 # @aave/react
 
+## 4.0.0-next.40
+
+### Minor Changes
+
+- 141c0fe: **fix:** `UserMerklClaimableReward.amount: Erc20Token` to `UserMerklClaimableReward.claimable: Erc20Amount`
+- b591d64: **feat:** support for incentive rewards with `userClaimableRewards` action, `useUserClaimableRewards` hook, and `useClaimRewards` transaction hook
+
+### Patch Changes
+
+- Updated dependencies [141c0fe]
+- Updated dependencies [b591d64]
+  - @aave/graphql@1.0.0-next.30
+  - @aave/client@4.0.0-next.40
+
 ## 4.0.0-next.39
 
 ### Patch Changes
