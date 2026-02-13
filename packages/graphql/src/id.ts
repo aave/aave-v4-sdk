@@ -157,6 +157,11 @@ export type OnChainReserveId = Tagged<string, 'OnChainReserveId'>;
 export type ReserveId = Tagged<Base64EncodedCompositeId, 'ReserveId'>;
 
 /**
+ * A reward identifier.
+ */
+export type RewardId = Tagged<string, 'RewardId'>;
+
+/**
  * Creates a reserve identifier from a given value.
  *
  * @remarks
