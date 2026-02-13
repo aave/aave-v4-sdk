@@ -48,11 +48,21 @@ describe('Querying Chains on Aave V4', () => {
           query: { chainIds: [ETHEREUM_FORK_ID] },
         });
         assertOk(result);
-        expect(result.value).toBeArrayWithElements(
-          expect.objectContaining({
+        expect(result.value).toMatchSnapshot([
+          {
             chainId: ETHEREUM_FORK_ID,
-          }),
-        );
+            explorerUrl: expect.any(String),
+            icon: expect.any(String),
+            isFork: expect.any(Boolean),
+            isTestnet: expect.any(Boolean),
+            name: expect.any(String),
+            nativeGateway: expect.any(String),
+            nativeInfo: expect.any(Object),
+            nativeWrappedToken: expect.any(String),
+            rpcUrl: expect.any(String),
+            signatureGateway: expect.any(String),
+          },
+        ]);
       });
     });
   });
@@ -62,8 +72,18 @@ describe('Querying Chains on Aave V4', () => {
       it('Then it should return the expected data for the chain', async () => {
         const result = await chain(client, { chainId: ETHEREUM_FORK_ID });
         assertOk(result);
-        expect(result.value).toMatchObject({
+        expect(result.value).toMatchSnapshot({
           chainId: ETHEREUM_FORK_ID,
+          explorerUrl: expect.any(String),
+          icon: expect.any(String),
+          isFork: expect.any(Boolean),
+          isTestnet: expect.any(Boolean),
+          name: expect.any(String),
+          nativeGateway: expect.any(String),
+          nativeInfo: expect.any(Object),
+          nativeWrappedToken: expect.any(String),
+          rpcUrl: expect.any(String),
+          signatureGateway: expect.any(String),
         });
       });
     });

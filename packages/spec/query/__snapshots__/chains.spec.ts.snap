@@ -1,0 +1,37 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Querying Chains on Aave V4 > Given a user who wants to fetch a single chain > When fetching a single chain > Then it should return the expected data for the chain 1`] = `
+{
+  "__typename": "Chain",
+  "chainId": 123456789,
+  "explorerUrl": Any<String>,
+  "icon": Any<String>,
+  "isFork": Any<Boolean>,
+  "isTestnet": Any<Boolean>,
+  "name": Any<String>,
+  "nativeGateway": Any<String>,
+  "nativeInfo": Any<Object>,
+  "nativeWrappedToken": Any<String>,
+  "rpcUrl": Any<String>,
+  "signatureGateway": Any<String>,
+}
+`;
+
+exports[`Querying Chains on Aave V4 > Given a user who wants to list available chains > When listing supported chains by chain IDs > Then it should return the expected chains 1`] = `
+[
+  {
+    "__typename": "Chain",
+    "chainId": 123456789,
+    "explorerUrl": Any<String>,
+    "icon": Any<String>,
+    "isFork": Any<Boolean>,
+    "isTestnet": Any<Boolean>,
+    "name": Any<String>,
+    "nativeGateway": Any<String>,
+    "nativeInfo": Any<Object>,
+    "nativeWrappedToken": Any<String>,
+    "rpcUrl": Any<String>,
+    "signatureGateway": Any<String>,
+  },
+]
+`;
