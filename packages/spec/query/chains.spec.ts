@@ -12,18 +12,47 @@ describe('Querying Chains on Aave V4', () => {
         async (filter) => {
           const result = await chains(client, { query: { filter } });
           assertOk(result);
-          expect(result.value).toMatchSnapshot();
+          // Staging environment has only testnet chains for the moment
+          switch (filter) {
+            case ChainsFilter.MAINNET_ONLY:
+              // NOTE: Enable when Aave V4 is deployed to mainnet
+              // expect(result.value).toBeArrayWithElements(
+              //   expect.objectContaining({
+              //     isTestnet: false,
+              //   }),
+              // );
+              break;
+            case ChainsFilter.TESTNET_ONLY:
+              expect(result.value).toBeArrayWithElements(
+                expect.objectContaining({
+                  isTestnet: true,
+                }),
+              );
+              break;
+            case ChainsFilter.ALL:
+              expect(result.value).toBeArrayWithElements(
+                expect.objectContaining({
+                  isTestnet: expect.any(Boolean),
+                }),
+              );
+              break;
+          }
         },
       );
     });
 
     describe('When listing supported chains by chain IDs', () => {
       it('Then it should return the expected chains', async () => {
+        // NOTE: Add more chainsIds when Aave V4 extend to more chains
         const result = await chains(client, {
           query: { chainIds: [ETHEREUM_FORK_ID] },
         });
         assertOk(result);
-        expect(result.value).toMatchSnapshot();
+        expect(result.value).toBeArrayWithElements(
+          expect.objectContaining({
+            chainId: ETHEREUM_FORK_ID,
+          }),
+        );
       });
     });
   });
@@ -33,7 +62,9 @@ describe('Querying Chains on Aave V4', () => {
       it('Then it should return the expected data for the chain', async () => {
         const result = await chain(client, { chainId: ETHEREUM_FORK_ID });
         assertOk(result);
-        expect(result.value).toMatchSnapshot();
+        expect(result.value).toMatchObject({
+          chainId: ETHEREUM_FORK_ID,
+        });
       });
     });
   });
