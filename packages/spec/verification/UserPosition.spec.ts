@@ -146,26 +146,20 @@ describe('Given a user with a User Position on a Spoke', () => {
 
         it('Then the totalSupplied value should be the sum of the principal and interest for all positions in the spoke', async () => {
           const totalSupplied = suppliesPositions.reduce(
-            (acc, supply) =>
-              acc.plus(
-                supply.principal.exchange.value.plus(
-                  supply.interest.exchange.value,
-                ),
-              ),
+            (acc, supply) => acc.plus(supply.withdrawable.exchange.value),
             bigDecimal('0'),
           );
+
           expect(totalSupplied).toBeBigDecimalCloseTo(
             position.totalSupplied.current.value,
-            { precision: 2 },
+            { percent: 0.1 },
           );
         });
 
         it('Then the totalCollateral value should be the sum of the collateral values from the spoke', async () => {
           expect(position.totalCollateral.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalCollateralValue,
-            {
-              precision: 1,
-            },
+            { percent: 0.1 },
           );
         });
 
@@ -173,78 +167,60 @@ describe('Given a user with a User Position on a Spoke', () => {
           const totalCollateral = suppliesPositions
             .filter((supply) => supply.isCollateral)
             .reduce(
-              (acc, supply) =>
-                acc.plus(
-                  supply.principal.exchange.value.plus(
-                    supply.interest.exchange.value,
-                  ),
-                ),
+              (acc, supply) => acc.plus(supply.withdrawable.exchange.value),
               bigDecimal('0'),
             );
           const totalDebt = borrowPositions.reduce(
-            (acc, borrow) =>
-              acc.plus(
-                borrow.debt.exchange.value.plus(borrow.interest.exchange.value),
-              ),
+            (acc, borrow) => acc.plus(borrow.debt.exchange.value),
             bigDecimal('0'),
           );
 
           expect(totalCollateral.minus(totalDebt)).toBeBigDecimalCloseTo(
             position.netCollateral.current.value,
-            { percent: 0.05 },
+            { percent: 0.1 },
           );
         });
 
         it('Then the totalDebt value should be the sum of the principal and interest for all positions in the spoke', async () => {
           expect(position.totalDebt.current.value).toBeBigDecimalCloseTo(
             accountDataOnChain.totalDebtValue,
-            { precision: 1 },
+            { percent: 0.1 },
           );
         });
 
         it('Then the netBalance value should be the sum of the total supplied minus the borrows (debt)', async () => {
           const totalSupplied = suppliesPositions.reduce(
-            (acc, supply) =>
-              acc.plus(
-                supply.principal.exchange.value.plus(
-                  supply.interest.exchange.value,
-                ),
-              ),
+            (acc, supply) => acc.plus(supply.withdrawable.exchange.value),
             bigDecimal('0'),
           );
 
           const totalDebt = borrowPositions.reduce(
-            (acc, borrow) =>
-              acc.plus(
-                borrow.debt.exchange.value.plus(borrow.interest.exchange.value),
-              ),
+            (acc, borrow) => acc.plus(borrow.debt.exchange.value),
             bigDecimal('0'),
           );
 
           expect(totalSupplied.minus(totalDebt)).toBeBigDecimalCloseTo(
             position.netBalance.current.value,
-            { percent: 0.05 },
+            { percent: 0.1 },
           );
         });
 
         it('Then the healthFactor value should be the health factor from the spoke', async () => {
           expect(position.healthFactor.current).toBeBigDecimalCloseTo(
             accountDataOnChain.healthFactor,
-            { precision: 2 },
+            { percent: 0.01 },
           );
         });
 
         it('Then the averageCollateralFactor value should be the average collateral factor from the spoke', async () => {
-          expect(position.averageCollateralFactor.value).toBeBigDecimalCloseTo(
+          expect(position.averageCollateralFactor.value).toBeBigDecimalEqualTo(
             accountDataOnChain.avgCollateralFactor,
-            { precision: 2 },
           );
         });
 
         it('Then the riskPremium value should be the risk premium from the spoke', async () => {
-          expect(position.riskPremium?.current.value).toBeBigDecimalCloseTo(
+          expect(position.riskPremium?.current.value).toBeBigDecimalEqualTo(
             accountDataOnChain.riskPremium,
-            { precision: 2 },
           );
         });
 

@@ -7,6 +7,7 @@ export * from './inputs';
 export * from './misc';
 export * from './protocol';
 export * from './reserve';
+export * from './rewards';
 export * from './spoke';
 export * from './swaps';
 export * from './transactions';

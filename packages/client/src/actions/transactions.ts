@@ -4,6 +4,8 @@ import {
   type ActivitiesRequest,
   BorrowQuery,
   type BorrowRequest,
+  ClaimRewardsQuery,
+  type ClaimRewardsRequest,
   type ExecutionPlan,
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
@@ -396,6 +398,33 @@ export function setUserSuppliesAsCollateral(
   request: SetUserSuppliesAsCollateralRequest,
 ): ResultAsync<TransactionRequest, UnexpectedError> {
   return client.query(SetUserSuppliesAsCollateralQuery, { request });
+}
+
+/**
+ * Creates a transaction to claim rewards.
+ *
+ * ```ts
+ * const result = await claimRewards(client, {
+ *   ids: [rewardId('abc123')],
+ * });
+ *
+ * if (result.isErr()) {
+ *   // Handle error
+ *   return;
+ * }
+ *
+ * // result.value: TransactionRequest
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The claim rewards request parameters.
+ * @returns The transaction request to claim rewards.
+ */
+export function claimRewards(
+  client: AaveClient,
+  request: ClaimRewardsRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(ClaimRewardsQuery, { request });
 }
 
 /**

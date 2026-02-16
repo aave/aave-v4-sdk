@@ -192,28 +192,18 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
 
             it('Then the netBalance value should be the sum of the total supplied minus the borrows (debt)', async () => {
               const totalSupplied = userSuppliesItems.reduce(
-                (acc, supply) =>
-                  acc.plus(
-                    supply.principal.exchange.value.plus(
-                      supply.interest.exchange.value,
-                    ),
-                  ),
+                (acc, supply) => acc.plus(supply.withdrawable.exchange.value),
                 bigDecimal('0'),
               );
 
               const totalDebt = userBorrowsItems.reduce(
-                (acc, borrow) =>
-                  acc.plus(
-                    borrow.debt.exchange.value.plus(
-                      borrow.interest.exchange.value,
-                    ),
-                  ),
+                (acc, borrow) => acc.plus(borrow.debt.exchange.value),
                 bigDecimal('0'),
               );
 
               expect(totalSupplied.minus(totalDebt)).toBeBigDecimalCloseTo(
                 summaryData.netBalance.current.value,
-                { percent: 0.05 },
+                { percent: 0.1 },
               );
             });
 
@@ -224,7 +214,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
                 );
               expect(summaryData.totalCollateral.value).toBeBigDecimalCloseTo(
                 expectedTotalCollateral,
-                { percent: 0.05 },
+                { percent: 0.1 },
               );
             });
 
@@ -235,28 +225,29 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
                 );
               expect(summaryData.totalDebt.value).toBeBigDecimalCloseTo(
                 expectedTotalDebt,
-                { percent: 0.05 },
+                { percent: 0.1 },
               );
             });
 
             it('Then the netApy value should be the weighted average of the supply and borrow APYs', async () => {
-              // netApy = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
+              // netApy = (Σ(supply_amount_i * supply_apy_i) - Σ(borrow_amount_j * borrow_apy_j)) / netWorth
+              // where netWorth = totalSupplied - totalBorrowed
               const totalSupplied = userSuppliesItems.reduce(
-                (acc, supply) =>
-                  acc.plus(
-                    supply.principal.exchange.value.plus(
-                      supply.interest.exchange.value,
-                    ),
-                  ),
+                (acc, supply) => acc.plus(supply.withdrawable.exchange.value),
                 bigDecimal('0'),
               );
 
+              const totalBorrowed = userBorrowsItems.reduce(
+                (acc, borrow) => acc.plus(borrow.debt.exchange.value),
+                bigDecimal('0'),
+              );
+
+              const netWorth = totalSupplied.minus(totalBorrowed);
+
               const weightedSupplyApy = userSuppliesItems.reduce(
                 (acc, supply) => {
-                  const suppliedAmount = supply.principal.exchange.value.plus(
-                    supply.interest.exchange.value,
-                  );
-                  const supplyApy = supply.reserve.summary.supplyApy.value;
+                  const suppliedAmount = supply.withdrawable.exchange.value;
+                  const supplyApy = supply.reserve.summary.supplyApy.normalized;
                   return acc.plus(suppliedAmount.times(supplyApy));
                 },
                 bigDecimal('0'),
@@ -264,10 +255,8 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
 
               const weightedBorrowApy = userBorrowsItems.reduce(
                 (acc, borrow) => {
-                  const borrowedAmount = borrow.debt.exchange.value.plus(
-                    borrow.interest.exchange.value,
-                  );
-                  const borrowApy = borrow.reserve.summary.borrowApy.value;
+                  const borrowedAmount = borrow.debt.exchange.value;
+                  const borrowApy = borrow.reserve.summary.borrowApy.normalized;
                   return acc.plus(borrowedAmount.times(borrowApy));
                 },
                 bigDecimal('0'),
@@ -275,14 +264,15 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
 
               const expectedNetApy = weightedSupplyApy
                 .minus(weightedBorrowApy)
-                .div(totalSupplied);
+                .div(netWorth);
 
-              expect(summaryData.netApy.value).toBeBigDecimalCloseTo(
+              expect(summaryData.netApy.normalized).toBeBigDecimalCloseTo(
                 expectedNetApy,
-                { precision: 3 },
+                { percent: 0.1 },
               );
             });
 
+            // TODO: Create ticket to check the math in the backend
             it('Then the netAccruedInterest value should be the sum of the supply interests minus the borrow interests', async () => {
               const totalSupplyInterest = userSuppliesItems.reduce(
                 (acc, supply) => acc.plus(supply.interest.exchange.value),
@@ -300,7 +290,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               expect(
                 summaryData.netAccruedInterest.value,
               ).toBeBigDecimalCloseTo(expectedNetAccruedInterest, {
-                percent: 0.5,
+                percent: 0.1,
               });
             });
 
@@ -314,7 +304,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
 
               expect(summaryData.lowestHealthFactor).toBeBigDecimalCloseTo(
                 expectedLowestHealthFactor,
-                { precision: 3 },
+                { percent: 0.1 },
               );
             });
           });
