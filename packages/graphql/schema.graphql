@@ -282,6 +282,11 @@ input ChainsRequestQuery @oneOf {
   filter: ChainsFilter
 }
 
+input ClaimRewardsRequest {
+  """The claiming ids"""
+  ids: [RewardId!]!
+}
+
 type CollateralFactorVariation {
   reserveId: ReserveId!
   token: Erc20Token!
@@ -937,6 +942,34 @@ type MaxLiquidationBonusVariation {
   after: PercentNumber!
 }
 
+type MerklBorrowReward {
+  id: RewardId!
+  startDate: DateTime!
+  endDate: DateTime!
+  discountApy: PercentNumber!
+  payoutToken: Erc20Token!
+  criteria: [MerklCriteria!]!
+  userEligible: Boolean!
+}
+
+union MerklCriteria = MerklGenericCriteria
+
+type MerklGenericCriteria {
+  id: ID!
+  text: String!
+  userPassed: Boolean!
+}
+
+type MerklSupplyReward {
+  id: RewardId!
+  startDate: DateTime!
+  endDate: DateTime!
+  extraApy: PercentNumber!
+  payoutToken: Erc20Token!
+  criteria: [MerklCriteria!]!
+  userEligible: Boolean!
+}
+
 type Mutation {
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
@@ -1057,7 +1090,7 @@ type PermitTypedData {
 }
 
 type PositionAmount {
-  reserve: ReserveInfo
+  reserve: ReserveInfo!
   amount: Erc20Amount!
 }
 
@@ -1133,8 +1166,35 @@ input PreviewAction @oneOf {
   withdrawSwap: WithdrawSwapQuoteRequest
 }
 
+type PreviewMerklBorrowReward {
+  id: RewardId!
+  startDate: DateTime!
+  endDate: DateTime!
+  discountApy: PercentNumber!
+  payoutToken: Erc20Token!
+  criteria: [MerklCriteria!]!
+  reserve: ReserveInfo!
+}
+
+type PreviewMerklSupplyReward {
+  id: RewardId!
+  startDate: DateTime!
+  endDate: DateTime!
+  extraApy: PercentNumber!
+  payoutToken: Erc20Token!
+  criteria: [MerklCriteria!]!
+  reserve: ReserveInfo!
+}
+
 input PreviewRequest {
   action: PreviewAction!
+}
+
+union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward
+
+type PreviewRewardOutcome {
+  lost: [PreviewReward!]!
+  gained: [PreviewReward!]!
 }
 
 type PreviewUserPosition {
@@ -1148,6 +1208,7 @@ type PreviewUserPosition {
   netBalance(currency: Currency! = USD): ExchangeAmountVariation!
   projectedEarnings: ExchangeAmountVariation!
   borrowingPower: ExchangeAmountVariation!
+  rewards: PreviewRewardOutcome!
   otherConditions: [UserPositionConditionVariation!]!
 }
 
@@ -1234,6 +1295,12 @@ type Query {
   userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
+
+  """Claim rewards for a user"""
+  claimRewards(request: ClaimRewardsRequest!): TransactionRequest!
+
+  """The rewards a user can claim"""
+  userClaimableRewards(request: UserClaimableRewardsRequest!): [UserClaimableReward!]!
 }
 
 """Quote accuracy level for swap quotes"""
@@ -1434,6 +1501,7 @@ type ReserveSummary {
   borrowed: Erc20Amount!
   supplyApy: PercentNumber!
   borrowApy: PercentNumber!
+  rewards: [Reward!]!
 }
 
 type ReserveUserState {
@@ -1514,6 +1582,10 @@ input ReservesRequestQuery @oneOf {
   """Get all the reserves based on the token categories"""
   chainTokenCategories: [ChainTokenCategories!]
 }
+
+union Reward = MerklSupplyReward | MerklBorrowReward
+
+scalar RewardId
 
 input SetSpokeUserPositionManagerRequest {
   """The spoke id"""
@@ -2218,6 +2290,12 @@ input UserChains {
   chainIds: [ChainId!]!
 }
 
+union UserClaimableReward = UserMerklClaimableReward
+
+input UserClaimableRewardsRequest {
+  user: EvmAddress!
+}
+
 input UserHub {
   """The user address"""
   user: EvmAddress!
@@ -2229,6 +2307,14 @@ input UserHub {
 input UserHubInput @oneOf {
   input: HubInput
   id: HubId
+}
+
+type UserMerklClaimableReward {
+  id: RewardId!
+  claimable: Erc20Amount!
+  startDate: DateTime!
+  endDate: DateTime!
+  claimUntil: DateTime!
 }
 
 type UserPosition {

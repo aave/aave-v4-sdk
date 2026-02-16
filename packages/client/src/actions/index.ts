@@ -2,6 +2,7 @@ export * from './hubs';
 export * from './misc';
 export * from './protocol';
 export * from './reserves';
+export * from './rewards';
 export * from './spokes';
 export * from './swap';
 export * from './transactions';
