@@ -11,6 +11,7 @@ import {
   HealthFactorResultFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
+  MerklCriteriaFragment,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   PercentNumberVariationFragment,
@@ -263,6 +264,100 @@ export type UserPositionConditionVariation = FragmentOf<
   typeof UserPositionConditionVariationFragment
 >;
 
+export const PreviewMerklSupplyRewardFragment = graphql(
+  `fragment PreviewMerklSupplyReward on PreviewMerklSupplyReward {
+    __typename
+    id
+    startDate
+    endDate
+    extraApy {
+      ...PercentNumber
+    }
+    payoutToken {
+      ...Erc20Token
+    }
+    criteria {
+      ...MerklCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [
+    PercentNumberFragment,
+    Erc20TokenFragment,
+    MerklCriteriaFragment,
+    ReserveInfoFragment,
+  ],
+);
+export type PreviewMerklSupplyReward = FragmentOf<
+  typeof PreviewMerklSupplyRewardFragment
+>;
+
+export const PreviewMerklBorrowRewardFragment = graphql(
+  `fragment PreviewMerklBorrowReward on PreviewMerklBorrowReward {
+    __typename
+    id
+    startDate
+    endDate
+    discountApy {
+      ...PercentNumber
+    }
+    payoutToken {
+      ...Erc20Token
+    }
+    criteria {
+      ...MerklCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [
+    PercentNumberFragment,
+    Erc20TokenFragment,
+    MerklCriteriaFragment,
+    ReserveInfoFragment,
+  ],
+);
+export type PreviewMerklBorrowReward = FragmentOf<
+  typeof PreviewMerklBorrowRewardFragment
+>;
+
+export type PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward;
+
+export const PreviewRewardFragment: FragmentDocumentFor<
+  PreviewReward,
+  'PreviewReward'
+> = graphql(
+  `fragment PreviewReward on PreviewReward {
+    __typename
+    ... on PreviewMerklSupplyReward {
+      ...PreviewMerklSupplyReward
+    }
+    ... on PreviewMerklBorrowReward {
+      ...PreviewMerklBorrowReward
+    }
+  }`,
+  [PreviewMerklSupplyRewardFragment, PreviewMerklBorrowRewardFragment],
+);
+
+export const PreviewRewardOutcomeFragment = graphql(
+  `fragment PreviewRewardOutcome on PreviewRewardOutcome {
+    __typename
+    lost {
+      ...PreviewReward
+    }
+    gained {
+      ...PreviewReward
+    }
+  }`,
+  [PreviewRewardFragment],
+);
+export type PreviewRewardOutcome = FragmentOf<
+  typeof PreviewRewardOutcomeFragment
+>;
+
 export const PreviewUserPositionFragment = graphql(
   `fragment PreviewUserPosition on PreviewUserPosition {
     __typename
@@ -288,6 +383,9 @@ export const PreviewUserPositionFragment = graphql(
     borrowingPower {
       ...ExchangeAmountVariation
     }
+    rewards {
+      ...PreviewRewardOutcome
+    }
     otherConditions {
       ...UserPositionConditionVariation
     }
@@ -296,6 +394,7 @@ export const PreviewUserPositionFragment = graphql(
     HealthFactorResultFragment,
     PercentNumberVariationFragment,
     ExchangeAmountVariationFragment,
+    PreviewRewardOutcomeFragment,
     UserPositionConditionVariationFragment,
   ],
 );
@@ -307,7 +406,7 @@ export type PreviewUserPosition = FragmentOf<
  * @internal
  */
 export const PreviewQuery = graphql(
-  `query Preview($request: PreviewRequest!, $currency: Currency! = USD) {
+  `query Preview($request: PreviewRequest!, $currency: Currency! = USD, $timeWindow: TimeWindow! = LAST_WEEK) {
     value: preview(request: $request) {
       ...PreviewUserPosition
     }
