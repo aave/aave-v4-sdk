@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 1.0.0-next.30
+
+### Minor Changes
+
+- 141c0fe: **fix:** `UserMerklClaimableReward.amount: Erc20Token` to `UserMerklClaimableReward.claimable: Erc20Amount`
+- b591d64: **feat:** support for incentive rewards with `userClaimableRewards` action, `useUserClaimableRewards` hook, and `useClaimRewards` transaction hook
+
 ## 1.0.0-next.29
 
 ### Patch Changes

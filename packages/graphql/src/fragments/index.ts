@@ -3,6 +3,7 @@ export * from './common';
 export * from './hubs';
 export * from './permits';
 export * from './reserve';
+export * from './rewards';
 export * from './spoke';
 export * from './swaps';
 export * from './transactions';
