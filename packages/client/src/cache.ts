@@ -16,6 +16,9 @@ import {
   isReserveInputVariant,
   isTxHashInputVariant,
   type LiquidatedActivity,
+  type MerklBorrowReward,
+  type MerklGenericCriteria,
+  type MerklSupplyReward,
   type NativeToken,
   type RepayActivity,
   type RepayWithSupplyActivity,
@@ -29,6 +32,7 @@ import {
   type TokenSwapActivity,
   type UpdatedDynamicConfigActivity,
   type UpdatedRiskPremiumActivity,
+  type UserMerklClaimableReward,
   type UserPosition,
   type UserPositionQuery,
   type UsingAsCollateralActivity,
@@ -133,6 +137,14 @@ export const exchange = cacheExchange({
     HubSummarySample: {
       date: transformToDate,
     },
+    PreviewMerklBorrowReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
+    },
+    PreviewMerklSupplyReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
+    },
     ProtocolHistorySample: {
       date: transformToDate,
     },
@@ -141,6 +153,14 @@ export const exchange = cacheExchange({
     },
     LiquidatedActivity: {
       timestamp: transformToDate,
+    },
+    MerklBorrowReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
+    },
+    MerklSupplyReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
     },
     RepayActivity: {
       timestamp: transformToDate,
@@ -174,6 +194,11 @@ export const exchange = cacheExchange({
     },
     WithdrawSwapActivity: {
       timestamp: transformToDate,
+    },
+    UserMerklClaimableReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
+      claimUntil: transformToDate,
     },
     UserPosition: {
       createdAt: transformToDate,
@@ -330,25 +355,29 @@ export const exchange = cacheExchange({
     // Entities with id field as key
     Asset: (data: Asset) => data.id,
     BorrowActivity: (data: BorrowActivity) => data.id,
+    BorrowSwapActivity: (data: BorrowSwapActivity) => data.id,
     Hub: (data: Hub) => data.id,
     HubAsset: (data: HubAsset) => data.id,
     LiquidatedActivity: (data: LiquidatedActivity) => data.id,
+    MerklBorrowReward: (data: MerklBorrowReward) => data.id,
+    MerklGenericCriteria: (data: MerklGenericCriteria) => data.id,
+    MerklSupplyReward: (data: MerklSupplyReward) => data.id,
     RepayActivity: (data: RepayActivity) => data.id,
+    RepayWithSupplyActivity: (data: RepayWithSupplyActivity) => data.id,
     Reserve: (data: Reserve) => data.id,
     ReserveInfo: (data: ReserveInfo) => data.id,
     Spoke: (data: Spoke) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
+    SupplySwapActivity: (data: SupplySwapActivity) => data.id,
     TokenInfo: (data: TokenInfo) => data.id,
-    UserPosition: (data: UserPosition) => data.id,
-    UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
-    WithdrawActivity: (data: WithdrawActivity) => data.id,
+    TokenSwapActivity: (data: TokenSwapActivity) => data.id,
     UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
       data.id,
     UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
-    TokenSwapActivity: (data: TokenSwapActivity) => data.id,
-    SupplySwapActivity: (data: SupplySwapActivity) => data.id,
-    BorrowSwapActivity: (data: BorrowSwapActivity) => data.id,
-    RepayWithSupplyActivity: (data: RepayWithSupplyActivity) => data.id,
+    UserMerklClaimableReward: (data: UserMerklClaimableReward) => data.id,
+    UserPosition: (data: UserPosition) => data.id,
+    UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
+    WithdrawActivity: (data: WithdrawActivity) => data.id,
     WithdrawSwapActivity: (data: WithdrawSwapActivity) => data.id,
 
     // Entities with address field as key
@@ -409,6 +438,9 @@ export const exchange = cacheExchange({
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PrepareSwapOrder: () => null,
+    PreviewMerklBorrowReward: () => null,
+    PreviewMerklSupplyReward: () => null,
+    PreviewRewardOutcome: () => null,
     PreviewUserPosition: () => null,
     RepayWithSupply: () => null,
     RepayWithSupplyQuoteResult: () => null,

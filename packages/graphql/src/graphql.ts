@@ -49,6 +49,7 @@ import type {
   OnChainHubAssetId,
   OnChainReserveId,
   ReserveId,
+  RewardId,
   SpokeId,
   SwapId,
   SwapQuoteId,
@@ -96,6 +97,7 @@ export const graphql = initGraphQLTada<{
     QuoteAccuracy: QuoteAccuracy;
     ReserveId: ReserveId;
     ReservesRequestFilter: ReservesRequestFilter;
+    RewardId: RewardId;
     Signature: Signature;
     SpokeId: SpokeId;
     String: string;
