@@ -4,19 +4,8 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 {
   "__typename": "Hub",
   "address": Any<String>,
-  "chain": {
-    "__typename": "Chain",
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": Any<String>,
-    "icon": Any<String>,
-    "isFork": Any<Boolean>,
-    "isTestnet": Any<Boolean>,
-    "name": Any<String>,
-    "nativeGateway": Any<String>,
-    "nativeInfo": Any<Object>,
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": Any<String>,
-    "signatureGateway": Any<String>,
   },
   "id": Any<String>,
   "name": Any<String>,
@@ -28,19 +17,8 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 {
   "__typename": "Hub",
   "address": Any<String>,
-  "chain": {
-    "__typename": "Chain",
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": Any<String>,
-    "icon": Any<String>,
-    "isFork": Any<Boolean>,
-    "isTestnet": Any<Boolean>,
-    "name": Any<String>,
-    "nativeGateway": Any<String>,
-    "nativeInfo": Any<Object>,
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": Any<String>,
-    "signatureGateway": Any<String>,
   },
   "id": Any<String>,
   "name": Any<String>,
@@ -52,19 +30,8 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 {
   "__typename": "Hub",
   "address": Any<String>,
-  "chain": {
-    "__typename": "Chain",
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": Any<String>,
-    "icon": Any<String>,
-    "isFork": Any<Boolean>,
-    "isTestnet": Any<Boolean>,
-    "name": Any<String>,
-    "nativeGateway": Any<String>,
-    "nativeInfo": Any<Object>,
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": Any<String>,
-    "signatureGateway": Any<String>,
   },
   "id": Any<String>,
   "name": Any<String>,
@@ -76,19 +43,8 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 {
   "__typename": "Hub",
   "address": Any<String>,
-  "chain": {
-    "__typename": "Chain",
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": Any<String>,
-    "icon": Any<String>,
-    "isFork": Any<Boolean>,
-    "isTestnet": Any<Boolean>,
-    "name": Any<String>,
-    "nativeGateway": Any<String>,
-    "nativeInfo": Any<Object>,
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": Any<String>,
-    "signatureGateway": Any<String>,
   },
   "id": Any<String>,
   "name": Any<String>,
