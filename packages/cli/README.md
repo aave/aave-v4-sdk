@@ -20,7 +20,7 @@ $ npm install -g @aave/cli
 $ aave COMMAND
 running command...
 $ aave (--version)
-@aave/cli/4.1.0-next.32 darwin-arm64 node-v22.17.0
+@aave/cli/4.1.0-next.33 darwin-arm64 node-v22.17.0
 $ aave --help [COMMAND]
 USAGE
   $ aave COMMAND
@@ -51,7 +51,7 @@ DESCRIPTION
   List Aave v4 liquidity hubs
 ```
 
-_See code: [src/commands/hubs/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.32/src/commands/hubs/list.ts)_
+_See code: [src/commands/hubs/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.33/src/commands/hubs/list.ts)_
 
 ## `aave reserves list`
 
@@ -74,7 +74,7 @@ DESCRIPTION
   List Aave v4 reserves
 ```
 
-_See code: [src/commands/reserves/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.32/src/commands/reserves/list.ts)_
+_See code: [src/commands/reserves/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.33/src/commands/reserves/list.ts)_
 
 ## `aave spokes list`
 
@@ -96,5 +96,5 @@ DESCRIPTION
   List Aave v4 spokes
 ```
 
-_See code: [src/commands/spokes/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.32/src/commands/spokes/list.ts)_
+_See code: [src/commands/spokes/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.33/src/commands/spokes/list.ts)_
 <!-- commandsstop -->
