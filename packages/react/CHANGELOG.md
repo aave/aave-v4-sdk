@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.41
+
+### Patch Changes
+
+- 7546d4d: **fix:** issue with stale content being served when the cache refresh gets interrupted.
+- Updated dependencies [7546d4d]
+  - @aave/core@1.0.0-next.15
+  - @aave/client@4.0.0-next.41
+
 ## 4.0.0-next.40
 
 ### Minor Changes
