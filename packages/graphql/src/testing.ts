@@ -303,7 +303,6 @@ export function makeSwapReceipt(): SwapReceipt {
     __typename: 'SwapReceipt',
     id: randomBase64String() as SwapId,
     createdAt: new Date(),
-    explorerUrl: 'https://example.com/explorer.json',
   };
 }
 
