@@ -1,6 +1,7 @@
 import {
   assertOk,
   type BigDecimal,
+  bigDecimal,
   evmAddress,
   type HealthFactorError,
   type PreviewUserPosition,
@@ -13,6 +14,8 @@ import {
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
+  fundErc20Address,
 } from '@aave/client/testing';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -141,6 +144,17 @@ describe('Withdraw Preview Math', () => {
       });
       assertOk(secondSupplyResult);
 
+      // Fund the user with USDT to avoid repay debt issues
+      const fundResult = await fundErc20Address(
+        evmAddress(user.account.address),
+        {
+          address: ETHEREUM_USDT_ADDRESS,
+          amount: bigDecimal('100'),
+          decimals: 6,
+        },
+      );
+      assertOk(fundResult);
+
       const firstRisk =
         firstSupplyResult.value.reserveInfo.settings.collateralRisk.value;
       const secondRisk =
@@ -159,6 +173,7 @@ describe('Withdraw Preview Math', () => {
       beforeAll(async () => {
         const borrowResult = await borrowFromRandomReserve(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDT_ADDRESS,
           ratioToBorrow: 0.9,
         });
         assertOk(borrowResult);
@@ -239,6 +254,7 @@ describe('Withdraw Preview Math', () => {
 
         const borrowResult = await borrowFromRandomReserve(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDT_ADDRESS,
           ratioToBorrow: 0.1,
         });
         assertOk(borrowResult);
