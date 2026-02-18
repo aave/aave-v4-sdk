@@ -73,7 +73,7 @@ describe('Withdraw Position swapping on Aave V4', () => {
           );
         assertOk(result);
         const orderReceipt = result.value as SwapReceipt;
-        annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
+        annotate(`Swap id: ${orderReceipt.id}`);
         const swapStatus = await waitForSwapToFulfill(
           orderReceipt.id,
           2 * 60 * 1000,

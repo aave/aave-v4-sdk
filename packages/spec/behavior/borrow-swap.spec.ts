@@ -126,7 +126,7 @@ describe('Borrow Position swapping on Aave V4', () => {
             );
           assertOk(result);
           const orderReceipt = result.value as SwapReceipt;
-          annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
+          annotate(`Swap explorer url: ${orderReceipt.id}`);
           // NOTE: Waiting to fulfill the swap makes the test flaky and unreliable (sometimes the swap is not fulfilled in time)
           // The part checking the borrow positions should be checked manually (for now)
         });

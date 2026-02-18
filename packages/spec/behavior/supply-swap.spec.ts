@@ -113,7 +113,7 @@ describe('Supply Position swapping on Aave V4', () => {
         assertOk(result);
 
         const orderReceipt = result.value as SwapReceipt;
-        annotate(`Swap explorer url: ${orderReceipt.explorerUrl}`);
+        annotate(`Swap id: ${orderReceipt.id}`);
         // NOTE: Waiting to fulfill the swap makes the test flaky and unreliable (sometimes the swap is not fulfilled in time)
         // The part checking the supply positions should be checked manually (for now)
       });
