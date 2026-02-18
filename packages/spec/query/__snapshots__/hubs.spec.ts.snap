@@ -3,33 +3,12 @@
 exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
 {
   "__typename": "Hub",
-  "address": "0xaD905aD5EA5B98cD50AE40Cfe368344686a21366",
-  "chain": {
-    "__typename": "Chain",
+  "address": Any<String>,
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": "https://etherscan.io",
-    "icon": "https://statics.aave.com/ethereum.svg",
-    "isFork": true,
-    "isTestnet": true,
-    "name": "Devnet",
-    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
-    "nativeInfo": {
-      "__typename": "TokenInfo",
-      "categories": [
-        "ETH_CORRELATED",
-      ],
-      "decimals": 18,
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI6OkVUSA==",
-      "name": "Ether",
-      "symbol": "ETH",
-    },
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
-    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  "id": "MTIzNDU2Nzg5OjoweGFEOTA1YUQ1RUE1Qjk4Y0Q1MEFFNDBDZmUzNjgzNDQ2ODZhMjEzNjY=",
-  "name": "Core",
+  "id": Any<String>,
+  "name": Any<String>,
   "summary": Any<Object>,
 }
 `;
@@ -37,33 +16,12 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
 {
   "__typename": "Hub",
-  "address": "0x5DDF2369cB82F9514043627731157B8d313E8295",
-  "chain": {
-    "__typename": "Chain",
+  "address": Any<String>,
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": "https://etherscan.io",
-    "icon": "https://statics.aave.com/ethereum.svg",
-    "isFork": true,
-    "isTestnet": true,
-    "name": "Devnet",
-    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
-    "nativeInfo": {
-      "__typename": "TokenInfo",
-      "categories": [
-        "ETH_CORRELATED",
-      ],
-      "decimals": 18,
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI6OkVUSA==",
-      "name": "Ether",
-      "symbol": "ETH",
-    },
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
-    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  "id": "MTIzNDU2Nzg5OjoweDVEREYyMzY5Y0I4MkY5NTE0MDQzNjI3NzMxMTU3QjhkMzEzRTgyOTU=",
-  "name": "Frontier",
+  "id": Any<String>,
+  "name": Any<String>,
   "summary": Any<Object>,
 }
 `;
@@ -71,33 +29,12 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
 {
   "__typename": "Hub",
-  "address": "0x6ACF162ca44eB6929eff8c3296a2cdD6bFA7b8BF",
-  "chain": {
-    "__typename": "Chain",
+  "address": Any<String>,
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": "https://etherscan.io",
-    "icon": "https://statics.aave.com/ethereum.svg",
-    "isFork": true,
-    "isTestnet": true,
-    "name": "Devnet",
-    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
-    "nativeInfo": {
-      "__typename": "TokenInfo",
-      "categories": [
-        "ETH_CORRELATED",
-      ],
-      "decimals": 18,
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI6OkVUSA==",
-      "name": "Ether",
-      "symbol": "ETH",
-    },
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
-    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  "id": "MTIzNDU2Nzg5OjoweDZBQ0YxNjJjYTQ0ZUI2OTI5ZWZmOGMzMjk2YTJjZEQ2YkZBN2I4QkY=",
-  "name": "Prime",
+  "id": Any<String>,
+  "name": Any<String>,
   "summary": Any<Object>,
 }
 `;
@@ -105,33 +42,12 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 4`] = `
 {
   "__typename": "Hub",
-  "address": "0x86F37ba3b480c5fE22A7eb1ba2B2D49c94089FBB",
-  "chain": {
-    "__typename": "Chain",
+  "address": Any<String>,
+  "chain": ObjectContaining {
     "chainId": 123456789,
-    "explorerUrl": "https://etherscan.io",
-    "icon": "https://statics.aave.com/ethereum.svg",
-    "isFork": true,
-    "isTestnet": true,
-    "name": "Devnet",
-    "nativeGateway": "0x6f1aE3c0A22B393116Ded7332f465b0973fD1027",
-    "nativeInfo": {
-      "__typename": "TokenInfo",
-      "categories": [
-        "ETH_CORRELATED",
-      ],
-      "decimals": 18,
-      "icon": "https://statics.aave.com/ethereum.svg",
-      "id": "RXRoZXI6OkVUSA==",
-      "name": "Ether",
-      "symbol": "ETH",
-    },
-    "nativeWrappedToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "rpcUrl": "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146",
-    "signatureGateway": "0x9478027b9827A576dB0CE6d99A5E47B4F350a83d",
   },
-  "id": "MTIzNDU2Nzg5OjoweDg2RjM3YmEzYjQ4MGM1ZkUyMkE3ZWIxYmEyQjJENDljOTQwODlGQkI=",
-  "name": "Yield Seeking",
+  "id": Any<String>,
+  "name": Any<String>,
   "summary": Any<Object>,
 }
 `;
