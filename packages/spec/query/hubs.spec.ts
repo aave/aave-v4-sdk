@@ -20,6 +20,12 @@ describe('Querying Hubs on Aave V4', () => {
         assertOk(result);
         result.value.forEach((hub) => {
           expect(hub).toMatchSnapshot({
+            address: expect.any(String),
+            chain: expect.objectContaining({
+              chainId: ETHEREUM_FORK_ID,
+            }),
+            id: expect.any(String),
+            name: expect.any(String),
             summary: expect.any(Object),
           });
         });
