@@ -1,6 +1,7 @@
 import {
   assertOk,
   delay,
+  nonNullable,
   type SwapFulfilled,
   type SwapId,
   TimeoutError,
@@ -30,7 +31,7 @@ export async function waitForSwapToFulfill(
       client,
       { id: swapId },
       { requestPolicy: 'network-only' },
-    );
+    ).map(nonNullable);
     assertOk(result);
 
     if (result.value.__typename === 'SwapFulfilled') {
