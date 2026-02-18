@@ -10,7 +10,7 @@ import {
   type TypedDocumentNode,
   type Client as UrqlClient,
 } from '@urql/core';
-import { map, pipe } from 'wonka';
+import { map, pipe, tap } from 'wonka';
 import { batchFetchExchange } from './batching';
 import type { Context } from './context';
 import { UnexpectedError } from './errors';
@@ -33,7 +33,7 @@ export type QueryOptions = {
   batch?: boolean;
 };
 
-const skipTracking = Symbol('skipTracking');
+const refetching = Symbol('refetching');
 
 export class GqlClient {
   /**
@@ -47,6 +47,8 @@ export class GqlClient {
   >();
 
   private readonly staleQueries = new Set<number>();
+
+  private readonly pendingRefreshes = new Set<number>();
 
   private readonly logger: Logger;
 
@@ -166,13 +168,15 @@ export class GqlClient {
 
     for (const { entry } of matchingEntries) {
       if (entry.watching > 0) {
+        this.pendingRefreshes.add(entry.operation.key);
+
         // Active query: reexecute immediately
         this.urql.reexecuteOperation(
           makeOperation(entry.operation.kind, entry.operation, {
             ...entry.operation.context,
             requestPolicy: 'network-only',
             batch: false, // never batch, run ASAP!
-            [skipTracking]: true,
+            [refetching]: true,
           }),
         );
       } else {
@@ -238,33 +242,45 @@ export class GqlClient {
     return ({ forward }) =>
       (ops$) =>
         pipe(
-          ops$,
-          map((op: Operation) => {
-            switch (op.kind) {
-              case 'query':
-                if (op.context.pause || skipTracking in op.context) {
+          pipe(
+            ops$,
+            map((op: Operation) => {
+              switch (op.kind) {
+                case 'query':
+                  if (op.context.pause || refetching in op.context) {
+                    break;
+                  }
+
+                  this.addQueryReference(op);
+
+                  if (this.staleQueries.has(op.key)) {
+                    this.staleQueries.delete(op.key);
+                    return makeOperation(op.kind, op, {
+                      ...op.context,
+                      requestPolicy: 'network-only',
+                    });
+                  }
                   break;
-                }
 
-                this.addQueryReference(op);
+                case 'teardown':
+                  this.releaseQueryReference(op.key);
 
-                if (this.staleQueries.has(op.key)) {
-                  this.staleQueries.delete(op.key);
-                  return makeOperation(op.kind, op, {
-                    ...op.context,
-                    requestPolicy: 'network-only',
-                  });
-                }
-                break;
+                  if (this.pendingRefreshes.has(op.key)) {
+                    this.pendingRefreshes.delete(op.key);
+                    this.staleQueries.add(op.key);
+                  }
+                  break;
+              }
 
-              case 'teardown':
-                this.releaseQueryReference(op.key);
-                break;
+              return op;
+            }),
+            forward,
+          ),
+          tap((result) => {
+            if (refetching in result.operation.context) {
+              this.pendingRefreshes.delete(result.operation.key);
             }
-
-            return op;
           }),
-          forward,
         );
   }
 

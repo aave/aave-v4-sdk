@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.15
+
+### Patch Changes
+
+- 7546d4d: **fix:** issue with stale content being served when the cache refresh gets interrupted.
+
 ## 1.0.0-next.14
 
 ### Patch Changes
