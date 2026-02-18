@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.31
+
+### Patch Changes
+
+- e499fff: **feat:** removes `SwapReceipt.explorerUrl` and supports `swapStatus` nullable result.
+
 ## 1.0.0-next.30
 
 ### Minor Changes

@@ -114,6 +114,32 @@ describe(`Given an instance of the ${GqlClient.name}`, () => {
         subscription.unsubscribe();
       });
     });
+
+    describe('When the query is marked for refresh but the subscriber unsubscribes before the refetch completes (e.g., useQuery unmounts)', () => {
+      const client = new GqlClient(context);
+
+      it('Then it should mark the query as stale so the next read skips the cache', async () => {
+        let received = false;
+        const subscription = client.urql
+          .query(TestQuery, { id: 1 })
+          .subscribe(() => {
+            received = true;
+          });
+        await vi.waitUntil(() => received, { timeout: 1000 });
+
+        await client.refreshQueryWhere(TestQuery, () => true);
+        subscription.unsubscribe();
+
+        const result = await client.query(
+          TestQuery,
+          { id: 1 },
+          { requestPolicy: 'cache-first' }, // gets ignored because the query is stale
+        );
+        assertOk(result);
+
+        expect(requests).toHaveLength(2); // 2 HTTP requests were made
+      });
+    });
   });
 
   describe('And a query that was executed and cached, then marked for refresh', () => {
