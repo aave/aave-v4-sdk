@@ -1,5 +1,21 @@
 # @aave/client
 
+## 4.0.0-next.42
+
+### Patch Changes
+
+- e499fff: **feat:** removes `SwapReceipt.explorerUrl` and supports `swapStatus` nullable result.
+- Updated dependencies [e499fff]
+  - @aave/graphql@1.0.0-next.31
+
+## 4.0.0-next.41
+
+### Patch Changes
+
+- 7546d4d: **fix:** issue with stale content being served when the cache refresh gets interrupted.
+- Updated dependencies [7546d4d]
+  - @aave/core@1.0.0-next.15
+
 ## 4.0.0-next.40
 
 ### Minor Changes

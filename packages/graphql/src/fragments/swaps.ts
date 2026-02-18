@@ -137,7 +137,6 @@ export const SwapReceiptFragment = graphql(
   `fragment SwapReceipt on SwapReceipt {
     __typename
     id
-    explorerUrl
     createdAt
   }`,
 );

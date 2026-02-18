@@ -145,7 +145,7 @@ describe('Token swapping on Aave V4', () => {
         swapResult.value.__typename === 'SwapReceipt',
         `Swap result is not a swap receipt: ${swapResult.value.__typename}`,
       );
-      annotate(`Swap link: ${swapResult.value.explorerUrl}`);
+      annotate(`Swap id: ${swapResult.value.id}`);
     });
 
     it.todo('Then they should be able to swap via permit');
