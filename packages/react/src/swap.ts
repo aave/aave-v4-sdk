@@ -2036,6 +2036,10 @@ export function useCancelSwap(
   return useAsyncTask(
     (request) =>
       swapStatus(client, { id: request.id }).andThen((status) => {
+        if (status === null) {
+          return UnexpectedError.from('Swap not found').asResultAsync();
+        }
+
         switch (status.__typename) {
           case 'SwapOpen':
           case 'SwapPendingSignature':
@@ -2059,7 +2063,7 @@ export function useCancelSwap(
                     // TODO: verify that if fails cause too early, we need to waitForSwapOutcome(client)({ id: request.id })
                     .andThen(() => swapStatus(client, { id: request.id }))
                     .andThen((status) => {
-                      if (status.__typename === 'SwapCancelled') {
+                      if (status?.__typename === 'SwapCancelled') {
                         return okAsync(toSwapCancelledResult(status));
                       }
                       return new CannotCancelSwapError(

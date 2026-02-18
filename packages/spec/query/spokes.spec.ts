@@ -1,5 +1,5 @@
 import { assertOk } from '@aave/client';
-import { spokes } from '@aave/client/actions';
+import { reserves, spokes } from '@aave/client/actions';
 import {
   client,
   ETHEREUM_FORK_ID,
@@ -16,7 +16,16 @@ describe('Querying Spokes on Aave V4', () => {
         },
       });
       assertOk(spokesResult);
-      expect(spokesResult.value).toMatchSnapshot();
+      expect(spokesResult.value).toBeArrayWithElements(
+        expect.objectContaining({
+          address: expect.any(String),
+          chain: expect.objectContaining({
+            chainId: ETHEREUM_FORK_ID,
+          }),
+          id: expect.any(String),
+          name: expect.any(String),
+        }),
+      );
     });
   });
 
@@ -28,7 +37,29 @@ describe('Querying Spokes on Aave V4', () => {
         },
       });
       assertOk(spokesResult);
-      expect(spokesResult.value).toMatchSnapshot();
+      expect(spokesResult.value).toBeArrayWithElements(
+        expect.objectContaining({
+          address: expect.any(String),
+          chain: expect.any(Object),
+          id: expect.any(String),
+          name: expect.any(String),
+        }),
+      );
+
+      // Note: Not possible to check spoke - hub relationship directly
+      // We need to check through the reserves
+      for (const spoke of spokesResult.value) {
+        const reservesResult = await reserves(client, {
+          query: { spokeId: spoke.id },
+        });
+        assertOk(reservesResult);
+        expect(reservesResult.value.length).toBeGreaterThan(0);
+
+        const hasMatchingHub = reservesResult.value.some(
+          (reserve) => reserve.asset.hub.id === ETHEREUM_HUB_CORE_ID,
+        );
+        expect(hasMatchingHub).toBe(true);
+      }
     });
   });
 });
