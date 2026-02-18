@@ -91,6 +91,38 @@ describe('Querying User Balances on Aave V4', () => {
       });
     });
 
+    describe('When the user queries balances by tokens', () => {
+      it('Then only the balances of the tokens are returned', async () => {
+        const balances = await userBalances(client, {
+          user: evmAddress(user.account.address),
+          filter: {
+            tokens: {
+              chainTokens: [
+                {
+                  chainId: ETHEREUM_FORK_ID,
+                  token: {
+                    erc20: ETHEREUM_USDC_ADDRESS,
+                  },
+                },
+                {
+                  chainId: ETHEREUM_FORK_ID,
+                  token: {
+                    erc20: ETHEREUM_1INCH_ADDRESS,
+                  },
+                },
+              ],
+            },
+          },
+        });
+        assertOk(balances);
+        assertNonEmptyArray(balances.value);
+        expect(balances.value.length).toBe(2);
+        const symbols = balances.value.map((elem) => elem.info.symbol);
+        expect(symbols).toContain('USDC');
+        expect(symbols).toContain('1INCH');
+      });
+    });
+
     describe('When the user queries balances by swappable tokens on a specific chainId', () => {
       // TODO: this query needs to be fixed as it can take even 20 seconds to complete
       it.skip('Then the balances of assets that can be swapped are returned', async () => {
