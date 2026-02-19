@@ -1291,7 +1291,7 @@ type Query {
   repayWithSupplyQuote(request: RepayWithSupplyQuoteRequest!): RepayWithSupplyQuoteResult!
   withdrawSwapQuote(request: WithdrawSwapQuoteRequest!): WithdrawSwapQuoteResult!
   preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult!
-  swapStatus(request: SwapStatusRequest!): SwapStatus!
+  swapStatus(request: SwapStatusRequest!): SwapStatus
   userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
   prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
@@ -1903,7 +1903,6 @@ scalar SwapQuoteId
 type SwapReceipt {
   id: SwapId!
   createdAt: DateTime!
-  explorerUrl: String!
 }
 
 input SwapRequest @oneOf {
