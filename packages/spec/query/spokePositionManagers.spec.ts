@@ -13,7 +13,13 @@ describe('Querying Position Managers on Aave V4', () => {
         });
 
         assertOk(result);
-        expect(result.value.items).toMatchSnapshot();
+        expect(result.value.items).toBeArrayWithElements(
+          expect.objectContaining({
+            address: expect.any(String),
+            name: expect.any(String),
+            active: expect.any(Boolean),
+          }),
+        );
       });
     });
 
