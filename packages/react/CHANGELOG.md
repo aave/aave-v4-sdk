@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.43
+
+### Patch Changes
+
+- e15455c: **chore:** surfaces cache update errors
+- Updated dependencies [e15455c]
+  - @aave/core@1.0.0-next.16
+  - @aave/client@4.0.0-next.43
+
 ## 4.0.0-next.42
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.16
+
+### Patch Changes
+
+- e15455c: **chore:** surfaces cache update errors
+
 ## 1.0.0-next.15
 
 ### Patch Changes
