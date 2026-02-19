@@ -1,18 +1,21 @@
 import {
   assertOk,
   type BigDecimal,
+  bigDecimal,
   evmAddress,
   type HealthFactorError,
   type PreviewUserPosition,
   type Reserve,
 } from '@aave/client';
-import { preview } from '@aave/client/actions';
+import { preview, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
+  fundErc20Address,
 } from '@aave/client/testing';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -20,7 +23,8 @@ import {
   borrowFromRandomReserve,
   findReserveAndSupply,
 } from '../../helpers/supplyBorrow';
-import { repayAllExistingBorrows } from '../../helpers/withdrawRepay';
+import { repayFromReserve } from '../../helpers/withdrawRepay';
+import { assertSingleElementArray } from '../../test-utils';
 
 describe('Withdraw Preview Math', () => {
   describe('Given a user with 1 supply position enabled as collateral', () => {
@@ -141,6 +145,17 @@ describe('Withdraw Preview Math', () => {
       });
       assertOk(secondSupplyResult);
 
+      // Fund the user with USDT to avoid repay debt issues
+      const fundResult = await fundErc20Address(
+        evmAddress(user.account.address),
+        {
+          address: ETHEREUM_USDT_ADDRESS,
+          amount: bigDecimal('500'),
+          decimals: 6,
+        },
+      );
+      assertOk(fundResult);
+
       const firstRisk =
         firstSupplyResult.value.reserveInfo.settings.collateralRisk.value;
       const secondRisk =
@@ -159,6 +174,7 @@ describe('Withdraw Preview Math', () => {
       beforeAll(async () => {
         const borrowResult = await borrowFromRandomReserve(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDT_ADDRESS,
           ratioToBorrow: 0.9,
         });
         assertOk(borrowResult);
@@ -235,13 +251,38 @@ describe('Withdraw Preview Math', () => {
 
     describe('And the user has 1 borrow position that is fully covered by the safest collateral', () => {
       beforeAll(async () => {
-        await repayAllExistingBorrows(client, user, ETHEREUM_SPOKE_CORE_ID);
-
-        const borrowResult = await borrowFromRandomReserve(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-          ratioToBorrow: 0.1,
+        // Check if we have a borrow positions
+        const borrows = await userBorrows(client, {
+          query: {
+            userSpoke: {
+              spoke: ETHEREUM_SPOKE_CORE_ID,
+              user: evmAddress(user.account.address),
+            },
+          },
         });
-        assertOk(borrowResult);
+        assertOk(borrows);
+
+        if (borrows.value.length === 0) {
+          const borrowResult = await borrowFromRandomReserve(client, user, {
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            token: ETHEREUM_USDT_ADDRESS,
+            ratioToBorrow: 0.1,
+          });
+          assertOk(borrowResult);
+        } else {
+          // Repay partially the existing borrow position to fill the criteria
+          assertSingleElementArray(borrows.value);
+          const repayResult = await repayFromReserve(client, user, {
+            reserve: borrows.value[0].reserve.id,
+            amount: {
+              erc20: {
+                value: { exact: borrows.value[0].debt.amount.value.times(0.8) },
+              },
+            },
+            sender: evmAddress(user.account.address),
+          });
+          assertOk(repayResult);
+        }
       });
 
       describe('When the user previews a withdraw action from the collateral with the lower collateralRisk', () => {
