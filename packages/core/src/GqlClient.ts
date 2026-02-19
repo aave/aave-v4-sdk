@@ -126,14 +126,14 @@ export class GqlClient {
    *
    * @internal
    */
-  async refreshQueryWhere<TValue, TVariables extends AnyVariables>(
+  refreshQueryWhere<TValue, TVariables extends AnyVariables>(
     document: TypedDocumentNode<StandardData<TValue>, TVariables>,
     predicate: (
       variables: TVariables,
       data: TValue,
     ) => boolean | Promise<boolean>,
-  ): Promise<void> {
-    await this.refreshWhere(async (op) => {
+  ): ResultAsync<void, UnexpectedError> {
+    return this.refreshWhere(async (op) => {
       if (op.query === document) {
         const result = this.urql.readQuery(
           document,
@@ -154,36 +154,43 @@ export class GqlClient {
     });
   }
 
-  protected async refreshWhere(
+  protected refreshWhere(
     predicate: (op: Operation) => boolean | Promise<boolean>,
-  ): Promise<void> {
-    const predicateResults = await Promise.all(
-      Array.from(this.queryRegistry.values()).map(async (entry) => ({
-        entry,
-        matches: await predicate(entry.operation),
-      })),
-    );
-
-    const matchingEntries = predicateResults.filter(({ matches }) => matches);
-
-    for (const { entry } of matchingEntries) {
-      if (entry.watching > 0) {
-        this.pendingRefreshes.add(entry.operation.key);
-
-        // Active query: reexecute immediately
-        this.urql.reexecuteOperation(
-          makeOperation(entry.operation.kind, entry.operation, {
-            ...entry.operation.context,
-            requestPolicy: 'network-only',
-            batch: false, // never batch, run ASAP!
-            [refetching]: true,
-          }),
+  ): ResultAsync<void, UnexpectedError> {
+    return ResultAsync.fromPromise(
+      (async () => {
+        const predicateResults = await Promise.all(
+          Array.from(this.queryRegistry.values()).map(async (entry) => ({
+            entry,
+            matches: await predicate(entry.operation),
+          })),
         );
-      } else {
-        // Flag as stale for next activation
-        this.staleQueries.add(entry.operation.key);
-      }
-    }
+
+        const matchingEntries = predicateResults.filter(
+          ({ matches }) => matches,
+        );
+
+        for (const { entry } of matchingEntries) {
+          if (entry.watching > 0) {
+            this.pendingRefreshes.add(entry.operation.key);
+
+            // Active query: reexecute immediately
+            this.urql.reexecuteOperation(
+              makeOperation(entry.operation.kind, entry.operation, {
+                ...entry.operation.context,
+                requestPolicy: 'network-only',
+                batch: false, // never batch, run ASAP!
+                [refetching]: true,
+              }),
+            );
+          } else {
+            // Flag as stale for next activation
+            this.staleQueries.add(entry.operation.key);
+          }
+        }
+      })(),
+      (err) => UnexpectedError.from(err),
+    );
   }
 
   private exchanges(): Exchange[] {

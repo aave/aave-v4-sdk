@@ -137,7 +137,8 @@ describe(`Given an instance of the ${GqlClient.name}`, () => {
         );
         assertOk(result);
 
-        expect(requests).toHaveLength(2); // 2 HTTP requests were made
+        // 3 HTTP requests: initial query + refetch from reexecuteOperation + stale re-query
+        expect(requests).toHaveLength(3);
       });
     });
   });
