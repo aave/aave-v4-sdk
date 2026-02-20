@@ -267,7 +267,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
             },
           }).map(nonNullable);
           assertOk(position);
-          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
+          expect(position.value.healthFactor.current).toBeBigDecimalLessThan(
             HFBeforeBorrow,
           );
         });
@@ -324,7 +324,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
             },
           }).map(nonNullable);
           assertOk(position);
-          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
+          expect(position.value.healthFactor.current).toBeBigDecimalLessThan(
             HFBeforeWithdraw,
           );
         });

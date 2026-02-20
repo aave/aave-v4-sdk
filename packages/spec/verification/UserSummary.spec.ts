@@ -40,27 +40,29 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
       assertOk(resultSupplies);
 
       if (resultSupplies.value.length < 3) {
-        const result = await ResultAsync.combine([
-          findReserveAndSupply(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_GHO_ADDRESS,
-            asCollateral: true,
-            amount: bigDecimal('100'),
-          }),
-          findReserveAndSupply(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_USDC_ADDRESS,
-            asCollateral: true,
-            amount: bigDecimal('100'),
-          }),
-          findReserveAndSupply(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_AAVE_ADDRESS,
-            asCollateral: false,
-            amount: bigDecimal('0.5'),
-          }),
-        ]);
-        assertOk(result);
+        const resultGHO = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_GHO_ADDRESS,
+          asCollateral: true,
+          amount: bigDecimal('100'),
+        });
+        assertOk(resultGHO);
+
+        const resultUSDC = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDC_ADDRESS,
+          asCollateral: true,
+          amount: bigDecimal('100'),
+        });
+        assertOk(resultUSDC);
+
+        const resultAAVE = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_AAVE_ADDRESS,
+          asCollateral: false,
+          amount: bigDecimal('0.5'),
+        });
+        assertOk(resultAAVE);
       }
     }, 180_000);
 

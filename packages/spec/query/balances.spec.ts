@@ -1,4 +1,10 @@
-import { assertOk, bigDecimal, evmAddress, OrderDirection } from '@aave/client';
+import {
+  assertOk,
+  bigDecimal,
+  evmAddress,
+  OrderDirection,
+  ResultAsync,
+} from '@aave/client';
 import { userBalances, userPositions } from '@aave/client/actions';
 import {
   client,
@@ -7,7 +13,10 @@ import {
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
+  ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
+  fundErc20Address,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
@@ -21,6 +30,7 @@ const user = await createNewWallet(
 describe('Querying User Balances on Aave V4', () => {
   describe('Given a user with one supply position and multiple tokens to use on the protocol', () => {
     beforeAll(async () => {
+      // NOTE: Remember the wallet also has ETH
       const balances = await userBalances(client, {
         user: evmAddress(user.account.address),
         filter: {
@@ -31,14 +41,30 @@ describe('Querying User Balances on Aave V4', () => {
       });
       assertOk(balances);
       if (balances.value.length < 3) {
-        for (const token of [ETHEREUM_USDC_ADDRESS, ETHEREUM_1INCH_ADDRESS]) {
-          const setup = await findReserveAndSupply(client, user, {
-            token: token,
+        const result = await ResultAsync.combine([
+          fundErc20Address(evmAddress(user.account.address), {
+            address: ETHEREUM_USDC_ADDRESS,
             amount: bigDecimal('100'),
-            asCollateral: true,
-          });
-          assertOk(setup);
-        }
+            decimals: 6,
+          }),
+          fundErc20Address(evmAddress(user.account.address), {
+            address: ETHEREUM_1INCH_ADDRESS,
+            amount: bigDecimal('100'),
+            decimals: 18,
+          }),
+          fundErc20Address(evmAddress(user.account.address), {
+            address: ETHEREUM_USDT_ADDRESS,
+            amount: bigDecimal('100'),
+            decimals: 6,
+          }),
+        ]);
+        assertOk(result);
+        const resultSupply = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDC_ADDRESS,
+          amount: bigDecimal('50'),
+        });
+        assertOk(resultSupply);
       }
     }, 60_000);
 
@@ -70,7 +96,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         // NOTE: One less because 1INCH is not supported on the hub
-        expect(balances.value.length).toBe(2);
+        expect(balances.value.length).toBe(3);
       });
     });
 
@@ -87,7 +113,7 @@ describe('Querying User Balances on Aave V4', () => {
         });
         assertOk(balances);
         // NOTE: One less because 1INCH is not supported on the spoke
-        expect(balances.value.length).toBe(2);
+        expect(balances.value.length).toBe(3);
       });
     });
 
@@ -107,7 +133,7 @@ describe('Querying User Balances on Aave V4', () => {
                 {
                   chainId: ETHEREUM_FORK_ID,
                   token: {
-                    erc20: ETHEREUM_1INCH_ADDRESS,
+                    erc20: ETHEREUM_USDT_ADDRESS,
                   },
                 },
               ],
@@ -119,7 +145,7 @@ describe('Querying User Balances on Aave V4', () => {
         expect(balances.value.length).toBe(2);
         const symbols = balances.value.map((elem) => elem.info.symbol);
         expect(symbols).toContain('USDC');
-        expect(symbols).toContain('1INCH');
+        expect(symbols).toContain('USDT');
       });
     });
 
@@ -129,12 +155,24 @@ describe('Querying User Balances on Aave V4', () => {
           user: evmAddress(user.account.address),
           filter: {
             swappable: {
-              chainIds: [ETHEREUM_FORK_ID],
+              tokens: [
+                {
+                  chainId: ETHEREUM_FORK_ID,
+                  address: ETHEREUM_USDC_ADDRESS,
+                },
+                {
+                  chainId: ETHEREUM_FORK_ID,
+                  address: ETHEREUM_USDT_ADDRESS,
+                },
+              ],
             },
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(3);
+        expect(balances.value.length).toBe(2);
+        const symbols = balances.value.map((elem) => elem.info.symbol);
+        expect(symbols).toContain('USDC');
+        expect(symbols).toContain('USDT');
       });
     });
 
@@ -157,7 +195,7 @@ describe('Querying User Balances on Aave V4', () => {
           },
         });
         assertOk(balances);
-        expect(balances.value.length).toBe(2);
+        expect(balances.value.length).toBe(3);
       });
     });
 
