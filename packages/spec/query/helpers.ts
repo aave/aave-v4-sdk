@@ -27,7 +27,6 @@ import {
 } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import { b } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 import { findReservesToBorrow } from '../helpers/reserves';
 import {
   borrowFromRandomReserve,
