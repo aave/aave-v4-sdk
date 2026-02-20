@@ -23,6 +23,7 @@ import {
   type Chain,
   createPublicClient,
   createWalletClient,
+  encodeFunctionData,
   http,
   parseEther,
   parseUnits,
@@ -164,7 +165,6 @@ export function fundNativeAddress(
   address: EvmAddress,
   amount: BigDecimal = bigDecimal('1.0'), // 1 ETH
 ): ResultAsync<string, UnexpectedError> {
-  // Create client with fork chain - you'll need to replace this with your actual fork chain config
   const publicClient = createPublicClient({
     chain: {
       id: ETHEREUM_FORK_ID,
@@ -182,15 +182,10 @@ export function fundNativeAddress(
   const amountHex = `0x${amountInWei.toString(16)}`;
 
   return ResultAsync.fromPromise(
-    publicClient
-      .request<TSetBalanceRpc>({
-        method: 'tenderly_setBalance',
-        params: [[address], amountHex],
-      })
-      .then(async (res) => {
-        await wait(500); // Temporal fix to avoid tenderly issues with the balance not being set
-        return res;
-      }),
+    publicClient.request<TSetBalanceRpc>({
+      method: 'tenderly_setBalance',
+      params: [[address], amountHex],
+    }),
     (err) => UnexpectedError.from(err),
   );
 }
@@ -203,6 +198,7 @@ export function fundErc20Address(
     decimals?: number;
   },
 ): ResultAsync<string, Error> {
+  const tempWallet = '0x6C6D386F3F5106d45A32B013d89B5618F5f5ba51';
   const publicClient = createPublicClient({
     chain: {
       id: ETHEREUM_FORK_ID,
@@ -222,16 +218,40 @@ export function fundErc20Address(
     token.decimals ?? 18,
   );
   const amountHex = `0x${amountInSmallestUnit.toString(16)}`;
-
+  const transferData = encodeFunctionData({
+    abi: [
+      {
+        name: 'transfer',
+        type: 'function',
+        inputs: [
+          { name: 'to', type: 'address' },
+          { name: 'amount', type: 'uint256' },
+        ],
+        outputs: [{ name: '', type: 'bool' }],
+      },
+    ] as const,
+    functionName: 'transfer',
+    args: [address, amountInSmallestUnit],
+  });
   return ResultAsync.fromPromise(
     publicClient
       .request<TSetErc20BalanceRpc>({
         method: 'tenderly_setErc20Balance',
-        params: [token.address, address, amountHex],
+        params: [token.address, tempWallet, amountHex],
       })
-      .then(async (res) => {
-        await wait(500); // Temporal fix to avoid tenderly issues with the balance not being set
-        return res;
+      .then(async () => {
+        // Transfer from tempWallet to target address to emit Transfer event
+        const txHash = await publicClient.request({
+          method: 'eth_sendTransaction' as 'eth_sendRawTransaction',
+          params: [
+            {
+              from: tempWallet,
+              to: token.address,
+              data: transferData,
+            },
+          ],
+        } as never);
+        return txHash as string;
       }),
     (err) => UnexpectedError.from(err),
   );
