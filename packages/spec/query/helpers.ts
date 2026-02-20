@@ -16,28 +16,25 @@ import {
   userSupplies,
 } from '@aave/client/actions';
 import {
+  ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_SPOKE_ETHENA_ID,
+  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-
+import { b } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
+import { findReservesToBorrow } from '../helpers/reserves';
 import {
-  findReservesToBorrow,
-  findReservesToSupply,
-} from '../helpers/reserves';
-import {
+  borrowFromRandomReserve,
   borrowFromReserve,
   findReserveAndSupply,
-  supplyToReserve,
 } from '../helpers/supplyBorrow';
-import {
-  repayFromReserve,
-  withdrawFromReserve,
-} from '../helpers/withdrawRepay';
+import { withdrawFromReserve } from '../helpers/withdrawRepay';
 import { assertNonEmptyArray } from '../test-utils';
 
 export const recreateUserActivities = async (
@@ -72,41 +69,48 @@ export const recreateUserActivities = async (
   );
 
   // Supply/Withdraw activities: minimum 3 supply activities
-  const listReservesToSupply = await findReservesToSupply(client, user, {
-    canUseAsCollateral: true,
-    spoke: params.spoke,
-  });
-  if (supplyActivities.length < 3 || withdrawActivities.length < 3) {
-    assertOk(listReservesToSupply);
-    for (
-      let i = Math.max(supplyActivities.length, withdrawActivities.length);
-      i < 3;
-      i++
-    ) {
-      const result: Result<TxHash, Error> = await fundErc20Address(
-        evmAddress(user.account.address),
-        {
-          address: listReservesToSupply.value[i]!.asset.underlying.address,
-          amount: bigDecimal('0.2'),
-          decimals:
-            listReservesToSupply.value[i]!.asset.underlying.info.decimals,
-        },
-      ).andThen(
-        (): ResultAsync<TxHash, Error> =>
-          supplyToReserve(client, user, {
-            reserve: listReservesToSupply.value[i]!.id,
-            amount: { erc20: { value: bigDecimal('0.2') } },
-            sender: evmAddress(user.account.address),
-          }).andThen(() =>
-            withdrawFromReserve(client, user, {
-              reserve: listReservesToSupply.value[i]!.id,
-              amount: { erc20: { exact: bigDecimal('0.1') } },
-              sender: evmAddress(user.account.address),
-            }),
-          ),
-      );
-      assertOk(result);
-    }
+  if (supplyActivities.length < 3 && withdrawActivities.length < 3) {
+    const resultUSDC = await findReserveAndSupply(client, user, {
+      spoke: params.spoke,
+      amount: bigDecimal('100'),
+      token: ETHEREUM_USDC_ADDRESS,
+      asCollateral: true,
+    }).andThen((reserve) =>
+      withdrawFromReserve(client, user, {
+        reserve: reserve.reserveInfo.id,
+        amount: { erc20: { exact: bigDecimal('10') } },
+        sender: evmAddress(user.account.address),
+      }),
+    );
+    assertOk(resultUSDC);
+
+    const resultAAVE = await findReserveAndSupply(client, user, {
+      spoke: params.spoke,
+      amount: bigDecimal('1'),
+      token: ETHEREUM_AAVE_ADDRESS,
+      asCollateral: true,
+    }).andThen((reserve) =>
+      withdrawFromReserve(client, user, {
+        reserve: reserve.reserveInfo.id,
+        amount: { erc20: { exact: bigDecimal('0.1') } },
+        sender: evmAddress(user.account.address),
+      }),
+    );
+    assertOk(resultAAVE);
+
+    const resultUSDT = await findReserveAndSupply(client, user, {
+      spoke: params.spoke,
+      amount: bigDecimal('100'),
+      token: ETHEREUM_USDT_ADDRESS,
+      asCollateral: true,
+    }).andThen((reserve) =>
+      withdrawFromReserve(client, user, {
+        reserve: reserve.reserveInfo.id,
+        amount: { erc20: { exact: bigDecimal('20') } },
+        sender: evmAddress(user.account.address),
+      }),
+    );
+    assertOk(resultUSDT);
   }
 
   // SetCollateral activity: at least 1 set collateral activity
@@ -288,101 +292,33 @@ export const recreateUserPositions = async (
   assertOk(userGlobalPositions);
   if (userGlobalPositions.value.length < 2) {
     // One position is a supply/borrow in a specific spoke
-    const listReservesToSupplyCoreSpoke = await findReservesToSupply(
-      client,
-      user,
-      {
-        spoke: firstSpoke,
-        canUseAsCollateral: true,
-      },
-    );
-    assertOk(listReservesToSupplyCoreSpoke);
+    const supplyResultFirstSpoke = await findReserveAndSupply(client, user, {
+      spoke: firstSpoke,
+      asCollateral: true,
+    });
+    assertOk(supplyResultFirstSpoke);
 
-    const resultCoreSpoke = await fundErc20Address(
-      evmAddress(user.account.address),
-      {
-        address:
-          listReservesToSupplyCoreSpoke.value[0]!.asset.underlying.address,
-        amount: bigDecimal('1'),
-        decimals:
-          listReservesToSupplyCoreSpoke.value[0]!.asset.underlying.info
-            .decimals,
-      },
-    ).andThen(() =>
-      supplyToReserve(client, user, {
-        reserve: listReservesToSupplyCoreSpoke.value[0]!.id,
-        amount: { erc20: { value: bigDecimal('0.2') } },
-        sender: evmAddress(user.account.address),
-      })
-        .andThen(() =>
-          findReservesToBorrow(client, user, {
-            spoke: firstSpoke,
-          }),
-        )
-        .andThen((listReservesToBorrowCoreSpoke) =>
-          borrowFromReserve(client, user, {
-            reserve: listReservesToBorrowCoreSpoke[0].id,
-            amount: {
-              erc20: {
-                value:
-                  listReservesToBorrowCoreSpoke[0].userState!.borrowable.amount.value.times(
-                    0.1,
-                  ),
-              },
-            },
-            sender: evmAddress(user.account.address),
-          }),
-        ),
-    );
-    assertOk(resultCoreSpoke);
+    const borrowResultFirstSpoke = await borrowFromRandomReserve(client, user, {
+      spoke: firstSpoke,
+      ratioToBorrow: 0.3,
+    });
+    assertOk(borrowResultFirstSpoke);
 
     // Second position is a supply/borrow in a specific spoke
-    const listReservesToSupplyEmodeSpoke = await findReservesToSupply(
+    const supplyResultSecondSpoke = await findReserveAndSupply(client, user, {
+      spoke: secondSpoke,
+      asCollateral: true,
+    });
+    assertOk(supplyResultSecondSpoke);
+
+    const borrowResultSecondSpoke = await borrowFromRandomReserve(
       client,
       user,
       {
         spoke: secondSpoke,
-        canUseAsCollateral: true,
+        ratioToBorrow: 0.3,
       },
     );
-    assertOk(listReservesToSupplyEmodeSpoke);
-
-    const resultEmodeSpoke = await fundErc20Address(
-      evmAddress(user.account.address),
-      {
-        address:
-          listReservesToSupplyEmodeSpoke.value[0]!.asset.underlying.address,
-        amount: bigDecimal('1'),
-        decimals:
-          listReservesToSupplyEmodeSpoke.value[0]!.asset.underlying.info
-            .decimals,
-      },
-    ).andThen(() =>
-      supplyToReserve(client, user, {
-        reserve: listReservesToSupplyEmodeSpoke.value[0]!.id,
-        amount: { erc20: { value: bigDecimal('0.2') } },
-        sender: evmAddress(user.account.address),
-      })
-        .andThen(() =>
-          findReservesToBorrow(client, user, {
-            spoke: secondSpoke,
-          }),
-        )
-        .andThen((listReservesToBorrowEmodeSpoke) =>
-          borrowFromReserve(client, user, {
-            reserve: listReservesToBorrowEmodeSpoke[0].id,
-            amount: {
-              erc20: {
-                value:
-                  listReservesToBorrowEmodeSpoke[0].userState!.borrowable.amount.value.times(
-                    0.1,
-                  ),
-              },
-            },
-            sender: evmAddress(user.account.address),
-          }),
-        ),
-    );
-    assertOk(resultEmodeSpoke);
+    assertOk(borrowResultSecondSpoke);
   }
 };
