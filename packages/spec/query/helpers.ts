@@ -33,7 +33,10 @@ import {
   borrowFromReserve,
   findReserveAndSupply,
 } from '../helpers/supplyBorrow';
-import { withdrawFromReserve } from '../helpers/withdrawRepay';
+import {
+  repayFromReserve,
+  withdrawFromReserve,
+} from '../helpers/withdrawRepay';
 import { assertNonEmptyArray } from '../test-utils';
 
 export const recreateUserActivities = async (
