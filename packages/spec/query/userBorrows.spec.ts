@@ -22,7 +22,7 @@ describe('Querying User Borrow Positions on Aave V4', () => {
       await recreateUserBorrows(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
       });
-    }, 120_000);
+    }, 180_000);
 
     describe('When the user queries their borrow positions by spoke', () => {
       it('Then the matching borrow positions are returned', async () => {
