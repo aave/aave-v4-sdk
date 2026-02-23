@@ -13,10 +13,10 @@ import {
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -45,27 +45,29 @@ describe('Given a user with a User Position on a Spoke', () => {
       assertOk(resultSupplies);
 
       if (resultSupplies.value.length < 3) {
-        const result = await ResultAsync.combine([
-          findReserveAndSupply(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_GHO_ADDRESS,
-            asCollateral: true,
-            amount: bigDecimal('100'),
-          }),
-          findReserveAndSupply(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_USDC_ADDRESS,
-            asCollateral: true,
-            amount: bigDecimal('100'),
-          }),
-          findReserveAndSupply(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_AAVE_ADDRESS,
-            asCollateral: false,
-            amount: bigDecimal('0.5'),
-          }),
-        ]);
-        assertOk(result);
+        const resultUSDT = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDT_ADDRESS,
+          asCollateral: true,
+          amount: bigDecimal('100'),
+        });
+        assertOk(resultUSDT);
+
+        const resultUSDC = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDC_ADDRESS,
+          asCollateral: true,
+          amount: bigDecimal('100'),
+        });
+        assertOk(resultUSDC);
+
+        const resultAAVE = await findReserveAndSupply(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_AAVE_ADDRESS,
+          asCollateral: false,
+          amount: bigDecimal('0.5'),
+        });
+        assertOk(resultAAVE);
       }
     }, 100_000);
 
@@ -82,19 +84,19 @@ describe('Given a user with a User Position on a Spoke', () => {
         assertOk(borrows);
 
         if (borrows.value.length < 2) {
-          const result = await ResultAsync.combine([
-            borrowFromRandomReserve(client, user, {
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-              token: ETHEREUM_AAVE_ADDRESS,
-              ratioToBorrow: 0.1,
-            }),
-            borrowFromRandomReserve(client, user, {
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-              token: ETHEREUM_WETH_ADDRESS,
-              ratioToBorrow: 0.1,
-            }),
-          ]);
-          assertOk(result);
+          const resultUSDT = await borrowFromRandomReserve(client, user, {
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            token: ETHEREUM_USDT_ADDRESS,
+            ratioToBorrow: 0.1,
+          });
+          assertOk(resultUSDT);
+
+          const resultWETH = await borrowFromRandomReserve(client, user, {
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            token: ETHEREUM_WETH_ADDRESS,
+            ratioToBorrow: 0.1,
+          });
+          assertOk(resultWETH);
         }
       }, 180_000);
 
@@ -219,9 +221,13 @@ describe('Given a user with a User Position on a Spoke', () => {
         });
 
         it('Then the riskPremium value should be the risk premium from the spoke', async () => {
-          expect(position.riskPremium?.current.value).toBeBigDecimalEqualTo(
-            accountDataOnChain.riskPremium,
-          );
+          if (position.riskPremium === null) {
+            expect(accountDataOnChain.riskPremium).toBeBigDecimalEqualTo(0);
+          } else {
+            expect(position.riskPremium?.current.value).toBeBigDecimalEqualTo(
+              accountDataOnChain.riskPremium,
+            );
+          }
         });
 
         it.todo('Then it should return the correct netApy value');

@@ -6,12 +6,12 @@ import {
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_SPOKE_ETHENA_ADDRESS,
   ETHEREUM_SPOKE_ETHENA_ID,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDe_ADDRESS,
   ETHEREUM_USDT_ADDRESS,
 } from '@aave/client/testing';
 
@@ -40,13 +40,13 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
       assertOk(resultSupplies);
 
       if (resultSupplies.value.length < 3) {
-        const resultGHO = await findReserveAndSupply(client, user, {
+        const resultUSDT = await findReserveAndSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
-          token: ETHEREUM_GHO_ADDRESS,
+          token: ETHEREUM_USDT_ADDRESS,
           asCollateral: true,
           amount: bigDecimal('100'),
         });
-        assertOk(resultGHO);
+        assertOk(resultUSDT);
 
         const resultUSDC = await findReserveAndSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -81,7 +81,6 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
         if (borrows.value.length < 1) {
           const borrowAAVE = await borrowFromRandomReserve(client, user, {
             spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_AAVE_ADDRESS,
             ratioToBorrow: 0.1,
           });
           assertOk(borrowAAVE);
@@ -101,21 +100,20 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
           assertOk(supplies);
 
           if (supplies.value.length < 2) {
-            const result = await ResultAsync.combine([
-              findReserveAndSupply(client, user, {
-                spoke: ETHEREUM_SPOKE_ETHENA_ID,
-                token: ETHEREUM_GHO_ADDRESS,
-                asCollateral: true,
-                amount: bigDecimal('0.1'),
-              }),
-              findReserveAndSupply(client, user, {
-                spoke: ETHEREUM_SPOKE_ETHENA_ID,
-                token: ETHEREUM_USDC_ADDRESS,
-                asCollateral: false,
-                amount: bigDecimal('100'),
-              }),
-            ]);
+            const result = await findReserveAndSupply(client, user, {
+              spoke: ETHEREUM_SPOKE_ETHENA_ID,
+              asCollateral: false,
+              amount: bigDecimal('1'),
+            });
             assertOk(result);
+
+            const resultUSDC = await findReserveAndSupply(client, user, {
+              spoke: ETHEREUM_SPOKE_ETHENA_ID,
+              token: ETHEREUM_USDe_ADDRESS,
+              asCollateral: true,
+              amount: bigDecimal('100'),
+            });
+            assertOk(resultUSDC);
           }
         }, 100_000);
 
@@ -134,7 +132,6 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
             if (borrows.value.length < 1) {
               const borrowWETH = await borrowFromRandomReserve(client, user, {
                 spoke: ETHEREUM_SPOKE_ETHENA_ID,
-                token: ETHEREUM_USDT_ADDRESS,
                 ratioToBorrow: 0.2,
               });
               assertOk(borrowWETH);
