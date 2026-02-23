@@ -23,7 +23,6 @@ import {
   type Chain,
   createPublicClient,
   createWalletClient,
-  encodeFunctionData,
   http,
   parseEther,
   parseUnits,
@@ -201,7 +200,6 @@ export function fundErc20Address(
     decimals?: number;
   },
 ): ResultAsync<string, Error> {
-  const tempWallet = '0x6C6D386F3F5106d45A32B013d89B5618F5f5ba51';
   const publicClient = createPublicClient({
     chain: {
       id: ETHEREUM_FORK_ID,
@@ -221,41 +219,12 @@ export function fundErc20Address(
     token.decimals ?? 18,
   );
   const amountHex = `0x${amountInSmallestUnit.toString(16)}`;
-  const transferData = encodeFunctionData({
-    abi: [
-      {
-        name: 'transfer',
-        type: 'function',
-        inputs: [
-          { name: 'to', type: 'address' },
-          { name: 'amount', type: 'uint256' },
-        ],
-        outputs: [{ name: '', type: 'bool' }],
-      },
-    ] as const,
-    functionName: 'transfer',
-    args: [address, amountInSmallestUnit],
-  });
+
   return ResultAsync.fromPromise(
-    publicClient
-      .request<TSetErc20BalanceRpc>({
-        method: 'tenderly_setErc20Balance',
-        params: [token.address, tempWallet, amountHex],
-      })
-      .then(async () => {
-        // Transfer from tempWallet to target address to emit Transfer event
-        const txHash = await publicClient.request({
-          method: 'eth_sendTransaction' as 'eth_sendRawTransaction',
-          params: [
-            {
-              from: tempWallet,
-              to: token.address,
-              data: transferData,
-            },
-          ],
-        } as never);
-        return txHash as string;
-      }),
+    publicClient.request<TSetErc20BalanceRpc>({
+      method: 'tenderly_setErc20Balance',
+      params: [token.address, address, amountHex],
+    }),
     (err) => UnexpectedError.from(err),
   );
 }
