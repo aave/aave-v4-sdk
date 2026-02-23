@@ -32,6 +32,18 @@ export function isHasProcessedKnownTransactionRequest(
   return result.operations !== null && result.operations.length > 0;
 }
 
+export type TransactionReceipt = {
+  __typename: 'TransactionReceipt';
+  txHash: TxHash;
+};
+
+/**
+ * @internal
+ */
+export function transactionReceipt(txHash: TxHash): TransactionReceipt {
+  return { __typename: 'TransactionReceipt', txHash };
+}
+
 export type SendWithError =
   | CancelError
   | SigningError
