@@ -4,6 +4,7 @@ import type { Address } from 'viem';
 
 // Constants
 const WAD = 10n ** 18n; // 1e18 = 1.0 in WAD format
+const RAY = 10n ** 27n; // 1e27 = 1.0 in RAY format
 const userAccountDataABI = [
   {
     inputs: [{ name: 'user', type: 'address' }],
@@ -15,7 +16,7 @@ const userAccountDataABI = [
           { name: 'avgCollateralFactor', type: 'uint256' },
           { name: 'healthFactor', type: 'uint256' },
           { name: 'totalCollateralValue', type: 'uint256' },
-          { name: 'totalDebtValue', type: 'uint256' },
+          { name: 'totalDebtValueRay', type: 'uint256' },
           { name: 'activeCollateralCount', type: 'uint256' },
           { name: 'borrowedCount', type: 'uint256' },
         ],
@@ -42,8 +43,12 @@ function formatWAD(value: bigint): BigDecimal {
   return bigDecimal(value).div(WAD);
 }
 
+function formatRAY(value: bigint): bigint {
+  return value / RAY;
+}
+
 function formatUSD(value: bigint): BigDecimal {
-  return bigDecimal(value).div(bigDecimal('1e26'));
+  return bigDecimal(value).div('1e26');
 }
 
 function formatBPS(value: bigint): BigDecimal {
@@ -75,7 +80,7 @@ export function getAccountData(
         avgCollateralFactor: formatWAD(result.avgCollateralFactor),
         healthFactor: formatWAD(result.healthFactor),
         totalCollateralValue: formatUSD(result.totalCollateralValue),
-        totalDebtValue: formatUSD(result.totalDebtValue),
+        totalDebtValue: formatUSD(formatRAY(result.totalDebtValueRay)),
         activeCollateralCount: Number(result.activeCollateralCount),
         borrowedCount: Number(result.borrowedCount),
       };
