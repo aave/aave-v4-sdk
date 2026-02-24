@@ -24,6 +24,12 @@ export type ClientConfig = {
    */
   cache?: boolean;
   /**
+   * Whether to enable query batching.
+   *
+   * @defaultValue `true`
+   */
+  batch?: boolean;
+  /**
    * Whether to enable debug mode.
    *
    * @defaultValue `false`
@@ -44,6 +50,7 @@ export function configureContext({
   environment = production,
   headers,
   cache = true,
+  batch = true,
   debug = false,
   fragments = [],
 }: ClientConfig): Context {
@@ -52,6 +59,7 @@ export function configureContext({
     environment,
     headers,
     cache: cache ? exchange : null,
+    batch,
     debug,
     fragments,
   };
