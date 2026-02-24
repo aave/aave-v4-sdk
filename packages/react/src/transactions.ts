@@ -6,6 +6,8 @@ import {
   type PaginatedActivitiesResult,
   supportsPermit,
   type TimeWindowQueryOptions,
+  type TransactionReceipt,
+  transactionReceipt,
   UnexpectedError,
 } from '@aave/client';
 import {
@@ -58,8 +60,8 @@ import {
   type Prettify,
   ResultAsync,
   type Signature,
-  type TxHash,
 } from '@aave/types';
+
 import { useAaveClient } from './context';
 import {
   cancel,
@@ -231,7 +233,7 @@ function handleSingleApproval(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -243,7 +245,7 @@ export function useSupply(
   >,
 ): UseAsyncTask<
   SupplyRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -355,7 +357,7 @@ function injectSupplyPermitSignature(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -367,7 +369,7 @@ export function useBorrow(
   >,
 ): UseAsyncTask<
   BorrowRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -452,7 +454,7 @@ export function useBorrow(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -464,7 +466,7 @@ export function useRepay(
   >,
 ): UseAsyncTask<
   RepayRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -573,7 +575,7 @@ function injectRepayPermitSignature(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -585,7 +587,7 @@ export function useWithdraw(
   >,
 ): UseAsyncTask<
   WithdrawRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -655,7 +657,7 @@ export function useWithdraw(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -665,7 +667,7 @@ export function useRenounceSpokeUserPositionManager(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   RenounceSpokeUserPositionManagerRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -722,7 +724,7 @@ export function useRenounceSpokeUserPositionManager(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -732,7 +734,7 @@ export function useUpdateUserPositionConditions(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   UpdateUserPositionConditionsRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -794,7 +796,7 @@ export function useUpdateUserPositionConditions(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -803,7 +805,7 @@ export function useSetUserSuppliesAsCollateral(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetUserSuppliesAsCollateralRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -914,7 +916,7 @@ export function useSetUserSuppliesAsCollateral(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -926,7 +928,7 @@ export function useLiquidatePosition(
   >,
 ): UseAsyncTask<
   LiquidatePositionRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -1036,7 +1038,7 @@ function injectLiquidatePermitSignature(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -1045,7 +1047,7 @@ export function useSetSpokeUserPositionManager(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetSpokeUserPositionManagerRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -1407,7 +1409,7 @@ export function useActivitiesAction(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -1416,7 +1418,7 @@ export function useClaimRewards(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   ClaimRewardsRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -1427,7 +1429,7 @@ export function useClaimRewards(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
-        .map((result) => result.txHash),
+        .map((result) => transactionReceipt(result.txHash)),
     [client, handler],
   );
 }
