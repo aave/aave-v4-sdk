@@ -15,7 +15,7 @@ import {
 import {
   client,
   createNewWallet,
-  ETHEREUM_GHO_ADDRESS,
+  ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
 } from '@aave/client/testing';
@@ -37,7 +37,7 @@ describe('Borrow Position swapping on Aave V4', () => {
     beforeAll(async () => {
       const setup = await findReserveAndSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_GHO_ADDRESS,
+        token: ETHEREUM_AAVE_ADDRESS,
         asCollateral: true,
       });
       assertOk(setup);
@@ -87,17 +87,21 @@ describe('Borrow Position swapping on Aave V4', () => {
 
           // Find a reserve with liquidity to swap into
           for (const reserve of reservesToSwap) {
-            const result = await borrowSwapQuote(client, {
-              market: {
-                debtPosition: borrowedPosition.id,
-                buyReserve: reserve.id,
-                amount: borrowedPosition.principal.amount.value.div(2),
-                user: evmAddress(user.account.address),
-              },
-            });
-            if (result.isOk()) {
-              reserveToSwap = reserve;
-              break;
+            try {
+              const result = await borrowSwapQuote(client, {
+                market: {
+                  debtPosition: borrowedPosition.id,
+                  buyReserve: reserve.id,
+                  amount: borrowedPosition.principal.amount.value.div(2),
+                  user: evmAddress(user.account.address),
+                },
+              });
+              if (result.isOk()) {
+                reserveToSwap = reserve;
+                break;
+              }
+            } catch (_e) {
+              // Ignore errors and try the next reserve
             }
           }
 

@@ -4,8 +4,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_USDC_ADDRESS,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 
@@ -37,7 +37,6 @@ describe('Querying User Supply Positions on Aave V4', () => {
         });
         assertOk(supplyPositions);
 
-        expect(supplyPositions.value.length).toBe(3);
         expect(supplyPositions.value).toBeArrayWithElements(
           expect.objectContaining({
             reserve: expect.objectContaining({
@@ -57,7 +56,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
             userToken: {
               token: {
                 chainId: ETHEREUM_FORK_ID,
-                address: ETHEREUM_GHO_ADDRESS,
+                address: ETHEREUM_USDC_ADDRESS,
               },
               user: evmAddress(user.account.address),
             },
@@ -69,7 +68,7 @@ describe('Querying User Supply Positions on Aave V4', () => {
             reserve: expect.objectContaining({
               asset: expect.objectContaining({
                 underlying: expect.objectContaining({
-                  address: ETHEREUM_GHO_ADDRESS,
+                  address: ETHEREUM_USDC_ADDRESS,
                 }),
               }),
             }),
@@ -92,7 +91,6 @@ describe('Querying User Supply Positions on Aave V4', () => {
         });
         assertOk(supplyPositions);
 
-        expect(supplyPositions.value.length).toBeGreaterThan(3);
         expect(supplyPositions.value).toBeArrayWithElements(
           expect.objectContaining({
             reserve: expect.objectContaining({

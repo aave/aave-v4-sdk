@@ -189,8 +189,7 @@ describe('Supplying Assets on Aave V4', () => {
     });
   });
 
-  // TODO: Enable when we have a test fork that allow us to control
-  describe.skip('Given a user and a reserve that supports native token deposits', () => {
+  describe('Given a user and a reserve that supports native token deposits', () => {
     describe('When the user supplies native tokens to a reserve but they do NOT enable the supply as collateral', () => {
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const nativeReserve = await findReservesToSupply(client, user, {
