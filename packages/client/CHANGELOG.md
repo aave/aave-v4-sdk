@@ -1,5 +1,315 @@
 # @aave/client
 
+## 4.0.0-next.45
+
+### Minor Changes
+
+- 4f9bb95: **feat:** add `batch` flag to `ClientConfig` to disable query batching
+
+### Patch Changes
+
+- Updated dependencies [4f9bb95]
+  - @aave/core@1.0.0-next.17
+
+## 4.0.0-next.44
+
+### Minor Changes
+
+- f6434aa: **feat:** return `TransactionReceipt` from `waitForTransaction` and transaction hooks instead of `TxHash`
+
+## 4.0.0-next.43
+
+### Patch Changes
+
+- Updated dependencies [e15455c]
+  - @aave/core@1.0.0-next.16
+
+## 4.0.0-next.42
+
+### Patch Changes
+
+- e499fff: **feat:** removes `SwapReceipt.explorerUrl` and supports `swapStatus` nullable result.
+- Updated dependencies [e499fff]
+  - @aave/graphql@1.0.0-next.31
+
+## 4.0.0-next.41
+
+### Patch Changes
+
+- 7546d4d: **fix:** issue with stale content being served when the cache refresh gets interrupted.
+- Updated dependencies [7546d4d]
+  - @aave/core@1.0.0-next.15
+
+## 4.0.0-next.40
+
+### Minor Changes
+
+- 141c0fe: **fix:** `UserMerklClaimableReward.amount: Erc20Token` to `UserMerklClaimableReward.claimable: Erc20Amount`
+- b591d64: **feat:** support for incentive rewards with `userClaimableRewards` action, `useUserClaimableRewards` hook, and `useClaimRewards` transaction hook
+
+### Patch Changes
+
+- Updated dependencies [141c0fe]
+- Updated dependencies [b591d64]
+  - @aave/graphql@1.0.0-next.30
+
+## 4.0.0-next.39
+
+### Patch Changes
+
+- a8716b1: **feat:** support `SwappableTokensRequestQuery.tokens`.
+- Updated dependencies [a8716b1]
+  - @aave/graphql@1.0.0-next.29
+
+## 4.0.0-next.38
+
+### Patch Changes
+
+- e012b95: **feat:** supports `SwapOperation` and `ActivityItem` nodes changes.
+- Updated dependencies [e012b95]
+  - @aave/graphql@1.0.0-next.28
+
+## 4.0.0-next.37
+
+## 4.0.0-next.36
+
+## 4.0.0-next.35
+
+## 4.0.0-next.34
+
+### Patch Changes
+
+- f4c8623: **fix:** correct typo `SpokePositionManger` to `SpokePositionManager` in GraphQL schema and cache
+- 64b6596: **feat:** add `SwapOperation` union to `SwapStatus` entries. Support `InsufficientLiquidityError`. Add `orderClass` and `kind` to `SwapStatus` and ActivityItem` union entries.
+- ece7453: **fix:** extends cache refresh mechanism to account for past queries that left a presence in the cache but are no longer watched.
+- c6fc0f7: **chore:** updates environments config
+- dcf74e8: **fix:** consistent `CancelError` and `UnexpectedError` handling in thirdweb and privy implementations
+- Updated dependencies [f4c8623]
+- Updated dependencies [64b6596]
+- Updated dependencies [ece7453]
+  - @aave/graphql@1.0.0-next.27
+  - @aave/core@1.0.0-next.14
+
+## 4.0.0-next.32
+
+### Patch Changes
+
+- b65232e: **feat:** support USDT-like approval reset flow in React hooks.
+- Updated dependencies [b65232e]
+- Updated dependencies [05f1e7e]
+  - @aave/graphql@1.0.0-next.26
+  - @aave/types@1.0.0-next.8
+  - @aave/core@1.0.0-next.13
+
+## 4.0.0-next.31
+
+## 4.0.0-next.30
+
+### Minor Changes
+
+- c3ae5d8: **feat:** add `selectedSlippage` field to `SwapQuote` fragment and `deadline` field to limit order input types
+
+### Patch Changes
+
+- 3a9cc5f: **fix:** ensure cache updates after transactions for cache-first hooks
+- 9fa182b: **feat:** imperative read hooks now default to `cache-first` request policy
+- 87e0889: **feat:** support `AssetSampleBreakdown`.
+- Updated dependencies [c3ae5d8]
+- Updated dependencies [87e0889]
+  - @aave/graphql@1.0.0-next.25
+
+## 4.0.0-next.29
+
+### Patch Changes
+
+- 644ed9c: **chore:** removes deprecated `Erc20ApprovalRequired.transaction`.
+- a96356a: **fix:** cast `PermitTypedData.message.deadline` to `number` to align with `ERC20PermitSignature` input type after GraphQL schema update
+- 83c0dc7: **fix:** add missing URQL cache configuration for swap activity types and date transformers
+- 3554361: **chore:** support new `PermiTypeData` GQL definition.
+- 2bbf48f: **fix:** remove `supportedChains` dependency from Privy transaction receipt handling
+- Updated dependencies [644ed9c]
+- Updated dependencies [3554361]
+  - @aave/graphql@1.0.0-next.24
+
+## 4.0.0-next.28
+
+### Patch Changes
+
+- 65b96f7: **fix:** wait for approval transactions before executing main transaction in `useSupply` and `useRepay` hooks
+
+## 4.0.0-next.27
+
+### Patch Changes
+
+- 3e336b1: **chore:** rename `swapId` to `id` in swap activity types and `collateralUsed` to `supplyUsed` in `RepayWithSupplyActivity`
+- Updated dependencies [3e336b1]
+  - @aave/graphql@1.0.0-next.23
+
+## 4.0.0-next.26
+
+### Patch Changes
+
+- b588966: **chore:** support latest activity types.
+- Updated dependencies [b588966]
+  - @aave/graphql@1.0.0-next.22
+
+## 4.0.0-next.25
+
+### Patch Changes
+
+- c959acc: **fix:** removes `Erc20Token.permitSupported`
+- Updated dependencies [c959acc]
+  - @aave/graphql@1.0.0-next.21
+
+## 4.0.0-next.24
+
+### Patch Changes
+
+- 92c2d8f: **fix:** removes extra SwapTypedData fragment from query.
+- Updated dependencies [92c2d8f]
+  - @aave/graphql@1.0.0-next.20
+
+## 4.0.0-next.23
+
+### Minor Changes
+
+- 7ddec84: **feat:** implement `useSwapStatus` hook and makes `useUserSwaps` poll for status updates until terminal state.
+
+### Patch Changes
+
+- 5a52991: **feat:** add curried variant of `signTypedDataWith` for Result chaining patterns
+- Updated dependencies [7ddec84]
+  - @aave/core@1.0.0-next.12
+
+## 4.0.0-next.22
+
+### Patch Changes
+
+- 45e1145: **feat:** simplify supply and repay with ERC-20 permit signing hooks and helpers
+- Updated dependencies [45e1145]
+  - @aave/graphql@1.0.0-next.19
+
+## 4.0.0-next.21
+
+### Patch Changes
+
+- 531b1f6: **feat:** dual-request strategy for `useTokenSwapQuote` with Fast and Accurate quotes
+- Updated dependencies [531b1f6]
+  - @aave/core@1.0.0-next.11
+
+## 4.0.0-next.20
+
+### Patch Changes
+
+- ec7fa5e: **fix:** update schema with `QuoteAccuracy` enum and `SwapQuote` field changes. Renamed `spotBuy`/`spotSell` to `buy`/`sell`, added `accuracy` field.
+- Updated dependencies [ec7fa5e]
+  - @aave/graphql@1.0.0-next.18
+
+## 4.0.0-next.19
+
+### Patch Changes
+
+- ebb671f: **fix:** missing `UserPosition.netAccruedInterest`.
+- dfafb5e: **fix:** pass `$currency` to `netAccruedInterest` fields.
+- 2dd17d2: **fix:** removes duplicate HubAssetsRequestOrderBy export.
+- c40b2d4: **fix:** adds missing TS types for updated GQL input types.
+- Updated dependencies [ebb671f]
+- Updated dependencies [dfafb5e]
+- Updated dependencies [2dd17d2]
+- Updated dependencies [7b5995b]
+- Updated dependencies [c40b2d4]
+  - @aave/graphql@1.0.0-next.17
+
+## 4.0.0-next.18
+
+### Patch Changes
+
+- 7ac6dd9: **chore:** updates to recentl schema changes.
+- caf0bf3: **chore:** support recent swap related GQL changes.
+- daf3b0f: **chore:** support latest schema and better error handling.
+- cdab8e1: **fix:** error handling of unknown GQL typenames.
+- Updated dependencies [7ac6dd9]
+- Updated dependencies [caf0bf3]
+- Updated dependencies [daf3b0f]
+- Updated dependencies [cdab8e1]
+  - @aave/graphql@1.0.0-next.16
+  - @aave/types@1.0.0-next.7
+  - @aave/core@1.0.0-next.10
+
+## 4.0.0-next.17
+
+### Patch Changes
+
+- d5ba506: **chore:** support most recent GQL schema.
+- Updated dependencies [d5ba506]
+  - @aave/graphql@1.0.0-next.15
+
+## 4.0.0-next.16
+
+### Patch Changes
+
+- f31d016: **fix:** issue with decodeUserPositionId`.
+- Updated dependencies [f31d016]
+  - @aave/graphql@1.0.0-next.14
+
+## 4.0.0-next.15
+
+### Patch Changes
+
+- 402281c: **feat:** expose tx hash from `TransactionError`.
+- Updated dependencies [402281c]
+  - @aave/core@1.0.0-next.9
+
+## 4.0.0-next.14
+
+### Patch Changes
+
+- 40a234e: **feat:** support latest swap GQL changes.
+- Updated dependencies [40a234e]
+  - @aave/graphql@1.0.0-next.13
+
+## 4.0.0-next.13
+
+### Patch Changes
+
+- Updated dependencies [93adceb]
+  - @aave/graphql@1.0.0-next.12
+
+## 4.0.0-next.12
+
+### Patch Changes
+
+- 1b7736a: **fix:** removes `period` argument from `PreviewUserPosition.projectedEarnings` field.
+- 5fad9a6: **feat:** `preparePositionSwap` and `supplySwapQuote` actions.
+- 3eb2d1a: **feat:** support changes to `SwapStatus` union.
+- 6c71713: **feat:** allows to expand swap strategies without breaking changes.
+- b06776a: **feat:** `withdrawSwapQuote` action, `useWithdrawSwapQuote` and `useWithdrawSwap` hooks.
+- 1931215: **feat:** `repayWithSupplyQuote` action, `useRepayWithSupplyQuote` and `useRepayWithSupply` hooks.
+- 551c14c: **feat:** `borrowSwapQuote` action and `useBorrowSwap` hook.
+- Updated dependencies [1b7736a]
+- Updated dependencies [5fad9a6]
+- Updated dependencies [3eb2d1a]
+- Updated dependencies [6c71713]
+- Updated dependencies [b06776a]
+- Updated dependencies [5fad9a6]
+- Updated dependencies [1931215]
+- Updated dependencies [5fad9a6]
+- Updated dependencies [551c14c]
+- Updated dependencies [4c076bd]
+  - @aave/graphql@1.0.0-next.11
+  - @aave/types@1.0.0-next.6
+  - @aave/core@1.0.0-next.8
+
+## 4.0.0-next.11
+
+### Patch Changes
+
+- 7920b63: **chore:** removes deprecated `ProtocolHistorySample.earnings` field.
+- 312863d: **chore:** removes support for `assetCategoryBorrowHistory` and `assetCategorySupplyHistory`.
+- Updated dependencies [7920b63]
+- Updated dependencies [312863d]
+  - @aave/graphql@1.0.0-next.10
+
 ## 4.0.0-next.10
 
 ### Patch Changes

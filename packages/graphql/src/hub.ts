@@ -95,3 +95,9 @@ export type HubSummaryHistoryRequest = RequestOf<typeof HubSummaryHistoryQuery>;
 export type HubSummaryHistoryRequestQuery = ReturnType<
   typeof graphql.scalar<'HubSummaryHistoryRequestQuery'>
 >;
+export type HubAssetsRequestOrderBy = ReturnType<
+  typeof graphql.scalar<'HubAssetsRequestOrderBy'>
+>;
+export type HubsRequestOrderBy = ReturnType<
+  typeof graphql.scalar<'HubsRequestOrderBy'>
+>;

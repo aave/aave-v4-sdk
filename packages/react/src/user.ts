@@ -199,7 +199,7 @@ export function useUserSupplies({
  * ```
  */
 export function useUserSuppliesAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserSuppliesRequest, UserSupplyItem[], UnexpectedError> {
   const client = useAaveClient();
@@ -207,8 +207,9 @@ export function useUserSuppliesAction(
   return useAsyncTask(
     (request: UserSuppliesRequest) =>
       userSupplies(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
@@ -355,7 +356,7 @@ export function useUserBorrows({
  * ```
  */
 export function useUserBorrowsAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<UserBorrowsRequest, UserBorrowItem[], UnexpectedError> {
   const client = useAaveClient();
@@ -363,8 +364,9 @@ export function useUserBorrowsAction(
   return useAsyncTask(
     (request: UserBorrowsRequest) =>
       userBorrows(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
@@ -599,6 +601,7 @@ export function useUserPositionsAction(
       userPositions(client, request, {
         currency: options.currency,
         timeWindow: options.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
@@ -907,7 +910,10 @@ export function useUserBalancesAction(
 
   return useAsyncTask(
     (request: UserBalancesRequest) =>
-      userBalances(client, request, { currency: options.currency }),
+      userBalances(client, request, {
+        currency: options.currency,
+        requestPolicy: 'cache-first',
+      }),
     [client, options.currency],
   );
 }

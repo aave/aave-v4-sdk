@@ -1,31 +1,44 @@
 import {
   type ActivitiesQuery,
+  type Asset,
   type BorrowActivity,
+  type BorrowSwapActivity,
   type Chain,
+  decodeSpokeId,
   type Erc20Token,
   encodeHubId,
+  encodeReserveId,
+  encodeUserPositionId,
   type Hub,
   type HubAsset,
   type HubQuery,
   isHubInputVariant,
+  isReserveInputVariant,
   isTxHashInputVariant,
   type LiquidatedActivity,
+  type MerklBorrowReward,
+  type MerklGenericCriteria,
+  type MerklSupplyReward,
   type NativeToken,
   type RepayActivity,
+  type RepayWithSupplyActivity,
   type Reserve,
   type ReserveInfo,
+  type ReserveQuery,
   type Spoke,
   type SupplyActivity,
-  type SwapByIntent,
-  type SwapByIntentWithApprovalRequired,
-  type SwapByTransaction,
+  type SupplySwapActivity,
   type TokenInfo,
+  type TokenSwapActivity,
   type UpdatedDynamicConfigActivity,
   type UpdatedRiskPremiumActivity,
+  type UserMerklClaimableReward,
   type UserPosition,
+  type UserPositionQuery,
   type UsingAsCollateralActivity,
   type VariablesOf,
   type WithdrawActivity,
+  type WithdrawSwapActivity,
 } from '@aave/graphql';
 import introspectedSchema from '@aave/graphql/schema';
 import { BigDecimal, type TxHash } from '@aave/types';
@@ -118,17 +131,19 @@ export const exchange = cacheExchange({
     AssetBorrowSample: {
       date: transformToDate,
     },
-    AssetCategoryBorrowSample: {
-      date: transformToDate,
-    },
-    AssetCategorySupplySample: {
-      date: transformToDate,
-    },
     AssetSupplySample: {
       date: transformToDate,
     },
     HubSummarySample: {
       date: transformToDate,
+    },
+    PreviewMerklBorrowReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
+    },
+    PreviewMerklSupplyReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
     },
     ProtocolHistorySample: {
       date: transformToDate,
@@ -138,6 +153,14 @@ export const exchange = cacheExchange({
     },
     LiquidatedActivity: {
       timestamp: transformToDate,
+    },
+    MerklBorrowReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
+    },
+    MerklSupplyReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
     },
     RepayActivity: {
       timestamp: transformToDate,
@@ -157,10 +180,43 @@ export const exchange = cacheExchange({
     UpdatedRiskPremiumActivity: {
       timestamp: transformToDate,
     },
+    TokenSwapActivity: {
+      timestamp: transformToDate,
+    },
+    SupplySwapActivity: {
+      timestamp: transformToDate,
+    },
+    BorrowSwapActivity: {
+      timestamp: transformToDate,
+    },
+    RepayWithSupplyActivity: {
+      timestamp: transformToDate,
+    },
+    WithdrawSwapActivity: {
+      timestamp: transformToDate,
+    },
+    UserMerklClaimableReward: {
+      startDate: transformToDate,
+      endDate: transformToDate,
+      claimUntil: transformToDate,
+    },
+    UserPosition: {
+      createdAt: transformToDate,
+    },
+    UserBorrowItem: {
+      createdAt: transformToNullableDate,
+    },
+    UserSupplyItem: {
+      createdAt: transformToNullableDate,
+    },
     SpokeUserPositionManager: {
       approvedOn: transformToDate,
     },
     SwapCancelled: {
+      createdAt: transformToDate,
+      cancelledAt: transformToNullableDate,
+    },
+    SwapCancelledResult: {
       createdAt: transformToDate,
       cancelledAt: transformToNullableDate,
     },
@@ -183,12 +239,6 @@ export const exchange = cacheExchange({
     SwapReceipt: {
       createdAt: transformToDate,
     },
-    // Intentionally omitted to keep it as BigIntString
-    // PermitMessageData: {
-    //   value: transformToBigInt,
-    //   nonce: transformToBigInt,
-    // },
-
     Query: {
       hub: (_, { request }: VariablesOf<typeof HubQuery>) => {
         if (isHubInputVariant(request.query)) {
@@ -201,6 +251,40 @@ export const exchange = cacheExchange({
           __typename: 'Hub',
           id: request.query.hubId,
         };
+      },
+
+      reserve: (_, { request }: VariablesOf<typeof ReserveQuery>) => {
+        if (isReserveInputVariant(request.query)) {
+          return {
+            __typename: 'Reserve',
+            id: encodeReserveId(request.query.reserveInput),
+          };
+        }
+        return {
+          __typename: 'Reserve',
+          id: request.query.reserveId,
+        };
+      },
+
+      userPosition: (_, { request }: VariablesOf<typeof UserPositionQuery>) => {
+        if ('userSpoke' in request && request.userSpoke) {
+          const { chainId, address } = decodeSpokeId(request.userSpoke.spoke);
+          return {
+            __typename: 'UserPosition',
+            id: encodeUserPositionId({
+              chainId,
+              spoke: address,
+              user: request.userSpoke.user,
+            }),
+          };
+        }
+        if ('id' in request && request.id) {
+          return {
+            __typename: 'UserPosition',
+            id: request.id,
+          };
+        }
+        return undefined;
       },
 
       activities: (
@@ -268,30 +352,33 @@ export const exchange = cacheExchange({
     },
   },
   keys: {
-    // Entitied with composite key
+    // Entities with id field as key
+    Asset: (data: Asset) => data.id,
+    BorrowActivity: (data: BorrowActivity) => data.id,
+    BorrowSwapActivity: (data: BorrowSwapActivity) => data.id,
     Hub: (data: Hub) => data.id,
     HubAsset: (data: HubAsset) => data.id,
+    LiquidatedActivity: (data: LiquidatedActivity) => data.id,
+    MerklBorrowReward: (data: MerklBorrowReward) => data.id,
+    MerklGenericCriteria: (data: MerklGenericCriteria) => data.id,
+    MerklSupplyReward: (data: MerklSupplyReward) => data.id,
+    RepayActivity: (data: RepayActivity) => data.id,
+    RepayWithSupplyActivity: (data: RepayWithSupplyActivity) => data.id,
     Reserve: (data: Reserve) => data.id,
     ReserveInfo: (data: ReserveInfo) => data.id,
     Spoke: (data: Spoke) => data.id,
-
-    // Entities with id field as key
-    BorrowActivity: (data: BorrowActivity) => data.id,
-    LiquidatedActivity: (data: LiquidatedActivity) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
-    SwapByIntent: (data: SwapByIntent) => data.quote.quoteId,
-    SwapByIntentWithApprovalRequired: (
-      data: SwapByIntentWithApprovalRequired,
-    ) => data.quote.quoteId,
-    SwapByTransaction: (data: SwapByTransaction) => data.quote.quoteId,
-    UserPosition: (data: UserPosition) => data.id,
+    SupplySwapActivity: (data: SupplySwapActivity) => data.id,
+    TokenInfo: (data: TokenInfo) => data.id,
+    TokenSwapActivity: (data: TokenSwapActivity) => data.id,
     UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
       data.id,
     UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
+    UserMerklClaimableReward: (data: UserMerklClaimableReward) => data.id,
+    UserPosition: (data: UserPosition) => data.id,
     UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
     WithdrawActivity: (data: WithdrawActivity) => data.id,
-    RepayActivity: (data: RepayActivity) => data.id,
-    TokenInfo: (data: TokenInfo) => data.id,
+    WithdrawSwapActivity: (data: WithdrawSwapActivity) => data.id,
 
     // Entities with address field as key
     Erc20Token: (data: Erc20Token) => data.address,
@@ -300,33 +387,21 @@ export const exchange = cacheExchange({
     Chain: (data: Chain) => data.chainId.toString(),
     NativeToken: (data: NativeToken) => data.chain.chainId.toString(),
 
-    // Entities without keys will be embedded directly on the parent entity
-    PaginatedActivitiesResult: () => null,
-    PaginatedResultInfo: () => null,
-    PaginatedSpokePositionManagerResult: () => null,
-    PaginatedSpokeUserPositionManagerResult: () => null,
-    PaginatedUserSwapsResult: () => null,
-    SpokePositionManger: () => null,
-    SpokeUserPositionManager: () => null,
-    SwapReceipt: () => null,
-    SwapTransactionRequest: () => null,
-
     // Value objects and result types
     ApySample: () => null,
-    Asset: () => null,
+    BorrowSwap: () => null,
     AssetAmountWithChange: () => null,
     AssetBorrowSample: () => null,
-    AssetCategoryBorrowSample: () => null,
-    AssetCategorySupplySample: () => null,
     AssetPriceSample: () => null,
+    AssetSampleBreakdown: () => null,
     AssetSummary: () => null,
     AssetSupplySample: () => null,
-    CancelSwapTypedData: () => null,
-    CancelSwapTypeDefinition: () => null,
     DecimalNumber: () => null,
+    CollateralFactorVariation: () => null,
     DecimalNumberWithChange: () => null,
     DomainData: () => null,
     Erc20Amount: () => null,
+    Erc20Approval: () => null,
     Erc20ApprovalRequired: () => null,
     ExchangeAmount: () => null,
     ExchangeAmountVariation: () => null,
@@ -341,33 +416,62 @@ export const exchange = cacheExchange({
     HubSummary: () => null,
     HubSummarySample: () => null,
     InsufficientBalanceError: () => null,
+    InsufficientLiquidityError: () => null,
+    LiquidationFeeVariation: () => null,
+    MaxLiquidationBonusVariation: () => null,
     NativeAmount: () => null,
+    PaginatedActivitiesResult: () => null,
+    PaginatedResultInfo: () => null,
+    PaginatedSpokePositionManagerResult: () => null,
+    PaginatedSpokeUserPositionManagerResult: () => null,
+    PaginatedUserSwapsResult: () => null,
     PercentNumber: () => null,
     PercentNumberVariation: () => null,
     PercentNumberWithChange: () => null,
-    PermitMessageData: () => null,
-    PermitTypedDataResponse: () => null,
+    PermitTypedData: () => null,
+    BorrowSwapQuoteResult: () => null,
+    PercentNumberChangeSnapshot: () => null,
+    PositionAmount: () => null,
+    PositionSwapAdapterContractApproval: () => null,
+    PositionSwapByIntentApprovalsRequired: () => null,
+    PositionSwapPositionManagerApproval: () => null,
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
+    PrepareSwapOrder: () => null,
+    PreviewMerklBorrowReward: () => null,
+    PreviewMerklSupplyReward: () => null,
+    PreviewRewardOutcome: () => null,
     PreviewUserPosition: () => null,
+    RepayWithSupply: () => null,
+    RepayWithSupplyQuoteResult: () => null,
     ProtocolHistorySample: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,
     ReserveSummary: () => null,
     ReserveUserState: () => null,
-    SwapApprovalRequired: () => null,
-    SwapByIntentTypedData: () => null,
-    SwapByIntentTypeDefinition: () => null,
+    SpokePositionManager: () => null,
+    SpokeUserPositionManager: () => null,
+    SwapByIntent: () => null,
+    SwapByIntentWithApprovalRequired: () => null,
+    SupplySwap: () => null,
+    SupplySwapQuoteResult: () => null,
+    SwapByTransaction: () => null,
     SwapCancelled: () => null,
+    SwapCancelledResult: () => null,
     SwapExpired: () => null,
     SwapFulfilled: () => null,
     SwapOpen: () => null,
     SwapPendingSignature: () => null,
     SwapQuote: () => null,
     SwapQuoteCosts: () => null,
+    SwapReceipt: () => null,
+    SwapTransactionRequest: () => null,
+    SwapTypedData: () => null,
+    TokenSwap: () => null,
+    TokenSwapQuoteResult: () => null,
+    WithdrawSwap: () => null,
+    WithdrawSwapQuoteResult: () => null,
     TransactionRequest: () => null,
-    TypeDefinition: () => null,
-    TypeField: () => null,
     UserBalance: () => null,
     UserBorrowItem: () => null,
     UserPositionRiskPremium: () => null,

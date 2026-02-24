@@ -4,6 +4,8 @@ import {
   type ActivitiesRequest,
   BorrowQuery,
   type BorrowRequest,
+  ClaimRewardsQuery,
+  type ClaimRewardsRequest,
   type ExecutionPlan,
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
@@ -55,7 +57,7 @@ import {
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -93,7 +95,7 @@ export function borrow(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -128,7 +130,7 @@ export function supply(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -161,7 +163,7 @@ export function repay(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * **Withdraw specific amount:**
@@ -215,7 +217,7 @@ export function withdraw(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  *
@@ -244,7 +246,7 @@ export function renounceSpokeUserPositionManager(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  *
@@ -278,7 +280,7 @@ export function updateUserPositionConditions(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -323,7 +325,7 @@ export function liquidatePosition(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -364,9 +366,12 @@ export function setSpokeUserPositionManager(
 export function preview(
   client: AaveClient,
   request: PreviewRequest,
-  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PreviewUserPosition, UnexpectedError> {
-  return client.query(PreviewQuery, { request, ...options });
+  return client.query(PreviewQuery, { request, currency }, { requestPolicy });
 }
 
 /**
@@ -396,6 +401,33 @@ export function setUserSuppliesAsCollateral(
 }
 
 /**
+ * Creates a transaction to claim rewards.
+ *
+ * ```ts
+ * const result = await claimRewards(client, {
+ *   ids: [rewardId('abc123')],
+ * });
+ *
+ * if (result.isErr()) {
+ *   // Handle error
+ *   return;
+ * }
+ *
+ * // result.value: TransactionRequest
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The claim rewards request parameters.
+ * @returns The transaction request to claim rewards.
+ */
+export function claimRewards(
+  client: AaveClient,
+  request: ClaimRewardsRequest,
+): ResultAsync<TransactionRequest, UnexpectedError> {
+  return client.query(ClaimRewardsQuery, { request });
+}
+
+/**
  * Fetches paginated list of activities.
  *
  * ```ts
@@ -416,20 +448,17 @@ export function setUserSuppliesAsCollateral(
 export function activities(
   client: AaveClient,
   request: ActivitiesRequest,
-  options: CurrencyQueryOptions &
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
     TimeWindowQueryOptions &
     RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PaginatedActivitiesResult, UnexpectedError> {
   return client.query(
     ActivitiesQuery,
-    {
-      request,
-      currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
-      timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-    },
-    {
-      requestPolicy:
-        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
-    },
+    { request, currency, timeWindow },
+    { requestPolicy },
   );
 }

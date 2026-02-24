@@ -24,7 +24,6 @@ import {
   type PausableReadResult,
   type PausableSuspenseResult,
   type ReadResult,
-  type Selector,
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
@@ -146,7 +145,7 @@ export function useReserve({
  * ```
  */
 export function useReserveAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReserveRequest, Reserve | null, UnexpectedError> {
   const client = useAaveClient();
@@ -154,27 +153,16 @@ export function useReserveAction(
   return useAsyncTask(
     (request: ReserveRequest) =>
       reserve(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );
 }
 
-export type UseReservesArgs<T = Reserve[]> = Prettify<
-  ReservesRequest &
-    CurrencyQueryOptions &
-    TimeWindowQueryOptions & {
-      /**
-       * A function that maps the full list of reserves
-       * into a derived or narrowed value.
-       *
-       * Example: pick a single reserve based on a criteria.
-       *
-       * @experimental This is experimental and may be subject to breaking changes.
-       */
-      selector?: Selector<Reserve[], T>;
-    }
+export type UseReservesArgs = Prettify<
+  ReservesRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
@@ -195,38 +183,10 @@ export type UseReservesArgs<T = Reserve[]> = Prettify<
  *   suspense: true,
  * });
  * ```
- *
- * **Reserves with Highest Supply APY**
- * ```tsx
- * const { data } = useReserves({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
- *   suspense: true,
- *   selector: pickHighestSupplyApyReserve,
- * });
- * ```
- *
- * **Reserves with Lowest Borrow APY**
- * ```tsx
- * const { data } = useReserves({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
- *   suspense: true,
- *   selector: pickLowestBorrowApyReserve,
- * });
- * ```
  */
-export function useReserves<T = Reserve[]>(
-  args: UseReservesArgs<T> & Suspendable,
-): SuspenseResult<T>;
+export function useReserves(
+  args: UseReservesArgs & Suspendable,
+): SuspenseResult<Reserve[]>;
 /**
  * Fetch reserves based on specified criteria.
  *
@@ -245,9 +205,9 @@ export function useReserves<T = Reserve[]>(
  * });
  * ```
  */
-export function useReserves<T = Reserve[]>(
-  args: Pausable<UseReservesArgs<T>> & Suspendable,
-): PausableSuspenseResult<T>;
+export function useReserves(
+  args: Pausable<UseReservesArgs> & Suspendable,
+): PausableSuspenseResult<Reserve[]>;
 /**
  * Fetch reserves based on specified criteria.
  *
@@ -263,36 +223,10 @@ export function useReserves<T = Reserve[]>(
  *   orderBy: { name: 'ASC' },
  * });
  * ```
- *
- * **Reserves with Highest Supply APY**
- * ```tsx
- * const { data } = useReserves({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
- *   selector: pickHighestSupplyApyReserve,
- * });
- * ```
- *
- * **Reserves with Lowest Borrow APY**
- * ```tsx
- * const { data } = useReserves({
- *   query: {
- *     spoke: {
- *       address: evmAddress('0x123...'),
- *       chainId: chainId(1)
- *     }
- *   },
- *   selector: pickLowestBorrowApyReserve,
- * });
- * ```
  */
-export function useReserves<T = Reserve[]>(
-  args: UseReservesArgs<T>,
-): ReadResult<T>;
+export function useReserves(
+  args: UseReservesArgs,
+): ReadResult<Reserve[], UnexpectedError>;
 /**
  * Fetch reserves based on specified criteria.
  *
@@ -310,21 +244,20 @@ export function useReserves<T = Reserve[]>(
  * });
  * ```
  */
-export function useReserves<T = Reserve[]>(
-  args: Pausable<UseReservesArgs<T>>,
-): PausableReadResult<T>;
+export function useReserves(
+  args: Pausable<UseReservesArgs>,
+): PausableReadResult<Reserve[], UnexpectedError>;
 
-export function useReserves<T = Reserve[]>({
+export function useReserves({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
-  selector,
   ...request
-}: NullishDeep<UseReservesArgs<T>> & {
+}: NullishDeep<UseReservesArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<T, UnexpectedError> {
+}): SuspendableResult<Reserve[], UnexpectedError> {
   return useSuspendableQuery({
     document: ReservesQuery,
     variables: {
@@ -334,7 +267,6 @@ export function useReserves<T = Reserve[]>({
     },
     suspense,
     pause,
-    selector: (selector || undefined) as Selector<Reserve[], T> | undefined,
   });
 }
 
@@ -367,39 +299,9 @@ export function useReserves<T = Reserve[]>({
  *   console.error(result.error);
  * }
  * ```
- *
- * **Reserves with Highest Supply APY**
- * ```ts
- * const [execute, { called, data, error, loading }] = useReservesAction();
- *
- * // …
- *
- * const result = await execute(…).map(pickHighestSupplyApyReserve);
- *
- * if (result.isOk()) {
- *   console.log(result.value); // Reserve | null
- * } else {
- *   console.error(result.error);
- * }
- * ```
- *
- * **Reserves with Lowest Borrow APY**
- * ```ts
- * const [execute, { called, data, error, loading }] = useReservesAction();
- *
- * // …
- *
- * const result = await execute(…).map(pickLowestBorrowApyReserve);
- *
- * if (result.isOk()) {
- *   console.log(result.value); // Reserve | null
- * } else {
- *   console.error(result.error);
- * }
- * ```
  */
 export function useReservesAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ReservesRequest, Reserve[], UnexpectedError> {
   const client = useAaveClient();
@@ -407,8 +309,9 @@ export function useReservesAction(
   return useAsyncTask(
     (request: ReservesRequest) =>
       reserves(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
   );

@@ -1,6 +1,16 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 
+export const DomainDataFragment = graphql(
+  `fragment DomainData on DomainData {
+    name
+    version
+    chainId
+    verifyingContract
+  }`,
+);
+export type DomainData = FragmentOf<typeof DomainDataFragment>;
+
 export const DecimalNumberFragment =
   graphql(`fragment DecimalNumber on DecimalNumber {
     __typename
@@ -94,7 +104,6 @@ export const Erc20TokenFragment = graphql(
       ...Chain
     }
     isWrappedNativeToken
-    permitSupported
   }`,
   [TokenInfoFragment, ChainFragment],
 );
@@ -314,3 +323,29 @@ export const HealthFactorResultFragment: FragmentDocumentFor<
   }`,
   [HealthFactorVariationFragment, HealthFactorErrorFragment],
 );
+
+export const InsufficientBalanceErrorFragment = graphql(
+  `fragment InsufficientBalanceError on InsufficientBalanceError {
+    __typename
+    required {
+      ...DecimalNumber
+    }
+    available {
+      ...DecimalNumber
+    }
+  }`,
+  [DecimalNumberFragment],
+);
+export type InsufficientBalanceError = FragmentOf<
+  typeof InsufficientBalanceErrorFragment
+>;
+
+export const InsufficientLiquidityErrorFragment = graphql(
+  `fragment InsufficientLiquidityError on InsufficientLiquidityError {
+    __typename
+    reason
+  }`,
+);
+export type InsufficientLiquidityError = FragmentOf<
+  typeof InsufficientLiquidityErrorFragment
+>;

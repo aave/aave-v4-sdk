@@ -1,59 +1,88 @@
 import {
+  type AaveClient,
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
-  errAsync,
-  ValidationError,
+  supportsPermit,
+  type TimeWindowQueryOptions,
 } from '@aave/client';
 import {
+  borrowSwapQuote,
   cancelSwap,
-  prepareSwap,
+  preparePositionSwap,
   prepareSwapCancel,
+  prepareTokenSwap,
+  repayWithSupplyQuote,
+  supplySwapQuote,
   swap,
-  swapQuote,
   swapStatus,
+  tokenSwapQuote,
+  withdrawSwapQuote,
 } from '@aave/client/actions';
-import type {
-  CancelError,
-  SigningError,
-  TimeoutError,
-  TransactionError,
+import {
+  type CancelError,
+  type SigningError,
+  type TimeoutError,
+  type TransactionError,
   UnexpectedError,
+  ValidationError,
 } from '@aave/core';
 import type {
   InsufficientBalanceError,
+  InsufficientLiquidityError,
   PaginatedUserSwapsResult,
+  PositionSwapApproval,
   PrepareSwapCancelRequest,
-  SwapByIntentTypedData,
-  SwapByIntentWithApprovalRequired,
+  SupplySwapQuoteRequest,
   SwapCancelled,
-  SwapExecutionPlan,
+  SwapCancelledResult,
   SwapQuote,
-  SwapQuoteRequest,
   SwapReceipt,
+  SwapStatus,
+  SwapStatusRequest,
   SwapTransactionRequest,
+  TokenSwapQuoteRequest,
   UserSwapsRequest,
 } from '@aave/graphql';
 import {
-  type CancelSwapTypedData,
-  type ERC20PermitSignature,
-  type PrepareSwapRequest,
-  type SwapApprovalRequired,
+  BorrowSwapQuoteQuery,
+  type BorrowSwapQuoteRequest,
+  type Erc20Approval,
+  type PositionSwapByIntentApprovalsRequired,
+  type PreparePositionSwapRequest,
+  QuoteAccuracy,
+  RepayWithSupplyQuoteQuery,
+  type RepayWithSupplyQuoteRequest,
+  SupplySwapQuoteQuery,
+  type SwapByIntentInput,
   SwappableTokensQuery,
   type SwappableTokensRequest,
-  SwapQuoteQuery,
+  type SwapRequest,
+  SwapStatusQuery,
+  type SwapTypedData,
   type Token,
+  TokenSwapQuoteQuery,
+  type TokenSwapQuoteResult,
   type TransactionRequest,
   UserSwapsQuery,
+  WithdrawSwapQuoteQuery,
+  type WithdrawSwapQuoteRequest,
 } from '@aave/graphql';
+import type {
+  NullishDeep,
+  Prettify,
+  Result,
+  ResultAsync,
+  Signature,
+} from '@aave/types';
 import {
-  invariant,
-  type NullishDeep,
+  err,
+  isSignature,
+  never,
+  ok,
   okAsync,
-  type Prettify,
-  type ResultAsync,
   ResultAwareError,
 } from '@aave/types';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAaveClient } from './context';
 import {
   type CancelOperation,
@@ -68,137 +97,274 @@ import {
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
+  trySignatureFrom,
   useSuspendableQuery,
 } from './helpers';
 import { type UseAsyncTask, useAsyncTask } from './helpers/tasks';
 
-export type UseSwapQuoteArgs = Prettify<
-  SwapQuoteRequest & CurrencyQueryOptions
+function extractTokenSwapQuote(
+  data: TokenSwapQuoteResult,
+): Result<
+  SwapQuote,
+  ValidationError<InsufficientLiquidityError> | UnexpectedError
+> {
+  switch (data.__typename) {
+    case 'SwapByIntent':
+    case 'SwapByIntentWithApprovalRequired':
+    case 'SwapByTransaction':
+      return ok(data.quote);
+    case 'InsufficientLiquidityError':
+      return err(ValidationError.fromGqlNode(data));
+    default:
+      return err(
+        UnexpectedError.upgradeRequired(
+          `Unsupported swap quote result: ${data.__typename}`,
+        ),
+      );
+  }
+}
+
+function toSwapCancelledResult(cancelled: SwapCancelled): SwapCancelledResult {
+  return {
+    __typename: 'SwapCancelledResult',
+    swapId: cancelled.swapId,
+    createdAt: cancelled.createdAt,
+    cancelledAt: cancelled.cancelledAt,
+    explorerUrl: cancelled.explorerUrl,
+  };
+}
+
+function extractPositionSwapQuote(
+  data: PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError,
+): Result<
+  SwapQuote,
+  ValidationError<InsufficientLiquidityError> | UnexpectedError
+> {
+  switch (data.__typename) {
+    case 'PositionSwapByIntentApprovalsRequired':
+      return ok(data.quote);
+    case 'InsufficientLiquidityError':
+      return err(ValidationError.fromGqlNode(data));
+    default:
+      return err(
+        UnexpectedError.upgradeRequired(
+          `Unsupported position swap quote result: ${(data as { __typename: string }).__typename}`,
+        ),
+      );
+  }
+}
+
+function injectTokenSwapQuoteAccuracy(
+  request: NullishDeep<TokenSwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<TokenSwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  // Limit orders don't have an accuracy field
+  return request;
+}
+
+function injectSupplySwapQuoteAccuracy(
+  request: NullishDeep<SupplySwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<SupplySwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectBorrowSwapQuoteAccuracy(
+  request: NullishDeep<BorrowSwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<BorrowSwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectRepayWithSupplyQuoteAccuracy(
+  request: NullishDeep<RepayWithSupplyQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<RepayWithSupplyQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+function injectWithdrawSwapQuoteAccuracy(
+  request: NullishDeep<WithdrawSwapQuoteRequest>,
+  accuracy: QuoteAccuracy,
+): NullishDeep<WithdrawSwapQuoteRequest> {
+  if ('market' in request && request.market) {
+    return { market: { ...request.market, accuracy } };
+  }
+  return request;
+}
+
+export type UseTokenSwapQuoteArgs = Prettify<
+  TokenSwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
- * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useSwapQuote({
+ * const { data } = useTokenSwapQuote({
+ *   market: {
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
  *   suspense: true,
  * });
  * ```
  */
-export function useSwapQuote(
-  args: UseSwapQuoteArgs & Suspendable,
+export function useTokenSwapQuote(
+  args: UseTokenSwapQuoteArgs & Suspendable,
 ): SuspenseResult<SwapQuote>;
 /**
- * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * Pausable suspense mode.
  *
  * ```tsx
- * const { data } = useSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
- *   from: evmAddress('0x742d35cc...'),
+ * const { data } = useTokenSwapQuote({
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   suspense: true,
  *   pause: true,
  * });
  * ```
  */
-export function useSwapQuote(
-  args: Pausable<UseSwapQuoteArgs> & Suspendable,
+export function useTokenSwapQuote(
+  args: Pausable<UseTokenSwapQuoteArgs> & Suspendable,
 ): PausableSuspenseResult<SwapQuote>;
 /**
- * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * ```tsx
- * const { data, error, loading } = useSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
+ * const { data, error, loading } = useTokenSwapQuote({
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  * });
  * ```
  */
-export function useSwapQuote(args: UseSwapQuoteArgs): ReadResult<SwapQuote>;
+export function useTokenSwapQuote(
+  args: UseTokenSwapQuoteArgs,
+): ReadResult<SwapQuote>;
 /**
- * @internal
  * Fetch a swap quote for the specified trade parameters.
  *
  * Pausable loading state mode.
  *
  * ```tsx
- * const { data, error, loading, paused } = useSwapQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
- *   from: evmAddress('0x742d35cc...'),
+ * const { data, error, loading, paused } = useTokenSwapQuote({
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
  *   pause: true,
  * });
  * ```
  */
-export function useSwapQuote(
-  args: Pausable<UseSwapQuoteArgs>,
+export function useTokenSwapQuote(
+  args: Pausable<UseTokenSwapQuoteArgs>,
 ): PausableReadResult<SwapQuote>;
 
-/**
- * @internal
- */
-export function useSwapQuote({
+export function useTokenSwapQuote({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: NullishDeep<UseSwapQuoteArgs> & {
+}: NullishDeep<UseTokenSwapQuoteArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<SwapQuote, UnexpectedError> {
-  return useSuspendableQuery({
-    document: SwapQuoteQuery,
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
+    document: TokenSwapQuoteQuery,
     variables: {
-      request,
+      request: injectTokenSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
       currency,
     },
+    selector: extractTokenSwapQuote,
     suspense,
     pause,
+    batch: false, // Don't batch with Accurate query
   });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: TokenSwapQuoteQuery,
+    variables: {
+      request: injectTokenSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: extractTokenSwapQuote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
 }
 
 /**
- * @internal
  * Low-level hook to execute a swap quote action directly.
  *
- * @experimental This hook is experimental and may be subject to breaking changes.
  * @remarks
  * This hook **does not** actively watch for updated data on the swap quote.
  * Use this hook to retrieve quotes on demand as part of a larger workflow
  * (e.g., in an event handler to get a fresh quote before executing a swap).
  *
  * ```ts
- * const [getQuote, { called, data, error, loading }] = useSwapQuoteAction();
+ * const [getQuote, { called, data, error, loading }] = useTokenSwapQuoteAction();
  *
  * // …
  *
  * const result = await getQuote({
- *   chainId: chainId(1),
- *   buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *   sell: { erc20: evmAddress('0x6B175474E...') },
- *   amount: bigDecimal('1000'),
- *   kind: SwapKind.SELL,
+ *   market: {
+ *     chainId: chainId(1),
+ *     buy: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     sell: { erc20: evmAddress('0x6B175474E…') },
+ *     amount: bigDecimal('1000'),
+ *     kind: SwapKind.Sell,
+ *   },
  * });
  *
  * if (result.isOk()) {
@@ -208,14 +374,21 @@ export function useSwapQuote({
  * }
  * ```
  */
-export function useSwapQuoteAction(
+export function useTokenSwapQuoteAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<SwapQuoteRequest, SwapQuote, UnexpectedError> {
+): UseAsyncTask<
+  TokenSwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: SwapQuoteRequest) =>
-      swapQuote(client, request, { currency: options.currency }),
+    (request: TokenSwapQuoteRequest) =>
+      tokenSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).andThen(extractTokenSwapQuote),
     [client, options.currency],
   );
 }
@@ -223,7 +396,6 @@ export function useSwapQuoteAction(
 export type UseSwappableTokensArgs = SwappableTokensRequest;
 
 /**
- * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * This signature supports React Suspense:
@@ -239,7 +411,6 @@ export function useSwappableTokens(
   args: UseSwappableTokensArgs & Suspendable,
 ): SuspenseResult<Token[]>;
 /**
- * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * Pausable suspense mode.
@@ -256,7 +427,6 @@ export function useSwappableTokens(
   args: Pausable<UseSwappableTokensArgs> & Suspendable,
 ): PausableSuspenseResult<Token[]>;
 /**
- * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * ```tsx
@@ -269,7 +439,6 @@ export function useSwappableTokens(
   args: UseSwappableTokensArgs,
 ): ReadResult<Token[]>;
 /**
- * @internal
  * Fetch the list of tokens available for swapping on a specific chain.
  *
  * Pausable loading state mode.
@@ -285,9 +454,6 @@ export function useSwappableTokens(
   args: Pausable<UseSwappableTokensArgs>,
 ): PausableReadResult<Token[]>;
 
-/**
- * @internal
- */
 export function useSwappableTokens({
   suspense = false,
   pause = false,
@@ -307,11 +473,10 @@ export function useSwappableTokens({
 }
 
 export type UseUserSwapsArgs = Prettify<
-  UserSwapsRequest & CurrencyQueryOptions
+  UserSwapsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
- * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * This signature supports React Suspense:
@@ -319,7 +484,7 @@ export type UseUserSwapsArgs = Prettify<
  * ```tsx
  * const { data } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  *   suspense: true,
  * });
@@ -329,7 +494,6 @@ export function useUserSwaps(
   args: UseUserSwapsArgs & Suspendable,
 ): SuspenseResult<PaginatedUserSwapsResult>;
 /**
- * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * Pausable suspense mode.
@@ -337,7 +501,7 @@ export function useUserSwaps(
  * ```tsx
  * const { data } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  *   suspense: true,
  *   pause: true,
@@ -348,13 +512,12 @@ export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs> & Suspendable,
 ): PausableSuspenseResult<PaginatedUserSwapsResult>;
 /**
- * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * ```tsx
  * const { data, error, loading } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  * });
  * ```
@@ -363,7 +526,6 @@ export function useUserSwaps(
   args: UseUserSwapsArgs,
 ): ReadResult<PaginatedUserSwapsResult>;
 /**
- * @internal
  * Fetch the user's swap history for a specific chain.
  *
  * Pausable loading state mode.
@@ -371,7 +533,7 @@ export function useUserSwaps(
  * ```tsx
  * const { data, error, loading, paused } = useUserSwaps({
  *   chainId: chainId(1),
- *   user: evmAddress('0x742d35cc...'),
+ *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  *   pause: true,
  * });
@@ -381,92 +543,605 @@ export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs>,
 ): PausableReadResult<PaginatedUserSwapsResult>;
 
-/**
- * @internal
- */
 export function useUserSwaps({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseUserSwapsArgs> & {
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> {
-  return useSuspendableQuery({
-    document: UserSwapsQuery,
-    variables: {
-      request,
-      currency,
-    },
-    suspense,
-    pause,
-  });
+  const client = useAaveClient();
+  const [allTerminal, setAllTerminal] = useState(false);
+
+  const result: SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> =
+    useSuspendableQuery({
+      document: UserSwapsQuery,
+      variables: { request, currency, timeWindow },
+      suspense,
+      pause: pause || allTerminal,
+      pollInterval: client.context.environment.swapStatusInterval,
+    });
+
+  useEffect(() => {
+    if (result.data && result.data.items.length > 0) {
+      const allItemsTerminal = result.data.items.every(isTerminalSwapStatus);
+      if (allItemsTerminal) {
+        setAllTerminal(true);
+      }
+    }
+  }, [result.data]);
+
+  return result;
 }
 
-export type UseSwapTokensRequest = Prettify<
-  PrepareSwapRequest & CurrencyQueryOptions
+// ------------------------------------------------------------
+
+function isTerminalSwapStatus(data: SwapStatus): boolean {
+  return (
+    data.__typename === 'SwapFulfilled' ||
+    data.__typename === 'SwapCancelled' ||
+    data.__typename === 'SwapExpired'
+  );
+}
+
+export type UseSwapStatusArgs = Prettify<
+  SwapStatusRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
-export type SwapIntent =
-  | SwapByIntentTypedData
-  | SwapByIntentWithApprovalRequired
-  | SwapTransactionRequest
-  | SwapApprovalRequired;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Polls automatically until the swap reaches a terminal state (fulfilled, cancelled, or expired).
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: UseSwapStatusArgs & Suspendable,
+): SuspenseResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   suspense: true,
+ *   pause: shouldPause,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: Pausable<UseSwapStatusArgs> & Suspendable,
+): PausableSuspenseResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Polls automatically until the swap reaches a terminal state (fulfilled, cancelled, or expired).
+ *
+ * ```tsx
+ * const { data, error, loading } = useSwapStatus({
+ *   id: swapReceipt.id,
+ * });
+ * ```
+ */
+export function useSwapStatus(args: UseSwapStatusArgs): ReadResult<SwapStatus>;
+/**
+ * Monitor the status of a single swap operation in real-time.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSwapStatus({
+ *   id: swapReceipt.id,
+ *   pause: shouldPause,
+ * });
+ * ```
+ */
+export function useSwapStatus(
+  args: Pausable<UseSwapStatusArgs>,
+): PausableReadResult<SwapStatus>;
+
+export function useSwapStatus({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  ...request
+}: NullishDeep<UseSwapStatusArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SwapStatus, UnexpectedError> {
+  const client = useAaveClient();
+  const [isTerminal, setIsTerminal] = useState(false);
+
+  const result: SuspendableResult<SwapStatus, UnexpectedError> =
+    useSuspendableQuery({
+      document: SwapStatusQuery,
+      variables: { request, currency, timeWindow },
+      suspense,
+      pause: pause || isTerminal,
+      pollInterval: client.context.environment.swapStatusInterval,
+    });
+
+  useEffect(() => {
+    if (result.data && isTerminalSwapStatus(result.data)) {
+      setIsTerminal(true);
+    }
+  }, [result.data]);
+
+  return result;
+}
+
+// ------------------------------------------------------------
+
+export type UseSupplySwapQuoteArgs = Prettify<
+  SupplySwapQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: UseSupplySwapQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: Pausable<UseSupplySwapQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: UseSupplySwapQuoteArgs,
+): ReadResult<SwapQuote>;
+/**
+ * Fetch a quote for a supply swap operation with the specified parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSupplySwapQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSupplySwapQuote(
+  args: Pausable<UseSupplySwapQuoteArgs>,
+): PausableReadResult<SwapQuote>;
+
+export function useSupplySwapQuote({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseSupplySwapQuoteArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
+    document: SupplySwapQuoteQuery,
+    variables: {
+      request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Fast),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense,
+    pause,
+    batch: false, // Don't batch with Accurate query
+  });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: SupplySwapQuoteQuery,
+    variables: {
+      request: injectSupplySwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
+}
+
+/**
+ * Low-level hook to execute a supply swap quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useSupplySwapQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   sellPosition: userSupplyItem.id,
+ *   buyReserve: reserve.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Supply swap quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useSupplySwapQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<
+  SupplySwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: SupplySwapQuoteRequest) =>
+      supplySwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).andThen(extractPositionSwapQuote),
+    [client, options.currency],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseBorrowSwapQuoteArgs = Prettify<
+  BorrowSwapQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: UseBorrowSwapQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: Pausable<UseBorrowSwapQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * ```tsx
+ * const { data, error, loading } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: UseBorrowSwapQuoteArgs,
+): ReadResult<SwapQuote>;
+/**
+ * Fetch a quote for a borrow swap operation with the specified parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useBorrowSwapQuote({
+ *   market: {
+ *     sellPosition: userBorrowItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useBorrowSwapQuote(
+  args: Pausable<UseBorrowSwapQuoteArgs>,
+): PausableReadResult<SwapQuote>;
+
+export function useBorrowSwapQuote({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseBorrowSwapQuoteArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
+    document: BorrowSwapQuoteQuery,
+    variables: {
+      request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense,
+    pause,
+    batch: false, // Don't batch with Accurate query
+  });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: BorrowSwapQuoteQuery,
+    variables: {
+      request: injectBorrowSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
+}
+
+/**
+ * Low-level hook to execute a borrow swap quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useBorrowSwapQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   debtPosition: userBorrowItem.id,
+ *   buyReserve: reserve.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Borrow swap quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useBorrowSwapQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<
+  BorrowSwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: BorrowSwapQuoteRequest) =>
+      borrowSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).andThen(extractPositionSwapQuote),
+    [client, options.currency],
+  );
+}
+
+// ------------------------------------------------------------
 
 export type SwapHandlerOptions = {
   cancel: CancelOperation;
 };
 
-export type SwapHandler = (
-  intent: SwapIntent,
-  options: SwapHandlerOptions,
-) => ResultAsync<
-  ERC20PermitSignature | SwapReceipt,
-  SendTransactionError | PendingTransactionError
->;
+export type SwapSignerError = CancelError | SigningError | UnexpectedError;
 
-function isERC20PermitSignature(
-  signature: unknown,
-): signature is ERC20PermitSignature {
-  return (
-    typeof signature === 'object' &&
-    signature !== null &&
-    'deadline' in signature &&
-    'value' in signature
-  );
+// ------------------------------------------------------------
+
+export type PositionSwapPlan = PositionSwapApproval | SwapTypedData;
+
+export type PositionSwapHandler = (
+  plan: PositionSwapPlan,
+  options: SwapHandlerOptions,
+) => ResultAsync<PendingTransaction | Signature, SwapSignerError>;
+
+export type PositionSwapValue = {
+  quote?: SwapQuote;
+};
+
+function processApprovals(result: PositionSwapByIntentApprovalsRequired) {
+  return {
+    with: (
+      handler: PositionSwapHandler,
+    ): ResultAsync<PreparePositionSwapRequest, SwapSignerError> =>
+      result.approvals.reduce<
+        ResultAsync<PreparePositionSwapRequest, SwapSignerError>
+      >(
+        (acc, approval) =>
+          acc.andThen((request) =>
+            handler(approval, { cancel }).map((value) => {
+              switch (approval.__typename) {
+                case 'PositionSwapAdapterContractApproval':
+                  request.adapterContractSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
+                case 'PositionSwapPositionManagerApproval':
+                  request.positionManagerSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
+              }
+              return request;
+            }),
+          ),
+        okAsync({
+          quoteId: result.quote.quoteId,
+          adapterContractSignature: null,
+          positionManagerSignature: null,
+        }),
+      ),
+  };
 }
 
+function swapPosition(
+  client: AaveClient,
+  intent: SwapByIntentInput,
+): ResultAsync<
+  SwapReceipt,
+  ValidationError<InsufficientBalanceError> | UnexpectedError
+> {
+  return swap(client, { intent }).andThen((plan) => {
+    switch (plan.__typename) {
+      case 'SwapReceipt':
+        return okAsync(plan);
+      default:
+        return UnexpectedError.from(plan).asResultAsync();
+    }
+  });
+}
+
+// ------------------------------------------------------------
+
+export type UseSupplySwapRequest = Prettify<
+  SupplySwapQuoteRequest & CurrencyQueryOptions
+>;
+
 /**
- * @internal
- * Orchestrate the swap execution plan.
+ * Orchestrate the supply swap execution plan.
  *
  * ```tsx
- * const [sendTransaction, sending] = useSendTransaction(wallet);
- * const [signSwapByIntentWith, signing] = useSignSwapByIntentWith(wallet);
+ * const [signTypedData] = useSignTypedData(wallet);
  *
- * const [swap, swapping] = useSwapTokens((plan) => {
+ * const [swapSupply, { loading, error }] = useSupplySwap((plan) => {
  *   switch (plan.__typename) {
- *     case 'SwapByIntentTypedData':
- *       return signSwapByIntentWith(plan);
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
  *
- *     case 'SwapApprovalRequired':
- *     case 'SwapByIntentWithApprovalRequired':
- *       return sendTransaction(plan.transaction);
- *
- *     case 'SwapTransactionRequest':
- *       return sendTransaction(plan.transaction);
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
  *   }
  * });
  *
- * const result = await swap({
+ * const result = await swapSupply({
  *   market: {
- *     chainId: chainId(1),
- *     buy: { erc20: evmAddress('0xA0b86a33E6...') },
- *     sell: { erc20: evmAddress('0x6B175474E...') },
+ *     sellPosition: supplyPosition.id,
+ *     buyReserve: targetReserve.id,
  *     amount: bigDecimal('1000'),
- *     kind: SwapKind.SELL,
- *     user: evmAddress('0x742d35cc...'),
+ *     user: evmAddress('0x742d35cc…'),
+ *     enableCollateral: true,
  *   },
  * });
  *
@@ -478,104 +1153,824 @@ function isERC20PermitSignature(
  * // result.value: SwapReceipt
  * ```
  */
-export function useSwapTokens(
-  handler: SwapHandler,
+export function useSupplySwap(
+  handler: PositionSwapHandler,
 ): UseAsyncTask<
-  PrepareSwapRequest,
+  SupplySwapQuoteRequest,
+  SwapReceipt,
+  | SwapSignerError
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseSupplySwapRequest) => {
+      return supplySwapQuote(client, request, { currency }).andThen(
+        (result) => {
+          return processApprovals(result)
+            .with(handler)
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
+            );
+        },
+      );
+    },
+    [client, handler],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseBorrowSwapRequest = Prettify<
+  BorrowSwapQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Orchestrate the borrow swap execution plan.
+ *
+ * ```tsx
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [swapBorrow, { loading, error }] = useBorrowSwap((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await swapBorrow({
+ *   market: {
+ *     debtPosition: userBorrowItem.id,
+ *     buyReserve: targetReserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
+ */
+export function useBorrowSwap(
+  handler: PositionSwapHandler,
+): UseAsyncTask<
+  BorrowSwapQuoteRequest,
+  SwapReceipt,
+  | SwapSignerError
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseBorrowSwapRequest) => {
+      return borrowSwapQuote(client, request, { currency }).andThen(
+        (result) => {
+          return processApprovals(result)
+            .with(handler)
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
+            );
+        },
+      );
+    },
+    [client, handler],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseRepayWithSupplyQuoteArgs = Prettify<
+  RepayWithSupplyQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch a quote for a repay with supply operation with the specified parameters.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useRepayWithSupplyQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyPosition: userBorrowItem.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useRepayWithSupplyQuote(
+  args: UseRepayWithSupplyQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a repay with supply operation with the specified parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useRepayWithSupplyQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyPosition: userBorrowItem.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useRepayWithSupplyQuote(
+  args: Pausable<UseRepayWithSupplyQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a repay with supply operation with the specified parameters.
+ *
+ * ```tsx
+ * const { data, error, loading } = useRepayWithSupplyQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyPosition: userBorrowItem.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ * ```
+ */
+export function useRepayWithSupplyQuote(
+  args: UseRepayWithSupplyQuoteArgs,
+): ReadResult<SwapQuote>;
+/**
+ * Fetch a quote for a repay with supply operation with the specified parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useRepayWithSupplyQuote({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyPosition: userBorrowItem.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useRepayWithSupplyQuote(
+  args: Pausable<UseRepayWithSupplyQuoteArgs>,
+): PausableReadResult<SwapQuote>;
+
+export function useRepayWithSupplyQuote({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseRepayWithSupplyQuoteArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
+    document: RepayWithSupplyQuoteQuery,
+    variables: {
+      request: injectRepayWithSupplyQuoteAccuracy(request, QuoteAccuracy.Fast),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense,
+    pause,
+    batch: false, // Don't batch with Accurate query
+  });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: RepayWithSupplyQuoteQuery,
+    variables: {
+      request: injectRepayWithSupplyQuoteAccuracy(
+        request,
+        QuoteAccuracy.Accurate,
+      ),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
+}
+
+/**
+ * Low-level hook to execute a repay with supply quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useRepayWithSupplyQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   repayWithReserve: reserve.id,
+ *   debtPosition: userBorrowItem.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Repay with supply quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useRepayWithSupplyQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<
+  RepayWithSupplyQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: RepayWithSupplyQuoteRequest) =>
+      repayWithSupplyQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).andThen(extractPositionSwapQuote),
+    [client, options.currency],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseRepayWithSupplyRequest = Prettify<
+  RepayWithSupplyQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Orchestrate the repay with supply execution plan.
+ *
+ * ```tsx
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [repayWithSupply, { loading, error }] = useRepayWithSupply((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await repayWithSupply({
+ *   market: {
+ *     sellPosition: userSupplyItem.id,
+ *     buyPosition: userBorrowItem.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
+ */
+export function useRepayWithSupply(
+  handler: PositionSwapHandler,
+): UseAsyncTask<
+  RepayWithSupplyQuoteRequest,
+  SwapReceipt,
+  | SwapSignerError
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseRepayWithSupplyRequest) => {
+      return repayWithSupplyQuote(client, request, { currency }).andThen(
+        (result) => {
+          return processApprovals(result)
+            .with(handler)
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
+            );
+        },
+      );
+    },
+    [client, handler],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseWithdrawSwapQuoteArgs = Prettify<
+  WithdrawSwapQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: UseWithdrawSwapQuoteArgs & Suspendable,
+): SuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: Pausable<UseWithdrawSwapQuoteArgs> & Suspendable,
+): PausableSuspenseResult<SwapQuote>;
+/**
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * ```tsx
+ * const { data, error, loading } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: UseWithdrawSwapQuoteArgs,
+): ReadResult<SwapQuote>;
+/**
+ * Fetch a quote for a withdraw swap operation with the specified parameters.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useWithdrawSwapQuote({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyReserve: reserve.id,
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useWithdrawSwapQuote(
+  args: Pausable<UseWithdrawSwapQuoteArgs>,
+): PausableReadResult<SwapQuote>;
+
+export function useWithdrawSwapQuote({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseWithdrawSwapQuoteArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  // Fast query - no polling, suspends in suspense mode for quick initial render
+  const fastResult = useSuspendableQuery({
+    document: WithdrawSwapQuoteQuery,
+    variables: {
+      request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Fast),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense,
+    pause,
+    batch: false, // Don't batch with Accurate query
+  });
+
+  // Accurate query - with polling, never suspends, fires after Fast in suspense mode
+  const accurateResult = useSuspendableQuery({
+    document: WithdrawSwapQuoteQuery,
+    variables: {
+      request: injectWithdrawSwapQuoteAccuracy(request, QuoteAccuracy.Accurate),
+      currency,
+    },
+    selector: extractPositionSwapQuote,
+    suspense: false, // Never suspend on Accurate (would cause re-suspend)
+    pause: pause || (suspense && !fastResult.data),
+    pollInterval: client.context.environment.swapQuoteInterval,
+    batch: false, // Don't batch with Fast query
+  });
+
+  if (accurateResult.data) {
+    return accurateResult;
+  }
+
+  return fastResult;
+}
+
+/**
+ * Low-level hook to execute a withdraw swap quote action directly.
+ *
+ * @remarks
+ * This hook **does not** actively watch for updated data on the swap quote.
+ * Use this hook to retrieve quotes on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [getQuote, { called, data, error, loading }] = useWithdrawSwapQuoteAction();
+ *
+ * // …
+ *
+ * const result = await getQuote({
+ *   position: userSupplyItem.id,
+ *   buyReserve: reserve.id,
+ *   amount: bigDecimal('1000'),
+ *   user: evmAddress('0x742d35cc…'),
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log('Withdraw swap quote:', result.value);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useWithdrawSwapQuoteAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<
+  WithdrawSwapQuoteRequest,
+  SwapQuote,
+  UnexpectedError | ValidationError<InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: WithdrawSwapQuoteRequest) =>
+      withdrawSwapQuote(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }).andThen(extractPositionSwapQuote),
+    [client, options.currency],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseWithdrawSwapRequest = Prettify<
+  WithdrawSwapQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Orchestrate the withdraw swap execution plan.
+ *
+ * ```tsx
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [withdrawSwap, { loading, error }] = useWithdrawSwap((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await withdrawSwap({
+ *   market: {
+ *     position: userSupplyItem.id,
+ *     buyToken: { erc20: evmAddress('0xA0b86a33E6…') },
+ *     amount: bigDecimal('1000'),
+ *     user: evmAddress('0x742d35cc…'),
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
+ */
+export function useWithdrawSwap(
+  handler: PositionSwapHandler,
+): UseAsyncTask<
+  WithdrawSwapQuoteRequest,
+  SwapReceipt,
+  | SwapSignerError
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseWithdrawSwapRequest) => {
+      return withdrawSwapQuote(client, request, { currency }).andThen(
+        (result) => {
+          return processApprovals(result)
+            .with(handler)
+            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((order) =>
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  swapPosition(client, {
+                    quoteId: order.newQuoteId,
+                    signature,
+                  }),
+                ),
+            );
+        },
+      );
+    },
+    [client, handler],
+  );
+}
+
+// ------------------------------------------------------------
+
+export type UseTokenSwapRequest = Prettify<
+  TokenSwapQuoteRequest & CurrencyQueryOptions
+>;
+
+export type TokenSwapPlan =
+  | SwapTypedData
+  | Erc20Approval
+  | SwapTransactionRequest;
+
+export type TokenSwapHandler = (
+  plan: TokenSwapPlan,
+  options: SwapHandlerOptions,
+) => ResultAsync<PendingTransaction | Signature, SwapSignerError>;
+
+/**
+ * Orchestrate the token swap execution plan.
+ *
+ * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [swap, { loading, error }] = useTokenSwap((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'Erc20Approval':
+ *       if (plan.bySignature) {
+ *         return signTypedData(plan.bySignature);
+ *       }
+ *       return sendTransaction(plan.byTransaction);
+ *
+ *     case 'SwapTransactionRequest':
+ *       return sendTransaction(plan.transaction);
+ *
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
+ *   }
+ * });
+ *
+ * const result = await swap({
+ *   fromQuote: {
+ *     quoteId: quote.quoteId,
+ *   },
+ * });
+ *
+ * if (result.isErr()) {
+ *   console.error(result.error);
+ *   return;
+ * }
+ *
+ * // result.value: SwapReceipt
+ * ```
+ */
+export function useTokenSwap(
+  handler: TokenSwapHandler,
+): UseAsyncTask<
+  UseTokenSwapRequest,
   SwapReceipt,
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
 > {
   const client = useAaveClient();
 
   const executeSwap = useCallback(
     (
-      plan: SwapExecutionPlan,
+      request: SwapRequest,
     ): ResultAsync<
       SwapReceipt,
       | SendTransactionError
       | PendingTransactionError
       | ValidationError<InsufficientBalanceError>
     > => {
-      switch (plan.__typename) {
-        case 'SwapTransactionRequest':
-          return handler(plan, { cancel })
-            .map(PendingTransaction.ensure)
-            .andThen((pendingTransaction) => pendingTransaction.wait())
-            .andThen(() => {
-              return okAsync(plan.orderReceipt);
-            });
-        case 'SwapApprovalRequired':
-          return handler(plan, { cancel })
-            .map(PendingTransaction.ensure)
-            .andThen((pendingTransaction) => pendingTransaction.wait())
-            .andThen(() => handler(plan.originalTransaction, { cancel }))
-            .map(PendingTransaction.ensure)
-            .andThen((pendingTransaction) => pendingTransaction.wait())
-            .andThen(() => {
-              return okAsync(plan.originalTransaction.orderReceipt);
-            });
-        case 'InsufficientBalanceError':
-          return errAsync(ValidationError.fromGqlNode(plan));
-        case 'SwapReceipt':
-          return okAsync(plan);
-      }
+      return swap(client, request).andThen((plan) => {
+        switch (plan.__typename) {
+          case 'SwapTransactionRequest':
+            return handler(plan, { cancel })
+              .andThen(PendingTransaction.tryFrom)
+              .andThen((pendingTransaction) => pendingTransaction.wait())
+              .andThen(() => okAsync(plan.orderReceipt));
+
+          case 'SwapReceipt':
+            return okAsync(plan);
+        }
+      });
     },
-    [handler],
+    [client, handler],
   );
 
   return useAsyncTask(
     ({
       currency = DEFAULT_QUERY_OPTIONS.currency,
       ...request
-    }: UseSwapTokensRequest) =>
-      prepareSwap(client, request, { currency }).andThen((preparePlan) => {
-        switch (preparePlan.__typename) {
+    }: UseTokenSwapRequest) =>
+      tokenSwapQuote(client, request, { currency }).andThen((quoteResult) => {
+        switch (quoteResult.__typename) {
           case 'SwapByTransaction':
-            return swap(client, {
-              transaction: { quoteId: preparePlan.quote.quoteId },
-            }).andThen(executeSwap);
+            return executeSwap({
+              transaction: { quoteId: quoteResult.quote.quoteId },
+            });
 
           case 'SwapByIntent':
-            return handler(preparePlan.data, { cancel }).andThen(
-              (signedTypedData) => {
-                invariant(
-                  isERC20PermitSignature(signedTypedData),
-                  'Invalid signature',
-                );
-
-                return swap(client, {
-                  intent: {
-                    quoteId: preparePlan.quote.quoteId,
-                    signature: signedTypedData.value,
-                  },
-                }).andThen(executeSwap);
-              },
+            return prepareTokenSwap(client, {
+              quoteId: quoteResult.quote.quoteId,
+            }).andThen((order) =>
+              handler(order.data, { cancel })
+                .andThen(trySignatureFrom)
+                .andThen((signature) =>
+                  executeSwap({
+                    intent: { quoteId: order.newQuoteId, signature },
+                  }),
+                ),
             );
 
           case 'SwapByIntentWithApprovalRequired':
-            return handler(preparePlan, { cancel })
-              .map(PendingTransaction.ensure)
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(preparePlan.data, { cancel }))
-              .map(PendingTransaction.ensure)
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen((signedTypedData) => {
-                invariant(
-                  isERC20PermitSignature(signedTypedData),
-                  'Invalid signature',
+            if (supportsPermit(quoteResult)) {
+              const approval = quoteResult.approvals[0];
+              return handler(approval, { cancel })
+                .andThen((result) => {
+                  if (isSignature(result)) {
+                    return prepareTokenSwap(client, {
+                      quoteId: quoteResult.quote.quoteId,
+                      permitSig: {
+                        deadline: approval.bySignature.message
+                          .deadline as number,
+                        value: result,
+                      },
+                    });
+                  }
+                  if (PendingTransaction.isInstanceOf(result)) {
+                    return result.wait().andThen(() =>
+                      prepareTokenSwap(client, {
+                        quoteId: quoteResult.quote.quoteId,
+                      }),
+                    );
+                  }
+                  return UnexpectedError.from(result).asResultAsync();
+                })
+                .andThen((order) =>
+                  handler(order.data, { cancel })
+                    .andThen(trySignatureFrom)
+                    .andThen((signature) =>
+                      executeSwap({
+                        intent: {
+                          quoteId: order.newQuoteId,
+                          signature,
+                        },
+                      }),
+                    ),
                 );
-                return swap(client, {
-                  intent: {
-                    quoteId: preparePlan.quote.quoteId,
-                    signature: signedTypedData.value,
-                  },
-                }).andThen(executeSwap);
-              });
+            }
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(preparePlan));
+            return quoteResult.approvals
+              .reduce(
+                (chain, approval) =>
+                  chain.andThen(() =>
+                    handler({ ...approval, bySignature: null }, { cancel })
+                      .andThen(PendingTransaction.tryFrom)
+                      .andThen((pendingTransaction) =>
+                        pendingTransaction.wait(),
+                      ),
+                  ),
+                okAsync(undefined) as ResultAsync<
+                  unknown,
+                  SendTransactionError | PendingTransactionError
+                >,
+              )
+              .andThen(() =>
+                prepareTokenSwap(client, {
+                  quoteId: quoteResult.quote.quoteId,
+                }),
+              )
+              .andThen((order) => handler(order.data, { cancel }))
+              .andThen(trySignatureFrom)
+              .andThen((signature) =>
+                executeSwap({
+                  intent: { quoteId: quoteResult.quote.quoteId, signature },
+                }),
+              );
+          default:
+            never(
+              `Unsupported swap quote result: ${quoteResult.__typename}. To be removed from API soon.`,
+            );
         }
       }),
     [client, handler, executeSwap],
@@ -583,11 +1978,9 @@ export function useSwapTokens(
 }
 
 export type CancelSwapHandler = (
-  data: CancelSwapTypedData | TransactionRequest,
-) => ResultAsync<
-  ERC20PermitSignature | PendingTransaction,
-  SigningError | UnexpectedError
->;
+  data: SwapTypedData | TransactionRequest,
+  options: SwapHandlerOptions,
+) => ResultAsync<PendingTransaction | Signature, SwapSignerError>;
 
 export class CannotCancelSwapError extends ResultAwareError {
   name = 'CannotCancelSwapError' as const;
@@ -602,25 +1995,24 @@ export type CancelSwapError =
   | UnexpectedError;
 
 /**
- * @internal
  * Executes the complete swap cancellation workflow combining preparation and execution.
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signSwapCancelWith] = useSignSwapCancelWith(wallet);
+ * const [signTypedData] = useSignTypedData(wallet);
  *
- * const [cancelSwap, {loading, error}] = useCancelSwap((plan: CancelSwapTypedData | TransactionRequest) => {
+ * const [cancelSwap, { loading, error }] = useCancelSwap((plan) => {
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
  *
- *     case 'CancelSwapTypedData':
- *       return signSwapCancelWith(plan);
+ *     case 'SwapTypedData':
+ *       return signTypedData(plan);
  *   }
  * });
  *
  * const result = await cancelSwap({
- *   id: swapId('123...'),
+ *   id: swapId('123…'),
  * });
  *
  * if (result.isErr()) {
@@ -628,62 +2020,71 @@ export type CancelSwapError =
  *   return;
  * }
  *
- * // result.value: SwapCancelled
+ * // result.value: SwapCancelledResult
  * console.log('Swap cancelled:', result.value);
  * ```
  */
 export function useCancelSwap(
   handler: CancelSwapHandler,
-): UseAsyncTask<PrepareSwapCancelRequest, SwapCancelled, CancelSwapError> {
+): UseAsyncTask<
+  PrepareSwapCancelRequest,
+  SwapCancelledResult,
+  CancelSwapError
+> {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request) =>
       swapStatus(client, { id: request.id }).andThen((status) => {
+        if (status === null) {
+          return UnexpectedError.from('Swap not found').asResultAsync();
+        }
+
         switch (status.__typename) {
           case 'SwapOpen':
           case 'SwapPendingSignature':
             return prepareSwapCancel(client, request)
-              .andThen((result) => handler(result.data))
-              .andThen((signedTypedData) => {
-                invariant(
-                  isERC20PermitSignature(signedTypedData),
-                  'Invalid signature',
-                );
-
-                return cancelSwap(client, {
-                  intent: { id: request.id, signature: signedTypedData.value },
-                });
-              })
+              .andThen((result) => handler(result.data, { cancel }))
+              .andThen(trySignatureFrom)
+              .andThen((signature) =>
+                cancelSwap(client, {
+                  intent: { id: request.id, signature },
+                }),
+              )
               .andThen((plan) => {
-                if (plan.__typename === 'SwapCancelled') {
+                if (plan.__typename === 'SwapCancelledResult') {
                   return okAsync(plan);
                 }
 
                 return (
-                  handler(plan)
-                    .map(PendingTransaction.ensure)
+                  handler(plan, { cancel })
+                    .andThen(PendingTransaction.tryFrom)
                     .andThen((pendingTransaction) => pendingTransaction.wait())
                     // TODO: verify that if fails cause too early, we need to waitForSwapOutcome(client)({ id: request.id })
                     .andThen(() => swapStatus(client, { id: request.id }))
                     .andThen((status) => {
-                      if (status.__typename === 'SwapCancelled') {
-                        return okAsync(status);
+                      if (status?.__typename === 'SwapCancelled') {
+                        return okAsync(toSwapCancelledResult(status));
                       }
-                      return errAsync(
-                        new CannotCancelSwapError('Failed to cancel swap'),
-                      );
+                      return new CannotCancelSwapError(
+                        'Failed to cancel swap',
+                      ).asResultAsync();
                     })
                 );
               });
 
           case 'SwapCancelled':
-            return okAsync(status);
+            return okAsync(toSwapCancelledResult(status));
+
+          case 'SwapExpired':
+            return new CannotCancelSwapError(
+              'Swap cannot longer be cancelled',
+            ).asResultAsync();
 
           default:
-            return errAsync(
-              new CannotCancelSwapError('Swap cannot longer be cancelled'),
-            );
+            return UnexpectedError.upgradeRequired(
+              `Unsupported swap status: ${status.__typename}`,
+            ).asResultAsync();
         }
       }),
     [client, handler],

@@ -1,23 +1,48 @@
-import type { BigDecimal } from '@aave/types';
+import type { BigDecimal, BigDecimalSource } from '@aave/types';
 import * as matchers from 'jest-extended';
 import { expect } from 'vitest';
 
 expect.extend(matchers);
 
 expect.extend({
+  toBeBigDecimalEqualTo(received: BigDecimal, expected: BigDecimalSource) {
+    const pass = received.eq(expected);
+
+    return {
+      pass,
+      message: pass
+        ? () => `expected ${received} to be equal to ${expected}`
+        : () => `expected ${received} not to be equal to ${expected}`,
+    };
+  },
+
   toBeBigDecimalCloseTo(
     received: BigDecimal,
     expected: BigDecimal,
-    precision = 2,
+    config: { precision: number } | { percent: number },
   ) {
-    const pass = received.round(precision).eq(expected.round(precision));
+    let pass: boolean;
+    let configDescription: string;
+
+    if ('precision' in config) {
+      pass = received
+        .round(config.precision)
+        .eq(expected.round(config.precision));
+      configDescription = `precision ${config.precision}`;
+    } else {
+      // Calculate percent tolerance: abs(received - expected) <= abs(expected * percent / 100)
+      const difference = received.minus(expected).abs();
+      const tolerance = expected.abs().times(config.percent).div(100);
+      pass = difference.lte(tolerance);
+      configDescription = `${config.percent}% tolerance`;
+    }
 
     return {
       pass,
       message: () =>
         pass
-          ? `expected "${received}" not to be close to ${expected}`
-          : `expected "${received}" to be close to ${expected}, but got difference of ${received.minus(expected)}`,
+          ? `expected "${received}" not to be close to ${expected} (${configDescription})`
+          : `expected "${received}" to be close to ${expected} (${configDescription}), but got difference of ${received.minus(expected)}`,
     };
   },
 
@@ -157,16 +182,23 @@ expect.extend({
     const pass =
       isArray && received.every((item) => this.equals(item, expected));
 
+    const nonMatchingItems = isArray
+      ? received.filter((item) => !this.equals(item, expected))
+      : [];
+    const matchingItems = isArray
+      ? received.filter((item) => this.equals(item, expected))
+      : [];
+
     return {
       pass,
       message: () =>
         pass
           ? `Expected array not to have all items matching:\n  ${printExpected(
               expected,
-            )}\nBut it does.\n\nReceived:\n  ${printReceived(received)}`
+            )}\nBut it does.\n\nReceived:\n  ${printReceived(received)}\n\nItems matching (should not all match):\n  ${printReceived(matchingItems)}\n\nItems not matching:\n  ${printReceived(nonMatchingItems)}`
           : `Expected all array items to match:\n  ${printExpected(
               expected,
-            )}\nBut received:\n  ${printReceived(received)}`,
+            )}\nBut received:\n  ${printReceived(received)}\n\nItems not matching:\n  ${printReceived(nonMatchingItems)}`,
     };
   },
 });

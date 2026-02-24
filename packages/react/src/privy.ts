@@ -1,18 +1,27 @@
-import { SigningError, UnexpectedError } from '@aave/client';
+import {
+  CancelError,
+  SigningError,
+  type SignTypedDataError,
+  type TypedData,
+  UnexpectedError,
+} from '@aave/client';
 import {
   sendTransaction,
-  supportedChains,
+  toViemChain,
   waitForTransactionResult,
 } from '@aave/client/viem';
-import type {
-  CancelSwapTypedData,
-  ERC20PermitSignature,
-  PermitRequest,
-  SwapByIntentTypedData,
-  TransactionRequest,
-} from '@aave/graphql';
-import { invariant, ResultAsync, signatureFrom } from '@aave/types';
-import { useSignTypedData, useWallets } from '@privy-io/react-auth';
+import type { TransactionRequest } from '@aave/graphql';
+import {
+  invariant,
+  ResultAsync,
+  type Signature,
+  signatureFrom,
+} from '@aave/types';
+import {
+  type MessageTypes,
+  useSignTypedData as usePrivySignTypedData,
+  useWallets,
+} from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import {
   PendingTransaction,
@@ -20,7 +29,22 @@ import {
   type UseSendTransactionResult,
   useAsyncTask,
 } from './helpers';
-import { usePermitTypedDataAction } from './permits';
+import { useChainAction } from './misc';
+
+function isUserRejection(err: unknown): boolean {
+  if (err && typeof err === 'object') {
+    if ('code' in err && err.code === 4001) return true;
+    if ('message' in err && typeof err.message === 'string') {
+      const msg = err.message.toLowerCase();
+      return (
+        msg.includes('user rejected') ||
+        msg.includes('user denied') ||
+        msg.includes('rejected the request')
+      );
+    }
+  }
+  return false;
+}
 
 /**
  * A hook that provides a way to send Aave transactions using a Privy wallet.
@@ -33,6 +57,7 @@ import { usePermitTypedDataAction } from './permits';
  */
 export function useSendTransaction(): UseSendTransactionResult {
   const { wallets } = useWallets();
+  const [fetchChain] = useChainAction();
 
   return useAsyncTask(
     (request: TransactionRequest) => {
@@ -43,138 +68,70 @@ export function useSendTransaction(): UseSendTransactionResult {
         `Expected a connected wallet with address ${request.from} to be found.`,
       );
 
-      return ResultAsync.fromPromise(
-        wallet.switchChain(request.chainId),
-        (error) => UnexpectedError.from(error),
-      )
-        .map(() => wallet.getEthereumProvider())
-        .map((provider) =>
-          createWalletClient({
-            account: request.from,
-            chain: supportedChains[request.chainId],
-            transport: custom(provider),
-          }),
-        )
-        .andThen((walletClient) =>
-          sendTransaction(walletClient, request).map(
-            (hash) =>
-              new PendingTransaction(() =>
-                waitForTransactionResult(walletClient, request, hash),
+      return fetchChain({ chainId: request.chainId })
+        .map((chain) => {
+          invariant(chain, `Chain ${request.chainId} is not supported`);
+          return toViemChain(chain);
+        })
+        .andThen((chain) =>
+          ResultAsync.fromPromise(
+            wallet.switchChain(request.chainId),
+            (error) => UnexpectedError.from(error),
+          )
+            .map(() => wallet.getEthereumProvider())
+            .map((provider) =>
+              createWalletClient({
+                account: request.from,
+                chain,
+                transport: custom(provider),
+              }),
+            )
+            .andThen((walletClient) =>
+              sendTransaction(walletClient, request).map(
+                (hash) =>
+                  new PendingTransaction(() =>
+                    waitForTransactionResult(walletClient, request, hash),
+                  ),
               ),
-          ),
+            ),
         );
     },
-    [wallets],
+    [wallets, fetchChain],
   );
 }
 
-export type SignERC20PermitError = SigningError | UnexpectedError;
-
 /**
- * A hook that provides a way to sign ERC20 permits using a Privy wallet.
+ * A hook that provides a way to sign EIP-712 typed data (ERC-20 permits, swap intents, etc.)
+ * using a Privy wallet.
  *
  * ```ts
- * const { ready, authenticated, user } = usePrivy(); // privy hook
- * const [signERC20Permit, { loading, error, data }] = useERC20Permit();
- *
- * const run = async () => {
- *   const result = await signERC20Permit({
- *     supply: {
- *       sender: evmAddress(user!.wallet!.address), // User's address
- *       reserve: {
- *         reserveId: reserve.id,
- *         chainId: reserve.chain.chainId,
- *         spoke: reserve.spoke.address,
- *       },
- *       amount: {
- *         value: bigDecimal(42), // 42 USDC
- *       },
- *     },
- *   });
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('ERC20 Permit signature:', result.value);
- * };
+ * const [signTypedData, { loading, error, data }] = useSignTypedData();
  * ```
  */
-export function useERC20Permit(): UseAsyncTask<
-  PermitRequest,
-  ERC20PermitSignature,
-  SignERC20PermitError
+export function useSignTypedData(): UseAsyncTask<
+  TypedData,
+  Signature,
+  SignTypedDataError
 > {
-  const [permitTypedData] = usePermitTypedDataAction();
-  const { signTypedData } = useSignTypedData();
+  const { signTypedData: privySignTypedData } = usePrivySignTypedData();
 
   return useAsyncTask(
-    (request: PermitRequest) => {
-      return permitTypedData(request).andThen((response) =>
-        ResultAsync.fromPromise(
-          signTypedData({
-            types: response.types,
-            primaryType: response.primaryType,
-            domain: response.domain,
-            message: response.message,
-          }),
-          (error) => SigningError.from(error),
-        ).map(({ signature }) => ({
-          deadline: response.message.deadline,
-          value: signatureFrom(signature),
-        })),
-      );
-    },
-    [permitTypedData, signTypedData],
-  );
-}
-
-export type SignSwapTypedDataError = SigningError | UnexpectedError;
-
-/**
- * @internal
- * A hook that provides a way to sign swap typed data using a Privy wallet.
- *
- * ```ts
- * const [signSwapTypedData, { loading, error, data }] = useSignSwapTypedDataWith();
- *
- * const run = async () => {
- *   const result = await signSwapTypedData(swapTypedData);
- *
- *   if (result.isErr()) {
- *     console.error(result.error);
- *     return;
- *   }
- *
- *   console.log('Swap typed data signed:', result.value);
- * };
- * ```
- */
-export function useSignSwapTypedDataWith(): UseAsyncTask<
-  SwapByIntentTypedData | CancelSwapTypedData,
-  ERC20PermitSignature,
-  SignSwapTypedDataError
-> {
-  const { signTypedData } = useSignTypedData();
-
-  return useAsyncTask(
-    (typedData: SwapByIntentTypedData | CancelSwapTypedData) => {
-      const message = JSON.parse(typedData.message);
-
+    (typedData: TypedData) => {
       return ResultAsync.fromPromise(
-        signTypedData({
-          types: typedData.types,
-          primaryType: typedData.primaryType,
+        privySignTypedData({
           domain: typedData.domain,
-          message,
+          types: typedData.types as MessageTypes,
+          primaryType: typedData.primaryType,
+          message: typedData.message,
         }),
-        (error) => SigningError.from(error),
-      ).map(({ signature }) => ({
-        deadline: message.deadline,
-        value: signatureFrom(signature),
-      }));
+        (error) => {
+          if (isUserRejection(error)) {
+            return CancelError.from(error);
+          }
+          return SigningError.from(error);
+        },
+      ).map(({ signature }) => signatureFrom(signature));
     },
-    [signTypedData],
+    [privySignTypedData],
   );
 }

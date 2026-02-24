@@ -1,5 +1,12 @@
 import type { Primitive, Tagged } from 'type-fest';
 
+export type {
+  JsonArray,
+  JsonObject,
+  JsonPrimitive,
+  JsonValue,
+} from 'type-fest';
+
 /**
  * A void value.
  */
@@ -9,11 +16,6 @@ export type Void = Tagged<undefined, 'Void'>;
  * An opaque pagination cursor.
  */
 export type Cursor = Tagged<string, 'Cursor'>;
-
-/**
- * A JSON value.
- */
-export type JSONString = Tagged<string, 'JSONString'>;
 
 /**
  * Beautify the  readout of all of the members of that intersection.
@@ -65,3 +67,11 @@ export type NullishDeep<T> = T extends ReadonlyArray<infer U>
       : T extends object
         ? { [K in keyof T]: NullishDeep<T[K]> | null | undefined }
         : T | null | undefined;
+
+/**
+ * Non-distributive override. Replaces properties in T with those in U.
+ * Unlike `Omit<T, keyof U> & U`, does not distribute over unions.
+ *
+ * @internal
+ */
+export type Override<T, U> = { [K in Exclude<keyof T, keyof U>]: T[K] } & U;

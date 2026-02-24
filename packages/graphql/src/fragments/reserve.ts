@@ -6,6 +6,7 @@ import {
   Erc20AmountFragment,
   PercentNumberFragment,
 } from './common';
+import { RewardFragment } from './rewards';
 import { SpokeFragment } from './spoke';
 
 export const ReserveSettingsFragment = graphql(
@@ -57,8 +58,11 @@ export const ReserveSummaryFragment = graphql(
     borrowApy {
       ...PercentNumber
     }
+    rewards {
+      ...Reward
+    }
   }`,
-  [Erc20AmountFragment, PercentNumberFragment],
+  [Erc20AmountFragment, PercentNumberFragment, RewardFragment],
 );
 export type ReserveSummary = FragmentOf<typeof ReserveSummaryFragment>;
 
@@ -117,6 +121,7 @@ export const ReserveFragment = graphql(
     canBorrow
     canSupply
     canUseAsCollateral
+    canSwapFrom
     userState {
       ...ReserveUserState
     }

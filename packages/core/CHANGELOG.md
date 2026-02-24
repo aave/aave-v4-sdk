@@ -1,5 +1,76 @@
 # @aave/core
 
+## 1.0.0-next.17
+
+### Minor Changes
+
+- 4f9bb95: **feat:** add `batch` flag to `ClientConfig` to disable query batching
+
+## 1.0.0-next.16
+
+### Patch Changes
+
+- e15455c: **chore:** surfaces cache update errors
+
+## 1.0.0-next.15
+
+### Patch Changes
+
+- 7546d4d: **fix:** issue with stale content being served when the cache refresh gets interrupted.
+
+## 1.0.0-next.14
+
+### Patch Changes
+
+- 64b6596: **feat:** add `SwapOperation` union to `SwapStatus` entries. Support `InsufficientLiquidityError`. Add `orderClass` and `kind` to `SwapStatus` and ActivityItem` union entries.
+- ece7453: **fix:** extends cache refresh mechanism to account for past queries that left a presence in the cache but are no longer watched.
+
+## 1.0.0-next.13
+
+### Patch Changes
+
+- Updated dependencies [b65232e]
+  - @aave/types@1.0.0-next.8
+
+## 1.0.0-next.12
+
+### Minor Changes
+
+- 7ddec84: **feat:** implement `useSwapStatus` hook and makes `useUserSwaps` poll for status updates until terminal state.
+
+## 1.0.0-next.11
+
+### Patch Changes
+
+- 531b1f6: **feat:** dual-request strategy for `useTokenSwapQuote` with Fast and Accurate quotes
+
+## 1.0.0-next.10
+
+### Patch Changes
+
+- caf0bf3: **chore:** support recent swap related GQL changes.
+- daf3b0f: **chore:** support latest schema and better error handling.
+- cdab8e1: **fix:** error handling of unknown GQL typenames.
+- Updated dependencies [caf0bf3]
+- Updated dependencies [daf3b0f]
+- Updated dependencies [cdab8e1]
+  - @aave/types@1.0.0-next.7
+
+## 1.0.0-next.9
+
+### Patch Changes
+
+- 402281c: **feat:** expose tx hash from `TransactionError`.
+
+## 1.0.0-next.8
+
+### Patch Changes
+
+- Updated dependencies [5fad9a6]
+- Updated dependencies [5fad9a6]
+- Updated dependencies [5fad9a6]
+  - @aave/types@1.0.0-next.6
+
 ## 1.0.0-next.7
 
 ### Patch Changes

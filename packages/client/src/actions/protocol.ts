@@ -42,21 +42,18 @@ import {
 export function asset(
   client: AaveClient,
   request: AssetRequest,
-  options: CurrencyQueryOptions &
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
     TimeWindowQueryOptions &
     RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Asset | null, UnexpectedError> {
   return client.query(
     AssetQuery,
-    {
-      request,
-      currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
-      timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-    },
-    {
-      requestPolicy:
-        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
-    },
+    { request, currency, timeWindow },
+    { requestPolicy },
   );
 }
 
@@ -107,21 +104,24 @@ export function assetPriceHistory(
  *
  * @param client - Aave client.
  * @param request - The asset supply history request parameters.
- * @param options - The query options.
+ * @param options - The query options including currency and time window.
  * @returns Array of asset supply samples over time.
  */
 export function assetSupplyHistory(
   client: AaveClient,
   request: AssetSupplyHistoryRequest,
-  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<AssetSupplySample[], UnexpectedError> {
   return client.query(
     AssetSupplyHistoryQuery,
-    { request },
-    {
-      requestPolicy:
-        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
-    },
+    { request, currency, timeWindow },
+    { requestPolicy },
   );
 }
 
@@ -139,21 +139,24 @@ export function assetSupplyHistory(
  *
  * @param client - Aave client.
  * @param request - The asset borrow history request parameters.
- * @param options - The query options.
+ * @param options - The query options including currency and time window.
  * @returns Array of asset borrow samples over time.
  */
 export function assetBorrowHistory(
   client: AaveClient,
   request: AssetBorrowHistoryRequest,
-  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<AssetBorrowSample[], UnexpectedError> {
   return client.query(
     AssetBorrowHistoryQuery,
-    { request },
-    {
-      requestPolicy:
-        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
-    },
+    { request, currency, timeWindow },
+    { requestPolicy },
   );
 }
 

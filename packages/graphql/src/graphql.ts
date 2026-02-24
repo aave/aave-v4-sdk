@@ -6,7 +6,7 @@ import type {
   ChainId,
   Cursor,
   EvmAddress,
-  JSONString,
+  JsonObject,
   Signature,
   TxHash,
   TypedSelectionSet,
@@ -20,20 +20,25 @@ import {
 import type {
   ActivityType,
   ApyMetric,
+  BorrowSwapKind,
   ChainsFilter,
   CollateralMetric,
   Currency,
-  HubAssetStatusType,
-  HubAssetsRequestOrderBy,
   OperationType,
   OrderDirection,
   PageSize,
+  QuoteAccuracy,
+  RepayWithSupplyKind,
   ReservesRequestFilter,
-  SwapKind,
+  SupplySwapKind,
+  SwapActivityStatus,
+  SwapOrderClass,
   SwapStatusFilter,
   TimeWindow,
   TokenCategory,
+  TokenSwapKind,
   UserPositionConditionsUpdate,
+  WithdrawSwapKind,
 } from './enums';
 import type { introspection } from './graphql-env';
 import type {
@@ -44,6 +49,7 @@ import type {
   OnChainHubAssetId,
   OnChainReserveId,
   ReserveId,
+  RewardId,
   SpokeId,
   SwapId,
   SwapQuoteId,
@@ -68,38 +74,43 @@ export const graphql = initGraphQLTada<{
     BigInt: bigint;
     BlockchainData: BlockchainData;
     Boolean: boolean;
+    BorrowSwapKind: BorrowSwapKind;
     ChainId: ChainId;
     ChainsFilter: ChainsFilter;
     CollateralMetric: CollateralMetric;
     Currency: Currency;
+    RepayWithSupplyKind: RepayWithSupplyKind;
     Cursor: Cursor;
     DateTime: Date;
     EvmAddress: EvmAddress;
     Float: number;
     HubAssetId: HubAssetId;
-    HubAssetsRequestOrderBy: HubAssetsRequestOrderBy;
-    HubAssetStatusType: HubAssetStatusType;
     HubId: HubId;
     ID: ID;
     Int: number;
-    JSON: JSONString;
+    JSON: JsonObject;
     OnChainHubAssetId: OnChainHubAssetId;
     OnChainReserveId: OnChainReserveId;
     OperationType: OperationType;
     OrderDirection: OrderDirection;
     PageSize: PageSize;
+    QuoteAccuracy: QuoteAccuracy;
     ReserveId: ReserveId;
     ReservesRequestFilter: ReservesRequestFilter;
+    RewardId: RewardId;
     Signature: Signature;
     SpokeId: SpokeId;
     String: string;
+    SupplySwapKind: SupplySwapKind;
+    SwapActivityStatus: SwapActivityStatus;
     SwapId: SwapId;
-    SwapKind: SwapKind;
+    SwapOrderClass: SwapOrderClass;
     SwapQuoteId: SwapQuoteId;
     SwapStatusFilter: SwapStatusFilter;
     TimeWindow: TimeWindow;
     TokenCategory: TokenCategory;
     TokenInfoId: TokenInfoId;
+    TokenSwapKind: TokenSwapKind;
     TxHash: TxHash;
     UserBalanceId: UserBalanceId;
     UserBorrowItemId: UserBorrowItemId;
@@ -107,6 +118,7 @@ export const graphql = initGraphQLTada<{
     UserPositionId: UserPositionId;
     UserSupplyItemId: UserSupplyItemId;
     Void: Void;
+    WithdrawSwapKind: WithdrawSwapKind;
   };
 }>();
 

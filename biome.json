@@ -50,6 +50,7 @@
     {
       "includes": [
         ".changeset/*.json",
+        ".claude/*.json",
         "**/package.json",
         "packages/graphql/src/schema.json"
       ],

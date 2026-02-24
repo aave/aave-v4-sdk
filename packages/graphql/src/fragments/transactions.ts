@@ -1,6 +1,11 @@
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
-import { DecimalNumberFragment } from './common';
+import {
+  DecimalNumberFragment,
+  type InsufficientBalanceError,
+  InsufficientBalanceErrorFragment,
+} from './common';
+import { PermitTypedDataFragment } from './permits';
 
 export const TransactionRequestFragment = graphql(
   `fragment TransactionRequest on TransactionRequest {
@@ -15,11 +20,25 @@ export const TransactionRequestFragment = graphql(
 );
 export type TransactionRequest = FragmentOf<typeof TransactionRequestFragment>;
 
+export const Erc20ApprovalFragment = graphql(
+  `fragment Erc20Approval on Erc20Approval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    bySignature {
+      ...PermitTypedData
+    }
+  }`,
+  [TransactionRequestFragment, PermitTypedDataFragment],
+);
+export type Erc20Approval = FragmentOf<typeof Erc20ApprovalFragment>;
+
 export const Erc20ApprovalRequiredFragment = graphql(
   `fragment Erc20ApprovalRequired on Erc20ApprovalRequired {
     __typename
-    transaction {
-      ...TransactionRequest
+    approvals {
+      ...Erc20Approval
     }
     reason
     requiredAmount {
@@ -32,7 +51,7 @@ export const Erc20ApprovalRequiredFragment = graphql(
       ...TransactionRequest
     }
   }`,
-  [TransactionRequestFragment, DecimalNumberFragment],
+  [TransactionRequestFragment, Erc20ApprovalFragment, DecimalNumberFragment],
 );
 export type Erc20ApprovalRequired = FragmentOf<
   typeof Erc20ApprovalRequiredFragment
@@ -53,22 +72,6 @@ export const PreContractActionRequiredFragment = graphql(
 );
 export type PreContractActionRequired = FragmentOf<
   typeof PreContractActionRequiredFragment
->;
-
-export const InsufficientBalanceErrorFragment = graphql(
-  `fragment InsufficientBalanceError on InsufficientBalanceError {
-    __typename
-    required {
-      ...DecimalNumber
-    }
-    available {
-      ...DecimalNumber
-    }
-  }`,
-  [DecimalNumberFragment],
-);
-export type InsufficientBalanceError = FragmentOf<
-  typeof InsufficientBalanceErrorFragment
 >;
 
 export type ExecutionPlan =

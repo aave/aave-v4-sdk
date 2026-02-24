@@ -1,10 +1,12 @@
 import type { FragmentOf } from 'gql.tada';
+
 import {
   DecimalNumberFragment,
   DecimalNumberWithChangeFragment,
   Erc20TokenFragment,
   ExchangeAmountFragment,
   ExchangeAmountWithChangeFragment,
+  HubFragment,
   PercentNumberFragment,
 } from './fragments';
 import { graphql, type RequestOf } from './graphql';
@@ -17,6 +19,25 @@ export const AssetPriceSampleFragment = graphql(
     }`,
 );
 export type AssetPriceSample = FragmentOf<typeof AssetPriceSampleFragment>;
+
+export const AssetSampleBreakdownFragment = graphql(
+  `fragment AssetSampleBreakdown on AssetSampleBreakdown {
+      __typename
+      amount {
+        ...DecimalNumber
+      }
+      apy {
+        ...PercentNumber
+      }
+      hub {
+        ...Hub
+      }
+    }`,
+  [DecimalNumberFragment, PercentNumberFragment, HubFragment],
+);
+export type AssetSampleBreakdown = FragmentOf<
+  typeof AssetSampleBreakdownFragment
+>;
 
 export const AssetSupplySampleFragment = graphql(
   `fragment AssetSupplySample on AssetSupplySample {
@@ -31,8 +52,14 @@ export const AssetSupplySampleFragment = graphql(
       lowestApy {
         ...PercentNumber
       }
+      averageApy {
+        ...PercentNumber
+      }
+      breakdown {
+        ...AssetSampleBreakdown
+      }
     }`,
-  [DecimalNumberFragment, PercentNumberFragment],
+  [DecimalNumberFragment, PercentNumberFragment, AssetSampleBreakdownFragment],
 );
 export type AssetSupplySample = FragmentOf<typeof AssetSupplySampleFragment>;
 
@@ -49,8 +76,14 @@ export const AssetBorrowSampleFragment = graphql(
       lowestApy {
         ...PercentNumber
       }
+      averageApy {
+        ...PercentNumber
+      }
+      breakdown {
+        ...AssetSampleBreakdown
+      }
     }`,
-  [DecimalNumberFragment, PercentNumberFragment],
+  [DecimalNumberFragment, PercentNumberFragment, AssetSampleBreakdownFragment],
 );
 export type AssetBorrowSample = FragmentOf<typeof AssetBorrowSampleFragment>;
 
@@ -74,7 +107,7 @@ export const AssetSummaryFragment = graphql(
   `fragment AssetSummary on AssetSummary {
       __typename
       totalSupplyCap {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalSupplied {
         ...AssetAmountWithChange
@@ -83,7 +116,7 @@ export const AssetSummaryFragment = graphql(
         ...AssetAmountWithChange
       }
       totalBorrowCap {
-        ...DecimalNumberWithChange
+        ...AssetAmountWithChange
       }
       totalBorrowed {
         ...AssetAmountWithChange
@@ -98,11 +131,7 @@ export const AssetSummaryFragment = graphql(
         ...PercentNumber
       }
     }`,
-  [
-    AssetAmountWithChangeFragment,
-    DecimalNumberWithChangeFragment,
-    PercentNumberFragment,
-  ],
+  [AssetAmountWithChangeFragment, PercentNumberFragment],
 );
 export type AssetSummary = FragmentOf<typeof AssetSummaryFragment>;
 
@@ -161,7 +190,7 @@ export type AssetPriceHistoryRequestQuery = ReturnType<
  * @internal
  */
 export const AssetSupplyHistoryQuery = graphql(
-  `query AssetSupplyHistory($request: AssetSupplyHistoryRequest!) {
+  `query AssetSupplyHistory($request: AssetSupplyHistoryRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: assetSupplyHistory(request: $request) {
         ...AssetSupplySample
       }
@@ -179,7 +208,7 @@ export type AssetSupplyHistoryRequestQuery = ReturnType<
  * @internal
  */
 export const AssetBorrowHistoryQuery = graphql(
-  `query AssetBorrowHistory($request: AssetBorrowHistoryRequest!) {
+  `query AssetBorrowHistory($request: AssetBorrowHistoryRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
       value: assetBorrowHistory(request: $request) {
         ...AssetBorrowSample
       }
@@ -201,9 +230,6 @@ export const ProtocolHistorySampleFragment = graphql(
       ...ExchangeAmount
     }
     borrows {
-      ...ExchangeAmount
-    }
-    earnings {
       ...ExchangeAmount
     }
   }`,

@@ -1,6 +1,6 @@
 {
   "name": "@aave/cli",
-  "version": "4.1.0-next.3",
+  "version": "4.1.0-next.37",
   "description": "CLI to interact with AaveKit API",
   "keywords": [
     "aave",
@@ -28,8 +28,8 @@
   "scripts": {
     "build": "rimraf dist && tsc -b",
     "postpack": "rimraf oclif.manifest.json",
-    "prepack": "oclif manifest && oclif readme",
-    "version": "oclif readme && git add README.md"
+    "prepack": "oclif manifest",
+    "readme": "oclif readme"
   },
   "dependencies": {
     "@aave/client": "workspace:*",
@@ -41,7 +41,7 @@
   "devDependencies": {
     "@oclif/test": "^4",
     "@types/node": "^24",
-    "oclif": "^4",
+    "oclif": "^4.22.73",
     "rimraf": "^6.1.2",
     "tsx": "^4.20.3",
     "typescript": "^5"

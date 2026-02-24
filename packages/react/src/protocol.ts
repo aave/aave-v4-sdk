@@ -202,7 +202,9 @@ export function useAssetPriceHistory({
   });
 }
 
-export type UseAssetSupplyHistoryArgs = AssetSupplyHistoryRequest;
+export type UseAssetSupplyHistoryArgs = Prettify<
+  AssetSupplyHistoryRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch historical supply data for a specific asset.
@@ -268,6 +270,8 @@ export function useAssetSupplyHistory(
 export function useAssetSupplyHistory({
   suspense = false,
   pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseAssetSupplyHistoryArgs> & {
   suspense?: boolean;
@@ -277,6 +281,8 @@ export function useAssetSupplyHistory({
     document: AssetSupplyHistoryQuery,
     variables: {
       request,
+      currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -284,7 +290,9 @@ export function useAssetSupplyHistory({
   });
 }
 
-export type UseAssetBorrowHistoryArgs = AssetBorrowHistoryRequest;
+export type UseAssetBorrowHistoryArgs = Prettify<
+  AssetBorrowHistoryRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch historical borrow data for a specific asset.
@@ -350,6 +358,8 @@ export function useAssetBorrowHistory(
 export function useAssetBorrowHistory({
   suspense = false,
   pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseAssetBorrowHistoryArgs> & {
   suspense?: boolean;
@@ -359,6 +369,8 @@ export function useAssetBorrowHistory({
     document: AssetBorrowHistoryQuery,
     variables: {
       request,
+      currency,
+      timeWindow,
     },
     suspense,
     pause,

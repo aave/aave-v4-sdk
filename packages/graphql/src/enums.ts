@@ -48,6 +48,7 @@ export enum OperationType {
   SpokeSupply = 'SPOKE_SUPPLY',
   SpokeWithdraw = 'SPOKE_WITHDRAW',
   SpokeUpdateUserRiskPremium = 'SPOKE_UPDATE_USER_RISK_PREMIUM',
+  SpokeUpdateUserDynamicConfig = 'SPOKE_UPDATE_USER_DYNAMIC_CONFIG',
   SpokeSetUserUsingAsCollateral = 'SPOKE_SET_USER_USING_AS_COLLATERAL',
   SpokeSetUserPositionManager = 'SPOKE_SET_USER_POSITION_MANAGER',
   RenounceSpokeUserPositionManager = 'RENOUNCE_SPOKE_USER_POSITION_MANAGER',
@@ -64,23 +65,6 @@ export enum ChainsFilter {
 }
 
 /**
- * The status type for hub assets.
- */
-export enum HubAssetStatusType {
-  Active = 'ACTIVE',
-  Frozen = 'FROZEN',
-  Paused = 'PAUSED',
-}
-
-/**
- * The order by options for hub assets request.
- */
-export enum HubAssetsRequestOrderBy {
-  Balance = 'BALANCE',
-  Name = 'NAME',
-}
-
-/**
  * The activity type for user history.
  */
 export enum ActivityType {
@@ -92,6 +76,11 @@ export enum ActivityType {
   SetAsCollateral = 'SET_AS_COLLATERAL',
   UpdatedDynamicConfig = 'UPDATED_DYNAMIC_CONFIG',
   UpdatedRiskPremium = 'UPDATED_RISK_PREMIUM',
+  TokenToTokenSwap = 'TOKEN_TO_TOKEN_SWAP',
+  SupplySwap = 'SUPPLY_SWAP',
+  BorrowSwap = 'BORROW_SWAP',
+  RepayWithSupply = 'REPAY_WITH_SUPPLY',
+  WithdrawSwap = 'WITHDRAW_SWAP',
 }
 
 /**
@@ -131,11 +120,35 @@ export enum ReservesRequestFilter {
 }
 
 /**
- * The swap kind for swapping tokens.
+ * The borrow swap kind for debt swaps.
  */
-export enum SwapKind {
+export enum BorrowSwapKind {
+  Current = 'CURRENT',
+  New = 'NEW',
+}
+
+/**
+ * The repay with supply kind for repay swaps.
+ */
+export enum RepayWithSupplyKind {
+  Repay = 'REPAY',
+  Supply = 'SUPPLY',
+}
+
+/**
+ * The supply swap kind for supply swaps.
+ */
+export enum SupplySwapKind {
+  Current = 'CURRENT',
+  New = 'NEW',
+}
+
+/**
+ * The withdraw swap kind for withdraw swaps.
+ */
+export enum WithdrawSwapKind {
+  Withdraw = 'WITHDRAW',
   Buy = 'BUY',
-  Sell = 'SELL',
 }
 
 /**
@@ -163,4 +176,64 @@ export enum TokenCategory {
 export enum UserPositionConditionsUpdate {
   AllDynamicConfig = 'ALL_DYNAMIC_CONFIG',
   JustRiskPremium = 'JUST_RISK_PREMIUM',
+}
+
+/**
+ * Quote accuracy level for swap quotes.
+ */
+export enum QuoteAccuracy {
+  /**
+   * Fast price quality - faster response, potentially less accurate price
+   */
+  Fast = 'FAST',
+  /**
+   * Verified price quality - more accurate price, potentially slower response
+   */
+  Accurate = 'ACCURATE',
+}
+
+/**
+ * Order class indicating market or limit order type.
+ */
+export enum SwapOrderClass {
+  /**
+   * Market order - executed immediately at current market price
+   */
+  Market = 'MARKET',
+  /**
+   * Limit order - executed at specified price or better
+   */
+  Limit = 'LIMIT',
+}
+
+/**
+ * The status of a swap activity.
+ */
+export enum SwapActivityStatus {
+  /**
+   * The swap was fulfilled successfully
+   */
+  Fulfilled = 'FULFILLED',
+  /**
+   * The swap was cancelled
+   */
+  Cancelled = 'CANCELLED',
+  /**
+   * The swap expired before being fulfilled
+   */
+  Expired = 'EXPIRED',
+}
+
+/**
+ * The swap kind for token swaps.
+ */
+export enum TokenSwapKind {
+  /**
+   * Buy a specific amount of the target token
+   */
+  Buy = 'BUY',
+  /**
+   * Sell a specific amount of the source token
+   */
+  Sell = 'SELL',
 }

@@ -33,12 +33,13 @@ async function sendMessage(
 
 function createMessageTestResults(
   success: number,
-  failure: number,
+  failures: number,
+  skipped: number,
   testSuiteName: string,
 ) {
   const result = { status: '', message: '' };
-  const totalTests = success + failure;
-  const percent = (success / totalTests).toFixed(2);
+  const totalTests = success + failures + skipped;
+  const percent = ((success + skipped) / totalTests).toFixed(2);
 
   if (Number.parseFloat(percent) >= 0.98) {
     result.status = '#069C56';
@@ -52,7 +53,7 @@ function createMessageTestResults(
   }
 
   result.message = `${testSuiteName}\n`;
-  result.message += `Total tests ${totalTests}\n Pass ${success} / Fail ${failure}`;
+  result.message += `Total tests ${totalTests}\n Pass ${success} / Fail ${failures} / Skip ${skipped}`;
   const reportUrl = `https://github.com/aave/aave-v4-sdk/actions/runs/${process.env.GITHUB_RUN_ID || ''}/`;
   result.message += `\n <${reportUrl}|Link Github Pipeline>`;
   return result;
@@ -67,6 +68,7 @@ const main = async (): Promise<void> => {
   const message = createMessageTestResults(
     testResultsJson.numPassedTests,
     testResultsJson.numFailedTests,
+    testResultsJson.numPendingTests,
     'Aave SDK V4 - E2E Tests',
   );
   await sendMessage(message.message, message.status, 'Aave SDK V4 - E2E Tests');

@@ -1,9 +1,10 @@
 import { bigDecimal, evmAddress, type Reserve, useSupply } from '@aave/react';
 import { useSendTransaction } from '@aave/react/viem';
+import { Block } from 'baseui/block';
 import { Button } from 'baseui/button';
 import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
-import { ParagraphSmall } from 'baseui/typography';
+import { KIND, Notification } from 'baseui/notification';
 import { useState } from 'react';
 import type { WalletClient } from 'viem';
 
@@ -13,22 +14,37 @@ interface SupplyFormProps {
 }
 
 export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
-  const [status, setStatus] = useState<string>('');
+  const [status, setStatus] = useState<{
+    kind: keyof typeof KIND;
+    message: string;
+  } | null>(null);
 
   const [sendTransaction] = useSendTransaction(walletClient);
-  const [supply, { loading, error }] = useSupply((plan) => {
+  const [supply, { loading }] = useSupply((plan) => {
     switch (plan.__typename) {
       case 'TransactionRequest':
-        setStatus('Sign the Supply Transaction in your wallet');
+        setStatus({
+          kind: KIND.info,
+          message: 'Sign the Supply Transaction in your wallet',
+        });
         return sendTransaction(plan).andTee(() =>
-          setStatus('Sending Supply Transaction…'),
+          setStatus({
+            kind: KIND.info,
+            message: 'Sending Supply Transaction…',
+          }),
         );
 
       case 'Erc20ApprovalRequired':
       case 'PreContractActionRequired':
-        setStatus('Sign the Approval Transaction in your wallet');
+        setStatus({
+          kind: KIND.info,
+          message: 'Sign the Approval Transaction in your wallet',
+        });
         return sendTransaction(plan.transaction).andTee(() =>
-          setStatus('Sending Approval Transaction…'),
+          setStatus({
+            kind: KIND.info,
+            message: 'Sending Approval Transaction…',
+          }),
         );
     }
   });
@@ -38,7 +54,7 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
 
     const amount = e.currentTarget.amount.value as string;
     if (!amount) {
-      setStatus('Please enter an amount');
+      setStatus({ kind: KIND.info, message: 'Please enter an amount' });
       return;
     }
 
@@ -52,15 +68,28 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
       sender: evmAddress(walletClient.account!.address),
     });
 
-    if (result.isOk()) {
-      setStatus('Supply successful!');
-    } else {
-      setStatus('Supply failed!');
+    if (result.isErr()) {
+      switch (result.error.name) {
+        case 'ValidationError':
+          setStatus({
+            kind: KIND.warning,
+            message: 'Insufficient funds in your wallet',
+          });
+          return;
+        case 'CancelError':
+          setStatus({ kind: KIND.info, message: 'Transaction cancelled' });
+          return;
+        default:
+          setStatus({ kind: KIND.negative, message: result.error.message });
+          return;
+      }
     }
+
+    setStatus({ kind: KIND.info, message: 'Supply successful!' });
   };
 
   return (
-    <form onSubmit={submit}>
+    <Block as='form' onSubmit={submit} marginTop='scale600'>
       <FormControl
         label='Amount'
         caption='Human-friendly amount (e.g. 1.23, 4.56, 7.89)'
@@ -74,15 +103,18 @@ export function SupplyForm({ reserve, walletClient }: SupplyFormProps) {
         />
       </FormControl>
 
-      <Button type='submit' disabled={loading}>
+      <Button type='submit' disabled={loading} isLoading={loading}>
         Supply
       </Button>
 
-      {status && <ParagraphSmall>{status}</ParagraphSmall>}
-
-      {error && (
-        <ParagraphSmall color='negative'>{error.toString()}</ParagraphSmall>
+      {status && (
+        <Notification
+          kind={status.kind}
+          overrides={{ Body: { style: { width: 'auto' } } }}
+        >
+          {status.message}
+        </Notification>
       )}
-    </form>
+    </Block>
   );
 }

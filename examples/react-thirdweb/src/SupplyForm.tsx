@@ -13,7 +13,7 @@ interface SupplyFormProps {
 }
 
 export function SupplyForm({ wallet }: SupplyFormProps) {
-  const [status, setStatus] = useState<string>('');
+  const [status, setStatus] = useState('');
 
   const [sendTransaction] = useSendTransaction(thirdwebClient);
   const [supply, { loading, error }] = useSupply((plan) => {

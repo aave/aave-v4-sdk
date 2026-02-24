@@ -6,16 +6,14 @@ import type {
   ValidationError,
 } from '@aave/core';
 import type {
-  CancelSwapTypedData,
-  ERC20PermitSignature,
   ExecutionPlan,
   HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
   OperationType,
-  PermitTypedDataResponse,
-  SwapByIntentTypedData,
+  PermitTypedData,
+  SwapTypedData,
 } from '@aave/graphql';
-import type { ResultAsync, TxHash } from '@aave/types';
+import type { ResultAsync, Signature, TxHash } from '@aave/types';
 
 /**
  * @internal
@@ -34,6 +32,18 @@ export function isHasProcessedKnownTransactionRequest(
   return result.operations !== null && result.operations.length > 0;
 }
 
+export type TransactionReceipt = {
+  __typename: 'TransactionReceipt';
+  txHash: TxHash;
+};
+
+/**
+ * @internal
+ */
+export function transactionReceipt(txHash: TxHash): TransactionReceipt {
+  return { __typename: 'TransactionReceipt', txHash };
+}
+
 export type SendWithError =
   | CancelError
   | SigningError
@@ -45,10 +55,13 @@ export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
   result: T,
 ) => ResultAsync<TransactionResult, SendWithError>;
 
-export type ERC20PermitHandler = (
-  result: PermitTypedDataResponse,
-) => ResultAsync<ERC20PermitSignature, SigningError>;
+export type SignTypedDataError = CancelError | SigningError;
 
-export type SwapSignatureHandler = (
-  result: CancelSwapTypedData | SwapByIntentTypedData,
-) => ResultAsync<ERC20PermitSignature, SigningError>;
+/**
+ * Union type for all EIP-712 typed data structures used in the SDK.
+ */
+export type TypedData = PermitTypedData | SwapTypedData;
+
+export type TypedDataHandler = (
+  data: TypedData,
+) => ResultAsync<Signature, SignTypedDataError>;

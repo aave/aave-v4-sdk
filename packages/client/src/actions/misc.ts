@@ -13,7 +13,11 @@ import {
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
-import { type BatchOptions, DEFAULT_QUERY_OPTIONS } from '../options';
+import {
+  type BatchOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
+} from '../options';
 
 /**
  * Fetches a specific chain by chain ID.
@@ -26,27 +30,18 @@ import { type BatchOptions, DEFAULT_QUERY_OPTIONS } from '../options';
  *
  * @param client - Aave client.
  * @param request - The chain request parameters.
+ * @param options - The query options.
  * @returns The chain data, or null if not found.
  */
-
 export function chain(
   client: AaveClient,
   request: ChainRequest,
-): ResultAsync<Chain | null, UnexpectedError>;
-/**
- * @internal
- */
-export function chain(
-  client: AaveClient,
-  request: ChainRequest,
-  options: BatchOptions,
-): ResultAsync<Chain | null, UnexpectedError>;
-export function chain(
-  client: AaveClient,
-  request: ChainRequest,
-  { batch }: BatchOptions = DEFAULT_QUERY_OPTIONS,
+  {
+    batch = DEFAULT_QUERY_OPTIONS.batch,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: BatchOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Chain | null, UnexpectedError> {
-  return client.query(ChainQuery, { request }, { batch });
+  return client.query(ChainQuery, { request }, { batch, requestPolicy });
 }
 
 /**
@@ -108,11 +103,15 @@ export function hasProcessedKnownTransaction(
  *
  * @param client - Aave client.
  * @param request - The exchange rate request parameters.
+ * @param options - The query options.
  * @returns The exchange rate information as a fiat amount.
  */
 export function exchangeRate(
   client: AaveClient,
   request: ExchangeRateRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<ExchangeAmount, UnexpectedError> {
-  return client.query(ExchangeRateQuery, { request });
+  return client.query(ExchangeRateQuery, { request }, { requestPolicy });
 }

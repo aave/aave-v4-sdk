@@ -6,6 +6,7 @@ import {
   Currency,
   type DecimalNumber,
   decodeReserveId,
+  decodeUserPositionId,
   type ExchangeAmount,
   type NativeAmount,
   type PreviewAction,
@@ -43,6 +44,7 @@ const gasEstimates: Record<keyof PreviewAction, bigint> = {
   withdraw: 195_049n,
   repay: 217_889n + estimatedApprovalGas,
   setUserSuppliesAsCollateral: 240_284n,
+  updateUserPositionConditions: 280_000n,
 };
 
 function inferGasEstimate(action: PreviewAction): bigint {
@@ -77,6 +79,12 @@ function extractChainId(action: PreviewAction): ChainId {
         );
         return prev;
       }).chainId;
+  }
+
+  if ('updateUserPositionConditions' in action) {
+    return decodeUserPositionId(
+      action.updateUserPositionConditions.userPositionId,
+    ).chainId;
   }
 
   never('Expected reserve id');
@@ -141,7 +149,7 @@ function useExecutionDetails(): UseAsyncTask<
           transport: http(),
         });
 
-        if ('activity' in query) {
+        if ('activity' in query && query.activity.txHash) {
           return ResultAsync.fromPromise(
             publicClient.getTransactionReceipt({ hash: query.activity.txHash }),
             (error) => UnexpectedError.from(error),

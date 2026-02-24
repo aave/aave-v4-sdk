@@ -1,7 +1,6 @@
-import type { ExtendWithOpaqueType, TxHash } from '@aave/types';
+import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import {
-  type Chain,
   ChainFragment,
   Erc20AmountFragment,
   type Erc20ApprovalRequired,
@@ -12,16 +11,18 @@ import {
   HealthFactorResultFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
+  MerklCriteriaFragment,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   PercentNumberVariationFragment,
+  PositionAmountFragment,
   ReserveInfoFragment,
   SpokeFragment,
+  TokenAmountFragment,
   type TransactionRequest,
   TransactionRequestFragment,
 } from './fragments';
 import { type FragmentDocumentFor, graphql, type RequestOf } from './graphql';
-import type { ID } from './id';
 
 /**
  * @internal
@@ -263,6 +264,100 @@ export type UserPositionConditionVariation = FragmentOf<
   typeof UserPositionConditionVariationFragment
 >;
 
+export const PreviewMerklSupplyRewardFragment = graphql(
+  `fragment PreviewMerklSupplyReward on PreviewMerklSupplyReward {
+    __typename
+    id
+    startDate
+    endDate
+    extraApy {
+      ...PercentNumber
+    }
+    payoutToken {
+      ...Erc20Token
+    }
+    criteria {
+      ...MerklCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [
+    PercentNumberFragment,
+    Erc20TokenFragment,
+    MerklCriteriaFragment,
+    ReserveInfoFragment,
+  ],
+);
+export type PreviewMerklSupplyReward = FragmentOf<
+  typeof PreviewMerklSupplyRewardFragment
+>;
+
+export const PreviewMerklBorrowRewardFragment = graphql(
+  `fragment PreviewMerklBorrowReward on PreviewMerklBorrowReward {
+    __typename
+    id
+    startDate
+    endDate
+    discountApy {
+      ...PercentNumber
+    }
+    payoutToken {
+      ...Erc20Token
+    }
+    criteria {
+      ...MerklCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [
+    PercentNumberFragment,
+    Erc20TokenFragment,
+    MerklCriteriaFragment,
+    ReserveInfoFragment,
+  ],
+);
+export type PreviewMerklBorrowReward = FragmentOf<
+  typeof PreviewMerklBorrowRewardFragment
+>;
+
+export type PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward;
+
+export const PreviewRewardFragment: FragmentDocumentFor<
+  PreviewReward,
+  'PreviewReward'
+> = graphql(
+  `fragment PreviewReward on PreviewReward {
+    __typename
+    ... on PreviewMerklSupplyReward {
+      ...PreviewMerklSupplyReward
+    }
+    ... on PreviewMerklBorrowReward {
+      ...PreviewMerklBorrowReward
+    }
+  }`,
+  [PreviewMerklSupplyRewardFragment, PreviewMerklBorrowRewardFragment],
+);
+
+export const PreviewRewardOutcomeFragment = graphql(
+  `fragment PreviewRewardOutcome on PreviewRewardOutcome {
+    __typename
+    lost {
+      ...PreviewReward
+    }
+    gained {
+      ...PreviewReward
+    }
+  }`,
+  [PreviewRewardFragment],
+);
+export type PreviewRewardOutcome = FragmentOf<
+  typeof PreviewRewardOutcomeFragment
+>;
+
 export const PreviewUserPositionFragment = graphql(
   `fragment PreviewUserPosition on PreviewUserPosition {
     __typename
@@ -282,11 +377,14 @@ export const PreviewUserPositionFragment = graphql(
     netBalance(currency: $currency) {
       ...ExchangeAmountVariation
     }
-    projectedEarnings(period: ANNUAL) {
+    projectedEarnings {
       ...ExchangeAmountVariation
     }
     borrowingPower {
       ...ExchangeAmountVariation
+    }
+    rewards {
+      ...PreviewRewardOutcome
     }
     otherConditions {
       ...UserPositionConditionVariation
@@ -296,6 +394,7 @@ export const PreviewUserPositionFragment = graphql(
     HealthFactorResultFragment,
     PercentNumberVariationFragment,
     ExchangeAmountVariationFragment,
+    PreviewRewardOutcomeFragment,
     UserPositionConditionVariationFragment,
   ],
 );
@@ -307,7 +406,7 @@ export type PreviewUserPosition = FragmentOf<
  * @internal
  */
 export const PreviewQuery = graphql(
-  `query Preview($request: PreviewRequest!, $currency: Currency! = USD) {
+  `query Preview($request: PreviewRequest!, $currency: Currency! = USD, $timeWindow: TimeWindow! = LAST_WEEK) {
     value: preview(request: $request) {
       ...PreviewUserPosition
     }
@@ -558,6 +657,135 @@ export type UpdatedRiskPremiumActivity = FragmentOf<
   typeof UpdatedRiskPremiumActivityFragment
 >;
 
+export const TokenSwapActivityFragment = graphql(
+  `fragment TokenSwapActivity on TokenSwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    sell {
+      ...TokenAmount
+    }
+    buy {
+      ...TokenAmount
+    }
+    explorerUrl
+    orderClass
+    kind
+    status
+  }`,
+  [ChainFragment, TokenAmountFragment],
+);
+export type TokenSwapActivity = FragmentOf<typeof TokenSwapActivityFragment>;
+
+export const SupplySwapActivityFragment = graphql(
+  `fragment SupplySwapActivity on SupplySwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    sell {
+      ...PositionAmount
+    }
+    buy {
+      ...PositionAmount
+    }
+    explorerUrl
+    orderClass
+    kind
+    status
+  }`,
+  [ChainFragment, PositionAmountFragment],
+);
+export type SupplySwapActivity = FragmentOf<typeof SupplySwapActivityFragment>;
+
+export const BorrowSwapActivityFragment = graphql(
+  `fragment BorrowSwapActivity on BorrowSwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    sell {
+      ...PositionAmount
+    }
+    buy {
+      ...PositionAmount
+    }
+    explorerUrl
+    orderClass
+    kind
+    status
+  }`,
+  [ChainFragment, PositionAmountFragment],
+);
+export type BorrowSwapActivity = FragmentOf<typeof BorrowSwapActivityFragment>;
+
+export const RepayWithSupplyActivityFragment = graphql(
+  `fragment RepayWithSupplyActivity on RepayWithSupplyActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    repay {
+      ...PositionAmount
+    }
+    supply {
+      ...PositionAmount
+    }
+    explorerUrl
+    orderClass
+    kind
+    status
+  }`,
+  [ChainFragment, PositionAmountFragment],
+);
+export type RepayWithSupplyActivity = FragmentOf<
+  typeof RepayWithSupplyActivityFragment
+>;
+
+export const WithdrawSwapActivityFragment = graphql(
+  `fragment WithdrawSwapActivity on WithdrawSwapActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    withdraw {
+      ...PositionAmount
+    }
+    buy {
+      ...TokenAmount
+    }
+    explorerUrl
+    orderClass
+    kind
+    status
+  }`,
+  [ChainFragment, PositionAmountFragment, TokenAmountFragment],
+);
+export type WithdrawSwapActivity = FragmentOf<
+  typeof WithdrawSwapActivityFragment
+>;
+
 export const ActivityItemFragment = graphql(
   `fragment ActivityItem on ActivityItem {
     __typename
@@ -585,6 +813,21 @@ export const ActivityItemFragment = graphql(
     ... on UpdatedRiskPremiumActivity {
       ...UpdatedRiskPremiumActivity
     }
+    ... on TokenSwapActivity {
+      ...TokenSwapActivity
+    }
+    ... on SupplySwapActivity {
+      ...SupplySwapActivity
+    }
+    ... on BorrowSwapActivity {
+      ...BorrowSwapActivity
+    }
+    ... on RepayWithSupplyActivity {
+      ...RepayWithSupplyActivity
+    }
+    ... on WithdrawSwapActivity {
+      ...WithdrawSwapActivity
+    }
   }`,
   [
     BorrowActivityFragment,
@@ -595,16 +838,15 @@ export const ActivityItemFragment = graphql(
     UsingAsCollateralActivityFragment,
     UpdatedDynamicConfigActivityFragment,
     UpdatedRiskPremiumActivityFragment,
+    TokenSwapActivityFragment,
+    SupplySwapActivityFragment,
+    BorrowSwapActivityFragment,
+    RepayWithSupplyActivityFragment,
+    WithdrawSwapActivityFragment,
   ],
 );
 export type ActivityItem = ExtendWithOpaqueType<
-  FragmentOf<typeof ActivityItemFragment>,
-  {
-    id: ID;
-    timestamp: Date;
-    txHash: TxHash;
-    chain: Chain;
-  }
+  FragmentOf<typeof ActivityItemFragment>
 >;
 
 export const PaginatedActivitiesResultFragment = graphql(

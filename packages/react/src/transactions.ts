@@ -1,15 +1,19 @@
-import type {
-  AaveClient,
-  ActivitiesRequest,
-  CurrencyQueryOptions,
-  PaginatedActivitiesResult,
-  TimeWindowQueryOptions,
+import {
+  type AaveClient,
+  type ActivitiesRequest,
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type PaginatedActivitiesResult,
+  supportsPermit,
+  type TimeWindowQueryOptions,
+  type TransactionReceipt,
+  transactionReceipt,
   UnexpectedError,
 } from '@aave/client';
-import { DEFAULT_QUERY_OPTIONS } from '@aave/client';
 import {
   activities,
   borrow,
+  claimRewards,
   liquidatePosition,
   preview,
   renounceSpokeUserPositionManager,
@@ -24,52 +28,64 @@ import { ValidationError } from '@aave/core';
 import {
   ActivitiesQuery,
   type BorrowRequest,
-  decodeHubId,
+  type ClaimRewardsRequest,
   decodeReserveId,
-  HubQuery,
-  HubsQuery,
+  type ERC20PermitSignature,
+  type Erc20Approval,
+  type Erc20ApprovalRequired,
+  type ExecutionPlan,
   type InsufficientBalanceError,
-  isChainIdsVariant,
-  isHubInputVariant,
-  isSpokeInputVariant,
   type LiquidatePositionRequest,
+  type PermitTypedData,
+  type PreContractActionRequired,
   PreviewQuery,
   type PreviewRequest,
   type PreviewUserPosition,
   type RenounceSpokeUserPositionManagerRequest,
   type RepayRequest,
-  ReservesQuery,
   type SetSpokeUserPositionManagerRequest,
   type SetUserSuppliesAsCollateralRequest,
-  SpokePositionManagersQuery,
-  SpokesQuery,
+  type SpokeInput,
   type SupplyRequest,
+  type TransactionRequest,
   type UpdateUserPositionConditionsRequest,
-  UserBalancesQuery,
-  UserPositionQuery,
-  UserPositionsQuery,
-  UserSummaryQuery,
   type WithdrawRequest,
 } from '@aave/graphql';
 import {
   errAsync,
+  expectTypename,
+  isSignature,
   type NullishDeep,
+  okAsync,
   type Prettify,
-  type TxHash,
+  ResultAsync,
+  type Signature,
 } from '@aave/types';
+
 import { useAaveClient } from './context';
 import {
   cancel,
+  type ExecutionPlanHandler,
   type Pausable,
   type PausableReadResult,
   type PausableSuspenseResult,
+  PendingTransaction,
   type PendingTransactionError,
   type ReadResult,
+  refreshHubs,
+  refreshReserves,
+  refreshSpokePositionManagers,
+  refreshSpokes,
+  refreshUserBalances,
+  refreshUserBorrows,
+  refreshUserPositionById,
+  refreshUserPositions,
+  refreshUserSummary,
+  refreshUserSupplies,
   type SendTransactionError,
   type Suspendable,
   type SuspendableResult,
   type SuspenseResult,
-  type TransactionHandler,
   type UseAsyncTask,
   useAsyncTask,
   useSuspendableQuery,
@@ -79,67 +95,92 @@ function refreshQueriesForReserveChange(
   client: AaveClient,
   request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
 ) {
-  const { chainId, spoke } = decodeReserveId(request.reserve);
-  return async () =>
-    Promise.all([
-      // update user positions
-      await client.refreshQueryWhere(
-        UserPositionsQuery,
-        (variables, data) =>
-          variables.request.user === request.sender &&
-          data.some(
-            (position) =>
-              position.spoke.chain.chainId === chainId &&
-              position.spoke.address === spoke,
-          ),
-      ),
-      await client.refreshQueryWhere(
-        UserPositionQuery,
-        (_, data) =>
-          data?.spoke.chain.chainId === chainId &&
-          data?.spoke.address === spoke &&
-          data.user === request.sender,
-      ),
-
-      // update user summary
-      await client.refreshQueryWhere(UserSummaryQuery, (variables) =>
-        variables.request.user === request.sender &&
-        isSpokeInputVariant(variables.request.filter)
-          ? variables.request.filter.spoke.chainId === chainId &&
-            variables.request.filter.spoke.address === spoke
-          : isChainIdsVariant(variables.request.filter)
-            ? variables.request.filter.chainIds.some((id) => id === chainId)
-            : false,
-      ),
-
-      // update reserves
-      await client.refreshQueryWhere(ReservesQuery, (_, data) =>
-        data.some((reserve) => reserve.id === request.reserve),
-      ),
-
-      // update spokes
-      await client.refreshQueryWhere(SpokesQuery, (_, data) =>
-        data.some(
-          (item) => item.chain.chainId === chainId && item.address === spoke,
-        ),
-      ),
-
-      // update user balances
-      await client.refreshQueryWhere(
-        UserBalancesQuery,
-        // update any user balances for the given user
-        (variables) => variables.request.user === request.sender,
-      ),
-
-      // update hubs
-      await client.refreshQueryWhere(
-        HubsQuery,
-        (variables) =>
-          isChainIdsVariant(variables.request) &&
-          variables.request.chainIds.some((id) => id === chainId),
-      ),
-    ]);
+  const { chainId, spoke: address } = decodeReserveId(request.reserve);
+  const spoke: SpokeInput = { chainId, address };
+  return ResultAsync.combine([
+    refreshUserPositions(client, request.sender, spoke),
+    refreshUserSummary(client, request.sender, spoke),
+    refreshReserves(client, [request.reserve]),
+    refreshSpokes(client, spoke),
+    refreshUserBalances(client, request.sender),
+    refreshUserSupplies(client, request.sender),
+    refreshUserBorrows(client, request.sender),
+    refreshHubs(client, chainId),
+  ]);
 }
+
+function toPermitSignature(
+  signature: Signature,
+  permitTypedData: PermitTypedData,
+): ERC20PermitSignature {
+  return {
+    deadline: permitTypedData.message.deadline as number,
+    value: signature,
+  };
+}
+
+type ApprovalHandler = ExecutionPlanHandler<
+  TransactionRequest | Erc20Approval,
+  Signature | PendingTransaction
+>;
+
+/**
+ * Sends all approvals sequentially via transactions (no permit).
+ */
+function sendApprovalTransactions(
+  plan: Erc20ApprovalRequired,
+  handler: ApprovalHandler,
+): ResultAsync<
+  TransactionRequest,
+  SendTransactionError | PendingTransactionError
+> {
+  return plan.approvals
+    .reduce<
+      ResultAsync<unknown, SendTransactionError | PendingTransactionError>
+    >(
+      (chain, approval) =>
+        chain.andThen(() =>
+          handler({ ...approval, bySignature: null }, { cancel })
+            .andThen(PendingTransaction.tryFrom)
+            .andThen((pending) => pending.wait()),
+        ),
+      okAsync(undefined),
+    )
+    .map(() => plan.originalTransaction);
+}
+
+type SingleApprovalPlan = Erc20ApprovalRequired & {
+  approvals: [Erc20Approval & { bySignature: PermitTypedData }];
+};
+
+/**
+ * Processes a single approval that supports permit.
+ * The handler decides whether to use a permit signature or a transaction.
+ * Returns either a new TransactionRequest (from permit callback) or the plan's original transaction.
+ */
+function handleSingleApproval(
+  plan: SingleApprovalPlan,
+  handler: ApprovalHandler,
+  onPermit: (
+    permitSig: ERC20PermitSignature,
+  ) => ResultAsync<ExecutionPlan, UnexpectedError>,
+): ResultAsync<
+  TransactionRequest,
+  SendTransactionError | PendingTransactionError | UnexpectedError
+> {
+  const approval = plan.approvals[0];
+
+  return handler(approval, { cancel }).andThen((result) => {
+    if (isSignature(result)) {
+      return onPermit(toPermitSignature(result, approval.bySignature)).map(
+        expectTypename('TransactionRequest'),
+      );
+    }
+    return result.wait().map(() => plan.originalTransaction);
+  });
+}
+
+// ------------------------------------------------------------
 
 /**
  * A hook that provides a way to supply assets to an Aave reserve.
@@ -150,7 +191,10 @@ function refreshQueriesForReserveChange(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'Erc20ApprovalRequired':
+ *
+ *     case 'Erc20Approval':
+ *       return sendTransaction(plan.byTransaction);
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -189,16 +233,19 @@ function refreshQueriesForReserveChange(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useSupply(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | Erc20Approval | PreContractActionRequired,
+    Signature | PendingTransaction
+  >,
 ): UseAsyncTask<
   SupplyRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -211,25 +258,55 @@ export function useSupply(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
             case 'Erc20ApprovalRequired':
+              if (supportsPermit(plan)) {
+                return handleSingleApproval(plan, handler, (permitSig) =>
+                  supply(
+                    client,
+                    injectSupplyPermitSignature(request, permitSig),
+                  ),
+                ).andThen((transaction) => handler(transaction, { cancel }));
+              }
+              return sendApprovalTransactions(plan, handler).andThen(
+                (transaction) => handler(transaction, { cancel }),
+              );
+
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen(PendingTransaction.tryFrom)
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
           }
         })
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
+}
+
+function injectSupplyPermitSignature(
+  request: SupplyRequest,
+  permitSig: ERC20PermitSignature,
+): SupplyRequest {
+  if ('erc20' in request.amount) {
+    return {
+      ...request,
+      amount: {
+        erc20: {
+          ...request.amount.erc20,
+          permitSig,
+        },
+      },
+    };
+  }
+  return request;
 }
 
 /**
@@ -241,7 +318,7 @@ export function useSupply(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'Erc20ApprovalRequired':
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -280,16 +357,19 @@ export function useSupply(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useBorrow(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | PreContractActionRequired,
+    PendingTransaction
+  >,
 ): UseAsyncTask<
   BorrowRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -302,23 +382,23 @@ export function useBorrow(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
-            case 'Erc20ApprovalRequired':
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
+
+            case 'Erc20ApprovalRequired':
+              return UnexpectedError.from(plan).asResultAsync();
           }
         })
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
 }
@@ -332,7 +412,10 @@ export function useBorrow(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'Erc20ApprovalRequired':
+ *
+ *     case 'Erc20Approval':
+ *       return sendTransaction(plan.byTransaction);
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -371,16 +454,19 @@ export function useBorrow(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useRepay(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | Erc20Approval | PreContractActionRequired,
+    Signature | PendingTransaction
+  >,
 ): UseAsyncTask<
   RepayRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -393,25 +479,52 @@ export function useRepay(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
             case 'Erc20ApprovalRequired':
+              if (supportsPermit(plan)) {
+                return handleSingleApproval(plan, handler, (permitSig) =>
+                  repay(client, injectRepayPermitSignature(request, permitSig)),
+                ).andThen((transaction) => handler(transaction, { cancel }));
+              }
+              return sendApprovalTransactions(plan, handler).andThen(
+                (transaction) => handler(transaction, { cancel }),
+              );
+
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen(PendingTransaction.tryFrom)
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
           }
         })
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
+}
+
+function injectRepayPermitSignature(
+  request: RepayRequest,
+  permitSig: ERC20PermitSignature,
+): RepayRequest {
+  if ('erc20' in request.amount) {
+    return {
+      ...request,
+      amount: {
+        erc20: {
+          ...request.amount.erc20,
+          permitSig,
+        },
+      },
+    };
+  }
+  return request;
 }
 
 /**
@@ -423,7 +536,7 @@ export function useRepay(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'Erc20ApprovalRequired':
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -462,16 +575,19 @@ export function useRepay(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useWithdraw(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | PreContractActionRequired,
+    PendingTransaction
+  >,
 ): UseAsyncTask<
   WithdrawRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -484,23 +600,23 @@ export function useWithdraw(
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+              return handler(plan, { cancel });
 
-            case 'Erc20ApprovalRequired':
             case 'PreContractActionRequired':
               return handler(plan, { cancel })
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }))
-                .andThen((pendingTransaction) => pendingTransaction.wait())
-                .andThen(client.waitForTransaction);
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
+
+            case 'Erc20ApprovalRequired':
+              return UnexpectedError.from(plan).asResultAsync();
           }
         })
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
 }
@@ -541,17 +657,17 @@ export function useWithdraw(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
  */
 
 export function useRenounceSpokeUserPositionManager(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   RenounceSpokeUserPositionManagerRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -560,14 +676,9 @@ export function useRenounceSpokeUserPositionManager(
     (request: RenounceSpokeUserPositionManagerRequest) =>
       renounceSpokeUserPositionManager(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(() =>
-          client.refreshQueryWhere(
-            SpokePositionManagersQuery,
-            (variables) => variables.request.spoke === request.spoke,
-          ),
-        ),
+        .andThrough(() => refreshSpokePositionManagers(client, request.spoke)),
     [client, handler],
   );
 }
@@ -613,17 +724,17 @@ export function useRenounceSpokeUserPositionManager(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
  */
 
 export function useUpdateUserPositionConditions(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   UpdateUserPositionConditionsRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -632,20 +743,11 @@ export function useUpdateUserPositionConditions(
     (request: UpdateUserPositionConditionsRequest) =>
       updateUserPositionConditions(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(async () => {
-          const { userPositionId } = request;
-          return Promise.all([
-            client.refreshQueryWhere(UserPositionsQuery, (_, data) =>
-              data.some((position) => position.id === userPositionId),
-            ),
-            client.refreshQueryWhere(
-              UserPositionQuery,
-              (_, data) => data?.id === userPositionId,
-            ),
-          ]);
-        }),
+        .andThrough(() =>
+          refreshUserPositionById(client, request.userPositionId),
+        ),
     [client, handler],
   );
 }
@@ -694,16 +796,16 @@ export function useUpdateUserPositionConditions(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetUserSuppliesAsCollateral(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetUserSuppliesAsCollateralRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -716,82 +818,39 @@ export function useSetUserSuppliesAsCollateral(
       );
       return setUserSuppliesAsCollateral(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(() =>
-          Promise.all([
-            // update user positions
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(
-                UserPositionsQuery,
-                (variables, data) =>
-                  variables.request.user === request.sender &&
-                  data.some(
-                    (position) =>
-                      position.spoke.chain.chainId === chainId &&
-                      position.spoke.address === spoke,
-                  ),
-              ),
-            ),
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(
-                UserPositionQuery,
-                (_, data) =>
-                  data?.spoke.chain.chainId === chainId &&
-                  data?.spoke.address === spoke &&
-                  data.user === request.sender,
-              ),
-            ),
+        .andThrough(() =>
+          ResultAsync.combine([
+            // update user supplies
+            refreshUserSupplies(client, request.sender),
 
-            // update user summary
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(UserSummaryQuery, (variables) =>
-                variables.request.user === request.sender &&
-                isSpokeInputVariant(variables.request.filter)
-                  ? variables.request.filter.spoke.chainId === chainId &&
-                    variables.request.filter.spoke.address === spoke
-                  : isChainIdsVariant(variables.request.filter)
-                    ? variables.request.filter.chainIds.some(
-                        (id) => id === chainId,
-                      )
-                    : false,
-              ),
-            ),
+            // update user borrows
+            refreshUserBorrows(client, request.sender),
+
+            ...reserveDetails.flatMap(({ chainId, spoke }) => [
+              // update user positions
+              refreshUserPositions(client, request.sender, {
+                chainId,
+                address: spoke,
+              }),
+
+              // update user summary
+              refreshUserSummary(client, request.sender, {
+                chainId,
+                address: spoke,
+              }),
+
+              // update spokes
+              refreshSpokes(client, { chainId, address: spoke }),
+            ]),
 
             // update reserves
-            client.refreshQueryWhere(ReservesQuery, (_, data) =>
-              data.some((reserve) => reserveIds.includes(reserve.id)),
-            ),
-
-            // update spokes
-            ...reserveDetails.map(({ chainId, spoke }) =>
-              client.refreshQueryWhere(SpokesQuery, (_, data) =>
-                data.some(
-                  (item) =>
-                    item.chain.chainId === chainId && item.address === spoke,
-                ),
-              ),
-            ),
+            refreshReserves(client, reserveIds),
 
             // update hubs
             ...reserveDetails.map(({ chainId }) =>
-              client.refreshQueryWhere(HubsQuery, (variables) =>
-                isChainIdsVariant(variables.request.query)
-                  ? variables.request.query.chainIds.some(
-                      (id) => id === chainId,
-                    )
-                  : variables.request.query.tokens.some(
-                      (token) => token.chainId === chainId,
-                    ),
-              ),
-            ),
-            ...reserveDetails.map(({ chainId }) =>
-              client.refreshQueryWhere(HubQuery, (variables) =>
-                isHubInputVariant(variables.request.query)
-                  ? variables.request.query.hubInput.chainId === chainId
-                  : decodeHubId(variables.request.query.hubId).chainId ===
-                    chainId,
-              ),
+              refreshHubs(client, chainId),
             ),
           ]),
         );
@@ -809,7 +868,10 @@ export function useSetUserSuppliesAsCollateral(
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
  *       return sendTransaction(plan);
- *     case 'Erc20ApprovalRequired':
+ *
+ *     case 'Erc20Approval':
+ *       return sendTransaction(plan.byTransaction);
+ *
  *     case 'PreContractActionRequired':
  *       return sendTransaction(plan.transaction);
  *   }
@@ -854,16 +916,19 @@ export function useSetUserSuppliesAsCollateral(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useLiquidatePosition(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<
+    TransactionRequest | Erc20Approval | PreContractActionRequired,
+    PendingTransaction | Signature
+  >,
 ): UseAsyncTask<
   LiquidatePositionRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -873,27 +938,48 @@ export function useLiquidatePosition(
   return useAsyncTask(
     (request: LiquidatePositionRequest) =>
       // TODO: update the relevant read queries
-      liquidatePosition(client, request).andThen((plan) => {
-        switch (plan.__typename) {
-          case 'TransactionRequest':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+      liquidatePosition(client, request)
+        .andThen((plan) => {
+          switch (plan.__typename) {
+            case 'TransactionRequest':
+              return handler(plan, { cancel });
 
-          case 'Erc20ApprovalRequired':
-          case 'PreContractActionRequired':
-            return handler(plan, { cancel })
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => handler(plan.originalTransaction, { cancel }))
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(client.waitForTransaction);
+            case 'Erc20ApprovalRequired':
+              if (supportsPermit(plan)) {
+                return handleSingleApproval(plan, handler, (permitSig) =>
+                  liquidatePosition(
+                    client,
+                    injectLiquidatePermitSignature(request, permitSig),
+                  ),
+                ).andThen((transaction) => handler(transaction, { cancel }));
+              }
+              return sendApprovalTransactions(plan, handler).andThen(
+                (transaction) => handler(transaction, { cancel }),
+              );
 
-          case 'InsufficientBalanceError':
-            return errAsync(ValidationError.fromGqlNode(plan));
-        }
-      }),
+            case 'PreContractActionRequired':
+              return handler(plan, { cancel })
+                .andThen(PendingTransaction.tryFrom)
+                .andThen((pending) => pending.wait())
+                .andThen(() => handler(plan.originalTransaction, { cancel }));
+
+            case 'InsufficientBalanceError':
+              return errAsync(ValidationError.fromGqlNode(plan));
+          }
+        })
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction),
     [client, handler],
   );
+}
+
+function injectLiquidatePermitSignature(
+  request: LiquidatePositionRequest,
+  _permitSig: ERC20PermitSignature,
+): LiquidatePositionRequest {
+  // TODO inject permitSig in the appropriate place once supported in the GQL schema
+  return request;
 }
 
 /**
@@ -952,16 +1038,16 @@ export function useLiquidatePosition(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
  */
 export function useSetSpokeUserPositionManager(
-  handler: TransactionHandler,
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetSpokeUserPositionManagerRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -970,14 +1056,9 @@ export function useSetSpokeUserPositionManager(
     (request: SetSpokeUserPositionManagerRequest) =>
       setSpokeUserPositionManager(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
-        .andThen((pendingTransaction) => pendingTransaction.wait())
+        .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(() =>
-          client.refreshQueryWhere(
-            SpokePositionManagersQuery,
-            (variables) => variables.request.spoke === request.spoke,
-          ),
-        ),
+        .andThrough(() => refreshSpokePositionManagers(client, request.spoke)),
     [client, handler],
   );
 }
@@ -1022,7 +1103,10 @@ export function usePreviewAction(
 
   return useAsyncTask(
     (request: PreviewRequest) =>
-      preview(client, request, { currency: options.currency }),
+      preview(client, request, {
+        currency: options.currency,
+        requestPolicy: 'network-only',
+      }),
     [client, options.currency],
   );
 }
@@ -1269,7 +1353,7 @@ export function useActivities({
  * @returns The user history.
  */
 export function useActivitiesAction(
-  options: Required<CurrencyQueryOptions> &
+  options: CurrencyQueryOptions &
     TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
 ): UseAsyncTask<ActivitiesRequest, PaginatedActivitiesResult, UnexpectedError> {
   const client = useAaveClient();
@@ -1277,9 +1361,75 @@ export function useActivitiesAction(
   return useAsyncTask(
     (request: ActivitiesRequest) =>
       activities(client, request, {
-        currency: options.currency,
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
+        requestPolicy: 'cache-first',
       }),
     [client, options.currency, options.timeWindow],
+  );
+}
+
+/**
+ * A hook that provides a way to claim rewards.
+ *
+ * ```ts
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [claim, { loading, error }] = useClaimRewards((transaction, { cancel }) => {
+ *   return sendTransaction(transaction);
+ * });
+ *
+ * // …
+ *
+ * const result = await claim({
+ *   ids: [rewardId('abc123')],
+ * });
+ *
+ * if (result.isErr()) {
+ *   switch (result.error.name) {
+ *     case 'CancelError':
+ *       // The user cancelled the operation
+ *       return;
+ *
+ *     case 'SigningError':
+ *       console.error(`Failed to sign the transaction: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TimeoutError':
+ *       console.error(`Transaction timed out: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'TransactionError':
+ *       console.error(`Transaction failed: ${result.error.message}`);
+ *       break;
+ *
+ *     case 'UnexpectedError':
+ *       console.error(result.error.message);
+ *       break;
+ *   }
+ *   return;
+ * }
+ *
+ * console.log('Transaction sent with hash:', result.value.txHash);
+ * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
+ */
+export function useClaimRewards(
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
+): UseAsyncTask<
+  ClaimRewardsRequest,
+  TransactionReceipt,
+  SendTransactionError | PendingTransactionError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: ClaimRewardsRequest) =>
+      claimRewards(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .map((result) => transactionReceipt(result.txHash)),
+    [client, handler],
   );
 }

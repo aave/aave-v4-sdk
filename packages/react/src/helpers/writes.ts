@@ -4,15 +4,11 @@ import {
   type SigningError,
   type TimeoutError,
   type TransactionError,
-  type UnexpectedError,
+  UnexpectedError,
 } from '@aave/core';
-import type {
-  Erc20ApprovalRequired,
-  PreContractActionRequired,
-  TransactionRequest,
-} from '@aave/graphql';
-import type { ResultAsync } from '@aave/types';
-import { invariant } from '@aave/types';
+import type { TransactionRequest } from '@aave/graphql';
+import type { ResultAsync, Signature } from '@aave/types';
+import { isSignature, okAsync } from '@aave/types';
 import type { UseAsyncTask } from './tasks';
 
 /**
@@ -57,12 +53,23 @@ export class PendingTransaction {
   /**
    * @internal
    */
-  static ensure<T>(value: T): PendingTransaction & T {
-    invariant(
-      value instanceof PendingTransaction,
-      'Expected PendingTransaction',
-    );
-    return value as PendingTransaction & T;
+  static isInstanceOf(value: unknown): value is PendingTransaction {
+    return value instanceof PendingTransaction;
+  }
+
+  /**
+   * Narrows a value to PendingTransaction.
+   * Only accepts types that include PendingTransaction in the union.
+   *
+   * @internal
+   */
+  static tryFrom<T>(
+    value: PendingTransaction extends T ? T : never,
+  ): ResultAsync<PendingTransaction, UnexpectedError> {
+    if (PendingTransaction.isInstanceOf(value)) {
+      return okAsync(value);
+    }
+    return UnexpectedError.from(value).asResultAsync();
   }
 }
 
@@ -73,12 +80,28 @@ export type UseSendTransactionResult = UseAsyncTask<
 >;
 
 /**
- * The handler for sending Aave transactions.
+ * The Aave execution plan handler
  */
-export type TransactionHandler = (
-  result:
-    | TransactionRequest
-    | Erc20ApprovalRequired
-    | PreContractActionRequired,
+export type ExecutionPlanHandler<
+  T,
+  R extends Signature | PendingTransaction,
+> = (
+  plan: T,
   options: TransactionHandlerOptions,
-) => ResultAsync<PendingTransaction, SendTransactionError>;
+) => ResultAsync<R, SendTransactionError>;
+
+/**
+ * Tries to create a Signature from an unknown value.
+ *
+ * @internal
+ */
+export function trySignatureFrom(
+  value: unknown,
+): ResultAsync<Signature, UnexpectedError> {
+  if (isSignature(value)) {
+    return okAsync(value);
+  }
+  return UnexpectedError.from(
+    `Expected Signature, but got ${String(value)}`,
+  ).asResultAsync();
+}

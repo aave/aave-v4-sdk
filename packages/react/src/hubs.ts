@@ -402,7 +402,10 @@ export function useHubsAction(
 
   return useAsyncTask(
     (request: HubsRequest) =>
-      hubs(client, request, { currency: options.currency }),
+      hubs(client, request, {
+        currency: options.currency,
+        requestPolicy: 'cache-first',
+      }),
     [client, options.currency],
   );
 }

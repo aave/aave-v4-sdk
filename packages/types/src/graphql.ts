@@ -1,4 +1,5 @@
 import { InvariantError } from './helpers';
+import type { Override } from './misc';
 
 /**
  * @internal
@@ -62,9 +63,15 @@ export function assertTypename<Typename extends string>(
  *
  * @internal
  */
-export type ExtendWithOpaqueType<
-  T extends { __typename: string },
-  CommonProperties extends Record<string, unknown> = Record<string, unknown>,
-> =
-  | (T & CommonProperties)
-  | (CommonProperties & { __typename: OpaqueTypename });
+export type ExtendWithOpaqueType<T extends { __typename: string }> =
+  | T
+  | Override<T, { __typename: OpaqueTypename }>;
+
+/**
+ * @internal
+ */
+export function extendWithOpaqueType<T extends { __typename: string }>(
+  node: T,
+): ExtendWithOpaqueType<T> {
+  return node;
+}

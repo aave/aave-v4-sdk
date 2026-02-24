@@ -1,12 +1,11 @@
 import { describe, expectTypeOf, it } from 'vitest';
 import type { ExtendWithOpaqueType } from './graphql';
-import type { TxHash } from './hex';
 
 describe('Given the graphql type utilities', () => {
   describe('When using ExtendWithOpaqueType<T> where T is a GQL union', () => {
     type BaseUnion =
-      | { __typename: 'TypeA'; a: string }
-      | { __typename: 'TypeB'; b: number };
+      | { __typename: 'TypeA'; common: number; a: string }
+      | { __typename: 'TypeB'; common: number; b: number };
 
     type Extended = ExtendWithOpaqueType<BaseUnion>;
 
@@ -40,21 +39,12 @@ describe('Given the graphql type utilities', () => {
       expectTypeOf(item.__typename).not.toEqualTypeOf<'TypeA' | 'TypeB'>();
     });
 
-    it('Then it should allow to specify common properties of all union members', () => {
-      type CommonProperties = {
-        __typename: string;
-        id: string;
-        timestamp: Date;
-        txHash: TxHash;
-      };
-
-      type Extended = ExtendWithOpaqueType<BaseUnion, CommonProperties>;
+    it('Then it should preserve common properties across all union members', () => {
+      type Extended = ExtendWithOpaqueType<BaseUnion>;
 
       const item = {} as Extended;
 
-      expectTypeOf(item.id).toEqualTypeOf<string>();
-      expectTypeOf(item.timestamp).toEqualTypeOf<Date>();
-      expectTypeOf(item.txHash).toEqualTypeOf<TxHash>();
+      expectTypeOf(item.common).toEqualTypeOf<number>();
     });
   });
 });

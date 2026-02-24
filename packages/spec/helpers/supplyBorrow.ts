@@ -2,8 +2,10 @@ import type {
   AaveClient,
   BorrowRequest,
   Reserve,
+  ReserveId,
   SpokeId,
   SupplyRequest,
+  TransactionReceipt,
 } from '@aave/client';
 import {
   type BigDecimal,
@@ -11,33 +13,57 @@ import {
   evmAddress,
   invariant,
   type ResultAsync,
-  type TxHash,
 } from '@aave/client';
 
 import { borrow, reserve, supply } from '@aave/client/actions';
 import { fundErc20Address } from '@aave/client/testing';
 import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
-import {
-  findReservesToBorrow,
-  findReservesToSupply,
-} from '../helpers/reserves';
+import { findReservesToBorrow, findReservesToSupply } from './reserves';
 
 export function supplyToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   request: SupplyRequest,
-): ResultAsync<TxHash, Error> {
+): ResultAsync<TransactionReceipt, Error> {
   return supply(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
+}
+
+export function fundAndSupplyToReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  { reserveId, amount }: { reserveId: ReserveId; amount: BigDecimal },
+): ResultAsync<TransactionReceipt, Error> {
+  return reserve(client, {
+    query: { reserveId: reserveId },
+    user: evmAddress(user.account.address),
+  }).andThen((reserve) => {
+    return fundErc20Address(evmAddress(user.account.address), {
+      address: reserve!.asset.underlying.address,
+      amount: amount,
+      decimals: reserve!.asset.underlying.info.decimals,
+    }).andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: reserveId,
+        amount: {
+          erc20: {
+            value: amount,
+          },
+        },
+        sender: evmAddress(user.account.address),
+        enableCollateral: true,
+      }),
+    );
+  });
 }
 
 export function borrowFromReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   request: BorrowRequest,
-): ResultAsync<TxHash, Error> {
+): ResultAsync<TransactionReceipt, Error> {
   return borrow(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
@@ -72,24 +98,50 @@ export function findReserveAndSupply(
     amount,
     spoke,
     asCollateral,
+    swappable,
   }: {
-    token: EvmAddress;
-    amount: BigDecimal;
+    token?: EvmAddress;
+    amount?: BigDecimal;
     spoke?: SpokeId;
     asCollateral?: boolean;
+    swappable?: boolean;
   },
-): ResultAsync<Reserve, Error> {
+): ResultAsync<{ reserveInfo: Reserve; amountSupplied: BigDecimal }, Error> {
   return findReservesToSupply(client, user, {
     token: token,
     spoke: spoke,
-    asCollateral: asCollateral,
-  }).andThen((reserves) =>
-    supplyToReserve(client, user, {
-      reserve: reserves[0].id,
-      amount: { erc20: { value: amount } },
-      sender: evmAddress(user.account.address),
-    }).map(() => reserves[0]),
-  );
+    canUseAsCollateral: true, // Only consider reserves that support collateral; actual enabling is controlled by `asCollateral` / `enableCollateral` below
+  }).andThen((reserves) => {
+    const targetReserve = swappable
+      ? reserves.find((reserve) => reserve.canSwapFrom === true)
+      : reserves[0]!;
+    invariant(targetReserve, 'Target reserve not found');
+    const amountToSupply =
+      amount ??
+      targetReserve.supplyCap
+        .minus(targetReserve.summary.supplied.amount.value)
+        .div(100000);
+
+    return fundErc20Address(evmAddress(user.account.address), {
+      address: token ?? targetReserve.asset.underlying.address,
+      amount: amountToSupply,
+      decimals: targetReserve.asset.underlying.info.decimals,
+    }).andThen(() =>
+      supplyToReserve(client, user, {
+        reserve: targetReserve.id,
+        amount: {
+          erc20: {
+            value: amountToSupply,
+          },
+        },
+        sender: evmAddress(user.account.address),
+        enableCollateral: asCollateral ? true : null,
+      }).map(() => ({
+        reserveInfo: targetReserve,
+        amountSupplied: amountToSupply,
+      })),
+    );
+  });
 }
 
 export function supplyAndBorrow(
@@ -139,6 +191,38 @@ export function supplyAndBorrow(
         })),
     ),
   );
+}
+
+export function borrowFromRandomReserve(
+  client: AaveClient,
+  user: WalletClient<Transport, Chain, Account>,
+  params: {
+    spoke?: SpokeId;
+    token?: EvmAddress;
+    ratioToBorrow?: number;
+  },
+): ResultAsync<{ reserve: Reserve; amountBorrowed: BigDecimal }, Error> {
+  return findReservesToBorrow(client, user, {
+    spoke: params.spoke,
+    token: params.token,
+  }).andThen((reserves) => {
+    return borrowFromReserve(client, user, {
+      reserve: reserves[0].id,
+      amount: {
+        erc20: {
+          value: reserves[0].userState!.borrowable.amount.value.times(
+            params.ratioToBorrow ?? 0.1,
+          ),
+        },
+      },
+      sender: evmAddress(user.account.address),
+    }).map(() => ({
+      reserve: reserves[0],
+      amountBorrowed: reserves[0].userState!.borrowable.amount.value.times(
+        params.ratioToBorrow ?? 0.1,
+      ),
+    }));
+  });
 }
 
 export function supplyAndBorrowNativeToken(
