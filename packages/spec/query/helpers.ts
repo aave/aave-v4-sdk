@@ -6,7 +6,7 @@ import {
   type Result,
   type ResultAsync,
   type SpokeId,
-  type TxHash,
+  type TransactionReceipt,
 } from '@aave/client';
 import {
   activities,
@@ -170,7 +170,7 @@ export const recreateUserActivities = async (
         listReservesToBorrow.value[i]!.userState!.borrowable.amount.value.div(
           100,
         );
-      const result: Result<TxHash, Error> = await fundErc20Address(
+      const result: Result<TransactionReceipt, Error> = await fundErc20Address(
         evmAddress(user.account.address),
         {
           address: listReservesToBorrow.value[i]!.asset.underlying.address,
@@ -179,7 +179,7 @@ export const recreateUserActivities = async (
             listReservesToBorrow.value[i]!.asset.underlying.info.decimals,
         },
       ).andThen(
-        (): ResultAsync<TxHash, Error> =>
+        (): ResultAsync<TransactionReceipt, Error> =>
           borrowFromReserve(client, user, {
             reserve: listReservesToBorrow.value[i]!.id,
             amount: {

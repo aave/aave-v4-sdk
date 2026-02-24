@@ -5,6 +5,7 @@ import type {
   ReserveId,
   SpokeId,
   SupplyRequest,
+  TransactionReceipt,
 } from '@aave/client';
 import {
   type BigDecimal,
@@ -12,7 +13,6 @@ import {
   evmAddress,
   invariant,
   type ResultAsync,
-  type TxHash,
 } from '@aave/client';
 
 import { borrow, reserve, supply } from '@aave/client/actions';
@@ -25,7 +25,7 @@ export function supplyToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   request: SupplyRequest,
-): ResultAsync<TxHash, Error> {
+): ResultAsync<TransactionReceipt, Error> {
   return supply(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);
@@ -35,7 +35,7 @@ export function fundAndSupplyToReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   { reserveId, amount }: { reserveId: ReserveId; amount: BigDecimal },
-): ResultAsync<TxHash, Error> {
+): ResultAsync<TransactionReceipt, Error> {
   return reserve(client, {
     query: { reserveId: reserveId },
     user: evmAddress(user.account.address),
@@ -63,7 +63,7 @@ export function borrowFromReserve(
   client: AaveClient,
   user: WalletClient<Transport, Chain, Account>,
   request: BorrowRequest,
-): ResultAsync<TxHash, Error> {
+): ResultAsync<TransactionReceipt, Error> {
   return borrow(client, request)
     .andThen(sendWith(user))
     .andThen(client.waitForTransaction);

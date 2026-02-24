@@ -57,7 +57,7 @@ import {
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -95,7 +95,7 @@ export function borrow(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -130,7 +130,7 @@ export function supply(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -163,7 +163,7 @@ export function repay(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * **Withdraw specific amount:**
@@ -217,7 +217,7 @@ export function withdraw(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  *
@@ -246,7 +246,7 @@ export function renounceSpokeUserPositionManager(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  *
@@ -280,7 +280,7 @@ export function updateUserPositionConditions(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.
@@ -325,7 +325,7 @@ export function liquidatePosition(
  *   return;
  * }
  *
- * // result.value: TxHash
+ * // result.value: TransactionReceipt
  * ```
  *
  * @param client - Aave client.

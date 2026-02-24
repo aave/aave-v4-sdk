@@ -1,5 +1,16 @@
 # @aave/react
 
+## 4.0.0-next.44
+
+### Minor Changes
+
+- f6434aa: **feat:** return `TransactionReceipt` from `waitForTransaction` and transaction hooks instead of `TxHash`
+
+### Patch Changes
+
+- Updated dependencies [f6434aa]
+  - @aave/client@4.0.0-next.44
+
 ## 4.0.0-next.43
 
 ### Patch Changes
