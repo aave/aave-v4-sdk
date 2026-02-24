@@ -9,7 +9,6 @@ import {
 } from '@aave/client';
 import { reserves } from '@aave/client/actions';
 import {
-  ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
   ETHEREUM_GHO_ADDRESS,
@@ -22,7 +21,6 @@ import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { assertNonEmptyArray } from '../test-utils';
 
 const PERMIT_SUPPORTED_TOKENS_SHORTLIST: EvmAddress[] = [
-  ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_GHO_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
