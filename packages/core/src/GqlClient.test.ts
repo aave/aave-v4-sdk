@@ -245,6 +245,55 @@ describe(`Given an instance of the ${GqlClient.name}`, () => {
       });
     });
 
+    describe('When a cache-first query and a network-only query fire in the same batching window', () => {
+      const OtherQuery = gql`
+        query OtherQuery($id: Int!) {
+          value(id: $id)
+        }
+      `;
+
+      const client = new GqlClient(context);
+
+      beforeEach(async () => {
+        server.use(
+          api.query(OtherQuery, ({ variables }) =>
+            msw.HttpResponse.json({
+              data: {
+                value: variables.id,
+              },
+            }),
+          ),
+        );
+
+        // Prime the cache with TestQuery { id: 1 }
+        const setup = await client.query(TestQuery, { id: 1 });
+        assertOk(setup);
+        expect(requests).toHaveLength(1);
+      });
+
+      it('Then only the network-only query should appear in the HTTP request', async () => {
+        const result = await ResultAsync.combine([
+          client.query(TestQuery, { id: 1 }, { requestPolicy: 'cache-first' }),
+          client.query(
+            OtherQuery,
+            { id: 2 },
+            { requestPolicy: 'network-only' },
+          ),
+        ]);
+
+        assertOk(result);
+        // Only 2 HTTP requests total: the initial setup + the network-only OtherQuery
+        expect(requests).toHaveLength(2);
+
+        // The second request should be the OtherQuery only (not batched with cache-only)
+        expect(await requests[1]!.json()).toEqual({
+          operationName: 'OtherQuery',
+          query: stringifyDocument(OtherQuery),
+          variables: { id: 2 },
+        });
+      });
+    });
+
     describe('When batching concurrent queries', () => {
       it('Then it should limit batching to a maximum of 10 queries', async () => {
         const client = new GqlClient(context);
