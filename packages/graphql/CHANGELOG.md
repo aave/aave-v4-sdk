@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.32
+
+### Patch Changes
+
+- d978e56: **chore:** supports latest GQL schema.
+
 ## 1.0.0-next.31
 
 ### Patch Changes

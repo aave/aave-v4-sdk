@@ -1,5 +1,15 @@
 # @aave/react
 
+## 4.0.0-next.46
+
+### Patch Changes
+
+- d978e56: **chore:** supports latest GQL schema.
+- 55d21e4: **fix:** avoids `useAcynTask` used by all imperative hook from shadowing actual handler errors.
+- Updated dependencies [d978e56]
+  - @aave/graphql@1.0.0-next.32
+  - @aave/client@4.0.0-next.46
+
 ## 4.0.0-next.45
 
 ### Minor Changes
