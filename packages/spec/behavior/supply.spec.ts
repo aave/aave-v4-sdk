@@ -10,8 +10,8 @@ import { supply, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
 import { permitWith, sendWith } from '@aave/client/viem';
@@ -89,7 +89,7 @@ describe('Supplying Assets on Aave V4', () => {
 
       beforeAll(async () => {
         const setup = await findReservesToSupply(client, user, {
-          token: ETHEREUM_1INCH_ADDRESS,
+          token: ETHEREUM_USDT_ADDRESS,
           canUseAsCollateral: true,
         }).andThen((reserves) => {
           reserveNotCollateral = reserves[0];
