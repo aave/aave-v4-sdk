@@ -1,4 +1,4 @@
-import { invariant, nonNullable, type ResultAsync } from '@aave/types';
+import { invariant, type ResultAsync } from '@aave/types';
 import {
   type DependencyList,
   useCallback,
@@ -197,7 +197,9 @@ export function useAsyncTask<
         return result;
       } catch (error) {
         loadingRef.current = false;
-        setState(nonNullable(previousState));
+        if (previousState) {
+          setState(previousState);
+        }
         throw error;
       }
     },
