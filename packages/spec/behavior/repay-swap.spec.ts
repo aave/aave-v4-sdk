@@ -16,7 +16,7 @@ import {
 import {
   client,
   createNewWallet,
-  ETHEREUM_GHO_ADDRESS,
+  ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDT_ADDRESS,
@@ -37,7 +37,7 @@ describe('Repay Position swapping on Aave V4', () => {
     beforeAll(async () => {
       const setup = await findReserveAndSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_GHO_ADDRESS,
+        token: ETHEREUM_AAVE_ADDRESS,
         asCollateral: true,
       });
       assertOk(setup);
@@ -90,7 +90,7 @@ describe('Repay Position swapping on Aave V4', () => {
 
           assertOk(setup);
 
-          // Find the supply position that is NOT the collateral (GHO)
+          // Find the supply position that is NOT the collateral
           notCollateralSupply = setup.value.find(
             (supply) => !supply.isCollateral,
           )!;

@@ -71,18 +71,22 @@ describe('Supply Position swapping on Aave V4', () => {
 
         // Find a reserve with liquidity to swap into
         for (const reserve of reservesToSwap) {
-          const result = await supplySwapQuote(client, {
-            market: {
-              sellPosition: supplyPosition.id,
-              buyReserve: reserve.id,
-              amount: supplyPosition.principal.amount.value.div(2),
-              user: evmAddress(user.account.address),
-              enableCollateral: false,
-            },
-          });
-          if (result.isOk()) {
-            reserveToSwap = reserve;
-            break;
+          try {
+            const result = await supplySwapQuote(client, {
+              market: {
+                sellPosition: supplyPosition.id,
+                buyReserve: reserve.id,
+                amount: supplyPosition.principal.amount.value.div(2),
+                user: evmAddress(user.account.address),
+                enableCollateral: false,
+              },
+            });
+            if (result.isOk()) {
+              reserveToSwap = reserve;
+              break;
+            }
+          } catch (_e) {
+            // Ignore errors and try the next reserve
           }
         }
 

@@ -72,10 +72,13 @@ export const ETHEREUM_AAVE_ADDRESS = evmAddress(
 export const ETHEREUM_USDT_ADDRESS = evmAddress(
   '0xdac17f958d2ee523a2206206994597c13d831ec7',
 );
+export const ETHEREUM_USDe_ADDRESS = evmAddress(
+  '0x4c9EDD5852cd905f086C759E8383e09bff1E68B3',
+);
 
 // Spoke addresses and ids
 export const ETHEREUM_SPOKE_CORE_ADDRESS = evmAddress(
-  '0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC',
+  '0x46539e9123A18c427e6b4DFF114c28CF405Cb023',
 );
 export const ETHEREUM_SPOKE_CORE_ID = encodeSpokeId({
   chainId: ETHEREUM_FORK_ID,
@@ -83,28 +86,16 @@ export const ETHEREUM_SPOKE_CORE_ID = encodeSpokeId({
 });
 
 export const ETHEREUM_SPOKE_ETHENA_ADDRESS = evmAddress(
-  '0x2559E4E04F2cA7180e5f20C2872d22EC89601b56',
+  '0xf3b207c235f6154120F41eB63D5ACCBAfD4086D1',
 );
 export const ETHEREUM_SPOKE_ETHENA_ID = encodeSpokeId({
   chainId: ETHEREUM_FORK_ID,
   address: ETHEREUM_SPOKE_ETHENA_ADDRESS,
 });
 
-export const ETHEREUM_SPOKE_FRONTIER_ADDRESS = evmAddress(
-  '0x5738d9cB82d6a1617973C257D05A387bF5568F47',
-);
-
-export const ETHEREUM_SPOKE_ISO_STABLE_ADDRESS = evmAddress(
-  '0x4D4a7b3Ce709b4362D7095a4A0105bDFDb5dA2a7',
-);
-export const ETHEREUM_SPOKE_ISO_STABLE_ID = encodeSpokeId({
-  chainId: ETHEREUM_FORK_ID,
-  address: ETHEREUM_SPOKE_ISO_STABLE_ADDRESS,
-});
-
 // Hub addresses
 export const ETHEREUM_HUB_CORE_ADDRESS = evmAddress(
-  '0xaD905aD5EA5B98cD50AE40Cfe368344686a21366',
+  '0x3Ed2C9829FBCab6015E331a0352F8ae148217D70',
 );
 export const ETHEREUM_HUB_CORE_ID = encodeHubId({
   chainId: ETHEREUM_FORK_ID,
@@ -176,7 +167,6 @@ export function fundNativeAddress(
   address: EvmAddress,
   amount: BigDecimal = bigDecimal('1.0'), // 1 ETH
 ): ResultAsync<string, UnexpectedError> {
-  // Create client with fork chain - you'll need to replace this with your actual fork chain config
   const publicClient = createPublicClient({
     chain: {
       id: ETHEREUM_FORK_ID,
@@ -194,15 +184,10 @@ export function fundNativeAddress(
   const amountHex = `0x${amountInWei.toString(16)}`;
 
   return ResultAsync.fromPromise(
-    publicClient
-      .request<TSetBalanceRpc>({
-        method: 'tenderly_setBalance',
-        params: [[address], amountHex],
-      })
-      .then(async (res) => {
-        await wait(500); // Temporal fix to avoid tenderly issues with the balance not being set
-        return res;
-      }),
+    publicClient.request<TSetBalanceRpc>({
+      method: 'tenderly_setBalance',
+      params: [[address], amountHex],
+    }),
     (err) => UnexpectedError.from(err),
   );
 }
@@ -236,15 +221,10 @@ export function fundErc20Address(
   const amountHex = `0x${amountInSmallestUnit.toString(16)}`;
 
   return ResultAsync.fromPromise(
-    publicClient
-      .request<TSetErc20BalanceRpc>({
-        method: 'tenderly_setErc20Balance',
-        params: [token.address, address, amountHex],
-      })
-      .then(async (res) => {
-        await wait(500); // Temporal fix to avoid tenderly issues with the balance not being set
-        return res;
-      }),
+    publicClient.request<TSetErc20BalanceRpc>({
+      method: 'tenderly_setErc20Balance',
+      params: [token.address, address, amountHex],
+    }),
     (err) => UnexpectedError.from(err),
   );
 }

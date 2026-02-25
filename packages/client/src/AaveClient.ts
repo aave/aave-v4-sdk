@@ -1,11 +1,13 @@
 import { delay, GqlClient, TimeoutError, UnexpectedError } from '@aave/core';
 import type { HasProcessedKnownTransactionRequest } from '@aave/graphql';
-import { invariant, ResultAsync, type TxHash } from '@aave/types';
+import { invariant, ResultAsync } from '@aave/types';
 import { hasProcessedKnownTransaction } from './actions';
 import { type ClientConfig, configureContext } from './config';
 import {
   isHasProcessedKnownTransactionRequest,
+  type TransactionReceipt,
   type TransactionResult,
+  transactionReceipt,
 } from './types';
 
 export class AaveClient extends GqlClient {
@@ -32,11 +34,11 @@ export class AaveClient extends GqlClient {
    * Returns a {@link TimeoutError} if the transaction is not processed within the expected timeout period.
    *
    * @param result - The transaction execution result to wait for.
-   * @returns The transaction hash or a TimeoutError
+   * @returns The {@link TransactionReceipt} or a error
    */
   readonly waitForTransaction = (
     result: TransactionResult,
-  ): ResultAsync<TxHash, TimeoutError | UnexpectedError> => {
+  ): ResultAsync<TransactionReceipt, TimeoutError | UnexpectedError> => {
     invariant(
       isHasProcessedKnownTransactionRequest(result),
       'AaveClient.waitForTransaction called with an non-tracked operation. See the documentation for correct tracking setup.',
@@ -55,7 +57,7 @@ export class AaveClient extends GqlClient {
 
   protected async pollTransactionStatus(
     request: HasProcessedKnownTransactionRequest,
-  ): Promise<TxHash> {
+  ): Promise<TransactionReceipt> {
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < this.context.environment.indexingTimeout) {
@@ -67,7 +69,7 @@ export class AaveClient extends GqlClient {
       );
 
       if (processed) {
-        return request.txHash;
+        return transactionReceipt(request.txHash);
       }
 
       await delay(this.context.environment.pollingInterval);

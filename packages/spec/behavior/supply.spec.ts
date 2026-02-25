@@ -10,8 +10,8 @@ import { supply, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_1INCH_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
 import { permitWith, sendWith } from '@aave/client/viem';
@@ -89,7 +89,7 @@ describe('Supplying Assets on Aave V4', () => {
 
       beforeAll(async () => {
         const setup = await findReservesToSupply(client, user, {
-          token: ETHEREUM_1INCH_ADDRESS,
+          token: ETHEREUM_USDT_ADDRESS,
           canUseAsCollateral: true,
         }).andThen((reserves) => {
           reserveNotCollateral = reserves[0];
@@ -189,8 +189,7 @@ describe('Supplying Assets on Aave V4', () => {
     });
   });
 
-  // TODO: Enable when we have a test fork that allow us to control
-  describe.skip('Given a user and a reserve that supports native token deposits', () => {
+  describe('Given a user and a reserve that supports native token deposits', () => {
     describe('When the user supplies native tokens to a reserve but they do NOT enable the supply as collateral', () => {
       it('Then the supply position is updated and the tokens are not enabled as collateral', async () => {
         const nativeReserve = await findReservesToSupply(client, user, {

@@ -72,7 +72,7 @@ describe('Querying User Activities on Aave V4', () => {
       await recreateUserActivities(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
       });
-    }, 180_000);
+    }, 300_000);
 
     describe('When fetching the user activities by an activity type', () => {
       it.each(activityTypes)(

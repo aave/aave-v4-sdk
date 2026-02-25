@@ -1,5 +1,38 @@
 # @aave/react
 
+## 4.0.0-next.45
+
+### Minor Changes
+
+- 4f9bb95: **feat:** add `batch` flag to `ClientConfig` to disable query batching
+
+### Patch Changes
+
+- 8466b99: **fix:** add unmounted component guard in `useAsyncTask` to prevent undefined state errors, applies to all imperative hooks (e.g. `useSupply`, `useBorrow`, `useRepay`, `useWithdraw`)
+- Updated dependencies [4f9bb95]
+  - @aave/core@1.0.0-next.17
+  - @aave/client@4.0.0-next.45
+
+## 4.0.0-next.44
+
+### Minor Changes
+
+- f6434aa: **feat:** return `TransactionReceipt` from `waitForTransaction` and transaction hooks instead of `TxHash`
+
+### Patch Changes
+
+- Updated dependencies [f6434aa]
+  - @aave/client@4.0.0-next.44
+
+## 4.0.0-next.43
+
+### Patch Changes
+
+- e15455c: **chore:** surfaces cache update errors
+- Updated dependencies [e15455c]
+  - @aave/core@1.0.0-next.16
+  - @aave/client@4.0.0-next.43
+
 ## 4.0.0-next.42
 
 ### Patch Changes

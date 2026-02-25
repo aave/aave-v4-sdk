@@ -45,6 +45,13 @@ jobs:
 
       - name: Run tests
         run: pnpm spec
+
+      - name: Publish test report to GitHub
+        uses: mikepenz/action-junit-report@v6
+        if: always()
+        with:
+          report_paths: reports/test-results.xml
+          check_name: Aave V4 Spec Test Report
       
       - name: Publish results
         if: always()

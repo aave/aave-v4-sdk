@@ -6,6 +6,8 @@ import {
   type PaginatedActivitiesResult,
   supportsPermit,
   type TimeWindowQueryOptions,
+  type TransactionReceipt,
+  transactionReceipt,
   UnexpectedError,
 } from '@aave/client';
 import {
@@ -44,12 +46,9 @@ import {
   type SetSpokeUserPositionManagerRequest,
   type SetUserSuppliesAsCollateralRequest,
   type SpokeInput,
-  SpokePositionManagersQuery,
   type SupplyRequest,
   type TransactionRequest,
   type UpdateUserPositionConditionsRequest,
-  UserPositionQuery,
-  UserPositionsQuery,
   type WithdrawRequest,
 } from '@aave/graphql';
 import {
@@ -59,10 +58,10 @@ import {
   type NullishDeep,
   okAsync,
   type Prettify,
-  type ResultAsync,
+  ResultAsync,
   type Signature,
-  type TxHash,
 } from '@aave/types';
+
 import { useAaveClient } from './context';
 import {
   cancel,
@@ -75,9 +74,11 @@ import {
   type ReadResult,
   refreshHubs,
   refreshReserves,
+  refreshSpokePositionManagers,
   refreshSpokes,
   refreshUserBalances,
   refreshUserBorrows,
+  refreshUserPositionById,
   refreshUserPositions,
   refreshUserSummary,
   refreshUserSupplies,
@@ -96,17 +97,16 @@ function refreshQueriesForReserveChange(
 ) {
   const { chainId, spoke: address } = decodeReserveId(request.reserve);
   const spoke: SpokeInput = { chainId, address };
-  return async () =>
-    Promise.all([
-      refreshUserPositions(client, request.sender, spoke),
-      refreshUserSummary(client, request.sender, spoke),
-      refreshReserves(client, [request.reserve]),
-      refreshSpokes(client, spoke),
-      refreshUserBalances(client, request.sender),
-      refreshUserSupplies(client, request.sender),
-      refreshUserBorrows(client, request.sender),
-      refreshHubs(client, chainId),
-    ]);
+  return ResultAsync.combine([
+    refreshUserPositions(client, request.sender, spoke),
+    refreshUserSummary(client, request.sender, spoke),
+    refreshReserves(client, [request.reserve]),
+    refreshSpokes(client, spoke),
+    refreshUserBalances(client, request.sender),
+    refreshUserSupplies(client, request.sender),
+    refreshUserBorrows(client, request.sender),
+    refreshHubs(client, chainId),
+  ]);
 }
 
 function toPermitSignature(
@@ -233,7 +233,7 @@ function handleSingleApproval(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -245,7 +245,7 @@ export function useSupply(
   >,
 ): UseAsyncTask<
   SupplyRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -286,7 +286,7 @@ export function useSupply(
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
 }
@@ -357,7 +357,7 @@ function injectSupplyPermitSignature(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -369,7 +369,7 @@ export function useBorrow(
   >,
 ): UseAsyncTask<
   BorrowRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -398,7 +398,7 @@ export function useBorrow(
         })
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
 }
@@ -454,7 +454,7 @@ export function useBorrow(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -466,7 +466,7 @@ export function useRepay(
   >,
 ): UseAsyncTask<
   RepayRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -504,7 +504,7 @@ export function useRepay(
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
 }
@@ -575,7 +575,7 @@ function injectRepayPermitSignature(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -587,7 +587,7 @@ export function useWithdraw(
   >,
 ): UseAsyncTask<
   WithdrawRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -616,7 +616,7 @@ export function useWithdraw(
         })
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(refreshQueriesForReserveChange(client, request)),
+        .andThrough(() => refreshQueriesForReserveChange(client, request)),
     [client, handler],
   );
 }
@@ -657,7 +657,7 @@ export function useWithdraw(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -667,7 +667,7 @@ export function useRenounceSpokeUserPositionManager(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   RenounceSpokeUserPositionManagerRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -678,12 +678,7 @@ export function useRenounceSpokeUserPositionManager(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(() =>
-          client.refreshQueryWhere(
-            SpokePositionManagersQuery,
-            (variables) => variables.request.spoke === request.spoke,
-          ),
-        ),
+        .andThrough(() => refreshSpokePositionManagers(client, request.spoke)),
     [client, handler],
   );
 }
@@ -729,7 +724,7 @@ export function useRenounceSpokeUserPositionManager(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -739,7 +734,7 @@ export function useUpdateUserPositionConditions(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   UpdateUserPositionConditionsRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -750,18 +745,9 @@ export function useUpdateUserPositionConditions(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(async () => {
-          const { userPositionId } = request;
-          return Promise.all([
-            client.refreshQueryWhere(UserPositionsQuery, (_, data) =>
-              data.some((position) => position.id === userPositionId),
-            ),
-            client.refreshQueryWhere(
-              UserPositionQuery,
-              (_, data) => data?.id === userPositionId,
-            ),
-          ]);
-        }),
+        .andThrough(() =>
+          refreshUserPositionById(client, request.userPositionId),
+        ),
     [client, handler],
   );
 }
@@ -810,7 +796,7 @@ export function useUpdateUserPositionConditions(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -819,7 +805,7 @@ export function useSetUserSuppliesAsCollateral(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetUserSuppliesAsCollateralRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -834,8 +820,8 @@ export function useSetUserSuppliesAsCollateral(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(() =>
-          Promise.all([
+        .andThrough(() =>
+          ResultAsync.combine([
             // update user supplies
             refreshUserSupplies(client, request.sender),
 
@@ -930,7 +916,7 @@ export function useSetUserSuppliesAsCollateral(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transactions.
@@ -942,7 +928,7 @@ export function useLiquidatePosition(
   >,
 ): UseAsyncTask<
   LiquidatePositionRequest,
-  TxHash,
+  TransactionReceipt,
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
@@ -1052,7 +1038,7 @@ function injectLiquidatePermitSignature(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -1061,7 +1047,7 @@ export function useSetSpokeUserPositionManager(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   SetSpokeUserPositionManagerRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -1072,12 +1058,7 @@ export function useSetSpokeUserPositionManager(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andTee(() =>
-          client.refreshQueryWhere(
-            SpokePositionManagersQuery,
-            (variables) => variables.request.spoke === request.spoke,
-          ),
-        ),
+        .andThrough(() => refreshSpokePositionManagers(client, request.spoke)),
     [client, handler],
   );
 }
@@ -1428,7 +1409,7 @@ export function useActivitiesAction(
  *   return;
  * }
  *
- * console.log('Transaction sent with hash:', result.value);
+ * console.log('Transaction sent with hash:', result.value.txHash);
  * ```
  *
  * @param handler - The handler that will be used to handle the transaction.
@@ -1437,7 +1418,7 @@ export function useClaimRewards(
   handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
 ): UseAsyncTask<
   ClaimRewardsRequest,
-  TxHash,
+  TransactionReceipt,
   SendTransactionError | PendingTransactionError
 > {
   const client = useAaveClient();
@@ -1448,7 +1429,7 @@ export function useClaimRewards(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
-        .map((result) => result.txHash),
+        .map((result) => transactionReceipt(result.txHash)),
     [client, handler],
   );
 }

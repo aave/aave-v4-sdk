@@ -9,6 +9,7 @@ export type Context = {
   environment: EnvironmentConfig;
   headers?: Record<string, string>;
   cache: Exchange | null;
+  batch: boolean;
   debug: boolean;
   fragments: TypedDocumentNode[];
 };

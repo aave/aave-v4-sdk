@@ -10,8 +10,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
-  ETHEREUM_GHO_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
+  ETHEREUM_USDT_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -144,7 +144,7 @@ describe('Repay Preview Math', () => {
             user,
             {
               spoke: ETHEREUM_SPOKE_CORE_ID,
-              token: ETHEREUM_GHO_ADDRESS,
+              token: ETHEREUM_USDT_ADDRESS,
               ratioToBorrow: 0.2,
             },
           );

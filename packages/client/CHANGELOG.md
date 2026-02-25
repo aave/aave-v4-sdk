@@ -1,5 +1,29 @@
 # @aave/client
 
+## 4.0.0-next.45
+
+### Minor Changes
+
+- 4f9bb95: **feat:** add `batch` flag to `ClientConfig` to disable query batching
+
+### Patch Changes
+
+- Updated dependencies [4f9bb95]
+  - @aave/core@1.0.0-next.17
+
+## 4.0.0-next.44
+
+### Minor Changes
+
+- f6434aa: **feat:** return `TransactionReceipt` from `waitForTransaction` and transaction hooks instead of `TxHash`
+
+## 4.0.0-next.43
+
+### Patch Changes
+
+- Updated dependencies [e15455c]
+  - @aave/core@1.0.0-next.16
+
 ## 4.0.0-next.42
 
 ### Patch Changes
