@@ -5924,6 +5924,17 @@
             "args": []
           },
           {
+            "name": "receiveSharesEnabled",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "latestDynamicConfigKey",
             "type": {
               "kind": "NON_NULL",
@@ -8683,24 +8694,6 @@
                 "kind": "OBJECT",
                 "name": "PercentNumber",
                 "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "breakdown",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "UserRiskPremiumBreakdownItem",
-                    "ofType": null
-                  }
-                }
               }
             },
             "args": []

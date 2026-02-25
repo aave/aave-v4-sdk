@@ -27,6 +27,7 @@ export const ReserveSettingsFragment = graphql(
     borrowable
     collateral
     suppliable
+    receiveSharesEnabled
     latestDynamicConfigKey
   }`,
   [PercentNumberFragment],
