@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.17
+
+### Minor Changes
+
+- 4f9bb95: **feat:** add `batch` flag to `ClientConfig` to disable query batching
+
 ## 1.0.0-next.16
 
 ### Patch Changes

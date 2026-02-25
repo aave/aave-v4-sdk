@@ -1,5 +1,18 @@
 # @aave/react
 
+## 4.0.0-next.45
+
+### Minor Changes
+
+- 4f9bb95: **feat:** add `batch` flag to `ClientConfig` to disable query batching
+
+### Patch Changes
+
+- 8466b99: **fix:** add unmounted component guard in `useAsyncTask` to prevent undefined state errors, applies to all imperative hooks (e.g. `useSupply`, `useBorrow`, `useRepay`, `useWithdraw`)
+- Updated dependencies [4f9bb95]
+  - @aave/core@1.0.0-next.17
+  - @aave/client@4.0.0-next.45
+
 ## 4.0.0-next.44
 
 ### Minor Changes

@@ -2,6 +2,7 @@ import { type AnyVariables, errAsync, okAsync, ResultAsync } from '@aave/types';
 import {
   createClient,
   type Exchange,
+  fetchExchange,
   makeOperation,
   type Operation,
   type OperationResult,
@@ -200,14 +201,18 @@ export class GqlClient {
       exchanges.push(this.context.cache);
     }
 
-    exchanges.push(
-      batchFetchExchange({
-        batchInterval: 1,
-        maxBatchSize: 10,
-        url: this.context.environment.backend,
-        fetchOptions: this.getFetchOptions(),
-      }),
-    );
+    if (this.context.batch) {
+      exchanges.push(
+        batchFetchExchange({
+          batchInterval: 1,
+          maxBatchSize: 10,
+          url: this.context.environment.backend,
+          fetchOptions: this.getFetchOptions(),
+        }),
+      );
+    } else {
+      exchanges.push(fetchExchange);
+    }
 
     return exchanges;
   }
