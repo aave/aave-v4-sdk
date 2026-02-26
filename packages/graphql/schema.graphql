@@ -1487,6 +1487,7 @@ type ReserveSettings {
   borrowable: Boolean!
   collateral: Boolean!
   suppliable: Boolean!
+  receiveSharesEnabled: Boolean!
   latestDynamicConfigKey: DynamicConfigKey!
 }
 
@@ -2378,7 +2379,6 @@ input UserPositionRequest @oneOf {
 type UserPositionRiskPremium {
   current: PercentNumber!
   latest: PercentNumber!
-  breakdown: [UserRiskPremiumBreakdownItem!]!
 }
 
 input UserPositionsRequest {

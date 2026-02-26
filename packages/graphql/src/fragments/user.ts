@@ -123,11 +123,8 @@ export const UserPositionRiskPremiumFragment = graphql(
     latest {
       ...PercentNumber
     }
-    breakdown {
-      ...UserRiskPremiumBreakdownItem
-    }
   }`,
-  [PercentNumberFragment, UserRiskPremiumBreakdownItemFragment],
+  [PercentNumberFragment],
 );
 export type UserPositionRiskPremium = FragmentOf<
   typeof UserPositionRiskPremiumFragment
