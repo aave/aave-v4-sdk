@@ -145,7 +145,15 @@ describe('Querying User Supply Positions on Aave V4', () => {
           },
         });
         assertOk(supplyPositions);
-        expect(supplyPositions.value.length).toBe(3);
+        expect(supplyPositions.value).toBeArrayWithElements(
+          expect.objectContaining({
+            reserve: expect.objectContaining({
+              spoke: expect.objectContaining({
+                id: positions.value[0].spoke.id,
+              }),
+            }),
+          }),
+        );
       });
     });
 
