@@ -1,11 +1,14 @@
 import type { AaveClient } from '@aave/client';
 import {
+  type BorrowRequest,
+  decodeReserveId,
   decodeUserPositionId,
   type Hub,
   HubQuery,
   HubsQuery,
   isChainIdsVariant,
   isSpokeInputVariant,
+  type RepayRequest,
   type Reserve,
   type ReserveId,
   ReserveQuery,
@@ -16,6 +19,7 @@ import {
   SpokePositionManagersQuery,
   SpokeQuery,
   SpokesQuery,
+  type SupplyRequest,
   UserBalancesQuery,
   UserBorrowsQuery,
   type UserBorrowsRequestQuery,
@@ -26,6 +30,7 @@ import {
   UserSummaryQuery,
   UserSuppliesQuery,
   type UserSuppliesRequestQuery,
+  type WithdrawRequest,
 } from '@aave/graphql';
 import { type ChainId, type EvmAddress, ResultAsync } from '@aave/types';
 
@@ -204,5 +209,26 @@ export function refreshUserPositionById(
       UserPositionQuery,
       (_, data) => data?.id === userPositionId,
     ),
+  ]);
+}
+
+/**
+ * @internal
+ */
+export function refreshQueriesForReserveChange(
+  client: AaveClient,
+  request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
+) {
+  const { chainId, spoke: address } = decodeReserveId(request.reserve);
+  const spoke: SpokeInput = { chainId, address };
+  return ResultAsync.combine([
+    refreshUserPositions(client, request.sender, spoke),
+    refreshUserSummary(client, request.sender, spoke),
+    refreshReserves(client, [request.reserve]),
+    refreshSpokes(client, spoke),
+    refreshUserBalances(client, request.sender),
+    refreshUserSupplies(client, request.sender),
+    refreshUserBorrows(client, request.sender),
+    refreshHubs(client, chainId),
   ]);
 }
