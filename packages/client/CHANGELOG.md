@@ -1,5 +1,13 @@
 # @aave/client
 
+## 4.0.0-next.46
+
+### Patch Changes
+
+- d978e56: **chore:** supports latest GQL schema.
+- Updated dependencies [d978e56]
+  - @aave/graphql@1.0.0-next.32
+
 ## 4.0.0-next.45
 
 ### Minor Changes

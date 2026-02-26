@@ -20,7 +20,7 @@ $ npm install -g @aave/cli
 $ aave COMMAND
 running command...
 $ aave (--version)
-@aave/cli/4.1.0-next.36 darwin-arm64 node-v22.17.0
+@aave/cli/4.1.0-next.37 darwin-arm64 node-v22.17.0
 $ aave --help [COMMAND]
 USAGE
   $ aave COMMAND
@@ -29,9 +29,33 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`aave borrows list`](#aave-borrows-list)
 * [`aave hubs list`](#aave-hubs-list)
+* [`aave positions list`](#aave-positions-list)
 * [`aave reserves list`](#aave-reserves-list)
 * [`aave spokes list`](#aave-spokes-list)
+* [`aave supplies list`](#aave-supplies-list)
+
+## `aave borrows list`
+
+List user borrows for a specific chain
+
+```
+USAGE
+  $ aave borrows list --user <evm-address> -c <chain-id> [--json]
+
+FLAGS
+  -c, --chain_id=<chain-id>  (required) Chain ID to query borrows from
+      --user=<evm-address>   (required) User address
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+DESCRIPTION
+  List user borrows for a specific chain
+```
+
+_See code: [src/commands/borrows/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.37/src/commands/borrows/list.ts)_
 
 ## `aave hubs list`
 
@@ -51,7 +75,28 @@ DESCRIPTION
   List Aave v4 liquidity hubs
 ```
 
-_See code: [src/commands/hubs/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.36/src/commands/hubs/list.ts)_
+_See code: [src/commands/hubs/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.37/src/commands/hubs/list.ts)_
+
+## `aave positions list`
+
+List user positions across chains
+
+```
+USAGE
+  $ aave positions list --user <evm-address> -c <chain-id> [--json]
+
+FLAGS
+  -c, --chain_id=<chain-id>  (required) Filter by chain ID
+      --user=<evm-address>   (required) User address
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+DESCRIPTION
+  List user positions across chains
+```
+
+_See code: [src/commands/positions/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.37/src/commands/positions/list.ts)_
 
 ## `aave reserves list`
 
@@ -74,7 +119,7 @@ DESCRIPTION
   List Aave v4 reserves
 ```
 
-_See code: [src/commands/reserves/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.36/src/commands/reserves/list.ts)_
+_See code: [src/commands/reserves/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.37/src/commands/reserves/list.ts)_
 
 ## `aave spokes list`
 
@@ -96,5 +141,26 @@ DESCRIPTION
   List Aave v4 spokes
 ```
 
-_See code: [src/commands/spokes/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.36/src/commands/spokes/list.ts)_
+_See code: [src/commands/spokes/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.37/src/commands/spokes/list.ts)_
+
+## `aave supplies list`
+
+List user supplies for a specific chain
+
+```
+USAGE
+  $ aave supplies list --user <evm-address> -c <chain-id> [--json]
+
+FLAGS
+  -c, --chain_id=<chain-id>  (required) Chain ID to query supplies from
+      --user=<evm-address>   (required) User address
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+DESCRIPTION
+  List user supplies for a specific chain
+```
+
+_See code: [src/commands/supplies/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.0-next.37/src/commands/supplies/list.ts)_
 <!-- commandsstop -->
