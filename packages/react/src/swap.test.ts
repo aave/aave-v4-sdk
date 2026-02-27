@@ -89,11 +89,6 @@ const server = setupServer(msw.http.all('*', async () => msw.passthrough()));
 describe('Given the swap hooks', () => {
   beforeAll(() => {
     server.listen();
-
-    (BigInt.prototype as unknown as { toJSON: () => string }).toJSON =
-      function () {
-        return this.toString();
-      };
   });
 
   afterEach(() => {
@@ -102,7 +97,6 @@ describe('Given the swap hooks', () => {
 
   afterAll(() => {
     server.close();
-    delete (BigInt.prototype as unknown as { toJSON?: () => string }).toJSON;
   });
 
   describe(`And using the '${useTokenSwap.name}' hook`, () => {
