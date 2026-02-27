@@ -1,4 +1,10 @@
 import {
+  createNewWallet,
+  ETHEREUM_FORK_ID,
+  environment,
+  fundNativeAddress,
+} from '@aave/client/testing';
+import {
   PrepareTokenSwapQuery,
   SwapMutation,
   TokenSwapQuoteQuery,
@@ -12,9 +18,11 @@ import {
   makeSwapByTransaction,
   makeSwapReceipt,
   makeSwapTransactionRequest,
+  makeTransactionRequest,
 } from '@aave/graphql/testing';
-import { assertOk } from '@aave/types';
+import { assertOk, evmAddress } from '@aave/types';
 import * as msw from 'msw';
+import { setupServer } from 'msw/node';
 import {
   afterAll,
   afterEach,
@@ -26,14 +34,18 @@ import {
 
 import { renderHookWithinContext } from '../test-utils';
 import { useSendTransaction, useSignTypedData } from '../viem';
-
-import {
-  api,
-  dummyTransactionRequest,
-  server,
-  walletClient,
-} from './test-setup';
 import { useTokenSwap } from './useTokenSwap';
+
+const walletClient = await createNewWallet();
+await fundNativeAddress(evmAddress(walletClient.account.address));
+
+const dummyTransactionRequest = makeTransactionRequest({
+  chainId: ETHEREUM_FORK_ID,
+  from: evmAddress(walletClient.account.address),
+});
+
+const api = msw.graphql.link(environment.backend);
+const server = setupServer(msw.http.all('*', async () => msw.passthrough()));
 
 describe(`Given the '${useTokenSwap.name}' hook`, () => {
   beforeAll(() => {

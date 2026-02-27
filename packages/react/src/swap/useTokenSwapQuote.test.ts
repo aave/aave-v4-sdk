@@ -1,4 +1,9 @@
 import {
+  createNewWallet,
+  environment,
+  fundNativeAddress,
+} from '@aave/client/testing';
+import {
   QuoteAccuracy,
   TokenSwapKind,
   TokenSwapQuoteQuery,
@@ -8,6 +13,7 @@ import { makeSwapByIntent, makeSwapQuote } from '@aave/graphql/testing';
 import { bigDecimal, chainId, evmAddress } from '@aave/types';
 import { act } from '@testing-library/react';
 import * as msw from 'msw';
+import { setupServer } from 'msw/node';
 import {
   afterAll,
   afterEach,
@@ -20,9 +26,13 @@ import {
 } from 'vitest';
 
 import { renderHookWithinContext } from '../test-utils';
-
-import { api, server, walletClient } from './test-setup';
 import { useTokenSwapQuote } from './useTokenSwapQuote';
+
+const walletClient = await createNewWallet();
+await fundNativeAddress(evmAddress(walletClient.account.address));
+
+const api = msw.graphql.link(environment.backend);
+const server = setupServer(msw.http.all('*', async () => msw.passthrough()));
 
 describe(`Given the '${useTokenSwapQuote.name}' hook`, () => {
   let releaseAccurateQuote: (value: number) => void;
