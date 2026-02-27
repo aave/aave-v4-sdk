@@ -1,5 +1,4 @@
-import { AaveClient } from '@aave/client';
-import { environment } from '@aave/client/testing';
+import { client } from '@aave/client/testing';
 import { type RenderHookOptions, renderHook } from '@testing-library/react';
 // biome-ignore lint/correctness/noUnusedImports: React is needed for JSX
 import React, {
@@ -36,10 +35,6 @@ function createTestWrapper(
     children: ReactNode;
   }> = ({ children }: PropsWithChildren) => <>{children}</>,
 ) {
-  const client = AaveClient.create({
-    environment,
-  });
-
   return function TestWrapper({ children }: PropsWithChildren) {
     const AdditionalWrapper = additionalWrapper;
 
