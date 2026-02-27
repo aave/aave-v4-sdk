@@ -1,11 +1,15 @@
-import { type UserSwapsRequest, UserSwapsQuery } from '@aave/graphql';
 import {
+  createNewWallet,
+  environment,
+  fundNativeAddress,
+} from '@aave/client/testing';
+import { UserSwapsQuery, type UserSwapsRequest } from '@aave/graphql';
+import {
+  makePaginatedUserSwapsResult,
   makeSwapCancelled,
   makeSwapFulfilled,
   makeSwapOpen,
-  makePaginatedUserSwapsResult,
 } from '@aave/graphql/testing';
-import { createNewWallet, environment, fundNativeAddress } from '@aave/client/testing';
 import { chainId, evmAddress } from '@aave/types';
 import { act } from '@testing-library/react';
 import * as msw from 'msw';
@@ -20,7 +24,6 @@ import {
   it,
   vi,
 } from 'vitest';
-
 import { renderHookWithinContext } from '../test-utils';
 import { useUserSwaps } from './useUserSwaps';
 
@@ -30,49 +33,24 @@ await fundNativeAddress(evmAddress(walletClient.account.address));
 const api = msw.graphql.link(environment.backend);
 const server = setupServer(msw.http.all('*', async () => msw.passthrough()));
 
-function makeSwapFulfilled(): SwapFulfilled {
-  return {
-    __typename: 'SwapFulfilled',
-    swapId: 'fulfilled-swap-id' as SwapId,
-    txHash: '0xabc123' as TxHash,
-    createdAt: new Date(),
-    fulfilledAt: new Date(),
-    explorerUrl: 'https://example.com/explorer.json',
-    refundTxHash: null,
-    operation: makeTokenSwap(),
-  };
-}
-
-function makePaginatedUserSwapsResult(
-  items: Array<SwapOpen | SwapFulfilled | SwapCancelled>,
-) {
-  return {
-    __typename: 'PaginatedUserSwapsResult' as const,
-    items,
-    pageInfo: {
-      __typename: 'PaginatedResultInfo' as const,
-      prev: null,
-      next: null,
-    },
-  };
-}
-
 describe(`Given the '${useUserSwaps.name}' hook`, () => {
   beforeAll(() => {
     server.listen();
+    vi.useFakeTimers();
   });
+
   afterEach(() => {
     server.resetHandlers();
   });
+
   afterAll(() => {
+    vi.useRealTimers();
     server.close();
   });
 
   const request: UserSwapsRequest = {
-    request: {
-      chainId: chainId(1),
-      user: evmAddress(walletClient.account.address),
-    },
+    chainId: chainId(1),
+    user: evmAddress(walletClient.account.address),
   };
 
   describe('And a list of swaps with non-terminal statuses', () => {
@@ -106,13 +84,6 @@ describe(`Given the '${useUserSwaps.name}' hook`, () => {
       );
     });
 
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
     describe('When rendered for the first time', () => {
       it('Then it should return the swap list', async () => {
         const { result } = renderHookWithinContext(() => useUserSwaps(request));
@@ -120,7 +91,7 @@ describe(`Given the '${useUserSwaps.name}' hook`, () => {
         await vi.waitUntil(() => result.current.loading === false);
 
         expect(result.current.data?.items).toHaveLength(1);
-        expect(result.current.data?.items[0].__typename).toBe('SwapOpen');
+        expect(result.current.data?.items[0]!.__typename).toBe('SwapOpen');
       });
     });
 
@@ -172,34 +143,29 @@ describe(`Given the '${useUserSwaps.name}' hook`, () => {
       );
     });
 
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-    afterEach(() => {
-      vi.useRealTimers();
-    });
+    describe('When polling after terminal transition', () => {
+      it('Then it should stop polling once all items are terminal', async () => {
+        const { result } = renderHookWithinContext(() => useUserSwaps(request));
 
-    it('Then it should stop polling once all items are terminal', async () => {
-      const { result } = renderHookWithinContext(() => useUserSwaps(request));
+        await vi.waitUntil(() => result.current.loading === false);
+        expect(result.current.data?.items[0]!.__typename).toBe('SwapOpen');
 
-      await vi.waitUntil(() => result.current.loading === false);
-      expect(result.current.data?.items[0].__typename).toBe('SwapOpen');
+        // Advance to trigger next poll
+        await act(() => vi.advanceTimersToNextTimerAsync());
+        act(() => releaseTerminalResponse());
 
-      // Advance to trigger next poll
-      await act(() => vi.advanceTimersToNextTimerAsync());
-      act(() => releaseTerminalResponse());
+        await vi.waitUntil(
+          () => result.current.data?.items[0]!.__typename === 'SwapFulfilled',
+        );
 
-      await vi.waitUntil(
-        () => result.current.data?.items[0].__typename === 'SwapFulfilled',
-      );
+        // Record request count after terminal state
+        const countAfterTerminal = requestCount;
 
-      // Record request count after terminal state
-      const countAfterTerminal = requestCount;
+        // Advance timers again — no new request should be made
+        await act(() => vi.advanceTimersToNextTimerAsync());
 
-      // Advance timers again — no new request should be made
-      await act(() => vi.advanceTimersToNextTimerAsync());
-
-      expect(requestCount).toBe(countAfterTerminal);
+        expect(requestCount).toBe(countAfterTerminal);
+      });
     });
   });
 
@@ -222,31 +188,26 @@ describe(`Given the '${useUserSwaps.name}' hook`, () => {
       );
     });
 
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-    afterEach(() => {
-      vi.useRealTimers();
-    });
+    describe('When rendered', () => {
+      it('Then it should stop polling immediately after the first response', async () => {
+        const { result } = renderHookWithinContext(() =>
+          useUserSwaps({
+            ...request,
+            filterBy: [],
+          }),
+        );
 
-    it('Then it should stop polling immediately after the first response', async () => {
-      const { result } = renderHookWithinContext(() =>
-        useUserSwaps({
-          ...request,
-          filterBy: [],
-        }),
-      );
+        await vi.waitUntil(() => result.current.loading === false);
 
-      await vi.waitUntil(() => result.current.loading === false);
+        expect(result.current.data?.items[0]!.__typename).toBe('SwapCancelled');
 
-      expect(result.current.data?.items[0].__typename).toBe('SwapCancelled');
+        const countAfterFirstResponse = requestCount;
 
-      const countAfterFirstResponse = requestCount;
+        // Advance timers — no new request should be made
+        await act(() => vi.advanceTimersToNextTimerAsync());
 
-      // Advance timers — no new request should be made
-      await act(() => vi.advanceTimersToNextTimerAsync());
-
-      expect(requestCount).toBe(countAfterFirstResponse);
+        expect(requestCount).toBe(countAfterFirstResponse);
+      });
     });
   });
 });
