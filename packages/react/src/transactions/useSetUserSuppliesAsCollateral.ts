@@ -13,12 +13,6 @@ import {
   type ExecutionPlanHandler,
   type PendingTransaction,
   type PendingTransactionError,
-  type SendTransactionError,
-  type UseAsyncTask,
-  useAsyncTask,
-} from '../helpers';
-
-import {
   refreshHubs,
   refreshReserves,
   refreshSpokes,
@@ -26,7 +20,10 @@ import {
   refreshUserPositions,
   refreshUserSummary,
   refreshUserSupplies,
-} from './cache';
+  type SendTransactionError,
+  type UseAsyncTask,
+  useAsyncTask,
+} from '../helpers';
 
 /**
  * Hook for updating the collateral status of user's supplies.

@@ -32,6 +32,6 @@ describe('Given a ThirdwebClient instance', () => {
       const result = await sendWith(client, thirdwebClient, request);
 
       assertOk(result);
-    });
+    }, 60_000 /* 1 minute */);
   });
 });

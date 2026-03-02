@@ -1,6 +1,6 @@
+import { AaveClient } from '@aave/client';
 import { userPositions } from '@aave/client/actions';
 import {
-  client,
   createNewWallet,
   ETHEREUM_FORK_ID,
   environment,
@@ -121,6 +121,8 @@ describe(`Given the '${useSetUserSuppliesAsCollateral.name}' hook`, () => {
   });
 
   describe('And the client cache contains an entry for a query targeted by the andThrough callback', () => {
+    // Uses same client instance between the hook and the setup/assertion phases.
+    const client = AaveClient.create({ environment });
     let userPositionsRequestCount = 0;
 
     beforeEach(async () => {
@@ -148,7 +150,7 @@ describe(`Given the '${useSetUserSuppliesAsCollateral.name}' hook`, () => {
         ),
       );
 
-      // Prime the cache with a UserPositions query for the sender
+      // Prime the cache with a UserPositions query for the sender (uses the same client as the hook)
       const primed = await userPositions(
         client,
         {
@@ -171,12 +173,15 @@ describe(`Given the '${useSetUserSuppliesAsCollateral.name}' hook`, () => {
           result: {
             current: [setCollateral],
           },
-        } = renderHookWithinContext(() => {
-          const [sendTransaction] = useSendTransaction(walletClient);
-          return useSetUserSuppliesAsCollateral((plan) => {
-            return sendTransaction(plan);
-          });
-        });
+        } = renderHookWithinContext(
+          () => {
+            const [sendTransaction] = useSendTransaction(walletClient);
+            return useSetUserSuppliesAsCollateral((plan) => {
+              return sendTransaction(plan);
+            });
+          },
+          { client },
+        );
         const result = await setCollateral({
           changes: [{ reserve: reserve, enableCollateral: true }],
           sender,

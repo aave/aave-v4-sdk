@@ -4,6 +4,7 @@ import {
   type ChainId,
   type EvmAddress,
   evmAddress,
+  type TxHash,
   chainId as toChainId,
 } from '@aave/types';
 import {
@@ -22,6 +23,7 @@ import type {
   ExchangeAmount,
   ExchangeAmountWithChange,
   HealthFactorWithChange,
+  PaginatedUserSwapsResult,
   PercentNumber,
   PercentNumberWithChange,
   PermitTypedData,
@@ -34,6 +36,7 @@ import type {
   SwapByTransaction,
   SwapCancelled,
   SwapCancelledResult,
+  SwapFulfilled,
   SwapOpen,
   SwapQuote,
   SwapReceipt,
@@ -484,6 +487,39 @@ export function makeSwapCancelled(): SwapCancelled {
     cancelledAt: new Date(),
     explorerUrl: 'https://example.com/explorer.json',
     operation: makeTokenSwap(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapFulfilled(): SwapFulfilled {
+  return {
+    __typename: 'SwapFulfilled',
+    swapId: randomBase64String() as SwapId,
+    txHash: '0xabc123' as TxHash,
+    createdAt: new Date(),
+    fulfilledAt: new Date(),
+    explorerUrl: 'https://example.com/explorer.json',
+    refundTxHash: null,
+    operation: makeTokenSwap(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makePaginatedUserSwapsResult(
+  items: Array<SwapOpen | SwapFulfilled | SwapCancelled>,
+): PaginatedUserSwapsResult {
+  return {
+    __typename: 'PaginatedUserSwapsResult',
+    items,
+    pageInfo: {
+      __typename: 'PaginatedResultInfo',
+      prev: null,
+      next: null,
+    },
   };
 }
 
