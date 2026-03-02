@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 concurrency:
   group: ${{ github.workflow }}-tests-on-demand
