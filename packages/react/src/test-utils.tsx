@@ -1,4 +1,5 @@
-import { client } from '@aave/client/testing';
+import { AaveClient } from '@aave/client';
+import { environment } from '@aave/client/testing';
 import { type RenderHookOptions, renderHook } from '@testing-library/react';
 // biome-ignore lint/correctness/noUnusedImports: React is needed for JSX
 import React, {
@@ -34,6 +35,7 @@ function createTestWrapper(
   additionalWrapper: JSXElementConstructor<{
     children: ReactNode;
   }> = ({ children }: PropsWithChildren) => <>{children}</>,
+  client: AaveClient = AaveClient.create({ environment }),
 ) {
   return function TestWrapper({ children }: PropsWithChildren) {
     const AdditionalWrapper = additionalWrapper;
@@ -53,6 +55,7 @@ function createTestWrapper(
 }
 
 export type RenderHookWithContextOptions<TProps> = RenderHookOptions<TProps> & {
+  client?: AaveClient;
   onError?: (error: Error) => void;
 };
 
@@ -79,10 +82,14 @@ export type RenderHookWithContextOptions<TProps> = RenderHookOptions<TProps> & {
  */
 export function renderHookWithinContext<TProps, TResult>(
   callback: (props: TProps) => TResult,
-  { wrapper, ...restOptions }: RenderHookWithContextOptions<TProps> = {},
+  {
+    wrapper,
+    client,
+    ...restOptions
+  }: RenderHookWithContextOptions<TProps> = {},
 ) {
   return renderHook(callback, {
-    wrapper: createTestWrapper(wrapper),
+    wrapper: createTestWrapper(wrapper, client),
     ...restOptions,
   });
 }
