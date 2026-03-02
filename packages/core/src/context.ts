@@ -1,4 +1,4 @@
-import type { Exchange, TypedDocumentNode } from '@urql/core';
+import type { Exchange } from '@urql/core';
 import type { EnvironmentConfig } from './types';
 
 /**
@@ -11,5 +11,4 @@ export type Context = {
   cache: Exchange | null;
   batch: boolean;
   debug: boolean;
-  fragments: TypedDocumentNode[];
 };

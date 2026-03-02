@@ -15,7 +15,6 @@ import { map, pipe, tap } from 'wonka';
 import { batchFetchExchange } from './batching';
 import type { Context } from './context';
 import { UnexpectedError } from './errors';
-import { FragmentResolver } from './fragments';
 import { Logger, LogLevel } from './logger';
 import type { StandardData } from './types';
 import { extractOperationName } from './utils';
@@ -53,15 +52,12 @@ export class GqlClient {
 
   private readonly logger: Logger;
 
-  private readonly resolver: FragmentResolver;
-
   constructor(
     /**
      * @internal
      */
     public readonly context: Context,
   ) {
-    this.resolver = FragmentResolver.from(context.fragments);
     this.logger = Logger.named(
       context.displayName,
       context.debug ? LogLevel.DEBUG : LogLevel.SILENT,
@@ -101,9 +97,8 @@ export class GqlClient {
     variables: TVariables,
     { requestPolicy, batch = true }: QueryOptions = {},
   ): ResultAsync<TValue, UnexpectedError> {
-    const query = this.resolver.replaceFrom(document);
     return this.resultFrom(
-      this.urql.query(query, variables, { batch, requestPolicy }),
+      this.urql.query(document, variables, { batch, requestPolicy }),
     );
   }
 
@@ -187,6 +182,11 @@ export class GqlClient {
           } else {
             // Flag as stale for next activation
             this.staleQueries.add(entry.operation.key);
+            this.logger.debug(
+              `Marked query as stale: ${extractOperationName(
+                entry.operation,
+              )} (key: ${entry.operation.key})`,
+            );
           }
         }
       })(),
@@ -265,7 +265,10 @@ export class GqlClient {
 
                   this.addQueryReference(op);
 
-                  if (this.staleQueries.has(op.key)) {
+                  if (
+                    op.context.requestPolicy !== 'cache-only' &&
+                    this.staleQueries.has(op.key)
+                  ) {
                     this.staleQueries.delete(op.key);
                     return makeOperation(op.kind, op, {
                       ...op.context,

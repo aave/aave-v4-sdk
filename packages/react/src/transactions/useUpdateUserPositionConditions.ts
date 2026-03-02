@@ -11,12 +11,11 @@ import {
   type ExecutionPlanHandler,
   type PendingTransaction,
   type PendingTransactionError,
+  refreshUserPositionById,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
 } from '../helpers';
-
-import { refreshUserPositionById } from './cache';
 
 /**
  * Hook for updating user position conditions (dynamic config and/or risk premium).
