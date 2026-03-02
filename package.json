@@ -12,13 +12,13 @@
     "pnpm": ">=9.15.4"
   },
   "scripts": {
-    "build": "turbo build",
+    "build": "pnpm -r --sort --if-present run build",
     "changeset:publish": "pnpm changeset publish",
     "changeset:status": "pnpm changeset status",
     "changeset:version": "pnpm --filter cli readme && pnpm changeset version",
     "check:graphql": "pnpm --filter graphql check",
-    "clean": "rimraf .turbo packages/*/dist",
-    "dev": "turbo watch build",
+    "clean": "rimraf packages/*/dist",
+    "dev": "pnpm -r --sort --if-present run build && pnpm -r --parallel --stream --if-present run build --watch",
     "lint:fix": "biome check --write",
     "lint": "biome check",
     "new:package": "NODE_OPTIONS='--import tsx' plop --plopfile=plopfile.ts",
@@ -47,11 +47,11 @@
     "@vitest/ui": "^3.2.4",
     "jest-extended": "^6.0.0",
     "plop": "^4.0.4",
-    "rimraf": "^6.1.2",
+    "rimraf": "^6.1.3",
     "tsx": "^4.20.3",
-    "turbo": "^2.5.4",
     "typescript": "^5.9.2",
     "vite": "^7.2.7",
+    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^3.2.4"
   },
   "pnpm": {
