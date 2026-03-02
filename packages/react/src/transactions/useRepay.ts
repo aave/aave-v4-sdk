@@ -17,13 +17,12 @@ import {
   type ExecutionPlanHandler,
   PendingTransaction,
   type PendingTransactionError,
+  refreshQueriesForReserveChange,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
 } from '../helpers';
-
 import { handleSingleApproval, sendApprovalTransactions } from './approvals';
-import { refreshQueriesForReserveChange } from './cache';
 
 function injectRepayPermitSignature(
   request: RepayRequest,

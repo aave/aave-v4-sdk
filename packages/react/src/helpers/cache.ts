@@ -232,3 +232,54 @@ export function refreshQueriesForReserveChange(
     refreshHubs(client, chainId),
   ]);
 }
+
+/**
+ * @internal
+ */
+export function refreshAfterTokenSwap(client: AaveClient, user: EvmAddress) {
+  return refreshUserBalances(client, user);
+}
+
+/**
+ * @internal
+ */
+export function refreshAfterSupplySwap(client: AaveClient, user: EvmAddress) {
+  return ResultAsync.combine([
+    refreshUserSupplies(client, user),
+    refreshUserBalances(client, user),
+  ]);
+}
+
+/**
+ * @internal
+ */
+export function refreshAfterBorrowSwap(client: AaveClient, user: EvmAddress) {
+  return ResultAsync.combine([
+    refreshUserBorrows(client, user),
+    refreshUserBalances(client, user),
+  ]);
+}
+
+/**
+ * @internal
+ */
+export function refreshAfterRepayWithSupply(
+  client: AaveClient,
+  user: EvmAddress,
+) {
+  return ResultAsync.combine([
+    refreshUserSupplies(client, user),
+    refreshUserBorrows(client, user),
+    refreshUserBalances(client, user),
+  ]);
+}
+
+/**
+ * @internal
+ */
+export function refreshAfterWithdrawSwap(client: AaveClient, user: EvmAddress) {
+  return ResultAsync.combine([
+    refreshUserSupplies(client, user),
+    refreshUserBalances(client, user),
+  ]);
+}
