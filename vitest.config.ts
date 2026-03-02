@@ -13,7 +13,7 @@ export default defineConfig({
     testTimeout: 30_000,
     hookTimeout: 30_000,
     reporters: isCI
-      ? ['json', 'junit', 'github-actions', 'default', 'html']
+      ? ['json', 'junit', 'default', 'html']
       : ['default', 'html'],
     outputFile: {
       json: 'reports/test-results.json',
