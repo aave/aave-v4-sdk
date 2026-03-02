@@ -11,12 +11,11 @@ import {
   type ExecutionPlanHandler,
   type PendingTransaction,
   type PendingTransactionError,
+  refreshSpokePositionManagers,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
 } from '../helpers';
-
-import { refreshSpokePositionManagers } from './cache';
 
 /**
  * A hook that provides a way to renounce a position manager of a user for a specific spoke.

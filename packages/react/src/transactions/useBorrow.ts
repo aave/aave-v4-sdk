@@ -15,12 +15,11 @@ import {
   type ExecutionPlanHandler,
   type PendingTransaction,
   type PendingTransactionError,
+  refreshQueriesForReserveChange,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
 } from '../helpers';
-
-import { refreshQueriesForReserveChange } from './cache';
 
 /**
  * A hook that provides a way to borrow assets from an Aave reserve.
