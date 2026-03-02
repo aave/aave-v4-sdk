@@ -1,5 +1,4 @@
 import type { Context } from '@aave/core';
-import type { TypedDocumentNode } from '@urql/core';
 import type { EnvironmentConfig } from '../../core/src/types';
 import { exchange } from './cache';
 import { production } from './environments';
@@ -35,12 +34,6 @@ export type ClientConfig = {
    * @defaultValue `false`
    */
   debug?: boolean;
-  /**
-   * The custom fragments to use.
-   *
-   * @experimental This is an experimental API and may be subject to breaking changes.
-   */
-  fragments?: TypedDocumentNode[];
 };
 
 /**
@@ -52,7 +45,6 @@ export function configureContext({
   cache = true,
   batch = true,
   debug = false,
-  fragments = [],
 }: ClientConfig): Context {
   return {
     displayName: 'AaveClient',
@@ -61,6 +53,5 @@ export function configureContext({
     cache: cache ? exchange : null,
     batch,
     debug,
-    fragments,
   };
 }

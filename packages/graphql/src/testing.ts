@@ -4,9 +4,15 @@ import {
   type ChainId,
   type EvmAddress,
   evmAddress,
+  type TxHash,
   chainId as toChainId,
 } from '@aave/types';
-import { QuoteAccuracy, SwapOrderClass, TokenSwapKind } from './enums';
+import {
+  type OperationType,
+  QuoteAccuracy,
+  SwapOrderClass,
+  TokenSwapKind,
+} from './enums';
 import type {
   Chain,
   DecimalNumber,
@@ -15,16 +21,22 @@ import type {
   Erc20Approval,
   Erc20Token,
   ExchangeAmount,
+  ExchangeAmountWithChange,
+  HealthFactorWithChange,
+  PaginatedUserSwapsResult,
   PercentNumber,
+  PercentNumberWithChange,
   PermitTypedData,
   PositionSwapAdapterContractApproval,
   PositionSwapPositionManagerApproval,
   PrepareSwapOrder,
+  Spoke,
   SwapByIntent,
   SwapByIntentWithApprovalRequired,
   SwapByTransaction,
   SwapCancelled,
   SwapCancelledResult,
+  SwapFulfilled,
   SwapOpen,
   SwapQuote,
   SwapReceipt,
@@ -33,8 +45,11 @@ import type {
   TokenInfo,
   TokenSwap,
   TransactionRequest,
+  UserPosition,
+  UserPositionRiskPremium,
 } from './fragments';
 import {
+  encodeSpokeId,
   type ReserveId,
   reserveId,
   type SwapId,
@@ -43,11 +58,27 @@ import {
   type UserBorrowItemId,
   type UserSupplyItemId,
   userBorrowItemId,
+  userPositionId,
   userSupplyItemId,
 } from './id';
 
 function randomBase64String(): string {
   return btoa(crypto.randomUUID());
+}
+
+function makeSerializableBigInt(value: bigint): bigint {
+  return Object.create(BigInt.prototype, {
+    toJSON: {
+      value() {
+        return value.toString();
+      },
+    },
+    valueOf: {
+      value() {
+        return value;
+      },
+    },
+  });
 }
 
 /**
@@ -81,7 +112,9 @@ export function percentNumber(value: number, decimals = 6): PercentNumber {
     __typename: 'PercentNumber',
     value: normalized.div(2),
     normalized,
-    onChainValue: BigInt(normalized.rescale(decimals).toApproximateNumber()),
+    onChainValue: makeSerializableBigInt(
+      BigInt(normalized.rescale(decimals).toApproximateNumber()),
+    ),
     decimals,
   };
 }
@@ -93,8 +126,8 @@ export function decimalNumber(value: number, decimals = 18): DecimalNumber {
   return {
     __typename: 'DecimalNumber',
     value: bigDecimal(value),
-    onChainValue: BigInt(
-      bigDecimal(value).rescale(decimals).toApproximateNumber(),
+    onChainValue: makeSerializableBigInt(
+      BigInt(bigDecimal(value).rescale(decimals).toApproximateNumber()),
     ),
     decimals,
   };
@@ -216,18 +249,128 @@ export function makeErc20Amount(
 export function makeTransactionRequest({
   chainId = toChainId(1),
   from = randomEvmAddress(),
+  operations = [],
 }: {
   chainId?: ChainId;
   from?: EvmAddress;
+  operations?: OperationType[];
 } = {}): TransactionRequest {
   return {
     __typename: 'TransactionRequest',
     to: from,
     from,
     data: '0x' as BlockchainData,
-    value: 0n,
+    value: makeSerializableBigInt(0n),
     chainId,
-    operations: [],
+    operations,
+  };
+}
+
+function makePercentNumber(value = 0): PercentNumber {
+  return {
+    __typename: 'PercentNumber',
+    value: bigDecimal(value),
+    normalized: bigDecimal(value),
+    onChainValue: makeSerializableBigInt(0n),
+    decimals: 6,
+  };
+}
+
+function makePercentNumberWithChange(value = 0): PercentNumberWithChange {
+  return {
+    __typename: 'PercentNumberWithChange',
+    current: makePercentNumber(value),
+    change: makePercentNumber(0),
+  };
+}
+
+function makeExchangeAmountWithChange(value = 0): ExchangeAmountWithChange {
+  return {
+    __typename: 'ExchangeAmountWithChange',
+    current: makeExchangeAmount(value),
+    change: makePercentNumber(0),
+  };
+}
+
+function makeHealthFactorWithChange(): HealthFactorWithChange {
+  return {
+    __typename: 'HealthFactorWithChange',
+    current: null,
+    change: makePercentNumber(0),
+  };
+}
+
+function makeUserPositionRiskPremium(): UserPositionRiskPremium {
+  return {
+    __typename: 'UserPositionRiskPremium',
+    current: makePercentNumber(0),
+    latest: makePercentNumber(0),
+  };
+}
+
+function makeSpoke({
+  address,
+  chainId,
+}: {
+  address: EvmAddress;
+  chainId: ChainId;
+}): Spoke {
+  return {
+    __typename: 'Spoke',
+    id: encodeSpokeId({ chainId, address }),
+    name: 'Test Spoke',
+    address,
+    chain: {
+      __typename: 'Chain',
+      name: 'Test Chain',
+      icon: 'https://example.com/icon.png',
+      chainId,
+      rpcUrl: 'https://example.com/rpc',
+      explorerUrl: 'https://example.com/explorer',
+      isTestnet: true,
+      isFork: true,
+      nativeWrappedToken: randomEvmAddress(),
+      nativeGateway: randomEvmAddress(),
+      signatureGateway: randomEvmAddress(),
+      nativeInfo: makeTokenInfo('WETH'),
+    },
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeUserPosition({
+  address,
+  chainId,
+  user,
+}: {
+  address: EvmAddress;
+  chainId: ChainId;
+  user: EvmAddress;
+}): UserPosition {
+  return {
+    __typename: 'UserPosition',
+    id: userPositionId(randomBase64String()),
+    spoke: makeSpoke({ address, chainId }),
+    user,
+    createdAt: new Date(),
+    netApy: makePercentNumber(0),
+    netCollateral: makeExchangeAmountWithChange(0),
+    netBalance: makeExchangeAmountWithChange(0),
+    netAccruedInterest: makeExchangeAmount(0),
+    totalCollateral: makeExchangeAmountWithChange(0),
+    totalSupplied: makeExchangeAmountWithChange(0),
+    totalDebt: makeExchangeAmountWithChange(0),
+    netSupplyApy: makePercentNumberWithChange(0),
+    netBorrowApy: makePercentNumberWithChange(0),
+    healthFactor: makeHealthFactorWithChange(),
+    riskPremium: makeUserPositionRiskPremium(),
+    liquidationPrice: makeExchangeAmount(0),
+    borrowingPower: makeExchangeAmount(0),
+    canUpdateDynamicConfig: false,
+    netBalancePercentChange: makePercentNumber(0),
+    averageCollateralFactor: makePercentNumber(0),
   };
 }
 
@@ -344,6 +487,39 @@ export function makeSwapCancelled(): SwapCancelled {
     cancelledAt: new Date(),
     explorerUrl: 'https://example.com/explorer.json',
     operation: makeTokenSwap(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeSwapFulfilled(): SwapFulfilled {
+  return {
+    __typename: 'SwapFulfilled',
+    swapId: randomBase64String() as SwapId,
+    txHash: '0xabc123' as TxHash,
+    createdAt: new Date(),
+    fulfilledAt: new Date(),
+    explorerUrl: 'https://example.com/explorer.json',
+    refundTxHash: null,
+    operation: makeTokenSwap(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makePaginatedUserSwapsResult(
+  items: Array<SwapOpen | SwapFulfilled | SwapCancelled>,
+): PaginatedUserSwapsResult {
+  return {
+    __typename: 'PaginatedUserSwapsResult',
+    items,
+    pageInfo: {
+      __typename: 'PaginatedResultInfo',
+      prev: null,
+      next: null,
+    },
   };
 }
 

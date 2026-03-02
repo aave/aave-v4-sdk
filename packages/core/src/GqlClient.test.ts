@@ -41,7 +41,6 @@ const context: Context = {
   cache: cacheExchange(),
   batch: true,
   debug: false,
-  fragments: [],
 };
 
 const api = msw.graphql.link(context.environment.backend);
