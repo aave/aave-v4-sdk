@@ -27,17 +27,6 @@ export default defineConfig(() => [
     dts: true,
     platform: 'neutral',
     format: ['esm', 'cjs'],
-    define: {
-      'import.meta.env.ETHEREUM_TENDERLY_FORK_ID': JSON.stringify(
-        process.env.ETHEREUM_TENDERLY_FORK_ID,
-      ),
-      'import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC': JSON.stringify(
-        process.env.ETHEREUM_TENDERLY_PUBLIC_RPC,
-      ),
-      'import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER': JSON.stringify(
-        process.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
-      ),
-    },
   },
   // ESM only
   {
@@ -53,16 +42,5 @@ export default defineConfig(() => [
     dts: true,
     platform: 'node',
     format: ['esm'],
-    define: {
-      'import.meta.env.ETHEREUM_TENDERLY_FORK_ID': JSON.stringify(
-        process.env.ETHEREUM_TENDERLY_FORK_ID,
-      ),
-      'import.meta.env.ETHEREUM_TENDERLY_PUBLIC_RPC': JSON.stringify(
-        process.env.ETHEREUM_TENDERLY_PUBLIC_RPC,
-      ),
-      'import.meta.env.ETHEREUM_TENDERLY_BLOCKEXPLORER': JSON.stringify(
-        process.env.ETHEREUM_TENDERLY_BLOCKEXPLORER,
-      ),
-    },
   },
 ]);

@@ -9,7 +9,6 @@ interface ImportMetaEnv {
   readonly ETHEREUM_TENDERLY_FORK_ID: string;
   readonly ETHEREUM_TENDERLY_PUBLIC_RPC: string;
   readonly ETHEREUM_TENDERLY_ADMIN_RPC: string;
-  readonly ETHEREUM_TENDERLY_BLOCKEXPLORER: string;
   readonly THIRDWEB_TEST_SECRET_KEY: string;
   readonly THIRDWEB_TEST_WALLET_ADDRESS: string;
 }

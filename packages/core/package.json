@@ -49,7 +49,8 @@
     "@urql/exchange-graphcache": "^8.1.0",
     "msw": "^2.10.5",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   },
   "license": "MIT",
   "publishConfig": {
