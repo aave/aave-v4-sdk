@@ -23,6 +23,7 @@ import {
 } from '../helpers';
 
 import { handleSingleApproval, sendApprovalTransactions } from './approvals';
+import { refreshUserBalances } from './cache';
 
 function injectLiquidatePermitSignature(
   request: LiquidatePositionRequest,
@@ -110,7 +111,6 @@ export function useLiquidatePosition(
 
   return useAsyncTask(
     (request: LiquidatePositionRequest) =>
-      // TODO: update the relevant read queries
       liquidatePosition(client, request)
         .andThen((plan) => {
           switch (plan.__typename) {
@@ -142,7 +142,8 @@ export function useLiquidatePosition(
         })
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
-        .andThen(client.waitForTransaction),
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshUserBalances(client, request.liquidator)),
     [client, handler],
   );
 }
