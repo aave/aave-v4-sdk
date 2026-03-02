@@ -85,7 +85,6 @@ export function supplyNativeTokenToReserve(
         native: amount,
       },
       sender: evmAddress(user.account.address),
-      enableCollateral: true,
     }).map(() => reserves[0]),
   );
 }
