@@ -301,7 +301,7 @@ describe('Repaying Loans on Aave V4', () => {
         const positionAfter = repayResult.value.find((position) => {
           return (
             position.reserve.asset.underlying.address ===
-            borrowBefore.value[0]!.reserve.asset.underlying.address
+            positionBefore.reserve.asset.underlying.address
           );
         });
         invariant(positionAfter, 'No position found');
