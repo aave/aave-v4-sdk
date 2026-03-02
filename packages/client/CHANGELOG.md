@@ -1,5 +1,16 @@
 # @aave/client
 
+## 4.0.0-next.47
+
+### Patch Changes
+
+- 9a17380: **fix:** issue preventing cache invalidations.
+- f9cb688: **fix:** updates relevant cache entries upon successful swap.
+- Updated dependencies [9a17380]
+- Updated dependencies [f9cb688]
+  - @aave/graphql@1.0.0-next.33
+  - @aave/core@1.0.0-next.18
+
 ## 4.0.0-next.46
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @aave/core
 
+## 1.0.0-next.18
+
+### Patch Changes
+
+- 9a17380: **fix:** issue preventing cache invalidations.
+- f9cb688: **fix:** updates relevant cache entries upon successful swap.
+
 ## 1.0.0-next.17
 
 ### Minor Changes
