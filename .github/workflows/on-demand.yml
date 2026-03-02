@@ -17,6 +17,7 @@ on:
 permissions:
   contents: read
   id-token: write  # Required for OIDC authentication
+  checks: write
 
 concurrency:
   group: ${{ github.workflow }}-tests-on-demand
