@@ -3,6 +3,7 @@
   // See the tsconfig.build.json file for the actual build configuration of each package.
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "baseUrl": ".",
     "skipLibCheck": true, // Important for ambient types (e.g., vite-env.d.ts) to work
     "types": ["node"],
     "paths": {
@@ -10,15 +11,24 @@
       "@aave/core/testing": ["./packages/core/src/testing"],
       "@aave/client": ["./packages/client/src"],
       "@aave/client/actions": ["./packages/client/src/actions"],
+      "@aave/client/utils": ["./packages/client/src/utils"],
       "@aave/client/ethers": ["./packages/client/src/ethers"],
       "@aave/client/privy": ["./packages/client/src/privy"],
+      "@aave/client/thirdweb": ["./packages/client/src/thirdweb"],
       "@aave/client/testing": ["./packages/client/src/testing"],
       "@aave/client/viem": ["./packages/client/src/viem"],
       "@aave/graphql": ["./packages/graphql/src"],
+      "@aave/graphql/schema": ["./packages/graphql/src/schema"],
       "@aave/graphql/testing": ["./packages/graphql/src/testing"],
+      "@aave/react": ["./packages/react/src"],
+      "@aave/react/utils": ["./packages/react/src/utils"],
+      "@aave/react/ethers": ["./packages/react/src/ethers"],
+      "@aave/react/privy": ["./packages/react/src/privy"],
+      "@aave/react/thirdweb": ["./packages/react/src/thirdweb"],
+      "@aave/react/viem": ["./packages/react/src/viem/index"],
       "@aave/types": ["./packages/types/src"]
     }
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["dist", "node_modules", "examples", "templates"]
 }

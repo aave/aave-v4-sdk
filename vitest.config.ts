@@ -1,11 +1,15 @@
 import { resolve } from 'node:path';
 import { loadEnv } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 
 export default defineConfig({
   root: './',
+  plugins: [
+    tsconfigPaths({ projects: [resolve(__dirname, './tsconfig.json')] }),
+  ],
   test: {
     fileParallelism: false,
     setupFiles: [resolve(__dirname, './vitest.setup.ts')],

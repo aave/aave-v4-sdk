@@ -104,6 +104,7 @@
     "thirdweb": "^5.105.25",
     "tsup": "^8.5.1",
     "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
     "viem": "^2.37.5"
   },
   "peerDependencies": {
