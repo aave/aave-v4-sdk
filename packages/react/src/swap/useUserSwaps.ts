@@ -4,10 +4,15 @@ import {
   type TimeWindowQueryOptions,
 } from '@aave/client';
 import type { UnexpectedError } from '@aave/core';
-import type { PaginatedUserSwapsResult, UserSwapsRequest } from '@aave/graphql';
+import type {
+  PaginatedUserSwapsResult,
+  SwapFulfilled,
+  SwapStatus,
+  UserSwapsRequest,
+} from '@aave/graphql';
 import { UserSwapsQuery } from '@aave/graphql';
 import type { NullishDeep, Prettify } from '@aave/types';
-import { useEffect, useState } from 'react';
+import { useDeferredValue, useEffect, useState } from 'react';
 
 import { useAaveClient } from '../context';
 import {
@@ -21,7 +26,30 @@ import {
   useSuspendableQuery,
 } from '../helpers';
 
+import {
+  refreshAfterBorrowSwap,
+  refreshAfterRepayWithSupply,
+  refreshAfterSupplySwap,
+  refreshAfterTokenSwap,
+  refreshAfterWithdrawSwap,
+} from '../helpers/cache';
+
 import { isTerminalSwapStatus } from './helpers';
+
+function findNewlyFulfilledSwaps(
+  items: readonly SwapStatus[],
+  prevItems: readonly SwapStatus[],
+): SwapFulfilled[] {
+  const prevTypenames = new Map(
+    prevItems.map((item) => [item.swapId, item.__typename]),
+  );
+
+  return items.filter(
+    (item): item is SwapFulfilled =>
+      item.__typename === 'SwapFulfilled' &&
+      prevTypenames.get(item.swapId) !== 'SwapFulfilled',
+  );
+}
 
 export type UseUserSwapsArgs = Prettify<
   UserSwapsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
@@ -116,14 +144,51 @@ export function useUserSwaps({
       pollInterval: client.context.environment.swapStatusInterval,
     });
 
+  const items = result.data?.items ?? [];
+  const prevItems = useDeferredValue(items);
+
   useEffect(() => {
-    if (result.data && result.data.items.length > 0) {
-      const allItemsTerminal = result.data.items.every(isTerminalSwapStatus);
-      if (allItemsTerminal) {
-        setAllTerminal(true);
+    if (items.length === 0) return;
+
+    const allItemsTerminal = items.every(isTerminalSwapStatus);
+    if (allItemsTerminal) {
+      setAllTerminal(true);
+    }
+
+    for (const item of findNewlyFulfilledSwaps(items, prevItems)) {
+      switch (item.operation.__typename) {
+        case 'TokenSwap':
+          if (request.user) {
+            refreshAfterTokenSwap(client, request.user);
+          }
+          break;
+
+        case 'BorrowSwap':
+          if (request.user) {
+            refreshAfterBorrowSwap(client, request.user);
+          }
+          break;
+
+        case 'RepayWithSupply':
+          if (request.user) {
+            refreshAfterRepayWithSupply(client, request.user);
+          }
+          break;
+
+        case 'SupplySwap':
+          if (request.user) {
+            refreshAfterSupplySwap(client, request.user);
+          }
+          break;
+
+        case 'WithdrawSwap':
+          if (request.user) {
+            refreshAfterWithdrawSwap(client, request.user);
+          }
+          break;
       }
     }
-  }, [result.data]);
+  }, [items, prevItems, client, request.user]);
 
   return result;
 }
