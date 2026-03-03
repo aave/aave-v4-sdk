@@ -193,7 +193,12 @@ export function useTokenSwapQuote({
     batch: false, // Don't batch with Fast query
   });
 
-  if (accurateResult.data) {
+  const hasAccurateForCurrentCycle =
+    accurateResult.data &&
+    accurateResult.metadata.resultOperationKey ===
+      accurateResult.metadata.operationKey;
+
+  if (hasAccurateForCurrentCycle) {
     return accurateResult;
   }
 

@@ -8,10 +8,11 @@ import {
   type Result,
 } from '@aave/types';
 import { useEffect, useMemo, useState } from 'react';
-import { type TypedDocumentNode, useQuery } from 'urql';
+import { createRequest, type TypedDocumentNode, useQuery } from 'urql';
 import {
   type PausableReadResult,
   type PausableSuspenseResult,
+  type QueryMetadata,
   ReadResult,
   type SuspendableResult,
   type SuspenseResult,
@@ -151,7 +152,15 @@ export function useSuspendableQuery<
   boolean,
   boolean
 >): SuspendableResult<SelectorData, SelectorError | UnexpectedError> {
+  const [metadata, setMetadata] = useState<QueryMetadata>({
+    operationKey: 0,
+    resultOperationKey: undefined,
+  });
   const [loading, setLoading] = useState(true);
+  const operationId = useMemo(
+    () => createRequest(document, variables as Variables).key,
+    [document, variables],
+  );
   const [{ fetching, data, error, stale }, executeQuery] = useQuery({
     query: document,
     variables: variables as Variables,
@@ -166,12 +175,31 @@ export function useSuspendableQuery<
   });
 
   useEffect(() => {
+    setMetadata((current) => ({
+      ...current,
+      operationKey: operationId,
+    }));
+  }, [operationId]);
+
+  useEffect(() => {
     if (pause) return;
 
     if (!fetching) {
       setLoading(false);
     }
   }, [fetching, pause]);
+
+  useEffect(() => {
+    if (pause || fetching) {
+      return;
+    }
+
+    setMetadata((current) => ({
+      ...current,
+      resultOperationKey:
+        data && !stale ? current.operationKey : current.resultOperationKey,
+    }));
+  }, [pause, fetching, data, stale]);
 
   useEffect(() => {
     if (pollInterval <= 0 || fetching || pause) return undefined;
@@ -193,6 +221,7 @@ export function useSuspendableQuery<
       return ReadResult.Paused<SelectorData, SelectorError | UnexpectedError>(
         undefined,
         unexpectedError,
+        metadata,
       );
     }
 
@@ -202,17 +231,19 @@ export function useSuspendableQuery<
       return ReadResult.Paused<SelectorData, SelectorError>(
         undefined,
         selected.error,
+        metadata,
       );
     }
 
     return ReadResult.Paused<SelectorData, UnexpectedError>(
       selected.value,
       unexpectedError,
+      metadata,
     );
   }
 
   if (!suspense && loading) {
-    return ReadResult.Loading();
+    return ReadResult.Loading(metadata);
   }
 
   // stale indicates that the useQuery is fetching new data because the variables changed
@@ -225,7 +256,7 @@ export function useSuspendableQuery<
       throw unexpected;
     }
 
-    return ReadResult.Failure(unexpected, reloading);
+    return ReadResult.Failure(unexpected, metadata, reloading);
   }
 
   invariant(data, 'No data returned');
@@ -236,8 +267,8 @@ export function useSuspendableQuery<
     if (suspense) {
       throw selected.error;
     }
-    return ReadResult.Failure(selected.error, reloading);
+    return ReadResult.Failure(selected.error, metadata, reloading);
   }
 
-  return ReadResult.Success(selected.value, reloading);
+  return ReadResult.Success(selected.value, metadata, reloading);
 }

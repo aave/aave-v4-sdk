@@ -57,6 +57,12 @@ describe(`Given the '${useWithdrawSwapQuote.name}' hook`, () => {
             : undefined;
 
         if (accuracy === QuoteAccuracy.Fast) {
+          const fastBuyAmount = Number(
+            'market' in variables.request
+              ? String(variables.request.market?.amount)
+              : 0,
+          );
+
           return msw.HttpResponse.json({
             data: {
               value: {
@@ -64,6 +70,7 @@ describe(`Given the '${useWithdrawSwapQuote.name}' hook`, () => {
                 approvals: [],
                 quote: makeSwapQuote({
                   accuracy: QuoteAccuracy.Fast,
+                  buyAmount: fastBuyAmount,
                 }),
               },
             },
@@ -146,6 +153,48 @@ describe(`Given the '${useWithdrawSwapQuote.name}' hook`, () => {
             42,
           ),
         );
+      });
+    });
+
+    describe('When the request parameters change after an Accurate quote is shown', () => {
+      it('Then it should surface the new Fast quote before the next Accurate quote arrives', async () => {
+        const nextRequest: WithdrawSwapQuoteRequest = {
+          market: {
+            ...request.market,
+            amount: bigDecimal(2000),
+          },
+        };
+
+        const { result, rerender } = renderHookWithinContext(
+          ({ quoteRequest }) => useWithdrawSwapQuote(quoteRequest),
+          {
+            initialProps: { quoteRequest: request },
+          },
+        );
+
+        await vi.waitUntil(() => result.current.loading === false);
+
+        act(() => releaseAccurateQuote(1));
+        await vi.waitUntil(
+          () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+        );
+        expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(1);
+
+        rerender({ quoteRequest: nextRequest });
+
+        await vi.waitFor(() => {
+          expect(result.current.data?.accuracy).toEqual(QuoteAccuracy.Fast);
+          expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(
+            2000,
+          );
+        });
+
+        act(() => releaseAccurateQuote(2));
+
+        await vi.waitUntil(
+          () => result.current.data?.accuracy === QuoteAccuracy.Accurate,
+        );
+        expect(result.current.data!.buy.amount.value).toBeBigDecimalEqualTo(2);
       });
     });
   });
