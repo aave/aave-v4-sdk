@@ -136,6 +136,24 @@ export enum RepayWithSupplyKind {
 }
 
 /**
+ * The status of a stable vault withdrawal claim.
+ */
+export enum StableVaultClaimStatus {
+  /**
+   * The claim is ready to be redeemed.
+   */
+  Ready = 'READY',
+  /**
+   * The claim is still in the waiting period.
+   */
+  Pending = 'PENDING',
+  /**
+   * The claim status could not be determined.
+   */
+  Unknown = 'UNKNOWN',
+}
+
+/**
  * The supply swap kind for supply swaps.
  */
 export enum SupplySwapKind {

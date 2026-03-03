@@ -63,6 +63,22 @@ export function assetId(value: string): AssetId {
 }
 
 /**
+ * A boosted stable vault rate identifier.
+ */
+export type BoostedRateId = Tagged<string, 'BoostedRateId'>;
+
+/**
+ * @internal
+ */
+export function boostedRateId(value: string): BoostedRateId {
+  invariant(
+    typeof value === 'string' && value.length > 0,
+    `Invalid BoostedRateId: ${value}`,
+  );
+  return value as BoostedRateId;
+}
+
+/**
  * A hub identifier.
  */
 export type HubId = Tagged<Base64EncodedCompositeId, 'HubId'>;
@@ -315,6 +331,43 @@ export function swapQuoteId(value: string): SwapQuoteId {
 export type SpokeId = Tagged<Base64EncodedCompositeId, 'SpokeId'>;
 
 /**
+ * A stable vault identifier.
+ */
+export type StableVaultId = Tagged<string, 'StableVaultId'>;
+
+/**
+ * Creates a stable vault identifier from a given value.
+ */
+export function stableVaultId(value: string): StableVaultId {
+  invariant(
+    typeof value === 'string' && value.length > 0,
+    `Invalid StableVaultId: ${value}`,
+  );
+  return value as StableVaultId;
+}
+
+/**
+ * A stable vault withdrawal claim identifier.
+ */
+export type StableVaultWithdrawClaimId = Tagged<
+  string,
+  'StableVaultWithdrawClaimId'
+>;
+
+/**
+ * Creates a stable vault withdrawal claim identifier from a given value.
+ */
+export function stableVaultWithdrawClaimId(
+  value: string,
+): StableVaultWithdrawClaimId {
+  invariant(
+    typeof value === 'string' && value.length > 0,
+    `Invalid StableVaultWithdrawClaimId: ${value}`,
+  );
+  return value as StableVaultWithdrawClaimId;
+}
+
+/**
  * @internal
  */
 export type SpokeIdParts = {
@@ -452,4 +505,20 @@ export function tokenInfoId(value: string): TokenInfoId {
     `Invalid TokenInfoId: ${value}`,
   );
   return value as TokenInfoId;
+}
+
+/**
+ * A token movement identifier.
+ */
+export type TokenMovementId = Tagged<string, 'TokenMovementId'>;
+
+/**
+ * Creates a token movement identifier from a given value.
+ */
+export function tokenMovementId(value: string): TokenMovementId {
+  invariant(
+    typeof value === 'string' && value.length > 0,
+    `Invalid TokenMovementId: ${value}`,
+  );
+  return value as TokenMovementId;
 }
