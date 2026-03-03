@@ -30,6 +30,7 @@ import type {
   QuoteAccuracy,
   RepayWithSupplyKind,
   ReservesRequestFilter,
+  StableVaultClaimStatus,
   SupplySwapKind,
   SwapActivityStatus,
   SwapOrderClass,
@@ -43,6 +44,7 @@ import type {
 import type { introspection } from './graphql-env';
 import type {
   AssetId,
+  BoostedRateId,
   HubAssetId,
   HubId,
   ID,
@@ -51,9 +53,12 @@ import type {
   ReserveId,
   RewardId,
   SpokeId,
+  StableVaultId,
+  StableVaultWithdrawClaimId,
   SwapId,
   SwapQuoteId,
   TokenInfoId,
+  TokenMovementId,
   UserBalanceId,
   UserBorrowItemId,
   UserPositionId,
@@ -74,6 +79,7 @@ export const graphql = initGraphQLTada<{
     BigInt: bigint;
     BlockchainData: BlockchainData;
     Boolean: boolean;
+    BoostedRateId: BoostedRateId;
     BorrowSwapKind: BorrowSwapKind;
     ChainId: ChainId;
     ChainsFilter: ChainsFilter;
@@ -102,6 +108,9 @@ export const graphql = initGraphQLTada<{
     SpokeId: SpokeId;
     String: string;
     SupplySwapKind: SupplySwapKind;
+    StableVaultClaimStatus: StableVaultClaimStatus;
+    StableVaultId: StableVaultId;
+    StableVaultWithdrawClaimId: StableVaultWithdrawClaimId;
     SwapActivityStatus: SwapActivityStatus;
     SwapId: SwapId;
     SwapOrderClass: SwapOrderClass;
@@ -110,6 +119,7 @@ export const graphql = initGraphQLTada<{
     TimeWindow: TimeWindow;
     TokenCategory: TokenCategory;
     TokenInfoId: TokenInfoId;
+    TokenMovementId: TokenMovementId;
     TokenSwapKind: TokenSwapKind;
     TxHash: TxHash;
     UserBalanceId: UserBalanceId;
