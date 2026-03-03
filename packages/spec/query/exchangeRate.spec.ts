@@ -23,8 +23,11 @@ describe('Querying Exchange Rates on Aave V4', () => {
         });
 
         assertOk(result);
-        expect(result.value).toMatchSnapshot({
+        expect(result.value).toMatchObject({
           decimals: expect.any(Number),
+          icon: expect.any(String),
+          name: 'USD',
+          symbol: '$',
           value: expect.any(BigDecimal),
         });
       });
@@ -40,8 +43,11 @@ describe('Querying Exchange Rates on Aave V4', () => {
         });
 
         assertOk(result);
-        expect(result.value).toMatchSnapshot({
+        expect(result.value).toMatchObject({
           decimals: expect.any(Number),
+          icon: expect.any(String),
+          name: 'USD',
+          symbol: '$',
           value: expect.any(BigDecimal),
         });
       });
@@ -64,8 +70,11 @@ describe('Querying Exchange Rates on Aave V4', () => {
           });
 
           assertOk(result);
-          expect(result.value).toMatchSnapshot({
+          expect(result.value).toMatchObject({
             decimals: expect.any(Number),
+            icon: expect.any(String),
+            name: expect.any(String),
+            symbol: expect.any(String),
             value: expect.any(BigDecimal),
           });
         },
@@ -82,8 +91,11 @@ describe('Querying Exchange Rates on Aave V4', () => {
         });
 
         assertOk(result);
-        expect(result.value).toMatchSnapshot({
+        expect(result.value).toMatchObject({
           decimals: expect.any(Number),
+          icon: expect.any(String),
+          name: 'EUR',
+          symbol: '€',
           value: expect.any(BigDecimal),
         });
       });
