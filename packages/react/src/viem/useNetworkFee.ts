@@ -253,6 +253,7 @@ export const useNetworkFee: UseNetworkFee = (({
     pause,
     ...(suspense ? { suspense } : {}),
   });
+  const metadata = rate.metadata;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: query omitted since it's usually a literal object that changes at every render
   useEffect(() => {
@@ -267,16 +268,18 @@ export const useNetworkFee: UseNetworkFee = (({
         ? createNetworkFeeAmount(details.data, rate.data)
         : undefined,
       rate.error ? rate.error : undefined,
+      metadata,
     );
   }
 
   if (!details.called || details.loading || rate.loading) {
-    return ReadResult.Loading();
+    return ReadResult.Loading(metadata);
   }
 
   if (details.error || rate.error) {
     return ReadResult.Failure(
       details.error ?? rate.error ?? never('Unknown error'),
+      metadata,
     );
   }
 
@@ -285,5 +288,8 @@ export const useNetworkFee: UseNetworkFee = (({
     'Expected receipt, chain, and rate data',
   );
 
-  return ReadResult.Success(createNetworkFeeAmount(details.data, rate.data));
+  return ReadResult.Success(
+    createNetworkFeeAmount(details.data, rate.data),
+    metadata,
+  );
 }) as UseNetworkFee;

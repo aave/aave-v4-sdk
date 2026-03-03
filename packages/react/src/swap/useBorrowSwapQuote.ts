@@ -161,7 +161,12 @@ export function useBorrowSwapQuote({
     batch: false, // Don't batch with Fast query
   });
 
-  if (accurateResult.data) {
+  const hasAccurateForCurrentParams =
+    accurateResult.data &&
+    accurateResult.metadata.resultOperationKey ===
+      accurateResult.metadata.operationKey;
+
+  if (hasAccurateForCurrentParams) {
     return accurateResult;
   }
 
