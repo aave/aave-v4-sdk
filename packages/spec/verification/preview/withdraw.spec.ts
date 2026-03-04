@@ -13,7 +13,6 @@ import {
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
@@ -140,7 +139,7 @@ describe('Withdraw Preview Math', () => {
 
       const secondSupplyResult = await findReserveAndSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_USDC_ADDRESS,
+        token: ETHEREUM_USDT_ADDRESS,
         asCollateral: true,
       });
       assertOk(secondSupplyResult);

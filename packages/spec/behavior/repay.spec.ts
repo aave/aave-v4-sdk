@@ -4,7 +4,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
   getNativeBalance,
 } from '@aave/client/testing';
@@ -28,7 +28,7 @@ describe('Repaying Loans on Aave V4', () => {
 
     beforeEach(async () => {
       const supplySetup = await findReserveAndSupply(client, user, {
-        token: ETHEREUM_USDC_ADDRESS,
+        token: ETHEREUM_USDT_ADDRESS,
         spoke: ETHEREUM_SPOKE_CORE_ID,
         asCollateral: true,
       });

@@ -10,7 +10,6 @@ import { supply, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_USDC_ADDRESS,
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
@@ -30,12 +29,12 @@ describe('Supplying Assets on Aave V4', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
+          address: ETHEREUM_USDT_ADDRESS,
           amount: bigDecimal('10'),
           decimals: 6,
         }).andThen(() =>
           findReservesToSupply(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
+            token: ETHEREUM_USDT_ADDRESS,
             canUseAsCollateral: true,
           }),
         );

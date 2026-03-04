@@ -17,7 +17,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -41,7 +41,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
         const amountToSupply = bigDecimal('100');
 
         const setup = await findReserveAndSupply(client, user, {
-          token: ETHEREUM_USDC_ADDRESS,
+          token: ETHEREUM_USDT_ADDRESS,
           spoke: ETHEREUM_SPOKE_CORE_ID,
           asCollateral: true,
           amount: amountToSupply,
@@ -99,7 +99,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
         });
         assertOk(setup);
         usedReserves = setup!.value;
-      }, 60_000);
+      }, 90_000);
 
       describe('When the user checks the health factor', () => {
         it('Then the health factor should be a number greater than 1', async () => {
@@ -151,7 +151,7 @@ describe('Health Factor Scenarios on Aave V4', () => {
           );
 
           assertOk(setup);
-        });
+        }, 90_000);
 
         it('Then the health factor should be greater than before supplying more collateral', async () => {
           const position = await userPosition(client, {

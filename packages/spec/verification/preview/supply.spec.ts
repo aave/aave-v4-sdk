@@ -14,7 +14,7 @@ import {
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_USDT_ADDRESS,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToSupply } from '../../helpers/reserves';
@@ -33,7 +33,7 @@ describe('Supply Preview Math', () => {
     beforeAll(async () => {
       const setup = await findReserveAndSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_USDC_ADDRESS,
+        token: ETHEREUM_USDT_ADDRESS,
         asCollateral: true,
       });
       assertOk(setup);
