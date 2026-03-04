@@ -9,11 +9,11 @@ import {
   fundErc20Address,
   getNativeBalance,
 } from '@aave/client/testing';
-import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
+import { sendWith } from '../helpers/tools';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();

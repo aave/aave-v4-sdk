@@ -9,10 +9,10 @@ import {
   createNewWallet,
   ETHEREUM_FORK_ID,
 } from '@aave/client/testing';
-import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
+import { sendWith } from '../helpers/tools';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();

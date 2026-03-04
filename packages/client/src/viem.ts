@@ -52,6 +52,8 @@ import type {
   TypedDataHandler,
 } from './types';
 
+const DEFAULT_GAS_BUFFER_PERCENT = 115n;
+
 function isRpcError(err: unknown): err is RpcError {
   return isObject(err) && 'code' in err && 'message' in err;
 }
@@ -190,6 +192,7 @@ export function ensureChain(
 function estimateGas(
   walletClient: WalletClient,
   request: TransactionRequest,
+  gasBufferPercent: bigint = DEFAULT_GAS_BUFFER_PERCENT,
 ): ResultAsync<bigint, SigningError> {
   return ResultAsync.fromPromise(
     estimateGasWithViem(walletClient, {
@@ -199,14 +202,15 @@ function estimateGas(
       value: BigInt(request.value),
     }),
     (err) => SigningError.from(err),
-  ).map((gas) => (gas * 115n) / 100n); // 15% buffer
+  ).map((gas) => (gas * gasBufferPercent) / 100n);
 }
 
 function sendEip1559Transaction(
   walletClient: WalletClient<Transport, ViemChain, Account>,
   request: TransactionRequest,
+  gasBufferPercent: bigint = DEFAULT_GAS_BUFFER_PERCENT,
 ): ResultAsync<TxHash, CancelError | SigningError> {
-  return estimateGas(walletClient, request)
+  return estimateGas(walletClient, request, gasBufferPercent)
     .andThen((gas) =>
       ResultAsync.fromPromise(
         sendTransactionWithViem(walletClient, {
@@ -246,13 +250,14 @@ function isWalletClientWithAccount(
 export function sendTransaction(
   walletClient: WalletClient,
   request: TransactionRequest,
+  gasBufferPercent: bigint = DEFAULT_GAS_BUFFER_PERCENT,
 ): ResultAsync<TxHash, CancelError | SigningError> {
   invariant(
     isWalletClientWithAccount(walletClient),
     'Wallet client with account is required',
   );
 
-  return sendEip1559Transaction(walletClient, request);
+  return sendEip1559Transaction(walletClient, request, gasBufferPercent);
 }
 
 /**
@@ -311,39 +316,57 @@ export function waitForTransactionResult(
 function sendTransactionAndWait(
   walletClient: WalletClient,
   request: TransactionRequest,
+  gasBufferPercent: bigint = DEFAULT_GAS_BUFFER_PERCENT,
 ): ResultAsync<
   TransactionResult,
   CancelError | SigningError | TransactionError | UnexpectedError
 > {
-  return sendTransaction(walletClient, request).andThen((hash) =>
-    waitForTransactionResult(walletClient, request, hash),
+  return sendTransaction(walletClient, request, gasBufferPercent).andThen(
+    (hash) => waitForTransactionResult(walletClient, request, hash),
   );
 }
 
 function executePlan(
   walletClient: WalletClient,
   result: ExecutionPlan,
+  gasBufferPercent: bigint = DEFAULT_GAS_BUFFER_PERCENT,
 ): ReturnType<ExecutionPlanHandler> {
   switch (result.__typename) {
     case 'TransactionRequest':
-      return sendTransactionAndWait(walletClient, result);
+      return sendTransactionAndWait(walletClient, result, gasBufferPercent);
 
     case 'Erc20ApprovalRequired':
       return result.approvals
         .reduce<ReturnType<typeof sendTransactionAndWait>>(
           (chain, approval) =>
             chain.andThen(() =>
-              sendTransactionAndWait(walletClient, approval.byTransaction),
+              sendTransactionAndWait(
+                walletClient,
+                approval.byTransaction,
+                gasBufferPercent,
+              ),
             ),
           okAsync(undefined as never),
         )
         .andThen(() =>
-          sendTransactionAndWait(walletClient, result.originalTransaction),
+          sendTransactionAndWait(
+            walletClient,
+            result.originalTransaction,
+            gasBufferPercent,
+          ),
         );
 
     case 'PreContractActionRequired':
-      return sendTransactionAndWait(walletClient, result.transaction).andThen(
-        () => sendTransactionAndWait(walletClient, result.originalTransaction),
+      return sendTransactionAndWait(
+        walletClient,
+        result.transaction,
+        gasBufferPercent,
+      ).andThen(() =>
+        sendTransactionAndWait(
+          walletClient,
+          result.originalTransaction,
+          gasBufferPercent,
+        ),
       );
 
     case 'InsufficientBalanceError':
@@ -366,9 +389,24 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
   result?: T,
 ): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
-  return result
-    ? executePlan(walletClient, result)
-    : executePlan.bind(null, walletClient);
+  const executeWithDefaultGas = sendWithGasBuffer<T>(
+    walletClient,
+    DEFAULT_GAS_BUFFER_PERCENT,
+  );
+  return result === undefined
+    ? executeWithDefaultGas
+    : executeWithDefaultGas(result);
+}
+
+/**
+ * @internal
+ */
+export function sendWithGasBuffer<T extends ExecutionPlan = ExecutionPlan>(
+  walletClient: WalletClient,
+  gasBufferPercent: bigint,
+): ExecutionPlanHandler<T> {
+  return (executionPlan: T) =>
+    executePlan(walletClient, executionPlan, gasBufferPercent);
 }
 
 /**

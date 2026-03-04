@@ -8,7 +8,7 @@ import {
   fundErc20Address,
   getNativeBalance,
 } from '@aave/client/testing';
-import { permitWith, sendWith } from '@aave/client/viem';
+import { permitWith } from '@aave/client/viem';
 import type { Reserve, UserBorrowItem } from '@aave/graphql';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -18,6 +18,7 @@ import {
   findReserveAndSupply,
   supplyAndBorrowNativeToken,
 } from '../helpers/supplyBorrow';
+import { sendWith } from '../helpers/tools';
 
 const user = await createNewWallet();
 

@@ -17,9 +17,9 @@ import {
 
 import { borrow, reserve, supply } from '@aave/client/actions';
 import { fundErc20Address } from '@aave/client/testing';
-import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { findReservesToBorrow, findReservesToSupply } from './reserves';
+import { sendWith } from './tools';
 
 export function supplyToReserve(
   client: AaveClient,

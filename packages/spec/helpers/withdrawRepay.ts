@@ -6,8 +6,8 @@ import type {
   WithdrawRequest,
 } from '@aave/client';
 import { repay, withdraw } from '@aave/client/actions';
-import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
+import { sendWith } from './tools';
 
 export function withdrawFromReserve(
   client: AaveClient,

@@ -12,13 +12,13 @@ import {
   getBalance,
   getNativeBalance,
 } from '@aave/client/testing';
-import { sendWith } from '@aave/client/viem';
 import type { Reserve } from '@aave/graphql';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   findReserveAndSupply,
   supplyNativeTokenToReserve,
 } from '../helpers/supplyBorrow';
+import { sendWith } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
