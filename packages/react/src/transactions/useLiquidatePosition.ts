@@ -17,13 +17,13 @@ import {
   type ExecutionPlanHandler,
   PendingTransaction,
   type PendingTransactionError,
+  refreshUserBalances,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
 } from '../helpers';
 
 import { handleSingleApproval, sendApprovalTransactions } from './approvals';
-import { refreshUserBalances } from './cache';
 
 function injectLiquidatePermitSignature(
   request: LiquidatePositionRequest,
