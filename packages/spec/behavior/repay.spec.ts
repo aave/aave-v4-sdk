@@ -7,6 +7,7 @@ import {
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
   getNativeBalance,
+  sendWith,
 } from '@aave/client/testing';
 import { permitWith } from '@aave/client/viem';
 import type { Reserve, UserBorrowItem } from '@aave/graphql';
@@ -18,7 +19,6 @@ import {
   findReserveAndSupply,
   supplyAndBorrowNativeToken,
 } from '../helpers/supplyBorrow';
-import { sendWith } from '../helpers/tools';
 
 const user = await createNewWallet();
 

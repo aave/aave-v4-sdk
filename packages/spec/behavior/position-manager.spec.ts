@@ -14,9 +14,9 @@ import {
   client,
   createNewWallet,
   ETHEREUM_SPOKE_CORE_ID,
+  sendWith,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { sendWith } from '../helpers/tools';
 
 const user = await createNewWallet();
 

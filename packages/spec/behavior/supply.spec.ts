@@ -12,12 +12,12 @@ import {
   createNewWallet,
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
+  sendWith,
 } from '@aave/client/testing';
 import { permitWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToSupply } from '../helpers/reserves';
 import { supplyToReserve } from '../helpers/supplyBorrow';
-import { sendWith } from '../helpers/tools';
 import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet();

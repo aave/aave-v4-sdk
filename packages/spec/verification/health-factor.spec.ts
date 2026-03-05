@@ -19,6 +19,7 @@ import {
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
+  sendWith,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -30,7 +31,6 @@ import {
   supplyAndBorrow,
   supplyToReserve,
 } from '../helpers/supplyBorrow';
-import { sendWith } from '../helpers/tools';
 
 const user = await createNewWallet();
 

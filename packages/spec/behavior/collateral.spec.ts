@@ -8,11 +8,11 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  sendWith,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { sendWith } from '../helpers/tools';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();

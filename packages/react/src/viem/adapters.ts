@@ -17,7 +17,7 @@ import {
   useAsyncTask,
 } from '../helpers';
 
-const FORK_GAS_BUFFER_PERCENT = 150n;
+const FORK_GAS_MULTIPLIER = 1.5;
 
 /**
  * A hook that provides a way to send Aave transactions using a viem WalletClient instance.
@@ -47,12 +47,10 @@ export function useSendTransaction(
       return fetchChain(client, { chainId: request.chainId }, { batch: false })
         .andThen((chain) => {
           invariant(chain, `Chain ${request.chainId} is not supported`);
-          const gasBufferPercent = chain.isFork
-            ? FORK_GAS_BUFFER_PERCENT
-            : undefined;
+          const gasMultiplier = chain.isFork ? FORK_GAS_MULTIPLIER : undefined;
 
           return ensureChain(client, walletClient, request).andThen(() =>
-            sendTransaction(walletClient, request, gasBufferPercent),
+            sendTransaction(walletClient, request, gasMultiplier),
           );
         })
         .map(

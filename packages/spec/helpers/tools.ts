@@ -1,15 +1,4 @@
-import type { ExecutionPlan } from '@aave/client';
 import { TimeWindow } from '@aave/client';
-import { sendWithGasBuffer } from '@aave/client/viem';
-import type { WalletClient } from 'viem';
-
-export const SPEC_GAS_BUFFER_PERCENT = 200n;
-
-export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
-  walletClient: WalletClient,
-) {
-  return sendWithGasBuffer<T>(walletClient, SPEC_GAS_BUFFER_PERCENT);
-}
 
 function createUTCDate(year: number, month: number, date: number): Date {
   return new Date(Date.UTC(year, month, date, 0, 0, 0, 0));

@@ -11,6 +11,7 @@ import {
   ETHEREUM_SPOKE_CORE_ID,
   getBalance,
   getNativeBalance,
+  sendWith,
 } from '@aave/client/testing';
 import type { Reserve } from '@aave/graphql';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -18,7 +19,6 @@ import {
   findReserveAndSupply,
   supplyNativeTokenToReserve,
 } from '../helpers/supplyBorrow';
-import { sendWith } from '../helpers/tools';
 import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();

@@ -8,12 +8,12 @@ import {
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
+  sendWith,
 } from '@aave/client/testing';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';
 import { findReserveAndSupply } from '../helpers/supplyBorrow';
-import { sendWith } from '../helpers/tools';
 import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
