@@ -416,6 +416,9 @@ export const PreviewQuery = graphql(
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
+export type LiquidateExactAmountWithPermit = ReturnType<
+  typeof graphql.scalar<'LiquidateExactAmountWithPermit'>
+>;
 export type LiquidatePositionDebtAmount = ReturnType<
   typeof graphql.scalar<'LiquidatePositionDebtAmount'>
 >;
