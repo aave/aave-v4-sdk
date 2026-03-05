@@ -1,5 +1,15 @@
 # @aave/react
 
+## 4.0.0-next.48
+
+### Patch Changes
+
+- bb538dc: **fix:** ensure swap quote hooks surface fresh Fast quotes while waiting for current-cycle Accurate quotes.
+- 85ecc97: **feat:** supports liquidate with ERC20 permit sig.
+- Updated dependencies [85ecc97]
+  - @aave/graphql@1.0.0-next.34
+  - @aave/client@4.0.0-next.48
+
 ## 4.0.0-next.47
 
 ### Patch Changes

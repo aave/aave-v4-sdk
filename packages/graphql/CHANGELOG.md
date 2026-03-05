@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.34
+
+### Patch Changes
+
+- 85ecc97: **feat:** supports liquidate with ERC20 permit sig.
+
 ## 1.0.0-next.33
 
 ### Patch Changes

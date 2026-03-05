@@ -1,5 +1,13 @@
 # @aave/client
 
+## 4.0.0-next.48
+
+### Patch Changes
+
+- 85ecc97: **feat:** supports liquidate with ERC20 permit sig.
+- Updated dependencies [85ecc97]
+  - @aave/graphql@1.0.0-next.34
+
 ## 4.0.0-next.47
 
 ### Patch Changes
