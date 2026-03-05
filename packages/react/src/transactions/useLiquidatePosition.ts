@@ -27,9 +27,20 @@ import { handleSingleApproval, sendApprovalTransactions } from './approvals';
 
 function injectLiquidatePermitSignature(
   request: LiquidatePositionRequest,
-  _permitSig: ERC20PermitSignature,
+  permitSig: ERC20PermitSignature,
 ): LiquidatePositionRequest {
-  // TODO inject permitSig in the appropriate place once supported in the GQL schema
+  if ('exact' in request.amount && request.amount.exact) {
+    return {
+      ...request,
+      amount: {
+        exact: {
+          ...request.amount.exact,
+          permitSig,
+        },
+      },
+    };
+  }
+
   return request;
 }
 
