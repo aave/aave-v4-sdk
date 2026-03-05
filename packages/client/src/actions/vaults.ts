@@ -34,7 +34,7 @@ import {
   type StableVaultWithdrawRequest,
   type TransactionRequest,
 } from '@aave/graphql';
-import { errAsync, okAsync, ResultAsync } from '@aave/types';
+import { okAsync, ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
 import { DEFAULT_QUERY_OPTIONS, type RequestPolicyOptions } from '../options';
 
