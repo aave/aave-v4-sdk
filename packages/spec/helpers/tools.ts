@@ -3,7 +3,7 @@ import { TimeWindow } from '@aave/client';
 import { sendWithGasBuffer } from '@aave/client/viem';
 import type { WalletClient } from 'viem';
 
-export const SPEC_GAS_BUFFER_PERCENT = 150n;
+export const SPEC_GAS_BUFFER_PERCENT = 200n;
 
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
