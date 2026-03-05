@@ -52,7 +52,7 @@ import type {
   TypedDataHandler,
 } from './types';
 
-const DEFAULT_GAS_MULTIPLIER = 1.15;
+const DEFAULT_GAS_MULTIPLIER = 1.15; // 15% buffer for gas estimation
 const GAS_MULTIPLIER_SCALE = 100n;
 
 function isRpcError(err: unknown): err is RpcError {
@@ -190,6 +190,8 @@ export function ensureChain(
   });
 }
 
+const FALLBACK_GAS_LIMIT = 15_000_000n;
+
 function estimateGas(
   walletClient: WalletClient,
   request: TransactionRequest,
@@ -200,7 +202,7 @@ function estimateGas(
   );
   invariant(scaledMultiplier > 0, 'gasMultiplier must be a positive number');
 
-  return ResultAsync.fromPromise(
+  const result = ResultAsync.fromPromise(
     estimateGasWithViem(walletClient, {
       account: walletClient.account,
       data: request.data,
@@ -209,6 +211,12 @@ function estimateGas(
     }),
     (err) => SigningError.from(err),
   ).map((gas) => (gas * BigInt(scaledMultiplier)) / GAS_MULTIPLIER_SCALE);
+
+  // For forks, we use a fallback gas limit to avoid running out of gas
+  if (gasMultiplier > DEFAULT_GAS_MULTIPLIER) {
+    return result.orElse(() => okAsync(FALLBACK_GAS_LIMIT));
+  }
+  return result;
 }
 
 function sendEip1559Transaction(
