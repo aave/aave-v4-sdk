@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write  # Required for OIDC authentication
   checks: write
 
 concurrency:
@@ -32,6 +33,8 @@ jobs:
       ETHEREUM_TENDERLY_FORK_ID: ${{ vars.ETHEREUM_TENDERLY_FORK_ID }}
       ETHEREUM_TENDERLY_PUBLIC_RPC: ${{ vars.ETHEREUM_TENDERLY_PUBLIC_RPC }}
       ETHEREUM_TENDERLY_ADMIN_RPC: ${{ secrets.ETHEREUM_TENDERLY_ADMIN_RPC }}
+      ETHEREUM_TENDERLY_BLOCKEXPLORER: ${{ vars.ETHEREUM_TENDERLY_BLOCKEXPLORER }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
 
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +48,23 @@ jobs:
 
       - name: Run tests
         run: pnpm spec
+      
+      - name: Configure AWS credentials
+        if: always()
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload Playwright report to S3
+        if: always()
+        run: |
+          if [ -d "reports" ]; then
+            aws s3 sync reports/ s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/ --delete
+            echo "Aave V4 SDK report uploaded to: s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/"
+          else
+            echo "Aave V4 SDK report directory not found"
+          fi
 
       - name: Publish test report to GitHub
         uses: mikepenz/action-junit-report@v6
