@@ -56,6 +56,8 @@ function createMessageTestResults(
   result.message += `Total tests ${totalTests}\n Pass ${success} / Fail ${failures} / Skip ${skipped}`;
   const reportUrl = `https://github.com/aave/aave-v4-sdk/actions/runs/${process.env.GITHUB_RUN_ID || ''}/`;
   result.message += `\n <${reportUrl}|Link Github Pipeline>`;
+  const reportS3Url = `https://${process.env.S3_BUCKET_NAME}/aave-v4-sdk/${process.env.GITHUB_RUN_ID}/index.html`;
+  result.message += `\n <${reportS3Url}|Link HTML Report>`;
   return result;
 }
 
