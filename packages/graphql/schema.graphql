@@ -815,9 +815,21 @@ input LimitWithdrawSwapQuoteInput {
   deadline: DateTime
 }
 
+input LiquidateExactAmountWithPermit {
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
+  """
+  value: BigDecimal!
+
+  """
+  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  """
+  permitSig: ERC20PermitSignature
+}
+
 input LiquidatePositionDebtAmount @oneOf {
-  """Exact amount"""
-  exact: BigDecimal
+  """Exact amount with optional permit signature"""
+  exact: LiquidateExactAmountWithPermit
 
   """The most you can liquidate"""
   max: AlwaysTrue
