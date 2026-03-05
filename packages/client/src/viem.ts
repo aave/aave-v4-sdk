@@ -383,31 +383,43 @@ function executePlan(
 /**
  * Creates an execution plan handler that sends transactions using the provided wallet client.
  */
-export function sendWith(
+export function sendWith(walletClient: WalletClient): ExecutionPlanHandler;
+/**
+ * @internal
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
-  gasMultiplier?: number,
-): ExecutionPlanHandler;
+  gasBuffer: number,
+): ExecutionPlanHandler<T>;
 /**
  * Sends execution plan transactions using the provided wallet client.
  */
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
   result: T,
-  gasMultiplier?: number,
+): ReturnType<ExecutionPlanHandler<T>>;
+/**
+ * @internal
+ */
+export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
+  walletClient: WalletClient,
+  result: T,
+  gasBuffer: number,
 ): ReturnType<ExecutionPlanHandler<T>>;
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
-  gasOrResult?: number | T,
-  gasMultiplier?: number,
+  resultOrGasBuffer?: T | number,
+  gasBuffer: number = DEFAULT_GAS_MULTIPLIER,
 ): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
   const gas =
-    (typeof gasOrResult === 'number' ? gasOrResult : gasMultiplier) ??
-    DEFAULT_GAS_MULTIPLIER;
+    typeof resultOrGasBuffer === 'number' ? resultOrGasBuffer : gasBuffer;
 
-  if (gasOrResult !== undefined && typeof gasOrResult !== 'number') {
-    return executePlan(walletClient, gasOrResult, gas);
+  if (
+    resultOrGasBuffer !== undefined &&
+    typeof resultOrGasBuffer !== 'number'
+  ) {
+    return executePlan(walletClient, resultOrGasBuffer, gas);
   }
-
   return (executionPlan: T) => executePlan(walletClient, executionPlan, gas);
 }
 
