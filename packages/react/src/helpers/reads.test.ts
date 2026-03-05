@@ -99,29 +99,28 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
         );
 
         await vi.waitUntil(() => !result.current.loading);
+        await vi.waitUntil(
+          () =>
+            result.current.metadata.resultOperationKey ===
+            result.current.metadata.operationKey,
+        );
 
         expect(result.current).toMatchObject({
           data: 1,
           error: undefined,
           loading: false,
+          metadata: expect.objectContaining({
+            operationKey: expect.any(Number),
+            resultOperationKey: result.current.metadata.operationKey,
+          }),
         });
       });
     });
 
     describe('When re-rendering with new variables', () => {
-      // Track reloading states observed during the test
-      const reloadingStates: boolean[] = [];
-
-      it('Then it should keep `loading` false and set `reloading` true while fetching new data', async () => {
+      it('Then it should set `reloading` true while fetching new data, and update the `metadata` accordingly', async () => {
         const { result, rerender } = renderHookWithinContext(
-          ({ id }) => {
-            const r = useTestHook({ id });
-            // Capture reloading state on each render
-            if (!r.loading && r.data !== undefined) {
-              reloadingStates.push(r.reloading);
-            }
-            return r;
-          },
+          ({ id }) => useTestHook({ id }),
           {
             initialProps: { id: 1 },
           },
@@ -129,20 +128,63 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
         expect(result.current).toMatchObject({
           loading: true,
           reloading: false,
+          metadata: {
+            operationKey: expect.any(Number),
+            resultOperationKey: undefined,
+          },
         });
 
         await vi.waitUntil(() => !result.current.loading);
+        await vi.waitUntil(
+          () =>
+            result.current.metadata.resultOperationKey ===
+            result.current.metadata.operationKey,
+        );
         expect(result.current).toMatchObject({
           data: 1,
           loading: false,
           reloading: false,
+          metadata: {
+            operationKey: expect.any(Number),
+            resultOperationKey: result.current.metadata.operationKey,
+          },
         });
+        const metadataAfterFirstLoad = result.current.metadata;
 
         rerender({ id: 2 });
 
-        await vi.waitUntil(() => result.current.data === 2);
-        // we should have observed reloading=true at some point
-        expect(reloadingStates).toContain(true);
+        await vi.waitUntil(() => result.current.reloading === true);
+        expect(result.current).toMatchObject({
+          data: 1,
+          loading: false,
+          reloading: true,
+          metadata: {
+            operationKey: expect.any(Number),
+            resultOperationKey: metadataAfterFirstLoad.resultOperationKey,
+          },
+        });
+        expect(result.current.metadata.operationKey).not.toBe(
+          metadataAfterFirstLoad.operationKey,
+        );
+
+        await vi.waitUntil(() => !result.current.reloading);
+        await vi.waitUntil(
+          () =>
+            result.current.metadata.resultOperationKey ===
+            result.current.metadata.operationKey,
+        );
+        expect(result.current).toMatchObject({
+          data: 2,
+          loading: false,
+          reloading: false,
+          metadata: {
+            operationKey: expect.any(Number),
+            resultOperationKey: result.current.metadata.operationKey,
+          },
+        });
+        expect(result.current.metadata.operationKey).not.toBe(
+          metadataAfterFirstLoad.operationKey,
+        );
       });
     });
 
@@ -243,8 +285,19 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
         );
 
         await vi.waitUntil(() => result.current?.data);
+        await vi.waitUntil(
+          () =>
+            result.current.metadata.resultOperationKey ===
+            result.current.metadata.operationKey,
+        );
 
-        expect(result.current.data).toEqual(expect.any(Number));
+        expect(result.current).toMatchObject({
+          data: expect.any(Number),
+          metadata: expect.objectContaining({
+            operationKey: expect.any(Number),
+            resultOperationKey: result.current.metadata.operationKey,
+          }),
+        });
       });
     });
 
@@ -353,13 +406,19 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
       const firstResult = result.current.data as number;
 
       await act(() => vi.advanceTimersToNextTimerAsync());
-      expect(result.current.data).toEqual(firstResult + 1);
+      expect(result.current).toMatchObject({
+        data: firstResult + 1,
+      });
 
       await act(() => vi.advanceTimersToNextTimerAsync());
-      expect(result.current.data).toEqual(firstResult + 2);
+      expect(result.current).toMatchObject({
+        data: firstResult + 2,
+      });
 
       await act(() => vi.advanceTimersToNextTimerAsync());
-      expect(result.current.data).toEqual(firstResult + 3);
+      expect(result.current).toMatchObject({
+        data: firstResult + 3,
+      });
     });
 
     it('Then it should set reloading to true while refetching', async () => {
@@ -388,7 +447,9 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
       // After poll completes, we should have observed reloading=true at some point
       expect(reloadingStates).toContain(true);
       // And it should end with reloading=false
-      expect(result.current.reloading).toBe(false);
+      expect(result.current).toMatchObject({
+        reloading: false,
+      });
     });
   });
 });

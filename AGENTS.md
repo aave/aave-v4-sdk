@@ -14,8 +14,6 @@ pnpm test:<package> --run          # Package: types, core, client, react, cli
 pnpm vitest --run --project <project> <file> -t "<test-name>"  # Specific test
 ```
 
-After changing code in a dependency package (e.g., `@aave/graphql`, `@aave/types`, `@aave/core`), run `pnpm build` before testing dependent packages (e.g., `@aave/client`, `@aave/react`).
-
 ## SDK Architecture
 
 | Package | Purpose |
