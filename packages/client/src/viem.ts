@@ -190,7 +190,7 @@ export function ensureChain(
   });
 }
 
-const FALLBACK_GAS_LIMIT = 15_000_000n;
+// const FALLBACK_GAS_LIMIT = 15_000_000n;
 
 function estimateGas(
   walletClient: WalletClient,
@@ -208,6 +208,7 @@ function estimateGas(
       data: request.data,
       to: request.to,
       value: BigInt(request.value),
+      prepare: false,
     }),
     (err) => {
       return SigningError.from(err);
@@ -215,9 +216,9 @@ function estimateGas(
   ).map((gas) => (gas * BigInt(scaledMultiplier)) / GAS_MULTIPLIER_SCALE);
 
   // For forks, we use a fallback gas limit to avoid running out of gas
-  if (gasMultiplier > DEFAULT_GAS_MULTIPLIER) {
-    return result.orElse(() => okAsync(FALLBACK_GAS_LIMIT));
-  }
+  // if (gasMultiplier > DEFAULT_GAS_MULTIPLIER) {
+  //   return result.orElse(() => okAsync(FALLBACK_GAS_LIMIT));
+  // }
   return result;
 }
 
