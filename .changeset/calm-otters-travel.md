@@ -3,4 +3,4 @@
 "@aave/react": patch
 ---
 
-**fix:** improve viem transaction reliability on fork chains by increasing `gasBufferPercent` and aligning `sendWith` behavior
+**fix:** updating `viem` to 4.47.0 version and avoid preparing transactions when estimating gas
