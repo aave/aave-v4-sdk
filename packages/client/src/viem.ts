@@ -190,7 +190,7 @@ export function ensureChain(
   });
 }
 
-// const FALLBACK_GAS_LIMIT = 15_000_000n;
+const FALLBACK_GAS_LIMIT = 15_000_000n;
 
 function estimateGas(
   walletClient: WalletClient,
@@ -210,15 +210,14 @@ function estimateGas(
       value: BigInt(request.value),
     }),
     (err) => {
-      console.error('[estimateGas] gas estimation failed:', err);
       return SigningError.from(err);
     },
   ).map((gas) => (gas * BigInt(scaledMultiplier)) / GAS_MULTIPLIER_SCALE);
 
   // For forks, we use a fallback gas limit to avoid running out of gas
-  // if (gasMultiplier > DEFAULT_GAS_MULTIPLIER) {
-  //   return result.orElse(() => okAsync(FALLBACK_GAS_LIMIT));
-  // }
+  if (gasMultiplier > DEFAULT_GAS_MULTIPLIER) {
+    return result.orElse(() => okAsync(FALLBACK_GAS_LIMIT));
+  }
   return result;
 }
 
@@ -228,9 +227,8 @@ function sendEip1559Transaction(
   gasMultiplier: number = DEFAULT_GAS_MULTIPLIER,
 ): ResultAsync<TxHash, CancelError | SigningError> {
   return estimateGas(walletClient, request, gasMultiplier)
-    .andThen((gas) => {
-      console.log('[sendEip1559Transaction] gas:', gas);
-      return ResultAsync.fromPromise(
+    .andThen((gas) =>
+      ResultAsync.fromPromise(
         sendTransactionWithViem(walletClient, {
           account: walletClient.account,
           data: request.data,
@@ -251,8 +249,8 @@ function sendEip1559Transaction(
           }
           return SigningError.from(err);
         },
-      );
-    })
+      ),
+    )
     .map(txHash);
 }
 
