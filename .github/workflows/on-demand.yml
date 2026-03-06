@@ -60,7 +60,20 @@ jobs:
         if: always()
         run: |
           if [ -d "reports" ]; then
-            aws s3 sync reports/ s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/ --delete
+            # Upload all files except .gz files
+            aws s3 sync reports/ s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/ \
+              --delete \
+              --exclude "*.gz"
+
+            # Upload .gz files with correct headers so browsers decompress them transparently
+            find reports/ -name "*.gz" | while read gz_file; do
+              relative_path="${gz_file#reports/}"
+              aws s3 cp "$gz_file" \
+                "s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/${relative_path}" \
+                --content-type "application/json" \
+                --content-encoding "gzip"
+            done
+
             echo "Aave V4 SDK report uploaded to: s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/"
           else
             echo "Aave V4 SDK report directory not found"
