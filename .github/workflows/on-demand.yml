@@ -66,13 +66,19 @@ jobs:
               --delete \
               --exclude "*.gz"
 
-            # Upload .gz files with content-type application/gzip (no content-encoding).
-            # Using application/gzip prevents Cloudflare from transparently decompressing
+            # Decompress .gz files and upload as plain JSON.
+            # Vitest's html.meta.json.gz contains the test result data. Uploading it decompressed
+            # avoids all Content-Encoding/SES issues: SES (lockdown-install.js injected by wallet
+            # extensions) interferes with browser auto-decompression of fetch responses, causing
+            # Vitest's internal .json() call to fail with SyntaxError on raw gzip bytes.
             find reports/ -name "*.gz" | while read gz_file; do
-              relative_path="${gz_file#reports/}"
-              aws s3 cp "$gz_file" \
+              decompressed="${gz_file%.gz}"
+              gunzip -c "$gz_file" > "$decompressed"
+              relative_path="${decompressed#reports/}"
+              aws s3 cp "$decompressed" \
                 "s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/${relative_path}" \
-                --content-type "application/gzip"
+                --content-type "application/json"
+              rm "$decompressed"
             done
 
             echo "Aave V4 SDK report uploaded to: s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/"
