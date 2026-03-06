@@ -209,13 +209,16 @@ function estimateGas(
       to: request.to,
       value: BigInt(request.value),
     }),
-    (err) => SigningError.from(err),
+    (err) => {
+      console.error('[estimateGas] gas estimation failed:', err);
+      return SigningError.from(err);
+    },
   ).map((gas) => (gas * BigInt(scaledMultiplier)) / GAS_MULTIPLIER_SCALE);
 
   // For forks, we use a fallback gas limit to avoid running out of gas
-  if (gasMultiplier > DEFAULT_GAS_MULTIPLIER) {
-    return result.orElse(() => okAsync(FALLBACK_GAS_LIMIT));
-  }
+  // if (gasMultiplier > DEFAULT_GAS_MULTIPLIER) {
+  //   return result.orElse(() => okAsync(FALLBACK_GAS_LIMIT));
+  // }
   return result;
 }
 
