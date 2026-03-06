@@ -8,8 +8,8 @@ import {
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
   getNativeBalance,
-  sendWith,
 } from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReservesToBorrow } from '../helpers/reserves';

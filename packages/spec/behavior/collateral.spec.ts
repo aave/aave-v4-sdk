@@ -8,8 +8,8 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
-  sendWith,
 } from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { findReserveAndSupply } from '../helpers/supplyBorrow';

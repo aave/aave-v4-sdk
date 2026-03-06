@@ -11,8 +11,8 @@ import {
   ETHEREUM_SPOKE_CORE_ID,
   getBalance,
   getNativeBalance,
-  sendWith,
 } from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import type { Reserve } from '@aave/graphql';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {

@@ -19,8 +19,8 @@ import {
   ETHEREUM_SPOKE_CORE_ID,
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
-  sendWith,
 } from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   findReservesToBorrow,

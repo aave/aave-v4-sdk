@@ -34,13 +34,7 @@ import { afterAll, beforeAll } from 'vitest';
 import { AaveClient } from './AaveClient';
 import { chain } from './actions';
 import { local, production, staging } from './environments';
-import { sendWith as sendWithViem, toViemChain } from './viem';
-
-export const TEST_GAS_MULTIPLIER = 2;
-
-export function sendWith(walletClient: WalletClient) {
-  return sendWithViem(walletClient, TEST_GAS_MULTIPLIER);
-}
+import { toViemChain } from './viem';
 
 export const environment =
   import.meta.env.ENVIRONMENT === 'local'

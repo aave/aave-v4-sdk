@@ -13,9 +13,8 @@ import {
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
-  sendWith,
 } from '@aave/client/testing';
-import { permitWith } from '@aave/client/viem';
+import { permitWith, sendWith } from '@aave/client/viem';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { findReservesToSupply } from '../helpers/reserves';
 import { supplyToReserve } from '../helpers/supplyBorrow';

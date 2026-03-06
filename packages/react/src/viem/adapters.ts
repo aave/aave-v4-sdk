@@ -1,5 +1,4 @@
 import type { SignTypedDataError, TypedData } from '@aave/client';
-import { chain as fetchChain } from '@aave/client/actions';
 import {
   ensureChain,
   sendTransaction,
@@ -16,8 +15,6 @@ import {
   type UseSendTransactionResult,
   useAsyncTask,
 } from '../helpers';
-
-const FORK_GAS_MULTIPLIER = 1.5;
 
 /**
  * A hook that provides a way to send Aave transactions using a viem WalletClient instance.
@@ -44,15 +41,8 @@ export function useSendTransaction(
         'Expected a WalletClient to handle the operation result.',
       );
 
-      return fetchChain(client, { chainId: request.chainId }, { batch: false })
-        .andThen((chain) => {
-          invariant(chain, `Chain ${request.chainId} is not supported`);
-          const gasMultiplier = chain.isFork ? FORK_GAS_MULTIPLIER : undefined;
-
-          return ensureChain(client, walletClient, request).andThen(() =>
-            sendTransaction(walletClient, request, gasMultiplier),
-          );
-        })
+      return ensureChain(client, walletClient, request)
+        .andThen(() => sendTransaction(walletClient, request))
         .map(
           (hash) =>
             new PendingTransaction(() =>

@@ -7,9 +7,8 @@ import {
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
   getNativeBalance,
-  sendWith,
 } from '@aave/client/testing';
-import { permitWith } from '@aave/client/viem';
+import { permitWith, sendWith } from '@aave/client/viem';
 import type { Reserve, UserBorrowItem } from '@aave/graphql';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 

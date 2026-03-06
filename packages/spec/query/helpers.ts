@@ -24,8 +24,8 @@ import {
   ETHEREUM_USDT_ADDRESS,
   ETHEREUM_WETH_ADDRESS,
   fundErc20Address,
-  sendWith,
 } from '@aave/client/testing';
+import { sendWith } from '@aave/client/viem';
 import type { Account, Chain, Transport, WalletClient } from 'viem';
 import { findReservesToBorrow } from '../helpers/reserves';
 import {
