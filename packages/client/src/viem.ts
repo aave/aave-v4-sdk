@@ -228,8 +228,9 @@ function sendEip1559Transaction(
   gasMultiplier: number = DEFAULT_GAS_MULTIPLIER,
 ): ResultAsync<TxHash, CancelError | SigningError> {
   return estimateGas(walletClient, request, gasMultiplier)
-    .andThen((gas) =>
-      ResultAsync.fromPromise(
+    .andThen((gas) => {
+      console.log('[sendEip1559Transaction] gas:', gas);
+      return ResultAsync.fromPromise(
         sendTransactionWithViem(walletClient, {
           account: walletClient.account,
           data: request.data,
@@ -250,8 +251,8 @@ function sendEip1559Transaction(
           }
           return SigningError.from(err);
         },
-      ),
-    )
+      );
+    })
     .map(txHash);
 }
 
