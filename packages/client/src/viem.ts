@@ -190,7 +190,7 @@ export function ensureChain(
   });
 }
 
-const FALLBACK_GAS_LIMIT = 15_000_000n;
+// const FALLBACK_GAS_LIMIT = 15_000_000n;
 
 function estimateGas(
   walletClient: WalletClient,
