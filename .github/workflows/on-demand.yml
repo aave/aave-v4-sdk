@@ -56,7 +56,8 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Upload Playwright report to S3
+
+      - name: Upload Vitest report to S3
         if: always()
         run: |
           if [ -d "reports" ]; then
@@ -65,13 +66,13 @@ jobs:
               --delete \
               --exclude "*.gz"
 
-            # Upload .gz files with correct headers so browsers decompress them transparently
+            # Upload .gz files with content-type application/gzip (no content-encoding).
+            # Using application/gzip prevents Cloudflare from transparently decompressing
             find reports/ -name "*.gz" | while read gz_file; do
               relative_path="${gz_file#reports/}"
               aws s3 cp "$gz_file" \
                 "s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/${relative_path}" \
-                --content-type "application/json" \
-                --content-encoding "gzip"
+                --content-type "application/gzip"
             done
 
             echo "Aave V4 SDK report uploaded to: s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/"
