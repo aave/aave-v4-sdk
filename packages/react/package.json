@@ -94,7 +94,7 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
-    "viem": "^2.37.5"
+    "viem": "^2.47.0"
   },
   "peerDependencies": {
     "@privy-io/react-auth": "^2.20.0",
