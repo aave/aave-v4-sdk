@@ -17,6 +17,7 @@ import {
   type ExecutionPlanHandler,
   PendingTransaction,
   type PendingTransactionError,
+  refreshUserBalances,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
@@ -121,7 +122,6 @@ export function useLiquidatePosition(
 
   return useAsyncTask(
     (request: LiquidatePositionRequest) =>
-      // TODO: update the relevant read queries
       liquidatePosition(client, request)
         .andThen((plan) => {
           switch (plan.__typename) {
@@ -153,7 +153,8 @@ export function useLiquidatePosition(
         })
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
-        .andThen(client.waitForTransaction),
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshUserBalances(client, request.liquidator)),
     [client, handler],
   );
 }
