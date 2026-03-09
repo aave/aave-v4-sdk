@@ -103,7 +103,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "thirdweb": "^5.105.25",
-    "viem": "^2.31.6"
+    "viem": "^2.47.0"
   },
   "peerDependenciesMeta": {
     "@privy-io/react-auth": {
