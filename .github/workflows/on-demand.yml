@@ -87,7 +87,7 @@ jobs:
               rm "$decompressed"
             done
 
-            echo "Report URL: https://<your-domain>/aave-v4-sdk/${{ github.run_id }}/index.html#/"
+            echo "Aave V4 SDK report uploaded to: https://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/index.html"
           else
             echo "Aave V4 SDK report directory not found"
           fi
