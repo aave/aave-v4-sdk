@@ -4,10 +4,13 @@ import {
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
-import { hubs } from '@aave/client/actions';
+import { hubAssetInterestRateModel, hubs } from '@aave/client/actions';
 import {
   type Hub,
   type HubAsset,
+  type HubAssetInterestRateModelPoint,
+  HubAssetInterestRateModelQuery,
+  type HubAssetInterestRateModelRequest,
   HubAssetsQuery,
   type HubAssetsRequest,
   HubQuery,
@@ -18,7 +21,7 @@ import {
   HubsQuery,
   type HubsRequest,
 } from '@aave/graphql';
-import type { NullishDeep, Prettify } from '@aave/types';
+import { type NullishDeep, ok, type Prettify } from '@aave/types';
 import { useAaveClient } from './context';
 import {
   type Pausable,
@@ -366,6 +369,133 @@ export function useHubSummaryHistory({
     pause,
     batch: false, // Do not batch this since it's a slower than average query
   });
+}
+
+export type UseHubAssetInterestRateModelArgs = Prettify<
+  HubAssetInterestRateModelRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch the interest rate model for a specific hub asset.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubAssetInterestRateModel({
+ *   query: { hubAssetId: hubAssetId('...') },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useHubAssetInterestRateModel(
+  args: UseHubAssetInterestRateModelArgs & Suspendable,
+): SuspenseResult<HubAssetInterestRateModelPoint[]>;
+/**
+ * Fetch the interest rate model for a specific hub asset.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useHubAssetInterestRateModel({
+ *   query: { hubAssetId: hubAssetId('...') },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubAssetInterestRateModel(
+  args: Pausable<UseHubAssetInterestRateModelArgs> & Suspendable,
+): PausableSuspenseResult<HubAssetInterestRateModelPoint[]>;
+/**
+ * Fetch the interest rate model for a specific hub asset.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubAssetInterestRateModel({
+ *   query: { hubAssetId: hubAssetId('...') },
+ * });
+ * ```
+ */
+export function useHubAssetInterestRateModel(
+  args: UseHubAssetInterestRateModelArgs,
+): ReadResult<HubAssetInterestRateModelPoint[]>;
+/**
+ * Fetch the interest rate model for a specific hub asset.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useHubAssetInterestRateModel({
+ *   query: { hubAssetId: hubAssetId('...') },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubAssetInterestRateModel(
+  args: Pausable<UseHubAssetInterestRateModelArgs>,
+): PausableReadResult<HubAssetInterestRateModelPoint[]>;
+
+export function useHubAssetInterestRateModel({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseHubAssetInterestRateModelArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<HubAssetInterestRateModelPoint[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: HubAssetInterestRateModelQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+    selector: (data) => ok(data.points),
+  });
+}
+
+/**
+ * Low-level hook to execute a {@link hubAssetInterestRateModel} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data.
+ * Use this hook to retrieve data on demand as part of a larger workflow.
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useHubAssetInterestRateModelAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   query: { hubAssetId: hubAssetId('...') },
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // HubAssetInterestRateModelPoint[]
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useHubAssetInterestRateModelAction(
+  options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<
+  HubAssetInterestRateModelRequest,
+  HubAssetInterestRateModelPoint[],
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: HubAssetInterestRateModelRequest) =>
+      hubAssetInterestRateModel(client, request, {
+        currency: options.currency,
+        requestPolicy: 'cache-first',
+      }),
+    [client, options.currency],
+  );
 }
 
 /**

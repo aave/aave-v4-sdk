@@ -1,5 +1,6 @@
 import type { FragmentOf } from 'gql.tada';
 import {
+  Erc20AmountFragment,
   ExchangeAmountFragment,
   HubAssetFragment,
   PercentNumberFragment,
@@ -100,4 +101,47 @@ export type HubAssetsRequestOrderBy = ReturnType<
 >;
 export type HubsRequestOrderBy = ReturnType<
   typeof graphql.scalar<'HubsRequestOrderBy'>
+>;
+
+export type HubAssetInterestRateModelRequestQuery = ReturnType<
+  typeof graphql.scalar<'HubAssetInterestRateModelRequestQuery'>
+>;
+
+export const HubAssetInterestRateModelPointFragment = graphql(
+  `fragment HubAssetInterestRateModelPoint on HubAssetInterestRateModelPoint {
+      __typename
+      utilizationRate {
+        ...PercentNumber
+      }
+      borrowRate {
+        ...PercentNumber
+      }
+      supplyRate {
+        ...PercentNumber
+      }
+      liquidityDistance {
+        ...Erc20Amount
+      }
+    }`,
+  [PercentNumberFragment, Erc20AmountFragment],
+);
+export type HubAssetInterestRateModelPoint = FragmentOf<
+  typeof HubAssetInterestRateModelPointFragment
+>;
+
+/**
+ * @internal
+ */
+export const HubAssetInterestRateModelQuery = graphql(
+  `query HubAssetInterestRateModel($request: HubAssetInterestRateModelRequest!, $currency: Currency!) {
+      value: hubAssetInterestRateModel(request: $request) {
+        points {
+          ...HubAssetInterestRateModelPoint
+        }
+      }
+    }`,
+  [HubAssetInterestRateModelPointFragment],
+);
+export type HubAssetInterestRateModelRequest = RequestOf<
+  typeof HubAssetInterestRateModelQuery
 >;

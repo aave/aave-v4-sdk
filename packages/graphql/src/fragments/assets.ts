@@ -44,6 +44,18 @@ export const HubAssetSettingsFragment = graphql(
       }
       irStrategy
       reinvestmentController
+      optimalUtilizationRate {
+        ...PercentNumber
+      }
+      baseBorrowRate {
+        ...PercentNumber
+      }
+      slopeBelowOptimal {
+        ...PercentNumber
+      }
+      slopeAboveOptimal {
+        ...PercentNumber
+      }
     }`,
   [PercentNumberFragment],
 );

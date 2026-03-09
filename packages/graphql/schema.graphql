@@ -579,6 +579,47 @@ type HubAsset {
 
 scalar HubAssetId
 
+"""A single point on the interest rate model curve."""
+type HubAssetInterestRateModelPoint {
+  """The utilization rate at this point on the curve"""
+  utilizationRate: PercentNumber!
+
+  """The variable borrow rate at this utilization level"""
+  borrowRate: PercentNumber!
+
+  """
+  The supply rate at this utilization level (borrow_rate × utilization × (1 − fee))
+  """
+  supplyRate: PercentNumber!
+
+  """
+  The absolute liquidity distance from the current state to reach this utilization level.
+  Always a positive value representing the token amount that needs to move.
+  At the asset's current utilization, this value is zero.
+  """
+  liquidityDistance: Erc20Amount!
+}
+
+"""
+Request to compute the full interest rate model for a hub asset.
+Returns 201 data points covering 0% to 100% utilization in 0.5% steps,
+showing how supply/borrow rates and required liquidity changes vary across
+the entire utilization range.
+"""
+input HubAssetInterestRateModelRequest {
+  query: HubAssetInterestRateModelRequestQuery!
+}
+
+"""Identifies the hub asset to compute the interest rate model for."""
+input HubAssetInterestRateModelRequestQuery @oneOf {
+  """The hub asset id (chain_id + hub_address + onchain_hub_asset_id)"""
+  hubAssetId: HubAssetId
+}
+
+type HubAssetInterestRateModelResult {
+  points: [HubAssetInterestRateModelPoint!]!
+}
+
 type HubAssetSettings {
   """The fee receiver"""
   feeReceiver: EvmAddress!
@@ -591,6 +632,18 @@ type HubAssetSettings {
 
   """The reinvestment strategy"""
   reinvestmentController: EvmAddress
+
+  """The optimal utilization ratio"""
+  optimalUtilizationRate: PercentNumber!
+
+  """The base variable borrow rate"""
+  baseBorrowRate: PercentNumber!
+
+  """The variable borrow rate slope 1"""
+  slopeBelowOptimal: PercentNumber!
+
+  """The variable borrow rate slope 2"""
+  slopeAboveOptimal: PercentNumber!
 }
 
 type HubAssetSummary {
@@ -1253,6 +1306,7 @@ type Query {
   hub(request: HubRequest!): Hub
   hubAssets(request: HubAssetsRequest!): [HubAsset!]!
   hubSummaryHistory(request: HubSummaryHistoryRequest!): [HubSummarySample!]!
+  hubAssetInterestRateModel(request: HubAssetInterestRateModelRequest!): HubAssetInterestRateModelResult!
   reserve(request: ReserveRequest!): Reserve
   reserves(request: ReservesRequest!): [Reserve!]!
   supply(request: SupplyRequest!): ExecutionPlan!
@@ -1501,6 +1555,8 @@ type ReserveSettings {
   suppliable: Boolean!
   receiveSharesEnabled: Boolean!
   latestDynamicConfigKey: DynamicConfigKey!
+  borrowCap: Erc20Amount!
+  supplyCap: Erc20Amount!
 }
 
 type ReserveStatus {

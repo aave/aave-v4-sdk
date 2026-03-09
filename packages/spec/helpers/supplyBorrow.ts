@@ -117,7 +117,7 @@ export function findReserveAndSupply(
     invariant(targetReserve, 'Target reserve not found');
     const amountToSupply =
       amount ??
-      targetReserve.supplyCap
+      targetReserve.settings.supplyCap.amount.value
         .minus(targetReserve.summary.supplied.amount.value)
         .div(100000);
 
@@ -235,7 +235,7 @@ export function supplyAndBorrowNativeToken(
   return findReservesToSupply(client, user, {
     spoke: params.spoke,
   }).andThen((listSupplyReserves) => {
-    const amountToSupply = listSupplyReserves[0].supplyCap
+    const amountToSupply = listSupplyReserves[0].settings.supplyCap.amount.value
       .minus(listSupplyReserves[0].summary.supplied.amount.value)
       .div(10000);
 
