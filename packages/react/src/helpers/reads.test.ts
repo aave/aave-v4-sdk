@@ -1,7 +1,7 @@
 import { GraphQLErrorCode, UnexpectedError } from '@aave/client';
 import type { StandardData } from '@aave/core';
 import { createGraphQLErrorObject } from '@aave/core/testing';
-import { err, ok, type Result } from '@aave/types';
+import { err, never, ok, type Result } from '@aave/types';
 import { act } from '@testing-library/react';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -27,7 +27,10 @@ import type {
   SuspenseResult,
 } from './results';
 
-const TestQuery: TypedDocumentNode<StandardData<number>, { id: number }> = gql`
+const TestQuery: TypedDocumentNode<
+  StandardData<number | null>,
+  { id: number }
+> = gql`
   query TestQuery($id: Int) {
     value: health # Using 'health' as a placeholder field
   }
@@ -235,7 +238,7 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
             // biome-ignore lint/suspicious/noExplicitAny: testing internal API
             variables: { id: 42 } as any,
             suspense: false,
-            selector: (data: number) => ok(data * 2),
+            selector: (data) => (data ? ok(data * 2) : never()),
           }),
         );
 
@@ -261,7 +264,7 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
             // biome-ignore lint/suspicious/noExplicitAny: testing internal API
             variables: { id: 1 } as any,
             suspense: false,
-            selector: (_data: number): Result<number, CustomSelectorError> =>
+            selector: (_data): Result<number, CustomSelectorError> =>
               err(new CustomSelectorError('Selector failed')),
           }),
         );
@@ -271,6 +274,35 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
         expect(result.current).toMatchObject({
           data: undefined,
           error: expect.any(CustomSelectorError),
+          loading: false,
+        });
+      });
+    });
+
+    describe('When the query response `data` is `null`', () => {
+      it('Then it should return `null` as `data` without throwing', async () => {
+        server.use(
+          graphql.query(TestQuery, () => {
+            return HttpResponse.json({
+              data: null,
+            });
+          }),
+        );
+
+        const { result } = renderHookWithinContext(() =>
+          useSuspendableQuery({
+            document: TestQuery,
+            // biome-ignore lint/suspicious/noExplicitAny: testing internal API
+            variables: { id: 1 } as any,
+            suspense: false,
+          }),
+        );
+
+        await vi.waitUntil(() => !result.current.loading);
+
+        expect(result.current).toMatchObject({
+          data: null,
+          error: undefined,
           loading: false,
         });
       });
@@ -339,6 +371,26 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
       });
     });
 
+    describe('When using a selector that returns Ok', () => {
+      it('Then it should return the selected data', async () => {
+        const { result } = renderHookWithinContext(() =>
+          useSuspendableQuery({
+            document: TestQuery,
+            // biome-ignore lint/suspicious/noExplicitAny: testing internal API
+            variables: { id: 42 } as any,
+            suspense: true,
+            selector: (data) => (data ? ok(data * 2) : never()),
+          }),
+        );
+
+        await vi.waitUntil(() => result.current?.data);
+
+        expect(result.current).toMatchObject({
+          data: 84,
+        });
+      });
+    });
+
     describe('When using a selector that returns Err', () => {
       class CustomSelectorError extends Error {
         name = 'CustomSelectorError' as const;
@@ -353,7 +405,7 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
               // biome-ignore lint/suspicious/noExplicitAny: testing internal API
               variables: { id: 1 } as any,
               suspense: true,
-              selector: (_data: number): Result<number, CustomSelectorError> =>
+              selector: (_data): Result<number, CustomSelectorError> =>
                 err(new CustomSelectorError('Selector failed')),
             }),
           {
@@ -368,6 +420,33 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
           expect.any(CustomSelectorError),
           expect.any(Object),
         );
+      });
+    });
+
+    describe('When the query response `data` is `null`', () => {
+      it('Then it should suspend and resolve with `null` as `data`', async () => {
+        server.use(
+          graphql.query(TestQuery, () => {
+            return HttpResponse.json({
+              data: null,
+            });
+          }),
+        );
+
+        const { result } = renderHookWithinContext(() =>
+          useSuspendableQuery({
+            document: TestQuery,
+            // biome-ignore lint/suspicious/noExplicitAny: testing internal API
+            variables: { id: 1 } as any,
+            suspense: true,
+          }),
+        );
+
+        await vi.waitUntil(() => result.current?.data !== undefined);
+
+        expect(result.current).toMatchObject({
+          data: null,
+        });
       });
     });
   });

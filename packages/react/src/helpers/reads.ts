@@ -1,4 +1,5 @@
 import { type StandardData, UnexpectedError } from '@aave/client';
+import { extractDocumentName } from '@aave/core';
 import {
   type AnyVariables,
   invariant,
@@ -259,9 +260,14 @@ export function useSuspendableQuery<
     return ReadResult.Failure(unexpected, metadata, reloading);
   }
 
-  invariant(data, 'No data returned');
+  invariant(
+    data !== undefined,
+    `Unexpected empty response from the API for '${extractDocumentName(document) ?? 'unknown'}' query`,
+  );
 
-  const selected = selector(data.value);
+  // GraphQL responses can have `{ "data": null }` but urql types don't reflect this
+  const responseValue = data === null ? null : data.value;
+  const selected = selector(responseValue as ResponseValue);
 
   if (selected.isErr()) {
     if (suspense) {

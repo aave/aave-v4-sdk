@@ -1,5 +1,5 @@
 import type { Operation } from '@urql/core';
-import { Kind, type OperationDefinitionNode } from 'graphql';
+import { type DocumentNode, Kind, type OperationDefinitionNode } from 'graphql';
 
 /**
  * @internal
@@ -11,9 +11,16 @@ export function delay(ms: number): Promise<void> {
 /**
  * @internal
  */
-export function extractOperationName(op: Operation): string | null {
-  const def = op.query.definitions.find(
+export function extractDocumentName(document: DocumentNode): string | null {
+  const def = document.definitions.find(
     (d) => d.kind === Kind.OPERATION_DEFINITION,
   ) as OperationDefinitionNode | undefined;
   return def?.name?.value ?? null;
+}
+
+/**
+ * @internal
+ */
+export function extractOperationName(op: Operation): string | null {
+  return extractDocumentName(op.query);
 }
