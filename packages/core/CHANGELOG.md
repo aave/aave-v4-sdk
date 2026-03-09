@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.0.0-next.19
+
+### Patch Changes
+
+- a3ffb27: **fix:** force build to expose `extractDocumentName`.
+
 ## 1.0.0-next.18
 
 ### Patch Changes
