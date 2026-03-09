@@ -197,6 +197,7 @@ function estimateGas(
       data: request.data,
       to: request.to,
       value: BigInt(request.value),
+      prepare: false,
     }),
     (err) => SigningError.from(err),
   ).map((gas) => (gas * 115n) / 100n); // 15% buffer

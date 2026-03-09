@@ -38,16 +38,3 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
   "summary": Any<Object>,
 }
 `;
-
-exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 4`] = `
-{
-  "__typename": "Hub",
-  "address": Any<String>,
-  "chain": ObjectContaining {
-    "chainId": 123456789,
-  },
-  "id": Any<String>,
-  "name": Any<String>,
-  "summary": Any<Object>,
-}
-`;

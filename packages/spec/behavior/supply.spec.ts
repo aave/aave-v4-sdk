@@ -10,7 +10,7 @@ import { supply, userSupplies } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_USDT_ADDRESS,
   fundErc20Address,
 } from '@aave/client/testing';
@@ -29,12 +29,12 @@ describe('Supplying Assets on Aave V4', () => {
 
       beforeAll(async () => {
         const setup = await fundErc20Address(evmAddress(user.account.address), {
-          address: ETHEREUM_USDC_ADDRESS,
+          address: ETHEREUM_USDT_ADDRESS,
           amount: bigDecimal('10'),
           decimals: 6,
         }).andThen(() =>
           findReservesToSupply(client, user, {
-            token: ETHEREUM_USDC_ADDRESS,
+            token: ETHEREUM_USDT_ADDRESS,
             canUseAsCollateral: true,
           }),
         );
@@ -89,7 +89,7 @@ describe('Supplying Assets on Aave V4', () => {
 
       beforeAll(async () => {
         const setup = await findReservesToSupply(client, user, {
-          token: ETHEREUM_USDT_ADDRESS,
+          token: ETHEREUM_AAVE_ADDRESS,
           canUseAsCollateral: true,
         }).andThen((reserves) => {
           reserveNotCollateral = reserves[0];
@@ -104,7 +104,7 @@ describe('Supplying Assets on Aave V4', () => {
       });
 
       it('Then the supply position is updated and the tokens are enabled as collateral', async () => {
-        const amountToSupply = bigDecimal('1');
+        const amountToSupply = bigDecimal('0.1');
 
         const result = await supplyToReserve(client, user, {
           reserve: reserveNotCollateral.id,
@@ -152,7 +152,7 @@ describe('Supplying Assets on Aave V4', () => {
           reserveWithPermit = reserve;
           return fundErc20Address(evmAddress(user.account.address), {
             address: reserve.asset.underlying.address,
-            amount: bigDecimal('10'),
+            amount: bigDecimal('1'),
             decimals: reserve.asset.underlying.info.decimals,
           });
         });
