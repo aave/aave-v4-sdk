@@ -61,16 +61,22 @@ jobs:
         if: always()
         run: |
           if [ -d "reports" ]; then
-            # Upload all files except .gz files
+
+            # 1. Patch index.html FIRST (before sync), so the patched version is
+            #    what gets uploaded — not the original with the .gz reference.
+            #    sed strips ".gz" from window.METADATA_PATH so the browser fetches
+            #    "html.meta.json" (the decompressed file we upload in step 2).
+            index_file="reports/index.html"
+            if [ -f "$index_file" ]; then
+              sed -i 's|window\.METADATA_PATH="\([^"]*\)\.gz"|window.METADATA_PATH="\1"|g' "$index_file"
+            fi
+
+            # 2. Upload all non-.gz files (including the patched index.html)
             aws s3 sync reports/ s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/ \
               --delete \
               --exclude "*.gz"
 
-            # Decompress .gz files and upload as plain JSON.
-            # Vitest's html.meta.json.gz contains the test result data. Uploading it decompressed
-            # avoids all Content-Encoding/SES issues: SES (lockdown-install.js injected by wallet
-            # extensions) interferes with browser auto-decompression of fetch responses, causing
-            # Vitest's internal .json() call to fail with SyntaxError on raw gzip bytes.
+            # 3. Decompress .gz files and upload as plain JSON.
             find reports/ -name "*.gz" | while read gz_file; do
               decompressed="${gz_file%.gz}"
               gunzip -c "$gz_file" > "$decompressed"
@@ -81,7 +87,7 @@ jobs:
               rm "$decompressed"
             done
 
-            echo "Aave V4 SDK report uploaded to: s3://${{ secrets.S3_BUCKET_NAME }}/aave-v4-sdk/${{ github.run_id }}/"
+            echo "Report URL: https://<your-domain>/aave-v4-sdk/${{ github.run_id }}/index.html#/"
           else
             echo "Aave V4 SDK report directory not found"
           fi
