@@ -1,5 +1,15 @@
 # @aave/react
 
+## 4.0.0-next.49
+
+### Patch Changes
+
+- f28c494: **fix:** updating `viem` to 4.47.0 version and avoid preparing transactions when estimating gas
+- b435041: **fix:** `useUserPosition`, `useHub`, `useReserve`- and other single entity read hooks - throwing with `No data returned`.
+- 22c5de0: **fix:** refresh `userBalances` after `useLiquidatePosition` completes
+- Updated dependencies [f28c494]
+  - @aave/client@4.0.0-next.49
+
 ## 4.0.0-next.48
 
 ### Patch Changes

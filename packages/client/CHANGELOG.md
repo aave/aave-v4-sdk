@@ -1,5 +1,11 @@
 # @aave/client
 
+## 4.0.0-next.49
+
+### Patch Changes
+
+- f28c494: **fix:** updating `viem` to 4.47.0 version and avoid preparing transactions when estimating gas
+
 ## 4.0.0-next.48
 
 ### Patch Changes
