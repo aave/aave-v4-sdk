@@ -1,0 +1,35 @@
+packages/react/src/hubs.ts
+  9456471b74b664e0 7,11-13,374-500
+packages/client/src/actions/hubs.ts
+  9456471b74b664e0 5-7,153-183
+packages/graphql/src/hub.ts
+  9456471b74b664e0 3,105-147
+packages/graphql/src/fragments/reserve.ts
+  9456471b74b664e0 32-37,39
+packages/client/src/cache.ts
+  9456471b74b664e0 413-414
+packages/graphql/src/fragments/assets.ts
+  9456471b74b664e0 47-58
+.changeset/bright-rates-curve.md
+  9456471b74b664e0 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "377e922069abcb752983914a1c5afe6dde011c78",
+  "prompts": {
+    "9456471b74b664e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a5e03706-1202-4995-8dcf-44550e6b1528",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 246,
+      "total_deletions": 4,
+      "accepted_lines": 243,
+      "overriden_lines": 0
+    }
+  }
+}
