@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.35
+
+### Minor Changes
+
+- 377e922: **feat:** add `hubAssetInterestRateModel` query, action, and hooks for fetching interest rate curve data; add new fields to `HubAssetSettings` (`optimalUtilizationRate`, `baseBorrowRate`, `slopeBelowOptimal`, `slopeAboveOptimal`) and `ReserveSettings` (`borrowCap`, `supplyCap`)
+
 ## 1.0.0-next.34
 
 ### Patch Changes
