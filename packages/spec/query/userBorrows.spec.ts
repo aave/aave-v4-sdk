@@ -16,215 +16,213 @@ const user = await createNewWallet(
   '0x40e7024d48c43beb83f2328465b31b0d8e38835688cd7d9e24301f1aa1961d4b',
 );
 
-describe('Querying User Borrow Positions on Aave V4', () => {
-  describe('Given a user with multiple active borrow positions', () => {
-    beforeAll(async () => {
-      await recreateUserBorrows(client, user, {
-        spoke: ETHEREUM_SPOKE_CORE_ID,
-      });
-    }, 180_000);
+describe('Given a user with multiple active borrow positions', () => {
+  beforeAll(async () => {
+    await recreateUserBorrows(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ID,
+    });
+  }, 180_000);
 
-    describe('When the user queries their borrow positions by spoke', () => {
-      it('Then the matching borrow positions are returned', async () => {
-        const borrowPositions = await userBorrows(client, {
-          query: {
-            userSpoke: {
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-              user: evmAddress(user.account.address),
-            },
+  describe('When the user queries their borrow positions by spoke', () => {
+    it('Then the matching borrow positions are returned', async () => {
+      const borrowPositions = await userBorrows(client, {
+        query: {
+          userSpoke: {
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            user: evmAddress(user.account.address),
           },
-        });
-        assertOk(borrowPositions);
+        },
+      });
+      assertOk(borrowPositions);
 
-        expect(borrowPositions.value).toBeArrayWithElements(
-          expect.objectContaining({
-            reserve: expect.objectContaining({
-              spoke: expect.objectContaining({
-                id: ETHEREUM_SPOKE_CORE_ID,
-              }),
+      expect(borrowPositions.value).toBeArrayWithElements(
+        expect.objectContaining({
+          reserve: expect.objectContaining({
+            spoke: expect.objectContaining({
+              id: ETHEREUM_SPOKE_CORE_ID,
             }),
           }),
-        );
-      });
+        }),
+      );
     });
+  });
 
-    describe('When the user queries their borrow positions including zero balances', () => {
-      it('Then all borrow positions, including those with zero balances, are returned', async () => {
-        const borrowPositions = await userBorrows(client, {
-          query: {
-            userSpoke: {
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-              user: evmAddress(user.account.address),
-            },
+  describe('When the user queries their borrow positions including zero balances', () => {
+    it('Then all borrow positions, including those with zero balances, are returned', async () => {
+      const borrowPositions = await userBorrows(client, {
+        query: {
+          userSpoke: {
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+            user: evmAddress(user.account.address),
           },
-          includeZeroBalances: true,
-        });
-        assertOk(borrowPositions);
-        expect(borrowPositions.value).toBeArrayWithElements(
-          expect.objectContaining({
-            reserve: expect.objectContaining({
-              spoke: expect.objectContaining({
-                id: ETHEREUM_SPOKE_CORE_ID,
-              }),
+        },
+        includeZeroBalances: true,
+      });
+      assertOk(borrowPositions);
+      expect(borrowPositions.value).toBeArrayWithElements(
+        expect.objectContaining({
+          reserve: expect.objectContaining({
+            spoke: expect.objectContaining({
+              id: ETHEREUM_SPOKE_CORE_ID,
             }),
           }),
-        );
-      });
+        }),
+      );
     });
+  });
 
-    describe('When the user queries their borrow positions by chain ID', () => {
-      it('Then the borrow positions matching the specified chain IDs are returned', async () => {
-        const borrowPositions = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
-          },
-        });
-        assertOk(borrowPositions);
-
-        expect(borrowPositions.value).toBeArrayWithElements(
-          expect.objectContaining({
-            reserve: expect.objectContaining({
-              spoke: expect.objectContaining({
-                chain: expect.objectContaining({
-                  chainId: ETHEREUM_FORK_ID,
-                }),
-              }),
-            }),
-          }),
-        );
-      });
-    });
-
-    describe('When the user queries a specific borrow position by its ID', () => {
-      it('Then the corresponding borrow position is returned', async () => {
-        const positions = await userPositions(client, {
-          filter: {
+  describe('When the user queries their borrow positions by chain ID', () => {
+    it('Then the borrow positions matching the specified chain IDs are returned', async () => {
+      const borrowPositions = await userBorrows(client, {
+        query: {
+          userChains: {
             chainIds: [ETHEREUM_FORK_ID],
+            user: evmAddress(user.account.address),
           },
-          user: evmAddress(user.account.address),
-        });
-        assertOk(positions);
-        assertNonEmptyArray(positions.value);
-
-        const borrowPositions = await userBorrows(client, {
-          query: {
-            userPositionId: positions.value[0].id,
-          },
-        });
-        assertOk(borrowPositions);
-        expect(borrowPositions.value.length).toBe(3);
+        },
       });
+      assertOk(borrowPositions);
+
+      expect(borrowPositions.value).toBeArrayWithElements(
+        expect.objectContaining({
+          reserve: expect.objectContaining({
+            spoke: expect.objectContaining({
+              chain: expect.objectContaining({
+                chainId: ETHEREUM_FORK_ID,
+              }),
+            }),
+          }),
+        }),
+      );
     });
+  });
 
-    describe('When the user fetches borrow positions ordered by amount', () => {
-      it('Then the borrow positions are returned in order of amount', async () => {
-        const borrowPositionsDesc = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
-          },
-          orderBy: { amount: OrderDirection.Desc },
-        });
-        assertOk(borrowPositionsDesc);
-
-        const listOrderAmountDesc = borrowPositionsDesc.value.map(
-          (elem) => elem.principal.amount.value,
-        );
-        expect(listOrderAmountDesc).toBeSortedNumerically('desc');
-
-        const borrowPositionsAsc = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
-          },
-          orderBy: { amount: OrderDirection.Asc },
-        });
-        assertOk(borrowPositionsAsc);
-
-        const listOrderAmountAsc = borrowPositionsAsc.value.map(
-          (elem) => elem.principal.amount.value,
-        );
-        expect(listOrderAmountAsc).toBeSortedNumerically('asc');
+  describe('When the user queries a specific borrow position by its ID', () => {
+    it('Then the corresponding borrow position is returned', async () => {
+      const positions = await userPositions(client, {
+        filter: {
+          chainIds: [ETHEREUM_FORK_ID],
+        },
+        user: evmAddress(user.account.address),
       });
+      assertOk(positions);
+      assertNonEmptyArray(positions.value);
+
+      const borrowPositions = await userBorrows(client, {
+        query: {
+          userPositionId: positions.value[0].id,
+        },
+      });
+      assertOk(borrowPositions);
+      expect(borrowPositions.value.length).toBe(3);
     });
+  });
 
-    describe('When the user fetches borrow positions ordered by APY', () => {
-      it('Then the borrow positions are returned in order of APY', async () => {
-        const borrowPositionsDesc = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
+  describe('When the user fetches borrow positions ordered by amount', () => {
+    it('Then the borrow positions are returned in order of amount', async () => {
+      const borrowPositionsDesc = await userBorrows(client, {
+        query: {
+          userChains: {
+            chainIds: [ETHEREUM_FORK_ID],
+            user: evmAddress(user.account.address),
           },
-          orderBy: { apy: OrderDirection.Desc },
-        });
-        assertOk(borrowPositionsDesc);
-
-        const listOrderApyDesc = borrowPositionsDesc.value.map(
-          (elem) => elem.reserve.summary.borrowApy.value,
-        );
-        expect(listOrderApyDesc).toBeSortedNumerically('desc');
-
-        const borrowPositionsAsc = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
-          },
-          orderBy: { apy: OrderDirection.Asc },
-        });
-        assertOk(borrowPositionsAsc);
-
-        const listOrderApyAsc = borrowPositionsAsc.value.map(
-          (elem) => elem.reserve.summary.borrowApy.value,
-        );
-        expect(listOrderApyAsc).toBeSortedNumerically('asc');
+        },
+        orderBy: { amount: OrderDirection.Desc },
       });
+      assertOk(borrowPositionsDesc);
+
+      const listOrderAmountDesc = borrowPositionsDesc.value.map(
+        (elem) => elem.principal.amount.value,
+      );
+      expect(listOrderAmountDesc).toBeSortedNumerically('desc');
+
+      const borrowPositionsAsc = await userBorrows(client, {
+        query: {
+          userChains: {
+            chainIds: [ETHEREUM_FORK_ID],
+            user: evmAddress(user.account.address),
+          },
+        },
+        orderBy: { amount: OrderDirection.Asc },
+      });
+      assertOk(borrowPositionsAsc);
+
+      const listOrderAmountAsc = borrowPositionsAsc.value.map(
+        (elem) => elem.principal.amount.value,
+      );
+      expect(listOrderAmountAsc).toBeSortedNumerically('asc');
     });
+  });
 
-    describe('When the user fetches borrow positions ordered by asset name', () => {
-      it('Then the borrow positions are returned in order of asset name', async () => {
-        const borrowPositionsDesc = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
+  describe('When the user fetches borrow positions ordered by APY', () => {
+    it('Then the borrow positions are returned in order of APY', async () => {
+      const borrowPositionsDesc = await userBorrows(client, {
+        query: {
+          userChains: {
+            chainIds: [ETHEREUM_FORK_ID],
+            user: evmAddress(user.account.address),
           },
-          orderBy: { assetName: OrderDirection.Desc },
-        });
-        assertOk(borrowPositionsDesc);
-
-        const listOrderAssetNameDesc = borrowPositionsDesc.value.map(
-          (elem) => elem.reserve.asset.underlying.info.name,
-        );
-        expect(listOrderAssetNameDesc).toBeSortedAlphabetically('desc');
-
-        const borrowPositionsAsc = await userBorrows(client, {
-          query: {
-            userChains: {
-              chainIds: [ETHEREUM_FORK_ID],
-              user: evmAddress(user.account.address),
-            },
-          },
-          orderBy: { assetName: OrderDirection.Asc },
-        });
-        assertOk(borrowPositionsAsc);
-
-        const listOrderAssetNameAsc = borrowPositionsAsc.value.map(
-          (elem) => elem.reserve.asset.underlying.info.name,
-        );
-        expect(listOrderAssetNameAsc).toBeSortedAlphabetically('asc');
+        },
+        orderBy: { apy: OrderDirection.Desc },
       });
+      assertOk(borrowPositionsDesc);
+
+      const listOrderApyDesc = borrowPositionsDesc.value.map(
+        (elem) => elem.reserve.summary.borrowApy.value,
+      );
+      expect(listOrderApyDesc).toBeSortedNumerically('desc');
+
+      const borrowPositionsAsc = await userBorrows(client, {
+        query: {
+          userChains: {
+            chainIds: [ETHEREUM_FORK_ID],
+            user: evmAddress(user.account.address),
+          },
+        },
+        orderBy: { apy: OrderDirection.Asc },
+      });
+      assertOk(borrowPositionsAsc);
+
+      const listOrderApyAsc = borrowPositionsAsc.value.map(
+        (elem) => elem.reserve.summary.borrowApy.value,
+      );
+      expect(listOrderApyAsc).toBeSortedNumerically('asc');
+    });
+  });
+
+  describe('When the user fetches borrow positions ordered by asset name', () => {
+    it('Then the borrow positions are returned in order of asset name', async () => {
+      const borrowPositionsDesc = await userBorrows(client, {
+        query: {
+          userChains: {
+            chainIds: [ETHEREUM_FORK_ID],
+            user: evmAddress(user.account.address),
+          },
+        },
+        orderBy: { assetName: OrderDirection.Desc },
+      });
+      assertOk(borrowPositionsDesc);
+
+      const listOrderAssetNameDesc = borrowPositionsDesc.value.map(
+        (elem) => elem.reserve.asset.underlying.info.name,
+      );
+      expect(listOrderAssetNameDesc).toBeSortedAlphabetically('desc');
+
+      const borrowPositionsAsc = await userBorrows(client, {
+        query: {
+          userChains: {
+            chainIds: [ETHEREUM_FORK_ID],
+            user: evmAddress(user.account.address),
+          },
+        },
+        orderBy: { assetName: OrderDirection.Asc },
+      });
+      assertOk(borrowPositionsAsc);
+
+      const listOrderAssetNameAsc = borrowPositionsAsc.value.map(
+        (elem) => elem.reserve.asset.underlying.info.name,
+      );
+      expect(listOrderAssetNameAsc).toBeSortedAlphabetically('asc');
     });
   });
 });
