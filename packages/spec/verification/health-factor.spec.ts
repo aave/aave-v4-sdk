@@ -75,9 +75,10 @@ describe('Health Factor Scenarios on Aave V4', () => {
           spoke: ETHEREUM_SPOKE_CORE_ID,
           canUseAsCollateral: true,
         }).andThen((reservesToSupply) => {
-          const amountToSupply = reservesToSupply[0].supplyCap
-            .minus(reservesToSupply[0].summary.supplied.amount.value)
-            .div(10000);
+          const amountToSupply =
+            reservesToSupply[0].settings.supplyCap.amount.value
+              .minus(reservesToSupply[0].summary.supplied.amount.value)
+              .div(10000);
 
           return fundErc20Address(evmAddress(user.account.address), {
             address: reservesToSupply[0].asset.underlying.address,
@@ -129,9 +130,10 @@ describe('Health Factor Scenarios on Aave V4', () => {
           assertOk(position);
           HFBeforeSupply = position.value.healthFactor.current;
 
-          const amountToSupply = usedReserves.supplyReserve.supplyCap
-            .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
-            .div(10000);
+          const amountToSupply =
+            usedReserves.supplyReserve.settings.supplyCap.amount.value
+              .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
+              .div(10000);
 
           const setup = await fundErc20Address(
             evmAddress(user.account.address),
