@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
+exports[`Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 1`] = `
 {
   "__typename": "Hub",
   "address": Any<String>,
@@ -13,7 +13,7 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 }
 `;
 
-exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
+exports[`Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 2`] = `
 {
   "__typename": "Hub",
   "address": Any<String>,
@@ -26,7 +26,7 @@ exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hub
 }
 `;
 
-exports[`Querying Hubs on Aave V4 > Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
+exports[`Given a user who wants to list available hubs > When fetching hubs by chain ID(s) > Then it should return the expected data for each hub 3`] = `
 {
   "__typename": "Hub",
   "address": Any<String>,
