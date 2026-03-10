@@ -34,18 +34,320 @@ import {
 
 const user = await createNewWallet();
 
-describe('Health Factor Scenarios on Aave V4', () => {
-  describe('Given a user with a one supply position as collateral', () => {
-    describe('When the user checks the health factor', () => {
-      beforeAll(async () => {
-        const amountToSupply = bigDecimal('100');
+describe('Given a user with a one supply position as collateral', () => {
+  describe('When the user checks the health factor', () => {
+    beforeAll(async () => {
+      const amountToSupply = bigDecimal('100');
 
-        const setup = await findReserveAndSupply(client, user, {
-          token: ETHEREUM_USDT_ADDRESS,
+      const setup = await findReserveAndSupply(client, user, {
+        token: ETHEREUM_USDT_ADDRESS,
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+        asCollateral: true,
+        amount: amountToSupply,
+      });
+
+      assertOk(setup);
+    });
+
+    it('Then the health factor should be null', async () => {
+      const position = await userPosition(client, {
+        userSpoke: {
+          user: evmAddress(user.account.address),
           spoke: ETHEREUM_SPOKE_CORE_ID,
-          asCollateral: true,
+        },
+      }).map(nonNullable);
+      assertOk(position);
+      expect(position.value.healthFactor.current).toBeNull();
+    });
+  });
+
+  describe('And the user has a one borrow position', () => {
+    let usedReserves: { borrowReserve: Reserve; supplyReserve: Reserve };
+
+    beforeAll(async () => {
+      const reservesToBorrow = await findReservesToBorrow(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+      });
+      assertOk(reservesToBorrow);
+
+      const setup = await findReservesToSupply(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+        canUseAsCollateral: true,
+      }).andThen((reservesToSupply) => {
+        const amountToSupply =
+          reservesToSupply[0].settings.supplyCap.amount.value
+            .minus(reservesToSupply[0].summary.supplied.amount.value)
+            .div(10000);
+
+        return fundErc20Address(evmAddress(user.account.address), {
+          address: reservesToSupply[0].asset.underlying.address,
           amount: amountToSupply,
+          decimals: reservesToSupply[0].asset.underlying.info.decimals,
+        })
+          .andThen(() =>
+            supplyAndBorrow(client, user, {
+              reserveToSupply: reservesToSupply[0],
+              amountToSupply: amountToSupply,
+              reserveToBorrow: reservesToBorrow.value[0],
+              ratioToBorrow: 0.1,
+            }),
+          )
+          .map(() => ({
+            borrowReserve: reservesToBorrow.value[0],
+            supplyReserve: reservesToSupply[0],
+          }));
+      });
+      assertOk(setup);
+      usedReserves = setup!.value;
+    }, 90_000);
+
+    describe('When the user checks the health factor', () => {
+      it('Then the health factor should be a number greater than 1', async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
+          1,
+        );
+      });
+    });
+
+    describe('When the user supplies more collateral', () => {
+      let HFBeforeSupply: BigDecimal | null;
+
+      beforeAll(async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        HFBeforeSupply = position.value.healthFactor.current;
+
+        const amountToSupply =
+          usedReserves.supplyReserve.settings.supplyCap.amount.value
+            .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
+            .div(10000);
+
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: usedReserves.supplyReserve.asset.underlying.address,
+          amount: amountToSupply,
+          decimals: usedReserves.supplyReserve.asset.underlying.info.decimals,
+        }).andThen(() =>
+          supplyToReserve(client, user, {
+            amount: { erc20: { value: amountToSupply } },
+            reserve: usedReserves.supplyReserve.id,
+            enableCollateral: true,
+            sender: evmAddress(user.account.address),
+          }),
+        );
+
+        assertOk(setup);
+      }, 90_000);
+
+      it('Then the health factor should be greater than before supplying more collateral', async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
         });
+        assertOk(position);
+        expect(position.value!.healthFactor.current).toBeBigDecimalGreaterThan(
+          HFBeforeSupply,
+        );
+      });
+    });
+
+    describe('When the user repays partially the borrow position', () => {
+      let HFBeforeRepay: BigDecimal | null;
+
+      beforeAll(async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        HFBeforeRepay = position.value.healthFactor.current;
+
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: usedReserves.borrowReserve.asset.underlying.address,
+          amount:
+            usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+              1.5,
+            ),
+          decimals: usedReserves.borrowReserve.asset.underlying.info.decimals,
+        })
+          .andThen(() =>
+            repay(client, {
+              reserve: usedReserves.borrowReserve.id,
+              sender: evmAddress(user.account.address),
+              amount: {
+                erc20: {
+                  value: {
+                    exact:
+                      usedReserves.borrowReserve.userState!.borrowable.amount.value.div(
+                        20,
+                      ),
+                  },
+                },
+              },
+            }),
+          )
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction);
+
+        assertOk(setup);
+      });
+
+      it('Then the health factor should be greater than before repaying partially', async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
+          HFBeforeRepay,
+        );
+      });
+    });
+
+    describe('When the user borrows more money', () => {
+      let HFBeforeBorrow: BigDecimal | null;
+
+      beforeAll(async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        HFBeforeBorrow = position.value.healthFactor.current;
+
+        const setup = await borrow(client, {
+          sender: evmAddress(user.account.address),
+          reserve: usedReserves.borrowReserve.id,
+          amount: {
+            erc20: {
+              value:
+                usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+                  0.1,
+                ),
+            },
+          },
+        })
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction);
+
+        assertOk(setup);
+      });
+
+      it('Then the health factor should be less than before borrowing more money', async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        expect(position.value.healthFactor.current).toBeBigDecimalLessThan(
+          HFBeforeBorrow,
+        );
+      });
+    });
+
+    describe('When the user withdraws collateral', () => {
+      let HFBeforeWithdraw: BigDecimal | null;
+
+      beforeAll(async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        HFBeforeWithdraw = position.value.healthFactor.current;
+
+        const supplies = await userSupplies(client, {
+          query: {
+            userSpoke: {
+              spoke: usedReserves.supplyReserve.spoke.id,
+              user: evmAddress(user.account.address),
+            },
+          },
+        });
+        assertOk(supplies);
+        const amountToWithdraw = supplies.value
+          .find(
+            (supply) => supply.reserve.id === usedReserves.supplyReserve.id,
+          )!
+          .withdrawable.amount.value.div(2);
+
+        const setup = await withdraw(client, {
+          reserve: usedReserves.supplyReserve.id,
+          sender: evmAddress(user.account.address),
+          amount: {
+            erc20: {
+              exact: amountToWithdraw,
+            },
+          },
+        })
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction);
+
+        assertOk(setup);
+      }, 60_000);
+
+      it('Then the health factor should be less than before withdrawing collateral', async () => {
+        const position = await userPosition(client, {
+          userSpoke: {
+            user: evmAddress(user.account.address),
+            spoke: ETHEREUM_SPOKE_CORE_ID,
+          },
+        }).map(nonNullable);
+        assertOk(position);
+        expect(position.value.healthFactor.current).toBeBigDecimalLessThan(
+          HFBeforeWithdraw,
+        );
+      });
+    });
+
+    describe('When the user repays completely the borrow position', () => {
+      beforeAll(async () => {
+        const setup = await fundErc20Address(evmAddress(user.account.address), {
+          address: usedReserves.borrowReserve.asset.underlying.address,
+          amount:
+            usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
+              2,
+            ),
+          decimals: usedReserves.borrowReserve.asset.underlying.info.decimals,
+        })
+          .andThen(() =>
+            repay(client, {
+              reserve: usedReserves.borrowReserve.id,
+              sender: evmAddress(user.account.address),
+              amount: {
+                erc20: {
+                  value: {
+                    max: true,
+                  },
+                },
+              },
+            }),
+          )
+          .andThen(sendWith(user))
+          .andThen(client.waitForTransaction);
 
         assertOk(setup);
       });
@@ -59,322 +361,6 @@ describe('Health Factor Scenarios on Aave V4', () => {
         }).map(nonNullable);
         assertOk(position);
         expect(position.value.healthFactor.current).toBeNull();
-      });
-    });
-
-    describe('And the user has a one borrow position', () => {
-      let usedReserves: { borrowReserve: Reserve; supplyReserve: Reserve };
-
-      beforeAll(async () => {
-        const reservesToBorrow = await findReservesToBorrow(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-        });
-        assertOk(reservesToBorrow);
-
-        const setup = await findReservesToSupply(client, user, {
-          spoke: ETHEREUM_SPOKE_CORE_ID,
-          canUseAsCollateral: true,
-        }).andThen((reservesToSupply) => {
-          const amountToSupply =
-            reservesToSupply[0].settings.supplyCap.amount.value
-              .minus(reservesToSupply[0].summary.supplied.amount.value)
-              .div(10000);
-
-          return fundErc20Address(evmAddress(user.account.address), {
-            address: reservesToSupply[0].asset.underlying.address,
-            amount: amountToSupply,
-            decimals: reservesToSupply[0].asset.underlying.info.decimals,
-          })
-            .andThen(() =>
-              supplyAndBorrow(client, user, {
-                reserveToSupply: reservesToSupply[0],
-                amountToSupply: amountToSupply,
-                reserveToBorrow: reservesToBorrow.value[0],
-                ratioToBorrow: 0.1,
-              }),
-            )
-            .map(() => ({
-              borrowReserve: reservesToBorrow.value[0],
-              supplyReserve: reservesToSupply[0],
-            }));
-        });
-        assertOk(setup);
-        usedReserves = setup!.value;
-      }, 90_000);
-
-      describe('When the user checks the health factor', () => {
-        it('Then the health factor should be a number greater than 1', async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
-            1,
-          );
-        });
-      });
-
-      describe('When the user supplies more collateral', () => {
-        let HFBeforeSupply: BigDecimal | null;
-
-        beforeAll(async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          HFBeforeSupply = position.value.healthFactor.current;
-
-          const amountToSupply =
-            usedReserves.supplyReserve.settings.supplyCap.amount.value
-              .minus(usedReserves.supplyReserve.summary.supplied.amount.value)
-              .div(10000);
-
-          const setup = await fundErc20Address(
-            evmAddress(user.account.address),
-            {
-              address: usedReserves.supplyReserve.asset.underlying.address,
-              amount: amountToSupply,
-              decimals:
-                usedReserves.supplyReserve.asset.underlying.info.decimals,
-            },
-          ).andThen(() =>
-            supplyToReserve(client, user, {
-              amount: { erc20: { value: amountToSupply } },
-              reserve: usedReserves.supplyReserve.id,
-              enableCollateral: true,
-              sender: evmAddress(user.account.address),
-            }),
-          );
-
-          assertOk(setup);
-        }, 90_000);
-
-        it('Then the health factor should be greater than before supplying more collateral', async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          });
-          assertOk(position);
-          expect(
-            position.value!.healthFactor.current,
-          ).toBeBigDecimalGreaterThan(HFBeforeSupply);
-        });
-      });
-
-      describe('When the user repays partially the borrow position', () => {
-        let HFBeforeRepay: BigDecimal | null;
-
-        beforeAll(async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          HFBeforeRepay = position.value.healthFactor.current;
-
-          const setup = await fundErc20Address(
-            evmAddress(user.account.address),
-            {
-              address: usedReserves.borrowReserve.asset.underlying.address,
-              amount:
-                usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
-                  1.5,
-                ),
-              decimals:
-                usedReserves.borrowReserve.asset.underlying.info.decimals,
-            },
-          )
-            .andThen(() =>
-              repay(client, {
-                reserve: usedReserves.borrowReserve.id,
-                sender: evmAddress(user.account.address),
-                amount: {
-                  erc20: {
-                    value: {
-                      exact:
-                        usedReserves.borrowReserve.userState!.borrowable.amount.value.div(
-                          20,
-                        ),
-                    },
-                  },
-                },
-              }),
-            )
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction);
-
-          assertOk(setup);
-        });
-
-        it('Then the health factor should be greater than before repaying partially', async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          expect(position.value.healthFactor.current).toBeBigDecimalGreaterThan(
-            HFBeforeRepay,
-          );
-        });
-      });
-
-      describe('When the user borrows more money', () => {
-        let HFBeforeBorrow: BigDecimal | null;
-
-        beforeAll(async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          HFBeforeBorrow = position.value.healthFactor.current;
-
-          const setup = await borrow(client, {
-            sender: evmAddress(user.account.address),
-            reserve: usedReserves.borrowReserve.id,
-            amount: {
-              erc20: {
-                value:
-                  usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
-                    0.1,
-                  ),
-              },
-            },
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction);
-
-          assertOk(setup);
-        });
-
-        it('Then the health factor should be less than before borrowing more money', async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          expect(position.value.healthFactor.current).toBeBigDecimalLessThan(
-            HFBeforeBorrow,
-          );
-        });
-      });
-
-      describe('When the user withdraws collateral', () => {
-        let HFBeforeWithdraw: BigDecimal | null;
-
-        beforeAll(async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          HFBeforeWithdraw = position.value.healthFactor.current;
-
-          const supplies = await userSupplies(client, {
-            query: {
-              userSpoke: {
-                spoke: usedReserves.supplyReserve.spoke.id,
-                user: evmAddress(user.account.address),
-              },
-            },
-          });
-          assertOk(supplies);
-          const amountToWithdraw = supplies.value
-            .find(
-              (supply) => supply.reserve.id === usedReserves.supplyReserve.id,
-            )!
-            .withdrawable.amount.value.div(2);
-
-          const setup = await withdraw(client, {
-            reserve: usedReserves.supplyReserve.id,
-            sender: evmAddress(user.account.address),
-            amount: {
-              erc20: {
-                exact: amountToWithdraw,
-              },
-            },
-          })
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction);
-
-          assertOk(setup);
-        }, 60_000);
-
-        it('Then the health factor should be less than before withdrawing collateral', async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          expect(position.value.healthFactor.current).toBeBigDecimalLessThan(
-            HFBeforeWithdraw,
-          );
-        });
-      });
-
-      describe('When the user repays completely the borrow position', () => {
-        beforeAll(async () => {
-          const setup = await fundErc20Address(
-            evmAddress(user.account.address),
-            {
-              address: usedReserves.borrowReserve.asset.underlying.address,
-              amount:
-                usedReserves.borrowReserve.userState!.borrowable.amount.value.times(
-                  2,
-                ),
-              decimals:
-                usedReserves.borrowReserve.asset.underlying.info.decimals,
-            },
-          )
-            .andThen(() =>
-              repay(client, {
-                reserve: usedReserves.borrowReserve.id,
-                sender: evmAddress(user.account.address),
-                amount: {
-                  erc20: {
-                    value: {
-                      max: true,
-                    },
-                  },
-                },
-              }),
-            )
-            .andThen(sendWith(user))
-            .andThen(client.waitForTransaction);
-
-          assertOk(setup);
-        });
-
-        it('Then the health factor should be null', async () => {
-          const position = await userPosition(client, {
-            userSpoke: {
-              user: evmAddress(user.account.address),
-              spoke: ETHEREUM_SPOKE_CORE_ID,
-            },
-          }).map(nonNullable);
-          assertOk(position);
-          expect(position.value.healthFactor.current).toBeNull();
-        });
       });
     });
   });

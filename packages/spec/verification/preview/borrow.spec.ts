@@ -71,9 +71,7 @@ describe('Given a user with 1 supply position enabled as collateral', () => {
       });
 
       it('Then the riskPremium should be 0', () => {
-        expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(
-          0,
-        );
+        expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(0);
         expect(previewInfo.riskPremium.after.value).toBeBigDecimalEqualTo(0);
       });
     });
@@ -123,9 +121,7 @@ describe('Given a user with 1 supply position enabled as collateral', () => {
           expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(
             0,
           );
-          expect(previewInfo.riskPremium.after.value).toBeBigDecimalEqualTo(
-            0,
-          );
+          expect(previewInfo.riskPremium.after.value).toBeBigDecimalEqualTo(0);
         });
       });
     });
@@ -180,9 +176,7 @@ describe('Given a user with 1 supply position enabled as collateral', () => {
       });
 
       it('Then the riskPremium should be greater than 0', () => {
-        expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(
-          0,
-        );
+        expect(previewInfo.riskPremium.current.value).toBeBigDecimalEqualTo(0);
         expect(previewInfo.riskPremium.after.value).toBeBigDecimalGreaterThan(
           0,
         );
@@ -278,9 +272,7 @@ describe('Given a user with 1 supply position enabled as collateral', () => {
     });
 
     it('Then the healthFactor should be below 1 and flagged as an error', () => {
-      expect(previewInfo.healthFactor.__typename).toEqual(
-        'HealthFactorError',
-      );
+      expect(previewInfo.healthFactor.__typename).toEqual('HealthFactorError');
       expect(previewInfo.healthFactor.after).toBeBigDecimalLessThan(1);
       expect(previewInfo.healthFactor.current).toBeNull();
       expect((previewInfo.healthFactor as HealthFactorError).reason).toEqual(
