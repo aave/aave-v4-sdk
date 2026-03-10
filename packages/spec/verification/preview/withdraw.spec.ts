@@ -223,8 +223,7 @@ describe('Given a user with 2 supply positions enabled as collateral, with diffe
               sender: evmAddress(user.account.address),
               amount: {
                 erc20: {
-                  exact:
-                    highestCollateralRiskSupply.amountSupplied.times(0.8),
+                  exact: highestCollateralRiskSupply.amountSupplied.times(0.8),
                 },
               },
             },

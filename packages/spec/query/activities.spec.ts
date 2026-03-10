@@ -123,9 +123,7 @@ describe('Given a user with prior history of activities', () => {
       expect(result.value.items).toBeArrayWithElements(
         expect.objectContaining({
           __typename: expect.toBeOneOf(expectedTypes),
-          user: expect.toEqualCaseInsensitive(
-            evmAddress(user.account.address),
-          ),
+          user: expect.toEqualCaseInsensitive(evmAddress(user.account.address)),
         }),
       );
     });
@@ -143,9 +141,7 @@ describe('Given a user with prior history of activities', () => {
 
       expect(result.value.items).toBeArrayWithElements(
         expect.objectContaining({
-          user: expect.toEqualCaseInsensitive(
-            evmAddress(user.account.address),
-          ),
+          user: expect.toEqualCaseInsensitive(evmAddress(user.account.address)),
           chain: expect.objectContaining({
             chainId: ETHEREUM_FORK_ID,
           }),
@@ -191,9 +187,7 @@ describe('Given a user with prior history of activities', () => {
       // User not have swap activities so this should pass
       expect(result.value.items).toBeArrayWithElements(
         expect.objectContaining({
-          user: expect.toEqualCaseInsensitive(
-            evmAddress(user.account.address),
-          ),
+          user: expect.toEqualCaseInsensitive(evmAddress(user.account.address)),
           reserve: expect.objectContaining({
             asset: expect.objectContaining({
               hub: expect.objectContaining({
@@ -338,8 +332,7 @@ describe('Given a user want to know all activities without providing a user addr
         switch (item.__typename) {
           case 'SupplySwapActivity':
             expect(
-              decodeReserveId((item.sell as PositionAmount).reserve!.id)
-                .spoke,
+              decodeReserveId((item.sell as PositionAmount).reserve!.id).spoke,
             ).toEqual(ETHEREUM_SPOKE_CORE_ADDRESS);
             break;
           case 'BorrowSwapActivity':
@@ -385,15 +378,15 @@ describe('Given a user want to know all activities without providing a user addr
       swapActivities.forEach((item) => {
         switch (item.__typename) {
           case 'SupplySwapActivity':
-            expect(
-              (item.sell as PositionAmount).reserve!.asset.hub.id,
-            ).toEqual(ETHEREUM_HUB_CORE_ID);
+            expect((item.sell as PositionAmount).reserve!.asset.hub.id).toEqual(
+              ETHEREUM_HUB_CORE_ID,
+            );
             break;
           case 'BorrowSwapActivity':
           case 'WithdrawSwapActivity':
-            expect(
-              (item.buy as PositionAmount).reserve!.asset.hub.id,
-            ).toEqual(ETHEREUM_HUB_CORE_ID);
+            expect((item.buy as PositionAmount).reserve!.asset.hub.id).toEqual(
+              ETHEREUM_HUB_CORE_ID,
+            );
             break;
           case 'RepayWithSupplyActivity':
             expect(

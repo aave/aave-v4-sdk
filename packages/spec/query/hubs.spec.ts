@@ -54,9 +54,7 @@ describe('Given a user who wants to list available hubs', () => {
         const assetsInHub = result.value.map(
           (asset) => asset.underlying.address,
         );
-        expect(tokens.some((token) => assetsInHub.includes(token))).toBe(
-          true,
-        );
+        expect(tokens.some((token) => assetsInHub.includes(token))).toBe(true);
       }
     });
   });

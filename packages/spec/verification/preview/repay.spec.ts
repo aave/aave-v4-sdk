@@ -138,15 +138,11 @@ describe('Given a user with 1 supply position enabled as collateral', () => {
           assertOk(borrowResult);
         }
 
-        const secondBorrowResult = await borrowFromRandomReserve(
-          client,
-          user,
-          {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-            token: ETHEREUM_USDT_ADDRESS,
-            ratioToBorrow: 0.2,
-          },
-        );
+        const secondBorrowResult = await borrowFromRandomReserve(client, user, {
+          spoke: ETHEREUM_SPOKE_CORE_ID,
+          token: ETHEREUM_USDT_ADDRESS,
+          ratioToBorrow: 0.2,
+        });
         assertOk(secondBorrowResult);
         borrowReserveToRepay = secondBorrowResult.value.reserve;
       });
