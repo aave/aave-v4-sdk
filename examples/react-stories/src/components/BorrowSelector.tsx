@@ -2,27 +2,27 @@ import {
   type ChainId,
   type EvmAddress,
   OrderDirection,
-  type UserSupplyItem,
-  useUserSupplies,
+  type UserBorrowItem,
+  useUserBorrows,
 } from '@aave/react';
 import { FormControl } from 'baseui/form-control';
 import { type OnChangeParams, SingleSelect } from 'baseui/select';
 import { useEffect } from 'react';
 
-interface SupplySelectorProps {
+interface BorrowSelectorProps {
   chainId: ChainId;
   user: EvmAddress;
-  onChange: (supply: UserSupplyItem | null) => void;
-  selected: UserSupplyItem | null;
+  onChange: (borrow: UserBorrowItem | null) => void;
+  selected: UserBorrowItem | null;
 }
 
-export function SupplySelector({
+export function BorrowSelector({
   chainId,
   user,
   onChange,
   selected,
-}: SupplySelectorProps) {
-  const { data: supplies, loading } = useUserSupplies({
+}: BorrowSelectorProps) {
+  const { data: borrows, loading } = useUserBorrows({
     query: {
       userChains: {
         chainIds: [chainId],
@@ -35,10 +35,10 @@ export function SupplySelector({
   });
 
   useEffect(() => {
-    if (supplies?.length === 1) {
-      onChange(supplies[0]);
+    if (borrows?.length === 1) {
+      onChange(borrows[0]);
     }
-  }, [supplies, onChange]);
+  }, [borrows, onChange]);
 
   const handleChange = (params: OnChangeParams) => {
     switch (params.type) {
@@ -47,33 +47,33 @@ export function SupplySelector({
         break;
 
       case 'select':
-        onChange(params.option as UserSupplyItem);
+        onChange(params.option as UserBorrowItem);
         break;
     }
   };
 
   return (
     <FormControl
-      label='Supply Position'
+      label='Borrow Position'
       caption={
-        supplies?.length === 1
-          ? 'Only one supply position found'
-          : 'Select the supply position you want to withdraw from'
+        borrows?.length === 1
+          ? 'Only one borrow position found'
+          : 'Select the borrow position you want to repay'
       }
-      disabled={loading || supplies?.length === 1 || supplies?.length === 0}
-      error={supplies?.length === 0 ? 'No supply positions found' : undefined}
+      disabled={loading || borrows?.length === 1 || borrows?.length === 0}
+      error={borrows?.length === 0 ? 'No borrow positions found' : undefined}
     >
       <SingleSelect
-        placeholder='Select a supply position'
+        placeholder='Select a borrow position'
         valueKey='id'
         getValueLabel={({ option }) => {
           return option.reserve.asset.underlying.info.symbol;
         }}
         getOptionLabel={({ option }) =>
-          `${option.reserve.asset.underlying.info.symbol} — ${option.withdrawable.amount.value.toDisplayString(2)} ${option.withdrawable.token.info.symbol}`
+          `${option.reserve.asset.underlying.info.symbol} - ${option.debt.amount.value.toDisplayString(2)} ${option.debt.token.info.symbol}`
         }
         onChange={handleChange}
-        options={supplies}
+        options={borrows}
         value={selected ? [selected] : undefined}
       />
     </FormControl>

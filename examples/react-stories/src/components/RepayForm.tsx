@@ -1,39 +1,47 @@
-import { bigDecimal, evmAddress, type Reserve, useBorrow } from '@aave/react';
+import {
+  bigDecimal,
+  evmAddress,
+  type UserBorrowItem,
+  useRepay,
+} from '@aave/react';
 import { useSendTransaction } from '@aave/react/viem';
 import { Block } from 'baseui/block';
 import { Button } from 'baseui/button';
+import { Checkbox } from 'baseui/checkbox';
 import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
 import { KIND, Notification } from 'baseui/notification';
 import { useState } from 'react';
 import type { WalletClient } from 'viem';
 
-interface BorrowFormProps {
-  reserve: Reserve;
+interface RepayFormProps {
+  borrow: UserBorrowItem;
   walletClient: WalletClient;
 }
 
-export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
+export function RepayForm({ borrow, walletClient }: RepayFormProps) {
   const [status, setStatus] = useState<{
     kind: keyof typeof KIND;
     message: string;
   } | null>(null);
+  const [useMax, setUseMax] = useState(false);
 
   const [sendTransaction] = useSendTransaction(walletClient);
-  const [borrow, { loading }] = useBorrow((plan) => {
+  const [repay, { loading }] = useRepay((plan) => {
     switch (plan.__typename) {
       case 'TransactionRequest':
         setStatus({
           kind: KIND.info,
-          message: 'Sign the Borrow Transaction in your wallet',
+          message: 'Sign the Repay Transaction in your wallet',
         });
         return sendTransaction(plan).andTee(() =>
           setStatus({
             kind: KIND.info,
-            message: 'Sending Borrow Transaction…',
+            message: 'Sending Repay Transaction…',
           }),
         );
 
+      case 'Erc20ApprovalRequired':
       case 'PreContractActionRequired':
         setStatus({
           kind: KIND.info,
@@ -51,17 +59,22 @@ export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const amount = e.currentTarget.amount.value as string;
-    if (!amount) {
-      setStatus({ kind: KIND.info, message: 'Please enter an amount' });
+    const form = e.currentTarget;
+    const amount = form.amount.value as string;
+
+    if (!useMax && !amount) {
+      setStatus({
+        kind: KIND.info,
+        message: 'Please enter an amount or enable Max',
+      });
       return;
     }
 
-    const result = await borrow({
-      reserve: reserve.id,
+    const result = await repay({
+      reserve: borrow.reserve.id,
       amount: {
         erc20: {
-          value: bigDecimal(amount),
+          value: useMax ? { max: true } : { exact: bigDecimal(amount) },
         },
       },
       sender: evmAddress(walletClient.account!.address),
@@ -72,7 +85,7 @@ export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
         case 'ValidationError':
           setStatus({
             kind: KIND.warning,
-            message: 'Insufficient borrow capacity for this reserve',
+            message: 'Insufficient balance to repay this amount',
           });
           return;
         case 'CancelError':
@@ -84,26 +97,42 @@ export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
       }
     }
 
-    setStatus({ kind: KIND.info, message: 'Borrow successful!' });
+    setStatus({ kind: KIND.info, message: 'Repay successful!' });
   };
+
+  const currentDebt = borrow.debt.amount.value.toDisplayString(2);
 
   return (
     <Block as='form' onSubmit={submit} marginTop='scale600'>
       <FormControl
         label='Amount'
-        caption='Human-friendly amount (e.g. 1.23, 4.56, 7.89)'
+        caption={
+          useMax
+            ? 'Repaying maximum available balance'
+            : `Current debt: ${currentDebt} ${borrow.debt.token.info.symbol}`
+        }
       >
         <Input
           name='amount'
           type='number'
           step={0.000000000000000001}
-          disabled={loading}
-          placeholder='Amount to borrow (in token units)'
+          disabled={loading || useMax}
+          placeholder={currentDebt}
         />
       </FormControl>
 
+      <FormControl>
+        <Checkbox
+          checked={useMax}
+          onChange={(e) => setUseMax(e.target.checked)}
+          disabled={loading}
+        >
+          Repay maximum available
+        </Checkbox>
+      </FormControl>
+
       <Button type='submit' disabled={loading} isLoading={loading}>
-        Borrow
+        Repay
       </Button>
 
       {status && (

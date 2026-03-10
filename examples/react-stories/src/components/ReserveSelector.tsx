@@ -47,8 +47,6 @@ export function ReserveSelector({
     }
   };
 
-  console.log(selected);
-
   return (
     <FormControl
       label='Reserve'
@@ -65,10 +63,7 @@ export function ReserveSelector({
       <SingleSelect
         placeholder='Select a reserve'
         valueKey='id'
-        getValueLabel={({ option }) => {
-          console.log(option);
-          return option.asset.underlying.info.name;
-        }}
+        getValueLabel={({ option }) => option.asset.underlying.info.name}
         getOptionLabel={({ option }) =>
           `${option.asset.underlying.info.name} - APY: ${option.summary.supplyApy.normalized.toFixed(2)}%`
         }
