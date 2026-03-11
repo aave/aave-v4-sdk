@@ -1,0 +1,23 @@
+examples/react-stories/src/tools.stories.tsx
+  20dc6100686be922 2,4-5,11,65-113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "3f28646cde7b6ad7ee4e07fdb269b0d6a18c4010",
+  "prompts": {
+    "20dc6100686be922": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ae209b6-44fc-46f8-b834-1386e5bfe87e",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Cesare Naldi <naldi.cesare@gmail.com>",
+      "messages": [],
+      "total_additions": 140,
+      "total_deletions": 88,
+      "accepted_lines": 53,
+      "overriden_lines": 0
+    }
+  }
+}
