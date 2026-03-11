@@ -1,0 +1,23 @@
+packages/react/src/transactions/useBorrow.test.ts
+  36dc2641f2b538b7 1-303
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "8b57b9a320b38f0b6b60e4a214b0463f91fae715",
+  "prompts": {
+    "36dc2641f2b538b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "317afd79-c3f4-41a5-81c2-83190b3d8fe6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Cesare Naldi <naldi.cesare@gmail.com>",
+      "messages": [],
+      "total_additions": 303,
+      "total_deletions": 0,
+      "accepted_lines": 303,
+      "overriden_lines": 0
+    }
+  }
+}
