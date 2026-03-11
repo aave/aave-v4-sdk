@@ -1,0 +1,23 @@
+examples/react-stories/src/liquidity.stories.tsx
+  20bba769bdbdba1e 1-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "19def1ca19476f1ac2fa99d213640913e5854a4e",
+  "prompts": {
+    "20bba769bdbdba1e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc9652da-1ab9-46a0-9143-b3876119a3d1",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Cesare Naldi <naldi.cesare@gmail.com>",
+      "messages": [],
+      "total_additions": 54,
+      "total_deletions": 2,
+      "accepted_lines": 52,
+      "overriden_lines": 0
+    }
+  }
+}
