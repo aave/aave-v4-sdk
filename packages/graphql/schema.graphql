@@ -175,6 +175,17 @@ input BorrowApyHistoryRequest {
   window: TimeWindow! = LAST_DAY
 }
 
+type BorrowPoints {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  userEligible: Boolean!
+}
+
 input BorrowRequest {
   """The reserve id"""
   reserve: ReserveId!
@@ -1154,6 +1165,21 @@ type PermitTypedData {
   message: JSON!
 }
 
+union PointsCriteria = PointsGenericCriteria
+
+type PointsGenericCriteria {
+  id: ID!
+  text: String!
+  userPassed: Boolean!
+}
+
+type PointsProgram {
+  id: RewardId!
+  name: String!
+  externalUrl: String
+  iconUrl: String
+}
+
 type PositionAmount {
   reserve: ReserveInfo!
   amount: Erc20Amount!
@@ -1231,6 +1257,17 @@ input PreviewAction @oneOf {
   withdrawSwap: WithdrawSwapQuoteRequest
 }
 
+type PreviewBorrowPoints {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  reserve: ReserveInfo!
+}
+
 type PreviewMerklBorrowReward {
   id: RewardId!
   startDate: DateTime!
@@ -1255,11 +1292,22 @@ input PreviewRequest {
   action: PreviewAction!
 }
 
-union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward
+union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPoints | PreviewBorrowPoints
 
 type PreviewRewardOutcome {
   lost: [PreviewReward!]!
   gained: [PreviewReward!]!
+}
+
+type PreviewSupplyPoints {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  reserve: ReserveInfo!
 }
 
 type PreviewUserPosition {
@@ -1652,7 +1700,7 @@ input ReservesRequestQuery @oneOf {
   chainTokenCategories: [ChainTokenCategories!]
 }
 
-union Reward = MerklSupplyReward | MerklBorrowReward
+union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPoints | BorrowPoints
 
 scalar RewardId
 
@@ -1790,6 +1838,17 @@ type SupplyActivity {
 input SupplyApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+}
+
+type SupplyPoints {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  userEligible: Boolean!
 }
 
 input SupplyRequest {
@@ -2013,11 +2072,6 @@ type SwapTypedData {
 input SwapWithTransactionInput {
   quoteId: SwapQuoteId!
   permitSig: Signature
-
-  """
-  Whether the swap order creator is a smart contract wallet. If not provided, it will be inferred following the ERC-1271 standard.
-  """
-  isSenderSmartContractWallet: Boolean
 }
 
 input SwappableTokenInput @oneOf {
