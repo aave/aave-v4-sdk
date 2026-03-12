@@ -159,6 +159,22 @@ scalar BigInt
 
 scalar BlockchainData
 
+type BoostedRate {
+  """The unique identifier for this boosted rate tier"""
+  id: BoostedRateId!
+
+  """The display name for this boosted rate tier"""
+  name: String!
+
+  """The number of users currently assigned to this boosted rate"""
+  userCount: BigInt!
+
+  """The annual percentage yield for this boosted rate tier"""
+  apy: PercentNumber!
+}
+
+scalar BoostedRateId
+
 type BorrowActivity {
   id: ID!
   user: EvmAddress!
@@ -1051,6 +1067,12 @@ type Mutation {
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
   swap(request: SwapRequest!): SwapExecutionPlan!
   cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
+
+  """
+  Redeem a pending withdrawal claim.
+  Returns a transaction if the claim is ready, or the pending availability timestamp if not.
+  """
+  stableVaultWithdrawRedeem(request: StableVaultWithdrawRedeemRequest!): StableVaultWithdrawRedeemExecutionPlan!
 }
 
 type NativeAmount {
@@ -1119,6 +1141,22 @@ type PaginatedSpokePositionManagerResult {
 
 type PaginatedSpokeUserPositionManagerResult {
   items: [SpokeUserPositionManager!]!
+  pageInfo: PaginatedResultInfo!
+}
+
+type PaginatedStableVaultMovementsResult {
+  """The list of token movement records"""
+  items: [TokenMovementRecord!]!
+
+  """Pagination metadata for navigating results"""
+  pageInfo: PaginatedResultInfo!
+}
+
+type PaginatedStableVaultRateUsersResult {
+  """The list of user addresses assigned to the rate tier"""
+  items: [EvmAddress!]!
+
+  """Pagination metadata for navigating results"""
   pageInfo: PaginatedResultInfo!
 }
 
@@ -1415,6 +1453,53 @@ type Query {
 
   """The rewards a user can claim"""
   userClaimableRewards(request: UserClaimableRewardsRequest!): [UserClaimableReward!]!
+
+  """Get a single stable vault by its id."""
+  stableVault(request: StableVaultRequest!): StableVault
+
+  """Get all stable vaults managed by the given admin address."""
+  stableVaults(request: StableVaultsRequest!): [StableVault!]!
+
+  """
+  Get the paginated list of users assigned to a specific rate tier in a stable vault.
+  """
+  stableVaultRateUsers(request: StableVaultRateUsersRequest!): PaginatedStableVaultRateUsersResult!
+
+  """
+  Build a transaction to assign users to a boosted rate tier in a stable vault.
+  """
+  stableVaultAssignRate(request: StableVaultAssignRateRequest!): TransactionRequest!
+
+  """
+  Build a transaction to remove users from a boosted rate tier in a stable vault.
+  """
+  stableVaultUnassignRate(request: StableVaultUnassignRateRequest!): TransactionRequest!
+
+  """Build a transaction to claim surplus assets from a stable vault."""
+  stableVaultClaimSurplus(request: StableVaultClaimSurplusRequest!): TransactionRequest!
+
+  """Get the paginated list of token movements for a stable vault."""
+  stableVaultMovements(request: StableVaultMovementsRequest!): PaginatedStableVaultMovementsResult!
+
+  """
+  Build a transaction to deposit tokens into a stable vault.
+  Returns a transaction request, an ERC20 approval if needed, or an insufficient balance error.
+  """
+  stableVaultDeposit(request: StableVaultDepositRequest!): StableVaultDepositExecutionPlan!
+
+  """
+  Build a transaction to withdraw tokens from a stable vault.
+  Returns either an instant transaction or a delayed withdrawal claim depending on vault liquidity.
+  """
+  stableVaultWithdraw(request: StableVaultWithdrawRequest!): StableVaultWithdrawExecutionPlan!
+
+  """Get the current status of a pending withdrawal claim."""
+  stableVaultClaimStatus(request: StableVaultClaimStatusRequest!): StableVaultClaimStatus!
+
+  """
+  Get a user's positions across stable vaults, optionally filtered to a specific vault.
+  """
+  stableVaultUserPositions(request: StableVaultUserPositionsRequest!): [StableVaultUserPosition!]!
 }
 
 """Quote accuracy level for swap quotes"""
@@ -1824,6 +1909,247 @@ input SpokesRequestQuery @oneOf {
   chainIds: [ChainId!]
 }
 
+type StableVault {
+  """The unique identifier for the stable vault"""
+  id: StableVaultId!
+
+  """The display name of the stable vault"""
+  name: String!
+
+  """The on-chain contract address of the stable vault"""
+  address: EvmAddress!
+
+  """The admin address that manages the vault"""
+  admin: EvmAddress!
+
+  """The chain the vault is deployed on"""
+  chain: Chain!
+
+  """Aggregated summary statistics for the vault"""
+  summary: StableVaultSummary!
+
+  """The rate configuration for the vault, including base and boosted rates"""
+  rates: StableVaultRates!
+}
+
+input StableVaultAmountInput {
+  """The token address used in the stable vault operation"""
+  address: EvmAddress!
+
+  """The token amount"""
+  value: AmountInput!
+
+  """
+  The signed ERC20 permit message to operate on the token without a prior approval transaction
+  """
+  permitSig: ERC20PermitSignature
+}
+
+input StableVaultAssignRateRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The boosted rate tier id to assign users to"""
+  rateId: BoostedRateId!
+
+  """The list of user addresses to assign to the rate tier"""
+  users: [EvmAddress!]!
+}
+
+enum StableVaultClaimStatus {
+  """The claim is ready to be redeemed"""
+  READY
+
+  """The claim is still in the waiting period"""
+  PENDING
+
+  """The claim status could not be determined"""
+  UNKNOWN
+}
+
+input StableVaultClaimStatusRequest {
+  """The withdrawal claim id to check"""
+  claimId: StableVaultWithdrawClaimId!
+}
+
+input StableVaultClaimSurplusRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The list of surplus claims to execute"""
+  claims: [SurplusClaim!]!
+}
+
+union StableVaultDepositExecutionPlan = TransactionRequest | Erc20ApprovalRequired | InsufficientBalanceError
+
+input StableVaultDepositRequest {
+  """The target stable vault"""
+  vault: StableVaultInput!
+
+  """The depositor's address"""
+  user: EvmAddress!
+
+  """The token and amount to deposit"""
+  amount: StableVaultAmountInput!
+}
+
+scalar StableVaultId
+
+input StableVaultInput {
+  """The stable vault id"""
+  id: StableVaultId!
+}
+
+input StableVaultMovementsRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The number of results per page"""
+  pageSize: PageSize!
+
+  """The pagination cursor for fetching the next page"""
+  cursor: Cursor
+}
+
+type StableVaultPendingAvailability {
+  """The earliest time at which the withdrawal claim becomes redeemable"""
+  executableAfter: DateTime!
+}
+
+input StableVaultRateUsersRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The rate tier id to query users for"""
+  rateId: BoostedRateId!
+
+  """The number of results per page"""
+  pageSize: PageSize!
+
+  """The pagination cursor for fetching the next page"""
+  cursor: Cursor
+}
+
+type StableVaultRates {
+  """The base APY applied to all depositors in the vault"""
+  baseRate: PercentNumber!
+
+  """The display name for the rate tier"""
+  name: String!
+
+  """The list of boosted rate tiers available for eligible users"""
+  boostedRates: [BoostedRate!]!
+}
+
+input StableVaultRequest {
+  """The stable vault id to look up"""
+  id: StableVaultId!
+}
+
+type StableVaultSummary {
+  """The total number of shares issued by the vault"""
+  shares: BigInt!
+
+  """The total number of users deposited in the vault"""
+  userCount: BigInt!
+
+  """The total value of deposits in the vault"""
+  totalDeposits: BigDecimal!
+}
+
+input StableVaultUnassignRateRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The boosted rate tier id to remove users from"""
+  rateId: BoostedRateId!
+
+  """The list of user addresses to remove from the rate tier"""
+  users: [EvmAddress!]!
+}
+
+type StableVaultUserPosition {
+  """Unique identifier derived from vault id and user address"""
+  id: StableVaultUserPositionId!
+
+  """The stable vault this position belongs to"""
+  vault: StableVault!
+
+  """The user's address"""
+  user: EvmAddress!
+
+  """The original deposited amount"""
+  principal: DecimalNumber!
+
+  """The accrued interest on the position"""
+  interests: DecimalNumber!
+
+  """The number of vault shares held"""
+  shares: DecimalNumber!
+
+  """The total balance (principal + interest)"""
+  totalBalance: DecimalNumber!
+
+  """The effective annual percentage yield for this position"""
+  apy: PercentNumber!
+
+  """The boosted rate tier the user is assigned to"""
+  boostedRateId: BoostedRateId!
+}
+
+scalar StableVaultUserPositionId
+
+input StableVaultUserPositionsRequest {
+  """The user address to get positions for"""
+  user: EvmAddress!
+
+  """Optional filter to narrow results to a specific vault"""
+  filter: StableVaultUserPositionsRequestFilter
+}
+
+input StableVaultUserPositionsRequestFilter {
+  """Filter positions to a specific stable vault"""
+  vault: StableVaultInput!
+}
+
+type StableVaultWithdrawClaim {
+  """The unique identifier for the pending withdrawal claim"""
+  claimId: StableVaultWithdrawClaimId!
+
+  """The transaction to submit to initiate the withdrawal claim"""
+  transaction: TransactionRequest!
+
+  """The earliest time at which the claim can be redeemed"""
+  executableAfter: DateTime!
+}
+
+scalar StableVaultWithdrawClaimId
+
+union StableVaultWithdrawExecutionPlan = TransactionRequest | StableVaultWithdrawClaim
+
+union StableVaultWithdrawRedeemExecutionPlan = TransactionRequest | StableVaultPendingAvailability
+
+input StableVaultWithdrawRedeemRequest {
+  """The withdrawal claim id to redeem"""
+  claimId: StableVaultWithdrawClaimId!
+}
+
+input StableVaultWithdrawRequest {
+  """The stable vault to withdraw from"""
+  vault: StableVaultInput!
+
+  """The withdrawer's address"""
+  user: EvmAddress!
+
+  """The token and amount to withdraw"""
+  amount: StableVaultAmountInput!
+}
+
+input StableVaultsRequest {
+  """The admin address to filter vaults by"""
+  admin: EvmAddress!
+}
+
 type SupplyActivity {
   id: ID!
   user: EvmAddress!
@@ -1898,6 +2224,14 @@ input SupplySwapQuoteRequest @oneOf {
 }
 
 union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
+
+input SurplusClaim {
+  """The token address of the surplus asset to claim"""
+  asset: EvmAddress!
+
+  """The amount to claim, in the token's main unit (e.g., 1.5 USDC)"""
+  amount: BigDecimal!
+}
 
 enum SwapActivityStatus {
   FULFILLED
@@ -2136,6 +2470,92 @@ input TokenInput @oneOf {
 
   """The erc20 address"""
   erc20: EvmAddress
+}
+
+union TokenMovement = TokenMovementBridgeOut | TokenMovementBridgeIn | TokenMovementAllocate | TokenMovementDeallocate | TokenMovementSwap | TokenMovementRebalance
+
+type TokenMovementAllocate {
+  """The token allocated to a yield strategy"""
+  token: Erc20Token!
+
+  """The amount allocated"""
+  amount: BigDecimal!
+}
+
+type TokenMovementBridgeIn {
+  """The source token from the origin chain"""
+  fromToken: Erc20Token!
+
+  """The destination token received"""
+  toToken: Erc20Token!
+
+  """The amount bridged in"""
+  amount: BigDecimal!
+}
+
+type TokenMovementBridgeOut {
+  """The source token being bridged out"""
+  fromToken: Erc20Token!
+
+  """The destination token on the target chain"""
+  toToken: Erc20Token!
+
+  """The amount bridged"""
+  amount: BigDecimal!
+}
+
+type TokenMovementDeallocate {
+  """The token deallocated from a yield strategy"""
+  token: Erc20Token!
+
+  """The amount deallocated"""
+  amount: BigDecimal!
+}
+
+scalar TokenMovementId
+
+type TokenMovementRebalance {
+  """The token being rebalanced"""
+  token: Erc20Token!
+
+  """The amount rebalanced"""
+  amount: BigDecimal!
+}
+
+type TokenMovementRecord {
+  """The unique identifier for this movement record"""
+  id: TokenMovementId!
+
+  """The movement type and its associated details"""
+  type: TokenMovement!
+
+  """The status of the movement record"""
+  status: TokenMovementStatus!
+
+  """The timestamp when the movement occurred"""
+  timestamp: DateTime!
+
+  """The on-chain transaction hash"""
+  txHash: TxHash!
+}
+
+enum TokenMovementStatus {
+  PENDING
+  DONE
+}
+
+type TokenMovementSwap {
+  """The token being swapped from"""
+  fromToken: Erc20Token!
+
+  """The amount of the source token"""
+  fromAmount: BigDecimal!
+
+  """The token being swapped to"""
+  toToken: Erc20Token!
+
+  """The amount of the destination token received"""
+  toAmount: BigDecimal!
 }
 
 type TokenSwap {

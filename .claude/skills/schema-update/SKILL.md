@@ -58,7 +58,7 @@ Update `packages/client/src/cache.ts` to handle new/removed types:
 
 #### Keys Section
 
-- [ ] **Add new types with `id` field**: These should be normalized (cached by id)
+- [ ] **Add new types with `id` field**: Type the `data` parameter with the fragment type from `@aave/graphql` and return `data.id`.
   ```typescript
   NewTypeName: (data: NewTypeName) => data.id,
   ```
