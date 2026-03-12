@@ -191,6 +191,17 @@ input BorrowApyHistoryRequest {
   window: TimeWindow! = LAST_DAY
 }
 
+type BorrowPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  userEligible: Boolean!
+}
+
 input BorrowRequest {
   """The reserve id"""
   reserve: ReserveId!
@@ -1192,6 +1203,21 @@ type PermitTypedData {
   message: JSON!
 }
 
+union PointsCriteria = PointsGenericCriteria
+
+type PointsGenericCriteria {
+  id: ID!
+  text: String!
+  userPassed: Boolean!
+}
+
+type PointsProgram {
+  id: RewardId!
+  name: String!
+  externalUrl: String
+  iconUrl: String
+}
+
 type PositionAmount {
   reserve: ReserveInfo!
   amount: Erc20Amount!
@@ -1269,6 +1295,17 @@ input PreviewAction @oneOf {
   withdrawSwap: WithdrawSwapQuoteRequest
 }
 
+type PreviewBorrowPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  reserve: ReserveInfo!
+}
+
 type PreviewMerklBorrowReward {
   id: RewardId!
   startDate: DateTime!
@@ -1293,11 +1330,22 @@ input PreviewRequest {
   action: PreviewAction!
 }
 
-union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward
+union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPointsReward | PreviewBorrowPointsReward
 
 type PreviewRewardOutcome {
   lost: [PreviewReward!]!
   gained: [PreviewReward!]!
+}
+
+type PreviewSupplyPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  reserve: ReserveInfo!
 }
 
 type PreviewUserPosition {
@@ -1737,7 +1785,7 @@ input ReservesRequestQuery @oneOf {
   chainTokenCategories: [ChainTokenCategories!]
 }
 
-union Reward = MerklSupplyReward | MerklBorrowReward
+union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
 
 scalar RewardId
 
@@ -2116,6 +2164,17 @@ type SupplyActivity {
 input SupplyApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+}
+
+type SupplyPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  userEligible: Boolean!
 }
 
 input SupplyRequest {

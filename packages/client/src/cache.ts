@@ -3,6 +3,7 @@ import {
   type Asset,
   type BoostedRateId,
   type BorrowActivity,
+  type BorrowPoints,
   type BorrowSwapActivity,
   type Chain,
   decodeSpokeId,
@@ -21,6 +22,8 @@ import {
   type MerklGenericCriteria,
   type MerklSupplyReward,
   type NativeToken,
+  type PointsGenericCriteria,
+  type PointsProgram,
   type RepayActivity,
   type RepayWithSupplyActivity,
   type Reserve,
@@ -30,6 +33,7 @@ import {
   type StableVault,
   type StableVaultUserPosition,
   type SupplyActivity,
+  type SupplyPoints,
   type SupplySwapActivity,
   type TokenInfo,
   type TokenMovementRecord,
@@ -141,6 +145,14 @@ export const exchange = cacheExchange({
     HubSummarySample: {
       date: transformToDate,
     },
+    BorrowPointsReward: {
+      startDate: transformToDate,
+      endDate: transformToNullableDate,
+    },
+    PreviewBorrowPointsReward: {
+      startDate: transformToDate,
+      endDate: transformToNullableDate,
+    },
     PreviewMerklBorrowReward: {
       startDate: transformToDate,
       endDate: transformToDate,
@@ -148,6 +160,14 @@ export const exchange = cacheExchange({
     PreviewMerklSupplyReward: {
       startDate: transformToDate,
       endDate: transformToDate,
+    },
+    PreviewSupplyPointsReward: {
+      startDate: transformToDate,
+      endDate: transformToNullableDate,
+    },
+    SupplyPointsReward: {
+      startDate: transformToDate,
+      endDate: transformToNullableDate,
     },
     ProtocolHistorySample: {
       date: transformToDate,
@@ -373,6 +393,7 @@ export const exchange = cacheExchange({
     // Entities with id field as key
     Asset: (data: Asset) => data.id,
     BorrowActivity: (data: BorrowActivity) => data.id,
+    BorrowPointsReward: (data: BorrowPoints) => data.id,
     BorrowSwapActivity: (data: BorrowSwapActivity) => data.id,
     // URQL SystemFields & DataFields doesn't play ball with the bigint scalar (BoostedRate.userCounts field),
     // hence the type assertion to BoostedRateId which is a string alias of the id
@@ -383,6 +404,8 @@ export const exchange = cacheExchange({
     MerklBorrowReward: (data: MerklBorrowReward) => data.id,
     MerklGenericCriteria: (data: MerklGenericCriteria) => data.id,
     MerklSupplyReward: (data: MerklSupplyReward) => data.id,
+    PointsGenericCriteria: (data: PointsGenericCriteria) => data.id,
+    PointsProgram: (data: PointsProgram) => data.id,
     RepayActivity: (data: RepayActivity) => data.id,
     RepayWithSupplyActivity: (data: RepayWithSupplyActivity) => data.id,
     Reserve: (data: Reserve) => data.id,
@@ -391,6 +414,7 @@ export const exchange = cacheExchange({
     StableVault: (data: StableVault) => data.id,
     StableVaultUserPosition: (data: StableVaultUserPosition) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
+    SupplyPointsReward: (data: SupplyPoints) => data.id,
     SupplySwapActivity: (data: SupplySwapActivity) => data.id,
     TokenInfo: (data: TokenInfo) => data.id,
     TokenMovementRecord: (data: TokenMovementRecord) => data.id,
@@ -466,9 +490,11 @@ export const exchange = cacheExchange({
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PrepareSwapOrder: () => null,
+    PreviewBorrowPointsReward: () => null,
     PreviewMerklBorrowReward: () => null,
     PreviewMerklSupplyReward: () => null,
     PreviewRewardOutcome: () => null,
+    PreviewSupplyPointsReward: () => null,
     PreviewUserPosition: () => null,
     ProtocolHistorySample: () => null,
     RepayWithSupply: () => null,

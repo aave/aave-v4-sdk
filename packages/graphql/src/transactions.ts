@@ -15,6 +15,8 @@ import {
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   PercentNumberVariationFragment,
+  PointsCriteriaFragment,
+  PointsProgramFragment,
   PositionAmountFragment,
   ReserveInfoFragment,
   SpokeFragment,
@@ -324,7 +326,60 @@ export type PreviewMerklBorrowReward = FragmentOf<
   typeof PreviewMerklBorrowRewardFragment
 >;
 
-export type PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward;
+export const PreviewSupplyPointsFragment = graphql(
+  `fragment PreviewSupplyPoints on PreviewSupplyPointsReward {
+    __typename
+    id
+    program {
+      ...PointsProgram
+    }
+    name
+    startDate
+    endDate
+    multiplier
+    criteria {
+      ...PointsCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [PointsProgramFragment, PointsCriteriaFragment, ReserveInfoFragment],
+);
+export type PreviewSupplyPoints = FragmentOf<
+  typeof PreviewSupplyPointsFragment
+>;
+
+export const PreviewBorrowPointsFragment = graphql(
+  `fragment PreviewBorrowPoints on PreviewBorrowPointsReward {
+    __typename
+    id
+    program {
+      ...PointsProgram
+    }
+    name
+    startDate
+    endDate
+    multiplier
+    criteria {
+      ...PointsCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [PointsProgramFragment, PointsCriteriaFragment, ReserveInfoFragment],
+);
+export type PreviewBorrowPoints = FragmentOf<
+  typeof PreviewBorrowPointsFragment
+>;
+
+export type PreviewReward = ExtendWithOpaqueType<
+  | PreviewMerklSupplyReward
+  | PreviewMerklBorrowReward
+  | PreviewSupplyPoints
+  | PreviewBorrowPoints
+>;
 
 export const PreviewRewardFragment: FragmentDocumentFor<
   PreviewReward,
@@ -338,8 +393,19 @@ export const PreviewRewardFragment: FragmentDocumentFor<
     ... on PreviewMerklBorrowReward {
       ...PreviewMerklBorrowReward
     }
+    ... on PreviewSupplyPointsReward {
+      ...PreviewSupplyPoints
+    }
+    ... on PreviewBorrowPointsReward {
+      ...PreviewBorrowPoints
+    }
   }`,
-  [PreviewMerklSupplyRewardFragment, PreviewMerklBorrowRewardFragment],
+  [
+    PreviewMerklSupplyRewardFragment,
+    PreviewMerklBorrowRewardFragment,
+    PreviewSupplyPointsFragment,
+    PreviewBorrowPointsFragment,
+  ],
 );
 
 export const PreviewRewardOutcomeFragment = graphql(
