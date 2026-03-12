@@ -671,7 +671,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "BorrowPoints",
+        "name": "BorrowPointsReward",
         "fields": [
           {
             "name": "id",
@@ -3884,7 +3884,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PreviewBorrowPoints",
+        "name": "PreviewBorrowPointsReward",
         "fields": [
           {
             "name": "id",
@@ -4182,11 +4182,11 @@
           },
           {
             "kind": "OBJECT",
-            "name": "PreviewSupplyPoints"
+            "name": "PreviewSupplyPointsReward"
           },
           {
             "kind": "OBJECT",
-            "name": "PreviewBorrowPoints"
+            "name": "PreviewBorrowPointsReward"
           }
         ]
       },
@@ -4235,7 +4235,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PreviewSupplyPoints",
+        "name": "PreviewSupplyPointsReward",
         "fields": [
           {
             "name": "id",
@@ -6748,11 +6748,11 @@
           },
           {
             "kind": "OBJECT",
-            "name": "SupplyPoints"
+            "name": "SupplyPointsReward"
           },
           {
             "kind": "OBJECT",
-            "name": "BorrowPoints"
+            "name": "BorrowPointsReward"
           }
         ]
       },
@@ -7000,7 +7000,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SupplyPoints",
+        "name": "SupplyPointsReward",
         "fields": [
           {
             "name": "id",

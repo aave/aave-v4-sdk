@@ -175,7 +175,7 @@ input BorrowApyHistoryRequest {
   window: TimeWindow! = LAST_DAY
 }
 
-type BorrowPoints {
+type BorrowPointsReward {
   id: RewardId!
   program: PointsProgram!
   name: String!
@@ -1257,7 +1257,7 @@ input PreviewAction @oneOf {
   withdrawSwap: WithdrawSwapQuoteRequest
 }
 
-type PreviewBorrowPoints {
+type PreviewBorrowPointsReward {
   id: RewardId!
   program: PointsProgram!
   name: String!
@@ -1292,14 +1292,14 @@ input PreviewRequest {
   action: PreviewAction!
 }
 
-union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPoints | PreviewBorrowPoints
+union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPointsReward | PreviewBorrowPointsReward
 
 type PreviewRewardOutcome {
   lost: [PreviewReward!]!
   gained: [PreviewReward!]!
 }
 
-type PreviewSupplyPoints {
+type PreviewSupplyPointsReward {
   id: RewardId!
   program: PointsProgram!
   name: String!
@@ -1700,7 +1700,7 @@ input ReservesRequestQuery @oneOf {
   chainTokenCategories: [ChainTokenCategories!]
 }
 
-union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPoints | BorrowPoints
+union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
 
 scalar RewardId
 
@@ -1840,7 +1840,7 @@ input SupplyApyHistoryRequest {
   window: TimeWindow! = LAST_DAY
 }
 
-type SupplyPoints {
+type SupplyPointsReward {
   id: RewardId!
   program: PointsProgram!
   name: String!

@@ -327,7 +327,7 @@ export type PreviewMerklBorrowReward = FragmentOf<
 >;
 
 export const PreviewSupplyPointsFragment = graphql(
-  `fragment PreviewSupplyPoints on PreviewSupplyPoints {
+  `fragment PreviewSupplyPoints on PreviewSupplyPointsReward {
     __typename
     id
     program {
@@ -351,7 +351,7 @@ export type PreviewSupplyPoints = FragmentOf<
 >;
 
 export const PreviewBorrowPointsFragment = graphql(
-  `fragment PreviewBorrowPoints on PreviewBorrowPoints {
+  `fragment PreviewBorrowPoints on PreviewBorrowPointsReward {
     __typename
     id
     program {
@@ -374,11 +374,12 @@ export type PreviewBorrowPoints = FragmentOf<
   typeof PreviewBorrowPointsFragment
 >;
 
-export type PreviewReward =
+export type PreviewReward = ExtendWithOpaqueType<
   | PreviewMerklSupplyReward
   | PreviewMerklBorrowReward
   | PreviewSupplyPoints
-  | PreviewBorrowPoints;
+  | PreviewBorrowPoints
+>;
 
 export const PreviewRewardFragment: FragmentDocumentFor<
   PreviewReward,
@@ -392,10 +393,10 @@ export const PreviewRewardFragment: FragmentDocumentFor<
     ... on PreviewMerklBorrowReward {
       ...PreviewMerklBorrowReward
     }
-    ... on PreviewSupplyPoints {
+    ... on PreviewSupplyPointsReward {
       ...PreviewSupplyPoints
     }
-    ... on PreviewBorrowPoints {
+    ... on PreviewBorrowPointsReward {
       ...PreviewBorrowPoints
     }
   }`,

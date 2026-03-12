@@ -141,11 +141,11 @@ export const exchange = cacheExchange({
     HubSummarySample: {
       date: transformToDate,
     },
-    BorrowPoints: {
+    BorrowPointsReward: {
       startDate: transformToDate,
       endDate: transformToNullableDate,
     },
-    PreviewBorrowPoints: {
+    PreviewBorrowPointsReward: {
       startDate: transformToDate,
       endDate: transformToNullableDate,
     },
@@ -157,11 +157,11 @@ export const exchange = cacheExchange({
       startDate: transformToDate,
       endDate: transformToDate,
     },
-    PreviewSupplyPoints: {
+    PreviewSupplyPointsReward: {
       startDate: transformToDate,
       endDate: transformToNullableDate,
     },
-    SupplyPoints: {
+    SupplyPointsReward: {
       startDate: transformToDate,
       endDate: transformToNullableDate,
     },
@@ -375,7 +375,7 @@ export const exchange = cacheExchange({
     // Entities with id field as key
     Asset: (data: Asset) => data.id,
     BorrowActivity: (data: BorrowActivity) => data.id,
-    BorrowPoints: (data: BorrowPoints) => data.id,
+    BorrowPointsReward: (data: BorrowPoints) => data.id,
     BorrowSwapActivity: (data: BorrowSwapActivity) => data.id,
     Hub: (data: Hub) => data.id,
     HubAsset: (data: HubAsset) => data.id,
@@ -391,7 +391,7 @@ export const exchange = cacheExchange({
     ReserveInfo: (data: ReserveInfo) => data.id,
     Spoke: (data: Spoke) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
-    SupplyPoints: (data: SupplyPoints) => data.id,
+    SupplyPointsReward: (data: SupplyPoints) => data.id,
     SupplySwapActivity: (data: SupplySwapActivity) => data.id,
     TokenInfo: (data: TokenInfo) => data.id,
     TokenSwapActivity: (data: TokenSwapActivity) => data.id,
@@ -464,11 +464,11 @@ export const exchange = cacheExchange({
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PrepareSwapOrder: () => null,
-    PreviewBorrowPoints: () => null,
+    PreviewBorrowPointsReward: () => null,
     PreviewMerklBorrowReward: () => null,
     PreviewMerklSupplyReward: () => null,
     PreviewRewardOutcome: () => null,
-    PreviewSupplyPoints: () => null,
+    PreviewSupplyPointsReward: () => null,
     PreviewUserPosition: () => null,
     RepayWithSupply: () => null,
     RepayWithSupplyQuoteResult: () => null,

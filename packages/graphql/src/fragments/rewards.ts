@@ -19,7 +19,7 @@ export type MerklGenericCriteria = FragmentOf<
   typeof MerklGenericCriteriaFragment
 >;
 
-export type MerklCriteria = MerklGenericCriteria;
+export type MerklCriteria = ExtendWithOpaqueType<MerklGenericCriteria>;
 
 export const MerklCriteriaFragment: FragmentDocumentFor<
   MerklCriteria,
@@ -46,7 +46,7 @@ export type PointsGenericCriteria = FragmentOf<
   typeof PointsGenericCriteriaFragment
 >;
 
-export type PointsCriteria = PointsGenericCriteria;
+export type PointsCriteria = ExtendWithOpaqueType<PointsGenericCriteria>;
 
 export const PointsCriteriaFragment: FragmentDocumentFor<
   PointsCriteria,
@@ -115,7 +115,7 @@ export const MerklBorrowRewardFragment = graphql(
 export type MerklBorrowReward = FragmentOf<typeof MerklBorrowRewardFragment>;
 
 export const SupplyPointsFragment = graphql(
-  `fragment SupplyPoints on SupplyPoints {
+  `fragment SupplyPoints on SupplyPointsReward {
     __typename
     id
     program {
@@ -135,7 +135,7 @@ export const SupplyPointsFragment = graphql(
 export type SupplyPoints = FragmentOf<typeof SupplyPointsFragment>;
 
 export const BorrowPointsFragment = graphql(
-  `fragment BorrowPoints on BorrowPoints {
+  `fragment BorrowPoints on BorrowPointsReward {
     __typename
     id
     program {
@@ -167,10 +167,10 @@ export const RewardFragment: FragmentDocumentFor<Reward, 'Reward'> = graphql(
     ... on MerklBorrowReward {
       ...MerklBorrowReward
     }
-    ... on SupplyPoints {
+    ... on SupplyPointsReward {
       ...SupplyPoints
     }
-    ... on BorrowPoints {
+    ... on BorrowPointsReward {
       ...BorrowPoints
     }
   }`,
