@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.36
+
+### Patch Changes
+
+- 242582c: **feat:** support `Points` reward types in reward and preview reward queries
+
 ## 1.0.0-next.35
 
 ### Minor Changes
