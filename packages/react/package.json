@@ -93,8 +93,8 @@
     "thirdweb": "^5.105.25",
     "tsup": "^8.5.1",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4",
-    "viem": "^2.47.0"
+    "viem": "^2.47.0",
+    "vitest": "^4.1.0"
   },
   "peerDependencies": {
     "@privy-io/react-auth": "^2.20.0",
