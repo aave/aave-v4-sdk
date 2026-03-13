@@ -1,5 +1,14 @@
 # @aave/react
 
+## 4.0.0-next.52
+
+### Patch Changes
+
+- 242582c: **feat:** support `Points` reward types in reward and preview reward queries
+- Updated dependencies [242582c]
+  - @aave/graphql@1.0.0-next.36
+  - @aave/client@4.0.0-next.52
+
 ## 4.0.0-next.51
 
 ### Minor Changes
