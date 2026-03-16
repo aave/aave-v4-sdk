@@ -1,10 +1,8 @@
 import {
-  type ChainId,
   type EvmAddress,
   type SpokeId,
   type UserPosition,
   useUserPosition,
-  useUserPositions,
 } from '@aave/react';
 import { Block } from 'baseui/block';
 import { HeadingXSmall, ParagraphSmall } from 'baseui/typography';
