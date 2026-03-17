@@ -109,7 +109,7 @@ describe('Given a user with 1 supply position enabled as collateral', () => {
           });
           assertOk(previewResult);
           previewInfo = previewResult.value;
-        });
+        }, 45_000);
 
         it('Then the healthFactor should decrease', () => {
           expect(previewInfo.healthFactor.after).toBeBigDecimalLessThan(

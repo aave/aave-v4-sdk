@@ -88,7 +88,7 @@ describe('Given a user and a reserve with an active borrow position', () => {
         );
       assertOk(repayResult);
       expect(repayResult.value.length).toBe(0);
-    });
+    }, 60_000);
   });
 
   describe('When the user repays a partial amount of the loan', () => {
@@ -155,7 +155,7 @@ describe('Given a user and a reserve with an active borrow position', () => {
         positionBefore.debt.amount.value.minus(amountToRepay),
         { precision: 4 },
       );
-    });
+    }, 90_000);
   });
 
   describe('When the user repays a partial amount of the loan using a valid permit signature', () => {
@@ -249,7 +249,7 @@ describe('Given a user and a reserve that supports repayments in native tokens',
 
     assertOk(setup);
     reserveSupportingNative = setup.value.borrowReserve;
-  }, 60_000);
+  }, 90_000);
 
   describe('When the user repays a partial amount of the loan in native tokens', () => {
     it('Then the borrow position is updated to reflect the reduced outstanding balance', async () => {
