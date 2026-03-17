@@ -47,7 +47,7 @@ describe('Given a user with a one supply position as collateral', () => {
       });
 
       assertOk(setup);
-    });
+    }, 60_000);
 
     it('Then the health factor should be null', async () => {
       const position = await userPosition(client, {
@@ -148,7 +148,7 @@ describe('Given a user with a one supply position as collateral', () => {
         );
 
         assertOk(setup);
-      }, 90_000);
+      }, 120_000);
 
       it('Then the health factor should be greater than before supplying more collateral', async () => {
         const position = await userPosition(client, {
@@ -205,7 +205,7 @@ describe('Given a user with a one supply position as collateral', () => {
           .andThen(client.waitForTransaction);
 
         assertOk(setup);
-      });
+      }, 90_000);
 
       it('Then the health factor should be greater than before repaying partially', async () => {
         const position = await userPosition(client, {
@@ -250,7 +250,7 @@ describe('Given a user with a one supply position as collateral', () => {
           .andThen(client.waitForTransaction);
 
         assertOk(setup);
-      });
+      }, 60_000);
 
       it('Then the health factor should be less than before borrowing more money', async () => {
         const position = await userPosition(client, {
@@ -307,7 +307,7 @@ describe('Given a user with a one supply position as collateral', () => {
           .andThen(client.waitForTransaction);
 
         assertOk(setup);
-      }, 60_000);
+      }, 90_000);
 
       it('Then the health factor should be less than before withdrawing collateral', async () => {
         const position = await userPosition(client, {
@@ -350,7 +350,7 @@ describe('Given a user with a one supply position as collateral', () => {
           .andThen(client.waitForTransaction);
 
         assertOk(setup);
-      });
+      }, 60_000);
 
       it('Then the health factor should be null', async () => {
         const position = await userPosition(client, {

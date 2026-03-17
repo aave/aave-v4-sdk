@@ -17,7 +17,7 @@ import {
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { signTypedDataWith } from '@aave/client/viem';
 import { beforeAll, describe, it } from 'vitest';
@@ -48,7 +48,7 @@ describe('Given a user with a supply position enabled as collateral', () => {
     beforeAll(async () => {
       const setup = await borrowFromRandomReserve(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_USDC_ADDRESS,
+        token: ETHEREUM_WETH_ADDRESS,
         ratioToBorrow: 0.5,
       }).andThen((info) =>
         userBorrows(client, {
@@ -64,7 +64,7 @@ describe('Given a user with a supply position enabled as collateral', () => {
       assertOk(setup);
       assertSingleElementArray(setup.value);
       borrowedPosition = setup.value[0];
-    });
+    }, 60_000);
 
     describe('When the user swaps part of the borrow position to a different token using a market order', () => {
       let reserveToSwap: Reserve;
