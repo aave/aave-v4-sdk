@@ -312,6 +312,12 @@ input ChainsRequestQuery @oneOf {
 input ClaimRewardsRequest {
   """The claiming ids"""
   ids: [RewardId!]!
+
+  """The user claiming"""
+  user: EvmAddress!
+
+  """The chain to claim on"""
+  chainId: ChainId!
 }
 
 type CollateralFactorVariation {
@@ -1601,8 +1607,6 @@ union RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired | Insuf
 type Reserve {
   id: ReserveId!
   onChainId: OnChainReserveId!
-  borrowCap: BigDecimal!
-  supplyCap: BigDecimal!
   chain: Chain!
   summary: ReserveSummary!
   settings: ReserveSettings!
@@ -2836,6 +2840,7 @@ union UserClaimableReward = UserMerklClaimableReward
 
 input UserClaimableRewardsRequest {
   user: EvmAddress!
+  chainId: ChainId!
 }
 
 input UserHub {

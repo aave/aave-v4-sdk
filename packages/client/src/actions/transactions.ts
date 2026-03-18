@@ -406,6 +406,8 @@ export function setUserSuppliesAsCollateral(
  * ```ts
  * const result = await claimRewards(client, {
  *   ids: [rewardId('abc123')],
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x9abc…'),
  * });
  *
  * if (result.isErr()) {
