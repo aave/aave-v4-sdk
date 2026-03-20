@@ -71,7 +71,6 @@ function injectDepositPermitSignature(
  *
  * ```ts
  * const [sendTransaction] = useSendTransaction(wallet);
- * const [signTypedData] = useSignTypedData(wallet);
  *
  * const [deposit, { loading, error }] = useStableVaultDeposit((plan) => {
  *   switch (plan.__typename) {
@@ -79,9 +78,6 @@ function injectDepositPermitSignature(
  *       return sendTransaction(plan);
  *
  *     case 'Erc20Approval':
- *       if (plan.bySignature) {
- *         return signTypedData(plan.bySignature);
- *       }
  *       return sendTransaction(plan.byTransaction);
  *   }
  * });
