@@ -75,8 +75,10 @@ function injectDepositPermitSignature(
  * const [deposit, { loading, error }] = useStableVaultDeposit((plan) => {
  *   switch (plan.__typename) {
  *     case 'TransactionRequest':
+ *       return sendTransaction(plan);
+ *
  *     case 'Erc20Approval':
- *       return sendTransaction(plan.byTransaction ?? plan);
+ *       return sendTransaction(plan.byTransaction);
  *   }
  * });
  * ```
