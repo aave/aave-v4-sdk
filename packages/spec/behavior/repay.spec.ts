@@ -8,7 +8,7 @@ import {
   fundErc20Address,
   getNativeBalance,
 } from '@aave/client/testing';
-import { permitWith, sendWith } from '@aave/client/viem';
+import { sendWith, signTypedDataWith } from '@aave/client/viem';
 import type { Reserve, UserBorrowItem } from '@aave/graphql';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -192,20 +192,47 @@ describe('Given a user and a reserve with an active borrow position', () => {
     it('Then the repayment is processed without requiring prior ERC20 approval', async () => {
       const amountToRepay = borrowBefore.debt.amount.value.div(2);
 
-      const repayResult = await permitWith(user, (permitSig) =>
-        repay(client, {
-          reserve: reserve.id,
-          sender: evmAddress(user.account.address),
-          amount: {
-            erc20: {
-              permitSig,
-              value: {
-                exact: amountToRepay,
-              },
-            },
+      // Step 1: Get the initial plan (expects Erc20ApprovalRequired with permit support)
+      const initialPlan = await repay(client, {
+        reserve: reserve.id,
+        sender: evmAddress(user.account.address),
+        amount: {
+          erc20: {
+            value: { exact: amountToRepay },
           },
-        }),
-      )
+        },
+      });
+      assertOk(initialPlan);
+      invariant(
+        initialPlan.value.__typename === 'Erc20ApprovalRequired',
+        `Expected Erc20ApprovalRequired but got: ${initialPlan.value.__typename}`,
+      );
+
+      const approval = initialPlan.value.approvals[0];
+      invariant(approval, 'No approval found');
+      const permitTypedData = approval.bySignature;
+      invariant(permitTypedData, 'No permit typed data found');
+      const signedAmount = permitTypedData.signedAmount;
+
+      // Step 2: Sign the permit
+      const signResult = await signTypedDataWith(user, permitTypedData);
+      assertOk(signResult);
+      const permitSig = {
+        deadline: permitTypedData.message.deadline as number,
+        value: signResult.value,
+      };
+
+      // Step 3: Repay with the signed permit
+      const repayResult = await repay(client, {
+        reserve: reserve.id,
+        sender: evmAddress(user.account.address),
+        amount: {
+          erc20: {
+            permit: { permitSig, signedAmount },
+            value: { exact: amountToRepay },
+          },
+        },
+      })
         .andThen((tx) => {
           invariant(
             tx.__typename === 'TransactionRequest',

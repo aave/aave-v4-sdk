@@ -11,6 +11,7 @@ export const PermitTypedDataFragment = graphql(
       ...DomainData
     }
     message
+    signedAmount
   }`,
   [DomainDataFragment],
 );

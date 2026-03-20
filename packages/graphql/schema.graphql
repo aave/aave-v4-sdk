@@ -1207,6 +1207,11 @@ type PermitTypedData {
   primaryType: String!
   domain: DomainData!
   message: JSON!
+
+  """
+  The exact amount included in the permit message, in human-readable decimal form.
+  """
+  signedAmount: BigDecimal!
 }
 
 union PointsCriteria = PointsGenericCriteria
@@ -1554,9 +1559,9 @@ input RepayErc20AmountInputWithPermit {
   value: AmountInput!
 
   """
-  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  Exact signed permit payload to use when building a repay transaction from an already-signed message.
   """
-  permitSig: ERC20PermitSignature
+  permit: RepaySignedPermitInput
 }
 
 input RepayRequest {
@@ -1568,6 +1573,16 @@ input RepayRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
+}
+
+input RepaySignedPermitInput {
+  """
+  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  """
+  permitSig: ERC20PermitSignature!
+
+  """Exact token amount that was signed, in its main unit (e.g., 1.5 DAI)."""
+  signedAmount: BigDecimal!
 }
 
 type RepayWithSupply {
