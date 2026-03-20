@@ -78,7 +78,7 @@ export const ETHEREUM_USDe_ADDRESS = evmAddress(
 
 // Spoke addresses and ids
 export const ETHEREUM_SPOKE_CORE_ADDRESS = evmAddress(
-  '0x46539e9123A18c427e6b4DFF114c28CF405Cb023',
+  '0xeFa83c7C212B41d7521562a461D8633cb2863674',
 );
 export const ETHEREUM_SPOKE_CORE_ID = encodeSpokeId({
   chainId: ETHEREUM_FORK_ID,
@@ -86,7 +86,7 @@ export const ETHEREUM_SPOKE_CORE_ID = encodeSpokeId({
 });
 
 export const ETHEREUM_SPOKE_ETHENA_ADDRESS = evmAddress(
-  '0xf3b207c235f6154120F41eB63D5ACCBAfD4086D1',
+  '0x16d46123A51A85073Dce8CF1bDFC6c1Dc268bFEf',
 );
 export const ETHEREUM_SPOKE_ETHENA_ID = encodeSpokeId({
   chainId: ETHEREUM_FORK_ID,
@@ -95,7 +95,7 @@ export const ETHEREUM_SPOKE_ETHENA_ID = encodeSpokeId({
 
 // Hub addresses
 export const ETHEREUM_HUB_CORE_ADDRESS = evmAddress(
-  '0x3Ed2C9829FBCab6015E331a0352F8ae148217D70',
+  '0xdea2C9042091e34BBA7EC0139638E79056a128B8',
 );
 export const ETHEREUM_HUB_CORE_ID = encodeHubId({
   chainId: ETHEREUM_FORK_ID,

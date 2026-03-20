@@ -108,10 +108,6 @@ export const exchange = cacheExchange({
       price: transformToBigDecimal,
       date: transformToDate,
     },
-    Reserve: {
-      borrowCap: transformToBigDecimal,
-      supplyCap: transformToBigDecimal,
-    },
     HealthFactorError: {
       current: transformToNullableBigDecimal,
       after: transformToNullableBigDecimal,
