@@ -1,5 +1,18 @@
 # @aave/client
 
+## 4.0.0-next.53
+
+### Minor Changes
+
+- 407c24d: **feat:** update repay permit schema to use `RepaySignedPermitInput` with explicit `signedAmount`, and expose `signedAmount` on `PermitTypedData`
+
+### Patch Changes
+
+- d233ea6: **fix:** update schema adding required `chainId` and `user` fields to `ClaimRewardsRequest` and `UserClaimableRewardsRequest`, remove deprecated `borrowCap` and `supplyCap` from `Reserve`
+- Updated dependencies [407c24d]
+- Updated dependencies [d233ea6]
+  - @aave/graphql@1.0.0-next.37
+
 ## 4.0.0-next.52
 
 ### Patch Changes
