@@ -652,6 +652,7 @@ export function makePermitTypedData(): PermitTypedData {
       nonce: '0',
       deadline: 1234567890,
     },
+    signedAmount: bigDecimal(1),
   };
 }
 
