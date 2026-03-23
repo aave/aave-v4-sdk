@@ -494,6 +494,9 @@ export type RepayAmountInputWithPermit = ReturnType<
 export type RepayErc20AmountInputWithPermit = ReturnType<
   typeof graphql.scalar<'RepayErc20AmountInputWithPermit'>
 >;
+export type RepaySignedPermitInput = ReturnType<
+  typeof graphql.scalar<'RepaySignedPermitInput'>
+>;
 export type WithdrawReserveAmountInput = ReturnType<
   typeof graphql.scalar<'WithdrawReserveAmountInput'>
 >;

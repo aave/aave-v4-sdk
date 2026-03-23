@@ -108,6 +108,9 @@ export const exchange = cacheExchange({
       price: transformToBigDecimal,
       date: transformToDate,
     },
+    PermitTypedData: {
+      signedAmount: transformToBigDecimal,
+    },
     HealthFactorError: {
       current: transformToNullableBigDecimal,
       after: transformToNullableBigDecimal,
