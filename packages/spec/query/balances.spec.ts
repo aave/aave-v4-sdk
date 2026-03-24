@@ -10,6 +10,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_1INCH_ADDRESS,
+  ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
   ETHEREUM_HUB_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ADDRESS,
@@ -23,7 +24,7 @@ import { findReserveAndSupply } from '../helpers/supplyBorrow';
 import { assertNonEmptyArray } from '../test-utils';
 
 const user = await createNewWallet(
-  '0xb648cc3d9bdad37b60bcd7177b783a9c7ddfb36b6c7699f74f8dd27d4d150503',
+  '0x0f935f2b7b5a50afff829d59fd42b0e38f84ccb761b84bf510841695853bfe1e',
 );
 
 // Get the user balances for the protocol. This will only return assets that can be used on the protocol
@@ -37,6 +38,7 @@ describe('Given a user with one supply position and multiple tokens to use on th
           chainIds: [ETHEREUM_FORK_ID],
         },
       },
+      includeZeroBalances: false,
     });
     assertOk(balances);
     if (balances.value.length < 3) {
@@ -60,8 +62,8 @@ describe('Given a user with one supply position and multiple tokens to use on th
       assertOk(result);
       const resultSupply = await findReserveAndSupply(client, user, {
         spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_USDC_ADDRESS,
-        amount: bigDecimal('50'),
+        token: ETHEREUM_AAVE_ADDRESS,
+        amount: bigDecimal('1'),
       });
       assertOk(resultSupply);
     }
