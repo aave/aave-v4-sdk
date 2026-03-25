@@ -57,6 +57,9 @@
       },
       "spokes": {
         "description": "List available spokes"
+      },
+      "user": {
+        "description": "Inspect user account data"
       }
     }
   },
