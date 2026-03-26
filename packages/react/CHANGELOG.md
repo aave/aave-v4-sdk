@@ -1,5 +1,17 @@
 # @aave/react
 
+## 4.0.0-next.54
+
+### Minor Changes
+
+- e1c5051: **feat:** add `reserveRates`, `maxBorrowingPower`, and `remainingBorrowingPower` to `PreviewUserPosition`; rename `borrowingPower` to `maxBorrowingPower` on `UserPosition`; add `suppliable` and `borrowable` to `ReserveSummary`
+
+### Patch Changes
+
+- Updated dependencies [e1c5051]
+  - @aave/graphql@1.0.0-next.38
+  - @aave/client@4.0.0-next.54
+
 ## 4.0.0-next.53
 
 ### Minor Changes

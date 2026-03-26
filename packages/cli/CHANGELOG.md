@@ -1,5 +1,16 @@
 # @aave/cli
 
+## 4.1.0-next.46
+
+### Minor Changes
+
+- e1c5051: **feat:** add `reserveRates`, `maxBorrowingPower`, and `remainingBorrowingPower` to `PreviewUserPosition`; rename `borrowingPower` to `maxBorrowingPower` on `UserPosition`; add `suppliable` and `borrowable` to `ReserveSummary`
+
+### Patch Changes
+
+- Updated dependencies [e1c5051]
+  - @aave/client@4.0.0-next.54
+
 ## 4.1.0-next.45
 
 ### Patch Changes

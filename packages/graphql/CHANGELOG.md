@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.0.0-next.38
+
+### Minor Changes
+
+- e1c5051: **feat:** add `reserveRates`, `maxBorrowingPower`, and `remainingBorrowingPower` to `PreviewUserPosition`; rename `borrowingPower` to `maxBorrowingPower` on `UserPosition`; add `suppliable` and `borrowable` to `ReserveSummary`
+
 ## 1.0.0-next.37
 
 ### Minor Changes
