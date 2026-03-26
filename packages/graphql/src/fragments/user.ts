@@ -175,7 +175,10 @@ export const UserPositionFragment = graphql(
     liquidationPrice(currency: $currency) {
       ...ExchangeAmount
     }
-    borrowingPower(currency: $currency) {
+    maxBorrowingPower(currency: $currency) {
+      ...ExchangeAmount
+    }
+    remainingBorrowingPower(currency: $currency) {
       ...ExchangeAmount
     }
     canUpdateDynamicConfig

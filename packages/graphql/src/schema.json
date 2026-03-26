@@ -4328,6 +4328,31 @@
         "interfaces": []
       },
       {
+        "kind": "OBJECT",
+        "name": "PreviewReserveRates",
+        "fields": [
+          {
+            "name": "supplyApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumberVariation",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "borrowApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumberVariation",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "UNION",
         "name": "PreviewReward",
         "possibleTypes": [
@@ -4542,6 +4567,18 @@
             "args": []
           },
           {
+            "name": "reserveRates",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PreviewReserveRates",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "netCollateral",
             "type": {
               "kind": "NON_NULL",
@@ -4600,7 +4637,19 @@
             "args": []
           },
           {
-            "name": "borrowingPower",
+            "name": "maxBorrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "remainingBorrowingPower",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6975,6 +7024,30 @@
           },
           {
             "name": "borrowed",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "suppliable",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "borrowable",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -10355,7 +10428,30 @@
             ]
           },
           {
-            "name": "borrowingPower",
+            "name": "maxBorrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "remainingBorrowingPower",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
