@@ -1341,6 +1341,11 @@ input PreviewRequest {
   action: PreviewAction!
 }
 
+type PreviewReserveRates {
+  supplyApy: PercentNumberVariation
+  borrowApy: PercentNumberVariation
+}
+
 union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPointsReward | PreviewBorrowPointsReward
 
 type PreviewRewardOutcome {
@@ -1366,10 +1371,17 @@ type PreviewUserPosition {
 
   """The net apy for one user position on a current spoke"""
   netApy: PercentNumberVariation!
+
+  """
+  Reserve rates after the action.
+  Only populated for supply and borrow actions.
+  """
+  reserveRates: PreviewReserveRates!
   netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
   netBalance(currency: Currency! = USD): ExchangeAmountVariation!
   projectedEarnings: ExchangeAmountVariation!
-  borrowingPower: ExchangeAmountVariation!
+  maxBorrowingPower: ExchangeAmountVariation!
+  remainingBorrowingPower: ExchangeAmountVariation!
   rewards: PreviewRewardOutcome!
   otherConditions: [UserPositionConditionVariation!]!
 }
@@ -1720,6 +1732,8 @@ type ReserveStatus {
 type ReserveSummary {
   supplied: Erc20Amount!
   borrowed: Erc20Amount!
+  suppliable: Erc20Amount!
+  borrowable: Erc20Amount!
   supplyApy: PercentNumber!
   borrowApy: PercentNumber!
   rewards: [Reward!]!
@@ -2917,7 +2931,8 @@ type UserPosition {
   1 collateral you should render health factor
   """
   liquidationPrice(currency: Currency! = USD): ExchangeAmount
-  borrowingPower(currency: Currency! = USD): ExchangeAmount!
+  maxBorrowingPower(currency: Currency! = USD): ExchangeAmount!
+  remainingBorrowingPower(currency: Currency! = USD): ExchangeAmount!
   canUpdateDynamicConfig: Boolean!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentNumber!
   spoke: Spoke!

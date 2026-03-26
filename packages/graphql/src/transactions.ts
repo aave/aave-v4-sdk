@@ -446,8 +446,19 @@ export const PreviewUserPositionFragment = graphql(
     projectedEarnings {
       ...ExchangeAmountVariation
     }
-    borrowingPower {
+    maxBorrowingPower {
       ...ExchangeAmountVariation
+    }
+    remainingBorrowingPower {
+      ...ExchangeAmountVariation
+    }
+    reserveRates {
+      supplyApy {
+        ...PercentNumberVariation
+      }
+      borrowApy {
+        ...PercentNumberVariation
+      }
     }
     rewards {
       ...PreviewRewardOutcome

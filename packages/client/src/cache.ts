@@ -492,6 +492,7 @@ export const exchange = cacheExchange({
     PreviewBorrowPointsReward: () => null,
     PreviewMerklBorrowReward: () => null,
     PreviewMerklSupplyReward: () => null,
+    PreviewReserveRates: () => null,
     PreviewRewardOutcome: () => null,
     PreviewSupplyPointsReward: () => null,
     PreviewUserPosition: () => null,
