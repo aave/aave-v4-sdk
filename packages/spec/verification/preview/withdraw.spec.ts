@@ -205,7 +205,8 @@ describe('Given a user with 2 supply positions enabled as collateral, with diffe
         );
       });
 
-      it('Then the riskPremium should increase', () => {
+      // NOTE: Enable when adding to reserves riskPremium values
+      it.skip('Then the riskPremium should increase', () => {
         expect(previewInfo.riskPremium.after.value).toBeBigDecimalGreaterThan(
           previewInfo.riskPremium.current.value,
         );
@@ -282,7 +283,8 @@ describe('Given a user with 2 supply positions enabled as collateral, with diffe
       }
     });
 
-    describe('When the user previews a withdraw action from the collateral with the lower collateralRisk', () => {
+    // NOTE: Enable when adding to reserves riskPremium values
+    describe.skip('When the user previews a withdraw action from the collateral with the lower collateralRisk', () => {
       let previewInfo: PreviewUserPosition;
 
       beforeAll(async () => {

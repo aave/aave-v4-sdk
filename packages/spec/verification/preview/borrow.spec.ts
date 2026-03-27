@@ -127,7 +127,8 @@ describe('Given a user with 1 supply position enabled as collateral', () => {
     });
   });
 
-  describe('And the collateral is a risky token with collateralRisk > 0', () => {
+  // NOTE: Enable when riskPremium is added to some reserve
+  describe.skip('And the collateral is a risky token with collateralRisk > 0', () => {
     let user: WalletClient<Transport, Chain, Account>;
 
     beforeAll(async () => {
