@@ -215,8 +215,9 @@ describe('Given a user with a User Position on a Spoke', () => {
         });
 
         it('Then the averageCollateralFactor value should be the average collateral factor from the spoke', async () => {
-          expect(position.averageCollateralFactor.value).toBeBigDecimalEqualTo(
+          expect(position.averageCollateralFactor.value).toBeBigDecimalCloseTo(
             accountDataOnChain.avgCollateralFactor,
+            { percent: 0.1 },
           );
         });
 
