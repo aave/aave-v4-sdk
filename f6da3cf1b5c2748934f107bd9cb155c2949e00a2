@@ -1,0 +1,73 @@
+packages/core/CHANGELOG.md
+  dc664a13e1cc3b1d 5
+packages/types/CHANGELOG.md
+  dc664a13e1cc3b1d 5
+packages/client/CHANGELOG.md
+  dc664a13e1cc3b1d 5
+packages/graphql/CHANGELOG.md
+  dc664a13e1cc3b1d 5
+packages/client/package.json
+  dc664a13e1cc3b1d 3
+packages/graphql/package.json
+  dc664a13e1cc3b1d 3
+packages/cli/CHANGELOG.md
+  dc664a13e1cc3b1d 5
+packages/core/package.json
+  dc664a13e1cc3b1d 3
+packages/react/package.json
+  dc664a13e1cc3b1d 3
+packages/types/package.json
+  dc664a13e1cc3b1d 3
+packages/react/CHANGELOG.md
+  dc664a13e1cc3b1d 5
+packages/cli/package.json
+  dc664a13e1cc3b1d 3
+packages/cli/README.md
+  dc664a13e1cc3b1d 23,58,78,99,122,144,165
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.20",
+  "base_commit_sha": "f6da3cf1b5c2748934f107bd9cb155c2949e00a2",
+  "prompts": {
+    "d499ef61290ac352": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55fcb5b0-bdf1-4113-b083-2a0e9c4bd9f6",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 30,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "dc664a13e1cc3b1d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3091-47dc-76e2-b649-0c6ebb1bd2ab",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>",
+      "messages": [],
+      "total_additions": 19,
+      "total_deletions": 1718,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    },
+    "e281cfb9c841af68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3092-188c-74f3-8368-2d1bb8aa51e9",
+        "model": "unknown"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 2045,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
