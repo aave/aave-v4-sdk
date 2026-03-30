@@ -48,7 +48,9 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
     });
 
     await vi.waitUntil(async () => {
-      const balance = await publicClient.getBalance({ address: account.address });
+      const balance = await publicClient.getBalance({
+        address: account.address,
+      });
       return balance > 0n;
     }, 10_000);
   });
