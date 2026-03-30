@@ -19,12 +19,11 @@ import {
   UserRejectedRequestError,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useSendTransaction } from './adapters';
 
 const account = privateKeyToAccount(generatePrivateKey());
-await fundNativeAddress(evmAddress(account.address));
 
 describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
   const request: TransactionRequest = {
@@ -36,6 +35,10 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
     chainId: ETHEREUM_FORK_ID,
     operations: [],
   };
+
+  beforeAll(async () => {
+    await fundNativeAddress(evmAddress(account.address));
+  });
 
   describe('When the wallet is on a different chain than the TransactionRequest chain', () => {
     let walletChainId = `0x${(42).toString(16)}`;
