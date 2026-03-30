@@ -1,5 +1,6 @@
 import {
   ETHEREUM_FORK_ID,
+  ETHEREUM_FORK_RPC_URL,
   fundNativeAddress,
   setupEip1193Interceptor,
 } from '@aave/client/testing';
@@ -12,14 +13,16 @@ import {
   evmAddress,
 } from '@aave/types';
 import {
+  createPublicClient,
   createWalletClient,
   custom,
+  http,
   MethodNotSupportedRpcError,
   SwitchChainError,
   UserRejectedRequestError,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useSendTransaction } from './adapters';
 
@@ -37,7 +40,17 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
   };
 
   beforeAll(async () => {
-    await fundNativeAddress(evmAddress(account.address));
+    const funded = await fundNativeAddress(evmAddress(account.address));
+    assertOk(funded);
+
+    const publicClient = createPublicClient({
+      transport: http(ETHEREUM_FORK_RPC_URL),
+    });
+
+    await vi.waitUntil(async () => {
+      const balance = await publicClient.getBalance({ address: account.address });
+      return balance > 0n;
+    }, 10_000);
   });
 
   describe('When the wallet is on a different chain than the TransactionRequest chain', () => {
