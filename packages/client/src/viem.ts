@@ -44,6 +44,8 @@ import { mainnet, sepolia } from 'viem/chains';
 import type { AaveClient } from './AaveClient';
 import { chain as fetchChain } from './actions';
 import { supportsPermit } from './adapters';
+import { resolveTxHash } from './safe';
+export { isSafeWallet } from './safe';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -282,31 +284,36 @@ export function waitForTransactionResult(
   CancelError | TransactionError | UnexpectedError
 > {
   return ResultAsync.fromPromise(
-    waitForTransactionReceipt(walletClient, {
-      hash: initialTxHash,
-      pollingInterval: 100,
-      retryCount: 20,
-      retryDelay: 50,
-    }),
+    resolveTxHash(initialTxHash),
     (err) => UnexpectedError.from(err),
-  ).andThen((receipt) => {
-    const hash = txHash(receipt.transactionHash);
+  ).andThen((resolvedHash) =>
+    ResultAsync.fromPromise(
+      waitForTransactionReceipt(walletClient, {
+        hash: resolvedHash,
+        pollingInterval: 100,
+        retryCount: 20,
+        retryDelay: 50,
+      }),
+      (err) => UnexpectedError.from(err),
+    ).andThen((receipt) => {
+      const hash = txHash(receipt.transactionHash);
 
-    switch (receipt.status) {
-      case 'reverted':
-        if (initialTxHash !== hash) {
-          return errAsync(CancelError.from(`Transaction replaced by ${hash}`));
-        }
-        return errAsync(transactionError(walletClient.chain, hash, request));
-      case 'success':
-        return okAsync({
-          // viem's waitForTransactionReceipt supports transaction replacement
-          // so it's important to use the transaction hash from the receipt
-          txHash: hash,
-          operations: request.operations,
-        });
-    }
-  });
+      switch (receipt.status) {
+        case 'reverted':
+          if (resolvedHash !== hash) {
+            return errAsync(
+              CancelError.from(`Transaction replaced by ${hash}`),
+            );
+          }
+          return errAsync(transactionError(walletClient.chain, hash, request));
+        case 'success':
+          return okAsync({
+            txHash: hash,
+            operations: request.operations,
+          });
+      }
+    }),
+  );
 }
 
 function sendTransactionAndWait(

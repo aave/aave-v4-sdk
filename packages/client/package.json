@@ -96,6 +96,7 @@
   },
   "devDependencies": {
     "@bgd-labs/aave-address-book": "^4.25.3",
+    "@safe-global/safe-apps-sdk": "^9.1.0",
     "@node-kit/pnpm-workspace-root": "^3.3.1",
     "@privy-io/server-auth": "^1.32.5",
     "dotenv": "^17.2.3",
@@ -109,6 +110,7 @@
   },
   "peerDependencies": {
     "@privy-io/server-auth": "^1.28.8",
+    "@safe-global/safe-apps-sdk": ">=9.0.0",
     "ethers": "^6.14.4",
     "thirdweb": "^5.105.25",
     "viem": "^2.47.0"
@@ -118,6 +120,9 @@
       "optional": true
     },
     "@privy-io/server-auth": {
+      "optional": true
+    },
+    "@safe-global/safe-apps-sdk": {
       "optional": true
     },
     "thirdweb": {

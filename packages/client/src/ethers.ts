@@ -28,6 +28,7 @@ import {
   type TypedDataField,
 } from 'ethers';
 import { supportsPermit } from './adapters';
+import { resolveTxHash } from './safe';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -101,24 +102,32 @@ export function waitForTransactionResult(
   request: TransactionRequest,
   response: TransactionResponse,
 ): ResultAsync<TransactionResult, TransactionError | UnexpectedError> {
-  return ResultAsync.fromPromise(response.wait(), (err) =>
-    UnexpectedError.from(err),
-  ).andThen((receipt) => {
-    const hash = txHash(nonNullable(receipt?.hash));
+  return ResultAsync.fromPromise(
+    resolveTxHash(txHash(response.hash)),
+    (err) => UnexpectedError.from(err),
+  ).andThen((resolvedHash) =>
+    ResultAsync.fromPromise(
+      resolvedHash !== txHash(response.hash)
+        ? response.provider!.waitForTransaction(resolvedHash)
+        : response.wait(),
+      (err) => UnexpectedError.from(err),
+    ).andThen((receipt) => {
+      const hash = txHash(nonNullable(receipt?.hash));
 
-    if (receipt?.status === 0) {
-      return errAsync(
-        TransactionError.new({
-          txHash: hash,
-          request,
-        }),
-      );
-    }
-    return okAsync({
-      txHash: hash,
-      operations: request.operations,
-    });
-  });
+      if (receipt?.status === 0) {
+        return errAsync(
+          TransactionError.new({
+            txHash: hash,
+            request,
+          }),
+        );
+      }
+      return okAsync({
+        txHash: hash,
+        operations: request.operations,
+      });
+    }),
+  );
 }
 
 function sendTransactionAndWait(
