@@ -1,0 +1,25 @@
+packages/client/src/viem.ts
+  8be71e6dae16ea8b 285-286
+packages/client/src/ethers.ts
+  8be71e6dae16ea8b 105-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "502e1a09555053a9371c66a05888f9d9c260ef75",
+  "prompts": {
+    "8be71e6dae16ea8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be6208f9-c6d8-457f-a31e-0bb01decdf82",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 6,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
