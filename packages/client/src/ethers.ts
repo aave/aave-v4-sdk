@@ -108,7 +108,7 @@ export function waitForTransactionResult(
   ).andThen((resolvedHash) =>
     ResultAsync.fromPromise(
       resolvedHash !== txHash(response.hash)
-        ? response.provider!.waitForTransaction(resolvedHash)
+        ? nonNullable(response.provider).waitForTransaction(resolvedHash)
         : response.wait(),
       (err) => UnexpectedError.from(err),
     ).andThen((receipt) => {

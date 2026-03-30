@@ -45,7 +45,6 @@ import type { AaveClient } from './AaveClient';
 import { chain as fetchChain } from './actions';
 import { supportsPermit } from './adapters';
 import { resolveTxHash } from './safe';
-export { isSafeWallet } from './safe';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -459,3 +458,5 @@ export function permitWith<E>(
     return okAsync(result);
   });
 }
+
+export { isSafeWallet } from './safe';
