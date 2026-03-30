@@ -100,6 +100,7 @@ export function tokenSwapQuote(
         case 'SwapByIntent':
         case 'SwapByIntentWithApprovalRequired':
         case 'SwapByTransaction':
+        case 'SwapByTransactionWithApprovalRequired':
           return okAsync(result);
 
         case 'InsufficientLiquidityError':

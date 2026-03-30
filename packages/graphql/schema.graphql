@@ -2295,6 +2295,15 @@ type SwapByTransaction {
   quote: SwapQuote!
 }
 
+type SwapByTransactionWithApprovalRequired {
+  quote: SwapQuote!
+
+  """
+  All required approvals (may contain reset + actual for USDT on mainnet)
+  """
+  approvals: [Erc20Approval!]!
+}
+
 type SwapCancelled {
   swapId: SwapId!
   createdAt: DateTime!
@@ -2623,7 +2632,7 @@ input TokenSwapQuoteRequest @oneOf {
   fromQuote: MarketOrderTokenSwapFromQuoteInput
 }
 
-union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientLiquidityError
+union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | SwapByTransactionWithApprovalRequired | InsufficientLiquidityError
 
 type TransactionRequest {
   to: EvmAddress!
