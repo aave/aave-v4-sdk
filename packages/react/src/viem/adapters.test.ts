@@ -1,7 +1,6 @@
 import {
+  createNewWallet,
   ETHEREUM_FORK_ID,
-  ETHEREUM_FORK_RPC_URL,
-  fundNativeAddress,
   setupEip1193Interceptor,
 } from '@aave/client/testing';
 import { CancelError, SigningError } from '@aave/core';
@@ -13,47 +12,28 @@ import {
   evmAddress,
 } from '@aave/types';
 import {
-  createPublicClient,
   createWalletClient,
   custom,
-  http,
   MethodNotSupportedRpcError,
   SwitchChainError,
   UserRejectedRequestError,
 } from 'viem';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useSendTransaction } from './adapters';
 
-const account = privateKeyToAccount(generatePrivateKey());
+const user = await createNewWallet();
 
 describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
   const request: TransactionRequest = {
     __typename: 'TransactionRequest',
-    to: evmAddress(account.address),
-    from: evmAddress(account.address),
+    to: evmAddress(user.account.address),
+    from: evmAddress(user.account.address),
     data: '0x' as BlockchainData,
     value: 0n,
     chainId: ETHEREUM_FORK_ID,
     operations: [],
   };
-
-  beforeAll(async () => {
-    const funded = await fundNativeAddress(evmAddress(account.address));
-    assertOk(funded);
-
-    const publicClient = createPublicClient({
-      transport: http(ETHEREUM_FORK_RPC_URL),
-    });
-
-    await vi.waitUntil(async () => {
-      const balance = await publicClient.getBalance({
-        address: account.address,
-      });
-      return balance > 0n;
-    }, 10_000);
-  });
 
   describe('When the wallet is on a different chain than the TransactionRequest chain', () => {
     let walletChainId = `0x${(42).toString(16)}`;
@@ -79,7 +59,7 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
     });
 
     const wallet = createWalletClient({
-      account,
+      account: user.account,
       transport: custom(provider),
     });
 
@@ -128,7 +108,7 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
     });
 
     const wallet = createWalletClient({
-      account,
+      account: user.account,
       transport: custom(provider),
     });
 
