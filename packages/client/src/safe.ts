@@ -8,6 +8,10 @@ let _sdk: any = null;
 const SAFE_POLL_INTERVAL_MS = 2000;
 const SAFE_POLL_TIMEOUT_MS = 5 * 60 * 1000;
 const SAFE_INFO_TIMEOUT_MS = 200;
+const SAFE_ALLOWED_DOMAINS: RegExp[] = [
+  /gnosis-safe\.io$/,
+  /app\.safe\.global$/,
+];
 
 declare const self: unknown;
 
@@ -33,11 +37,9 @@ async function getSafeSDK(): Promise<any | null> {
   try {
     // Dynamic import so consumers without @safe-global/safe-apps-sdk installed
     // don't get a hard failure at module load time (it's an optional peer dep).
-    const mod = await import(
-      /* webpackIgnore: true */ '@safe-global/safe-apps-sdk'
-    );
+    const mod = await import('@safe-global/safe-apps-sdk');
     const SDK = mod.default ?? mod;
-    _sdk = new SDK();
+    _sdk = new SDK({ allowedDomains: SAFE_ALLOWED_DOMAINS });
     return _sdk;
   } catch {
     return null;
