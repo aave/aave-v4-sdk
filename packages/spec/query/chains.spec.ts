@@ -11,15 +11,13 @@ describe('Given a user who wants to list available chains', () => {
       async (filter) => {
         const result = await chains(client, { query: { filter } });
         assertOk(result);
-        // Staging environment has only testnet chains for the moment
         switch (filter) {
           case ChainsFilter.MAINNET_ONLY:
-            // NOTE: Enable when Aave V4 is deployed to mainnet
-            // expect(result.value).toBeArrayWithElements(
-            //   expect.objectContaining({
-            //     isTestnet: false,
-            //   }),
-            // );
+            expect(result.value).toBeArrayWithElements(
+              expect.objectContaining({
+                isTestnet: false,
+              }),
+            );
             break;
           case ChainsFilter.TESTNET_ONLY:
             expect(result.value).toBeArrayWithElements(
