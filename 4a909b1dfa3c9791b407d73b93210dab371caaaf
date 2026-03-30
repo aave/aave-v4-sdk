@@ -1,0 +1,31 @@
+packages/react/src/swap/useTokenSwapQuote.ts
+  bdc440b0c5639ad9 41
+packages/graphql/src/fragments/swaps.ts
+  bdc440b0c5639ad9 136-151,173-175,184
+.changeset/sc-wallet-presign.md
+  bdc440b0c5639ad9 1-7
+packages/client/src/actions/swap.ts
+  bdc440b0c5639ad9 103
+packages/react/src/swap/useTokenSwap.ts
+  bdc440b0c5639ad9 212-234
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "4a909b1dfa3c9791b407d73b93210dab371caaaf",
+  "prompts": {
+    "bdc440b0c5639ad9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8bd4494-8e83-4192-bf3f-897309ade35d",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 52,
+      "total_deletions": 0,
+      "accepted_lines": 52,
+      "overriden_lines": 0
+    }
+  }
+}
