@@ -102,9 +102,8 @@ export function waitForTransactionResult(
   request: TransactionRequest,
   response: TransactionResponse,
 ): ResultAsync<TransactionResult, TransactionError | UnexpectedError> {
-  return ResultAsync.fromPromise(
-    resolveTxHash(txHash(response.hash)),
-    (err) => UnexpectedError.from(err),
+  return ResultAsync.fromPromise(resolveTxHash(txHash(response.hash)), (err) =>
+    UnexpectedError.from(err),
   ).andThen((resolvedHash) =>
     ResultAsync.fromPromise(
       resolvedHash !== txHash(response.hash)

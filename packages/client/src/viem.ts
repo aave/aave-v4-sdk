@@ -282,9 +282,8 @@ export function waitForTransactionResult(
   TransactionResult,
   CancelError | TransactionError | UnexpectedError
 > {
-  return ResultAsync.fromPromise(
-    resolveTxHash(initialTxHash),
-    (err) => UnexpectedError.from(err),
+  return ResultAsync.fromPromise(resolveTxHash(initialTxHash), (err) =>
+    UnexpectedError.from(err),
   ).andThen((resolvedHash) =>
     ResultAsync.fromPromise(
       waitForTransactionReceipt(walletClient, {
