@@ -1238,7 +1238,7 @@ type PositionSwapAdapterContractApproval {
   bySignature: SwapTypedData!
 }
 
-union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapPositionManagerApproval
+union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapPositionManagerApproval | PositionSwapSetCollateralApproval
 
 type PositionSwapByIntentApprovalsRequired {
   quote: SwapQuote!
@@ -1247,6 +1247,10 @@ type PositionSwapByIntentApprovalsRequired {
 
 type PositionSwapPositionManagerApproval {
   byTransaction: TransactionRequest!
+  bySignature: SwapTypedData!
+}
+
+type PositionSwapSetCollateralApproval {
   bySignature: SwapTypedData!
 }
 
@@ -1269,6 +1273,12 @@ input PreparePositionSwapRequest {
 
   """position manager signature - can be approved via transaction"""
   positionManagerSignature: Signature
+
+  """
+  SetUsingAsCollateral signature (only needed for collateral swaps when destination
+  asset is not already enabled as collateral)
+  """
+  setCollateralSignature: Signature
 }
 
 union PreparePositionSwapResult = PrepareSwapOrder | InsufficientBalanceError

@@ -577,6 +577,19 @@ export type PositionSwapPositionManagerApproval = FragmentOf<
   typeof PositionSwapPositionManagerApprovalFragment
 >;
 
+export const PositionSwapSetCollateralApprovalFragment = graphql(
+  `fragment PositionSwapSetCollateralApproval on PositionSwapSetCollateralApproval {
+    __typename
+    bySignature {
+      ...SwapTypedData
+    }
+  }`,
+  [SwapTypedDataFragment],
+);
+export type PositionSwapSetCollateralApproval = FragmentOf<
+  typeof PositionSwapSetCollateralApprovalFragment
+>;
+
 export const PositionSwapApprovalFragment = graphql(
   `fragment PositionSwapApproval on PositionSwapApproval {
     __typename
@@ -586,10 +599,14 @@ export const PositionSwapApprovalFragment = graphql(
     ... on PositionSwapPositionManagerApproval {
       ...PositionSwapPositionManagerApproval
     }
+    ... on PositionSwapSetCollateralApproval {
+      ...PositionSwapSetCollateralApproval
+    }
   }`,
   [
     PositionSwapAdapterContractApprovalFragment,
     PositionSwapPositionManagerApprovalFragment,
+    PositionSwapSetCollateralApprovalFragment,
   ],
 );
 export type PositionSwapApproval = FragmentOf<

@@ -3851,6 +3851,10 @@
           {
             "kind": "OBJECT",
             "name": "PositionSwapPositionManagerApproval"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapSetCollateralApproval"
           }
         ]
       },
@@ -3907,6 +3911,25 @@
             },
             "args": []
           },
+          {
+            "name": "bySignature",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapTypedData",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PositionSwapSetCollateralApproval",
+        "fields": [
           {
             "name": "bySignature",
             "type": {
