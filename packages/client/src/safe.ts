@@ -8,10 +8,7 @@ let _sdk: any = null;
 const SAFE_POLL_INTERVAL_MS = 2000;
 const SAFE_POLL_TIMEOUT_MS = 5 * 60 * 1000;
 const SAFE_INFO_TIMEOUT_MS = 200;
-const SAFE_ALLOWED_DOMAINS: RegExp[] = [
-  /gnosis-safe\.io$/,
-  /app\.safe\.global$/,
-];
+const SAFE_ALLOWED_DOMAINS: RegExp[] = [/^app\.safe\.global$/];
 
 declare const self: unknown;
 
