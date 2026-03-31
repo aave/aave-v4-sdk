@@ -50,7 +50,7 @@ async function getSafeSDK(): Promise<any | null> {
  * Returns true if running inside a Safe App iframe.
  * Synchronous false for non-iframe contexts.
  */
-export async function isSafeWallet(): Promise<boolean> {
+async function isSafeWallet(): Promise<boolean> {
   if (!isInIframe()) return false;
   if (_isSafe !== null) return _isSafe;
 

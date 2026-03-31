@@ -457,5 +457,3 @@ export function permitWith<E>(
     return okAsync(result);
   });
 }
-
-export { isSafeWallet } from './safe';
