@@ -1,0 +1,23 @@
+.changeset/sc-wallet-presign.md
+  aa6a2181bde07e3e 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "8e18cc7baa2053c28f7ed0aa000abc4f58bff7ba",
+  "prompts": {
+    "aa6a2181bde07e3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ea3e082-b7fa-46a2-8c2d-4642844a118d",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
