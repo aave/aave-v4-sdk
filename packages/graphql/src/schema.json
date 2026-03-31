@@ -8242,6 +8242,43 @@
       },
       {
         "kind": "OBJECT",
+        "name": "SwapByTransactionWithApprovalRequired",
+        "fields": [
+          {
+            "name": "quote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapQuote",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "approvals",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Approval",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "SwapCancelled",
         "fields": [
           {
@@ -9586,6 +9623,10 @@
           {
             "kind": "OBJECT",
             "name": "SwapByTransaction"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SwapByTransactionWithApprovalRequired"
           },
           {
             "kind": "OBJECT",

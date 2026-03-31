@@ -133,6 +133,22 @@ export const SwapByTransactionFragment = graphql(
 );
 export type SwapByTransaction = FragmentOf<typeof SwapByTransactionFragment>;
 
+export const SwapByTransactionWithApprovalRequiredFragment = graphql(
+  `fragment SwapByTransactionWithApprovalRequired on SwapByTransactionWithApprovalRequired {
+    __typename
+    quote {
+      ...SwapQuote
+    }
+    approvals {
+      ...Erc20Approval
+    }
+  }`,
+  [SwapQuoteFragment, Erc20ApprovalFragment],
+);
+export type SwapByTransactionWithApprovalRequired = FragmentOf<
+  typeof SwapByTransactionWithApprovalRequiredFragment
+>;
+
 export const SwapReceiptFragment = graphql(
   `fragment SwapReceipt on SwapReceipt {
     __typename
@@ -154,6 +170,9 @@ export const TokenSwapQuoteResultFragment = graphql(
     ... on SwapByTransaction {
       ...SwapByTransaction
     }
+    ... on SwapByTransactionWithApprovalRequired {
+      ...SwapByTransactionWithApprovalRequired
+    }
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
@@ -162,6 +181,7 @@ export const TokenSwapQuoteResultFragment = graphql(
     SwapByIntentFragment,
     SwapByIntentWithApprovalRequiredFragment,
     SwapByTransactionFragment,
+    SwapByTransactionWithApprovalRequiredFragment,
     InsufficientLiquidityErrorFragment,
   ],
 );

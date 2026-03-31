@@ -38,6 +38,7 @@ function extractTokenSwapQuote(
     case 'SwapByIntent':
     case 'SwapByIntentWithApprovalRequired':
     case 'SwapByTransaction':
+    case 'SwapByTransactionWithApprovalRequired':
       return ok(data.quote);
     case 'InsufficientLiquidityError':
       return err(ValidationError.fromGqlNode(data));
