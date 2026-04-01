@@ -78,9 +78,6 @@ function sendTransactionAndWait(
       ResultAsync.fromPromise(
         waitForTransactionReceipt(publicClient, {
           hash,
-          pollingInterval: 100,
-          retryCount: 20,
-          retryDelay: 50,
         }),
         (err) => UnexpectedError.from(err),
       ),
