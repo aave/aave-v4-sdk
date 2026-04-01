@@ -1,5 +1,11 @@
 # @aave/client
 
+## 4.0.3
+
+### Patch Changes
+
+- 0e2969e: **fix:** use viem client defaults for transaction receipt polling and retries
+
 ## 4.0.2
 
 ### Patch Changes
