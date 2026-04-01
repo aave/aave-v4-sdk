@@ -288,9 +288,6 @@ export function waitForTransactionResult(
     ResultAsync.fromPromise(
       waitForTransactionReceipt(walletClient, {
         hash: resolvedHash,
-        pollingInterval: 100,
-        retryCount: 20,
-        retryDelay: 50,
       }),
       (err) => UnexpectedError.from(err),
     ).andThen((receipt) => {
