@@ -1,5 +1,12 @@
 # @aave/react
 
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [571ae62]
+  - @aave/client@4.0.2
+
 ## 4.0.1
 
 ### Patch Changes

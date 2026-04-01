@@ -1,5 +1,11 @@
 # @aave/client
 
+## 4.0.2
+
+### Patch Changes
+
+- 571ae62: Fix Safe wallet detection failing due to allowedDomains regex not matching the full origin (https://app.safe.global). Also restore webpackIgnore comment for dynamic import and increase getInfo timeout from 200ms to 5s.
+
 ## 4.0.1
 
 ### Patch Changes
