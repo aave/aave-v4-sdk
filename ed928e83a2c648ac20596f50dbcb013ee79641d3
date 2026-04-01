@@ -1,0 +1,55 @@
+packages/react/src/swap/useSupplySwap.test.ts
+  68885bbf5e372aae 19,91-94,116,147
+packages/react/src/swap/useWithdrawSwap.test.ts
+  68885bbf5e372aae 19,91-94,116,146
+packages/react/src/swap/useRepayWithSupply.test.ts
+  68885bbf5e372aae 19,91-94,116,147
+packages/react/src/swap/useBorrowSwap.test.ts
+  68885bbf5e372aae 19,91-94,116,147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.3",
+  "base_commit_sha": "ed928e83a2c648ac20596f50dbcb013ee79641d3",
+  "prompts": {
+    "3808ed405f64120f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4869-01d6-7271-9a46-df42f3d1e466",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "68885bbf5e372aae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4868-9890-7830-8345-1124d73fe474",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 28,
+      "total_deletions": 2,
+      "accepted_lines": 28,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 810,
+      "overriden_lines": 0
+    }
+  }
+}
