@@ -26,15 +26,14 @@ import { renderHookWithinContext } from '../test-utils';
 import { useSendTransaction } from './adapters';
 
 vi.mock('@aave/client/viem', async () => {
-  const actual = await vi.importActual<typeof import('@aave/client/viem')>(
-    '@aave/client/viem',
-  );
+  const actual =
+    await vi.importActual<typeof import('@aave/client/viem')>(
+      '@aave/client/viem',
+    );
 
   return {
     ...actual,
-    sendTransaction: vi.fn(() =>
-      okAsync(txHash(`0x${'0'.repeat(63)}1`)),
-    ),
+    sendTransaction: vi.fn(() => okAsync(txHash(`0x${'0'.repeat(63)}1`))),
   };
 });
 
