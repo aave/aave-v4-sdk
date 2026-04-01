@@ -16,6 +16,7 @@ import {
   makePrepareSwapOrder,
   makeSwapQuote,
   makeSwapReceipt,
+  makeSwapTypedData,
   makeTransactionRequest,
 } from '@aave/graphql/testing';
 import { assertOk, evmAddress } from '@aave/types';
@@ -87,6 +88,10 @@ describe(`Given the '${useWithdrawSwap.name}' hook`, () => {
                 makePositionSwapAdapterContractApproval({
                   byTransaction: dummyTransactionRequest,
                 }),
+                {
+                  __typename: 'PositionSwapSetCollateralApproval',
+                  bySignature: makeSwapTypedData(),
+                },
               ],
             },
           },
@@ -108,6 +113,7 @@ describe(`Given the '${useWithdrawSwap.name}' hook`, () => {
           switch (plan.__typename) {
             case 'PositionSwapPositionManagerApproval':
             case 'PositionSwapAdapterContractApproval':
+            case 'PositionSwapSetCollateralApproval':
               return signSwapTypedData(plan.bySignature);
 
             case 'SwapTypedData':
@@ -117,7 +123,6 @@ describe(`Given the '${useWithdrawSwap.name}' hook`, () => {
       });
 
       const result = await swap({} as WithdrawSwapQuoteRequest);
-
       assertOk(result);
     });
   });
@@ -138,6 +143,7 @@ describe(`Given the '${useWithdrawSwap.name}' hook`, () => {
               return sendTransaction(plan.byTransaction);
 
             case 'PositionSwapAdapterContractApproval':
+            case 'PositionSwapSetCollateralApproval':
               return signSwapTypedData(plan.bySignature);
 
             case 'SwapTypedData':
@@ -147,7 +153,6 @@ describe(`Given the '${useWithdrawSwap.name}' hook`, () => {
       });
 
       const result = await swap({} as WithdrawSwapQuoteRequest);
-
       assertOk(result);
     });
   });
