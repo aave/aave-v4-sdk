@@ -108,6 +108,11 @@ export function processApprovals(
                     ? value
                     : null;
                   break;
+                case 'PositionSwapSetCollateralApproval':
+                  request.setCollateralSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
               }
               return request;
             }),
@@ -116,6 +121,7 @@ export function processApprovals(
           quoteId: result.quote.quoteId,
           adapterContractSignature: null,
           positionManagerSignature: null,
+          setCollateralSignature: null,
         }),
       ),
   };

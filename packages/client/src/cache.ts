@@ -486,6 +486,7 @@ export const exchange = cacheExchange({
     PositionSwapAdapterContractApproval: () => null,
     PositionSwapByIntentApprovalsRequired: () => null,
     PositionSwapPositionManagerApproval: () => null,
+    PositionSwapSetCollateralApproval: () => null,
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PrepareSwapOrder: () => null,
