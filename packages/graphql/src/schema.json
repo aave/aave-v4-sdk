@@ -10990,6 +10990,18 @@
             "args": []
           },
           {
+            "name": "balance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "withdrawable",
             "type": {
               "kind": "NON_NULL",

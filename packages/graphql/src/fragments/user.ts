@@ -28,6 +28,9 @@ export const UserSupplyItemFragment = graphql(
     principal {
       ...Erc20Amount
     }
+    balance {
+      ...Erc20Amount
+    }
     withdrawable {
       ...Erc20Amount
     }
