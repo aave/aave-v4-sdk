@@ -22,7 +22,8 @@ import {
   RoundingMode,
 } from '@aave/types';
 import { useEffect } from 'react';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, fallback, http } from 'viem';
+import { mainnet } from 'viem/chains';
 import { useAaveClient } from '../context';
 import {
   ReadResult,
@@ -35,6 +36,14 @@ import {
   type UseNetworkFeeRequestQuery,
   useExchangeRate,
 } from '../misc';
+
+const publicRpcFallbacks: Partial<Record<number, string[]>> = {
+  [mainnet.id]: [
+    'https://mainnet.gateway.tenderly.co',
+    'https://rpc.flashbots.net',
+    'https://eth.llamarpc.com',
+  ],
+};
 
 const estimatedApprovalGas = 55_558n;
 
@@ -144,9 +153,14 @@ function useExecutionDetails(): UseAsyncTask<
   return useAsyncTask(
     (query) =>
       resolveChain(client, query).andThen((chain) => {
+        const viemChain = toViemChain(chain);
+        const urls = [
+          ...(publicRpcFallbacks[viemChain.id] ?? []),
+          ...viemChain.rpcUrls.default.http,
+        ];
         const publicClient = createPublicClient({
-          chain: toViemChain(chain),
-          transport: http(),
+          chain: viemChain,
+          transport: fallback(urls.map((url) => http(url))),
         });
 
         if ('activity' in query && query.activity.txHash) {
