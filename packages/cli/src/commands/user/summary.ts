@@ -13,7 +13,10 @@ import { userSummary } from '@aave/client/actions';
 
 import * as common from '../../common.js';
 
-function formatAmount(symbol: string, value: { toFixed: (decimals: number) => string }) {
+function formatAmount(
+  symbol: string,
+  value: { toFixed: (decimals: number) => string },
+) {
   return `${symbol}${value.toFixed(2)}`;
 }
 
@@ -31,10 +34,7 @@ export default class UserSummaryCommand extends common.V4Command {
     }),
   };
 
-  protected override headers = [
-    { value: 'Metric' },
-    { value: 'Value' },
-  ];
+  protected override headers = [{ value: 'Metric' }, { value: 'Value' }];
 
   private getSummaryRequest(): ResultAsync<
     UserSummaryRequest,
@@ -74,13 +74,22 @@ export default class UserSummaryCommand extends common.V4Command {
           ],
           [
             'Total Collateral',
-            formatAmount(summary.totalCollateral.symbol, summary.totalCollateral.value),
+            formatAmount(
+              summary.totalCollateral.symbol,
+              summary.totalCollateral.value,
+            ),
           ],
           [
             'Total Supplied',
-            formatAmount(summary.totalSupplied.symbol, summary.totalSupplied.value),
+            formatAmount(
+              summary.totalSupplied.symbol,
+              summary.totalSupplied.value,
+            ),
           ],
-          ['Total Debt', formatAmount(summary.totalDebt.symbol, summary.totalDebt.value)],
+          [
+            'Total Debt',
+            formatAmount(summary.totalDebt.symbol, summary.totalDebt.value),
+          ],
           ['Net APY', `${summary.netApy.normalized.toFixed(4)}%`],
           [
             'Accrued Interest',
@@ -89,7 +98,10 @@ export default class UserSummaryCommand extends common.V4Command {
               summary.netAccruedInterest.value,
             ),
           ],
-          ['Lowest Health Factor', summary.lowestHealthFactor?.toFixed(2) ?? 'N/A'],
+          [
+            'Lowest Health Factor',
+            summary.lowestHealthFactor?.toFixed(2) ?? 'N/A',
+          ],
         ]);
 
         return ok(summary);
