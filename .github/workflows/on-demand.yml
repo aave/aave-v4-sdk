@@ -46,7 +46,7 @@ jobs:
         run: pnpm spec
       
       - name: Configure AWS credentials
-        if: always()
+        if: ${{ always() && github.ref_name == 'main' }}
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
@@ -54,7 +54,7 @@ jobs:
 
 
       - name: Upload Vitest report to S3
-        if: always()
+        if: ${{ always() && github.ref_name == 'main' }}
         run: |
           if [ -d "reports" ]; then
 
