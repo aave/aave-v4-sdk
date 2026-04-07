@@ -1,5 +1,24 @@
 # @aave/cli
 
+## 4.1.4
+
+### Patch Changes
+
+- b8f65dd: **feat:** add `balance` field to `UserSupplyItem` fragment
+- 5277e51: **feat:** add supply action command to CLI
+- ad3e905: **feat:** add repay/withdraw command actions
+- b504b5c: **feat:** add borrow action command
+- f064787: Add PositionSwapSetCollateralApproval support for V4 adapter refactor
+
+  - Add PositionSwapSetCollateralApproval fragment and union variant to graphql package
+  - Add setCollateralSignature field to PreparePositionSwapRequest
+  - Handle new approval type in signApprovals helper (spec) and processApprovals (react)
+  - Update schema from backend with new V4 adapter types
+
+- Updated dependencies [b8f65dd]
+- Updated dependencies [f064787]
+  - @aave/client@4.0.4
+
 ## 4.1.3
 
 ### Patch Changes
