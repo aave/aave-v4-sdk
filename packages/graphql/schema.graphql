@@ -3125,7 +3125,10 @@ type UserSupplyItem {
   """The amount supplied to this reserve"""
   principal: Erc20Amount!
 
-  """The overall amount you can withdraw, including accrued interests"""
+  """The current supply balance based on shares, including accrued interest"""
+  balance: Erc20Amount!
+
+  """The amount currently withdrawable, capped by available liquidity"""
   withdrawable: Erc20Amount!
 
   """The interest amount earned on supplying"""
@@ -3138,7 +3141,7 @@ type UserSupplyItem {
   When the supply was created.
   This is null if they have no supply item, for
   example, when using include_zero_balances this comes
-  back as principal and withdrawable as 0
+  back as principal, balance, and withdrawable as 0
   """
   createdAt: DateTime
 }
