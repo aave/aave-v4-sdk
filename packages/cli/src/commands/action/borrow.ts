@@ -1,4 +1,5 @@
 import {
+  type BorrowRequest,
   bigDecimal,
   evmAddress,
   InvariantError,
@@ -8,12 +9,11 @@ import {
   ResultAsync,
   reserveId,
   type SendWithError,
-  type SupplyRequest,
   type TimeoutError,
   type TransactionReceipt,
   type UnexpectedError,
 } from '@aave/client';
-import { reserve, supply } from '@aave/client/actions';
+import { borrow, reserve } from '@aave/client/actions';
 import { sendWith, toViemChain } from '@aave/client/viem';
 import { Flags } from '@oclif/core';
 import { createWalletClient, http } from 'viem';
@@ -21,41 +21,34 @@ import { privateKeyToAccount } from 'viem/accounts';
 
 import * as common from '../../common.js';
 
-export default class ActionSupply extends common.V4Command {
-  static override description = 'Supply ERC20 tokens to a reserve';
+export default class ActionBorrow extends common.V4Command {
+  static override description = 'Borrow ERC20 tokens from a reserve';
 
   static override flags = {
     'reserve-id': Flags.string({
       required: true,
-      description: 'Reserve ID of the reserve to supply',
+      description: 'Reserve ID of the reserve to borrow from',
     }),
     amount: Flags.string({
       required: true,
-      description: 'Amount of the token to supply',
+      description: 'Amount of the token to borrow',
     }),
     'private-key': common.privateKey({
       required: false,
     }),
-    'enable-collateral': Flags.boolean({
-      required: false,
-      default: false,
-      description:
-        'If provided, the supplied position is enabled as collateral',
-    }),
   };
 
-  private getSupplyRequest(): ResultAsync<
+  private getBorrowRequest(): ResultAsync<
     {
-      request: SupplyRequest;
+      request: BorrowRequest;
       reserve: Reserve;
       amount: string;
-      collateralEnabled: boolean;
       privateKey: `0x${string}`;
     },
     InvariantError | UnexpectedError
   > {
     return ResultAsync.fromPromise(
-      this.parse(ActionSupply),
+      this.parse(ActionBorrow),
       (error) => new InvariantError(String(error)),
     ).andThen(({ flags }) => {
       const privateKey = (flags['private-key'] ??
@@ -67,7 +60,6 @@ export default class ActionSupply extends common.V4Command {
 
       const parsedReserveId = reserveId(flags['reserve-id']);
       const amount = flags.amount.trim();
-      const collateralEnabled = flags['enable-collateral'];
 
       invariant(amount.length > 0, 'Amount cannot be empty');
 
@@ -89,11 +81,9 @@ export default class ActionSupply extends common.V4Command {
               },
             },
             sender,
-            enableCollateral: collateralEnabled ? (true as const) : null,
           },
           reserve: reserveData,
           amount,
-          collateralEnabled,
           privateKey,
         });
       });
@@ -103,7 +93,7 @@ export default class ActionSupply extends common.V4Command {
   async run(): Promise<
     TransactionReceipt | InvariantError | SendWithError | TimeoutError
   > {
-    const result = await this.getSupplyRequest().andThen(
+    const result = await this.getBorrowRequest().andThen(
       ({ request, reserve, amount, privateKey }) => {
         const wallet = createWalletClient({
           account: privateKeyToAccount(privateKey),
@@ -111,10 +101,10 @@ export default class ActionSupply extends common.V4Command {
           transport: http(reserve.chain.rpcUrl),
         });
 
-        return supply(this.client, request)
+        return borrow(this.client, request)
           .andThen(sendWith(wallet))
           .andTee((txResult) =>
-            this.log(`Supply transaction sent with hash: ${txResult.txHash}`),
+            this.log(`Borrow transaction sent with hash: ${txResult.txHash}`),
           )
           .andThen(this.client.waitForTransaction)
           .map((txResult) => {

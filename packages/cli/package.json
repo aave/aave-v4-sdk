@@ -53,6 +53,9 @@
     "commands": "./dist/commands",
     "topicSeparator": " ",
     "topics": {
+      "action": {
+        "description": "Actions to perform in the Aave v4 protocol"
+      },
       "hubs": {
         "description": "List available liquidity hubs"
       },
