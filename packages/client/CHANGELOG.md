@@ -1,5 +1,21 @@
 # @aave/client
 
+## 4.0.4
+
+### Patch Changes
+
+- b8f65dd: **feat:** add `balance` field to `UserSupplyItem` fragment
+- f064787: Add PositionSwapSetCollateralApproval support for V4 adapter refactor
+
+  - Add PositionSwapSetCollateralApproval fragment and union variant to graphql package
+  - Add setCollateralSignature field to PreparePositionSwapRequest
+  - Handle new approval type in signApprovals helper (spec) and processApprovals (react)
+  - Update schema from backend with new V4 adapter types
+
+- Updated dependencies [b8f65dd]
+- Updated dependencies [f064787]
+  - @aave/graphql@1.0.2
+
 ## 4.0.3
 
 ### Patch Changes
