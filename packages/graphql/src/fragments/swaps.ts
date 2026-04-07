@@ -133,6 +133,22 @@ export const SwapByTransactionFragment = graphql(
 );
 export type SwapByTransaction = FragmentOf<typeof SwapByTransactionFragment>;
 
+export const SwapByTransactionWithApprovalRequiredFragment = graphql(
+  `fragment SwapByTransactionWithApprovalRequired on SwapByTransactionWithApprovalRequired {
+    __typename
+    quote {
+      ...SwapQuote
+    }
+    approvals {
+      ...Erc20Approval
+    }
+  }`,
+  [SwapQuoteFragment, Erc20ApprovalFragment],
+);
+export type SwapByTransactionWithApprovalRequired = FragmentOf<
+  typeof SwapByTransactionWithApprovalRequiredFragment
+>;
+
 export const SwapReceiptFragment = graphql(
   `fragment SwapReceipt on SwapReceipt {
     __typename
@@ -154,6 +170,9 @@ export const TokenSwapQuoteResultFragment = graphql(
     ... on SwapByTransaction {
       ...SwapByTransaction
     }
+    ... on SwapByTransactionWithApprovalRequired {
+      ...SwapByTransactionWithApprovalRequired
+    }
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
@@ -162,6 +181,7 @@ export const TokenSwapQuoteResultFragment = graphql(
     SwapByIntentFragment,
     SwapByIntentWithApprovalRequiredFragment,
     SwapByTransactionFragment,
+    SwapByTransactionWithApprovalRequiredFragment,
     InsufficientLiquidityErrorFragment,
   ],
 );
@@ -557,6 +577,19 @@ export type PositionSwapPositionManagerApproval = FragmentOf<
   typeof PositionSwapPositionManagerApprovalFragment
 >;
 
+export const PositionSwapSetCollateralApprovalFragment = graphql(
+  `fragment PositionSwapSetCollateralApproval on PositionSwapSetCollateralApproval {
+    __typename
+    bySignature {
+      ...SwapTypedData
+    }
+  }`,
+  [SwapTypedDataFragment],
+);
+export type PositionSwapSetCollateralApproval = FragmentOf<
+  typeof PositionSwapSetCollateralApprovalFragment
+>;
+
 export const PositionSwapApprovalFragment = graphql(
   `fragment PositionSwapApproval on PositionSwapApproval {
     __typename
@@ -566,10 +599,14 @@ export const PositionSwapApprovalFragment = graphql(
     ... on PositionSwapPositionManagerApproval {
       ...PositionSwapPositionManagerApproval
     }
+    ... on PositionSwapSetCollateralApproval {
+      ...PositionSwapSetCollateralApproval
+    }
   }`,
   [
     PositionSwapAdapterContractApprovalFragment,
     PositionSwapPositionManagerApprovalFragment,
+    PositionSwapSetCollateralApprovalFragment,
   ],
 );
 export type PositionSwapApproval = FragmentOf<

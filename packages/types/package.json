@@ -1,6 +1,6 @@
 {
   "name": "@aave/types",
-  "version": "1.0.0-next.8",
+  "version": "1.0.0",
   "description": "Core types for the Aave SDK",
   "repository": {
     "directory": "packages/types",
@@ -43,7 +43,7 @@
   "devDependencies": {
     "tsup": "^8.5.1",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.0"
   },
   "license": "MIT",
   "publishConfig": {

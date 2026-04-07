@@ -29,8 +29,14 @@ export const ReserveSettingsFragment = graphql(
     suppliable
     receiveSharesEnabled
     latestDynamicConfigKey
+    borrowCap {
+      ...Erc20Amount
+    }
+    supplyCap {
+      ...Erc20Amount
+    }
   }`,
-  [PercentNumberFragment],
+  [PercentNumberFragment, Erc20AmountFragment],
 );
 export type ReserveSettings = FragmentOf<typeof ReserveSettingsFragment>;
 
@@ -51,6 +57,12 @@ export const ReserveSummaryFragment = graphql(
       ...Erc20Amount
     }
     borrowed {
+      ...Erc20Amount
+    }
+    suppliable {
+      ...Erc20Amount
+    }
+    borrowable {
       ...Erc20Amount
     }
     supplyApy {
@@ -105,8 +117,6 @@ export const ReserveFragment = graphql(
     spoke {
       ...Spoke
     }
-    borrowCap
-    supplyCap
     chain {
       ...Chain
     }

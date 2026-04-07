@@ -16,7 +16,7 @@
     "react-dom": "^19.1.0",
     "styletron-engine-monolithic": "^1.0.0",
     "styletron-react": "^6.1.1",
-    "viem": "^2.37.5"
+    "viem": "^2.47.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.8",

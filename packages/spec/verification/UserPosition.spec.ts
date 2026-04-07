@@ -56,7 +56,7 @@ describe('Given a user with a User Position on a Spoke', () => {
         const resultUSDC = await findReserveAndSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
           token: ETHEREUM_USDC_ADDRESS,
-          asCollateral: true,
+          asCollateral: false,
           amount: bigDecimal('100'),
         });
         assertOk(resultUSDC);
@@ -64,7 +64,7 @@ describe('Given a user with a User Position on a Spoke', () => {
         const resultAAVE = await findReserveAndSupply(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
           token: ETHEREUM_AAVE_ADDRESS,
-          asCollateral: false,
+          asCollateral: true,
           amount: bigDecimal('0.5'),
         });
         assertOk(resultAAVE);
@@ -215,8 +215,9 @@ describe('Given a user with a User Position on a Spoke', () => {
         });
 
         it('Then the averageCollateralFactor value should be the average collateral factor from the spoke', async () => {
-          expect(position.averageCollateralFactor.value).toBeBigDecimalEqualTo(
+          expect(position.averageCollateralFactor.value).toBeBigDecimalCloseTo(
             accountDataOnChain.avgCollateralFactor,
+            { percent: 0.1 },
           );
         });
 

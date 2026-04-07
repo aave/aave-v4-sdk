@@ -1,8 +1,8 @@
 import {
   ETHEREUM_FORK_ID,
-  fundNativeAddress,
   setupEip1193Interceptor,
 } from '@aave/client/testing';
+import { sendTransaction } from '@aave/client/viem';
 import { CancelError, SigningError } from '@aave/core';
 import type { TransactionRequest } from '@aave/graphql';
 import {
@@ -10,6 +10,8 @@ import {
   assertOk,
   type BlockchainData,
   evmAddress,
+  okAsync,
+  txHash,
 } from '@aave/types';
 import {
   createWalletClient,
@@ -19,14 +21,29 @@ import {
   UserRejectedRequestError,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
 import { useSendTransaction } from './adapters';
 
+vi.mock('@aave/client/viem', async () => {
+  const actual =
+    await vi.importActual<typeof import('@aave/client/viem')>(
+      '@aave/client/viem',
+    );
+
+  return {
+    ...actual,
+    sendTransaction: vi.fn(() => okAsync(txHash(`0x${'0'.repeat(63)}1`))),
+  };
+});
+
 const account = privateKeyToAccount(generatePrivateKey());
-await fundNativeAddress(evmAddress(account.address));
 
 describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
+  beforeEach(() => {
+    vi.mocked(sendTransaction).mockClear();
+  });
+
   const request: TransactionRequest = {
     __typename: 'TransactionRequest',
     to: evmAddress(account.address),
@@ -73,6 +90,7 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
       const tx = await result.current[0](request);
 
       assertOk(tx);
+      expect(sendTransaction).toHaveBeenCalledOnce();
     });
   });
 
@@ -122,6 +140,7 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
       const tx = await result.current[0](request);
 
       assertOk(tx);
+      expect(sendTransaction).toHaveBeenCalledOnce();
     });
   });
 
@@ -171,6 +190,7 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
 
       assertErr(tx);
       expect(tx.error).toBeInstanceOf(SigningError);
+      expect(sendTransaction).not.toHaveBeenCalled();
     });
   });
 
@@ -220,6 +240,7 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
 
       assertErr(tx);
       expect(tx.error).toBeInstanceOf(CancelError);
+      expect(sendTransaction).not.toHaveBeenCalled();
     });
   });
 
@@ -259,6 +280,7 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
 
       assertErr(tx);
       expect(tx.error).toBeInstanceOf(SigningError);
+      expect(sendTransaction).not.toHaveBeenCalled();
     });
   });
 });

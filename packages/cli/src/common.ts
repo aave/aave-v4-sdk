@@ -43,6 +43,16 @@ export const address = Flags.custom<EvmAddress>({
   helpValue: '<evm-address>',
 });
 
+export const privateKey = Flags.custom<`0x${string}`>({
+  char: 'k',
+  name: 'private-key',
+  description:
+    'Private key to sign transactions (overrides PRIVATE_KEY env var)',
+  parse: async (input) =>
+    (input.startsWith('0x') ? input : `0x${input}`) as `0x${string}`,
+  helpValue: '<private-key>',
+});
+
 function convertBigIntsToStrings(obj: unknown): unknown {
   if (typeof obj === 'bigint') {
     return obj.toString();

@@ -269,7 +269,7 @@ export function updateUserPositionConditions(
  *   collateral: reserveId('SGVsbG8h'),
  *   debt: reserveId('Q2lhbyE= '),
  *   amount: {
- *     exact: bigDecimal('1000'),
+ *     exact: { value: bigDecimal('1000') },
  *   },
  *   liquidator: evmAddress('0x9abc…'),
  *   user: evmAddress('0xdef0…'),
@@ -406,6 +406,8 @@ export function setUserSuppliesAsCollateral(
  * ```ts
  * const result = await claimRewards(client, {
  *   ids: [rewardId('abc123')],
+ *   chainId: chainId(1),
+ *   user: evmAddress('0x9abc…'),
  * });
  *
  * if (result.isErr()) {

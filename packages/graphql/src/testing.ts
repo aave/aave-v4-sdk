@@ -367,7 +367,8 @@ export function makeUserPosition({
     healthFactor: makeHealthFactorWithChange(),
     riskPremium: makeUserPositionRiskPremium(),
     liquidationPrice: makeExchangeAmount(0),
-    borrowingPower: makeExchangeAmount(0),
+    maxBorrowingPower: makeExchangeAmount(0),
+    remainingBorrowingPower: makeExchangeAmount(0),
     canUpdateDynamicConfig: false,
     netBalancePercentChange: makePercentNumber(0),
     averageCollateralFactor: makePercentNumber(0),
@@ -652,6 +653,7 @@ export function makePermitTypedData(): PermitTypedData {
       nonce: '0',
       deadline: 1234567890,
     },
+    signedAmount: bigDecimal(1),
   };
 }
 

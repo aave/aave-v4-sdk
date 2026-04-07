@@ -14,6 +14,7 @@ import { DEFAULT_QUERY_OPTIONS, type RequestPolicyOptions } from '../options';
  * ```ts
  * const result = await userClaimableRewards(client, {
  *   user: evmAddress('0x742d35cc…'),
+ *   chainId: chainId(1),
  * });
  *
  * if (result.isErr()) {

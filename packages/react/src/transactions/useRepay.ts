@@ -9,7 +9,7 @@ import type {
   RepayRequest,
   TransactionRequest,
 } from '@aave/graphql';
-import { errAsync, type Signature } from '@aave/types';
+import { type BigDecimal, errAsync, type Signature } from '@aave/types';
 
 import { useAaveClient } from '../context';
 import {
@@ -27,6 +27,7 @@ import { handleSingleApproval, sendApprovalTransactions } from './approvals';
 function injectRepayPermitSignature(
   request: RepayRequest,
   permitSig: ERC20PermitSignature,
+  signedAmount: BigDecimal,
 ): RepayRequest {
   if ('erc20' in request.amount) {
     return {
@@ -34,7 +35,7 @@ function injectRepayPermitSignature(
       amount: {
         erc20: {
           ...request.amount.erc20,
-          permitSig,
+          permit: { permitSig, signedAmount },
         },
       },
     };
@@ -123,7 +124,14 @@ export function useRepay(
             case 'Erc20ApprovalRequired':
               if (supportsPermit(plan)) {
                 return handleSingleApproval(plan, handler, (permitSig) =>
-                  repay(client, injectRepayPermitSignature(request, permitSig)),
+                  repay(
+                    client,
+                    injectRepayPermitSignature(
+                      request,
+                      permitSig,
+                      plan.approvals[0].bySignature.signedAmount,
+                    ),
+                  ),
                 ).andThen((transaction) => handler(transaction, { cancel }));
               }
               return sendApprovalTransactions(plan, handler).andThen(

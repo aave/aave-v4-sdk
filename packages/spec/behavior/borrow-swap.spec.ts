@@ -17,7 +17,7 @@ import {
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_USDC_ADDRESS,
+  ETHEREUM_WETH_ADDRESS,
 } from '@aave/client/testing';
 import { signTypedDataWith } from '@aave/client/viem';
 import { beforeAll, describe, it } from 'vitest';
@@ -32,115 +32,113 @@ import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Borrow Position swapping on Aave V4', () => {
-  describe('Given a user with a supply position enabled as collateral', () => {
-    beforeAll(async () => {
-      const setup = await findReserveAndSupply(client, user, {
-        spoke: ETHEREUM_SPOKE_CORE_ID,
-        token: ETHEREUM_AAVE_ADDRESS,
-        asCollateral: true,
-      });
-      assertOk(setup);
+describe('Given a user with a supply position enabled as collateral', () => {
+  beforeAll(async () => {
+    const setup = await findReserveAndSupply(client, user, {
+      spoke: ETHEREUM_SPOKE_CORE_ID,
+      token: ETHEREUM_AAVE_ADDRESS,
+      asCollateral: true,
     });
+    assertOk(setup);
+  });
 
-    describe('And the user has a borrow position', () => {
-      let borrowedPosition: UserBorrowItem;
+  describe('And the user has a borrow position', () => {
+    let borrowedPosition: UserBorrowItem;
+
+    beforeAll(async () => {
+      const setup = await borrowFromRandomReserve(client, user, {
+        spoke: ETHEREUM_SPOKE_CORE_ID,
+        token: ETHEREUM_WETH_ADDRESS,
+        ratioToBorrow: 0.5,
+      }).andThen((info) =>
+        userBorrows(client, {
+          query: {
+            userSpoke: {
+              spoke: info.reserve.spoke.id,
+              user: evmAddress(user.account.address),
+            },
+          },
+        }),
+      );
+
+      assertOk(setup);
+      assertSingleElementArray(setup.value);
+      borrowedPosition = setup.value[0];
+    }, 60_000);
+
+    describe('When the user swaps part of the borrow position to a different token using a market order', () => {
+      let reserveToSwap: Reserve;
 
       beforeAll(async () => {
-        const setup = await borrowFromRandomReserve(client, user, {
+        const setup = await findReservesToBorrow(client, user, {
           spoke: ETHEREUM_SPOKE_CORE_ID,
-          token: ETHEREUM_USDC_ADDRESS,
-          ratioToBorrow: 0.5,
-        }).andThen((info) =>
-          userBorrows(client, {
-            query: {
-              userSpoke: {
-                spoke: info.reserve.spoke.id,
+        });
+        assertOk(setup);
+        assertNonEmptyArray(setup.value);
+        const reservesToSwap = setup.value.filter(
+          (reserve) =>
+            availableSwappableTokens.includes(
+              reserve.asset.underlying.address,
+            ) &&
+            reserve.asset.underlying.address !==
+              borrowedPosition.reserve.asset.underlying.address,
+        );
+
+        // Find a reserve with liquidity to swap into
+        for (const reserve of reservesToSwap) {
+          try {
+            const result = await borrowSwapQuote(client, {
+              market: {
+                debtPosition: borrowedPosition.id,
+                buyReserve: reserve.id,
+                amount: borrowedPosition.principal.amount.value.div(2),
                 user: evmAddress(user.account.address),
               },
-            },
-          }),
-        );
-
-        assertOk(setup);
-        assertSingleElementArray(setup.value);
-        borrowedPosition = setup.value[0];
-      });
-
-      describe('When the user swaps part of the borrow position to a different token using a market order', () => {
-        let reserveToSwap: Reserve;
-
-        beforeAll(async () => {
-          const setup = await findReservesToBorrow(client, user, {
-            spoke: ETHEREUM_SPOKE_CORE_ID,
-          });
-          assertOk(setup);
-          assertNonEmptyArray(setup.value);
-          const reservesToSwap = setup.value.filter(
-            (reserve) =>
-              availableSwappableTokens.includes(
-                reserve.asset.underlying.address,
-              ) &&
-              reserve.asset.underlying.address !==
-                borrowedPosition.reserve.asset.underlying.address,
-          );
-
-          // Find a reserve with liquidity to swap into
-          for (const reserve of reservesToSwap) {
-            try {
-              const result = await borrowSwapQuote(client, {
-                market: {
-                  debtPosition: borrowedPosition.id,
-                  buyReserve: reserve.id,
-                  amount: borrowedPosition.principal.amount.value.div(2),
-                  user: evmAddress(user.account.address),
-                },
-              });
-              if (result.isOk()) {
-                reserveToSwap = reserve;
-                break;
-              }
-            } catch (_e) {
-              // Ignore errors and try the next reserve
+            });
+            if (result.isOk()) {
+              reserveToSwap = reserve;
+              break;
             }
+          } catch (_e) {
+            // Ignore errors and try the next reserve
           }
+        }
 
-          if (!reserveToSwap) {
-            throw new Error('No reserve to swap found');
-          }
-        });
-
-        it('Then the user should be able to swap', async ({ annotate }) => {
-          const amountToSell = borrowedPosition.principal.amount.value.div(2);
-          const result = await borrowSwapQuote(client, {
-            market: {
-              debtPosition: borrowedPosition.id,
-              buyReserve: reserveToSwap.id,
-              amount: amountToSell,
-              user: evmAddress(user.account.address),
-              selectedSlippage: bigDecimal('50'),
-            },
-          })
-            .andThen(signApprovalsWith(user))
-            .andThen((request) => preparePositionSwap(client, request))
-            .andThen(({ newQuoteId, data }) =>
-              signTypedDataWith(user, data).andThen((signature) =>
-                swap(client, { intent: { quoteId: newQuoteId, signature } }),
-              ),
-            );
-          assertOk(result);
-          const orderReceipt = result.value as SwapReceipt;
-          annotate(`Swap explorer url: ${orderReceipt.id}`);
-          // NOTE: Waiting to fulfill the swap makes the test flaky and unreliable (sometimes the swap is not fulfilled in time)
-          // The part checking the borrow positions should be checked manually (for now)
-        });
+        if (!reserveToSwap) {
+          throw new Error('No reserve to swap found');
+        }
       });
 
-      describe('When the user swaps part of the borrow position to a different token using a limit order', () => {
-        it.todo(
-          'Then the swap should succeed and the position should be updated',
-        );
+      it('Then the user should be able to swap', async ({ annotate }) => {
+        const amountToSell = borrowedPosition.principal.amount.value.div(2);
+        const result = await borrowSwapQuote(client, {
+          market: {
+            debtPosition: borrowedPosition.id,
+            buyReserve: reserveToSwap.id,
+            amount: amountToSell,
+            user: evmAddress(user.account.address),
+            selectedSlippage: bigDecimal('50'),
+          },
+        })
+          .andThen(signApprovalsWith(user))
+          .andThen((request) => preparePositionSwap(client, request))
+          .andThen(({ newQuoteId, data }) =>
+            signTypedDataWith(user, data).andThen((signature) =>
+              swap(client, { intent: { quoteId: newQuoteId, signature } }),
+            ),
+          );
+        assertOk(result);
+        const orderReceipt = result.value as SwapReceipt;
+        annotate(`Swap explorer url: ${orderReceipt.id}`);
+        // NOTE: Waiting to fulfill the swap makes the test flaky and unreliable (sometimes the swap is not fulfilled in time)
+        // The part checking the borrow positions should be checked manually (for now)
       });
+    });
+
+    describe('When the user swaps part of the borrow position to a different token using a limit order', () => {
+      it.todo(
+        'Then the swap should succeed and the position should be updated',
+      );
     });
   });
 });

@@ -159,6 +159,22 @@ scalar BigInt
 
 scalar BlockchainData
 
+type BoostedRate {
+  """The unique identifier for this boosted rate tier"""
+  id: BoostedRateId!
+
+  """The display name for this boosted rate tier"""
+  name: String!
+
+  """The number of users currently assigned to this boosted rate"""
+  userCount: BigInt!
+
+  """The annual percentage yield for this boosted rate tier"""
+  apy: PercentNumber!
+}
+
+scalar BoostedRateId
+
 type BorrowActivity {
   id: ID!
   user: EvmAddress!
@@ -173,6 +189,17 @@ type BorrowActivity {
 input BorrowApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+}
+
+type BorrowPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  userEligible: Boolean!
 }
 
 input BorrowRequest {
@@ -285,6 +312,12 @@ input ChainsRequestQuery @oneOf {
 input ClaimRewardsRequest {
   """The claiming ids"""
   ids: [RewardId!]!
+
+  """The user claiming"""
+  user: EvmAddress!
+
+  """The chain to claim on"""
+  chainId: ChainId!
 }
 
 type CollateralFactorVariation {
@@ -579,6 +612,47 @@ type HubAsset {
 
 scalar HubAssetId
 
+"""A single point on the interest rate model curve."""
+type HubAssetInterestRateModelPoint {
+  """The utilization rate at this point on the curve"""
+  utilizationRate: PercentNumber!
+
+  """The variable borrow rate at this utilization level"""
+  borrowRate: PercentNumber!
+
+  """
+  The supply rate at this utilization level (borrow_rate × utilization × (1 − fee))
+  """
+  supplyRate: PercentNumber!
+
+  """
+  The absolute liquidity distance from the current state to reach this utilization level.
+  Always a positive value representing the token amount that needs to move.
+  At the asset's current utilization, this value is zero.
+  """
+  liquidityDistance: Erc20Amount!
+}
+
+"""
+Request to compute the full interest rate model for a hub asset.
+Returns 201 data points covering 0% to 100% utilization in 0.5% steps,
+showing how supply/borrow rates and required liquidity changes vary across
+the entire utilization range.
+"""
+input HubAssetInterestRateModelRequest {
+  query: HubAssetInterestRateModelRequestQuery!
+}
+
+"""Identifies the hub asset to compute the interest rate model for."""
+input HubAssetInterestRateModelRequestQuery @oneOf {
+  """The hub asset id (chain_id + hub_address + onchain_hub_asset_id)"""
+  hubAssetId: HubAssetId
+}
+
+type HubAssetInterestRateModelResult {
+  points: [HubAssetInterestRateModelPoint!]!
+}
+
 type HubAssetSettings {
   """The fee receiver"""
   feeReceiver: EvmAddress!
@@ -591,6 +665,18 @@ type HubAssetSettings {
 
   """The reinvestment strategy"""
   reinvestmentController: EvmAddress
+
+  """The optimal utilization ratio"""
+  optimalUtilizationRate: PercentNumber!
+
+  """The base variable borrow rate"""
+  baseBorrowRate: PercentNumber!
+
+  """The variable borrow rate slope 1"""
+  slopeBelowOptimal: PercentNumber!
+
+  """The variable borrow rate slope 2"""
+  slopeAboveOptimal: PercentNumber!
 }
 
 type HubAssetSummary {
@@ -815,9 +901,21 @@ input LimitWithdrawSwapQuoteInput {
   deadline: DateTime
 }
 
+input LiquidateExactAmountWithPermit {
+  """
+  Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
+  """
+  value: BigDecimal!
+
+  """
+  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  """
+  permitSig: ERC20PermitSignature
+}
+
 input LiquidatePositionDebtAmount @oneOf {
-  """Exact amount"""
-  exact: BigDecimal
+  """Exact amount with optional permit signature"""
+  exact: LiquidateExactAmountWithPermit
 
   """The most you can liquidate"""
   max: AlwaysTrue
@@ -975,6 +1073,12 @@ type Mutation {
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
   swap(request: SwapRequest!): SwapExecutionPlan!
   cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
+
+  """
+  Redeem a pending withdrawal claim.
+  Returns a transaction if the claim is ready, or the pending availability timestamp if not.
+  """
+  stableVaultWithdrawRedeem(request: StableVaultWithdrawRedeemRequest!): StableVaultWithdrawRedeemExecutionPlan!
 }
 
 type NativeAmount {
@@ -1046,6 +1150,22 @@ type PaginatedSpokeUserPositionManagerResult {
   pageInfo: PaginatedResultInfo!
 }
 
+type PaginatedStableVaultMovementsResult {
+  """The list of token movement records"""
+  items: [TokenMovementRecord!]!
+
+  """Pagination metadata for navigating results"""
+  pageInfo: PaginatedResultInfo!
+}
+
+type PaginatedStableVaultRateUsersResult {
+  """The list of user addresses assigned to the rate tier"""
+  items: [EvmAddress!]!
+
+  """Pagination metadata for navigating results"""
+  pageInfo: PaginatedResultInfo!
+}
+
 type PaginatedUserSwapsResult {
   items: [SwapStatus!]!
   pageInfo: PaginatedResultInfo!
@@ -1087,6 +1207,26 @@ type PermitTypedData {
   primaryType: String!
   domain: DomainData!
   message: JSON!
+
+  """
+  The exact amount included in the permit message, in human-readable decimal form.
+  """
+  signedAmount: BigDecimal!
+}
+
+union PointsCriteria = PointsGenericCriteria
+
+type PointsGenericCriteria {
+  id: ID!
+  text: String!
+  userPassed: Boolean!
+}
+
+type PointsProgram {
+  id: RewardId!
+  name: String!
+  externalUrl: String
+  iconUrl: String
 }
 
 type PositionAmount {
@@ -1098,7 +1238,7 @@ type PositionSwapAdapterContractApproval {
   bySignature: SwapTypedData!
 }
 
-union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapPositionManagerApproval
+union PositionSwapApproval = PositionSwapAdapterContractApproval | PositionSwapPositionManagerApproval | PositionSwapSetCollateralApproval
 
 type PositionSwapByIntentApprovalsRequired {
   quote: SwapQuote!
@@ -1107,6 +1247,10 @@ type PositionSwapByIntentApprovalsRequired {
 
 type PositionSwapPositionManagerApproval {
   byTransaction: TransactionRequest!
+  bySignature: SwapTypedData!
+}
+
+type PositionSwapSetCollateralApproval {
   bySignature: SwapTypedData!
 }
 
@@ -1129,6 +1273,12 @@ input PreparePositionSwapRequest {
 
   """position manager signature - can be approved via transaction"""
   positionManagerSignature: Signature
+
+  """
+  SetUsingAsCollateral signature (only needed for collateral swaps when destination
+  asset is not already enabled as collateral)
+  """
+  setCollateralSignature: Signature
 }
 
 union PreparePositionSwapResult = PrepareSwapOrder | InsufficientBalanceError
@@ -1166,6 +1316,17 @@ input PreviewAction @oneOf {
   withdrawSwap: WithdrawSwapQuoteRequest
 }
 
+type PreviewBorrowPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  reserve: ReserveInfo!
+}
+
 type PreviewMerklBorrowReward {
   id: RewardId!
   startDate: DateTime!
@@ -1190,11 +1351,27 @@ input PreviewRequest {
   action: PreviewAction!
 }
 
-union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward
+type PreviewReserveRates {
+  supplyApy: PercentNumberVariation
+  borrowApy: PercentNumberVariation
+}
+
+union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPointsReward | PreviewBorrowPointsReward
 
 type PreviewRewardOutcome {
   lost: [PreviewReward!]!
   gained: [PreviewReward!]!
+}
+
+type PreviewSupplyPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  reserve: ReserveInfo!
 }
 
 type PreviewUserPosition {
@@ -1204,10 +1381,17 @@ type PreviewUserPosition {
 
   """The net apy for one user position on a current spoke"""
   netApy: PercentNumberVariation!
+
+  """
+  Reserve rates after the action.
+  Only populated for supply and borrow actions.
+  """
+  reserveRates: PreviewReserveRates!
   netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
   netBalance(currency: Currency! = USD): ExchangeAmountVariation!
   projectedEarnings: ExchangeAmountVariation!
-  borrowingPower: ExchangeAmountVariation!
+  maxBorrowingPower: ExchangeAmountVariation!
+  remainingBorrowingPower: ExchangeAmountVariation!
   rewards: PreviewRewardOutcome!
   otherConditions: [UserPositionConditionVariation!]!
 }
@@ -1241,6 +1425,7 @@ type Query {
   hub(request: HubRequest!): Hub
   hubAssets(request: HubAssetsRequest!): [HubAsset!]!
   hubSummaryHistory(request: HubSummaryHistoryRequest!): [HubSummarySample!]!
+  hubAssetInterestRateModel(request: HubAssetInterestRateModelRequest!): HubAssetInterestRateModelResult!
   reserve(request: ReserveRequest!): Reserve
   reserves(request: ReservesRequest!): [Reserve!]!
   supply(request: SupplyRequest!): ExecutionPlan!
@@ -1301,6 +1486,53 @@ type Query {
 
   """The rewards a user can claim"""
   userClaimableRewards(request: UserClaimableRewardsRequest!): [UserClaimableReward!]!
+
+  """Get a single stable vault by its id."""
+  stableVault(request: StableVaultRequest!): StableVault
+
+  """Get all stable vaults managed by the given admin address."""
+  stableVaults(request: StableVaultsRequest!): [StableVault!]!
+
+  """
+  Get the paginated list of users assigned to a specific rate tier in a stable vault.
+  """
+  stableVaultRateUsers(request: StableVaultRateUsersRequest!): PaginatedStableVaultRateUsersResult!
+
+  """
+  Build a transaction to assign users to a boosted rate tier in a stable vault.
+  """
+  stableVaultAssignRate(request: StableVaultAssignRateRequest!): TransactionRequest!
+
+  """
+  Build a transaction to remove users from a boosted rate tier in a stable vault.
+  """
+  stableVaultUnassignRate(request: StableVaultUnassignRateRequest!): TransactionRequest!
+
+  """Build a transaction to claim surplus assets from a stable vault."""
+  stableVaultClaimSurplus(request: StableVaultClaimSurplusRequest!): TransactionRequest!
+
+  """Get the paginated list of token movements for a stable vault."""
+  stableVaultMovements(request: StableVaultMovementsRequest!): PaginatedStableVaultMovementsResult!
+
+  """
+  Build a transaction to deposit tokens into a stable vault.
+  Returns a transaction request, an ERC20 approval if needed, or an insufficient balance error.
+  """
+  stableVaultDeposit(request: StableVaultDepositRequest!): StableVaultDepositExecutionPlan!
+
+  """
+  Build a transaction to withdraw tokens from a stable vault.
+  Returns either an instant transaction or a delayed withdrawal claim depending on vault liquidity.
+  """
+  stableVaultWithdraw(request: StableVaultWithdrawRequest!): StableVaultWithdrawExecutionPlan!
+
+  """Get the current status of a pending withdrawal claim."""
+  stableVaultClaimStatus(request: StableVaultClaimStatusRequest!): StableVaultClaimStatus!
+
+  """
+  Get a user's positions across stable vaults, optionally filtered to a specific vault.
+  """
+  stableVaultUserPositions(request: StableVaultUserPositionsRequest!): [StableVaultUserPosition!]!
 }
 
 """Quote accuracy level for swap quotes"""
@@ -1349,9 +1581,9 @@ input RepayErc20AmountInputWithPermit {
   value: AmountInput!
 
   """
-  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  Exact signed permit payload to use when building a repay transaction from an already-signed message.
   """
-  permitSig: ERC20PermitSignature
+  permit: RepaySignedPermitInput
 }
 
 input RepayRequest {
@@ -1363,6 +1595,16 @@ input RepayRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
+}
+
+input RepaySignedPermitInput {
+  """
+  The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
+  """
+  permitSig: ERC20PermitSignature!
+
+  """Exact token amount that was signed, in its main unit (e.g., 1.5 DAI)."""
+  signedAmount: BigDecimal!
 }
 
 type RepayWithSupply {
@@ -1402,8 +1644,6 @@ union RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired | Insuf
 type Reserve {
   id: ReserveId!
   onChainId: OnChainReserveId!
-  borrowCap: BigDecimal!
-  supplyCap: BigDecimal!
   chain: Chain!
   summary: ReserveSummary!
   settings: ReserveSettings!
@@ -1489,6 +1729,8 @@ type ReserveSettings {
   suppliable: Boolean!
   receiveSharesEnabled: Boolean!
   latestDynamicConfigKey: DynamicConfigKey!
+  borrowCap: Erc20Amount!
+  supplyCap: Erc20Amount!
 }
 
 type ReserveStatus {
@@ -1500,6 +1742,8 @@ type ReserveStatus {
 type ReserveSummary {
   supplied: Erc20Amount!
   borrowed: Erc20Amount!
+  suppliable: Erc20Amount!
+  borrowable: Erc20Amount!
   supplyApy: PercentNumber!
   borrowApy: PercentNumber!
   rewards: [Reward!]!
@@ -1584,7 +1828,7 @@ input ReservesRequestQuery @oneOf {
   chainTokenCategories: [ChainTokenCategories!]
 }
 
-union Reward = MerklSupplyReward | MerklBorrowReward
+union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
 
 scalar RewardId
 
@@ -1708,6 +1952,247 @@ input SpokesRequestQuery @oneOf {
   chainIds: [ChainId!]
 }
 
+type StableVault {
+  """The unique identifier for the stable vault"""
+  id: StableVaultId!
+
+  """The display name of the stable vault"""
+  name: String!
+
+  """The on-chain contract address of the stable vault"""
+  address: EvmAddress!
+
+  """The admin address that manages the vault"""
+  admin: EvmAddress!
+
+  """The chain the vault is deployed on"""
+  chain: Chain!
+
+  """Aggregated summary statistics for the vault"""
+  summary: StableVaultSummary!
+
+  """The rate configuration for the vault, including base and boosted rates"""
+  rates: StableVaultRates!
+}
+
+input StableVaultAmountInput {
+  """The token address used in the stable vault operation"""
+  address: EvmAddress!
+
+  """The token amount"""
+  value: AmountInput!
+
+  """
+  The signed ERC20 permit message to operate on the token without a prior approval transaction
+  """
+  permitSig: ERC20PermitSignature
+}
+
+input StableVaultAssignRateRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The boosted rate tier id to assign users to"""
+  rateId: BoostedRateId!
+
+  """The list of user addresses to assign to the rate tier"""
+  users: [EvmAddress!]!
+}
+
+enum StableVaultClaimStatus {
+  """The claim is ready to be redeemed"""
+  READY
+
+  """The claim is still in the waiting period"""
+  PENDING
+
+  """The claim status could not be determined"""
+  UNKNOWN
+}
+
+input StableVaultClaimStatusRequest {
+  """The withdrawal claim id to check"""
+  claimId: StableVaultWithdrawClaimId!
+}
+
+input StableVaultClaimSurplusRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The list of surplus claims to execute"""
+  claims: [SurplusClaim!]!
+}
+
+union StableVaultDepositExecutionPlan = TransactionRequest | Erc20ApprovalRequired | InsufficientBalanceError
+
+input StableVaultDepositRequest {
+  """The target stable vault"""
+  vault: StableVaultInput!
+
+  """The depositor's address"""
+  user: EvmAddress!
+
+  """The token and amount to deposit"""
+  amount: StableVaultAmountInput!
+}
+
+scalar StableVaultId
+
+input StableVaultInput {
+  """The stable vault id"""
+  id: StableVaultId!
+}
+
+input StableVaultMovementsRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The number of results per page"""
+  pageSize: PageSize!
+
+  """The pagination cursor for fetching the next page"""
+  cursor: Cursor
+}
+
+type StableVaultPendingAvailability {
+  """The earliest time at which the withdrawal claim becomes redeemable"""
+  executableAfter: DateTime!
+}
+
+input StableVaultRateUsersRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The rate tier id to query users for"""
+  rateId: BoostedRateId!
+
+  """The number of results per page"""
+  pageSize: PageSize!
+
+  """The pagination cursor for fetching the next page"""
+  cursor: Cursor
+}
+
+type StableVaultRates {
+  """The base APY applied to all depositors in the vault"""
+  baseRate: PercentNumber!
+
+  """The display name for the rate tier"""
+  name: String!
+
+  """The list of boosted rate tiers available for eligible users"""
+  boostedRates: [BoostedRate!]!
+}
+
+input StableVaultRequest {
+  """The stable vault id to look up"""
+  id: StableVaultId!
+}
+
+type StableVaultSummary {
+  """The total number of shares issued by the vault"""
+  shares: BigInt!
+
+  """The total number of users deposited in the vault"""
+  userCount: BigInt!
+
+  """The total value of deposits in the vault"""
+  totalDeposits: BigDecimal!
+}
+
+input StableVaultUnassignRateRequest {
+  """The stable vault id"""
+  vaultId: StableVaultId!
+
+  """The boosted rate tier id to remove users from"""
+  rateId: BoostedRateId!
+
+  """The list of user addresses to remove from the rate tier"""
+  users: [EvmAddress!]!
+}
+
+type StableVaultUserPosition {
+  """Unique identifier derived from vault id and user address"""
+  id: StableVaultUserPositionId!
+
+  """The stable vault this position belongs to"""
+  vault: StableVault!
+
+  """The user's address"""
+  user: EvmAddress!
+
+  """The original deposited amount"""
+  principal: DecimalNumber!
+
+  """The accrued interest on the position"""
+  interests: DecimalNumber!
+
+  """The number of vault shares held"""
+  shares: DecimalNumber!
+
+  """The total balance (principal + interest)"""
+  totalBalance: DecimalNumber!
+
+  """The effective annual percentage yield for this position"""
+  apy: PercentNumber!
+
+  """The boosted rate tier the user is assigned to"""
+  boostedRateId: BoostedRateId!
+}
+
+scalar StableVaultUserPositionId
+
+input StableVaultUserPositionsRequest {
+  """The user address to get positions for"""
+  user: EvmAddress!
+
+  """Optional filter to narrow results to a specific vault"""
+  filter: StableVaultUserPositionsRequestFilter
+}
+
+input StableVaultUserPositionsRequestFilter {
+  """Filter positions to a specific stable vault"""
+  vault: StableVaultInput!
+}
+
+type StableVaultWithdrawClaim {
+  """The unique identifier for the pending withdrawal claim"""
+  claimId: StableVaultWithdrawClaimId!
+
+  """The transaction to submit to initiate the withdrawal claim"""
+  transaction: TransactionRequest!
+
+  """The earliest time at which the claim can be redeemed"""
+  executableAfter: DateTime!
+}
+
+scalar StableVaultWithdrawClaimId
+
+union StableVaultWithdrawExecutionPlan = TransactionRequest | StableVaultWithdrawClaim
+
+union StableVaultWithdrawRedeemExecutionPlan = TransactionRequest | StableVaultPendingAvailability
+
+input StableVaultWithdrawRedeemRequest {
+  """The withdrawal claim id to redeem"""
+  claimId: StableVaultWithdrawClaimId!
+}
+
+input StableVaultWithdrawRequest {
+  """The stable vault to withdraw from"""
+  vault: StableVaultInput!
+
+  """The withdrawer's address"""
+  user: EvmAddress!
+
+  """The token and amount to withdraw"""
+  amount: StableVaultAmountInput!
+}
+
+input StableVaultsRequest {
+  """The admin address to filter vaults by"""
+  admin: EvmAddress!
+}
+
 type SupplyActivity {
   id: ID!
   user: EvmAddress!
@@ -1722,6 +2207,17 @@ type SupplyActivity {
 input SupplyApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+}
+
+type SupplyPointsReward {
+  id: RewardId!
+  program: PointsProgram!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime
+  multiplier: Float!
+  criteria: [PointsCriteria!]
+  userEligible: Boolean!
 }
 
 input SupplyRequest {
@@ -1772,6 +2268,14 @@ input SupplySwapQuoteRequest @oneOf {
 
 union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
 
+input SurplusClaim {
+  """The token address of the surplus asset to claim"""
+  asset: EvmAddress!
+
+  """The amount to claim, in the token's main unit (e.g., 1.5 USDC)"""
+  amount: BigDecimal!
+}
+
 enum SwapActivityStatus {
   FULFILLED
   CANCELLED
@@ -1799,6 +2303,15 @@ type SwapByIntentWithApprovalRequired {
 
 type SwapByTransaction {
   quote: SwapQuote!
+}
+
+type SwapByTransactionWithApprovalRequired {
+  quote: SwapQuote!
+
+  """
+  All required approvals (may contain reset + actual for USDT on mainnet)
+  """
+  approvals: [Erc20Approval!]!
 }
 
 type SwapCancelled {
@@ -1945,11 +2458,6 @@ type SwapTypedData {
 input SwapWithTransactionInput {
   quoteId: SwapQuoteId!
   permitSig: Signature
-
-  """
-  Whether the swap order creator is a smart contract wallet. If not provided, it will be inferred following the ERC-1271 standard.
-  """
-  isSenderSmartContractWallet: Boolean
 }
 
 input SwappableTokenInput @oneOf {
@@ -2016,6 +2524,92 @@ input TokenInput @oneOf {
   erc20: EvmAddress
 }
 
+union TokenMovement = TokenMovementBridgeOut | TokenMovementBridgeIn | TokenMovementAllocate | TokenMovementDeallocate | TokenMovementSwap | TokenMovementRebalance
+
+type TokenMovementAllocate {
+  """The token allocated to a yield strategy"""
+  token: Erc20Token!
+
+  """The amount allocated"""
+  amount: BigDecimal!
+}
+
+type TokenMovementBridgeIn {
+  """The source token from the origin chain"""
+  fromToken: Erc20Token!
+
+  """The destination token received"""
+  toToken: Erc20Token!
+
+  """The amount bridged in"""
+  amount: BigDecimal!
+}
+
+type TokenMovementBridgeOut {
+  """The source token being bridged out"""
+  fromToken: Erc20Token!
+
+  """The destination token on the target chain"""
+  toToken: Erc20Token!
+
+  """The amount bridged"""
+  amount: BigDecimal!
+}
+
+type TokenMovementDeallocate {
+  """The token deallocated from a yield strategy"""
+  token: Erc20Token!
+
+  """The amount deallocated"""
+  amount: BigDecimal!
+}
+
+scalar TokenMovementId
+
+type TokenMovementRebalance {
+  """The token being rebalanced"""
+  token: Erc20Token!
+
+  """The amount rebalanced"""
+  amount: BigDecimal!
+}
+
+type TokenMovementRecord {
+  """The unique identifier for this movement record"""
+  id: TokenMovementId!
+
+  """The movement type and its associated details"""
+  type: TokenMovement!
+
+  """The status of the movement record"""
+  status: TokenMovementStatus!
+
+  """The timestamp when the movement occurred"""
+  timestamp: DateTime!
+
+  """The on-chain transaction hash"""
+  txHash: TxHash!
+}
+
+enum TokenMovementStatus {
+  PENDING
+  DONE
+}
+
+type TokenMovementSwap {
+  """The token being swapped from"""
+  fromToken: Erc20Token!
+
+  """The amount of the source token"""
+  fromAmount: BigDecimal!
+
+  """The token being swapped to"""
+  toToken: Erc20Token!
+
+  """The amount of the destination token received"""
+  toAmount: BigDecimal!
+}
+
 type TokenSwap {
   sell: TokenAmount!
   buy: TokenAmount!
@@ -2048,7 +2642,7 @@ input TokenSwapQuoteRequest @oneOf {
   fromQuote: MarketOrderTokenSwapFromQuoteInput
 }
 
-union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | InsufficientLiquidityError
+union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | SwapByTransactionWithApprovalRequired | InsufficientLiquidityError
 
 type TransactionRequest {
   to: EvmAddress!
@@ -2294,6 +2888,7 @@ union UserClaimableReward = UserMerklClaimableReward
 
 input UserClaimableRewardsRequest {
   user: EvmAddress!
+  chainId: ChainId!
 }
 
 input UserHub {
@@ -2355,7 +2950,8 @@ type UserPosition {
   1 collateral you should render health factor
   """
   liquidationPrice(currency: Currency! = USD): ExchangeAmount
-  borrowingPower(currency: Currency! = USD): ExchangeAmount!
+  maxBorrowingPower(currency: Currency! = USD): ExchangeAmount!
+  remainingBorrowingPower(currency: Currency! = USD): ExchangeAmount!
   canUpdateDynamicConfig: Boolean!
   netBalancePercentChange(window: TimeWindow! = LAST_DAY): PercentNumber!
   spoke: Spoke!

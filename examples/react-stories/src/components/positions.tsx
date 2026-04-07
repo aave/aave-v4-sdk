@@ -1,10 +1,8 @@
 import {
-  type ChainId,
   type EvmAddress,
   type SpokeId,
   type UserPosition,
   useUserPosition,
-  useUserPositions,
 } from '@aave/react';
 import { Block } from 'baseui/block';
 import { HeadingXSmall, ParagraphSmall } from 'baseui/typography';
@@ -69,26 +67,4 @@ export function SingleUserPosition({ spokeId, user }: SingleUserPositionProps) {
   }
 
   return <PositionDetails position={data} />;
-}
-
-export type AllUserPositionsProps = {
-  user: EvmAddress;
-  chainId: ChainId;
-};
-
-export function AllUserPositions({ user, chainId }: AllUserPositionsProps) {
-  const { data } = useUserPositions({
-    user,
-    filter: {
-      chainIds: [chainId],
-    },
-  });
-
-  return (
-    <>
-      {data?.map((position) => (
-        <PositionDetails key={position.id} position={position} />
-      ))}
-    </>
-  );
 }

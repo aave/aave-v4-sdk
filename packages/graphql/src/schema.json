@@ -572,6 +572,58 @@
       },
       {
         "kind": "OBJECT",
+        "name": "BoostedRate",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "apy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "BorrowActivity",
         "fields": [
           {
@@ -662,6 +714,103 @@
                 "kind": "OBJECT",
                 "name": "Chain",
                 "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "BorrowPointsReward",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "program",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PointsProgram",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "startDate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "endDate",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "multiplier",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "criteria",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "UNION",
+                  "name": "PointsCriteria",
+                  "ofType": null
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userEligible",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -1914,6 +2063,86 @@
       },
       {
         "kind": "OBJECT",
+        "name": "HubAssetInterestRateModelPoint",
+        "fields": [
+          {
+            "name": "utilizationRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "borrowRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "supplyRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "liquidityDistance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HubAssetInterestRateModelResult",
+        "fields": [
+          {
+            "name": "points",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "HubAssetInterestRateModelPoint",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "HubAssetSettings",
         "fields": [
           {
@@ -1955,6 +2184,54 @@
             "type": {
               "kind": "SCALAR",
               "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "optimalUtilizationRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "baseBorrowRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "slopeBelowOptimal",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "slopeAboveOptimal",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
             },
             "args": []
           }
@@ -2821,6 +3098,29 @@
                 }
               }
             ]
+          },
+          {
+            "name": "stableVaultWithdrawRedeem",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "StableVaultWithdrawRedeemExecutionPlan",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -3046,6 +3346,79 @@
                     "kind": "OBJECT",
                     "name": "SpokeUserPositionManager",
                     "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedResultInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PaginatedStableVaultMovementsResult",
+        "fields": [
+          {
+            "name": "items",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "TokenMovementRecord",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedResultInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PaginatedStableVaultRateUsersResult",
+        "fields": [
+          {
+            "name": "items",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
                   }
                 }
               }
@@ -3307,6 +3680,112 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "signedAmount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "PointsCriteria",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "PointsGenericCriteria"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PointsGenericCriteria",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "text",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userPassed",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PointsProgram",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "externalUrl",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "iconUrl",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -3372,6 +3851,10 @@
           {
             "kind": "OBJECT",
             "name": "PositionSwapPositionManagerApproval"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "PositionSwapSetCollateralApproval"
           }
         ]
       },
@@ -3428,6 +3911,25 @@
             },
             "args": []
           },
+          {
+            "name": "bySignature",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapTypedData",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PositionSwapSetCollateralApproval",
+        "fields": [
           {
             "name": "bySignature",
             "type": {
@@ -3561,6 +4063,104 @@
             "name": "InsufficientBalanceError"
           }
         ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PreviewBorrowPointsReward",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "program",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PointsProgram",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "startDate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "endDate",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "multiplier",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "criteria",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "UNION",
+                  "name": "PointsCriteria",
+                  "ofType": null
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "reserve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ReserveInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "OBJECT",
@@ -3751,6 +4351,31 @@
         "interfaces": []
       },
       {
+        "kind": "OBJECT",
+        "name": "PreviewReserveRates",
+        "fields": [
+          {
+            "name": "supplyApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumberVariation",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "borrowApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumberVariation",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "UNION",
         "name": "PreviewReward",
         "possibleTypes": [
@@ -3761,6 +4386,14 @@
           {
             "kind": "OBJECT",
             "name": "PreviewMerklBorrowReward"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "PreviewSupplyPointsReward"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "PreviewBorrowPointsReward"
           }
         ]
       },
@@ -3800,6 +4433,104 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PreviewSupplyPointsReward",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "program",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PointsProgram",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "startDate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "endDate",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "multiplier",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "criteria",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "UNION",
+                  "name": "PointsCriteria",
+                  "ofType": null
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "reserve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ReserveInfo",
+                "ofType": null
               }
             },
             "args": []
@@ -3853,6 +4584,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PercentNumberVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "reserveRates",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PreviewReserveRates",
                 "ofType": null
               }
             },
@@ -3917,7 +4660,19 @@
             "args": []
           },
           {
-            "name": "borrowingPower",
+            "name": "maxBorrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "remainingBorrowingPower",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4318,6 +5073,29 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "hubAssetInterestRateModel",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "HubAssetInterestRateModelResult",
+                "ofType": null
               }
             },
             "args": [
@@ -5334,6 +6112,267 @@
                 }
               }
             ]
+          },
+          {
+            "name": "stableVault",
+            "type": {
+              "kind": "OBJECT",
+              "name": "StableVault",
+              "ofType": null
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaults",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "StableVault",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultRateUsers",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedStableVaultRateUsersResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultAssignRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultUnassignRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultClaimSurplus",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultMovements",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedStableVaultMovementsResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultDeposit",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "StableVaultDepositExecutionPlan",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultWithdraw",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "StableVaultWithdrawExecutionPlan",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultClaimStatus",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stableVaultUserPositions",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "StableVaultUserPosition",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -5659,28 +6698,6 @@
             "args": []
           },
           {
-            "name": "borrowCap",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "supplyCap",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
             "name": "chain",
             "type": {
               "kind": "NON_NULL",
@@ -5944,6 +6961,30 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "borrowCap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "supplyCap",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -6006,6 +7047,30 @@
           },
           {
             "name": "borrowed",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "suppliable",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "borrowable",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -6174,6 +7239,14 @@
           {
             "kind": "OBJECT",
             "name": "MerklBorrowReward"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SupplyPointsReward"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "BorrowPointsReward"
           }
         ]
       },
@@ -6322,6 +7395,398 @@
       },
       {
         "kind": "OBJECT",
+        "name": "StableVault",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "admin",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "chain",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Chain",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "summary",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "StableVaultSummary",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "rates",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "StableVaultRates",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "StableVaultDepositExecutionPlan",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "TransactionRequest"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Erc20ApprovalRequired"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "InsufficientBalanceError"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StableVaultPendingAvailability",
+        "fields": [
+          {
+            "name": "executableAfter",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StableVaultRates",
+        "fields": [
+          {
+            "name": "baseRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "boostedRates",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "BoostedRate",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StableVaultSummary",
+        "fields": [
+          {
+            "name": "shares",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalDeposits",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StableVaultUserPosition",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "vault",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "StableVault",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "principal",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "interests",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "shares",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "totalBalance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "apy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "boostedRateId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StableVaultWithdrawClaim",
+        "fields": [
+          {
+            "name": "claimId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "transaction",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "executableAfter",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "StableVaultWithdrawExecutionPlan",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "TransactionRequest"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "StableVaultWithdrawClaim"
+          }
+        ]
+      },
+      {
+        "kind": "UNION",
+        "name": "StableVaultWithdrawRedeemExecutionPlan",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "TransactionRequest"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "StableVaultPendingAvailability"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
         "name": "SupplyActivity",
         "fields": [
           {
@@ -6412,6 +7877,103 @@
                 "kind": "OBJECT",
                 "name": "Chain",
                 "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SupplyPointsReward",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "program",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PointsProgram",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "startDate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "endDate",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "multiplier",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "criteria",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "UNION",
+                  "name": "PointsCriteria",
+                  "ofType": null
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userEligible",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -6694,6 +8256,43 @@
                 "kind": "OBJECT",
                 "name": "SwapQuote",
                 "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SwapByTransactionWithApprovalRequired",
+        "fields": [
+          {
+            "name": "quote",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SwapQuote",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "approvals",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Approval",
+                    "ofType": null
+                  }
+                }
               }
             },
             "args": []
@@ -7532,6 +9131,326 @@
         "interfaces": []
       },
       {
+        "kind": "UNION",
+        "name": "TokenMovement",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "TokenMovementBridgeOut"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "TokenMovementBridgeIn"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "TokenMovementAllocate"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "TokenMovementDeallocate"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "TokenMovementSwap"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "TokenMovementRebalance"
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TokenMovementAllocate",
+        "fields": [
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TokenMovementBridgeIn",
+        "fields": [
+          {
+            "name": "fromToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "toToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TokenMovementBridgeOut",
+        "fields": [
+          {
+            "name": "fromToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "toToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TokenMovementDeallocate",
+        "fields": [
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TokenMovementRebalance",
+        "fields": [
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TokenMovementRecord",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "type",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "TokenMovement",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "status",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "txHash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TokenMovementSwap",
+        "fields": [
+          {
+            "name": "fromToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "fromAmount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "toToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "toAmount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "OBJECT",
         "name": "TokenSwap",
         "fields": [
@@ -7727,6 +9646,10 @@
           {
             "kind": "OBJECT",
             "name": "SwapByTransaction"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SwapByTransactionWithApprovalRequired"
           },
           {
             "kind": "OBJECT",
@@ -8569,7 +10492,30 @@
             ]
           },
           {
-            "name": "borrowingPower",
+            "name": "maxBorrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "remainingBorrowingPower",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

@@ -2,6 +2,9 @@ import type { UnexpectedError } from '@aave/core';
 import {
   type Hub,
   type HubAsset,
+  type HubAssetInterestRateModelPoint,
+  HubAssetInterestRateModelQuery,
+  type HubAssetInterestRateModelRequest,
   HubAssetsQuery,
   type HubAssetsRequest,
   HubQuery,
@@ -146,4 +149,35 @@ export function hubSummaryHistory(
   }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubSummarySample[], UnexpectedError> {
   return client.query(HubSummaryHistoryQuery, { request }, { requestPolicy });
+}
+
+/**
+ * Fetches the interest rate model for a specific hub asset.
+ *
+ * ```ts
+ * const result = await hubAssetInterestRateModel(client, {
+ *   query: { hubAssetId: hubAssetId('...') },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub asset interest rate model request parameters.
+ * @param options - The query options.
+ * @returns Array of interest rate model points.
+ */
+export function hubAssetInterestRateModel(
+  client: AaveClient,
+  request: HubAssetInterestRateModelRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<HubAssetInterestRateModelPoint[], UnexpectedError> {
+  return client
+    .query(
+      HubAssetInterestRateModelQuery,
+      { request, currency },
+      { requestPolicy },
+    )
+    .map((result) => result.points);
 }

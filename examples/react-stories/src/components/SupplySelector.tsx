@@ -1,6 +1,7 @@
 import {
+  type ChainId,
   type EvmAddress,
-  type SpokeId,
+  OrderDirection,
   type UserSupplyItem,
   useUserSupplies,
 } from '@aave/react';
@@ -9,32 +10,28 @@ import { type OnChangeParams, SingleSelect } from 'baseui/select';
 import { useEffect } from 'react';
 
 interface SupplySelectorProps {
-  spokeId: SpokeId | undefined;
+  chainId: ChainId;
   user: EvmAddress;
   onChange: (supply: UserSupplyItem | null) => void;
   selected: UserSupplyItem | null;
 }
 
 export function SupplySelector({
-  spokeId,
+  chainId,
   user,
   onChange,
   selected,
 }: SupplySelectorProps) {
-  const {
-    data: supplies,
-    loading,
-    paused,
-  } = useUserSupplies({
-    query: spokeId
-      ? {
-          userSpoke: {
-            spoke: spokeId,
-            user,
-          },
-        }
-      : undefined,
-    pause: !spokeId,
+  const { data: supplies, loading } = useUserSupplies({
+    query: {
+      userChains: {
+        chainIds: [chainId],
+        user,
+      },
+    },
+    orderBy: {
+      amount: OrderDirection.Desc,
+    },
   });
 
   useEffect(() => {
@@ -63,9 +60,7 @@ export function SupplySelector({
           ? 'Only one supply position found'
           : 'Select the supply position you want to withdraw from'
       }
-      disabled={
-        paused || loading || supplies?.length === 1 || supplies?.length === 0
-      }
+      disabled={loading || supplies?.length === 1 || supplies?.length === 0}
       error={supplies?.length === 0 ? 'No supply positions found' : undefined}
     >
       <SingleSelect

@@ -17,7 +17,7 @@ cp .env.example .env
 2. Install dependencies:
 
 ```bash
-pnpm install
+pnpm install --ignore-workspace
 ```
 
 3. Run the development server:

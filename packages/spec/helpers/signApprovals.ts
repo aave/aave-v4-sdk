@@ -19,6 +19,7 @@ export function signApprovalsWith(
         quoteId: quote.quoteId,
         adapterContractSignature: null,
         positionManagerSignature: null,
+        setCollateralSignature: null,
       },
     );
 
@@ -32,10 +33,16 @@ export function signApprovalsWith(
             return SigningError.from(err);
           })
           .map((signature) => {
-            if (approval.__typename === 'PositionSwapAdapterContractApproval') {
-              request.adapterContractSignature = signature;
-            } else {
-              request.positionManagerSignature = signature;
+            switch (approval.__typename) {
+              case 'PositionSwapAdapterContractApproval':
+                request.adapterContractSignature = signature;
+                break;
+              case 'PositionSwapPositionManagerApproval':
+                request.positionManagerSignature = signature;
+                break;
+              case 'PositionSwapSetCollateralApproval':
+                request.setCollateralSignature = signature;
+                break;
             }
             return request;
           });

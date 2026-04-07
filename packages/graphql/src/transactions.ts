@@ -15,6 +15,8 @@ import {
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   PercentNumberVariationFragment,
+  PointsCriteriaFragment,
+  PointsProgramFragment,
   PositionAmountFragment,
   ReserveInfoFragment,
   SpokeFragment,
@@ -324,7 +326,60 @@ export type PreviewMerklBorrowReward = FragmentOf<
   typeof PreviewMerklBorrowRewardFragment
 >;
 
-export type PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward;
+export const PreviewSupplyPointsFragment = graphql(
+  `fragment PreviewSupplyPoints on PreviewSupplyPointsReward {
+    __typename
+    id
+    program {
+      ...PointsProgram
+    }
+    name
+    startDate
+    endDate
+    multiplier
+    criteria {
+      ...PointsCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [PointsProgramFragment, PointsCriteriaFragment, ReserveInfoFragment],
+);
+export type PreviewSupplyPoints = FragmentOf<
+  typeof PreviewSupplyPointsFragment
+>;
+
+export const PreviewBorrowPointsFragment = graphql(
+  `fragment PreviewBorrowPoints on PreviewBorrowPointsReward {
+    __typename
+    id
+    program {
+      ...PointsProgram
+    }
+    name
+    startDate
+    endDate
+    multiplier
+    criteria {
+      ...PointsCriteria
+    }
+    reserve {
+      ...ReserveInfo
+    }
+  }`,
+  [PointsProgramFragment, PointsCriteriaFragment, ReserveInfoFragment],
+);
+export type PreviewBorrowPoints = FragmentOf<
+  typeof PreviewBorrowPointsFragment
+>;
+
+export type PreviewReward = ExtendWithOpaqueType<
+  | PreviewMerklSupplyReward
+  | PreviewMerklBorrowReward
+  | PreviewSupplyPoints
+  | PreviewBorrowPoints
+>;
 
 export const PreviewRewardFragment: FragmentDocumentFor<
   PreviewReward,
@@ -338,8 +393,19 @@ export const PreviewRewardFragment: FragmentDocumentFor<
     ... on PreviewMerklBorrowReward {
       ...PreviewMerklBorrowReward
     }
+    ... on PreviewSupplyPointsReward {
+      ...PreviewSupplyPoints
+    }
+    ... on PreviewBorrowPointsReward {
+      ...PreviewBorrowPoints
+    }
   }`,
-  [PreviewMerklSupplyRewardFragment, PreviewMerklBorrowRewardFragment],
+  [
+    PreviewMerklSupplyRewardFragment,
+    PreviewMerklBorrowRewardFragment,
+    PreviewSupplyPointsFragment,
+    PreviewBorrowPointsFragment,
+  ],
 );
 
 export const PreviewRewardOutcomeFragment = graphql(
@@ -380,8 +446,19 @@ export const PreviewUserPositionFragment = graphql(
     projectedEarnings {
       ...ExchangeAmountVariation
     }
-    borrowingPower {
+    maxBorrowingPower {
       ...ExchangeAmountVariation
+    }
+    remainingBorrowingPower {
+      ...ExchangeAmountVariation
+    }
+    reserveRates {
+      supplyApy {
+        ...PercentNumberVariation
+      }
+      borrowApy {
+        ...PercentNumberVariation
+      }
     }
     rewards {
       ...PreviewRewardOutcome
@@ -416,6 +493,9 @@ export const PreviewQuery = graphql(
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
+export type LiquidateExactAmountWithPermit = ReturnType<
+  typeof graphql.scalar<'LiquidateExactAmountWithPermit'>
+>;
 export type LiquidatePositionDebtAmount = ReturnType<
   typeof graphql.scalar<'LiquidatePositionDebtAmount'>
 >;
@@ -424,6 +504,9 @@ export type RepayAmountInputWithPermit = ReturnType<
 >;
 export type RepayErc20AmountInputWithPermit = ReturnType<
   typeof graphql.scalar<'RepayErc20AmountInputWithPermit'>
+>;
+export type RepaySignedPermitInput = ReturnType<
+  typeof graphql.scalar<'RepaySignedPermitInput'>
 >;
 export type WithdrawReserveAmountInput = ReturnType<
   typeof graphql.scalar<'WithdrawReserveAmountInput'>

@@ -34,7 +34,6 @@ export function BorrowForm({ reserve, walletClient }: BorrowFormProps) {
           }),
         );
 
-      case 'Erc20ApprovalRequired':
       case 'PreContractActionRequired':
         setStatus({
           kind: KIND.info,

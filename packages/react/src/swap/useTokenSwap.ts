@@ -209,6 +209,29 @@ export function useTokenSwap(
                   intent: { quoteId: quoteResult.quote.quoteId, signature },
                 }),
               );
+
+          case 'SwapByTransactionWithApprovalRequired':
+            return quoteResult.approvals
+              .reduce(
+                (chain, approval) =>
+                  chain.andThen(() =>
+                    handler({ ...approval, bySignature: null }, { cancel })
+                      .andThen(PendingTransaction.tryFrom)
+                      .andThen((pendingTransaction) =>
+                        pendingTransaction.wait(),
+                      ),
+                  ),
+                okAsync(undefined) as ResultAsync<
+                  unknown,
+                  SendTransactionError | PendingTransactionError
+                >,
+              )
+              .andThen(() =>
+                executeSwap({
+                  transaction: { quoteId: quoteResult.quote.quoteId },
+                }),
+              );
+
           default:
             never(
               `Unsupported swap quote result: ${quoteResult.__typename}. To be removed from API soon.`,
