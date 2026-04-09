@@ -6,6 +6,7 @@ import {
   evmAddress,
   type HubId,
   hubId,
+  invariant,
   production,
   type SpokeId,
   spokeId,
@@ -13,6 +14,7 @@ import {
 } from '@aave/client';
 import { Command, Flags } from '@oclif/core';
 import TtyTable from 'tty-table';
+import { privateKeyToAccount } from 'viem/accounts';
 
 export const chain = Flags.custom<ChainId>({
   char: 'c',
@@ -52,6 +54,25 @@ export const privateKey = Flags.custom<`0x${string}`>({
     (input.startsWith('0x') ? input : `0x${input}`) as `0x${string}`,
   helpValue: '<private-key>',
 });
+
+export function userAddressFromFlagOrEnv(user?: EvmAddress): EvmAddress {
+  if (user) {
+    return user;
+  }
+
+  const privateKey = process.env.PRIVATE_KEY;
+  invariant(
+    privateKey,
+    'Provide --address or set PRIVATE_KEY environment variable',
+  );
+
+  const normalizedPrivateKey = privateKey.startsWith('0x')
+    ? privateKey
+    : `0x${privateKey}`;
+
+  const account = privateKeyToAccount(normalizedPrivateKey as `0x${string}`);
+  return evmAddress(account.address);
+}
 
 function convertBigIntsToStrings(obj: unknown): unknown {
   if (typeof obj === 'bigint') {

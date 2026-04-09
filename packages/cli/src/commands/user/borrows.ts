@@ -9,18 +9,17 @@ import {
   type UserBorrowItem,
   type UserBorrowsRequest,
 } from '@aave/client';
-
 import { userBorrows } from '@aave/client/actions';
 
 import * as common from '../../common.js';
 
-export default class ListBorrows extends common.V4Command {
+export default class UserBorrowsCommand extends common.V4Command {
   static override description = 'List user borrows for a specific chain';
 
   static override flags = {
-    user: common.address({
-      required: true,
-      description: 'User address',
+    address: common.address({
+      required: false,
+      description: 'User address (defaults to PRIVATE_KEY wallet address)',
     }),
     chain_id: common.chain({
       required: true,
@@ -42,13 +41,14 @@ export default class ListBorrows extends common.V4Command {
     InvariantError | UnexpectedError
   > {
     return ResultAsync.fromPromise(
-      this.parse(ListBorrows),
+      this.parse(UserBorrowsCommand),
       (error) => new InvariantError(String(error)),
     ).andThen(({ flags }) => {
-      const user = flags.user as EvmAddress;
+      const user = common.userAddressFromFlagOrEnv(
+        flags.address as EvmAddress | undefined,
+      );
       const chainId = flags.chain_id as ChainId;
 
-      invariant(user, 'You must provide a user address');
       invariant(chainId, 'You must provide a chain ID');
 
       return ok({

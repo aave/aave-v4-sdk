@@ -62,6 +62,9 @@
       "spokes": {
         "description": "List available spokes"
       },
+      "reserves": {
+        "description": "List available reserves"
+      },
       "user": {
         "description": "Inspect user account data"
       }
