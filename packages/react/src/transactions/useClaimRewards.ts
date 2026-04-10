@@ -1,4 +1,4 @@
-import { type TransactionReceipt, transactionReceipt } from '@aave/client';
+import { type TransactionReceipt } from '@aave/client';
 import { claimRewards } from '@aave/client/actions';
 import type { ClaimRewardsRequest, TransactionRequest } from '@aave/graphql';
 
@@ -8,6 +8,7 @@ import {
   type ExecutionPlanHandler,
   PendingTransaction,
   type PendingTransactionError,
+  refreshUserClaimableRewards,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
@@ -75,7 +76,10 @@ export function useClaimRewards(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
-        .map((result) => transactionReceipt(result.txHash)),
+        .andThen(client.waitForTransaction)
+        .andThrough(() =>
+          refreshUserClaimableRewards(client, request.user, request.chainId),
+        ),
     [client, handler],
   );
 }
