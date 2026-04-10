@@ -1,4 +1,4 @@
-import { type TransactionReceipt } from '@aave/client';
+import type { TransactionReceipt } from '@aave/client';
 import { claimRewards } from '@aave/client/actions';
 import type { ClaimRewardsRequest, TransactionRequest } from '@aave/graphql';
 
