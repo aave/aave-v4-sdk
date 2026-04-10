@@ -1,0 +1,77 @@
+packages/cli/src/commands/user/balance.ts
+  655616fcaaf715c6 1-100
+packages/cli/README.md
+  508377783bcb4d73 38,218-237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "2b7659bd36284fcff8d7684fc5dc8b39266ec37b",
+  "prompts": {
+    "3808ed405f64120f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4869-01d6-7271-9a46-df42f3d1e466",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "508377783bcb4d73": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d77ac-d596-7851-a723-3fc6bfb251c8",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 28,
+      "total_deletions": 7,
+      "accepted_lines": 28,
+      "overriden_lines": 0
+    },
+    "655616fcaaf715c6": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_28df1b7b9ffeLlDondXWblhCtA",
+        "model": "openai/gpt-5.3-codex"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 103,
+      "total_deletions": 3,
+      "accepted_lines": 100,
+      "overriden_lines": 0
+    },
+    "7d295671b110ec4c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d722a-befc-7b03-93f6-14e7db8f1e69",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 283,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 720,
+      "overriden_lines": 0
+    }
+  }
+}
