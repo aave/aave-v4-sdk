@@ -1,5 +1,5 @@
 import { AaveClient } from '@aave/client';
-import { userPositions } from '@aave/client/actions';
+import { reserveHolders, userPositions } from '@aave/client/actions';
 import {
   createNewWallet,
   ETHEREUM_FORK_ID,
@@ -12,12 +12,16 @@ import {
   HasProcessedKnownTransactionQuery,
   type OnChainReserveId,
   OperationType,
+  ReserveHoldersFilter,
   SupplyQuery,
   type SupplyRequest,
 } from '@aave/graphql';
 import {
+  makeErc20Amount,
   makeTransactionRequest,
   makeUserPosition,
+  percentNumber,
+  randomEvmAddress,
 } from '@aave/graphql/testing';
 import {
   assertErr,
@@ -138,9 +142,11 @@ describe(`Given the '${useSupply.name}' hook`, () => {
   describe('And the client cache contains an entry for a query targeted by the andThrough callback', () => {
     const client = AaveClient.create({ environment });
     let userPositionsRequestCount = 0;
+    let reserveHoldersRequestCount = 0;
 
     beforeEach(async () => {
       userPositionsRequestCount = 0;
+      reserveHoldersRequestCount = 0;
 
       server.use(
         api.query('UserPositions', () => {
@@ -154,6 +160,28 @@ describe(`Given the '${useSupply.name}' hook`, () => {
                   user: sender,
                 }),
               ],
+            },
+          });
+        }),
+        api.query('ReserveHolders', () => {
+          reserveHoldersRequestCount++;
+          return msw.HttpResponse.json({
+            data: {
+              value: {
+                items: [
+                  {
+                    __typename: 'ReserveHolder',
+                    address: randomEvmAddress(),
+                    amount: makeErc20Amount(1, 'WETH'),
+                    weight: percentNumber(0.5),
+                  },
+                ],
+                pageInfo: {
+                  __typename: 'PaginatedResultInfo',
+                  prev: null,
+                  next: null,
+                },
+              },
             },
           });
         }),
@@ -179,10 +207,23 @@ describe(`Given the '${useSupply.name}' hook`, () => {
       );
       assertOk(primed);
       expect(userPositionsRequestCount).toBe(1);
+
+      const primedReserveHolders = await reserveHolders(
+        client,
+        {
+          reserve: { reserveId: reserve },
+          filter: ReserveHoldersFilter.Supplied,
+        },
+        {
+          requestPolicy: 'cache-and-network',
+        },
+      );
+      assertOk(primedReserveHolders);
+      expect(reserveHoldersRequestCount).toBe(1);
     });
 
     describe('When the transaction succeeds', () => {
-      it('Then it should flag the cache entry as stale for the next activation', async () => {
+      it('Then it should flag the cache entries as stale for the next activation', async () => {
         const {
           result: {
             current: [supply],
@@ -199,7 +240,6 @@ describe(`Given the '${useSupply.name}' hook`, () => {
         );
         const result = await supply(supplyRequest);
         assertOk(result);
-        // After the transaction, the cache entry should be stale, so the next query should trigger a new request
         const afterTx = await userPositions(
           client,
           {
@@ -213,7 +253,21 @@ describe(`Given the '${useSupply.name}' hook`, () => {
           },
         );
         assertOk(afterTx);
+
+        const afterTxReserveHolders = await reserveHolders(
+          client,
+          {
+            reserve: { reserveId: reserve },
+            filter: ReserveHoldersFilter.Supplied,
+          },
+          {
+            requestPolicy: 'cache-first',
+          },
+        );
+        assertOk(afterTxReserveHolders);
+
         expect(userPositionsRequestCount).toBe(2);
+        expect(reserveHoldersRequestCount).toBe(2);
       });
     });
   });
