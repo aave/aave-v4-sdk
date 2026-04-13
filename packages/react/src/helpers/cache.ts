@@ -24,6 +24,7 @@ import {
   UserBalancesQuery,
   UserBorrowsQuery,
   type UserBorrowsRequestQuery,
+  UserClaimableRewardsQuery,
   type UserPosition,
   type UserPositionId,
   UserPositionQuery,
@@ -88,6 +89,22 @@ export function refreshUserBorrows(client: AaveClient, user: EvmAddress) {
     UserBorrowsQuery,
     (variables) =>
       extractUserBorrowsRequestUser(variables.request.query) === user,
+  );
+}
+
+/**
+ * @internal
+ */
+export function refreshUserClaimableRewards(
+  client: AaveClient,
+  user: EvmAddress,
+  chainId?: ChainId,
+) {
+  return client.refreshQueryWhere(
+    UserClaimableRewardsQuery,
+    (variables) =>
+      variables.request.user === user &&
+      (chainId === undefined || variables.request.chainId === chainId),
   );
 }
 
