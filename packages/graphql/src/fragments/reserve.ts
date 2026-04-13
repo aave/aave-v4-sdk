@@ -152,6 +152,21 @@ export const ReserveFragment = graphql(
 );
 export type Reserve = FragmentOf<typeof ReserveFragment>;
 
+export const ReserveHolderFragment = graphql(
+  `fragment ReserveHolder on ReserveHolder {
+    __typename
+    address
+    amount {
+      ...Erc20Amount
+    }
+    weight {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20AmountFragment, PercentNumberFragment],
+);
+export type ReserveHolder = FragmentOf<typeof ReserveHolderFragment>;
+
 export const ReserveInfoFragment = graphql(
   `fragment ReserveInfo on ReserveInfo {
     __typename

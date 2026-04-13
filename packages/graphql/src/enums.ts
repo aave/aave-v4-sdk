@@ -110,6 +110,20 @@ export enum Currency {
 }
 
 /**
+ * The filter for reserve holders.
+ */
+export enum ReserveHoldersFilter {
+  /**
+   * Filter by wallets that have supplied to this reserve.
+   */
+  Supplied = 'SUPPLIED',
+  /**
+   * Filter by wallets that have borrowed from this reserve.
+   */
+  Borrowed = 'BORROWED',
+}
+
+/**
  * The filter for reserves request.
  */
 export enum ReservesRequestFilter {

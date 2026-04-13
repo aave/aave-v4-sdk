@@ -3,7 +3,10 @@ import {
   type ApySample,
   BorrowApyHistoryQuery,
   type BorrowApyHistoryRequest,
+  type PaginatedReserveHoldersResult,
   type Reserve,
+  ReserveHoldersQuery,
+  type ReserveHoldersRequest,
   ReserveQuery,
   type ReserveRequest,
   ReservesQuery,
@@ -140,4 +143,34 @@ export function supplyApyHistory(
   }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<ApySample[], UnexpectedError> {
   return client.query(SupplyApyHistoryQuery, { request }, { requestPolicy });
+}
+
+/**
+ * Fetches a paginated list of top holders for a specific reserve.
+ *
+ * ```ts
+ * const result = await reserveHolders(client, {
+ *   reserve: { reserveId: reserveId('SGVsbG8h') },
+ *   filter: ReserveHoldersFilter.Supplied,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The reserve holders request parameters.
+ * @param options - The query options.
+ * @returns Paginated list of reserve holders.
+ */
+export function reserveHolders(
+  client: AaveClient,
+  request: ReserveHoldersRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PaginatedReserveHoldersResult, UnexpectedError> {
+  return client.query(
+    ReserveHoldersQuery,
+    { request, currency },
+    { requestPolicy },
+  );
 }
