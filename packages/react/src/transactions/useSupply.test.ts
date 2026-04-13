@@ -168,6 +168,7 @@ describe(`Given the '${useSupply.name}' hook`, () => {
           return msw.HttpResponse.json({
             data: {
               value: {
+                __typename: 'PaginatedReserveHoldersResult',
                 items: [
                   {
                     __typename: 'ReserveHolder',
