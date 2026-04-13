@@ -1132,6 +1132,19 @@ type PaginatedActivitiesResult {
   pageInfo: PaginatedResultInfo!
 }
 
+input PaginatedReserveHoldersRequest {
+  reserve: ReserveRequestQuery!
+  filter: ReserveHoldersFilter! = SUPPLIED
+  orderBy: ReserveHoldersOrderBy! = {amount: DESC}
+  pageSize: PageSize! = TEN
+  cursor: Cursor
+}
+
+type PaginatedReserveHoldersResult {
+  items: [ReserveHolder!]!
+  pageInfo: PaginatedResultInfo!
+}
+
 type PaginatedResultInfo {
   """The cursor to the previous page of results, if any."""
   prev: Cursor
@@ -1427,6 +1440,7 @@ type Query {
   hubSummaryHistory(request: HubSummaryHistoryRequest!): [HubSummarySample!]!
   hubAssetInterestRateModel(request: HubAssetInterestRateModelRequest!): HubAssetInterestRateModelResult!
   reserve(request: ReserveRequest!): Reserve
+  reserveHolders(request: PaginatedReserveHoldersRequest!): PaginatedReserveHoldersResult!
   reserves(request: ReservesRequest!): [Reserve!]!
   supply(request: SupplyRequest!): ExecutionPlan!
   borrow(request: BorrowRequest!): ExecutionPlan!
@@ -1690,6 +1704,21 @@ input ReserveErc20AmountInputWithPermit {
   The signed ERC20 permit message to operate on the relevant token without a need for an ERC20 Approval transaction.
   """
   permitSig: ERC20PermitSignature
+}
+
+type ReserveHolder {
+  address: EvmAddress!
+  amount: Erc20Amount!
+  weight: PercentNumber!
+}
+
+enum ReserveHoldersFilter {
+  SUPPLIED
+  BORROWED
+}
+
+input ReserveHoldersOrderBy {
+  amount: OrderDirection! = DESC
 }
 
 scalar ReserveId

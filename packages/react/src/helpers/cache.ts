@@ -10,6 +10,7 @@ import {
   isSpokeInputVariant,
   type RepayRequest,
   type Reserve,
+  ReserveHoldersQuery,
   type ReserveId,
   ReserveQuery,
   ReservesQuery,
@@ -149,6 +150,28 @@ export function refreshReserves(client: AaveClient, ids: ReserveId[]) {
 /**
  * @internal
  */
+export function refreshReserveHolders(client: AaveClient, ids: ReserveId[]) {
+  const decodedIds = ids.map(decodeReserveId);
+
+  return client.refreshQueryWhere(ReserveHoldersQuery, (variables) => {
+    const { reserve } = variables.request;
+
+    if ('reserveId' in reserve) {
+      return ids.includes(reserve.reserveId);
+    }
+
+    return decodedIds.some(
+      (decoded) =>
+        reserve.reserveInput.chainId === decoded.chainId &&
+        reserve.reserveInput.spoke === decoded.spoke &&
+        reserve.reserveInput.onChainId === decoded.onChainId,
+    );
+  });
+}
+
+/**
+ * @internal
+ */
 export function refreshUserSummary(
   client: AaveClient,
   user: EvmAddress,
@@ -242,6 +265,7 @@ export function refreshQueriesForReserveChange(
     refreshUserPositions(client, request.sender, spoke),
     refreshUserSummary(client, request.sender, spoke),
     refreshReserves(client, [request.reserve]),
+    refreshReserveHolders(client, [request.reserve]),
     refreshSpokes(client, spoke),
     refreshUserBalances(client, request.sender),
     refreshUserSupplies(client, request.sender),

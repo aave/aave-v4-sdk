@@ -1,5 +1,10 @@
-import { ApySampleFragment, ReserveFragment } from './fragments';
-import { graphql, type RequestOf } from './graphql';
+import {
+  ApySampleFragment,
+  PaginatedResultInfoFragment,
+  ReserveFragment,
+  ReserveHolderFragment,
+} from './fragments';
+import { graphql, type RequestOf, type ResultOf } from './graphql';
 
 /**
  * @internal
@@ -60,3 +65,29 @@ export type ReservesRequestQuery = ReturnType<
 export type ChainTokenCategories = ReturnType<
   typeof graphql.scalar<'ChainTokenCategories'>
 >;
+
+/**
+ * @internal
+ */
+export const ReserveHoldersQuery = graphql(
+  `query ReserveHolders($request: PaginatedReserveHoldersRequest!, $currency: Currency!) {
+    value: reserveHolders(request: $request) {
+      items {
+        ...ReserveHolder
+      }
+      pageInfo {
+        ...PaginatedResultInfo
+      }
+    }
+  }`,
+  [ReserveHolderFragment, PaginatedResultInfoFragment],
+);
+export type ReserveHoldersRequest = RequestOf<typeof ReserveHoldersQuery>;
+
+export type ReserveHoldersOrderBy = ReturnType<
+  typeof graphql.scalar<'ReserveHoldersOrderBy'>
+>;
+
+export type PaginatedReserveHoldersResult = ResultOf<
+  typeof ReserveHoldersQuery
+>['value'];

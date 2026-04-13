@@ -7,6 +7,7 @@ import {
   type HubId,
   hubId,
   invariant,
+  local,
   production,
   type SpokeId,
   spokeId,
@@ -105,6 +106,11 @@ export abstract class V4Command extends Command {
       description: 'Use staging environment',
       default: false,
     }),
+    local: Flags.boolean({
+      hidden: true,
+      description: 'Use local environment (http://localhost:3007/graphql)',
+      default: false,
+    }),
   };
 
   protected client!: AaveClient;
@@ -112,7 +118,11 @@ export abstract class V4Command extends Command {
   async init(): Promise<void> {
     await super.init();
     const { flags } = await this.parse(this.constructor as typeof V4Command);
-    const environment = flags.staging ? staging : production;
+    const environment = flags.local
+      ? local
+      : flags.staging
+        ? staging
+        : production;
     this.client = AaveClient.create({ environment });
   }
 

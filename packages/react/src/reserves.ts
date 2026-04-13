@@ -4,12 +4,15 @@ import {
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
-import { reserve, reserves } from '@aave/client/actions';
+import { reserve, reserveHolders, reserves } from '@aave/client/actions';
 import {
   type ApySample,
   BorrowApyHistoryQuery,
   type BorrowApyHistoryRequest,
+  type PaginatedReserveHoldersResult,
   type Reserve,
+  ReserveHoldersQuery,
+  type ReserveHoldersRequest,
   ReserveQuery,
   type ReserveRequest,
   ReservesQuery,
@@ -483,4 +486,138 @@ export function useSupplyApyHistory({
     pause,
     batch: false, // Do not batch this since it's a slower than average query
   });
+}
+
+export type UseReserveHoldersArgs = Prettify<
+  ReserveHoldersRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch a paginated list of top holders for a specific reserve.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useReserveHolders({
+ *   reserve: { reserveId: reserveId('SGVsbG8h') },
+ *   filter: ReserveHoldersFilter.Supplied,
+ *   suspense: true,
+ * });
+ *
+ * // data.items: ReserveHolder[]
+ * ```
+ */
+export function useReserveHolders(
+  args: UseReserveHoldersArgs & Suspendable,
+): SuspenseResult<PaginatedReserveHoldersResult>;
+/**
+ * Fetch a paginated list of top holders for a specific reserve.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useReserveHolders({
+ *   reserve: { reserveId: reserveId('SGVsbG8h') },
+ *   filter: ReserveHoldersFilter.Supplied,
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useReserveHolders(
+  args: Pausable<UseReserveHoldersArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedReserveHoldersResult>;
+/**
+ * Fetch a paginated list of top holders for a specific reserve.
+ *
+ * ```tsx
+ * const { data, error, loading } = useReserveHolders({
+ *   reserve: { reserveId: reserveId('SGVsbG8h') },
+ *   filter: ReserveHoldersFilter.Supplied,
+ * });
+ * ```
+ */
+export function useReserveHolders(
+  args: UseReserveHoldersArgs,
+): ReadResult<PaginatedReserveHoldersResult>;
+/**
+ * Fetch a paginated list of top holders for a specific reserve.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useReserveHolders({
+ *   reserve: { reserveId: reserveId('SGVsbG8h') },
+ *   filter: ReserveHoldersFilter.Supplied,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useReserveHolders(
+  args: Pausable<UseReserveHoldersArgs>,
+): PausableReadResult<PaginatedReserveHoldersResult>;
+
+export function useReserveHolders({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseReserveHoldersArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<PaginatedReserveHoldersResult, UnexpectedError> {
+  return useSuspendableQuery({
+    document: ReserveHoldersQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+  });
+}
+
+/**
+ * Low-level hook to execute a {@link reserveHolders} action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ * @remarks
+ * This hook **does not** actively watch for updated data on the reserve holders.
+ * Use this hook to retrieve data on demand as part of a larger workflow
+ * (e.g., in an event handler when paginating).
+ *
+ * ```ts
+ * const [execute, { called, data, error, loading }] = useReserveHoldersAction();
+ *
+ * // …
+ *
+ * const result = await execute({
+ *   reserve: { reserveId: reserveId('SGVsbG8h') },
+ *   filter: ReserveHoldersFilter.Supplied,
+ * });
+ *
+ * if (result.isOk()) {
+ *   console.log(result.value); // PaginatedReserveHoldersResult
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function useReserveHoldersAction(
+  options: CurrencyQueryOptions = DEFAULT_QUERY_OPTIONS,
+): UseAsyncTask<
+  ReserveHoldersRequest,
+  PaginatedReserveHoldersResult,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: ReserveHoldersRequest) =>
+      reserveHolders(client, request, {
+        currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
+        requestPolicy: 'cache-first',
+      }),
+    [client, options.currency],
+  );
 }

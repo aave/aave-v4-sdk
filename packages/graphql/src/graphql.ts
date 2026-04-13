@@ -29,6 +29,7 @@ import type {
   PageSize,
   QuoteAccuracy,
   RepayWithSupplyKind,
+  ReserveHoldersFilter,
   ReservesRequestFilter,
   StableVaultClaimStatus,
   SupplySwapKind,
@@ -103,6 +104,7 @@ export const graphql = initGraphQLTada<{
     OrderDirection: OrderDirection;
     PageSize: PageSize;
     QuoteAccuracy: QuoteAccuracy;
+    ReserveHoldersFilter: ReserveHoldersFilter;
     ReserveId: ReserveId;
     ReservesRequestFilter: ReservesRequestFilter;
     RewardId: RewardId;
