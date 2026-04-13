@@ -1,0 +1,23 @@
+packages/react/src/transactions/useSupply.test.ts
+  2bbf68c6a05378e0 171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "74d928409d9d9d59404e0a521fb0f90ed61f8252",
+  "prompts": {
+    "2bbf68c6a05378e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8285d2-9d9e-42ad-9783-3e5f58c42da5",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
