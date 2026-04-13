@@ -1,5 +1,5 @@
 import { assertOk, evmAddress, invariant, never, okAsync } from '@aave/client';
-import { repay, reserve, userBorrows } from '@aave/client/actions';
+import { repay, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
