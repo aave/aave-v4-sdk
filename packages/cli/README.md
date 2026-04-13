@@ -35,6 +35,7 @@ USAGE
 * [`aave reserve`](#aave-reserve)
 * [`aave reserves list`](#aave-reserves-list)
 * [`aave spokes list`](#aave-spokes-list)
+* [`aave user balance`](#aave-user-balance)
 * [`aave user borrows`](#aave-user-borrows)
 * [`aave user positions`](#aave-user-positions)
 * [`aave user summary`](#aave-user-summary)
@@ -213,6 +214,27 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/spokes/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.4/src/commands/spokes/list.ts)_
+
+## `aave user balance`
+
+List user token balances that can be used in Aave v4
+
+```
+USAGE
+  $ aave user balance -c <chain-id> [--json] [--address <evm-address>]
+
+FLAGS
+  -c, --chain_id=<chain-id>    (required) Chain ID to query balances from
+      --address=<evm-address>  User address (defaults to PRIVATE_KEY wallet address)
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+DESCRIPTION
+  List user token balances that can be used in Aave v4
+```
+
+_See code: [src/commands/user/balance.ts](https://github.com/aave/aave-v4-sdk/blob/v4.1.4/src/commands/user/balance.ts)_
 
 ## `aave user borrows`
 
