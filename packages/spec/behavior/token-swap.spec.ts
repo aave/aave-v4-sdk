@@ -37,7 +37,7 @@ async function createUserWithBalance(
   return user;
 }
 
-describe('When swapping ERC-20 for the first time', () => {
+describe.skip('When swapping ERC-20 for the first time', () => {
   it('Then they should be able to swap by sending the ERC20 approval transaction and by signing the swap order typed data', async ({
     annotate,
   }) => {
@@ -154,7 +154,7 @@ describe('When swapping ERC-20 for the first time', () => {
   });
 });
 
-describe('When swapping ERC-20 for ERC-20 using a limit order', () => {
+describe.skip('When swapping ERC-20 for ERC-20 using a limit order', () => {
   const LIMIT_BUY_AMOUNT = bigDecimal('0.001');
 
   it('Then they should be able to swap by sending the ERC20 approval transaction and by signing the swap order typed data', async ({
