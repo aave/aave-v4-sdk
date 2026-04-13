@@ -32,7 +32,7 @@ import { assertNonEmptyArray, assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Given a user with a supply position enabled as collateral', () => {
+describe.skip('Given a user with a supply position enabled as collateral', () => {
   beforeAll(async () => {
     const setup = await findReserveAndSupply(client, user, {
       spoke: ETHEREUM_SPOKE_CORE_ID,

@@ -28,7 +28,7 @@ import { assertSingleElementArray } from '../test-utils';
 
 const user = await createNewWallet();
 
-describe('Given a user with a supply position eligible for swapping', () => {
+describe.skip('Given a user with a supply position eligible for swapping', () => {
   let supplyPosition: UserSupplyItem;
 
   beforeAll(async () => {

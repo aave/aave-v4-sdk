@@ -1,5 +1,5 @@
 import { assertOk, evmAddress, invariant, never, okAsync } from '@aave/client';
-import { repay, userBorrows } from '@aave/client/actions';
+import { repay, reserve, userBorrows } from '@aave/client/actions';
 import {
   client,
   createNewWallet,
@@ -10,8 +10,9 @@ import {
 } from '@aave/client/testing';
 import { sendWith, signTypedDataWith } from '@aave/client/viem';
 import type { Reserve, UserBorrowItem } from '@aave/graphql';
+import type { Chain, Transport, WalletClient } from 'viem';
+import type { Account } from 'viem/accounts';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-
 import { findReservesToBorrow } from '../helpers/reserves';
 import {
   borrowFromReserve,
@@ -19,12 +20,12 @@ import {
   supplyAndBorrowNativeToken,
 } from '../helpers/supplyBorrow';
 
-const user = await createNewWallet();
-
 describe('Given a user and a reserve with an active borrow position', () => {
   let reserve: Reserve;
+  let user: WalletClient<Transport, Chain, Account>;
 
   beforeEach(async () => {
+    user = await createNewWallet();
     const supplySetup = await findReserveAndSupply(client, user, {
       token: ETHEREUM_USDT_ADDRESS,
       spoke: ETHEREUM_SPOKE_CORE_ID,
@@ -267,8 +268,10 @@ describe('Given a user and a reserve with an active borrow position', () => {
 
 describe('Given a user and a reserve that supports repayments in native tokens', () => {
   let reserveSupportingNative: Reserve;
+  let user: WalletClient<Transport, Chain, Account>;
 
   beforeAll(async () => {
+    user = await createNewWallet();
     const setup = await supplyAndBorrowNativeToken(client, user, {
       spoke: ETHEREUM_SPOKE_CORE_ID,
       ratioToBorrow: 0.4,
