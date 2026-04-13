@@ -1,0 +1,23 @@
+packages/react/src/helpers/cache.ts
+  2bbf68c6a05378e0 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "4f84812ae918604489d71cf4c836b198917cff75",
+  "prompts": {
+    "2bbf68c6a05378e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8285d2-9d9e-42ad-9783-3e5f58c42da5",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
