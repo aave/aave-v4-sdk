@@ -1,5 +1,18 @@
 # @aave/react
 
+## 4.1.0
+
+### Minor Changes
+
+- cdb2f23: **feat:** add `reserveHolders` query, `ReserveHoldersFilter` enum, `useReserveHolders` hook, and `reserves holders` CLI command
+
+### Patch Changes
+
+- 7b4beb6: **fix:** handle Merkl non-tracked claims in `useClaimRewards` and refresh `UserClaimableRewards` cache after successful claim
+- Updated dependencies [cdb2f23]
+  - @aave/graphql@1.1.0
+  - @aave/client@4.1.0
+
 ## 4.0.4
 
 ### Patch Changes
