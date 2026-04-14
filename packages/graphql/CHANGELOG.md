@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.1.0
+
+### Minor Changes
+
+- cdb2f23: **feat:** add `reserveHolders` query, `ReserveHoldersFilter` enum, `useReserveHolders` hook, and `reserves holders` CLI command
+
 ## 1.0.2
 
 ### Patch Changes

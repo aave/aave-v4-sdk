@@ -1,5 +1,20 @@
 # @aave/cli
 
+## 4.2.0
+
+### Minor Changes
+
+- cdb2f23: **feat:** add `reserveHolders` query, `ReserveHoldersFilter` enum, `useReserveHolders` hook, and `reserves holders` CLI command
+- 46893ab: **feat:** add market token swap command
+- 37c1fe3: feat: add user summary cli command
+- cb7ec01: **feat:** add reserve lookup command and move user queries under "user" command
+
+### Patch Changes
+
+- e0b9968: **feat:** add 'user balance' command
+- Updated dependencies [cdb2f23]
+  - @aave/client@4.1.0
+
 ## 4.1.4
 
 ### Patch Changes
