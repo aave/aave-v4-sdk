@@ -56,6 +56,9 @@
       "action": {
         "description": "Actions to perform in the Aave v4 protocol"
       },
+      "action:swap": {
+        "description": "Swap actions across tokens and positions (market mode)"
+      },
       "hubs": {
         "description": "List available liquidity hubs"
       },
