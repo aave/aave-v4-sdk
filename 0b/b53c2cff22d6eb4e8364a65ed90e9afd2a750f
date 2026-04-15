@@ -1,0 +1,27 @@
+packages/react/src/rewards.ts
+  06e1af022dc7fb47 9,12-13,18,23,97-109,111,115-135,174-179
+packages/react/src/helpers/optimisticRewards.ts
+  06e1af022dc7fb47 1-185
+packages/react/src/helpers/index.ts
+  06e1af022dc7fb47 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "0bb53c2cff22d6eb4e8364a65ed90e9afd2a750f",
+  "prompts": {
+    "06e1af022dc7fb47": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d91b1-da70-7573-92a1-83e31ec6114f",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 247,
+      "total_deletions": 17,
+      "accepted_lines": 232,
+      "overriden_lines": 0
+    }
+  }
+}
