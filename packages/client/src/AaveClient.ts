@@ -83,7 +83,7 @@ export class AaveClient extends GqlClient {
   /**
    * Records claimed reward IDs for a user on a chain, immediately removes them from
    * all active `useUserClaimableRewards` subscriptions (optimistic cache update), and
-   * schedules a real network refresh after 35s once Merkl has propagated the claim.
+   * schedules a real network refresh after 30s.
    *
    * @internal
    */
