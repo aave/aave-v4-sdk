@@ -57,7 +57,7 @@ function makeMockReward(id: string) {
         address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         info: {
           __typename: 'TokenInfo',
-          id: `token-info-usdc`,
+          id: 'token-info-usdc',
           name: 'USD Coin',
           symbol: 'USDC',
           icon: null,
@@ -126,7 +126,10 @@ describe('Given a post-claim cache-first read after markRewardsClaimed', () => {
     api.query('UserClaimableRewards', () =>
       msw.HttpResponse.json({
         data: {
-          value: [makeMockReward(MOCK_REWARD_ID), makeMockReward(MOCK_REWARD_ID_2)],
+          value: [
+            makeMockReward(MOCK_REWARD_ID),
+            makeMockReward(MOCK_REWARD_ID_2),
+          ],
         },
       }),
     ),
@@ -180,7 +183,10 @@ describe('Given the AaveClient graphcache with UserMerklClaimableReward entities
     api.query('UserClaimableRewards', () =>
       msw.HttpResponse.json({
         data: {
-          value: [makeMockReward(MOCK_REWARD_ID), makeMockReward(MOCK_REWARD_ID_2)],
+          value: [
+            makeMockReward(MOCK_REWARD_ID),
+            makeMockReward(MOCK_REWARD_ID_2),
+          ],
         },
       }),
     ),
