@@ -7400,6 +7400,56 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "liquidationConfig",
+            "type": {
+              "kind": "OBJECT",
+              "name": "SpokeLiquidationConfig",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SpokeLiquidationConfig",
+        "fields": [
+          {
+            "name": "targetHealthFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "healthFactorForMaxBonus",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "liquidationBonusFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []

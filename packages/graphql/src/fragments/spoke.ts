@@ -1,6 +1,26 @@
 import type { FragmentOf } from 'gql.tada';
 import { graphql } from '../graphql';
-import { ChainFragment, PaginatedResultInfoFragment } from './common';
+import {
+  ChainFragment,
+  PaginatedResultInfoFragment,
+  PercentNumberFragment,
+} from './common';
+
+export const SpokeLiquidationConfigFragment = graphql(
+  `fragment SpokeLiquidationConfig on SpokeLiquidationConfig {
+    __typename
+    targetHealthFactor
+    healthFactorForMaxBonus
+    liquidationBonusFactor {
+      ...PercentNumber
+    }
+  }`,
+  [PercentNumberFragment],
+);
+
+export type SpokeLiquidationConfig = FragmentOf<
+  typeof SpokeLiquidationConfigFragment
+>;
 
 export const SpokeFragment = graphql(
   `fragment Spoke on Spoke {
@@ -11,8 +31,11 @@ export const SpokeFragment = graphql(
     chain {
       ...Chain
     }
+    liquidationConfig {
+      ...SpokeLiquidationConfig
+    }
   }`,
-  [ChainFragment],
+  [ChainFragment, SpokeLiquidationConfigFragment],
 );
 
 export type Spoke = FragmentOf<typeof SpokeFragment>;
