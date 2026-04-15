@@ -334,6 +334,7 @@ function makeSpoke({
       signatureGateway: randomEvmAddress(),
       nativeInfo: makeTokenInfo('WETH'),
     },
+    liquidationConfig: null,
   };
 }
 
