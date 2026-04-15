@@ -1,0 +1,55 @@
+name: Snapshot Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Dist-tag for the snapshot (e.g. preview, next, canary)'
+        required: false
+        default: 'snapshot'
+  push:
+    branches:
+      - 'snapshot/**'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    name: Snapshot Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Configure npm registry
+        uses: actions/setup-node@v4
+        with:
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Compute tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG="${GITHUB_REF_NAME#snapshot/}"
+          else
+            TAG="${{ github.event.inputs.tag }}"
+          fi
+          echo "value=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Version packages (snapshot)
+        run: pnpm changeset version --snapshot ${{ steps.tag.outputs.value }}
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish snapshot
+        run: pnpm changeset publish --tag ${{ steps.tag.outputs.value }} --provenance
