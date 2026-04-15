@@ -5,6 +5,7 @@ import {
   fetchExchange,
   makeOperation,
   type Operation,
+  type OperationContext,
   type OperationResult,
   type OperationResultSource,
   type RequestPolicy,
@@ -41,7 +42,7 @@ export class GqlClient {
    */
   public readonly urql: UrqlClient;
 
-  private readonly queryRegistry = new Map<
+  protected readonly queryRegistry = new Map<
     number,
     { operation: Operation; watching: number }
   >();
@@ -194,8 +195,30 @@ export class GqlClient {
     );
   }
 
+  protected additionalExchanges(): Exchange[] {
+    return [];
+  }
+
+  protected reexecuteWithRefetching(
+    operation: Operation,
+    additionalContext: Record<string | symbol, unknown> = {},
+    requestPolicy: RequestPolicy = 'network-only',
+  ): void {
+    this.urql.reexecuteOperation(
+      makeOperation(operation.kind, operation, {
+        ...operation.context,
+        requestPolicy,
+        batch: false,
+        [refetching]: true,
+        ...additionalContext,
+      } as OperationContext),
+    );
+  }
+
   private exchanges(): Exchange[] {
     const exchanges: Exchange[] = [this.queryTrackingExchange()];
+
+    exchanges.push(...this.additionalExchanges());
 
     if (this.context.cache) {
       exchanges.push(this.context.cache);
