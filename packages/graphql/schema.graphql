@@ -1900,6 +1900,7 @@ type Spoke {
 
   """The spoke chain"""
   chain: Chain!
+  liquidationConfig: SpokeLiquidationConfig
 }
 
 scalar SpokeId
@@ -1910,6 +1911,12 @@ input SpokeInput {
 
   """The chain id the spoke is deployed to"""
   chainId: ChainId!
+}
+
+type SpokeLiquidationConfig {
+  targetHealthFactor: BigDecimal!
+  healthFactorForMaxBonus: BigDecimal!
+  liquidationBonusFactor: PercentNumber!
 }
 
 type SpokePositionManager {

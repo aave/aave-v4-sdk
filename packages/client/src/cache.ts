@@ -232,6 +232,10 @@ export const exchange = cacheExchange({
     UserSupplyItem: {
       createdAt: transformToNullableDate,
     },
+    SpokeLiquidationConfig: {
+      targetHealthFactor: transformToBigDecimal,
+      healthFactorForMaxBonus: transformToBigDecimal,
+    },
     SpokeUserPositionManager: {
       approvedOn: transformToDate,
     },
@@ -469,6 +473,7 @@ export const exchange = cacheExchange({
     InsufficientLiquidityError: () => null,
     LiquidationFeeVariation: () => null,
     MaxLiquidationBonusVariation: () => null,
+    SpokeLiquidationConfig: () => null,
     NativeAmount: () => null,
     PaginatedActivitiesResult: () => null,
     PaginatedReserveHoldersResult: () => null,
