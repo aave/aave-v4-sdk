@@ -85,6 +85,10 @@ export class AaveClient extends GqlClient {
    * all active `useUserClaimableRewards` subscriptions (optimistic cache update), and
    * schedules a real network refresh after 30s.
    *
+   * Reward claiming is done by ID, but the claim tx could include tokens earned from
+   * multiple reward campaigns if they share the same reward token. This would be a rare
+   * case, and currently it is not handled. The result is that the cache could still return
+   * rewards that were just claimed, and trying to claim them would be a no-op.
    * @internal
    */
   markRewardsClaimed(
