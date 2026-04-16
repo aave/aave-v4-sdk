@@ -7,14 +7,18 @@ import {
   invariant,
   ok,
   okAsync,
-  type RewardId,
   ResultAsync,
+  type RewardId,
   type SendWithError,
   type TimeoutError,
   type TransactionReceipt,
   type UnexpectedError,
 } from '@aave/client';
-import { chain, claimRewards, userClaimableRewards } from '@aave/client/actions';
+import {
+  chain,
+  claimRewards,
+  userClaimableRewards,
+} from '@aave/client/actions';
 import { sendWith, toViemChain } from '@aave/client/viem';
 import { Flags } from '@oclif/core';
 import { createWalletClient, http } from 'viem';
@@ -86,13 +90,15 @@ export default class ActionClaimRewards extends common.V4Command {
         : userClaimableRewards(this.client, {
             user,
             chainId,
-          } as Parameters<typeof userClaimableRewards>[1]).andThen((rewards) => {
-            invariant(
-              rewards.length > 0,
-              'No claimable rewards found for this wallet on this chain',
-            );
-            return ok(rewards.map((reward) => reward.id));
-          });
+          } as Parameters<typeof userClaimableRewards>[1]).andThen(
+            (rewards) => {
+              invariant(
+                rewards.length > 0,
+                'No claimable rewards found for this wallet on this chain',
+              );
+              return ok(rewards.map((reward) => reward.id));
+            },
+          );
 
       return idsResult.andThen((ids) =>
         chain(this.client, { chainId }).andThen((chainData) => {
@@ -128,7 +134,9 @@ export default class ActionClaimRewards extends common.V4Command {
         } as Parameters<typeof claimRewards>[1])
           .andThen(sendWith(wallet))
           .andTee((txResult) =>
-            this.log(`Claim rewards transaction sent with hash: ${txResult.txHash}`),
+            this.log(
+              `Claim rewards transaction sent with hash: ${txResult.txHash}`,
+            ),
           )
           .andThen(this.client.waitForTransaction)
           .map((txResult) => {
