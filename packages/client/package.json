@@ -1,6 +1,6 @@
 {
   "name": "@aave/client",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "The official TypeScript client for the AaveKit API",
   "keywords": [
     "aave",
@@ -92,7 +92,8 @@
     "@aave/types": "workspace:*",
     "@urql/core": "^6.0.1",
     "@urql/exchange-graphcache": "^8.1.0",
-    "graphql": "^16.11.0"
+    "graphql": "^16.11.0",
+    "wonka": "^6.3.5"
   },
   "devDependencies": {
     "@bgd-labs/aave-address-book": "^4.25.3",

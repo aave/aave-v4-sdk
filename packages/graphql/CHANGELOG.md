@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.1.1
+
+### Patch Changes
+
+- a5eb3c1: **feat:** add `SpokeLiquidationConfig` type and `liquidationConfig` field to `Spoke` fragment
+
 ## 1.1.0
 
 ### Minor Changes
