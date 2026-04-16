@@ -120,13 +120,16 @@ export class AaveClient extends GqlClient {
         const cached = this.urql.readQuery(UserClaimableRewardsQuery, vars, {
           requestPolicy: 'cache-only',
         });
-        const rewards = cached?.data?.value as ClaimableRewardShape[] | undefined;
+        const rewards = cached?.data?.value as
+          | ClaimableRewardShape[]
+          | undefined;
         if (!rewards?.length) continue;
 
         for (const reward of rewards) {
           const address = reward.claimable?.token?.address;
           if (!address) continue;
-          const tokenChainId = reward.claimable?.token?.chain?.chainId ?? chainId;
+          const tokenChainId =
+            reward.claimable?.token?.chain?.chainId ?? chainId;
           idToTokenKey.set(
             reward.id,
             `${tokenChainId}:${address.toLowerCase()}`,
