@@ -92,7 +92,8 @@
     "@aave/types": "workspace:*",
     "@urql/core": "^6.0.1",
     "@urql/exchange-graphcache": "^8.1.0",
-    "graphql": "^16.11.0"
+    "graphql": "^16.11.0",
+    "wonka": "^6.3.5"
   },
   "devDependencies": {
     "@bgd-labs/aave-address-book": "^4.25.3",
