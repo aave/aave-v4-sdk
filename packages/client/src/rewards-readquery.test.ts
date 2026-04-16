@@ -115,6 +115,19 @@ function makeMockReward(id: string) {
   };
 }
 
+function makeMockRewardWithToken(id: string, tokenAddress: string) {
+  return {
+    ...makeMockReward(id),
+    claimable: {
+      ...makeMockReward(id).claimable,
+      token: {
+        ...makeMockReward(id).claimable.token,
+        address: tokenAddress,
+      },
+    },
+  };
+}
+
 describe('Given a post-claim cache-first read after markRewardsClaimed', () => {
   // Fresh client — exchange pipeline is [queryTracking, claimResponseTransform, graphcache, fetch]
   const client = AaveClient.create({
@@ -149,7 +162,7 @@ describe('Given a post-claim cache-first read after markRewardsClaimed', () => {
     server.close();
   });
 
-  it('Then a cache-first read after markRewardsClaimed does not return the claimed reward', async () => {
+  it('Then a cache-first read after markRewardsClaimed removes all rows sharing the same payout token', async () => {
     // Record the claim — populates pendingRewardRemovals synchronously.
     client.markRewardsClaimed(MOCK_USER, MOCK_CHAIN_ID, [
       MOCK_REWARD_ID as RewardId,
@@ -165,8 +178,7 @@ describe('Given a post-claim cache-first read after markRewardsClaimed', () => {
     );
 
     assertOk(result);
-    expect(result.value).toHaveLength(1);
-    expect(result.value[0]?.id).toBe(MOCK_REWARD_ID_2);
+    expect(result.value).toHaveLength(0);
   });
 });
 
@@ -253,5 +265,60 @@ describe('Given the AaveClient graphcache with UserMerklClaimableReward entities
       expect(filtered).toHaveLength(1);
       expect(filtered[0]?.id).toBe(MOCK_REWARD_ID_2);
     });
+  });
+});
+
+describe('Given a post-claim cache-first read where rewards have different payout tokens', () => {
+  const client = AaveClient.create({
+    environment: testEnvironment,
+    batch: false,
+  });
+
+  const server = setupServer(
+    api.query('UserClaimableRewards', () =>
+      msw.HttpResponse.json({
+        data: {
+          value: [
+            makeMockRewardWithToken(
+              MOCK_REWARD_ID,
+              '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            ),
+            makeMockRewardWithToken(
+              MOCK_REWARD_ID_2,
+              '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            ),
+          ],
+        },
+      }),
+    ),
+  );
+
+  beforeAll(async () => {
+    server.listen();
+    const primed = await userClaimableRewards(client, {
+      user: MOCK_USER,
+      chainId: MOCK_CHAIN_ID,
+    });
+    assertOk(primed);
+  });
+
+  afterAll(() => {
+    server.close();
+  });
+
+  it('Then only the claimed reward is removed', async () => {
+    client.markRewardsClaimed(MOCK_USER, MOCK_CHAIN_ID, [
+      MOCK_REWARD_ID as RewardId,
+    ]);
+
+    const result = await userClaimableRewards(
+      client,
+      { user: MOCK_USER, chainId: MOCK_CHAIN_ID },
+      { requestPolicy: 'cache-first' },
+    );
+
+    assertOk(result);
+    expect(result.value).toHaveLength(1);
+    expect(result.value[0]?.id).toBe(MOCK_REWARD_ID_2);
   });
 });

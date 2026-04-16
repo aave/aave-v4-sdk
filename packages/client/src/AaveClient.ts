@@ -29,6 +29,15 @@ import {
 } from './types';
 
 type UserClaimableRewardsVars = VariablesOf<typeof UserClaimableRewardsQuery>;
+type ClaimableRewardShape = {
+  id: RewardId;
+  claimable?: {
+    token?: {
+      address?: string;
+      chain?: { chainId?: number };
+    };
+  };
+};
 
 export class AaveClient extends GqlClient {
   private readonly pendingRewardRemovals = new Map<
@@ -92,10 +101,59 @@ export class AaveClient extends GqlClient {
     chainId: ChainId,
     ids: RewardId[],
   ): void {
+    const matchingOperations: Operation[] = [];
+    const idToTokenKey = new Map<RewardId, string>();
+
+    if (this.context.cache) {
+      for (const [, entry] of this.queryRegistry) {
+        if (extractOperationName(entry.operation) !== 'UserClaimableRewards') {
+          continue;
+        }
+
+        const vars = entry.operation.variables as UserClaimableRewardsVars;
+        if (vars.request.user !== user || vars.request.chainId !== chainId) {
+          continue;
+        }
+
+        matchingOperations.push(entry.operation);
+
+        const cached = this.urql.readQuery(UserClaimableRewardsQuery, vars, {
+          requestPolicy: 'cache-only',
+        });
+        const rewards = cached?.data?.value as ClaimableRewardShape[] | undefined;
+        if (!rewards?.length) continue;
+
+        for (const reward of rewards) {
+          const address = reward.claimable?.token?.address;
+          if (!address) continue;
+          const tokenChainId = reward.claimable?.token?.chain?.chainId ?? chainId;
+          idToTokenKey.set(
+            reward.id,
+            `${tokenChainId}:${address.toLowerCase()}`,
+          );
+        }
+      }
+    }
+
+    const claimedTokenKeys = new Set(
+      ids.map((id) => idToTokenKey.get(id)).filter((key) => key !== undefined),
+    );
+
+    const expandedIds = new Set(ids);
+    if (claimedTokenKeys.size > 0) {
+      for (const [rewardId, tokenKey] of idToTokenKey) {
+        if (claimedTokenKeys.has(tokenKey)) {
+          expandedIds.add(rewardId);
+        }
+      }
+    }
+
     const key = `${user}:${chainId}`;
     const existing = this.pendingRewardRemovals.get(key);
     this.pendingRewardRemovals.set(key, {
-      ids: existing ? new Set([...existing.ids, ...ids]) : new Set(ids),
+      ids: existing
+        ? new Set([...existing.ids, ...expandedIds])
+        : new Set(expandedIds),
       expiresAt: Date.now() + 60_000,
     });
 
@@ -103,15 +161,8 @@ export class AaveClient extends GqlClient {
     // Without graphcache there is no normalized store to read from, so skip — the
     // claimResponseTransformExchange already filters every network response.
     if (this.context.cache) {
-      for (const [, entry] of this.queryRegistry) {
-        if (extractOperationName(entry.operation) !== 'UserClaimableRewards') {
-          continue;
-        }
-        const vars = entry.operation.variables as UserClaimableRewardsVars;
-        if (vars.request.user !== user || vars.request.chainId !== chainId) {
-          continue;
-        }
-        this.reexecuteWithRefetching(entry.operation, {}, 'cache-only');
+      for (const operation of matchingOperations) {
+        this.reexecuteWithRefetching(operation, {}, 'cache-only');
       }
     }
 
