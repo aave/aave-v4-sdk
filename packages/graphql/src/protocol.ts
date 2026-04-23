@@ -124,6 +124,8 @@ export const AssetSummaryFragment = graphql(
       totalBorrowable {
         ...AssetAmountWithChange
       }
+      reservesCount
+      activeReservesCount
       averageBorrowApy: borrowApy(metric: AVERAGE) {
         ...PercentNumber
       }

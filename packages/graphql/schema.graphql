@@ -126,6 +126,8 @@ type AssetSummary {
   totalBorrowCap: AssetAmountWithChange!
   totalBorrowed: AssetAmountWithChange!
   totalBorrowable: AssetAmountWithChange!
+  reservesCount: Int!
+  activeReservesCount: Int!
 
   """The supply apy dependent on what you pass in for the `metric`"""
   supplyApy(metric: ApyMetric! = AVERAGE): PercentNumber!
