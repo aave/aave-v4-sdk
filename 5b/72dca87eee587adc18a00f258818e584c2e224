@@ -1,0 +1,23 @@
+packages/core/src/index.ts
+  220b4ff8fa003c0a 6-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "5b72dca87eee587adc18a00f258818e584c2e224",
+  "prompts": {
+    "220b4ff8fa003c0a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "74382b00-63a7-434b-a230-78c64408a7a3",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 0,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
