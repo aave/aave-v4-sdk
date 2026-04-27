@@ -1,5 +1,16 @@
 # @aave/client
 
+## 4.2.0
+
+### Minor Changes
+
+- cfceb7e: **feat:** add `reservesCount` and `activeReservesCount` to `AssetSummary`
+
+### Patch Changes
+
+- Updated dependencies [cfceb7e]
+  - @aave/graphql@1.2.0
+
 ## 4.1.1
 
 ### Patch Changes
