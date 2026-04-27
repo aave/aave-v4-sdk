@@ -1,5 +1,16 @@
 # @aave/client
 
+## 4.1.1
+
+### Patch Changes
+
+- 5eb65e6: **fix:** optimistically remove claimed reward IDs from `UserClaimableRewards` cache before Merkl propagates
+- a5eb3c1: **feat:** add `SpokeLiquidationConfig` type and `liquidationConfig` field to `Spoke` fragment
+- Updated dependencies [5eb65e6]
+- Updated dependencies [a5eb3c1]
+  - @aave/core@1.0.1
+  - @aave/graphql@1.1.1
+
 ## 4.1.0
 
 ### Minor Changes
