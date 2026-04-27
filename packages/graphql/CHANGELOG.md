@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 1.2.0
+
+### Minor Changes
+
+- cfceb7e: **feat:** add `reservesCount` and `activeReservesCount` to `AssetSummary`
+
 ## 1.1.1
 
 ### Patch Changes
