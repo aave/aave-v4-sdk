@@ -1,3 +1,8 @@
+import type { FragmentOf } from 'gql.tada';
+import {
+  ExchangeAmountFragment,
+  PercentNumberFragment,
+} from './fragments/common';
 import {
   PaginatedSpokePositionManagerResultFragment,
   PaginatedSpokeUserPositionManagerResultFragment,
@@ -9,7 +14,7 @@ import { graphql, type RequestOf } from './graphql';
  * @internal
  */
 export const SpokeQuery = graphql(
-  `query Spoke($request: SpokeRequest!) {
+  `query Spoke($request: SpokeRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: spoke(request: $request) {
       ...Spoke
     }
@@ -26,7 +31,7 @@ export type SpokeRequestQuery = ReturnType<
  * @internal
  */
 export const SpokesQuery = graphql(
-  `query Spokes($request: SpokesRequest!) {
+  `query Spokes($request: SpokesRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: spokes(request: $request) {
       ...Spoke
     }
@@ -67,4 +72,44 @@ export const SpokeUserPositionManagersQuery = graphql(
 );
 export type SpokeUserPositionManagersRequest = RequestOf<
   typeof SpokeUserPositionManagersQuery
+>;
+
+export const SpokeSummarySampleFragment = graphql(
+  `fragment SpokeSummarySample on SpokeSummarySample {
+    __typename
+    date
+    deposits {
+      ...ExchangeAmount
+    }
+    borrows {
+      ...ExchangeAmount
+    }
+    availableLiquidity {
+      ...ExchangeAmount
+    }
+    utilizationRate {
+      ...PercentNumber
+    }
+  }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type SpokeSummarySample = FragmentOf<typeof SpokeSummarySampleFragment>;
+
+/**
+ * @internal
+ */
+export const SpokeSummaryHistoryQuery = graphql(
+  `query SpokeSummaryHistory($request: SpokeSummaryHistoryRequest!) {
+    value: spokeSummaryHistory(request: $request) {
+      ...SpokeSummarySample
+    }
+  }`,
+  [SpokeSummarySampleFragment],
+);
+export type SpokeSummaryHistoryRequest = RequestOf<
+  typeof SpokeSummaryHistoryQuery
+>;
+
+export type SpokeSummaryHistoryRequestQuery = ReturnType<
+  typeof graphql.scalar<'SpokeSummaryHistoryRequestQuery'>
 >;

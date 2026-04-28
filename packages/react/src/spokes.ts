@@ -1,4 +1,9 @@
-import type { UnexpectedError } from '@aave/client';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
+  type UnexpectedError,
+} from '@aave/client';
 import {
   type PaginatedSpokePositionManagerResult,
   type PaginatedSpokeUserPositionManagerResult,
@@ -12,7 +17,7 @@ import {
   SpokeUserPositionManagersQuery,
   type SpokeUserPositionManagersRequest,
 } from '@aave/graphql';
-import type { NullishDeep } from '@aave/types';
+import type { NullishDeep, Prettify } from '@aave/types';
 import {
   type Pausable,
   type PausableReadResult,
@@ -24,7 +29,9 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseSpokeArgs = SpokeRequest;
+export type UseSpokeArgs = Prettify<
+  SpokeRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch a specific spoke.
@@ -88,6 +95,8 @@ export function useSpoke(
 export function useSpoke({
   suspense = false,
   pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseSpokeArgs> & {
   suspense?: boolean;
@@ -97,13 +106,17 @@ export function useSpoke({
     document: SpokeQuery,
     variables: {
       request,
+      currency,
+      timeWindow,
     },
     suspense,
     pause,
   });
 }
 
-export type UseSpokesArgs = SpokesRequest;
+export type UseSpokesArgs = Prettify<
+  SpokesRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch spokes based on specified criteria.
@@ -165,6 +178,8 @@ export function useSpokes(
 export function useSpokes({
   suspense = false,
   pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseSpokesArgs> & {
   suspense?: boolean;
@@ -174,6 +189,8 @@ export function useSpokes({
     document: SpokesQuery,
     variables: {
       request,
+      currency,
+      timeWindow,
     },
     suspense,
     pause,

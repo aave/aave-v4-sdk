@@ -6,6 +6,7 @@ import {
   PercentNumberFragment,
 } from './fragments';
 import { HubFragment } from './fragments/hubs';
+import { SpokeFragment } from './fragments/spoke';
 import { graphql, type RequestOf } from './graphql';
 
 /**
@@ -145,3 +146,49 @@ export const HubAssetInterestRateModelQuery = graphql(
 export type HubAssetInterestRateModelRequest = RequestOf<
   typeof HubAssetInterestRateModelQuery
 >;
+
+export const HubSpokeConfigFragment = graphql(
+  `fragment HubSpokeConfig on HubSpokeConfig {
+      __typename
+      hub {
+        ...Hub
+      }
+      spoke {
+        ...Spoke
+      }
+      asset {
+        ...HubAsset
+      }
+      supplyCap {
+        ...Erc20Amount
+      }
+      borrowCap {
+        ...Erc20Amount
+      }
+      halted
+      riskPremiumThreshold {
+        ...PercentNumber
+      }
+    }`,
+  [
+    HubFragment,
+    SpokeFragment,
+    HubAssetFragment,
+    Erc20AmountFragment,
+    PercentNumberFragment,
+  ],
+);
+export type HubSpokeConfig = FragmentOf<typeof HubSpokeConfigFragment>;
+
+/**
+ * @internal
+ */
+export const HubSpokeConfigsQuery = graphql(
+  `query HubSpokeConfigs($request: HubSpokeConfigsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
+      value: hubSpokeConfigs(request: $request) {
+        ...HubSpokeConfig
+      }
+    }`,
+  [HubSpokeConfigFragment],
+);
+export type HubSpokeConfigsRequest = RequestOf<typeof HubSpokeConfigsQuery>;
