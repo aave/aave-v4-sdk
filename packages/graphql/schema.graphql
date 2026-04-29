@@ -757,7 +757,14 @@ type HubSpokeConfig {
   asset: HubAsset!
   supplyCap: Erc20Amount!
   borrowCap: Erc20Amount!
-  halted: Boolean!
+
+  """
+  Whether this (hub, spoke, asset) tuple is enabled on-chain.
+  Note: the on-chain `SpokeConfig` has a separate `halted` flag that the
+  indexer currently does not capture (tracked separately). For now,
+  `active` reflects only `SpokeConfig.active`.
+  """
+  active: Boolean!
   riskPremiumThreshold: PercentNumber!
 }
 
@@ -1938,10 +1945,10 @@ type SpokeConnectedHub {
 }
 
 type SpokeConnectedHubSummary {
-  totalBorrowed: ExchangeAmountWithChange!
+  totalBorrowed: ExchangeAmount!
   creditLine: ExchangeAmount!
   creditUsed: PercentNumber!
-  totalSupplied: ExchangeAmountWithChange!
+  totalSupplied: ExchangeAmount!
   utilizationRate: PercentNumber!
 }
 
@@ -1985,9 +1992,9 @@ input SpokeRequestQuery @oneOf {
 }
 
 type SpokeSummary {
-  totalBorrowed: ExchangeAmountWithChange!
+  totalBorrowed: ExchangeAmount!
   totalBorrowCap: ExchangeAmount!
-  totalSupplied: ExchangeAmountWithChange!
+  totalSupplied: ExchangeAmount!
   totalSupplyCap: ExchangeAmount!
   utilizationRate: PercentNumber!
   availableLiquidity: ExchangeAmount!

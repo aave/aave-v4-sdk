@@ -3,7 +3,6 @@ import { graphql } from '../graphql';
 import {
   ChainFragment,
   ExchangeAmountFragment,
-  ExchangeAmountWithChangeFragment,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
 } from './common';
@@ -29,13 +28,13 @@ export const SpokeSummaryFragment = graphql(
   `fragment SpokeSummary on SpokeSummary {
     __typename
     totalBorrowed {
-      ...ExchangeAmountWithChange
+      ...ExchangeAmount
     }
     totalBorrowCap {
       ...ExchangeAmount
     }
     totalSupplied {
-      ...ExchangeAmountWithChange
+      ...ExchangeAmount
     }
     totalSupplyCap {
       ...ExchangeAmount
@@ -49,11 +48,7 @@ export const SpokeSummaryFragment = graphql(
     uniqueAssets
     connectedHubs
   }`,
-  [
-    ExchangeAmountFragment,
-    ExchangeAmountWithChangeFragment,
-    PercentNumberFragment,
-  ],
+  [ExchangeAmountFragment, PercentNumberFragment],
 );
 
 export type SpokeSummary = FragmentOf<typeof SpokeSummaryFragment>;
@@ -62,7 +57,7 @@ export const SpokeConnectedHubSummaryFragment = graphql(
   `fragment SpokeConnectedHubSummary on SpokeConnectedHubSummary {
     __typename
     totalBorrowed {
-      ...ExchangeAmountWithChange
+      ...ExchangeAmount
     }
     creditLine {
       ...ExchangeAmount
@@ -71,17 +66,13 @@ export const SpokeConnectedHubSummaryFragment = graphql(
       ...PercentNumber
     }
     totalSupplied {
-      ...ExchangeAmountWithChange
+      ...ExchangeAmount
     }
     utilizationRate {
       ...PercentNumber
     }
   }`,
-  [
-    ExchangeAmountFragment,
-    ExchangeAmountWithChangeFragment,
-    PercentNumberFragment,
-  ],
+  [ExchangeAmountFragment, PercentNumberFragment],
 );
 
 export type SpokeConnectedHubSummary = FragmentOf<

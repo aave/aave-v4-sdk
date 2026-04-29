@@ -312,9 +312,9 @@ function makeUserPositionRiskPremium(): UserPositionRiskPremium {
 function makeSpokeSummary(): SpokeSummary {
   return {
     __typename: 'SpokeSummary',
-    totalBorrowed: makeExchangeAmountWithChange(0),
+    totalBorrowed: makeExchangeAmount(0),
     totalBorrowCap: makeExchangeAmount(0),
-    totalSupplied: makeExchangeAmountWithChange(0),
+    totalSupplied: makeExchangeAmount(0),
     totalSupplyCap: makeExchangeAmount(0),
     utilizationRate: makePercentNumber(0),
     availableLiquidity: makeExchangeAmount(0),

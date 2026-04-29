@@ -2435,7 +2435,7 @@
             "args": []
           },
           {
-            "name": "halted",
+            "name": "active",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -7676,7 +7676,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountWithChange",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -7712,7 +7712,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountWithChange",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -7824,7 +7824,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountWithChange",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },
@@ -7848,7 +7848,7 @@
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ExchangeAmountWithChange",
+                "name": "ExchangeAmount",
                 "ofType": null
               }
             },

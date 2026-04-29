@@ -165,7 +165,7 @@ export const HubSpokeConfigFragment = graphql(
       borrowCap {
         ...Erc20Amount
       }
-      halted
+      active
       riskPremiumThreshold {
         ...PercentNumber
       }
