@@ -12,6 +12,9 @@ import {
   type SpokePositionManagersRequest,
   SpokeQuery,
   type SpokeRequest,
+  SpokeSummaryHistoryQuery,
+  type SpokeSummaryHistoryRequest,
+  type SpokeSummarySample,
   SpokesQuery,
   type SpokesRequest,
   SpokeUserPositionManagersQuery,
@@ -273,6 +276,90 @@ export function useSpokePositionManagers({
     },
     suspense,
     pause,
+  });
+}
+
+export type UseSpokeSummaryHistoryArgs = SpokeSummaryHistoryRequest;
+
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: UseSpokeSummaryHistoryArgs & Suspendable,
+): SuspenseResult<SpokeSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: Pausable<UseSpokeSummaryHistoryArgs> & Suspendable,
+): PausableSuspenseResult<SpokeSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: UseSpokeSummaryHistoryArgs,
+): ReadResult<SpokeSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: Pausable<UseSpokeSummaryHistoryArgs>,
+): PausableReadResult<SpokeSummarySample[]>;
+
+export function useSpokeSummaryHistory({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseSpokeSummaryHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SpokeSummarySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: SpokeSummaryHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
   });
 }
 
