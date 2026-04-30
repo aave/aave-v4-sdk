@@ -68,9 +68,6 @@ export const SpokeConnectedHubSummaryFragment = graphql(
     totalSupplied {
       ...ExchangeAmount
     }
-    utilizationRate {
-      ...PercentNumber
-    }
   }`,
   [ExchangeAmountFragment, PercentNumberFragment],
 );

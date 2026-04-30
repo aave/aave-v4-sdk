@@ -2347,6 +2347,28 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "reservesCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "activeReservesCount",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -7713,18 +7735,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "ExchangeAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "utilizationRate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
                 "ofType": null
               }
             },

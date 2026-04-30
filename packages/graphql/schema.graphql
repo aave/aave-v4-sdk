@@ -702,6 +702,12 @@ type HubAssetSummary {
 
   """The utilization rate"""
   utilizationRate: PercentNumber!
+
+  """The number of spoke reserves for this hub asset"""
+  reservesCount: Int!
+
+  """The number of active spoke reserves for this hub asset"""
+  activeReservesCount: Int!
 }
 
 type HubAssetUserState {
@@ -1949,7 +1955,6 @@ type SpokeConnectedHubSummary {
   creditLine: ExchangeAmount!
   creditUsed: PercentNumber!
   totalSupplied: ExchangeAmount!
-  utilizationRate: PercentNumber!
 }
 
 scalar SpokeId
