@@ -1,0 +1,23 @@
+packages/react/src/spokes.ts
+  19bb57069b27ae37 15-17,282-365
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "f555da47069dda3fa2d083acc5cc3c9b024582db",
+  "prompts": {
+    "19bb57069b27ae37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f7a4c40-3dbc-4bc8-8be8-5a0a004ca6bb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 89,
+      "total_deletions": 2,
+      "accepted_lines": 89,
+      "overriden_lines": 0
+    }
+  }
+}
