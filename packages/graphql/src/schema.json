@@ -2468,6 +2468,17 @@
             "args": []
           },
           {
+            "name": "halted",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "riskPremiumThreshold",
             "type": {
               "kind": "NON_NULL",
@@ -7877,30 +7888,6 @@
             "args": []
           },
           {
-            "name": "utilizationRate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "availableLiquidity",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ExchangeAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
             "name": "uniqueAssets",
             "type": {
               "kind": "NON_NULL",
@@ -7959,30 +7946,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "ExchangeAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "availableLiquidity",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ExchangeAmount",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "utilizationRate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PercentNumber",
                 "ofType": null
               }
             },

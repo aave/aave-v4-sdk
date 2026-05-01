@@ -764,13 +764,14 @@ type HubSpokeConfig {
   supplyCap: Erc20Amount!
   borrowCap: Erc20Amount!
 
-  """
-  Whether this (hub, spoke, asset) tuple is enabled on-chain.
-  Note: the on-chain `SpokeConfig` has a separate `halted` flag that the
-  indexer currently does not capture (tracked separately). For now,
-  `active` reflects only `SpokeConfig.active`.
-  """
+  """When false, all operations for this asset on this spoke are blocked."""
   active: Boolean!
+
+  """
+  When true, liquidity flows (supply, borrow, repay, withdraw) for this asset on this spoke
+  are frozen, but deficit reporting, fee accounting, and premium management continue.
+  """
+  halted: Boolean!
   riskPremiumThreshold: PercentNumber!
 }
 
@@ -2001,8 +2002,6 @@ type SpokeSummary {
   totalBorrowCap: ExchangeAmount!
   totalSupplied: ExchangeAmount!
   totalSupplyCap: ExchangeAmount!
-  utilizationRate: PercentNumber!
-  availableLiquidity: ExchangeAmount!
   uniqueAssets: Int!
   connectedHubs: Int!
 }
@@ -2022,8 +2021,6 @@ type SpokeSummarySample {
   date: DateTime!
   deposits: ExchangeAmount!
   borrows: ExchangeAmount!
-  availableLiquidity: ExchangeAmount!
-  utilizationRate: PercentNumber!
 }
 
 input SpokeTokenInput {

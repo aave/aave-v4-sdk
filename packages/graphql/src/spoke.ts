@@ -1,8 +1,5 @@
 import type { FragmentOf } from 'gql.tada';
-import {
-  ExchangeAmountFragment,
-  PercentNumberFragment,
-} from './fragments/common';
+import { ExchangeAmountFragment } from './fragments/common';
 import {
   PaginatedSpokePositionManagerResultFragment,
   PaginatedSpokeUserPositionManagerResultFragment,
@@ -84,14 +81,8 @@ export const SpokeSummarySampleFragment = graphql(
     borrows {
       ...ExchangeAmount
     }
-    availableLiquidity {
-      ...ExchangeAmount
-    }
-    utilizationRate {
-      ...PercentNumber
-    }
   }`,
-  [ExchangeAmountFragment, PercentNumberFragment],
+  [ExchangeAmountFragment],
 );
 export type SpokeSummarySample = FragmentOf<typeof SpokeSummarySampleFragment>;
 

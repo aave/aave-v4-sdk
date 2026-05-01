@@ -39,12 +39,6 @@ export const SpokeSummaryFragment = graphql(
     totalSupplyCap {
       ...ExchangeAmount
     }
-    utilizationRate {
-      ...PercentNumber
-    }
-    availableLiquidity {
-      ...ExchangeAmount
-    }
     uniqueAssets
     connectedHubs
   }`,

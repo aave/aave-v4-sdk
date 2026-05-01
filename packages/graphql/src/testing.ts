@@ -316,8 +316,6 @@ function makeSpokeSummary(): SpokeSummary {
     totalBorrowCap: makeExchangeAmount(0),
     totalSupplied: makeExchangeAmount(0),
     totalSupplyCap: makeExchangeAmount(0),
-    utilizationRate: makePercentNumber(0),
-    availableLiquidity: makeExchangeAmount(0),
     uniqueAssets: 0,
     connectedHubs: 0,
   };
