@@ -1,4 +1,4 @@
-import type { Exchange } from '@urql/core';
+import type { Exchange, SSRExchange } from '@urql/core';
 import type { EnvironmentConfig } from './types';
 
 /**
@@ -9,6 +9,7 @@ export type Context = {
   environment: EnvironmentConfig;
   headers?: Record<string, string>;
   cache: Exchange | null;
+  ssr: SSRExchange | null;
   batch: boolean;
   debug: boolean;
 };
