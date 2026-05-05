@@ -1,4 +1,9 @@
-import type { UnexpectedError } from '@aave/client';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type TimeWindowQueryOptions,
+  type UnexpectedError,
+} from '@aave/client';
 import {
   type PaginatedSpokePositionManagerResult,
   type PaginatedSpokeUserPositionManagerResult,
@@ -7,12 +12,15 @@ import {
   type SpokePositionManagersRequest,
   SpokeQuery,
   type SpokeRequest,
+  SpokeSummaryHistoryQuery,
+  type SpokeSummaryHistoryRequest,
+  type SpokeSummarySample,
   SpokesQuery,
   type SpokesRequest,
   SpokeUserPositionManagersQuery,
   type SpokeUserPositionManagersRequest,
 } from '@aave/graphql';
-import type { NullishDeep } from '@aave/types';
+import type { NullishDeep, Prettify } from '@aave/types';
 import {
   type Pausable,
   type PausableReadResult,
@@ -24,7 +32,9 @@ import {
   useSuspendableQuery,
 } from './helpers';
 
-export type UseSpokeArgs = SpokeRequest;
+export type UseSpokeArgs = Prettify<
+  SpokeRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch a specific spoke.
@@ -88,6 +98,8 @@ export function useSpoke(
 export function useSpoke({
   suspense = false,
   pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseSpokeArgs> & {
   suspense?: boolean;
@@ -97,13 +109,17 @@ export function useSpoke({
     document: SpokeQuery,
     variables: {
       request,
+      currency,
+      timeWindow,
     },
     suspense,
     pause,
   });
 }
 
-export type UseSpokesArgs = SpokesRequest;
+export type UseSpokesArgs = Prettify<
+  SpokesRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
 
 /**
  * Fetch spokes based on specified criteria.
@@ -165,6 +181,8 @@ export function useSpokes(
 export function useSpokes({
   suspense = false,
   pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
 }: NullishDeep<UseSpokesArgs> & {
   suspense?: boolean;
@@ -174,6 +192,8 @@ export function useSpokes({
     document: SpokesQuery,
     variables: {
       request,
+      currency,
+      timeWindow,
     },
     suspense,
     pause,
@@ -256,6 +276,90 @@ export function useSpokePositionManagers({
     },
     suspense,
     pause,
+  });
+}
+
+export type UseSpokeSummaryHistoryArgs = SpokeSummaryHistoryRequest;
+
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: UseSpokeSummaryHistoryArgs & Suspendable,
+): SuspenseResult<SpokeSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: Pausable<UseSpokeSummaryHistoryArgs> & Suspendable,
+): PausableSuspenseResult<SpokeSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * ```tsx
+ * const { data, error, loading } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: UseSpokeSummaryHistoryArgs,
+): ReadResult<SpokeSummarySample[]>;
+/**
+ * Fetch historical summary data for a specific spoke.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useSpokeSummaryHistory({
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useSpokeSummaryHistory(
+  args: Pausable<UseSpokeSummaryHistoryArgs>,
+): PausableReadResult<SpokeSummarySample[]>;
+
+export function useSpokeSummaryHistory({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseSpokeSummaryHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<SpokeSummarySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: SpokeSummaryHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // Do not batch this since it's a slower than average query
   });
 }
 

@@ -144,6 +144,9 @@ export const exchange = cacheExchange({
     HubSummarySample: {
       date: transformToDate,
     },
+    SpokeSummarySample: {
+      date: transformToDate,
+    },
     BorrowPointsReward: {
       startDate: transformToDate,
       endDate: transformToNullableDate,
@@ -467,6 +470,7 @@ export const exchange = cacheExchange({
     HubAssetSettings: () => null,
     HubAssetSummary: () => null,
     HubAssetUserState: () => null,
+    HubSpokeConfig: () => null,
     HubSummary: () => null,
     HubSummarySample: () => null,
     InsufficientBalanceError: () => null,
@@ -474,6 +478,10 @@ export const exchange = cacheExchange({
     LiquidationFeeVariation: () => null,
     MaxLiquidationBonusVariation: () => null,
     SpokeLiquidationConfig: () => null,
+    SpokeConnectedHub: () => null,
+    SpokeConnectedHubSummary: () => null,
+    SpokeSummary: () => null,
+    SpokeSummarySample: () => null,
     NativeAmount: () => null,
     PaginatedActivitiesResult: () => null,
     PaginatedReserveHoldersResult: () => null,

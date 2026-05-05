@@ -31,6 +31,7 @@ import type {
   PositionSwapPositionManagerApproval,
   PrepareSwapOrder,
   Spoke,
+  SpokeSummary,
   SwapByIntent,
   SwapByIntentWithApprovalRequired,
   SwapByTransaction,
@@ -308,6 +309,18 @@ function makeUserPositionRiskPremium(): UserPositionRiskPremium {
   };
 }
 
+function makeSpokeSummary(): SpokeSummary {
+  return {
+    __typename: 'SpokeSummary',
+    totalBorrowed: makeExchangeAmount(0),
+    totalBorrowCap: makeExchangeAmount(0),
+    totalSupplied: makeExchangeAmount(0),
+    totalSupplyCap: makeExchangeAmount(0),
+    uniqueAssets: 0,
+    connectedHubs: 0,
+  };
+}
+
 function makeSpoke({
   address,
   chainId,
@@ -335,6 +348,8 @@ function makeSpoke({
       nativeInfo: makeTokenInfo('WETH'),
     },
     liquidationConfig: null,
+    summary: makeSpokeSummary(),
+    connectedHubs: [],
   };
 }
 

@@ -702,6 +702,12 @@ type HubAssetSummary {
 
   """The utilization rate"""
   utilizationRate: PercentNumber!
+
+  """The number of spoke reserves for this hub asset"""
+  reservesCount: Int!
+
+  """The number of active spoke reserves for this hub asset"""
+  activeReservesCount: Int!
 }
 
 type HubAssetUserState {
@@ -749,6 +755,32 @@ input HubRequest {
 input HubRequestQuery @oneOf {
   hubInput: HubInput
   hubId: HubId
+}
+
+type HubSpokeConfig {
+  hub: Hub!
+  spoke: Spoke!
+  asset: HubAsset!
+  supplyCap: Erc20Amount!
+  borrowCap: Erc20Amount!
+
+  """When false, all operations for this asset on this spoke are blocked."""
+  active: Boolean!
+
+  """
+  When true, liquidity flows (supply, borrow, repay, withdraw) for this asset on this spoke
+  are frozen, but deficit reporting, fee accounting, and premium management continue.
+  """
+  halted: Boolean!
+  riskPremiumThreshold: PercentNumber!
+}
+
+input HubSpokeConfigsRequest {
+  """The hub id"""
+  hubId: HubId!
+
+  """The spoke id"""
+  spokeId: SpokeId!
 }
 
 type HubSummary {
@@ -1441,6 +1473,12 @@ type Query {
   hubAssets(request: HubAssetsRequest!): [HubAsset!]!
   hubSummaryHistory(request: HubSummaryHistoryRequest!): [HubSummarySample!]!
   hubAssetInterestRateModel(request: HubAssetInterestRateModelRequest!): HubAssetInterestRateModelResult!
+
+  """
+  Per-asset configuration for a (hub, spoke) pair, including caps,
+  halted flag, and risk premium threshold.
+  """
+  hubSpokeConfigs(request: HubSpokeConfigsRequest!): [HubSpokeConfig!]!
   reserve(request: ReserveRequest!): Reserve
   reserveHolders(request: PaginatedReserveHoldersRequest!): PaginatedReserveHoldersResult!
   reserves(request: ReservesRequest!): [Reserve!]!
@@ -1462,6 +1500,7 @@ type Query {
 
   """Lists all spokes"""
   spokes(request: SpokesRequest!): [Spoke!]!
+  spokeSummaryHistory(request: SpokeSummaryHistoryRequest!): [SpokeSummarySample!]!
 
   """
   Get the user balances.
@@ -1903,6 +1942,20 @@ type Spoke {
   """The spoke chain"""
   chain: Chain!
   liquidationConfig: SpokeLiquidationConfig
+  summary(currency: Currency! = USD): SpokeSummary!
+  connectedHubs(currency: Currency! = USD): [SpokeConnectedHub!]!
+}
+
+type SpokeConnectedHub {
+  hub: Hub!
+  summary: SpokeConnectedHubSummary!
+}
+
+type SpokeConnectedHubSummary {
+  totalBorrowed: ExchangeAmount!
+  creditLine: ExchangeAmount!
+  creditUsed: PercentNumber!
+  totalSupplied: ExchangeAmount!
 }
 
 scalar SpokeId
@@ -1942,6 +1995,32 @@ input SpokeRequest {
 input SpokeRequestQuery @oneOf {
   spoke: SpokeInput
   spokeId: SpokeId
+}
+
+type SpokeSummary {
+  totalBorrowed: ExchangeAmount!
+  totalBorrowCap: ExchangeAmount!
+  totalSupplied: ExchangeAmount!
+  totalSupplyCap: ExchangeAmount!
+  uniqueAssets: Int!
+  connectedHubs: Int!
+}
+
+input SpokeSummaryHistoryRequest {
+  query: SpokeSummaryHistoryRequestQuery!
+  currency: Currency! = USD
+  window: TimeWindow! = LAST_DAY
+}
+
+input SpokeSummaryHistoryRequestQuery @oneOf {
+  spokeInput: SpokeInput
+  spokeId: SpokeId
+}
+
+type SpokeSummarySample {
+  date: DateTime!
+  deposits: ExchangeAmount!
+  borrows: ExchangeAmount!
 }
 
 input SpokeTokenInput {
