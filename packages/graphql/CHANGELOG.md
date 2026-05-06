@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 1.2.0
+
+### Minor Changes
+
+- cfceb7e: **feat:** add `reservesCount` and `activeReservesCount` to `AssetSummary`
+- c4dc4b1: **feat:** add `SpokeSummary`, `SpokeConnectedHub`, `HubSpokeConfig`, and `SpokeSummarySample` types; extend `Spoke` fragment with `summary` and `connectedHubs` fields; add `spokeSummaryHistory` and `hubSpokeConfigs` queries, actions, and hooks (`useHubSpokeConfigs`)
+
 ## 1.1.1
 
 ### Patch Changes
