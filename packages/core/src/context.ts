@@ -12,4 +12,5 @@ export type Context = {
   ssr: SSRExchange | null;
   batch: boolean;
   debug: boolean;
+  resolveNativeAssets: boolean;
 };

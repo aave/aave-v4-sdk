@@ -55,6 +55,14 @@ export type ClientConfig = {
    * @defaultValue `undefined` (disabled)
    */
   ssr?: SSRConfig;
+  /**
+   * Whether to resolve wrapped native assets (e.g. WETH → ETH) in all query results.
+   * When enabled, any `Erc20Token` with `isWrappedNativeToken: true` is replaced with
+   * the equivalent `NativeToken` before data reaches the caller.
+   *
+   * @defaultValue `false`
+   */
+  resolveNativeAssets?: boolean;
 };
 
 /**
@@ -67,6 +75,7 @@ export function configureContext({
   batch = true,
   debug = false,
   ssr,
+  resolveNativeAssets = false,
 }: ClientConfig): Context {
   return {
     displayName: 'AaveClient',
@@ -81,5 +90,6 @@ export function configureContext({
       : null,
     batch,
     debug,
+    resolveNativeAssets,
   };
 }

@@ -30,6 +30,58 @@ import {
 
 type UserClaimableRewardsVars = VariablesOf<typeof UserClaimableRewardsQuery>;
 
+function resolveNativeAssetsDeep(
+  value: unknown,
+  visited = new Set<object>(),
+): unknown {
+  if (value === null || typeof value !== 'object') return value;
+  if (visited.has(value as object)) return value;
+  visited.add(value as object);
+
+  if (Array.isArray(value)) {
+    return value.map((item) => resolveNativeAssetsDeep(item, visited));
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  if (
+    obj.__typename === 'Erc20Token' &&
+    obj.isWrappedNativeToken === true &&
+    obj.chain !== null &&
+    typeof obj.chain === 'object'
+  ) {
+    const chain = obj.chain as Record<string, unknown>;
+    return { __typename: 'NativeToken', info: chain.nativeInfo, chain };
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(obj)) {
+    result[key] = resolveNativeAssetsDeep(obj[key], visited);
+  }
+  return result;
+}
+
+// Swap operations use WETH/wrapped tokens directly as tradeable assets and must not
+// be resolved. All swap operations contain "Swap" in their name, except RepayWithSupplyQuote.
+const isSwapOperation = (name: string | null): boolean =>
+  name !== null && (name.includes('Swap') || name === 'RepayWithSupplyQuote');
+
+const nativeAssetResolutionExchange: Exchange =
+  ({ forward }) =>
+  (ops$) =>
+    pipe(
+      forward(ops$),
+      map((result: OperationResult) => {
+        if (result.operation.kind !== 'query' || !result.data) return result;
+        if (isSwapOperation(extractOperationName(result.operation)))
+          return result;
+        return {
+          ...result,
+          data: resolveNativeAssetsDeep(result.data) as typeof result.data,
+        };
+      }),
+    );
+
 export class AaveClient extends GqlClient {
   private readonly pendingRewardRemovals = new Map<
     string,
@@ -130,7 +182,12 @@ export class AaveClient extends GqlClient {
   }
 
   protected override additionalExchanges(): Exchange[] {
-    return [this.claimResponseTransformExchange()];
+    const exchanges: Exchange[] = [];
+    if (this.context.resolveNativeAssets) {
+      exchanges.push(nativeAssetResolutionExchange);
+    }
+    exchanges.push(this.claimResponseTransformExchange());
+    return exchanges;
   }
 
   private claimResponseTransformExchange(): Exchange {
