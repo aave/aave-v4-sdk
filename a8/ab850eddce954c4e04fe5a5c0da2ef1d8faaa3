@@ -1,0 +1,34 @@
+packages/client/src/index.ts
+  s_adf9c6bb916c44::t_0d7890dfcbf487 7-12
+packages/client/src/AaveClient.ts
+  s_adf9c6bb916c44::t_ad57d283e85e19 324,327
+  s_adf9c6bb916c44::t_0d7890dfcbf487 27,144-147,163-165,171-175,263-264,270-272,286-288
+  s_adf9c6bb916c44::t_c0072c3ce554c1 46
+  s_adf9c6bb916c44::t_b9ca26149260a3 23
+  s_adf9c6bb916c44::t_7a958fbed438e3 24-26,28,44-45,60-62,143,148-162,166-170,176-178,243-262,265-269,273-285,289-323,325-326
+.changeset/display-transform-exchange.md
+  s_adf9c6bb916c44::t_9db91c0283fa4a 1-12
+packages/client/src/config.ts
+  s_adf9c6bb916c44::t_7a958fbed438e3 21-53,92-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "a8ab850eddce954c4e04fe5a5c0da2ef1d8faaa3",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_adf9c6bb916c44": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a83ba5d8-20b8-46ba-bb54-576a590e1487",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
