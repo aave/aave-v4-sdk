@@ -41,8 +41,9 @@ export class AaveClient extends GqlClient {
     { ids: Set<RewardId>; expiresAt: number }
   >();
 
-  // Set once by create() after construction — accessed lazily by displayTransformExchange.
+  // Both set once by create() after construction — accessed lazily by displayTransformExchange.
   private displayConfig: DisplayConfig | undefined;
+  private displayOverrideMap: Map<string, AssetOverride> | null = null;
 
   /**
    * Create a new instance of the {@link AaveClient}.
@@ -59,6 +60,9 @@ export class AaveClient extends GqlClient {
   static create(options?: ClientConfig): AaveClient {
     const client = new AaveClient(configureContext(options ?? {}));
     client.displayConfig = options?.display;
+    client.displayOverrideMap = options?.display?.assetOverrides?.length
+      ? buildAssetOverrideMap(options.display.assetOverrides)
+      : null;
     return client;
   }
 
@@ -160,20 +164,18 @@ export class AaveClient extends GqlClient {
               config.showWrappedNativeReserveAsNative === true &&
               containsTypename(result.data, 'HubAsset');
 
-            const overrideMap = config.assetOverrides?.length
-              ? buildAssetOverrideMap(config.assetOverrides)
-              : null;
+            const overrideMap = this.displayOverrideMap;
 
             if (!applyWrappedNative && !overrideMap) return result;
 
-            return {
-              ...result,
-              data: deepTransformTokens(
-                result.data,
-                applyWrappedNative,
-                overrideMap,
-              ),
-            };
+            const data = deepTransformTokens(
+              result.data,
+              applyWrappedNative,
+              overrideMap,
+            );
+
+            // Preserve the original result reference if the walk found nothing to transform.
+            return data === result.data ? result : { ...result, data };
           }),
         );
   }
@@ -283,9 +285,17 @@ function deepTransformTokens(
   if (!data || typeof data !== 'object') return data;
 
   if (Array.isArray(data)) {
-    return data.map((item) =>
-      deepTransformTokens(item, applyWrappedNative, overrideMap),
-    );
+    let changed = false;
+    const result = data.map((item) => {
+      const transformed = deepTransformTokens(
+        item,
+        applyWrappedNative,
+        overrideMap,
+      );
+      if (transformed !== item) changed = true;
+      return transformed;
+    });
+    return changed ? result : data;
   }
 
   if (isErc20Token(data)) {
@@ -293,11 +303,14 @@ function deepTransformTokens(
   }
 
   const obj = data as Record<string, unknown>;
+  let changed = false;
   const result: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj)) {
-    result[k] = deepTransformTokens(v, applyWrappedNative, overrideMap);
+    const transformed = deepTransformTokens(v, applyWrappedNative, overrideMap);
+    if (transformed !== v) changed = true;
+    result[k] = transformed;
   }
-  return result;
+  return changed ? result : data;
 }
 
 function transformErc20Token(
