@@ -4,7 +4,12 @@ export * from '@aave/types';
 export type { SSRData } from '@urql/core';
 export * from './AaveClient';
 export * from './adapters';
-export type { ClientConfig, SSRConfig } from './config';
+export type {
+  AssetOverride,
+  ClientConfig,
+  DisplayConfig,
+  SSRConfig,
+} from './config';
 export * from './environments';
 export * from './options';
 export type * from './types';

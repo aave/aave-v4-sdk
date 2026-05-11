@@ -20,7 +20,12 @@ import {
 import type { Exchange, Operation, OperationResult } from '@urql/core';
 import { map, pipe } from 'wonka';
 import { hasProcessedKnownTransaction } from './actions';
-import { type ClientConfig, configureContext } from './config';
+import {
+  type AssetOverride,
+  type ClientConfig,
+  configureContext,
+  type DisplayConfig,
+} from './config';
 import {
   isHasProcessedKnownTransactionRequest,
   type TransactionReceipt,
@@ -36,6 +41,9 @@ export class AaveClient extends GqlClient {
     { ids: Set<RewardId>; expiresAt: number }
   >();
 
+  // Set once by create() after construction — accessed lazily by displayTransformExchange.
+  private displayConfig: DisplayConfig | undefined;
+
   /**
    * Create a new instance of the {@link AaveClient}.
    *
@@ -49,7 +57,9 @@ export class AaveClient extends GqlClient {
    * @returns The new instance of the client.
    */
   static create(options?: ClientConfig): AaveClient {
-    return new AaveClient(configureContext(options ?? {}));
+    const client = new AaveClient(configureContext(options ?? {}));
+    client.displayConfig = options?.display;
+    return client;
   }
 
   /**
@@ -130,7 +140,42 @@ export class AaveClient extends GqlClient {
   }
 
   protected override additionalExchanges(): Exchange[] {
-    return [this.claimResponseTransformExchange()];
+    // displayTransformExchange runs first so graphcache stores already-transformed display info.
+    return [
+      this.displayTransformExchange(),
+      this.claimResponseTransformExchange(),
+    ];
+  }
+
+  private displayTransformExchange(): Exchange {
+    return ({ forward }) =>
+      (ops$) =>
+        pipe(
+          forward(ops$),
+          map((result: OperationResult) => {
+            const config = this.displayConfig;
+            if (!config || !result.data) return result;
+
+            const applyWrappedNative =
+              config.showWrappedNativeReserveAsNative === true &&
+              containsTypename(result.data, 'HubAsset');
+
+            const overrideMap = config.assetOverrides?.length
+              ? buildAssetOverrideMap(config.assetOverrides)
+              : null;
+
+            if (!applyWrappedNative && !overrideMap) return result;
+
+            return {
+              ...result,
+              data: deepTransformTokens(
+                result.data,
+                applyWrappedNative,
+                overrideMap,
+              ),
+            };
+          }),
+        );
   }
 
   private claimResponseTransformExchange(): Exchange {
@@ -194,4 +239,89 @@ export class AaveClient extends GqlClient {
       `Timeout waiting for transaction ${request.txHash} to be processed.`,
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Display transform helpers
+// ---------------------------------------------------------------------------
+
+type Erc20TokenShape = {
+  __typename: 'Erc20Token';
+  info: Record<string, unknown>;
+  address: string;
+  chain: { chainId: number; nativeInfo: Record<string, unknown> };
+  isWrappedNativeToken: boolean;
+};
+
+function isErc20Token(value: unknown): value is Erc20TokenShape {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return (value as Record<string, unknown>).__typename === 'Erc20Token';
+}
+
+function containsTypename(data: unknown, typename: string): boolean {
+  if (!data || typeof data !== 'object') return false;
+  if (Array.isArray(data))
+    return data.some((item) => containsTypename(item, typename));
+  const obj = data as Record<string, unknown>;
+  if (obj.__typename === typename) return true;
+  return Object.values(obj).some((v) => containsTypename(v, typename));
+}
+
+function buildAssetOverrideMap(
+  overrides: AssetOverride[],
+): Map<string, AssetOverride> {
+  return new Map(
+    overrides.map((o) => [`${o.chainId}:${o.address.toLowerCase()}`, o]),
+  );
+}
+
+function deepTransformTokens(
+  data: unknown,
+  applyWrappedNative: boolean,
+  overrideMap: Map<string, AssetOverride> | null,
+): unknown {
+  if (!data || typeof data !== 'object') return data;
+
+  if (Array.isArray(data)) {
+    return data.map((item) =>
+      deepTransformTokens(item, applyWrappedNative, overrideMap),
+    );
+  }
+
+  if (isErc20Token(data)) {
+    return transformErc20Token(data, applyWrappedNative, overrideMap);
+  }
+
+  const obj = data as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    result[k] = deepTransformTokens(v, applyWrappedNative, overrideMap);
+  }
+  return result;
+}
+
+function transformErc20Token(
+  token: Erc20TokenShape,
+  applyWrappedNative: boolean,
+  overrideMap: Map<string, AssetOverride> | null,
+): Erc20TokenShape {
+  let current = token;
+
+  if (applyWrappedNative && token.isWrappedNativeToken) {
+    current = { ...current, info: { ...token.chain.nativeInfo } };
+  }
+
+  if (overrideMap) {
+    const key = `${token.chain.chainId}:${token.address.toLowerCase()}`;
+    const override = overrideMap.get(key);
+    if (override) {
+      const patch: Record<string, string> = {};
+      if (override.name !== undefined) patch.name = override.name;
+      if (override.symbol !== undefined) patch.symbol = override.symbol;
+      if (override.icon !== undefined) patch.icon = override.icon;
+      current = { ...current, info: { ...current.info, ...patch } };
+    }
+  }
+
+  return current;
 }
