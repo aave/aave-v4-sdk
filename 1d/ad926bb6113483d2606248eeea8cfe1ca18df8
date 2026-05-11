@@ -1,0 +1,44 @@
+packages/client/src/displayTransform.ts
+  s_adf9c6bb916c44::t_3a86fa18513b74 1-15,28-57,59-95,97,101-106
+  s_adf9c6bb916c44::t_f246178632d316 17-19,22-27
+  h_be8c3c572e9983 16,20-21,58
+  s_adf9c6bb916c44::t_53ca68cf9d7cbe 96,98-100
+packages/client/src/AaveClient.ts
+  s_adf9c6bb916c44::t_c9c6fd00eb1b67 170-172
+  s_adf9c6bb916c44::t_ac8985bf4c7bc2 30-31,33
+  h_be8c3c572e9983 32,168-169,176,180
+packages/client/src/displayTransform.test.ts
+  s_adf9c6bb916c44::t_5e9fe41246b3ac 195
+  h_be8c3c572e9983 7,9,14,21,71-72,78,101,105,109,113,117,121,125,135,224,276,283-311
+  s_adf9c6bb916c44::t_b9614795648938 99-100,102-104,106-108,110-112,114-116,118-120,122-124,126-128
+  s_adf9c6bb916c44::t_3ceaabcffd1ae1 132-134,136,144,157-158,161-162
+  s_adf9c6bb916c44::t_ca319a682aa0d7 196,209,221-223,225,235
+  s_adf9c6bb916c44::t_f1a6a2f29fd619 1-6,8,10-13,15-20,22-70,73-77,79-98,129-131,137-143,145-156,159-160,163-194,197-208,210-220,226-234,236-275,277-282
+.changeset/display-transform-exchange.md
+  s_adf9c6bb916c44::t_b7740faf2b233d 10
+  h_be8c3c572e9983 9,12
+packages/client/src/config.ts
+  h_be8c3c572e9983 46,52
+  s_adf9c6bb916c44::t_87703b97188208 29-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "1dad926bb6113483d2606248eeea8cfe1ca18df8",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_adf9c6bb916c44": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a83ba5d8-20b8-46ba-bb54-576a590e1487",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
