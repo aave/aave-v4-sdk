@@ -27,6 +27,11 @@ import {
   type DisplayConfig,
 } from './config';
 import {
+  buildAssetOverrideMap,
+  deepTransformTokens,
+  shouldApplyWrappedNativeTransform,
+} from './displayTransform';
+import {
   isHasProcessedKnownTransactionRequest,
   type TransactionReceipt,
   type TransactionResult,
@@ -160,19 +165,19 @@ export class AaveClient extends GqlClient {
             const config = this.displayConfig;
             if (!config || !result.data) return result;
 
-            // 'HubAsset' appears in reserve/position queries; 'Asset' in the standalone asset query.
-            const applyWrappedNative =
-              config.showWrappedNativeReserveAsNative === true &&
-              (containsTypename(result.data, 'HubAsset') ||
-                containsTypename(result.data, 'Asset'));
+            const applyWrappedNativeTransform =
+              shouldApplyWrappedNativeTransform(
+                config.showWrappedNativeReserveAsNative === true,
+                result.data,
+              );
 
             const overrideMap = this.displayOverrideMap;
 
-            if (!applyWrappedNative && !overrideMap) return result;
+            if (!applyWrappedNativeTransform && !overrideMap) return result;
 
             const data = deepTransformTokens(
               result.data,
-              applyWrappedNative,
+              applyWrappedNativeTransform,
               overrideMap,
             );
 
@@ -243,100 +248,4 @@ export class AaveClient extends GqlClient {
       `Timeout waiting for transaction ${request.txHash} to be processed.`,
     );
   }
-}
-
-// ---------------------------------------------------------------------------
-// Display transform helpers
-// ---------------------------------------------------------------------------
-
-type Erc20TokenShape = {
-  __typename: 'Erc20Token';
-  info: Record<string, unknown>;
-  address: string;
-  chain: { chainId: number; nativeInfo: Record<string, unknown> };
-  isWrappedNativeToken: boolean;
-};
-
-function isErc20Token(value: unknown): value is Erc20TokenShape {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-  return (value as Record<string, unknown>).__typename === 'Erc20Token';
-}
-
-function containsTypename(data: unknown, typename: string): boolean {
-  if (!data || typeof data !== 'object') return false;
-  if (Array.isArray(data))
-    return data.some((item) => containsTypename(item, typename));
-  const obj = data as Record<string, unknown>;
-  if (obj.__typename === typename) return true;
-  return Object.values(obj).some((v) => containsTypename(v, typename));
-}
-
-function buildAssetOverrideMap(
-  overrides: AssetOverride[],
-): Map<string, AssetOverride> {
-  return new Map(
-    overrides.map((o) => [`${o.chainId}:${o.address.toLowerCase()}`, o]),
-  );
-}
-
-function deepTransformTokens(
-  data: unknown,
-  applyWrappedNative: boolean,
-  overrideMap: Map<string, AssetOverride> | null,
-): unknown {
-  if (!data || typeof data !== 'object') return data;
-
-  if (Array.isArray(data)) {
-    let changed = false;
-    const result = data.map((item) => {
-      const transformed = deepTransformTokens(
-        item,
-        applyWrappedNative,
-        overrideMap,
-      );
-      if (transformed !== item) changed = true;
-      return transformed;
-    });
-    return changed ? result : data;
-  }
-
-  if (isErc20Token(data)) {
-    return transformErc20Token(data, applyWrappedNative, overrideMap);
-  }
-
-  const obj = data as Record<string, unknown>;
-  let changed = false;
-  const result: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(obj)) {
-    const transformed = deepTransformTokens(v, applyWrappedNative, overrideMap);
-    if (transformed !== v) changed = true;
-    result[k] = transformed;
-  }
-  return changed ? result : data;
-}
-
-function transformErc20Token(
-  token: Erc20TokenShape,
-  applyWrappedNative: boolean,
-  overrideMap: Map<string, AssetOverride> | null,
-): Erc20TokenShape {
-  let current = token;
-
-  if (applyWrappedNative && token.isWrappedNativeToken) {
-    current = { ...current, info: { ...token.chain.nativeInfo } };
-  }
-
-  if (overrideMap) {
-    const key = `${token.chain.chainId}:${token.address.toLowerCase()}`;
-    const override = overrideMap.get(key);
-    if (override) {
-      const patch: Record<string, string> = {};
-      if (override.name !== undefined) patch.name = override.name;
-      if (override.symbol !== undefined) patch.symbol = override.symbol;
-      if (override.icon !== undefined) patch.icon = override.icon;
-      current = { ...current, info: { ...current.info, ...patch } };
-    }
-  }
-
-  return current;
 }

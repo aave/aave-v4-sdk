@@ -26,12 +26,15 @@ export type AssetOverride = {
   chainId: number;
   /** The ERC-20 token address (checksummed or lowercase). */
   address: string;
-  /** Override the asset's display name. */
-  name?: string;
-  /** Override the asset's display symbol. */
-  symbol?: string;
-  /** Override the asset's display icon URL. */
-  icon?: string;
+  /** Display fields to override for this asset. */
+  display: {
+    /** Override the asset's display name. */
+    name?: string;
+    /** Override the asset's display symbol. */
+    symbol?: string;
+    /** Override the asset's display icon URL. */
+    icon?: string;
+  };
 };
 
 /**
@@ -39,14 +42,14 @@ export type AssetOverride = {
  */
 export type DisplayConfig = {
   /**
-   * When `true`, wrapped native tokens (e.g. WETH, WMATIC) are shown using the
-   * native asset's name, symbol, and icon (e.g. ETH, MATIC) for protocol reserve
-   * queries. Has no effect on wallet balance or raw swap queries.
+   * When `true`, wrapped native tokens (e.g. WETH) are shown using the
+   * native asset's name, symbol, and icon (e.g. ETH) for protocol reserve
+   * queries. Has no effect on wallet balance or swap queries.
    */
   showWrappedNativeReserveAsNative?: boolean;
   /**
    * Per-asset display overrides applied globally across all queries.
-   * Useful for renaming assets with unwieldy names (e.g. Pendle PT tokens).
+   * Useful for renaming assets to a more friendly display name.
    */
   assetOverrides?: AssetOverride[];
 };
