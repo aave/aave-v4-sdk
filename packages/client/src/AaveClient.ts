@@ -160,9 +160,11 @@ export class AaveClient extends GqlClient {
             const config = this.displayConfig;
             if (!config || !result.data) return result;
 
+            // 'HubAsset' appears in reserve/position queries; 'Asset' in the standalone asset query.
             const applyWrappedNative =
               config.showWrappedNativeReserveAsNative === true &&
-              containsTypename(result.data, 'HubAsset');
+              (containsTypename(result.data, 'HubAsset') ||
+                containsTypename(result.data, 'Asset'));
 
             const overrideMap = this.displayOverrideMap;
 
