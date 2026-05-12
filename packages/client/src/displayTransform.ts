@@ -126,7 +126,7 @@ export function transformErc20Token(
   if (overrideMap) {
     const key = `${token.chain.chainId}:${token.address.toLowerCase()}`;
     const override = overrideMap.get(key);
-    if (override) {
+    if (override?.display) {
       const { name, symbol, icon } = override.display;
       const patch: Record<string, string> = {};
       if (name !== undefined) patch.name = name;

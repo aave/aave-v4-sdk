@@ -171,6 +171,18 @@ describe('transformErc20Token', () => {
       expect(result).toBe(token);
     });
 
+    it('ignores malformed overrides that are missing display fields at runtime', () => {
+      const token = makeToken({ isWrappedNativeToken: false });
+      const overrideMap = buildAssetOverrideMap([
+        {
+          chainId: 1,
+          address: token.address,
+        } as AssetOverride,
+      ]);
+      const result = transformErc20Token(token, false, overrideMap);
+      expect(result).toBe(token);
+    });
+
     it('override is applied after the native-info replacement', () => {
       const token = makeToken();
       const overrides: AssetOverride[] = [
