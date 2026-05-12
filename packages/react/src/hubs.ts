@@ -15,6 +15,9 @@ import {
   type HubAssetsRequest,
   HubQuery,
   type HubRequest,
+  type HubSpokeConfig,
+  HubSpokeConfigsQuery,
+  type HubSpokeConfigsRequest,
   HubSummaryHistoryQuery,
   type HubSummaryHistoryRequest,
   type HubSummarySample,
@@ -538,4 +541,93 @@ export function useHubsAction(
       }),
     [client, options.currency],
   );
+}
+
+export type UseHubSpokeConfigsArgs = Prettify<
+  HubSpokeConfigsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
+
+/**
+ * Fetch per-asset configuration for a (hub, spoke) pair.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubSpokeConfigs({
+ *   hubId: hubId('SGVsbG8h'),
+ *   spokeId: spokeId('SGVsbG8h'),
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useHubSpokeConfigs(
+  args: UseHubSpokeConfigsArgs & Suspendable,
+): SuspenseResult<HubSpokeConfig[]>;
+/**
+ * Fetch per-asset configuration for a (hub, spoke) pair.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useHubSpokeConfigs({
+ *   hubId: hubId('SGVsbG8h'),
+ *   spokeId: spokeId('SGVsbG8h'),
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubSpokeConfigs(
+  args: Pausable<UseHubSpokeConfigsArgs> & Suspendable,
+): PausableSuspenseResult<HubSpokeConfig[]>;
+/**
+ * Fetch per-asset configuration for a (hub, spoke) pair.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubSpokeConfigs({
+ *   hubId: hubId('SGVsbG8h'),
+ *   spokeId: spokeId('SGVsbG8h'),
+ * });
+ * ```
+ */
+export function useHubSpokeConfigs(
+  args: UseHubSpokeConfigsArgs,
+): ReadResult<HubSpokeConfig[]>;
+/**
+ * Fetch per-asset configuration for a (hub, spoke) pair.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useHubSpokeConfigs({
+ *   hubId: hubId('SGVsbG8h'),
+ *   spokeId: spokeId('SGVsbG8h'),
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useHubSpokeConfigs(
+  args: Pausable<UseHubSpokeConfigsArgs>,
+): PausableReadResult<HubSpokeConfig[]>;
+
+export function useHubSpokeConfigs({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  ...request
+}: NullishDeep<UseHubSpokeConfigsArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<HubSpokeConfig[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: HubSpokeConfigsQuery,
+    variables: {
+      request,
+      currency,
+      timeWindow,
+    },
+    suspense,
+    pause,
+  });
 }

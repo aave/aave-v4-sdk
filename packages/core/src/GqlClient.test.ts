@@ -39,6 +39,7 @@ const context: Context = {
   },
   headers: {},
   cache: cacheExchange(),
+  ssr: null,
   batch: true,
   debug: false,
 };

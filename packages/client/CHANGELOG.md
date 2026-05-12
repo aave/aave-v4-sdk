@@ -1,5 +1,21 @@
 # @aave/client
 
+## 4.2.0
+
+### Minor Changes
+
+- cfceb7e: **feat:** add `reservesCount` and `activeReservesCount` to `AssetSummary`
+- 7e21fc6: **feat:** add SSR cache hand-off via the new `ssr` option on `AaveClient.create()` and `client.extractData()` / `client.restoreData()` methods
+- c4dc4b1: **feat:** add `SpokeSummary`, `SpokeConnectedHub`, `HubSpokeConfig`, and `SpokeSummarySample` types; extend `Spoke` fragment with `summary` and `connectedHubs` fields; add `spokeSummaryHistory` and `hubSpokeConfigs` queries, actions, and hooks (`useHubSpokeConfigs`)
+
+### Patch Changes
+
+- Updated dependencies [cfceb7e]
+- Updated dependencies [7e21fc6]
+- Updated dependencies [c4dc4b1]
+  - @aave/graphql@1.2.0
+  - @aave/core@1.1.0
+
 ## 4.1.1
 
 ### Patch Changes

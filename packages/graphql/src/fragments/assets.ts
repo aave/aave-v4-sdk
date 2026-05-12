@@ -30,6 +30,8 @@ export const HubAssetSummaryFragment = graphql(
       utilizationRate {
         ...PercentNumber
       }
+      reservesCount
+      activeReservesCount
     }`,
   [Erc20AmountFragment, PercentNumberFragment],
 );

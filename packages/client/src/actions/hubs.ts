@@ -9,6 +9,9 @@ import {
   type HubAssetsRequest,
   HubQuery,
   type HubRequest,
+  type HubSpokeConfig,
+  HubSpokeConfigsQuery,
+  type HubSpokeConfigsRequest,
   HubSummaryHistoryQuery,
   type HubSummaryHistoryRequest,
   type HubSummarySample,
@@ -180,4 +183,37 @@ export function hubAssetInterestRateModel(
       { requestPolicy },
     )
     .map((result) => result.points);
+}
+
+/**
+ * Fetches per-asset configuration for a (hub, spoke) pair.
+ *
+ * ```ts
+ * const result = await hubSpokeConfigs(client, {
+ *   hubId: hubId('SGVsbG8h'),
+ *   spokeId: spokeId('SGVsbG8h'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub spoke configs request parameters.
+ * @param options - The query options.
+ * @returns Array of per-asset hub spoke configurations.
+ */
+export function hubSpokeConfigs(
+  client: AaveClient,
+  request: HubSpokeConfigsRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<HubSpokeConfig[], UnexpectedError> {
+  return client.query(
+    HubSpokeConfigsQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }

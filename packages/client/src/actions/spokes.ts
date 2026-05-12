@@ -7,6 +7,9 @@ import {
   type SpokePositionManagersRequest,
   SpokeQuery,
   type SpokeRequest,
+  SpokeSummaryHistoryQuery,
+  type SpokeSummaryHistoryRequest,
+  type SpokeSummarySample,
   SpokesQuery,
   type SpokesRequest,
   SpokeUserPositionManagersQuery,
@@ -14,6 +17,12 @@ import {
 } from '@aave/graphql';
 import type { ResultAsync } from '@aave/types';
 import type { AaveClient } from '../AaveClient';
+import {
+  type CurrencyQueryOptions,
+  DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
+  type TimeWindowQueryOptions,
+} from '../options';
 
 /**
  * Fetches a specific spoke.
@@ -26,13 +35,25 @@ import type { AaveClient } from '../AaveClient';
  *
  * @param client - Aave client.
  * @param request - The spoke request parameters.
+ * @param options - The query options.
  * @returns The spoke data, or null if not found.
  */
 export function spoke(
   client: AaveClient,
   request: SpokeRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Spoke | null, UnexpectedError> {
-  return client.query(SpokeQuery, { request });
+  return client.query(
+    SpokeQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -46,13 +67,25 @@ export function spoke(
  *
  * @param client - Aave client.
  * @param request - The spokes request parameters.
+ * @param options - The query options.
  * @returns Array of spokes matching the criteria.
  */
 export function spokes(
   client: AaveClient,
   request: SpokesRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<Spoke[], UnexpectedError> {
-  return client.query(SpokesQuery, { request });
+  return client.query(
+    SpokesQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
 }
 
 /**
@@ -94,4 +127,30 @@ export function spokeUserPositionManagers(
   request: SpokeUserPositionManagersRequest,
 ): ResultAsync<PaginatedSpokeUserPositionManagerResult, UnexpectedError> {
   return client.query(SpokeUserPositionManagersQuery, { request });
+}
+
+/**
+ * Fetches historical summary data for a specific spoke.
+ *
+ * ```ts
+ * const result = await spokeSummaryHistory(client, {
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The spoke summary history request parameters.
+ * @param options - The query options.
+ * @returns Array of spoke summary samples over time.
+ */
+export function spokeSummaryHistory(
+  client: AaveClient,
+  request: SpokeSummaryHistoryRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<SpokeSummarySample[], UnexpectedError> {
+  return client.query(SpokeSummaryHistoryQuery, { request }, { requestPolicy });
 }

@@ -54,3 +54,21 @@ Use Claude `/schema-update` skill. See `.claude/skills/schema-update/SKILL.md`.
 - `patch` = bug fix, `minor` = feature, `major` = breaking change
 - Always include `@aave/client` and `@aave/react` when changing their dependencies (`@aave/graphql`, `@aave/types`, `@aave/core`)
 - One-line description only, bold type prefix (`**fix:**`)
+
+## Snapshot Releases
+
+Snapshot releases publish packages for testing without updating the real versions. They are triggered manually.
+
+Published versions follow the format `0.0.0-<tag>-<timestamp>` (e.g. `0.0.0-snapshot-20260427120000`).
+
+**To trigger a snapshot:**
+1. Create changesets as normal for the changes you want to test
+2. Manually trigger the workflow, optionally specifying a dist-tag (default: `snapshot`)
+
+**To install a snapshot:**
+```bash
+pnpm add @aave/client@snapshot   # latest snapshot tag
+pnpm add @aave/client@0.0.0-snapshot-20260427120000  # specific version
+```
+
+Do not merge the changeset version bump produced by the snapshot workflow back into any branch.

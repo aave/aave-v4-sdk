@@ -1,4 +1,10 @@
-import { type AnyVariables, errAsync, okAsync, ResultAsync } from '@aave/types';
+import {
+  type AnyVariables,
+  errAsync,
+  invariant,
+  okAsync,
+  ResultAsync,
+} from '@aave/types';
 import {
   createClient,
   type Exchange,
@@ -9,6 +15,7 @@ import {
   type OperationResult,
   type OperationResultSource,
   type RequestPolicy,
+  type SSRData,
   type TypedDocumentNode,
   type Client as UrqlClient,
 } from '@urql/core';
@@ -118,6 +125,38 @@ export class GqlClient {
   }
 
   /**
+   * Extract the cached query results captured server-side, ready to be
+   * serialized and shipped to the browser for hydration.
+   *
+   * Requires the `ssr` option to have been set when the client was created.
+   *
+   * @returns A serializable snapshot of the captured query results.
+   */
+  public extractData(): SSRData {
+    invariant(
+      this.context.ssr,
+      'extractData() requires the `ssr` option to be configured. See ClientConfig.',
+    );
+    return this.context.ssr.extractData();
+  }
+
+  /**
+   * Restore query results captured server-side into a client-side instance,
+   * so subsequent reads of the same queries resolve from the SSR snapshot
+   * without an additional network round-trip.
+   *
+   * Most users should pass `ssr.initialState` at construction time instead;
+   * this method is for advanced cases where the snapshot is loaded later.
+   */
+  public restoreData(data: SSRData): void {
+    invariant(
+      this.context.ssr,
+      'restoreData() requires the `ssr` option to be configured. See ClientConfig.',
+    );
+    this.context.ssr.restoreData(data);
+  }
+
+  /**
    * Refresh active queries matching the predicate, or mark the query as stale
    * if no active queries match (so it refreshes when next activated).
    *
@@ -222,6 +261,10 @@ export class GqlClient {
 
     if (this.context.cache) {
       exchanges.push(this.context.cache);
+    }
+
+    if (this.context.ssr) {
+      exchanges.push(this.context.ssr);
     }
 
     if (this.context.batch) {
