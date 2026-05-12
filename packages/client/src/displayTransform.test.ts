@@ -15,6 +15,8 @@ const makeToken = (
 ): Erc20TokenShape => ({
   __typename: 'Erc20Token',
   info: {
+    __typename: 'TokenInfo',
+    id: 'wrapped-token-info-id',
     name: 'Wrapped Ether',
     symbol: 'WETH',
     decimals: 18,
@@ -23,7 +25,14 @@ const makeToken = (
   address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
   chain: {
     chainId: 1,
-    nativeInfo: { name: 'Ether', symbol: 'ETH', decimals: 18, icon: 'eth.svg' },
+    nativeInfo: {
+      __typename: 'TokenInfo',
+      id: 'native-token-info-id',
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+      icon: 'eth.svg',
+    },
   },
   isWrappedNativeToken: true,
   ...overrides,
@@ -168,7 +177,17 @@ describe('transformErc20Token', () => {
     it('replaces info with nativeInfo for a wrapped native token', () => {
       const token = makeToken();
       const result = transformErc20Token(token, true, null);
-      expect(result.info).toEqual(token.chain.nativeInfo);
+      expect(result.info).toEqual({
+        ...token.chain.nativeInfo,
+        id: token.info.id,
+      });
+    });
+
+    it('preserves the original token info id for cache stability', () => {
+      const token = makeToken();
+      const result = transformErc20Token(token, true, null);
+      expect(result.info.id).toBe(token.info.id);
+      expect(result.info.id).not.toBe(token.chain.nativeInfo.id);
     });
 
     it('does not modify a non-wrapped token', () => {
@@ -265,7 +284,10 @@ describe('deepTransformTokens', () => {
   it('transforms a top-level Erc20Token', () => {
     const token = makeToken();
     const result = deepTransformTokens(token, true, null) as Erc20TokenShape;
-    expect(result.info).toEqual(token.chain.nativeInfo);
+    expect(result.info).toEqual({
+      ...token.chain.nativeInfo,
+      id: token.info.id,
+    });
   });
 
   it('transforms an Erc20Token nested inside an object', () => {
@@ -273,7 +295,7 @@ describe('deepTransformTokens', () => {
     const data = { reserve: { underlying: token } };
     const result = deepTransformTokens(data, true, null) as typeof data;
     expect((result.reserve.underlying as Erc20TokenShape).info).toEqual(
-      token.chain.nativeInfo,
+      { ...token.chain.nativeInfo, id: token.info.id },
     );
     expect(result).not.toBe(data);
   });
@@ -282,7 +304,10 @@ describe('deepTransformTokens', () => {
     const token = makeToken();
     const data = [token];
     const result = deepTransformTokens(data, true, null) as Erc20TokenShape[];
-    expect(result[0]!.info).toEqual(token.chain.nativeInfo);
+    expect(result[0]!.info).toEqual({
+      ...token.chain.nativeInfo,
+      id: token.info.id,
+    });
     expect(result).not.toBe(data);
   });
 

@@ -86,7 +86,10 @@ export function transformErc20Token(
   let current = token;
 
   if (applyWrappedNative && token.isWrappedNativeToken) {
-    current = { ...current, info: { ...token.chain.nativeInfo } };
+    current = {
+      ...current,
+      info: { ...token.chain.nativeInfo, id: token.info.id },
+    };
   }
 
   if (overrideMap) {
