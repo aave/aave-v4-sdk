@@ -294,9 +294,10 @@ describe('deepTransformTokens', () => {
     const token = makeToken();
     const data = { reserve: { underlying: token } };
     const result = deepTransformTokens(data, true, null) as typeof data;
-    expect((result.reserve.underlying as Erc20TokenShape).info).toEqual(
-      { ...token.chain.nativeInfo, id: token.info.id },
-    );
+    expect((result.reserve.underlying as Erc20TokenShape).info).toEqual({
+      ...token.chain.nativeInfo,
+      id: token.info.id,
+    });
     expect(result).not.toBe(data);
   });
 
