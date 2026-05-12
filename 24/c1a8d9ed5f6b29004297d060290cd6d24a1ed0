@@ -1,0 +1,21 @@
+packages/client/src/displayTransform.ts
+  s_0707e6b3106032::t_25d3fe28cb37b2 89-92
+packages/client/src/displayTransform.test.ts
+  s_0707e6b3106032::t_25d3fe28cb37b2 18-19,28-35,180-190,287-290,298,307-310
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "24c1a8d9ed5f6b29004297d060290cd6d24a1ed0",
+  "prompts": {},
+  "sessions": {
+    "s_0707e6b3106032": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1e0c-cb62-7323-9176-c8908895f335",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
