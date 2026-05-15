@@ -1,0 +1,23 @@
+packages/client/src/walletKind.ts
+  s_09e76c1c85406a::t_296ec13c68d858 80-81,83-84
+  s_09e76c1c85406a::t_cb9d3ad91f4c63 39-43,45
+  s_09e76c1c85406a::t_3613ee9c80e103 1-32,34-38,44,46-79,85-104
+packages/client/src/index.ts
+  s_09e76c1c85406a::t_c568f0b30acb72 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "eccca62d3d3140abb47868fc231f531e72292d24",
+  "prompts": {},
+  "sessions": {
+    "s_09e76c1c85406a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "27697950-c04a-4f72-ba6d-5a7f3ff22ed0",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
