@@ -9,3 +9,4 @@ export * from './environments';
 export * from './options';
 export type * from './types';
 export { transactionReceipt } from './types';
+export * from './walletKind';
