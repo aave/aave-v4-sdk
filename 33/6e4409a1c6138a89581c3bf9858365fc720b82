@@ -1,0 +1,21 @@
+packages/client/src/cache.ts
+  s_67d762d554ba7a::t_0056369152ec4d 492
+packages/graphql/src/transactions.ts
+  s_67d762d554ba7a::t_39763f101b985b 19-20,268-269,274-275,278,280-282,288,291,294
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "336e4409a1c6138a89581c3bf9858365fc720b82",
+  "prompts": {},
+  "sessions": {
+    "s_67d762d554ba7a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e3f2f-c054-7bb0-955c-a47c094c4e54",
+        "model": "gpt-5.5"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
