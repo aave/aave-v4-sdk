@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "5f52c178714cd44adb8f1a74236a936bfd228d8f",
+  "prompts": {
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 810,
+      "total_deletions": 9,
+      "accepted_lines": 810,
+      "overriden_lines": 0
+    }
+  }
+}

@@ -1,0 +1,35 @@
+packages/graphql/schema.graphql
+  37a5804c472cb637 760-767,1948,1951,1995,1997
+packages/graphql/src/fragments/spoke.ts
+  37a5804c472cb637 31,37,51,60,69,75
+packages/graphql/src/hub.ts
+  37a5804c472cb637 168
+packages/graphql/src/schema.json
+  37a5804c472cb637 2438,7679,7715,7827,7851
+packages/graphql/src/graphql-env.d.ts
+  37a5804c472cb637 109,238,246
+.changeset/spoke-summary-schema.md
+  37a5804c472cb637 7
+packages/graphql/src/testing.ts
+  37a5804c472cb637 315,317
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "ecacad16a1fe83ce5bd3d7ccbcc9f91e09099a66",
+  "prompts": {
+    "37a5804c472cb637": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af488fdf-1310-40df-8fe8-e48010b32936",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 15905,
+      "total_deletions": 32,
+      "accepted_lines": 30,
+      "overriden_lines": 0
+    }
+  }
+}

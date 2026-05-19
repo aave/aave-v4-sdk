@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "fac1dda5c63a3412fb04e3a5e2476faf6a42b17d",
+  "prompts": {
+    "aa6a2181bde07e3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ea3e082-b7fa-46a2-8c2d-4642844a118d",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 3,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}

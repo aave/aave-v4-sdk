@@ -1,0 +1,30 @@
+packages/core/src/context.ts
+  s_9e6aeed34a3438::t_ef80db1da36dd1 15
+packages/client/src/config.ts
+  h_be8c3c572e9983 58
+  s_9e6aeed34a3438::t_ef80db1da36dd1 59-65,78,93
+packages/client/src/AaveClient.ts
+  s_9e6aeed34a3438::t_ef80db1da36dd1 33-63,69-75,78-84,185-190
+  s_9e6aeed34a3438::t_a652754ee5f628 64-68,76-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "53c4fd093cfe47f402abe8a5d4971f96e2f5e8c5",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9e6aeed34a3438": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55773b88-7196-4b5c-9fda-f9b262ea623e",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

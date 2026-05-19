@@ -1,0 +1,25 @@
+packages/client/src/safe.ts
+  bed686b31f1759aa 10-11
+.changeset/fix-safe-domains.md
+  bed686b31f1759aa 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "829b13591aaa1ca60f9094eba50b9eb567b12653",
+  "prompts": {
+    "bed686b31f1759aa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7f0b41a0-926f-40d5-ad2b-e0e550fc9a1e",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 71,
+      "total_deletions": 66,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}

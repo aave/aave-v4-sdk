@@ -1,0 +1,27 @@
+packages/client/src/viem.ts
+  8be71e6dae16ea8b 461-462
+.changeset/safe-tx-hash-resolution.md
+  8be71e6dae16ea8b 1-5
+packages/client/src/ethers.ts
+  8be71e6dae16ea8b 111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "822992c09f1082d3d28f93332560a0b046651c4e",
+  "prompts": {
+    "8be71e6dae16ea8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be6208f9-c6d8-457f-a31e-0bb01decdf82",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 2,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    }
+  }
+}

@@ -1,0 +1,23 @@
+.changeset/curvy-teams-travel.md
+  d1c73a34ee71acaf 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "d073a52317df580c008df1475afa155ad090fdfd",
+  "prompts": {
+    "d1c73a34ee71acaf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8d097892-e56d-4460-a301-e2d4f15fbd4c",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 7,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}

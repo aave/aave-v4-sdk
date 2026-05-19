@@ -1,0 +1,25 @@
+packages/graphql/src/spoke.ts
+  f09266f804db756c 2,85
+packages/graphql/src/hub.ts
+  f09266f804db756c 169
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "421958c55af8cbe8c637b38eb003fff45699d9a1",
+  "prompts": {
+    "f09266f804db756c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cbd68950-fed2-4532-b94d-c64d7f87d3c1",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 15853,
+      "total_deletions": 19,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}

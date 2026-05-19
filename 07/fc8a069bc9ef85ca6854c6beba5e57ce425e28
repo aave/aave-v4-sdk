@@ -1,0 +1,23 @@
+.changeset/balance-field-supply-item.md
+  5a2fa353c9285ec0 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "07fc8a069bc9ef85ca6854c6beba5e57ce425e28",
+  "prompts": {
+    "5a2fa353c9285ec0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1d701586-bb56-442f-b83c-3cc1e6ed0172",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 0,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    }
+  }
+}

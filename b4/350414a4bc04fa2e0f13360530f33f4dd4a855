@@ -1,0 +1,25 @@
+packages/react/src/helpers/reads.ts
+  19b4e9696aa279ac 2,265,268-270
+packages/core/src/utils.ts
+  19b4e9696aa279ac 2,14-15,20-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "b4350414a4bc04fa2e0f13360530f33f4dd4a855",
+  "prompts": {
+    "19b4e9696aa279ac": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "694a9848-236e-4dfb-81c8-c44899539c17",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Cesare Naldi <naldi.cesare@gmail.com>",
+      "messages": [],
+      "total_additions": 19,
+      "total_deletions": 6,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}

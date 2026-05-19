@@ -1,0 +1,23 @@
+packages/client/src/safe.ts
+  879ab6450039f03c 11-14,40,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "1a1d7b85578bfaf5cb9796c75019af64aca2c266",
+  "prompts": {
+    "879ab6450039f03c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9266323d-b0ad-479d-bf3e-49c550fed4bb",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 6,
+      "total_deletions": 4,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    }
+  }
+}

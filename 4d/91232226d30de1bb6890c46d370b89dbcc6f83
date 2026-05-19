@@ -1,0 +1,34 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "4d91232226d30de1bb6890c46d370b89dbcc6f83",
+  "prompts": {
+    "843cc77310c7009d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3e2a-6b07-7b40-b0ef-8bb54bf068cc",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 810,
+      "overriden_lines": 0
+    }
+  }
+}

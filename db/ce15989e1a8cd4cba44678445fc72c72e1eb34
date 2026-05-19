@@ -1,0 +1,29 @@
+packages/graphql/src/fragments/swaps.ts
+  bdc440b0c5639ad9 136-151,173-175,184
+packages/client/src/actions/swap.ts
+  bdc440b0c5639ad9 103
+packages/react/src/swap/useTokenSwap.ts
+  bdc440b0c5639ad9 212-234
+packages/react/src/swap/useTokenSwapQuote.ts
+  bdc440b0c5639ad9 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "dbce15989e1a8cd4cba44678445fc72c72e1eb34",
+  "prompts": {
+    "bdc440b0c5639ad9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8bd4494-8e83-4192-bf3f-897309ade35d",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>",
+      "messages": [],
+      "total_additions": 45,
+      "total_deletions": 0,
+      "accepted_lines": 45,
+      "overriden_lines": 0
+    }
+  }
+}

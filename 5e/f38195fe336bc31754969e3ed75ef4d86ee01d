@@ -1,0 +1,23 @@
+.github/workflows/snapshot.yml
+  ab3a58773538a56e 1-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "5ef38195fe336bc31754969e3ed75ef4d86ee01d",
+  "prompts": {
+    "ab3a58773538a56e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e95eda-998e-447b-b69c-e26b686e6f88",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 58,
+      "total_deletions": 3,
+      "accepted_lines": 55,
+      "overriden_lines": 0
+    }
+  }
+}

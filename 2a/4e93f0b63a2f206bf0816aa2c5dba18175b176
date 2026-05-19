@@ -1,0 +1,60 @@
+packages/graphql/src/enums.ts
+  2bbf68c6a05378e0 113-125
+.changeset/bright-snakes-laugh.md
+  2bbf68c6a05378e0 1-8
+packages/client/src/actions/reserves.ts
+  2bbf68c6a05378e0 6,8-9,147-176
+packages/client/src/cache.ts
+  2bbf68c6a05378e0 474,504
+packages/react/src/reserves.ts
+  2bbf68c6a05378e0 7,12,14-15,490-623
+packages/cli/src/common.ts
+  2bbf68c6a05378e0 10,109-113,121-125
+packages/graphql/src/schema.json
+  2bbf68c6a05378e0 3275-3309,5171-5179,6888-6921
+packages/cli/src/commands/reserves/holders.ts
+  2bbf68c6a05378e0 1-80
+packages/graphql/src/fragments/reserve.ts
+  2bbf68c6a05378e0 155-169
+packages/graphql/schema.graphql
+  2bbf68c6a05378e0 1135-1147,1443,1709-1721
+packages/graphql/src/graphql.ts
+  2bbf68c6a05378e0 32,107
+packages/graphql/src/reserve.ts
+  2bbf68c6a05378e0 1-7,68-93
+packages/graphql/src/graphql-env.d.ts
+  2bbf68c6a05378e0 153-154,195,213-215
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "2a4e93f0b63a2f206bf0816aa2c5dba18175b176",
+  "prompts": {
+    "2bbf68c6a05378e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8285d2-9d9e-42ad-9783-3e5f58c42da5",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 689,
+      "total_deletions": 277,
+      "accepted_lines": 474,
+      "overriden_lines": 0
+    },
+    "35e588923e6da3f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8a5b545-0b75-4d9f-b250-13904529add4",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 15323,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}

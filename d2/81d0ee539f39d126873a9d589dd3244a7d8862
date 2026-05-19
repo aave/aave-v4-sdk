@@ -1,0 +1,68 @@
+packages/cli/package.json
+  ebcf0f657e8fd632 39-40
+.github/workflows/on-demand.yml
+  ebcf0f657e8fd632 49,57
+packages/cli/src/common.ts
+  ebcf0f657e8fd632 46-55
+packages/cli/src/commands/action/supply.ts
+  ebcf0f657e8fd632 1-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "d281d0ee539f39d126873a9d589dd3244a7d8862",
+  "prompts": {
+    "3808ed405f64120f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4869-01d6-7271-9a46-df42f3d1e466",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "736e109b35dc0fcc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4922-9344-7621-bf8c-5918a58ea4e6",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "ebcf0f657e8fd632": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4ebc-3ee9-7681-a097-98d32be0d48e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 151,
+      "total_deletions": 3,
+      "accepted_lines": 151,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 810,
+      "overriden_lines": 0
+    }
+  }
+}

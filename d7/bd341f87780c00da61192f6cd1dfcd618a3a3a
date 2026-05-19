@@ -1,0 +1,19 @@
+packages/client/src/AaveClient.ts
+  s_adf9c6bb916c44::t_d9bcd3ce5477c7 163,166-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "d7bd341f87780c00da61192f6cd1dfcd618a3a3a",
+  "prompts": {},
+  "sessions": {
+    "s_adf9c6bb916c44": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a83ba5d8-20b8-46ba-bb54-576a590e1487",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

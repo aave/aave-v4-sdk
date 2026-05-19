@@ -1,0 +1,42 @@
+packages/client/src/cache.ts
+  9456471b74b664e0 413-414
+packages/graphql/src/fragments/assets.ts
+  9456471b74b664e0 47-58
+packages/graphql/src/hub.ts
+  9456471b74b664e0 3,105-147
+packages/graphql/src/fragments/reserve.ts
+  9456471b74b664e0 32-37,39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "e52bdf2f5aaaf8285162c8c4184772724466621e",
+  "prompts": {
+    "481377a69f917644": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "798c32c8-e68a-49c4-857f-21e3e5959931",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Cesare Naldi <naldi.cesare@gmail.com>",
+      "messages": [],
+      "total_additions": 293,
+      "total_deletions": 43,
+      "accepted_lines": 268,
+      "overriden_lines": 0
+    },
+    "9456471b74b664e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a5e03706-1202-4995-8dcf-44550e6b1528",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Cesare Naldi <naldi.cesare@gmail.com>",
+      "messages": [],
+      "total_additions": 67,
+      "total_deletions": 2,
+      "accepted_lines": 66,
+      "overriden_lines": 0
+    }
+  }
+}

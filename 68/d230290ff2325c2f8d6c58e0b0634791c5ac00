@@ -1,0 +1,23 @@
+packages/react/src/transactions/useSupply.test.ts
+  36dc2641f2b538b7 1-24,26,28-120,122-193,195-259,261-291,293-303
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "68d230290ff2325c2f8d6c58e0b0634791c5ac00",
+  "prompts": {
+    "36dc2641f2b538b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "317afd79-c3f4-41a5-81c2-83190b3d8fe6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Cesare Naldi <naldi.cesare@gmail.com>",
+      "messages": [],
+      "total_additions": 293,
+      "total_deletions": 0,
+      "accepted_lines": 297,
+      "overriden_lines": 1
+    }
+  }
+}
