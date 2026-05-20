@@ -1,5 +1,13 @@
 # @aave/react
 
+## 5.0.0
+
+### Patch Changes
+
+- Updated dependencies [8fc4e62]
+  - @aave/graphql@2.0.0
+  - @aave/client@5.0.0
+
 ## 4.2.0
 
 ### Minor Changes
