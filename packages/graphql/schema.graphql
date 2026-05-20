@@ -1363,37 +1363,6 @@ input PreviewAction @oneOf {
   withdrawSwap: WithdrawSwapQuoteRequest
 }
 
-type PreviewBorrowPointsReward {
-  id: RewardId!
-  program: PointsProgram!
-  name: String!
-  startDate: DateTime!
-  endDate: DateTime
-  multiplier: Float!
-  criteria: [PointsCriteria!]
-  reserve: ReserveInfo!
-}
-
-type PreviewMerklBorrowReward {
-  id: RewardId!
-  startDate: DateTime!
-  endDate: DateTime!
-  discountApy: PercentNumber!
-  payoutToken: Erc20Token!
-  criteria: [MerklCriteria!]!
-  reserve: ReserveInfo!
-}
-
-type PreviewMerklSupplyReward {
-  id: RewardId!
-  startDate: DateTime!
-  endDate: DateTime!
-  extraApy: PercentNumber!
-  payoutToken: Erc20Token!
-  criteria: [MerklCriteria!]!
-  reserve: ReserveInfo!
-}
-
 input PreviewRequest {
   action: PreviewAction!
 }
@@ -1403,22 +1372,14 @@ type PreviewReserveRates {
   borrowApy: PercentNumberVariation
 }
 
-union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPointsReward | PreviewBorrowPointsReward
-
-type PreviewRewardOutcome {
-  lost: [PreviewReward!]!
-  gained: [PreviewReward!]!
+type PreviewRewardChange {
+  reserve: ReserveInfo!
+  reward: Reward!
 }
 
-type PreviewSupplyPointsReward {
-  id: RewardId!
-  program: PointsProgram!
-  name: String!
-  startDate: DateTime!
-  endDate: DateTime
-  multiplier: Float!
-  criteria: [PointsCriteria!]
-  reserve: ReserveInfo!
+type PreviewRewardOutcome {
+  lost: [PreviewRewardChange!]!
+  gained: [PreviewRewardChange!]!
 }
 
 type PreviewUserPosition {
