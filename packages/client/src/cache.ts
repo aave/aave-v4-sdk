@@ -151,22 +151,6 @@ export const exchange = cacheExchange({
       startDate: transformToDate,
       endDate: transformToNullableDate,
     },
-    PreviewBorrowPointsReward: {
-      startDate: transformToDate,
-      endDate: transformToNullableDate,
-    },
-    PreviewMerklBorrowReward: {
-      startDate: transformToDate,
-      endDate: transformToDate,
-    },
-    PreviewMerklSupplyReward: {
-      startDate: transformToDate,
-      endDate: transformToDate,
-    },
-    PreviewSupplyPointsReward: {
-      startDate: transformToDate,
-      endDate: transformToNullableDate,
-    },
     SupplyPointsReward: {
       startDate: transformToDate,
       endDate: transformToNullableDate,
@@ -504,12 +488,9 @@ export const exchange = cacheExchange({
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PrepareSwapOrder: () => null,
-    PreviewBorrowPointsReward: () => null,
-    PreviewMerklBorrowReward: () => null,
-    PreviewMerklSupplyReward: () => null,
     PreviewReserveRates: () => null,
+    PreviewRewardChange: () => null,
     PreviewRewardOutcome: () => null,
-    PreviewSupplyPointsReward: () => null,
     PreviewUserPosition: () => null,
     ProtocolHistorySample: () => null,
     RepayWithSupply: () => null,

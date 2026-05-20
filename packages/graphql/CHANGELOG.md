@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 2.0.0
+
+### Major Changes
+
+- 8fc4e62: Unify preview reward types into PreviewRewardChange { reserve, reward } reusing the Reward union; removes PreviewMerkl*/PreviewPoints* preview-specific types and the PreviewReward union (breaking).
+
 ## 1.2.0
 
 ### Minor Changes
