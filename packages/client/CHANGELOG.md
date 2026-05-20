@@ -1,5 +1,16 @@
 # @aave/client
 
+## 6.0.0
+
+### Major Changes
+
+- 68eb092: Realign with backend after the PreviewReward types were restored. The backend now exposes both the legacy `PreviewReward` union (`PreviewMerkl{Supply,Borrow}Reward` + `Preview{Supply,Borrow}PointsReward`) via deprecated `PreviewRewardOutcome.lost` / `.gained`, and the new wrapper as `ReserveReward` via `PreviewRewardOutcome.abandoned` / `.acquired`. Rename `PreviewRewardChange` to `ReserveReward` and switch the `PreviewRewardOutcome` fragment to query `abandoned` / `acquired` (breaking for the previous 2.0.0 shape).
+
+### Patch Changes
+
+- Updated dependencies [68eb092]
+  - @aave/graphql@3.0.0
+
 ## 5.0.0
 
 ### Major Changes
