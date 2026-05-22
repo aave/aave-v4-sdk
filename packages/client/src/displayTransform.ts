@@ -8,30 +8,32 @@ export type Erc20TokenShape = {
   isWrappedNativeToken: boolean;
 };
 
+// Typenames that represent protocol reserve contexts — wrapped-native transform applies to
+// Erc20Token descendants of these nodes.
+const RESERVE_TYPENAMES = new Set([
+  'Reserve',
+  'HubAsset',
+  'Asset',
+  'HubSpokeConfig',
+  'CollateralFactorVariation',
+  'LiquidationFeeVariation',
+  'MaxLiquidationBonusVariation',
+]);
+
+// Typenames whose Erc20Token descendants should NOT be transformed even when nested inside
+// a reserve node — covers user wallet balances and reward payout tokens.
+const WALLET_CONTEXT_TYPENAMES = new Set([
+  'ReserveUserState',
+  'HubAssetUserState',
+  'MerklSupplyReward',
+  'MerklBorrowReward',
+  'PreviewMerklSupplyReward',
+  'PreviewMerklBorrowReward',
+]);
+
 export function isErc20Token(value: unknown): value is Erc20TokenShape {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   return (value as Record<string, unknown>).__typename === 'Erc20Token';
-}
-
-export function shouldApplyWrappedNativeTransform(
-  showWrappedNativeReserveAsNative: boolean,
-  data: unknown,
-): boolean {
-  // We only want to apply the wrapped native transform on queries for protocol assets and/or reserves.
-  // Wallet balance and swap queries should not be affected.
-  return (
-    showWrappedNativeReserveAsNative &&
-    (containsTypename(data, 'HubAsset') || containsTypename(data, 'Asset'))
-  );
-}
-
-export function containsTypename(data: unknown, typename: string): boolean {
-  if (!data || typeof data !== 'object') return false;
-  if (Array.isArray(data))
-    return data.some((item) => containsTypename(item, typename));
-  const obj = data as Record<string, unknown>;
-  if (obj.__typename === typename) return true;
-  return Object.values(obj).some((v) => containsTypename(v, typename));
 }
 
 export function buildAssetOverrideMap(
@@ -46,6 +48,7 @@ export function deepTransformTokens(
   data: unknown,
   applyWrappedNative: boolean,
   overrideMap: Map<string, AssetOverride> | null,
+  withinReserve = false,
 ): unknown {
   if (!data || typeof data !== 'object') return data;
 
@@ -56,6 +59,7 @@ export function deepTransformTokens(
         item,
         applyWrappedNative,
         overrideMap,
+        withinReserve,
       );
       if (transformed !== item) changed = true;
       return transformed;
@@ -64,14 +68,27 @@ export function deepTransformTokens(
   }
 
   if (isErc20Token(data)) {
-    return transformErc20Token(data, applyWrappedNative, overrideMap);
+    return transformErc20Token(data, applyWrappedNative && withinReserve, overrideMap);
   }
 
   const obj = data as Record<string, unknown>;
+  const typename = obj.__typename as string | undefined;
+
+  let nextWithinReserve = withinReserve;
+  if (typename) {
+    if (RESERVE_TYPENAMES.has(typename)) nextWithinReserve = true;
+    if (WALLET_CONTEXT_TYPENAMES.has(typename)) nextWithinReserve = false;
+  }
+
   let changed = false;
   const result: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj)) {
-    const transformed = deepTransformTokens(v, applyWrappedNative, overrideMap);
+    const transformed = deepTransformTokens(
+      v,
+      applyWrappedNative,
+      overrideMap,
+      nextWithinReserve,
+    );
     if (transformed !== v) changed = true;
     result[k] = transformed;
   }
@@ -88,6 +105,8 @@ export function transformErc20Token(
   if (applyWrappedNative && token.isWrappedNativeToken) {
     current = {
       ...current,
+      // Preserve the original info.id so consumer-facing token identity is stable
+      // across the native transform (e.g. React keys, downstream identity checks).
       info: { ...token.chain.nativeInfo, id: token.info.id },
     };
   }

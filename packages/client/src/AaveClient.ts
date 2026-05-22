@@ -29,7 +29,6 @@ import {
 import {
   buildAssetOverrideMap,
   deepTransformTokens,
-  shouldApplyWrappedNativeTransform,
 } from './displayTransform';
 import {
   isHasProcessedKnownTransactionRequest,
@@ -149,7 +148,9 @@ export class AaveClient extends GqlClient {
   }
 
   protected override additionalExchanges(): Exchange[] {
-    // displayTransformExchange runs first so graphcache stores already-transformed display info.
+    // These exchanges are outermost in the pipeline — they receive results after graphcache
+    // has already normalised and stored the raw data. The cache always holds untransformed
+    // values; transforms are applied on every result emission before reaching the consumer.
     return [
       this.displayTransformExchange(),
       this.claimResponseTransformExchange(),
@@ -165,19 +166,15 @@ export class AaveClient extends GqlClient {
             const config = this.displayConfig;
             if (!config || !result.data) return result;
 
-            const applyWrappedNativeTransform =
-              shouldApplyWrappedNativeTransform(
-                config.showWrappedNativeReserveAsNative === true,
-                result.data,
-              );
-
+            const applyWrappedNative =
+              config.showWrappedNativeReserveAsNative === true;
             const overrideMap = this.displayOverrideMap;
 
-            if (!applyWrappedNativeTransform && !overrideMap) return result;
+            if (!applyWrappedNative && !overrideMap) return result;
 
             const data = deepTransformTokens(
               result.data,
-              applyWrappedNativeTransform,
+              applyWrappedNative,
               overrideMap,
             );
 

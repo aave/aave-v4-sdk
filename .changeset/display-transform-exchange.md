@@ -6,7 +6,7 @@
 
 Adds a `display` option to `ClientConfig` with two settings:
 
-- `showWrappedNativeReserveAsNative` — when `true`, wrapped native tokens (e.g. WETH) are shown using the native asset's name, symbol, and icon (e.g. ETH) for protocol reserve queries. Detected via `HubAsset` presence in the response, so `userBalances`, rewards, and raw token swap queries are unaffected.
-- `assetOverrides` — per-asset display overrides applied globally across all queries, keyed by `chainId` and `address`. Each entry takes a `display` object with optional `name`, `symbol`, and `icon` fields.
+- `showWrappedNativeReserveAsNative` — when `true`, wrapped native tokens (e.g. WETH) are shown using the native asset's name, symbol, and icon (e.g. ETH) within protocol reserve contexts (`Reserve`, `HubAsset`, `Asset`). Wallet balance, reward payout, and swap queries are unaffected.
+- `assetOverrides` — per-asset display overrides applied globally across all queries, keyed by `chainId` and `address`. Each entry takes a `display` object with optional `name`, `symbol`, and `icon` fields. If both settings target the same token, `assetOverrides` takes precedence.
 
-Both transforms are applied by a urql exchange before `graphcache`, so cached data already carries the transformed display info. The underlying `isWrappedNativeToken` flag and token `address` are preserved.
+Transforms are applied by a urql exchange that runs after `graphcache` in the result pipeline — the cache always stores raw untransformed data. The underlying `isWrappedNativeToken` flag and token `address` are preserved.

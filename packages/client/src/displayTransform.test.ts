@@ -2,11 +2,9 @@ import { describe, expect, it } from 'vitest';
 import type { AssetOverride } from './config';
 import {
   buildAssetOverrideMap,
-  containsTypename,
   deepTransformTokens,
   type Erc20TokenShape,
   isErc20Token,
-  shouldApplyWrappedNativeTransform,
   transformErc20Token,
 } from './displayTransform';
 
@@ -60,80 +58,6 @@ describe('isErc20Token', () => {
   });
 });
 
-describe('containsTypename', () => {
-  it('returns false for null', () => {
-    expect(containsTypename(null, 'HubAsset')).toBe(false);
-  });
-
-  it('returns false for primitives', () => {
-    expect(containsTypename(42, 'HubAsset')).toBe(false);
-  });
-
-  it('returns true when the top-level object matches', () => {
-    expect(containsTypename({ __typename: 'HubAsset' }, 'HubAsset')).toBe(true);
-  });
-
-  it('returns false when no object in the tree matches', () => {
-    expect(
-      containsTypename(
-        { __typename: 'Reserve', asset: { __typename: 'Erc20Token' } },
-        'HubAsset',
-      ),
-    ).toBe(false);
-  });
-
-  it('finds typename nested inside an object', () => {
-    const data = {
-      reserve: { asset: { __typename: 'HubAsset', name: 'WETH' } },
-    };
-    expect(containsTypename(data, 'HubAsset')).toBe(true);
-  });
-
-  it('finds typename inside an array', () => {
-    const data = [{ __typename: 'Reserve' }, { __typename: 'HubAsset' }];
-    expect(containsTypename(data, 'HubAsset')).toBe(true);
-  });
-
-  it('returns false when the array contains no matching typename', () => {
-    const data = [{ __typename: 'Reserve' }, { __typename: 'Erc20Token' }];
-    expect(containsTypename(data, 'HubAsset')).toBe(false);
-  });
-
-  it('finds typename deeply nested', () => {
-    const data = { a: { b: { c: [{ __typename: 'HubAsset' }] } } };
-    expect(containsTypename(data, 'HubAsset')).toBe(true);
-  });
-});
-
-describe('shouldApplyWrappedNative', () => {
-  const hubAssetData = {
-    reserves: [{ __typename: 'HubAsset', underlying: makeToken() }],
-  };
-  const assetData = { __typename: 'Asset', token: makeToken() };
-  const walletData = {
-    balances: [{ __typename: 'Erc20Amount', token: makeToken() }],
-  };
-
-  it('returns true when the flag is set and data contains HubAsset', () => {
-    expect(shouldApplyWrappedNativeTransform(true, hubAssetData)).toBe(true);
-  });
-
-  it('returns true when the flag is set and data contains Asset', () => {
-    expect(shouldApplyWrappedNativeTransform(true, assetData)).toBe(true);
-  });
-
-  it('returns false when the flag is set but data has no HubAsset or Asset typename', () => {
-    expect(shouldApplyWrappedNativeTransform(true, walletData)).toBe(false);
-  });
-
-  it('returns false when the flag is false even if HubAsset is present', () => {
-    expect(shouldApplyWrappedNativeTransform(false, hubAssetData)).toBe(false);
-  });
-
-  it('returns false for null data', () => {
-    expect(shouldApplyWrappedNativeTransform(true, null)).toBe(false);
-  });
-});
 
 describe('buildAssetOverrideMap', () => {
   it('builds a map keyed by chainId:address (lowercased)', () => {
@@ -183,7 +107,7 @@ describe('transformErc20Token', () => {
       });
     });
 
-    it('preserves the original token info id for cache stability', () => {
+    it('preserves the original token info id for consumer-facing identity stability', () => {
       const token = makeToken();
       const result = transformErc20Token(token, true, null);
       expect(result.info.id).toBe(token.info.id);
@@ -276,42 +200,6 @@ describe('deepTransformTokens', () => {
     expect(deepTransformTokens(data, true, null)).toBe(data);
   });
 
-  it('returns the same reference for a non-wrapped token when applyWrappedNative is true and no overrides', () => {
-    const token = makeToken({ isWrappedNativeToken: false });
-    expect(deepTransformTokens(token, true, null)).toBe(token);
-  });
-
-  it('transforms a top-level Erc20Token', () => {
-    const token = makeToken();
-    const result = deepTransformTokens(token, true, null) as Erc20TokenShape;
-    expect(result.info).toEqual({
-      ...token.chain.nativeInfo,
-      id: token.info.id,
-    });
-  });
-
-  it('transforms an Erc20Token nested inside an object', () => {
-    const token = makeToken();
-    const data = { reserve: { underlying: token } };
-    const result = deepTransformTokens(data, true, null) as typeof data;
-    expect((result.reserve.underlying as Erc20TokenShape).info).toEqual({
-      ...token.chain.nativeInfo,
-      id: token.info.id,
-    });
-    expect(result).not.toBe(data);
-  });
-
-  it('transforms Erc20Token items inside an array', () => {
-    const token = makeToken();
-    const data = [token];
-    const result = deepTransformTokens(data, true, null) as Erc20TokenShape[];
-    expect(result[0]!.info).toEqual({
-      ...token.chain.nativeInfo,
-      id: token.info.id,
-    });
-    expect(result).not.toBe(data);
-  });
-
   it('returns the same array reference when no tokens are transformed', () => {
     const data = [{ foo: 'bar' }, { baz: 42 }];
     expect(deepTransformTokens(data, true, null)).toBe(data);
@@ -323,15 +211,144 @@ describe('deepTransformTokens', () => {
     expect(deepTransformTokens(data, true, null)).toBe(data);
   });
 
-  it('applies asset override transforms via the overrideMap', () => {
-    const token = makeToken({ isWrappedNativeToken: false });
-    const overrides: AssetOverride[] = [
-      { chainId: 1, address: token.address, display: { symbol: 'CUSTSYM' } },
-    ];
-    const overrideMap = buildAssetOverrideMap(overrides);
-    const result = deepTransformTokens({ token }, false, overrideMap) as {
-      token: Erc20TokenShape;
-    };
-    expect(result.token.info.symbol).toBe('CUSTSYM');
+  describe('withinReserve scoping', () => {
+    it('does not transform a wrapped native token outside any reserve context', () => {
+      const token = makeToken();
+      const data = { balances: [{ __typename: 'Erc20Amount', token }] };
+      expect(deepTransformTokens(data, true, null)).toBe(data);
+    });
+
+    it('transforms a wrapped native token inside a HubAsset', () => {
+      const token = makeToken();
+      const data = { __typename: 'HubAsset', underlying: token };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.underlying as Erc20TokenShape).info).toEqual({
+        ...token.chain.nativeInfo,
+        id: token.info.id,
+      });
+      expect(result).not.toBe(data);
+    });
+
+    it('transforms a wrapped native token inside an Asset', () => {
+      const token = makeToken();
+      const data = { __typename: 'Asset', token };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.token as Erc20TokenShape).info.symbol).toBe('ETH');
+    });
+
+    it('transforms a wrapped native token inside a Reserve', () => {
+      const token = makeToken();
+      const data = {
+        __typename: 'Reserve',
+        summary: { supplied: { __typename: 'Erc20Amount', token } },
+      };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      const suppliedToken = result.summary.supplied.token as Erc20TokenShape;
+      expect(suppliedToken.info.symbol).toBe('ETH');
+    });
+
+    it('does not transform a wrapped native token that is a reward payout inside a Reserve', () => {
+      const token = makeToken();
+      const data = {
+        __typename: 'Reserve',
+        summary: {
+          rewards: [{ __typename: 'MerklSupplyReward', payoutToken: token }],
+        },
+      };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      const rewardToken = result.summary.rewards[0]!
+        .payoutToken as Erc20TokenShape;
+      expect(rewardToken.info.symbol).toBe('WETH');
+      expect(result.summary.rewards[0]!.payoutToken).toBe(token);
+    });
+
+    it('suppresses the transform for MerklBorrowReward payout tokens', () => {
+      const token = makeToken();
+      const data = {
+        __typename: 'HubAsset',
+        rewards: [{ __typename: 'MerklBorrowReward', payoutToken: token }],
+        underlying: makeToken({ isWrappedNativeToken: false }),
+      };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.rewards[0]!.payoutToken as Erc20TokenShape).info.symbol).toBe('WETH');
+    });
+
+    it('suppresses the transform for ReserveUserState tokens inside a Reserve', () => {
+      const token = makeToken();
+      const data = {
+        __typename: 'Reserve',
+        userState: { __typename: 'ReserveUserState', token },
+      };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.userState.token as Erc20TokenShape).info.symbol).toBe('WETH');
+      expect(result.userState.token).toBe(token);
+    });
+
+    it('suppresses the transform for HubAssetUserState tokens inside a HubAsset', () => {
+      const token = makeToken();
+      const data = {
+        __typename: 'HubAsset',
+        userState: { __typename: 'HubAssetUserState', token },
+      };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.userState.token as Erc20TokenShape).info.symbol).toBe('WETH');
+      expect(result.userState.token).toBe(token);
+    });
+
+    it('transforms a wrapped native token inside a HubSpokeConfig', () => {
+      const token = makeToken();
+      const data = { __typename: 'HubSpokeConfig', token };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.token as Erc20TokenShape).info.symbol).toBe('ETH');
+    });
+
+    it('transforms a wrapped native token inside a CollateralFactorVariation', () => {
+      const token = makeToken();
+      const data = { __typename: 'CollateralFactorVariation', token };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.token as Erc20TokenShape).info.symbol).toBe('ETH');
+    });
+
+    it('transforms Erc20Token items in an array inside a HubAsset', () => {
+      const token = makeToken();
+      const data = {
+        __typename: 'HubAsset',
+        amounts: [{ __typename: 'Erc20Amount', token }],
+      };
+      const result = deepTransformTokens(data, true, null) as typeof data;
+      expect((result.amounts[0]!.token as Erc20TokenShape).info.symbol).toBe('ETH');
+      expect(result).not.toBe(data);
+    });
+
+    it('does not apply wrapped native transform when applyWrappedNative is false even inside a HubAsset', () => {
+      const token = makeToken();
+      const data = { __typename: 'HubAsset', underlying: token };
+      expect(deepTransformTokens(data, false, null)).toBe(data);
+    });
+  });
+
+  describe('asset override map', () => {
+    it('applies overrides to tokens outside reserve context', () => {
+      const token = makeToken({ isWrappedNativeToken: false });
+      const overrides: AssetOverride[] = [
+        { chainId: 1, address: token.address, display: { symbol: 'CUSTSYM' } },
+      ];
+      const overrideMap = buildAssetOverrideMap(overrides);
+      const result = deepTransformTokens({ token }, false, overrideMap) as {
+        token: Erc20TokenShape;
+      };
+      expect(result.token.info.symbol).toBe('CUSTSYM');
+    });
+
+    it('applies overrides to tokens inside reserve context', () => {
+      const token = makeToken({ isWrappedNativeToken: false });
+      const overrides: AssetOverride[] = [
+        { chainId: 1, address: token.address, display: { symbol: 'CUSTSYM' } },
+      ];
+      const overrideMap = buildAssetOverrideMap(overrides);
+      const data = { __typename: 'HubAsset', underlying: token };
+      const result = deepTransformTokens(data, false, overrideMap) as typeof data;
+      expect((result.underlying as Erc20TokenShape).info.symbol).toBe('CUSTSYM');
+    });
   });
 });

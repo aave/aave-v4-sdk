@@ -26,7 +26,11 @@ export type AssetOverride = {
   chainId: number;
   /** The ERC-20 token address (checksummed or lowercase). */
   address: string;
-  /** Display fields to override for this asset. */
+  /**
+   * Display fields to override for this asset.
+   * `decimals` is intentionally excluded — it affects value formatting and
+   * cannot be safely overridden for display only.
+   */
   display: {
     /** Override the asset's display name. */
     name?: string;
@@ -39,6 +43,9 @@ export type AssetOverride = {
 
 /**
  * Controls how asset names, symbols, and icons are presented.
+ *
+ * When both `showWrappedNativeReserveAsNative` and an `assetOverride` target
+ * the same token, the override takes precedence.
  */
 export type DisplayConfig = {
   /**
@@ -94,6 +101,7 @@ export type ClientConfig = {
   ssr?: SSRConfig;
   /**
    * Controls how asset names, symbols, and icons are displayed.
+   * Display transforms are fixed at client creation — to change them, create a new client.
    *
    * @defaultValue `undefined` (no transforms applied)
    */
