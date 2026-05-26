@@ -68,7 +68,11 @@ export function deepTransformTokens(
   }
 
   if (isErc20Token(data)) {
-    return transformErc20Token(data, applyWrappedNative && withinReserve, overrideMap);
+    return transformErc20Token(
+      data,
+      applyWrappedNative && withinReserve,
+      overrideMap,
+    );
   }
 
   const obj = data as Record<string, unknown>;

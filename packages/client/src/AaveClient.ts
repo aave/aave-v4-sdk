@@ -26,10 +26,7 @@ import {
   configureContext,
   type DisplayConfig,
 } from './config';
-import {
-  buildAssetOverrideMap,
-  deepTransformTokens,
-} from './displayTransform';
+import { buildAssetOverrideMap, deepTransformTokens } from './displayTransform';
 import {
   isHasProcessedKnownTransactionRequest,
   type TransactionReceipt,

@@ -58,7 +58,6 @@ describe('isErc20Token', () => {
   });
 });
 
-
 describe('buildAssetOverrideMap', () => {
   it('builds a map keyed by chainId:address (lowercased)', () => {
     const overrides: AssetOverride[] = [
@@ -270,7 +269,9 @@ describe('deepTransformTokens', () => {
         underlying: makeToken({ isWrappedNativeToken: false }),
       };
       const result = deepTransformTokens(data, true, null) as typeof data;
-      expect((result.rewards[0]!.payoutToken as Erc20TokenShape).info.symbol).toBe('WETH');
+      expect(
+        (result.rewards[0]!.payoutToken as Erc20TokenShape).info.symbol,
+      ).toBe('WETH');
     });
 
     it('suppresses the transform for ReserveUserState tokens inside a Reserve', () => {
@@ -280,7 +281,9 @@ describe('deepTransformTokens', () => {
         userState: { __typename: 'ReserveUserState', token },
       };
       const result = deepTransformTokens(data, true, null) as typeof data;
-      expect((result.userState.token as Erc20TokenShape).info.symbol).toBe('WETH');
+      expect((result.userState.token as Erc20TokenShape).info.symbol).toBe(
+        'WETH',
+      );
       expect(result.userState.token).toBe(token);
     });
 
@@ -291,7 +294,9 @@ describe('deepTransformTokens', () => {
         userState: { __typename: 'HubAssetUserState', token },
       };
       const result = deepTransformTokens(data, true, null) as typeof data;
-      expect((result.userState.token as Erc20TokenShape).info.symbol).toBe('WETH');
+      expect((result.userState.token as Erc20TokenShape).info.symbol).toBe(
+        'WETH',
+      );
       expect(result.userState.token).toBe(token);
     });
 
@@ -316,7 +321,9 @@ describe('deepTransformTokens', () => {
         amounts: [{ __typename: 'Erc20Amount', token }],
       };
       const result = deepTransformTokens(data, true, null) as typeof data;
-      expect((result.amounts[0]!.token as Erc20TokenShape).info.symbol).toBe('ETH');
+      expect((result.amounts[0]!.token as Erc20TokenShape).info.symbol).toBe(
+        'ETH',
+      );
       expect(result).not.toBe(data);
     });
 
@@ -347,8 +354,14 @@ describe('deepTransformTokens', () => {
       ];
       const overrideMap = buildAssetOverrideMap(overrides);
       const data = { __typename: 'HubAsset', underlying: token };
-      const result = deepTransformTokens(data, false, overrideMap) as typeof data;
-      expect((result.underlying as Erc20TokenShape).info.symbol).toBe('CUSTSYM');
+      const result = deepTransformTokens(
+        data,
+        false,
+        overrideMap,
+      ) as typeof data;
+      expect((result.underlying as Erc20TokenShape).info.symbol).toBe(
+        'CUSTSYM',
+      );
     });
   });
 });

@@ -185,7 +185,12 @@ describe('displayTransformExchange — showWrappedNativeReserveAsNative', () => 
       ),
     );
     const result = await hubAssets(client, {
-      query: { hubInput: { chainId: CHAIN_ID, address: evmAddress('0x0000000000000000000000000000000000000001') } },
+      query: {
+        hubInput: {
+          chainId: CHAIN_ID,
+          address: evmAddress('0x0000000000000000000000000000000000000001'),
+        },
+      },
     });
     assertOk(result);
     const token = result.value[0]!.underlying;
@@ -201,7 +206,12 @@ describe('displayTransformExchange — showWrappedNativeReserveAsNative', () => 
       ),
     );
     const result = await hubAssets(client, {
-      query: { hubInput: { chainId: CHAIN_ID, address: evmAddress('0x0000000000000000000000000000000000000001') } },
+      query: {
+        hubInput: {
+          chainId: CHAIN_ID,
+          address: evmAddress('0x0000000000000000000000000000000000000001'),
+        },
+      },
     });
     assertOk(result);
     expect(result.value[0]!.underlying.info.id).toBe('token-info-weth');
@@ -214,7 +224,12 @@ describe('displayTransformExchange — showWrappedNativeReserveAsNative', () => 
       ),
     );
     const result = await hubAssets(client, {
-      query: { hubInput: { chainId: CHAIN_ID, address: evmAddress('0x0000000000000000000000000000000000000001') } },
+      query: {
+        hubInput: {
+          chainId: CHAIN_ID,
+          address: evmAddress('0x0000000000000000000000000000000000000001'),
+        },
+      },
     });
     assertOk(result);
     expect(result.value[0]!.summary.supplied.token.info.symbol).toBe('ETH');
@@ -238,7 +253,12 @@ describe('displayTransformExchange — showWrappedNativeReserveAsNative', () => 
       display: { showWrappedNativeReserveAsNative: true },
     });
     const result = await hubAssets(nonWrappedClient, {
-      query: { hubInput: { chainId: CHAIN_ID, address: evmAddress('0x0000000000000000000000000000000000000001') } },
+      query: {
+        hubInput: {
+          chainId: CHAIN_ID,
+          address: evmAddress('0x0000000000000000000000000000000000000001'),
+        },
+      },
     });
     assertOk(result);
     expect(result.value[0]!.underlying.info.symbol).toBe('WETH');
@@ -271,7 +291,12 @@ describe('displayTransformExchange — assetOverrides', () => {
 
   it('applies name and symbol overrides to the underlying token', async () => {
     const result = await hubAssets(client, {
-      query: { hubInput: { chainId: CHAIN_ID, address: evmAddress('0x0000000000000000000000000000000000000001') } },
+      query: {
+        hubInput: {
+          chainId: CHAIN_ID,
+          address: evmAddress('0x0000000000000000000000000000000000000001'),
+        },
+      },
     });
     assertOk(result);
     const token = result.value[0]!.underlying;
@@ -308,7 +333,12 @@ describe('displayTransformExchange — showWrappedNativeReserveAsNative + assetO
 
   it('override takes precedence — native name applied but symbol overridden', async () => {
     const result = await hubAssets(client, {
-      query: { hubInput: { chainId: CHAIN_ID, address: evmAddress('0x0000000000000000000000000000000000000001') } },
+      query: {
+        hubInput: {
+          chainId: CHAIN_ID,
+          address: evmAddress('0x0000000000000000000000000000000000000001'),
+        },
+      },
     });
     assertOk(result);
     const token = result.value[0]!.underlying;
