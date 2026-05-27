@@ -321,7 +321,9 @@ describe('deepTransformTokens', () => {
         borrowed: { __typename: 'Erc20Amount', token },
       };
       const result = deepTransformTokens(data, true, null) as typeof data;
-      expect((result.borrowed.token as Erc20TokenShape).info.symbol).toBe('ETH');
+      expect((result.borrowed.token as Erc20TokenShape).info.symbol).toBe(
+        'ETH',
+      );
     });
 
     it('transforms the supplied amount token inside a SupplyActivity', () => {
@@ -331,7 +333,9 @@ describe('deepTransformTokens', () => {
         supplied: { __typename: 'Erc20Amount', token },
       };
       const result = deepTransformTokens(data, true, null) as typeof data;
-      expect((result.supplied.token as Erc20TokenShape).info.symbol).toBe('ETH');
+      expect((result.supplied.token as Erc20TokenShape).info.symbol).toBe(
+        'ETH',
+      );
     });
 
     it('transforms the amount token inside a PositionAmount (swap activity legs)', () => {
@@ -344,7 +348,9 @@ describe('deepTransformTokens', () => {
         },
       };
       const result = deepTransformTokens(data, true, null) as typeof data;
-      expect((result.sell.amount.token as Erc20TokenShape).info.symbol).toBe('ETH');
+      expect((result.sell.amount.token as Erc20TokenShape).info.symbol).toBe(
+        'ETH',
+      );
     });
 
     it('does not transform a TokenAmount buy leg in WithdrawSwapActivity', () => {
