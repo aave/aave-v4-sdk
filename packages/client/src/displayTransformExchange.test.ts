@@ -42,6 +42,15 @@ const MOCK_CHAIN = {
   nativeWrappedToken: WETH_ADDRESS,
   nativeGateway: '0x0000000000000000000000000000000000000000',
   signatureGateway: '0x0000000000000000000000000000000000000000',
+  nativeWrappedInfo: {
+    __typename: 'TokenInfo',
+    id: 'token-info-weth',
+    name: 'Wrapped Ether',
+    symbol: 'WETH',
+    icon: 'weth.svg',
+    decimals: 18,
+    categories: [],
+  },
   nativeInfo: {
     __typename: 'TokenInfo',
     id: 'token-info-eth',
