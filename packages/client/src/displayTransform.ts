@@ -18,6 +18,14 @@ const RESERVE_TYPENAMES = new Set([
   'CollateralFactorVariation',
   'LiquidationFeeVariation',
   'MaxLiquidationBonusVariation',
+  // Activity types: the Erc20Amount fields (borrowed, supplied, repaid, etc.) are reserve
+  // assets and should transform. PositionAmount covers swap-activity position legs.
+  'BorrowActivity',
+  'SupplyActivity',
+  'RepayActivity',
+  'WithdrawActivity',
+  'LiquidatedActivity',
+  'PositionAmount',
 ]);
 
 // Typenames whose Erc20Token descendants should NOT be transformed even when nested inside
