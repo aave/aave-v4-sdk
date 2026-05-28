@@ -10,7 +10,7 @@ export type Erc20TokenShape = {
 
 // Typenames that represent protocol reserve contexts — wrapped-native transform applies to
 // Erc20Token descendants of these nodes.
-const RESERVE_TYPENAMES = new Set([
+const WRAPPED_NATIVE_TRANSFORM_ALLOWLIST = new Set([
   'Reserve',
   'HubAsset',
   'Asset',
@@ -18,8 +18,6 @@ const RESERVE_TYPENAMES = new Set([
   'CollateralFactorVariation',
   'LiquidationFeeVariation',
   'MaxLiquidationBonusVariation',
-  // Activity types: the Erc20Amount fields (borrowed, supplied, repaid, etc.) are reserve
-  // assets and should transform. PositionAmount covers swap-activity position legs.
   'BorrowActivity',
   'SupplyActivity',
   'RepayActivity',
@@ -30,7 +28,7 @@ const RESERVE_TYPENAMES = new Set([
 
 // Typenames whose Erc20Token descendants should NOT be transformed even when nested inside
 // a reserve node — covers user wallet balances and reward payout tokens.
-const WALLET_CONTEXT_TYPENAMES = new Set([
+const WRAPPED_NATIVE_TRANSFORM_BLOCKLIST = new Set([
   'ReserveUserState',
   'HubAssetUserState',
   'MerklSupplyReward',
@@ -88,8 +86,10 @@ export function deepTransformTokens(
 
   let nextWithinReserve = withinReserve;
   if (typename) {
-    if (RESERVE_TYPENAMES.has(typename)) nextWithinReserve = true;
-    if (WALLET_CONTEXT_TYPENAMES.has(typename)) nextWithinReserve = false;
+    if (WRAPPED_NATIVE_TRANSFORM_ALLOWLIST.has(typename))
+      nextWithinReserve = true;
+    if (WRAPPED_NATIVE_TRANSFORM_BLOCKLIST.has(typename))
+      nextWithinReserve = false;
   }
 
   let changed = false;
