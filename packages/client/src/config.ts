@@ -101,7 +101,6 @@ export type ClientConfig = {
   ssr?: SSRConfig;
   /**
    * Controls how asset names, symbols, and icons are displayed.
-   * Display transforms are fixed at client creation — to change them, create a new client.
    *
    * @defaultValue `undefined` (no transforms applied)
    */
