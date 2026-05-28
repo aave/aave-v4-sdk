@@ -47,6 +47,15 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
         signatureGateway: evmAddress(
           '0x0000000000000000000000000000000000000002',
         ),
+        nativeWrappedInfo: {
+          __typename: 'TokenInfo',
+          id: tokenInfoId('2'),
+          name: 'Wrapped Ether',
+          symbol: 'WETH',
+          icon: 'https://example.com/weth-icon.png',
+          decimals: 18,
+          categories: [],
+        },
         nativeInfo: {
           __typename: 'TokenInfo',
           id: tokenInfoId('1'),

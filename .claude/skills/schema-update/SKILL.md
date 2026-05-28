@@ -101,6 +101,18 @@ Add field transformers for enhanced client-side types:
 - Types with `createdAt: DateTime!` (non-nullable) → use `transformToDate`
 - Health factor types have nullable `BigDecimal` fields → use `transformToNullableBigDecimal`
 
+### Update Wrapped-Native Transform Lists
+
+When new object types are added to the schema, evaluate whether they belong in `packages/client/src/displayTransform.ts`:
+
+- [ ] For each new object type, ask: does it represent a **protocol reserve context** (i.e. its `Erc20Token` descendants are reserve assets like WETH that should display as ETH)?
+  - If yes → add to `WRAPPED_NATIVE_TRANSFORM_ALLOWLIST`
+- [ ] Does it represent a **user wallet balance or reward payout** that could appear nested inside a reserve context but should NOT be transformed?
+  - If yes → add to `WRAPPED_NATIVE_TRANSFORM_BLOCKLIST`
+- [ ] If uncertain, ask the user — don't silently skip
+
+**Note:** Types in neither list are transparent — they inherit the transform context from their parent. Only add a type when it needs to *change* the context (turn it on or off).
+
 ### Validate
 
 **IMPORTANT: Do not mark the schema update complete until build and all tests pass.**
@@ -178,3 +190,4 @@ export type InputName = ReturnType<typeof graphql.scalar<'InputName'>>;
 7. **Wrong nullable transformer** - Use `transformToNullableDate`/`transformToNullableBigDecimal` for nullable fields, non-nullable variants for required fields
 8. **Missing type imports in cache.ts** - Add imports for any new types used in the keys section
 9. **Marking complete with failing build/tests** - Always run `pnpm build` and `pnpm test --run` and fix all errors before marking complete
+10. **Skipping the wrapped-native transform evaluation** - Every new object type must be checked against `WRAPPED_NATIVE_TRANSFORM_ALLOWLIST` / `WRAPPED_NATIVE_TRANSFORM_BLOCKLIST` in `displayTransform.ts`; silently omitting it can cause wrong token display
