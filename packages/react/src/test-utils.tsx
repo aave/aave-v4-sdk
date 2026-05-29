@@ -1,8 +1,7 @@
 import { AaveClient } from '@aave/client';
 import { environment } from '@aave/client/testing';
 import { type RenderHookOptions, renderHook } from '@testing-library/react';
-// biome-ignore lint/correctness/noUnusedImports: React is needed for JSX
-import React, {
+import {
   Component,
   type JSXElementConstructor,
   type PropsWithChildren,
