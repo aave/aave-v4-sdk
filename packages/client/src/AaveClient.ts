@@ -20,7 +20,13 @@ import {
 import type { Exchange, Operation, OperationResult } from '@urql/core';
 import { map, pipe } from 'wonka';
 import { hasProcessedKnownTransaction } from './actions';
-import { type ClientConfig, configureContext } from './config';
+import {
+  type AssetOverride,
+  type ClientConfig,
+  configureContext,
+  type DisplayConfig,
+} from './config';
+import { buildAssetOverrideMap, deepTransformTokens } from './displayTransform';
 import {
   isHasProcessedKnownTransactionRequest,
   type TransactionReceipt,
@@ -36,6 +42,10 @@ export class AaveClient extends GqlClient {
     { ids: Set<RewardId>; expiresAt: number }
   >();
 
+  // Both set once by create() after construction — accessed lazily by displayTransformExchange.
+  private displayConfig: DisplayConfig | undefined;
+  private displayOverrideMap: Map<string, AssetOverride> | null = null;
+
   /**
    * Create a new instance of the {@link AaveClient}.
    *
@@ -49,7 +59,12 @@ export class AaveClient extends GqlClient {
    * @returns The new instance of the client.
    */
   static create(options?: ClientConfig): AaveClient {
-    return new AaveClient(configureContext(options ?? {}));
+    const client = new AaveClient(configureContext(options ?? {}));
+    client.displayConfig = options?.display;
+    client.displayOverrideMap = options?.display?.assetOverrides?.length
+      ? buildAssetOverrideMap(options.display.assetOverrides)
+      : null;
+    return client;
   }
 
   /**
@@ -130,7 +145,40 @@ export class AaveClient extends GqlClient {
   }
 
   protected override additionalExchanges(): Exchange[] {
-    return [this.claimResponseTransformExchange()];
+    // These exchanges are outermost in the pipeline — they receive results after graphcache
+    // has already normalised and stored the raw data. The cache always holds untransformed
+    // values; transforms are applied on every result emission before reaching the consumer.
+    return [
+      this.displayTransformExchange(),
+      this.claimResponseTransformExchange(),
+    ];
+  }
+
+  private displayTransformExchange(): Exchange {
+    return ({ forward }) =>
+      (ops$) =>
+        pipe(
+          forward(ops$),
+          map((result: OperationResult) => {
+            const config = this.displayConfig;
+            if (!config || !result.data) return result;
+
+            const applyWrappedNative =
+              config.showWrappedNativeReserveAsNative === true;
+            const overrideMap = this.displayOverrideMap;
+
+            if (!applyWrappedNative && !overrideMap) return result;
+
+            const data = deepTransformTokens(
+              result.data,
+              applyWrappedNative,
+              overrideMap,
+            );
+
+            // Preserve the original result reference if the walk found nothing to transform.
+            return data === result.data ? result : { ...result, data };
+          }),
+        );
   }
 
   private claimResponseTransformExchange(): Exchange {

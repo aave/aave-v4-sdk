@@ -76,6 +76,15 @@ function makeMockReward(id: string) {
           nativeWrappedToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
           nativeGateway: '0x0000000000000000000000000000000000000000',
           signatureGateway: '0x0000000000000000000000000000000000000000',
+          nativeWrappedInfo: {
+            __typename: 'TokenInfo',
+            id: 'token-info-weth',
+            name: 'Wrapped Ether',
+            symbol: 'WETH',
+            icon: null,
+            decimals: 18,
+            categories: [],
+          },
           nativeInfo: {
             __typename: 'TokenInfo',
             id: 'token-info-eth',
