@@ -1120,6 +1120,18 @@
             "args": []
           },
           {
+            "name": "nativeWrappedInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TokenInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "nativeInfo",
             "type": {
               "kind": "NON_NULL",
@@ -4584,6 +4596,42 @@
         "name": "PreviewRewardOutcome",
         "fields": [
           {
+            "name": "abandoned",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ReserveReward",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "acquired",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ReserveReward",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
             "name": "lost",
             "type": {
               "kind": "NON_NULL",
@@ -7152,6 +7200,37 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "HubAsset",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveReward",
+        "fields": [
+          {
+            "name": "reserve",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ReserveInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "reward",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "UNION",
+                "name": "Reward",
                 "ofType": null
               }
             },

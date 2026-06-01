@@ -201,6 +201,7 @@ export function makeChain(): Chain {
     nativeWrappedToken: randomEvmAddress(),
     nativeGateway: randomEvmAddress(),
     signatureGateway: randomEvmAddress(),
+    nativeWrappedInfo: makeTokenInfo('WETH'),
     nativeInfo: makeTokenInfo('WETH'),
   };
 }
@@ -345,6 +346,7 @@ function makeSpoke({
       nativeWrappedToken: randomEvmAddress(),
       nativeGateway: randomEvmAddress(),
       signatureGateway: randomEvmAddress(),
+      nativeWrappedInfo: makeTokenInfo('WETH'),
       nativeInfo: makeTokenInfo('WETH'),
     },
     liquidationConfig: null,

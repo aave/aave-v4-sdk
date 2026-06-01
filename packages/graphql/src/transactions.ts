@@ -11,14 +11,13 @@ import {
   HealthFactorResultFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
-  MerklCriteriaFragment,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   PercentNumberVariationFragment,
-  PointsCriteriaFragment,
-  PointsProgramFragment,
   PositionAmountFragment,
   ReserveInfoFragment,
+  type Reward,
+  RewardFragment,
   SpokeFragment,
   TokenAmountFragment,
   type TransactionRequest,
@@ -266,159 +265,33 @@ export type UserPositionConditionVariation = FragmentOf<
   typeof UserPositionConditionVariationFragment
 >;
 
-export const PreviewMerklSupplyRewardFragment = graphql(
-  `fragment PreviewMerklSupplyReward on PreviewMerklSupplyReward {
+export const ReserveRewardFragment = graphql(
+  `fragment ReserveReward on ReserveReward {
     __typename
-    id
-    startDate
-    endDate
-    extraApy {
-      ...PercentNumber
-    }
-    payoutToken {
-      ...Erc20Token
-    }
-    criteria {
-      ...MerklCriteria
-    }
     reserve {
       ...ReserveInfo
     }
-  }`,
-  [
-    PercentNumberFragment,
-    Erc20TokenFragment,
-    MerklCriteriaFragment,
-    ReserveInfoFragment,
-  ],
-);
-export type PreviewMerklSupplyReward = FragmentOf<
-  typeof PreviewMerklSupplyRewardFragment
->;
-
-export const PreviewMerklBorrowRewardFragment = graphql(
-  `fragment PreviewMerklBorrowReward on PreviewMerklBorrowReward {
-    __typename
-    id
-    startDate
-    endDate
-    discountApy {
-      ...PercentNumber
-    }
-    payoutToken {
-      ...Erc20Token
-    }
-    criteria {
-      ...MerklCriteria
-    }
-    reserve {
-      ...ReserveInfo
+    reward {
+      ...Reward
     }
   }`,
-  [
-    PercentNumberFragment,
-    Erc20TokenFragment,
-    MerklCriteriaFragment,
-    ReserveInfoFragment,
-  ],
+  [ReserveInfoFragment, RewardFragment],
 );
-export type PreviewMerklBorrowReward = FragmentOf<
-  typeof PreviewMerklBorrowRewardFragment
->;
-
-export const PreviewSupplyPointsFragment = graphql(
-  `fragment PreviewSupplyPoints on PreviewSupplyPointsReward {
-    __typename
-    id
-    program {
-      ...PointsProgram
-    }
-    name
-    startDate
-    endDate
-    multiplier
-    criteria {
-      ...PointsCriteria
-    }
-    reserve {
-      ...ReserveInfo
-    }
-  }`,
-  [PointsProgramFragment, PointsCriteriaFragment, ReserveInfoFragment],
-);
-export type PreviewSupplyPoints = FragmentOf<
-  typeof PreviewSupplyPointsFragment
->;
-
-export const PreviewBorrowPointsFragment = graphql(
-  `fragment PreviewBorrowPoints on PreviewBorrowPointsReward {
-    __typename
-    id
-    program {
-      ...PointsProgram
-    }
-    name
-    startDate
-    endDate
-    multiplier
-    criteria {
-      ...PointsCriteria
-    }
-    reserve {
-      ...ReserveInfo
-    }
-  }`,
-  [PointsProgramFragment, PointsCriteriaFragment, ReserveInfoFragment],
-);
-export type PreviewBorrowPoints = FragmentOf<
-  typeof PreviewBorrowPointsFragment
->;
-
-export type PreviewReward = ExtendWithOpaqueType<
-  | PreviewMerklSupplyReward
-  | PreviewMerklBorrowReward
-  | PreviewSupplyPoints
-  | PreviewBorrowPoints
->;
-
-export const PreviewRewardFragment: FragmentDocumentFor<
-  PreviewReward,
-  'PreviewReward'
-> = graphql(
-  `fragment PreviewReward on PreviewReward {
-    __typename
-    ... on PreviewMerklSupplyReward {
-      ...PreviewMerklSupplyReward
-    }
-    ... on PreviewMerklBorrowReward {
-      ...PreviewMerklBorrowReward
-    }
-    ... on PreviewSupplyPointsReward {
-      ...PreviewSupplyPoints
-    }
-    ... on PreviewBorrowPointsReward {
-      ...PreviewBorrowPoints
-    }
-  }`,
-  [
-    PreviewMerklSupplyRewardFragment,
-    PreviewMerklBorrowRewardFragment,
-    PreviewSupplyPointsFragment,
-    PreviewBorrowPointsFragment,
-  ],
-);
+export type ReserveReward = FragmentOf<typeof ReserveRewardFragment> & {
+  reward: Reward;
+};
 
 export const PreviewRewardOutcomeFragment = graphql(
   `fragment PreviewRewardOutcome on PreviewRewardOutcome {
     __typename
-    lost {
-      ...PreviewReward
+    abandoned {
+      ...ReserveReward
     }
-    gained {
-      ...PreviewReward
+    acquired {
+      ...ReserveReward
     }
   }`,
-  [PreviewRewardFragment],
+  [ReserveRewardFragment],
 );
 export type PreviewRewardOutcome = FragmentOf<
   typeof PreviewRewardOutcomeFragment

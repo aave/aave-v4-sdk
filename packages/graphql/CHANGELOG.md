@@ -1,5 +1,24 @@
 # @aave/graphql
 
+## 3.0.0
+
+### Major Changes
+
+- 68eb092: Realign with backend after the PreviewReward types were restored. The backend now exposes both the legacy `PreviewReward` union (`PreviewMerkl{Supply,Borrow}Reward` + `Preview{Supply,Borrow}PointsReward`) via deprecated `PreviewRewardOutcome.lost` / `.gained`, and the new wrapper as `ReserveReward` via `PreviewRewardOutcome.abandoned` / `.acquired`. Rename `PreviewRewardChange` to `ReserveReward` and switch the `PreviewRewardOutcome` fragment to query `abandoned` / `acquired` (breaking for the previous 2.0.0 shape).
+
+## 2.0.0
+
+### Major Changes
+
+- 8fc4e62: Unify preview reward types into PreviewRewardChange { reserve, reward } reusing the Reward union; removes PreviewMerkl*/PreviewPoints* preview-specific types and the PreviewReward union (breaking).
+
+## 1.2.0
+
+### Minor Changes
+
+- cfceb7e: **feat:** add `reservesCount` and `activeReservesCount` to `AssetSummary`
+- c4dc4b1: **feat:** add `SpokeSummary`, `SpokeConnectedHub`, `HubSpokeConfig`, and `SpokeSummarySample` types; extend `Spoke` fragment with `summary` and `connectedHubs` fields; add `spokeSummaryHistory` and `hubSpokeConfigs` queries, actions, and hooks (`useHubSpokeConfigs`)
+
 ## 1.1.1
 
 ### Patch Changes

@@ -268,6 +268,7 @@ type Chain {
   explorerUrl: String!
   isTestnet: Boolean!
   nativeWrappedToken: EvmAddress!
+  nativeWrappedInfo: TokenInfo!
   nativeInfo: TokenInfo!
   nativeGateway: EvmAddress!
   signatureGateway: EvmAddress!
@@ -1406,8 +1407,10 @@ type PreviewReserveRates {
 union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | PreviewSupplyPointsReward | PreviewBorrowPointsReward
 
 type PreviewRewardOutcome {
-  lost: [PreviewReward!]!
-  gained: [PreviewReward!]!
+  abandoned: [ReserveReward!]!
+  acquired: [ReserveReward!]!
+  lost: [PreviewReward!]! @deprecated(reason: "Use abandoned with ReserveReward instead.")
+  gained: [PreviewReward!]! @deprecated(reason: "Use acquired with ReserveReward instead.")
 }
 
 type PreviewSupplyPointsReward {
@@ -1787,6 +1790,11 @@ input ReserveRequest {
 input ReserveRequestQuery @oneOf {
   reserveId: ReserveId
   reserveInput: ReserveInput
+}
+
+type ReserveReward {
+  reserve: ReserveInfo!
+  reward: Reward!
 }
 
 type ReserveSettings {
@@ -3051,8 +3059,26 @@ type UserPosition {
 
   """The net collateral which is `totalCollateral` - `totalDebt`"""
   netCollateral(currency: Currency! = USD): ExchangeAmountWithChange!
+
+  """
+  Net APY across the user's supplies and borrows. Composes
+  [`net_supply_apy`] and [`net_borrow_apy`], both of which include the
+  user's eligible Merkl reward APY on top of base supply / borrow rates.
+  """
   netApy: PercentNumber!
+
+  """
+  Net supply APY weighted by USD balance. Includes the user's eligible
+  Merkl supply reward APY (`extra_apy`) on top of each reserve's base
+  supply rate.
+  """
   netSupplyApy: PercentNumberWithChange!
+
+  """
+  Net borrow APY weighted by USD debt. Subtracts the user's eligible
+  Merkl borrow reward APY (`discount_apy`) from each reserve's base
+  borrow rate.
+  """
   netBorrowApy: PercentNumberWithChange!
 
   """
@@ -3157,6 +3183,12 @@ type UserSummary {
 
   """
   Net APY = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
+  
+  Per-position `supply_apy_i` and `borrow_apy_j` include the user's
+  eligible Merkl reward APY (via [`UserPosition::net_supply_apy`] /
+  [`UserPosition::net_borrow_apy`]). Historical NET APY in
+  [`get_user_summary_history`] stays base-only because Merkl APR has no
+  historical campaign data.
   """
   netApy: PercentNumber!
 

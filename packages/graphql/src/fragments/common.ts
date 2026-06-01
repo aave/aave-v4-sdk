@@ -85,6 +85,9 @@ export const ChainFragment = graphql(
     nativeWrappedToken
     nativeGateway
     signatureGateway
+    nativeWrappedInfo {
+      ...TokenInfo
+    }
     nativeInfo {
       ...TokenInfo
     }

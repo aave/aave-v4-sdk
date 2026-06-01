@@ -151,22 +151,6 @@ export const exchange = cacheExchange({
       startDate: transformToDate,
       endDate: transformToNullableDate,
     },
-    PreviewBorrowPointsReward: {
-      startDate: transformToDate,
-      endDate: transformToNullableDate,
-    },
-    PreviewMerklBorrowReward: {
-      startDate: transformToDate,
-      endDate: transformToDate,
-    },
-    PreviewMerklSupplyReward: {
-      startDate: transformToDate,
-      endDate: transformToDate,
-    },
-    PreviewSupplyPointsReward: {
-      startDate: transformToDate,
-      endDate: transformToNullableDate,
-    },
     SupplyPointsReward: {
       startDate: transformToDate,
       endDate: transformToNullableDate,
@@ -435,7 +419,7 @@ export const exchange = cacheExchange({
     WithdrawSwapActivity: (data: WithdrawSwapActivity) => data.id,
 
     // Entities with address field as key
-    Erc20Token: (data: Erc20Token) => data.address,
+    Erc20Token: (data: Erc20Token) => `${data.chain.chainId}:${data.address}`,
 
     // Entities with other fields as key
     Chain: (data: Chain) => data.chainId.toString(),
@@ -504,17 +488,14 @@ export const exchange = cacheExchange({
     PreContractActionRequired: () => null,
     PrepareSwapCancelResult: () => null,
     PrepareSwapOrder: () => null,
-    PreviewBorrowPointsReward: () => null,
-    PreviewMerklBorrowReward: () => null,
-    PreviewMerklSupplyReward: () => null,
     PreviewReserveRates: () => null,
     PreviewRewardOutcome: () => null,
-    PreviewSupplyPointsReward: () => null,
     PreviewUserPosition: () => null,
     ProtocolHistorySample: () => null,
     RepayWithSupply: () => null,
     RepayWithSupplyQuoteResult: () => null,
     ReserveHolder: () => null,
+    ReserveReward: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,
     ReserveSummary: () => null,
