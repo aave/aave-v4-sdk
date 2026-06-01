@@ -1,0 +1,29 @@
+packages/client/src/displayTransform.ts
+  s_48855a1f262dd7::t_2cfd3872356cb9 13
+  s_48855a1f262dd7::t_bfb777be36c200 31
+  s_48855a1f262dd7::t_73e2c2c16b722c 89-92
+.claude/skills/schema-update/SKILL.md
+  s_48855a1f262dd7::t_6461b0d39e89d6 104-115
+  s_48855a1f262dd7::t_257b4d6be84ef6 193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "eaffcf0d9f4c91cfe5fa9ad65b3b5b79d3909ff2",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_48855a1f262dd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c718f11-d14a-4af8-ad12-17e0f9253e47",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
