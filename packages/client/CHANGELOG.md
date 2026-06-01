@@ -1,5 +1,24 @@
 # @aave/client
 
+## 6.1.0
+
+### Minor Changes
+
+- 0ebdca4: **feat:** add `display` config to `AaveClient.create()` for asset display transforms
+
+  Adds a `display` option to `ClientConfig` with two settings:
+
+  - `showWrappedNativeReserveAsNative` — when `true`, wrapped native tokens (e.g. WETH) are shown using the native asset's name, symbol, and icon (e.g. ETH) within protocol reserve contexts (`Reserve`, `HubAsset`, `Asset`). Wallet balance, reward payout, and swap queries are unaffected.
+  - `assetOverrides` — per-asset display overrides applied globally across all queries, keyed by `chainId` and `address`. Each entry takes a `display` object with optional `name`, `symbol`, and `icon` fields. If both settings target the same token, `assetOverrides` takes precedence.
+
+  Transforms are applied by a urql exchange that runs after `graphcache` in the result pipeline — the cache always stores raw untransformed data. The underlying `isWrappedNativeToken` flag and token `address` are preserved.
+
+### Patch Changes
+
+- 1d8269d: **fix:** Scope the urql graphcache key for `Erc20Token` by chain. The previous key used only `address`, which collapsed the same token contract across chains (e.g. the same ERC-20 on a mainnet and on a Tenderly fork) into a single cache entry — the embedded `chain` field was overwritten on each write, so any read through `Erc20Token.chain` (such as `Reserve.asset.underlying.chain`) returned the wrong chain. The key is now `${chain.chainId}:${address}`.
+- Updated dependencies [0ebdca4]
+  - @aave/graphql@3.0.1
+
 ## 6.0.0
 
 ### Major Changes

@@ -1,5 +1,15 @@
 # @aave/react
 
+## 6.1.0
+
+### Patch Changes
+
+- Updated dependencies [0ebdca4]
+- Updated dependencies [1d8269d]
+- Updated dependencies [0ebdca4]
+  - @aave/client@6.1.0
+  - @aave/graphql@3.0.1
+
 ## 6.0.0
 
 ### Patch Changes

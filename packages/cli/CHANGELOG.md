@@ -1,5 +1,17 @@
 # @aave/cli
 
+## 4.3.0
+
+### Minor Changes
+
+- e35158c: **feat:** add rewards commands to the CLI
+
+### Patch Changes
+
+- Updated dependencies [0ebdca4]
+- Updated dependencies [1d8269d]
+  - @aave/client@6.1.0
+
 ## 4.2.4
 
 ### Patch Changes
