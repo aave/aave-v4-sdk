@@ -1,0 +1,19 @@
+packages/client/src/cache.ts
+  s_0d0b7af46444d1::t_77a9ca52a85fd3 422
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b907c508e8694cff89f1b4ed5d77048dd890baf3",
+  "prompts": {},
+  "sessions": {
+    "s_0d0b7af46444d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13d34828-347d-4cb0-85cb-e1bcdb5aadc1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
