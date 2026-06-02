@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 3.0.1
+
+### Patch Changes
+
+- 0ebdca4: **feat:** add `nativeWrappedInfo` field to `Chain` fragment
+
 ## 3.0.0
 
 ### Major Changes
