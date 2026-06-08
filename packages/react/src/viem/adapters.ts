@@ -36,6 +36,13 @@ export function useSendTransaction(
 
   return useAsyncTask(
     (request: TransactionRequest) => {
+      if (!walletClient) {
+        console.debug('[aave-sdk] useSendTransaction: walletClient unavailable', {
+          value: walletClient, // null = wagmi invalidated; undefined = never connected
+          requestChainId: request.chainId,
+        });
+      }
+
       invariant(
         walletClient,
         'Expected a WalletClient to handle the operation result.',
