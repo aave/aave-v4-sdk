@@ -140,20 +140,21 @@ export function ensureChain(
   aaveClient: AaveClient,
   walletClient: WalletClient,
   request: TransactionRequest,
-): ResultAsync<void, CancelError | SigningError | UnexpectedError> {
+): ResultAsync<ViemChain, CancelError | SigningError | UnexpectedError> {
   return ResultAsync.fromPromise(walletClient.getChainId(), (err) =>
     SigningError.from(err),
-  ).andThen((chainId) => {
-    if (chainId === request.chainId) {
-      return okAsync();
-    }
-
-    return fetchChain(
+  ).andThen((currentChainId) =>
+    fetchChain(
       aaveClient,
       { chainId: request.chainId },
       { batch: false },
     ).andThen((chain) => {
       invariant(chain, `Chain ${request.chainId} is not supported`);
+      const viemChain = toViemChain(chain);
+
+      if (currentChainId === request.chainId) {
+        return okAsync(viemChain);
+      }
 
       return ResultAsync.fromPromise(
         walletClient.switchChain({ id: request.chainId }),
@@ -169,7 +170,7 @@ export function ensureChain(
 
         if (code === SwitchChainError.code) {
           return ResultAsync.fromPromise(
-            walletClient.addChain({ chain: toViemChain(chain) }),
+            walletClient.addChain({ chain: viemChain }),
             (err) => {
               if (
                 isRpcError(err) &&
@@ -183,9 +184,9 @@ export function ensureChain(
         }
 
         return err.asResultAsync();
-      });
-    });
-  });
+      }).map(() => viemChain);
+    }),
+  );
 }
 
 function estimateGas(
@@ -207,6 +208,7 @@ function estimateGas(
 function sendEip1559Transaction(
   walletClient: WalletClient<Transport, ViemChain, Account>,
   request: TransactionRequest,
+  chain?: ViemChain,
 ): ResultAsync<TxHash, CancelError | SigningError> {
   return estimateGas(walletClient, request)
     .andThen((gas) =>
@@ -216,7 +218,7 @@ function sendEip1559Transaction(
           data: request.data,
           to: request.to,
           value: BigInt(request.value),
-          chain: walletClient.chain,
+          chain: chain ?? walletClient.chain,
           gas,
         }),
         (err) => {
@@ -248,13 +250,14 @@ function isWalletClientWithAccount(
 export function sendTransaction(
   walletClient: WalletClient,
   request: TransactionRequest,
+  chain?: ViemChain,
 ): ResultAsync<TxHash, CancelError | SigningError> {
   invariant(
     isWalletClientWithAccount(walletClient),
     'Wallet client with account is required',
   );
 
-  return sendEip1559Transaction(walletClient, request);
+  return sendEip1559Transaction(walletClient, request, chain);
 }
 
 /**

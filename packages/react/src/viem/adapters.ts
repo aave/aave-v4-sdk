@@ -42,7 +42,7 @@ export function useSendTransaction(
       );
 
       return ensureChain(client, walletClient, request)
-        .andThen(() => sendTransaction(walletClient, request))
+        .andThen((chain) => sendTransaction(walletClient, request, chain))
         .map(
           (hash) =>
             new PendingTransaction(() =>
