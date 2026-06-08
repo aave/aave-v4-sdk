@@ -1,0 +1,28 @@
+packages/react/src/viem/adapters.ts
+  s_f76328716623f2::t_52c06ae9945d41 45
+packages/client/src/viem.ts
+  s_f76328716623f2::t_65d366831edb33 211,221
+  s_f76328716623f2::t_3682560327d9dd 143,146-147,153-157,173,187-189
+  s_f76328716623f2::t_6624e7bfbb5827 253,260
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "7df0c8c109cb5bc0e98012169a6f5736659f6b6b",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_f76328716623f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c7d1bece-801a-42f0-b9a4-10f597337295",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
