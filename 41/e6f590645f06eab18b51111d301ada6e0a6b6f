@@ -1,0 +1,19 @@
+.changeset/silver-cups-fly.md
+  s_f76328716623f2::t_e58a15ecad8959 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "41e6f590645f06eab18b51111d301ada6e0a6b6f",
+  "prompts": {},
+  "sessions": {
+    "s_f76328716623f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c7d1bece-801a-42f0-b9a4-10f597337295",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
