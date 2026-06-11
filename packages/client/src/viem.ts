@@ -161,10 +161,7 @@ export function ensureChain(
         return ResultAsync.fromPromise(
           walletClient.addChain({ chain }),
           (err) => {
-            if (
-              isRpcError(err) &&
-              err.code === UserRejectedRequestError.code
-            ) {
+            if (isRpcError(err) && err.code === UserRejectedRequestError.code) {
               return CancelError.from(err);
             }
             return SigningError.from(err);
