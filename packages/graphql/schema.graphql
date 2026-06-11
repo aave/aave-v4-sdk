@@ -191,6 +191,7 @@ type BorrowActivity {
 input BorrowApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+  includeRewards: Boolean! = true
 }
 
 type BorrowPointsReward {
@@ -2332,6 +2333,7 @@ type SupplyActivity {
 input SupplyApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+  includeRewards: Boolean! = true
 }
 
 type SupplyPointsReward {
