@@ -12,6 +12,9 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
+  type MultichainAsset,
+  MultichainAssetQuery,
+  type MultichainAssetRequest,
   ProtocolHistoryQuery,
   type ProtocolHistoryRequest,
   type ProtocolHistorySample,
@@ -52,6 +55,39 @@ export function asset(
 ): ResultAsync<Asset | null, UnexpectedError> {
   return client.query(
     AssetQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
+}
+
+/**
+ * Fetches information about an asset (ERC20 token) aggregated across multiple chains,
+ * matched by its token info ID or symbol.
+ *
+ * ```ts
+ * const result = await multichainAsset(client, {
+ *   query: { symbol: 'USDC' }
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The multichain asset request parameters.
+ * @param options - The query options including currency and time window.
+ * @returns The aggregated multichain asset data.
+ */
+export function multichainAsset(
+  client: AaveClient,
+  request: MultichainAssetRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<MultichainAsset, UnexpectedError> {
+  return client.query(
+    MultichainAssetQuery,
     { request, currency, timeWindow },
     { requestPolicy },
   );

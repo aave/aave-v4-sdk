@@ -172,6 +172,86 @@ export type AssetRequestQuery = ReturnType<
   typeof graphql.scalar<'AssetRequestQuery'>
 >;
 
+export const MultichainAssetSummaryFragment = graphql(
+  `fragment MultichainAssetSummary on MultichainAssetSummary {
+      __typename
+      totalSupplied {
+        ...ExchangeAmount
+      }
+      totalBorrowed {
+        ...ExchangeAmount
+      }
+      totalSupplyCap {
+        ...ExchangeAmount
+      }
+      totalBorrowCap {
+        ...ExchangeAmount
+      }
+      totalAvailableLiquidity {
+        ...ExchangeAmount
+      }
+      utilizationRate {
+        ...PercentNumber
+      }
+      highestSupplyApy {
+        ...PercentNumber
+      }
+      lowestSupplyApy {
+        ...PercentNumber
+      }
+      averageSupplyApy {
+        ...PercentNumber
+      }
+      highestBorrowApy {
+        ...PercentNumber
+      }
+      lowestBorrowApy {
+        ...PercentNumber
+      }
+      averageBorrowApy {
+        ...PercentNumber
+      }
+      chainCount
+      reservesCount
+      activeReservesCount
+    }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type MultichainAssetSummary = FragmentOf<
+  typeof MultichainAssetSummaryFragment
+>;
+
+export const MultichainAssetFragment = graphql(
+  `fragment MultichainAsset on MultichainAsset {
+      __typename
+      assets {
+        ...Asset
+      }
+      summary {
+        ...MultichainAssetSummary
+      }
+    }`,
+  [AssetFragment, MultichainAssetSummaryFragment],
+);
+export type MultichainAsset = FragmentOf<typeof MultichainAssetFragment>;
+
+/**
+ * @internal
+ */
+export const MultichainAssetQuery = graphql(
+  `query MultichainAsset($request: MultichainAssetRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
+      value: multichainAsset(request: $request) {
+        ...MultichainAsset
+      }
+    }`,
+  [MultichainAssetFragment],
+);
+export type MultichainAssetRequest = RequestOf<typeof MultichainAssetQuery>;
+
+export type MultichainAssetRequestQuery = ReturnType<
+  typeof graphql.scalar<'MultichainAssetRequestQuery'>
+>;
+
 /**
  * @internal
  */
