@@ -17,6 +17,9 @@ import {
   AssetSupplyHistoryQuery,
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
+  type MultichainAsset,
+  MultichainAssetQuery,
+  type MultichainAssetRequest,
   ProtocolHistoryQuery,
   type ProtocolHistoryRequest,
   type ProtocolHistorySample,
@@ -108,6 +111,97 @@ export function useAsset({
 }): SuspendableResult<Asset | null, UnexpectedError> {
   return useSuspendableQuery({
     document: AssetQuery,
+    variables: {
+      request,
+      currency,
+      timeWindow,
+    },
+    suspense,
+    pause,
+  });
+}
+
+export type UseMultichainAssetArgs = Prettify<
+  MultichainAssetRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+>;
+
+/**
+ * Fetch information about an asset (ERC20 token) aggregated across multiple chains,
+ * matched by its token info ID or symbol.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useMultichainAsset({
+ *   query: { symbol: 'USDC' },
+ *   suspense: true,
+ * });
+ * // data will be MultichainAsset
+ * ```
+ */
+export function useMultichainAsset(
+  args: UseMultichainAssetArgs & Suspendable,
+): SuspenseResult<MultichainAsset>;
+/**
+ * Fetch information about an asset (ERC20 token) aggregated across multiple chains,
+ * matched by its token info ID or symbol.
+ *
+ * Pausable suspense mode.
+ *
+ * ```tsx
+ * const { data } = useMultichainAsset({
+ *   query: { symbol: 'USDC' },
+ *   suspense: true,
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useMultichainAsset(
+  args: Pausable<UseMultichainAssetArgs> & Suspendable,
+): PausableSuspenseResult<MultichainAsset>;
+/**
+ * Fetch information about an asset (ERC20 token) aggregated across multiple chains,
+ * matched by its token info ID or symbol.
+ *
+ * ```tsx
+ * const { data, error, loading } = useMultichainAsset({
+ *   query: { symbol: 'USDC' },
+ * });
+ * // data will be MultichainAsset
+ * ```
+ */
+export function useMultichainAsset(
+  args: UseMultichainAssetArgs,
+): ReadResult<MultichainAsset>;
+/**
+ * Fetch information about an asset (ERC20 token) aggregated across multiple chains,
+ * matched by its token info ID or symbol.
+ *
+ * Pausable loading state mode.
+ *
+ * ```tsx
+ * const { data, error, loading, paused } = useMultichainAsset({
+ *   query: { symbol: 'USDC' },
+ *   pause: true,
+ * });
+ * ```
+ */
+export function useMultichainAsset(
+  args: Pausable<UseMultichainAssetArgs>,
+): PausableReadResult<MultichainAsset>;
+
+export function useMultichainAsset({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  ...request
+}: NullishDeep<UseMultichainAssetArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<MultichainAsset, UnexpectedError> {
+  return useSuspendableQuery({
+    document: MultichainAssetQuery,
     variables: {
       request,
       currency,
