@@ -4,4 +4,4 @@
 "@aave/react": minor
 ---
 
-Added `includeRewards` to borrow and supply APY history requests.
+**feat:** Added `includeRewards` to borrow and supply APY history requests.
