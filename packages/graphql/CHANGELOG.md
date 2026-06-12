@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 3.1.0
+
+### Minor Changes
+
+- f353446: **feat:** Added `includeRewards` to borrow and supply APY history requests.
+
 ## 3.0.1
 
 ### Patch Changes

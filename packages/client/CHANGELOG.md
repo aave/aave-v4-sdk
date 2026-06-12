@@ -1,5 +1,16 @@
 # @aave/client
 
+## 6.2.0
+
+### Minor Changes
+
+- f353446: **feat:** Added `includeRewards` to borrow and supply APY history requests.
+
+### Patch Changes
+
+- Updated dependencies [f353446]
+  - @aave/graphql@3.1.0
+
 ## 6.1.0
 
 ### Minor Changes
