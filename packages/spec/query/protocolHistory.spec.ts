@@ -1,4 +1,4 @@
-import { assertOk, chainId, Currency, TimeWindow } from '@aave/client';
+import { assertOk, Currency, chainId, TimeWindow } from '@aave/client';
 import { protocolHistory } from '@aave/client/actions';
 import { client } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
