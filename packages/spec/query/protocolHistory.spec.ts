@@ -1,4 +1,4 @@
-import { assertOk, Currency, TimeWindow } from '@aave/client';
+import { assertOk, chainId, Currency, TimeWindow } from '@aave/client';
 import { protocolHistory } from '@aave/client/actions';
 import { client } from '@aave/client/testing';
 import { describe, expect, it } from 'vitest';
@@ -65,6 +65,26 @@ describe('Given a user who wants to query protocol-wide historical data', () => 
         expect.objectContaining({
           deposits: expect.objectContaining({ name: 'GBP' }),
           borrows: expect.objectContaining({ name: 'GBP' }),
+        }),
+      );
+    });
+  });
+
+  describe('When fetching protocol history for a specific chain', () => {
+    it('Then it should return protocol history data filtered by chain', async () => {
+      const result = await protocolHistory(client, {
+        chainId: chainId(1),
+        window: TimeWindow.LastWeek,
+      });
+      assertOk(result);
+
+      const { now, startDate } = getTimeWindowDates(TimeWindow.LastWeek);
+      expect(result.value).toBeArrayWithElements(
+        expect.objectContaining({
+          __typename: 'ProtocolHistorySample',
+          date: expect.toBeBetweenDates(startDate, now),
+          deposits: expect.any(Object),
+          borrows: expect.any(Object),
         }),
       );
     });
