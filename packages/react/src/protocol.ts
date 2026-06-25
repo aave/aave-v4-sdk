@@ -387,7 +387,7 @@ export type UseProtocolHistoryArgs = ProtocolHistoryRequest;
  *
  * ```tsx
  * const { data } = useProtocolHistory({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(137)],
  *   currency: Currency.Usd,
  *   window: TimeWindow.LastWeek,
  *   suspense: true,

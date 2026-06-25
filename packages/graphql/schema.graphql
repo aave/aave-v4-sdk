@@ -1448,7 +1448,7 @@ type PreviewUserPosition {
 }
 
 input ProtocolHistoryRequest {
-  chainId: ChainId
+  chainIds: [ChainId!]
   currency: Currency! = USD
   window: TimeWindow! = LAST_DAY
 }

@@ -70,10 +70,10 @@ describe('Given a user who wants to query protocol-wide historical data', () => 
     });
   });
 
-  describe('When fetching protocol history for a specific chain', () => {
-    it('Then it should return protocol history data filtered by chain', async () => {
+  describe('When fetching protocol history for specific chains', () => {
+    it('Then it should return protocol history data filtered by chains', async () => {
       const result = await protocolHistory(client, {
-        chainId: chainId(1),
+        chainIds: [chainId(1)],
         window: TimeWindow.LastWeek,
       });
       assertOk(result);

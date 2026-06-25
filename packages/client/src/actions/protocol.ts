@@ -165,7 +165,7 @@ export function assetBorrowHistory(
  *
  * ```ts
  * const result = await protocolHistory(client, {
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(137)],
  *   currency: Currency.Usd,
  *   window: TimeWindow.LastWeek,
  * });
