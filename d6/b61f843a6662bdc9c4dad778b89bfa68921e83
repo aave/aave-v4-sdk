@@ -1,0 +1,27 @@
+packages/graphql/src/graphql-env.d.ts
+  s_4b643339b085a4::t_18f66a1e45b808 195,436
+packages/client/src/actions/protocol.ts
+  s_4b643339b085a4::t_4dabb1442d99c4 168
+packages/spec/query/protocolHistory.spec.ts
+  s_4b643339b085a4::t_0431a2f557db6c 73-74,76
+packages/react/src/protocol.ts
+  s_4b643339b085a4::t_7270180a0336dd 390
+packages/graphql/schema.graphql
+  s_4b643339b085a4::t_a505c9b929900b 1451
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "d6b61f843a6662bdc9c4dad778b89bfa68921e83",
+  "prompts": {},
+  "sessions": {
+    "s_4b643339b085a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b724d6b3-bb69-4e5e-afc4-ab2bb52bb806",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
