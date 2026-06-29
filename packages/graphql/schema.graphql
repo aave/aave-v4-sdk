@@ -1082,6 +1082,7 @@ type MerklBorrowReward {
   endDate: DateTime!
   discountApy: PercentNumber!
   payoutToken: Erc20Token!
+  displayPayoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   userEligible: Boolean!
 }
@@ -1100,6 +1101,7 @@ type MerklSupplyReward {
   endDate: DateTime!
   extraApy: PercentNumber!
   payoutToken: Erc20Token!
+  displayPayoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   userEligible: Boolean!
 }
@@ -1382,6 +1384,7 @@ type PreviewMerklBorrowReward {
   endDate: DateTime!
   discountApy: PercentNumber!
   payoutToken: Erc20Token!
+  displayPayoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   reserve: ReserveInfo!
 }
@@ -1392,6 +1395,7 @@ type PreviewMerklSupplyReward {
   endDate: DateTime!
   extraApy: PercentNumber!
   payoutToken: Erc20Token!
+  displayPayoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   reserve: ReserveInfo!
 }

@@ -3009,6 +3009,18 @@
             "args": []
           },
           {
+            "name": "displayPayoutToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "criteria",
             "type": {
               "kind": "NON_NULL",
@@ -3141,6 +3153,18 @@
           },
           {
             "name": "payoutToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "displayPayoutToken",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4418,6 +4442,18 @@
             "args": []
           },
           {
+            "name": "displayPayoutToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "criteria",
             "type": {
               "kind": "NON_NULL",
@@ -4501,6 +4537,18 @@
           },
           {
             "name": "payoutToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "displayPayoutToken",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

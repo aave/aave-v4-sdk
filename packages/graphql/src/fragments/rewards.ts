@@ -84,6 +84,9 @@ export const MerklSupplyRewardFragment = graphql(
     payoutToken {
       ...Erc20Token
     }
+    displayPayoutToken {
+      ...Erc20Token
+    }
     criteria {
       ...MerklCriteria
     }
@@ -103,6 +106,9 @@ export const MerklBorrowRewardFragment = graphql(
       ...PercentNumber
     }
     payoutToken {
+      ...Erc20Token
+    }
+    displayPayoutToken {
       ...Erc20Token
     }
     criteria {
