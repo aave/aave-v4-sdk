@@ -1,0 +1,27 @@
+packages/graphql/src/fragments/rewards.ts
+  s_279ddbbd46953f::t_494d9bc87600eb 87-89,111-113
+packages/graphql/schema.graphql
+  s_279ddbbd46953f::t_c0902bc44bc70e 1085,1104,1387,1398
+.changeset/bright-rewards-display.md
+  s_279ddbbd46953f::t_396de947021eef 1-7
+packages/graphql/src/graphql-env.d.ts
+  s_279ddbbd46953f::t_a131501a147433 142,145,187-188
+packages/graphql/src/schema.json
+  s_279ddbbd46953f::t_167377fe547659 3011-3022,3166-3177,4444-4455,4550-4561
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "5cfbe35f097a3b59a1bfe40fdfdb612eca52ad56",
+  "prompts": {},
+  "sessions": {
+    "s_279ddbbd46953f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1266-dace-7a00-93a7-aafd2843a014",
+        "model": "gpt-5.5"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
