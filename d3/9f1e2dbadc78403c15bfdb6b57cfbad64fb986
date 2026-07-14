@@ -1,0 +1,48 @@
+packages/graphql/schema.graphql
+  s_3bd48701485e9f::t_d17269760a6aaa 531-535,571-572,1003-1004,1008-1022,1145-1150,1522,1984-1989,2693-2702,2739-2743,3419-3423,3509
+packages/graphql/src/graphql.ts
+  s_3bd48701485e9f::t_e3c9807363edfd 96
+packages/client/src/rewards-readquery.test.ts
+  s_3bd48701485e9f::t_401577a065eef9 95
+  s_3bd48701485e9f::t_6bd37d270b36b4 63
+  s_3bd48701485e9f::t_287f597c44a92d 85
+packages/client/src/displayTransform.test.ts
+  s_3bd48701485e9f::t_afcb4b046b65be 20
+  s_3bd48701485e9f::t_ef88a732595051 32
+packages/graphql/src/transactions.ts
+  s_3bd48701485e9f::t_dbf23ad001f044 520-525,530
+packages/client/src/cache.ts
+  s_3bd48701485e9f::t_e43ef4988cca05 166
+.changeset/short-liquidation-facts.md
+  s_3bd48701485e9f::t_0660673d2b8fcd 1-7
+packages/graphql/src/graphql-env.d.ts
+  s_3bd48701485e9f::t_b9f84816e00b58 80,87,134,148,200,236,332,337,408
+packages/react/src/viem/useNetworkFee.test.ts
+  s_3bd48701485e9f::t_28640008ad3895 55
+  s_3bd48701485e9f::t_292f48ddf06700 65
+packages/graphql/src/schema.json
+  s_3bd48701485e9f::t_d17269760a6aaa 2804-2827,2862-2872,10099-10109
+packages/client/src/displayTransformExchange.test.ts
+  s_3bd48701485e9f::t_f8625f0661622c 50,60
+  s_3bd48701485e9f::t_3e2359208cb454 112
+packages/graphql/src/fragments/common.ts
+  s_3bd48701485e9f::t_4b603367c1bf25 68
+packages/graphql/src/testing.ts
+  s_3bd48701485e9f::t_fb224f17a66079 185
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "d39f1e2dbadc78403c15bfdb6b57cfbad64fb986",
+  "prompts": {},
+  "sessions": {
+    "s_3bd48701485e9f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e0d8c2b-7c0b-4f7f-a792-5d854aa0b758",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
