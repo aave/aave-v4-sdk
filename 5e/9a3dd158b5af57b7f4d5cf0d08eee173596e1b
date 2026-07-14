@@ -1,0 +1,19 @@
+.github/actions/setup/action.yml
+  s_67be8739e609fa::t_3bff8e38055191 16-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "5e9a3dd158b5af57b7f4d5cf0d08eee173596e1b",
+  "prompts": {},
+  "sessions": {
+    "s_67be8739e609fa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ba85a70-4c1d-4a0f-8e53-aebb693b7a62",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
