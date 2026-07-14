@@ -517,10 +517,17 @@ export const LiquidatedActivityFragment = graphql(
     collateral {
       ...Erc20Amount
     }
+    liquidatorReceived {
+      ...Erc20Amount
+    }
+    liquidationFee {
+      ...Erc20Amount
+    }
     debt {
       ...Erc20Amount
     }
     liquidator
+    liquidationHealthFactor
     chain {
       ...Chain
     }

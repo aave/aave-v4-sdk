@@ -528,6 +528,11 @@ input ForkTopUpRequest {
   Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction
   """
   native: BigDecimal
+
+  """
+  Fork to top up on. Defaults to the fork inferred from the request origin.
+  """
+  chainId: ChainId
 }
 
 type ForkTopUpResponse {
@@ -562,6 +567,8 @@ input HasProcessedKnownTransactionRequest {
   """The tx hash"""
   txHash: TxHash!
 }
+
+scalar HealthFactor
 
 type HealthFactorError {
   reason: String!
@@ -993,9 +1000,26 @@ type LiquidatedActivity {
   collateralReserve: ReserveInfo!
   debtReserve: ReserveInfo!
   collateral: Erc20Amount!
+  liquidatorReceived: Erc20Amount!
+  liquidationFee: Erc20Amount!
   debt: Erc20Amount!
   liquidator: EvmAddress!
   chain: Chain!
+
+  """
+  User's health factor at the moment immediately before the liquidation tx.
+  
+  Reuses the same building blocks as `user_summary_history`'s historical HF:
+  1. `spoke.user_position_history` snapshot per reserve at
+  `sequence_id < self.sequence_id` for shares + premium + dynamic config.
+  2. `get_reserve_asset_rates_history_bulk` to derive `HubAssetRates` at the
+  liquidation timestamp (gives balance-with-interest from shares).
+  3. `get_reserve_price_history_bulk` for the historical USD price.
+  4. `UserReserveSupplyState::get_user_supply_breakdown` /
+  `UserReserveDebtState::get_user_debt_breakdown` for the breakdown.
+  5. `UserDynamicConfigState::get_user_health_factor_formatted` for the HF.
+  """
+  liquidationHealthFactor: HealthFactor!
 }
 
 type LiquidationFeeVariation {
@@ -1118,6 +1142,12 @@ input MultichainAssetRequest {
   query: MultichainAssetRequestQuery!
   chainIds: [ChainId!]
   currency: Currency! = USD
+
+  """
+  Fold each reserve's Merkl reward into its supply/borrow APY before computing the
+  highest/lowest/average range. Defaults on; pass false for organic base rates only.
+  """
+  includeRewards: Boolean! = true
 }
 
 input MultichainAssetRequestQuery @oneOf {
@@ -1487,9 +1517,9 @@ type PreviewUserPosition {
 }
 
 input ProtocolHistoryRequest {
-  chainIds: [ChainId!]
   currency: Currency! = USD
   window: TimeWindow! = LAST_DAY
+  chainIds: [ChainId!]
 }
 
 type ProtocolHistorySample {
@@ -1951,7 +1981,12 @@ input ReservesRequestQuery @oneOf {
   tokenInfo: TokenInfoId
 
   """Get all the reserves for a token across chains, by its raw symbol"""
-  symbol: String
+  symbol: String @deprecated(reason: "Use symbolChainIds instead.")
+
+  """
+  Get all the reserves for a token by its raw symbol, optionally restricted to chains
+  """
+  symbolChainIds: SymbolInput
 }
 
 union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
@@ -2655,6 +2690,16 @@ input SwappableTokensRequestQuery @oneOf {
   to: SwappableTokenInput
 }
 
+input SymbolInput {
+  """The token symbol to match across chains"""
+  symbol: String!
+
+  """
+  Restrict the matched reserves to these chains; empty matches all chains
+  """
+  chainIds: [ChainId!]! = []
+}
+
 enum TimeWindow {
   LAST_DAY
   LAST_WEEK
@@ -2691,6 +2736,11 @@ type TokenInfo {
 
   """The token category,"""
   categories: [TokenCategory!]!
+
+  """
+  Case-folded, alias-resolved symbol grouping this token with the same asset on other chains.
+  """
+  canonicalSymbol: String!
 }
 
 scalar TokenInfoId
@@ -3366,6 +3416,11 @@ input UserSwapsRequest {
 input UserSymbol {
   user: EvmAddress!
   symbol: String!
+
+  """
+  Restrict the matched positions to these chains; empty matches all chains
+  """
+  chainIds: [ChainId!]! = []
 }
 
 input UserToken {
