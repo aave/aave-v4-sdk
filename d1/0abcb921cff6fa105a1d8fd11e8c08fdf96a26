@@ -7,6 +7,14 @@ packages/client/src/displayTransform.test.ts
   "base_commit_sha": "d10abcb921cff6fa105a1d8fd11e8c08fdf96a26",
   "prompts": {},
   "sessions": {
+    "s_0707e6b3106032": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1e0c-cb62-7323-9176-c8908895f335",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    },
     "s_ae4c68624454cb": {
       "agent_id": {
         "tool": "claude",
