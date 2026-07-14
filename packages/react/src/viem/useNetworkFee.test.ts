@@ -27,10 +27,6 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
     const activity: SupplyActivity = {
       __typename: 'SupplyActivity',
       id: '0x123-supply-1' as ID,
-      // Use a recent timestamp: the exchange-rate lookup resolves the rate `at`
-      // this time, and a hard-coded past date eventually drifts outside the
-      // backend's historical price window (fails with "Could not convert
-      // exchange rate").
       timestamp: new Date(),
       txHash: txHash(
         // the first ERC-20 token creation tx
