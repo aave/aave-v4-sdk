@@ -191,6 +191,7 @@ type BorrowActivity {
 input BorrowApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+  includeRewards: Boolean! = true
 }
 
 type BorrowPointsReward {
@@ -1447,6 +1448,7 @@ type PreviewUserPosition {
 }
 
 input ProtocolHistoryRequest {
+  chainIds: [ChainId!]
   currency: Currency! = USD
   window: TimeWindow! = LAST_DAY
 }
@@ -2332,6 +2334,7 @@ type SupplyActivity {
 input SupplyApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+  includeRewards: Boolean! = true
 }
 
 type SupplyPointsReward {
