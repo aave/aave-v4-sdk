@@ -1,0 +1,14 @@
+.github/workflows/release.yml
+  h_be8c3c572e9983 79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "c098636fe4530fe5736fabfc444d5ad57c542e06",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
