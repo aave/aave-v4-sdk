@@ -133,6 +133,8 @@ export type UserBorrowsRequestQuery = ReturnType<
   typeof graphql.scalar<'UserBorrowsRequestQuery'>
 >;
 export type UserToken = ReturnType<typeof graphql.scalar<'UserToken'>>;
+export type UserSymbol = ReturnType<typeof graphql.scalar<'UserSymbol'>>;
+export type UserTokenInfo = ReturnType<typeof graphql.scalar<'UserTokenInfo'>>;
 export type UserChains = ReturnType<typeof graphql.scalar<'UserChains'>>;
 export type UserBorrowsRequestOrderBy = ReturnType<
   typeof graphql.scalar<'UserBorrowsRequestOrderBy'>

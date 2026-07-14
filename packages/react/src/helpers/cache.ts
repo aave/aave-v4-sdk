@@ -41,6 +41,8 @@ function extractUserSuppliesRequestUser(
 ): EvmAddress {
   if ('userSpoke' in query) return query.userSpoke.user;
   if ('userToken' in query) return query.userToken.user;
+  if ('userTokenInfo' in query) return query.userTokenInfo.user;
+  if ('userSymbol' in query) return query.userSymbol.user;
   if ('userChains' in query) return query.userChains.user;
   if ('userHub' in query) return query.userHub.user;
 
@@ -53,6 +55,8 @@ function extractUserBorrowsRequestUser(
 ): EvmAddress {
   if ('userSpoke' in query) return query.userSpoke.user;
   if ('userToken' in query) return query.userToken.user;
+  if ('userTokenInfo' in query) return query.userTokenInfo.user;
+  if ('userSymbol' in query) return query.userSymbol.user;
   if ('userChains' in query) return query.userChains.user;
   if ('userHub' in query) return query.userHub.user;
 

@@ -191,6 +191,11 @@ type BorrowActivity {
 input BorrowApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+
+  """
+  Fold any corresponding Merkl borrow reward into each sample (discounted APY). Defaults on;
+  pass false for the organic borrow rate only.
+  """
   includeRewards: Boolean! = true
 }
 
@@ -1104,6 +1109,40 @@ type MerklSupplyReward {
   userEligible: Boolean!
 }
 
+type MultichainAsset {
+  assets: [Asset!]!
+  summary: MultichainAssetSummary!
+}
+
+input MultichainAssetRequest {
+  query: MultichainAssetRequestQuery!
+  chainIds: [ChainId!]
+  currency: Currency! = USD
+}
+
+input MultichainAssetRequestQuery @oneOf {
+  tokenInfo: TokenInfoId
+  symbol: String
+}
+
+type MultichainAssetSummary {
+  totalSupplied: ExchangeAmount!
+  totalBorrowed: ExchangeAmount!
+  totalSupplyCap: ExchangeAmount!
+  totalBorrowCap: ExchangeAmount!
+  totalAvailableLiquidity: ExchangeAmount!
+  utilizationRate: PercentNumber!
+  highestSupplyApy: PercentNumber!
+  lowestSupplyApy: PercentNumber!
+  averageSupplyApy: PercentNumber!
+  highestBorrowApy: PercentNumber!
+  lowestBorrowApy: PercentNumber!
+  averageBorrowApy: PercentNumber!
+  chainCount: Int!
+  reservesCount: Int!
+  activeReservesCount: Int!
+}
+
 type Mutation {
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
@@ -1468,6 +1507,7 @@ type Query {
   exchangeRate(request: ExchangeRateRequest!): ExchangeAmount!
   protocolHistory(request: ProtocolHistoryRequest!): [ProtocolHistorySample!]!
   asset(request: AssetRequest!): Asset
+  multichainAsset(request: MultichainAssetRequest!): MultichainAsset!
   assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
   assetBorrowHistory(request: AssetBorrowHistoryRequest!): [AssetBorrowSample!]!
   assetPriceHistory(request: AssetPriceHistoryRequest!): [AssetPriceSample!]!
@@ -1906,6 +1946,12 @@ input ReservesRequestQuery @oneOf {
 
   """Get all the reserves based on the token categories"""
   chainTokenCategories: [ChainTokenCategories!]
+
+  """Get all the reserves for a token across chains, matched by its symbol"""
+  tokenInfo: TokenInfoId
+
+  """Get all the reserves for a token across chains, by its raw symbol"""
+  symbol: String
 }
 
 union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
@@ -2334,6 +2380,11 @@ type SupplyActivity {
 input SupplyApyHistoryRequest {
   reserve: ReserveId!
   window: TimeWindow! = LAST_DAY
+
+  """
+  Fold any corresponding Merkl supply reward into each sample (juiced APY). Defaults on;
+  pass false for the organic supply rate only.
+  """
   includeRewards: Boolean! = true
 }
 
@@ -3002,6 +3053,8 @@ input UserBorrowsRequestOrderBy @oneOf {
 input UserBorrowsRequestQuery @oneOf {
   userSpoke: UserSpokeInput
   userToken: UserToken
+  userTokenInfo: UserTokenInfo
+  userSymbol: UserSymbol
   userPositionId: UserPositionId
   userChains: UserChains
   userHub: UserHub
@@ -3254,6 +3307,8 @@ input UserSuppliesRequestOrderBy @oneOf {
 input UserSuppliesRequestQuery @oneOf {
   userSpoke: UserSpokeInput
   userToken: UserToken
+  userTokenInfo: UserTokenInfo
+  userSymbol: UserSymbol
   userPositionId: UserPositionId
   userChains: UserChains
   userHub: UserHub
@@ -3308,9 +3363,19 @@ input UserSwapsRequest {
   cursor: Cursor
 }
 
+input UserSymbol {
+  user: EvmAddress!
+  symbol: String!
+}
+
 input UserToken {
   user: EvmAddress!
   token: Erc20Input!
+}
+
+input UserTokenInfo {
+  user: EvmAddress!
+  tokenInfoId: TokenInfoId!
 }
 
 type UsingAsCollateralActivity {
