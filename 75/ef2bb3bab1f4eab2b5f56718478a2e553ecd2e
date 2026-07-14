@@ -1,0 +1,19 @@
+.nvmrc
+  s_48c3754e265ad4::t_2dd97077de2763 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "75ef2bb3bab1f4eab2b5f56718478a2e553ecd2e",
+  "prompts": {},
+  "sessions": {
+    "s_48c3754e265ad4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4fd8ecd2-a013-4abf-9dd5-0f03143edbde",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
