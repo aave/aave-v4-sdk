@@ -182,6 +182,7 @@ export function makeTokenInfo(symbol: keyof typeof TestTokens): TokenInfo {
     id: tokenInfoId(randomBase64String()),
     name,
     symbol,
+    canonicalSymbol: symbol,
     decimals,
     icon: 'https://example.com/icon.png',
     categories: [],

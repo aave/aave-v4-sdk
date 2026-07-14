@@ -65,6 +65,7 @@ export const TokenInfoFragment = graphql(
     id
     name
     symbol
+    canonicalSymbol
     icon
     decimals
     categories

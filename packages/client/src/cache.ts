@@ -163,6 +163,7 @@ export const exchange = cacheExchange({
     },
     LiquidatedActivity: {
       timestamp: transformToDate,
+      liquidationHealthFactor: transformToBigDecimal,
     },
     MerklBorrowReward: {
       startDate: transformToDate,

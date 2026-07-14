@@ -2802,6 +2802,30 @@
             "args": []
           },
           {
+            "name": "liquidatorReceived",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "liquidationFee",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "debt",
             "type": {
               "kind": "NON_NULL",
@@ -2832,6 +2856,17 @@
                 "kind": "OBJECT",
                 "name": "Chain",
                 "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "liquidationHealthFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -10058,6 +10093,17 @@
                     "name": "Any"
                   }
                 }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "canonicalSymbol",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
