@@ -76,5 +76,5 @@ jobs:
         run: pnpm build
 
       - name: Publish snapshot
-        run: pnpm changeset publish --tag ${{ github.event.inputs.tag }} --provenance
+        run: pnpm changeset publish --tag ${{ github.event.inputs.tag }}
 
