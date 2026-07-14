@@ -1,0 +1,19 @@
+packages/react/src/viem/useNetworkFee.test.ts
+  s_48c3754e265ad4::t_2d76ce75700ee4 30-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "92b7bcdaa1629186ff5c112f39195a26e6657096",
+  "prompts": {},
+  "sessions": {
+    "s_48c3754e265ad4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4fd8ecd2-a013-4abf-9dd5-0f03143edbde",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
