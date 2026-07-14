@@ -41,8 +41,6 @@ import {
   waitForTransactionReceipt,
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
-import type { AaveClient } from './AaveClient';
-import { chain as fetchChain } from './actions';
 import { supportsPermit } from './adapters';
 import { resolveTxHash } from './safe';
 import type {
@@ -137,53 +135,41 @@ export function viemChainsFrom(chains: Chain[]): ViemChain[] {
  * @internal
  */
 export function ensureChain(
-  aaveClient: AaveClient,
   walletClient: WalletClient,
-  request: TransactionRequest,
-): ResultAsync<void, CancelError | SigningError | UnexpectedError> {
+  chain: ViemChain,
+): ResultAsync<void, CancelError | SigningError> {
   return ResultAsync.fromPromise(walletClient.getChainId(), (err) =>
     SigningError.from(err),
-  ).andThen((chainId) => {
-    if (chainId === request.chainId) {
+  ).andThen((currentChainId) => {
+    if (currentChainId === chain.id) {
       return okAsync();
     }
 
-    return fetchChain(
-      aaveClient,
-      { chainId: request.chainId },
-      { batch: false },
-    ).andThen((chain) => {
-      invariant(chain, `Chain ${request.chainId} is not supported`);
+    return ResultAsync.fromPromise(
+      walletClient.switchChain({ id: chain.id }),
+      (err) => SigningError.from(err),
+    ).orElse((err) => {
+      const code = isRpcError(err.cause)
+        ? err.cause.code
+        : // Unwrapping for MetaMask Mobile
+          // https://github.com/MetaMask/metamask-mobile/issues/2944#issuecomment-976988719
+          isProviderRpcError(err.cause)
+          ? err.cause.data?.originalError?.code
+          : undefined;
 
-      return ResultAsync.fromPromise(
-        walletClient.switchChain({ id: request.chainId }),
-        (err) => SigningError.from(err),
-      ).orElse((err) => {
-        const code = isRpcError(err.cause)
-          ? err.cause.code
-          : // Unwrapping for MetaMask Mobile
-            // https://github.com/MetaMask/metamask-mobile/issues/2944#issuecomment-976988719
-            isProviderRpcError(err.cause)
-            ? err.cause.data?.originalError?.code
-            : undefined;
+      if (code === SwitchChainError.code) {
+        return ResultAsync.fromPromise(
+          walletClient.addChain({ chain }),
+          (err) => {
+            if (isRpcError(err) && err.code === UserRejectedRequestError.code) {
+              return CancelError.from(err);
+            }
+            return SigningError.from(err);
+          },
+        );
+      }
 
-        if (code === SwitchChainError.code) {
-          return ResultAsync.fromPromise(
-            walletClient.addChain({ chain: toViemChain(chain) }),
-            (err) => {
-              if (
-                isRpcError(err) &&
-                err.code === UserRejectedRequestError.code
-              ) {
-                return CancelError.from(err);
-              }
-              return SigningError.from(err);
-            },
-          );
-        }
-
-        return err.asResultAsync();
-      });
+      return err.asResultAsync();
     });
   });
 }

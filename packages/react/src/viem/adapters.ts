@@ -3,18 +3,19 @@ import {
   ensureChain,
   sendTransaction,
   signTypedDataWith,
+  toViemChain,
   waitForTransactionResult,
 } from '@aave/client/viem';
 import type { TransactionRequest } from '@aave/graphql';
 import { invariant, type Signature } from '@aave/types';
-import type { WalletClient } from 'viem';
-import { useAaveClient } from '../context';
+import { createWalletClient, custom, type WalletClient } from 'viem';
 import {
   PendingTransaction,
   type UseAsyncTask,
   type UseSendTransactionResult,
   useAsyncTask,
 } from '../helpers';
+import { useChainAction } from '../misc';
 
 /**
  * A hook that provides a way to send Aave transactions using a viem WalletClient instance.
@@ -32,7 +33,7 @@ import {
 export function useSendTransaction(
   walletClient: WalletClient | null | undefined,
 ): UseSendTransactionResult {
-  const client = useAaveClient();
+  const [fetchChain] = useChainAction();
 
   return useAsyncTask(
     (request: TransactionRequest) => {
@@ -41,16 +42,33 @@ export function useSendTransaction(
         'Expected a WalletClient to handle the operation result.',
       );
 
-      return ensureChain(client, walletClient, request)
-        .andThen(() => sendTransaction(walletClient, request))
-        .map(
-          (hash) =>
-            new PendingTransaction(() =>
-              waitForTransactionResult(walletClient, request, hash),
+      return fetchChain({ chainId: request.chainId })
+        .map((chain) => {
+          invariant(chain, `Chain ${request.chainId} is not supported`);
+          return toViemChain(chain);
+        })
+        .andThen((viemChain) =>
+          ensureChain(walletClient, viemChain)
+            .map(() =>
+              createWalletClient({
+                account: walletClient.account,
+                chain: viemChain,
+                transport: custom({
+                  request: (args) => walletClient.request(args),
+                }),
+              }),
+            )
+            .andThen((walletClient) =>
+              sendTransaction(walletClient, request).map(
+                (hash) =>
+                  new PendingTransaction(() =>
+                    waitForTransactionResult(walletClient, request, hash),
+                  ),
+              ),
             ),
         );
     },
-    [client, walletClient],
+    [walletClient, fetchChain],
   );
 }
 
