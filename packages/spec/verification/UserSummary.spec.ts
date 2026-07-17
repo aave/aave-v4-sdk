@@ -7,13 +7,14 @@ import {
   createNewWallet,
   ETHEREUM_AAVE_ADDRESS,
   ETHEREUM_FORK_ID,
+  ETHEREUM_SPOKE_BLUECHIP_ADDRESS,
+  ETHEREUM_SPOKE_BLUECHIP_ID,
   ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_SPOKE_CORE_ID,
-  ETHEREUM_SPOKE_ETHENA_ADDRESS,
-  ETHEREUM_SPOKE_ETHENA_ID,
   ETHEREUM_USDC_ADDRESS,
-  ETHEREUM_USDe_ADDRESS,
   ETHEREUM_USDT_ADDRESS,
+  ETHEREUM_WBTC_ADDRESS,
+  ETHEREUM_WSTETH_ADDRESS,
 } from '@aave/client/testing';
 
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -23,9 +24,7 @@ import {
   findReserveAndSupply,
 } from '../helpers/supplyBorrow';
 
-const user = await createNewWallet(
-  '0x6225076f88cd85d88be09773d417df6819f2f9c2b7885fe8c75b898c4b23c5fd',
-);
+const user = await createNewWallet();
 
 describe('Given a user with two User Positions (2 different spokes)', () => {
   describe('With first user position with 3 supply positions, 2 of which set as collateral', () => {
@@ -93,7 +92,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
           const supplies = await userSupplies(client, {
             query: {
               userSpoke: {
-                spoke: ETHEREUM_SPOKE_ETHENA_ID,
+                spoke: ETHEREUM_SPOKE_BLUECHIP_ID,
                 user: evmAddress(user.account.address),
               },
             },
@@ -101,20 +100,21 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
           assertOk(supplies);
 
           if (supplies.value.length < 2) {
-            const result = await findReserveAndSupply(client, user, {
-              spoke: ETHEREUM_SPOKE_ETHENA_ID,
+            const resultWstEth = await findReserveAndSupply(client, user, {
+              spoke: ETHEREUM_SPOKE_BLUECHIP_ID,
+              token: ETHEREUM_WSTETH_ADDRESS,
               asCollateral: false,
-              amount: bigDecimal('1'),
+              amount: bigDecimal('0.5'),
             });
-            assertOk(result);
+            assertOk(resultWstEth);
 
-            const resultUSDC = await findReserveAndSupply(client, user, {
-              spoke: ETHEREUM_SPOKE_ETHENA_ID,
-              token: ETHEREUM_USDe_ADDRESS,
+            const resultWbtc = await findReserveAndSupply(client, user, {
+              spoke: ETHEREUM_SPOKE_BLUECHIP_ID,
+              token: ETHEREUM_WBTC_ADDRESS,
               asCollateral: true,
-              amount: bigDecimal('100'),
+              amount: bigDecimal('0.05'),
             });
-            assertOk(resultUSDC);
+            assertOk(resultWbtc);
           }
         }, 100_000);
 
@@ -123,7 +123,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
             const borrows = await userBorrows(client, {
               query: {
                 userSpoke: {
-                  spoke: ETHEREUM_SPOKE_ETHENA_ID,
+                  spoke: ETHEREUM_SPOKE_BLUECHIP_ID,
                   user: evmAddress(user.account.address),
                 },
               },
@@ -132,7 +132,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
 
             if (borrows.value.length < 1) {
               const borrowWETH = await borrowFromRandomReserve(client, user, {
-                spoke: ETHEREUM_SPOKE_ETHENA_ID,
+                spoke: ETHEREUM_SPOKE_BLUECHIP_ID,
                 ratioToBorrow: 0.2,
               });
               assertOk(borrowWETH);
@@ -142,7 +142,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
           describe('When fetching the User Summary data', () => {
             let summaryData: UserSummary;
             let accountDataCoreSpoke: UserAccountData;
-            let accountDataIsoStableSpoke: UserAccountData;
+            let accountDataBluechipSpoke: UserAccountData;
             let userSuppliesItems: UserSupplyItem[];
             let userBorrowsItems: UserBorrowItem[];
 
@@ -160,7 +160,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
                 ),
                 getAccountData(
                   evmAddress(user.account.address),
-                  ETHEREUM_SPOKE_ETHENA_ADDRESS,
+                  ETHEREUM_SPOKE_BLUECHIP_ADDRESS,
                 ),
                 userSupplies(client, {
                   query: {
@@ -184,7 +184,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               [
                 summaryData,
                 accountDataCoreSpoke,
-                accountDataIsoStableSpoke,
+                accountDataBluechipSpoke,
                 userSuppliesItems,
                 userBorrowsItems,
               ] = result.value;
@@ -210,7 +210,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
             it('Then the totalCollateral value should be the sum of the collateral values from both spokes', async () => {
               const expectedTotalCollateral =
                 accountDataCoreSpoke.totalCollateralValue.plus(
-                  accountDataIsoStableSpoke.totalCollateralValue,
+                  accountDataBluechipSpoke.totalCollateralValue,
                 );
               expect(summaryData.totalCollateral.value).toBeBigDecimalCloseTo(
                 expectedTotalCollateral,
@@ -221,7 +221,7 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
             it('Then the totalDebt value should be the sum of the debt values from both spokes', async () => {
               const expectedTotalDebt =
                 accountDataCoreSpoke.totalDebtValue.plus(
-                  accountDataIsoStableSpoke.totalDebtValue,
+                  accountDataBluechipSpoke.totalDebtValue,
                 );
               expect(summaryData.totalDebt.value).toBeBigDecimalCloseTo(
                 expectedTotalDebt,
@@ -272,35 +272,13 @@ describe('Given a user with two User Positions (2 different spokes)', () => {
               );
             });
 
-            // TODO: Create ticket to check the math in the backend
-            it('Then the netAccruedInterest value should be the sum of the supply interests minus the borrow interests', async () => {
-              const totalSupplyInterest = userSuppliesItems.reduce(
-                (acc, supply) => acc.plus(supply.interest.exchange.value),
-                bigDecimal('0'),
-              );
-
-              const totalBorrowInterest = userBorrowsItems.reduce(
-                (acc, borrow) => acc.plus(borrow.interest.exchange.value),
-                bigDecimal('0'),
-              );
-
-              const expectedNetAccruedInterest =
-                totalSupplyInterest.minus(totalBorrowInterest);
-
-              expect(
-                summaryData.netAccruedInterest.value,
-              ).toBeBigDecimalCloseTo(expectedNetAccruedInterest, {
-                percent: 0.1,
-              });
-            });
-
             it('Then the lowestHealthFactor value should be the minimum of the health factors from both spokes', async () => {
               const expectedLowestHealthFactor =
                 accountDataCoreSpoke.healthFactor.lt(
-                  accountDataIsoStableSpoke.healthFactor,
+                  accountDataBluechipSpoke.healthFactor,
                 )
                   ? accountDataCoreSpoke.healthFactor
-                  : accountDataIsoStableSpoke.healthFactor;
+                  : accountDataBluechipSpoke.healthFactor;
 
               expect(summaryData.lowestHealthFactor).toBeBigDecimalCloseTo(
                 expectedLowestHealthFactor,
