@@ -295,13 +295,9 @@ describe(`Given the viem's '${useSignTypedData.name}' adapter hook`, () => {
     vi.mocked(signTypedDataWith).mockClear();
   });
 
-  const typedData = {
-    ...makeSwapTypedData(),
-    domain: {
-      ...makeSwapTypedData().domain,
-      chainId: ETHEREUM_FORK_ID,
-    },
-  };
+  // `makeSwapTypedData` defaults its `domain.chainId` to the devnet fork id, which
+  // matches `ETHEREUM_FORK_ID` — the chain this test asserts the wallet switches to.
+  const typedData = makeSwapTypedData();
 
   describe("When the wallet is on a different chain than the typed data's chain", () => {
     let walletChainId = `0x${(42).toString(16)}`;
