@@ -1,0 +1,41 @@
+.changeset/tidy-signs-switch.md
+  s_48f033659eeeef::t_7b87d3e6709167 1-4
+  h_be8c3c572e9983 5
+packages/react/src/viem/adapters.test.ts
+  s_ef94560d3d185d::t_0eb72159b2c27a 28
+  s_ef94560d3d185d::t_a1f015b78bd820 5,8,15
+  s_ef94560d3d185d::t_76cc7879de679b 292-346
+  s_ef94560d3d185d::t_6f60769740a5d3 39-41
+packages/react/src/viem/adapters.ts
+  s_48f033659eeeef::t_ae285b6861c45a 1-5
+  s_48f033659eeeef::t_e8ad286b675688 90-92,97-113,115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "9187f0c114438f70cb7344eac83da5e5b762a21e",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_48f033659eeeef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e418c271-3a80-4a5e-90ec-234e8cac3c95",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    },
+    "s_ef94560d3d185d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4042b1a5-b8c2-4b75-84cd-c060f6ecf0b5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
