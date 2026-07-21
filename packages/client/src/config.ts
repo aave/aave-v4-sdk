@@ -18,6 +18,50 @@ export type SSRConfig =
   | { isServer: false; initialState?: SSRData };
 
 /**
+ * Overrides the display name, symbol, or icon for a specific asset.
+ * Applied globally across all queries.
+ */
+export type AssetOverride = {
+  /** The chain ID where this asset lives. */
+  chainId: number;
+  /** The ERC-20 token address (checksummed or lowercase). */
+  address: string;
+  /**
+   * Display fields to override for this asset.
+   * `decimals` is intentionally excluded — it affects value formatting and
+   * cannot be safely overridden for display only.
+   */
+  display: {
+    /** Override the asset's display name. */
+    name?: string;
+    /** Override the asset's display symbol. */
+    symbol?: string;
+    /** Override the asset's display icon URL. */
+    icon?: string;
+  };
+};
+
+/**
+ * Controls how asset names, symbols, and icons are presented.
+ *
+ * When both `showWrappedNativeReserveAsNative` and an `assetOverride` target
+ * the same token, the override takes precedence.
+ */
+export type DisplayConfig = {
+  /**
+   * When `true`, wrapped native tokens (e.g. WETH) are shown using the
+   * native asset's name, symbol, and icon (e.g. ETH) for protocol reserve
+   * queries. Has no effect on wallet balance or swap queries.
+   */
+  showWrappedNativeReserveAsNative?: boolean;
+  /**
+   * Per-asset display overrides applied globally across all queries.
+   * Useful for renaming assets to a more friendly display name.
+   */
+  assetOverrides?: AssetOverride[];
+};
+
+/**
  * The client configuration.
  */
 export type ClientConfig = {
@@ -55,6 +99,12 @@ export type ClientConfig = {
    * @defaultValue `undefined` (disabled)
    */
   ssr?: SSRConfig;
+  /**
+   * Controls how asset names, symbols, and icons are displayed.
+   *
+   * @defaultValue `undefined` (no transforms applied)
+   */
+  display?: DisplayConfig;
 };
 
 /**

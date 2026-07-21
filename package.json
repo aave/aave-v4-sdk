@@ -42,7 +42,7 @@
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^2.2.5",
-    "@changesets/cli": "^2.29.8",
+    "@changesets/cli": "^2.31.0",
     "@types/node": "^24.0.7",
     "@vitest/ui": "^4.1.0",
     "jest-extended": "^6.0.0",

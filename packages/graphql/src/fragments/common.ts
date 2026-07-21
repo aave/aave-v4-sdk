@@ -65,6 +65,7 @@ export const TokenInfoFragment = graphql(
     id
     name
     symbol
+    canonicalSymbol
     icon
     decimals
     categories
@@ -85,6 +86,9 @@ export const ChainFragment = graphql(
     nativeWrappedToken
     nativeGateway
     signatureGateway
+    nativeWrappedInfo {
+      ...TokenInfo
+    }
     nativeInfo {
       ...TokenInfo
     }

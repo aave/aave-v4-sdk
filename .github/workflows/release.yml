@@ -55,7 +55,6 @@ jobs:
   snapshot:
     name: Snapshot Release
     runs-on: ubuntu-latest
-    needs: verify
     if: github.event_name == 'workflow_dispatch'
 
     steps:
@@ -77,5 +76,5 @@ jobs:
         run: pnpm build
 
       - name: Publish snapshot
-        run: pnpm changeset publish --tag ${{ github.event.inputs.tag }} --provenance
+        run: pnpm changeset publish --tag ${{ github.event.inputs.tag }}
 

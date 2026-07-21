@@ -93,6 +93,7 @@ export const graphql = initGraphQLTada<{
     DateTime: Date;
     EvmAddress: EvmAddress;
     Float: number;
+    HealthFactor: BigDecimal;
     HubAssetId: HubAssetId;
     HubId: HubId;
     ID: ID;

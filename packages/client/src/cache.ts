@@ -163,6 +163,7 @@ export const exchange = cacheExchange({
     },
     LiquidatedActivity: {
       timestamp: transformToDate,
+      liquidationHealthFactor: transformToBigDecimal,
     },
     MerklBorrowReward: {
       startDate: transformToDate,
@@ -419,7 +420,7 @@ export const exchange = cacheExchange({
     WithdrawSwapActivity: (data: WithdrawSwapActivity) => data.id,
 
     // Entities with address field as key
-    Erc20Token: (data: Erc20Token) => data.address,
+    Erc20Token: (data: Erc20Token) => `${data.chain.chainId}:${data.address}`,
 
     // Entities with other fields as key
     Chain: (data: Chain) => data.chainId.toString(),
@@ -461,6 +462,8 @@ export const exchange = cacheExchange({
     InsufficientLiquidityError: () => null,
     LiquidationFeeVariation: () => null,
     MaxLiquidationBonusVariation: () => null,
+    MultichainAsset: () => null,
+    MultichainAssetSummary: () => null,
     SpokeLiquidationConfig: () => null,
     SpokeConnectedHub: () => null,
     SpokeConnectedHubSummary: () => null,
@@ -489,13 +492,13 @@ export const exchange = cacheExchange({
     PrepareSwapCancelResult: () => null,
     PrepareSwapOrder: () => null,
     PreviewReserveRates: () => null,
-    PreviewRewardChange: () => null,
     PreviewRewardOutcome: () => null,
     PreviewUserPosition: () => null,
     ProtocolHistorySample: () => null,
     RepayWithSupply: () => null,
     RepayWithSupplyQuoteResult: () => null,
     ReserveHolder: () => null,
+    ReserveReward: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,
     ReserveSummary: () => null,

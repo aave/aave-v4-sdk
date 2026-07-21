@@ -265,8 +265,8 @@ export type UserPositionConditionVariation = FragmentOf<
   typeof UserPositionConditionVariationFragment
 >;
 
-export const PreviewRewardChangeFragment = graphql(
-  `fragment PreviewRewardChange on PreviewRewardChange {
+export const ReserveRewardFragment = graphql(
+  `fragment ReserveReward on ReserveReward {
     __typename
     reserve {
       ...ReserveInfo
@@ -277,21 +277,21 @@ export const PreviewRewardChangeFragment = graphql(
   }`,
   [ReserveInfoFragment, RewardFragment],
 );
-export type PreviewRewardChange = FragmentOf<
-  typeof PreviewRewardChangeFragment
-> & { reward: Reward };
+export type ReserveReward = FragmentOf<typeof ReserveRewardFragment> & {
+  reward: Reward;
+};
 
 export const PreviewRewardOutcomeFragment = graphql(
   `fragment PreviewRewardOutcome on PreviewRewardOutcome {
     __typename
-    lost {
-      ...PreviewRewardChange
+    abandoned {
+      ...ReserveReward
     }
-    gained {
-      ...PreviewRewardChange
+    acquired {
+      ...ReserveReward
     }
   }`,
-  [PreviewRewardChangeFragment],
+  [ReserveRewardFragment],
 );
 export type PreviewRewardOutcome = FragmentOf<
   typeof PreviewRewardOutcomeFragment
@@ -517,10 +517,17 @@ export const LiquidatedActivityFragment = graphql(
     collateral {
       ...Erc20Amount
     }
+    liquidatorReceived {
+      ...Erc20Amount
+    }
+    liquidationFee {
+      ...Erc20Amount
+    }
     debt {
       ...Erc20Amount
     }
     liquidator
+    liquidationHealthFactor
     chain {
       ...Chain
     }
