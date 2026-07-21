@@ -2,15 +2,17 @@ import {
   ETHEREUM_FORK_ID,
   setupEip1193Interceptor,
 } from '@aave/client/testing';
-import { sendTransaction } from '@aave/client/viem';
+import { sendTransaction, signTypedDataWith } from '@aave/client/viem';
 import { CancelError, SigningError } from '@aave/core';
 import type { TransactionRequest } from '@aave/graphql';
+import { makeSwapTypedData } from '@aave/graphql/testing';
 import {
   assertErr,
   assertOk,
   type BlockchainData,
   evmAddress,
   okAsync,
+  signatureFrom,
   txHash,
 } from '@aave/types';
 import {
@@ -23,7 +25,7 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHookWithinContext } from '../test-utils';
-import { useSendTransaction } from './adapters';
+import { useSendTransaction, useSignTypedData } from './adapters';
 
 vi.mock('@aave/client/viem', async () => {
   const actual =
@@ -34,6 +36,9 @@ vi.mock('@aave/client/viem', async () => {
   return {
     ...actual,
     sendTransaction: vi.fn(() => okAsync(txHash(`0x${'0'.repeat(63)}1`))),
+    signTypedDataWith: vi.fn(() =>
+      okAsync(signatureFrom(`0x${'1'.repeat(130)}`)),
+    ),
   };
 });
 
@@ -281,6 +286,61 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
       assertErr(tx);
       expect(tx.error).toBeInstanceOf(SigningError);
       expect(sendTransaction).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe(`Given the viem's '${useSignTypedData.name}' adapter hook`, () => {
+  beforeEach(() => {
+    vi.mocked(signTypedDataWith).mockClear();
+  });
+
+  const typedData = {
+    ...makeSwapTypedData(),
+    domain: {
+      ...makeSwapTypedData().domain,
+      chainId: ETHEREUM_FORK_ID,
+    },
+  };
+
+  describe("When the wallet is on a different chain than the typed data's chain", () => {
+    let walletChainId = `0x${(42).toString(16)}`;
+
+    const provider = setupEip1193Interceptor((request) => {
+      switch (request.method) {
+        case 'wallet_switchEthereumChain':
+          walletChainId = request.params[0].chainId;
+          return {
+            jsonrpc: '2.0',
+            id: request.id,
+            result: null,
+          };
+
+        case 'eth_chainId':
+          return {
+            jsonrpc: '2.0',
+            id: request.id,
+            result: walletChainId,
+          };
+      }
+      return;
+    });
+
+    const wallet = createWalletClient({
+      account,
+      transport: custom(provider),
+    });
+
+    it('Then it should switch the chain before signing', async () => {
+      const { result } = renderHookWithinContext(() =>
+        useSignTypedData(wallet),
+      );
+
+      const signature = await result.current[0](typedData);
+
+      assertOk(signature);
+      expect(walletChainId).toBe(`0x${ETHEREUM_FORK_ID.toString(16)}`);
+      expect(signTypedDataWith).toHaveBeenCalledOnce();
     });
   });
 });
