@@ -1,0 +1,24 @@
+packages/react/src/viem/adapters.test.ts
+  s_ef94560d3d185d::t_1bfb0357c47d33 298-300
+packages/graphql/src/testing.ts
+  s_ef94560d3d185d::t_20c49cf9ed554f 677
+  s_ef94560d3d185d::t_2f783509bad3d3 429
+  s_ef94560d3d185d::t_e8120999d09385 398-408
+  s_ef94560d3d185d::t_6467cd74852bbd 397
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "16d0555105a474bbe7869c4460d32775bc90497e",
+  "prompts": {},
+  "sessions": {
+    "s_ef94560d3d185d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4042b1a5-b8c2-4b75-84cd-c060f6ecf0b5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
