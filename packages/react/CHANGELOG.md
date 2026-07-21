@@ -1,5 +1,12 @@
 # @aave/react
 
+## 6.2.1
+
+### Patch Changes
+
+- c28989b: **fix:** `useSignTypedData` (viem adapter) now switches the wallet to the typed data's `domain.chainId` before signing, preventing `Provided chainId must match the active chainId` errors
+  - @aave/client@6.2.1
+
 ## 6.2.0
 
 ### Minor Changes
