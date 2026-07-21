@@ -27,7 +27,7 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
     const activity: SupplyActivity = {
       __typename: 'SupplyActivity',
       id: '0x123-supply-1' as ID,
-      timestamp: new Date('2025-10-20T12:00:00Z'),
+      timestamp: new Date(),
       txHash: txHash(
         // the first ERC-20 token creation tx
         '0x9e7b5966b33b4393f250bfcf45eed7751d44981b6d8dec9422a0bd2a2c698306',
@@ -52,6 +52,7 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
           id: tokenInfoId('2'),
           name: 'Wrapped Ether',
           symbol: 'WETH',
+          canonicalSymbol: 'WETH',
           icon: 'https://example.com/weth-icon.png',
           decimals: 18,
           categories: [],
@@ -61,6 +62,7 @@ describe(`Given the ${useNetworkFee.name} hook for Viem/Wagmi integrations`, () 
           id: tokenInfoId('1'),
           name: 'Ethereum',
           symbol: 'ETH',
+          canonicalSymbol: 'ETH',
           icon: 'https://example.com/eth-icon.png',
           decimals: 18,
           categories: [],

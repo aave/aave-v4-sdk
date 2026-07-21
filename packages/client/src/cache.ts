@@ -163,6 +163,7 @@ export const exchange = cacheExchange({
     },
     LiquidatedActivity: {
       timestamp: transformToDate,
+      liquidationHealthFactor: transformToBigDecimal,
     },
     MerklBorrowReward: {
       startDate: transformToDate,
@@ -461,6 +462,8 @@ export const exchange = cacheExchange({
     InsufficientLiquidityError: () => null,
     LiquidationFeeVariation: () => null,
     MaxLiquidationBonusVariation: () => null,
+    MultichainAsset: () => null,
+    MultichainAssetSummary: () => null,
     SpokeLiquidationConfig: () => null,
     SpokeConnectedHub: () => null,
     SpokeConnectedHubSummary: () => null,

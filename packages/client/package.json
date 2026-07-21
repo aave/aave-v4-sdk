@@ -1,6 +1,6 @@
 {
   "name": "@aave/client",
-  "version": "6.0.0",
+  "version": "6.2.1",
   "description": "The official TypeScript client for the AaveKit API",
   "keywords": [
     "aave",

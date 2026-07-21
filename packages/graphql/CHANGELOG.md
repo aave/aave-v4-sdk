@@ -1,5 +1,24 @@
 # @aave/graphql
 
+## 3.1.0
+
+### Minor Changes
+
+- f353446: **feat:** Added `includeRewards` to borrow and supply APY history requests.
+- db2bc7b: protocolHistory: replace single `chainId` with `chainIds: [ChainId!]` to filter protocol history across multiple chain
+- 1b6ee19: **feat:** add `multichainAsset` query, action, and `useMultichainAsset` hook for fetching an asset aggregated across chains, plus `tokenInfo`/`symbol` query variants for `reserves` and `userTokenInfo`/`userSymbol` query variants for `userSupplies` and `userBorrows`
+
+### Patch Changes
+
+- d39f1e2: **feat:** expose `liquidatorReceived`, `liquidationFee`, and `liquidationHealthFactor` on `LiquidatedActivity`, plus `canonicalSymbol` on `TokenInfo`
+- ff75357: **feat:** Add `chainId` to `protocolHistory` request types
+
+## 3.0.1
+
+### Patch Changes
+
+- 0ebdca4: **feat:** add `nativeWrappedInfo` field to `Chain` fragment
+
 ## 3.0.0
 
 ### Major Changes

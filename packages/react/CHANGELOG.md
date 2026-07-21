@@ -1,5 +1,44 @@
 # @aave/react
 
+## 6.2.1
+
+### Patch Changes
+
+- c28989b: **fix:** `useSignTypedData` (viem adapter) now switches the wallet to the typed data's `domain.chainId` before signing, preventing `Provided chainId must match the active chainId` errors
+  - @aave/client@6.2.1
+
+## 6.2.0
+
+### Minor Changes
+
+- f353446: **feat:** Added `includeRewards` to borrow and supply APY history requests.
+- db2bc7b: protocolHistory: replace single `chainId` with `chainIds: [ChainId!]` to filter protocol history across multiple chain
+- 1b6ee19: **feat:** add `multichainAsset` query, action, and `useMultichainAsset` hook for fetching an asset aggregated across chains, plus `tokenInfo`/`symbol` query variants for `reserves` and `userTokenInfo`/`userSymbol` query variants for `userSupplies` and `userBorrows`
+
+### Patch Changes
+
+- a76557e: **fix:** re-create viem wallet client with correct chain after switching in `useSendTransaction` to prevent stale chain reference errors
+- d39f1e2: **feat:** expose `liquidatorReceived`, `liquidationFee`, and `liquidationHealthFactor` on `LiquidatedActivity`, plus `canonicalSymbol` on `TokenInfo`
+- ff75357: **feat:** Add `chainId` to `protocolHistory` request types
+- Updated dependencies [a76557e]
+- Updated dependencies [f353446]
+- Updated dependencies [db2bc7b]
+- Updated dependencies [1b6ee19]
+- Updated dependencies [d39f1e2]
+- Updated dependencies [ff75357]
+  - @aave/client@6.2.0
+  - @aave/graphql@3.1.0
+
+## 6.1.0
+
+### Patch Changes
+
+- Updated dependencies [0ebdca4]
+- Updated dependencies [1d8269d]
+- Updated dependencies [0ebdca4]
+  - @aave/client@6.1.0
+  - @aave/graphql@3.0.1
+
 ## 6.0.0
 
 ### Patch Changes
