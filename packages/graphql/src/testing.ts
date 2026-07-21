@@ -395,6 +395,18 @@ export function makeUserPosition({
 }
 
 /**
+ * The Tenderly devnet fork id (`ETHEREUM_TENDERLY_FORK_ID` in `.env`).
+ *
+ * Signed typed-data fixtures use this as their `domain.chainId` so that the viem
+ * adapters' chain-switch (`ensureChain`) no-ops against the fork-pinned test wallet.
+ * Hardcoded because `@aave/graphql` can't import `ETHEREUM_FORK_ID` from
+ * `@aave/client/testing` without a circular dependency; keep it in sync with `.env`.
+ *
+ * @internal
+ */
+const DEVNET_CHAIN_ID = toChainId(123456789);
+
+/**
  * @internal
  */
 export function makeSwapTypedData(): SwapTypedData {
@@ -414,7 +426,7 @@ export function makeSwapTypedData(): SwapTypedData {
       __typename: 'DomainData',
       name: 'Swap',
       version: '1',
-      chainId: toChainId(1),
+      chainId: DEVNET_CHAIN_ID,
       verifyingContract: randomEvmAddress(),
     } as DomainData,
     message: {
@@ -662,7 +674,7 @@ export function makePermitTypedData(): PermitTypedData {
       __typename: 'DomainData',
       name: 'Permit',
       version: '1',
-      chainId: toChainId(1),
+      chainId: DEVNET_CHAIN_ID,
       verifyingContract: randomEvmAddress(),
     } as DomainData,
     message: {
