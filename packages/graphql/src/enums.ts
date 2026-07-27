@@ -184,6 +184,31 @@ export enum WithdrawSwapKind {
 }
 
 /**
+ * Order class indicating market or limit order type.
+ */
+export enum OrderClass {
+  /**
+   * Market order - executed immediately at current market price
+   */
+  Market = 'MARKET',
+  /**
+   * Limit order - executed at specified price or better
+   */
+  Limit = 'LIMIT',
+}
+
+/**
+ * The filter for order status.
+ */
+export enum OrderStatusFilter {
+  Cancelled = 'CANCELLED',
+  Expired = 'EXPIRED',
+  Fulfilled = 'FULFILLED',
+  Open = 'OPEN',
+  PendingSignature = 'PENDING_SIGNATURE',
+}
+
+/**
  * The filter for swap status.
  */
 export enum SwapStatusFilter {

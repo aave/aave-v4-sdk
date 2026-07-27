@@ -51,6 +51,7 @@ import type {
 } from './fragments';
 import {
   encodeSpokeId,
+  type OrderQuoteId,
   type ReserveId,
   reserveId,
   type SwapId,
@@ -450,10 +451,13 @@ export function makeSwapQuote({
   accuracy?: QuoteAccuracy;
   buyAmount?: number;
 } = {}): SwapQuote {
+  // `orderQuoteId` is the same value as `quoteId`, just typed as the canonical
+  // `OrderQuoteId` for the Order lifecycle verbs.
+  const quoteId = makeQuoteId();
   return {
     __typename: 'SwapQuote',
     accuracy,
-    quoteId: makeQuoteId(),
+    quoteId,
     suggestedSlippage: percentNumber(0.01),
     selectedSlippage: null,
     buy: makeErc20Amount(buyAmount, 'USDC'),
@@ -467,6 +471,7 @@ export function makeSwapQuote({
     },
     finalBuy: makeErc20Amount(buyAmount, 'USDC'),
     finalSell: makeErc20Amount(1000, 'WETH'),
+    orderQuoteId: quoteId as string as OrderQuoteId,
   };
 }
 
