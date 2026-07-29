@@ -1,10 +1,10 @@
-import { preparePositionSwap, supplySwapQuote } from '@aave/client/actions';
+import { prepareOrder, supplySwapQuote } from '@aave/client/actions';
 import type { ValidationError } from '@aave/core';
 import type {
   InsufficientBalanceError,
   InsufficientLiquidityError,
+  OrderReceipt,
   SupplySwapQuoteRequest,
-  SwapReceipt,
 } from '@aave/graphql';
 import type { Prettify } from '@aave/types';
 
@@ -15,32 +15,37 @@ import {
   type CurrencyQueryOptions,
   cancel,
   DEFAULT_QUERY_OPTIONS,
-  type PositionSwapHandler,
-  processApprovals,
-  type SwapSignerError,
-  swapPosition,
+  type OrderSignerError,
+  type PositionOrderHandler,
+  processPositionOrderApprovals,
+  submitOrderIntent,
   trySignatureFrom,
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
 
-export type UseSupplySwapRequest = Prettify<
+export type UseSupplySwapOrderRequest = Prettify<
   SupplySwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
- * Orchestrate the supply swap execution plan.
+ * Execute a supply swap through the Order API.
+ *
+ * The Order-API equivalent of {@link useSupplySwap}: it fetches a supply swap
+ * quote, collects the position-swap approval signatures, prepares and signs the
+ * order, then submits it — resolving to an {@link OrderReceipt}.
  *
  * ```tsx
  * const [signTypedData] = useSignTypedData(wallet);
  *
- * const [swapSupply, { loading, error }] = useSupplySwap((plan) => {
+ * const [swapSupply, { loading, error }] = useSupplySwapOrder((plan) => {
  *   switch (plan.__typename) {
  *     case 'PositionSwapAdapterContractApproval':
  *     case 'PositionSwapPositionManagerApproval':
+ *     case 'PositionSwapSetCollateralApproval':
  *       return signTypedData(plan.bySignature);
  *
- *     case 'SwapTypedData':
+ *     case 'OrderTypedData':
  *       return signTypedData(plan);
  *   }
  * });
@@ -60,16 +65,15 @@ export type UseSupplySwapRequest = Prettify<
  *   return;
  * }
  *
- * // result.value: SwapReceipt
+ * // result.value: OrderReceipt
  * ```
- * @deprecated Superseded by the Order API; use {@link useSupplySwapOrder}. The swap API remains functional but will be removed in a later release.
  */
-export function useSupplySwap(
-  handler: PositionSwapHandler,
+export function useSupplySwapOrder(
+  handler: PositionOrderHandler,
 ): UseAsyncTask<
-  SupplySwapQuoteRequest,
-  SwapReceipt,
-  | SwapSignerError
+  UseSupplySwapOrderRequest,
+  OrderReceipt,
+  | OrderSignerError
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
@@ -80,23 +84,21 @@ export function useSupplySwap(
     ({
       currency = DEFAULT_QUERY_OPTIONS.currency,
       ...request
-    }: UseSupplySwapRequest) => {
-      return supplySwapQuote(client, request, { currency }).andThen(
-        (result) => {
-          return processApprovals(result)
-            .with(handler)
-            .andThen((request) => preparePositionSwap(client, request))
-            .andThen((order) =>
-              handler(order.data, { cancel })
-                .andThen(trySignatureFrom)
-                .andThen((signature) =>
-                  swapPosition(client, {
-                    quoteId: order.newQuoteId,
-                    signature,
-                  }),
-                ),
-            );
-        },
+    }: UseSupplySwapOrderRequest) => {
+      return supplySwapQuote(client, request, { currency }).andThen((result) =>
+        processPositionOrderApprovals(result)
+          .with(handler)
+          .andThen((request) => prepareOrder(client, request))
+          .andThen((order) =>
+            handler(order.data, { cancel })
+              .andThen(trySignatureFrom)
+              .andThen((signature) =>
+                submitOrderIntent(client, {
+                  quoteId: order.newQuoteId,
+                  signature,
+                }),
+              ),
+          ),
       );
     },
     [client, handler],

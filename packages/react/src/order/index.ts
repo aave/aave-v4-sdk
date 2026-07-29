@@ -6,6 +6,10 @@ export type {
   OrderValue,
 } from './helpers';
 export {
+  type UseBorrowSwapOrderRequest,
+  useBorrowSwapOrder,
+} from './useBorrowSwapOrder';
+export {
   type CancelOrderError,
   type CancelOrderHandler,
   CannotCancelOrderError,
@@ -28,3 +32,21 @@ export {
   type UsePendingOrdersArgs,
   usePendingOrders,
 } from './usePendingOrders';
+export {
+  type UseRepayWithSupplyOrderRequest,
+  useRepayWithSupplyOrder,
+} from './useRepayWithSupplyOrder';
+export {
+  type UseSupplySwapOrderRequest,
+  useSupplySwapOrder,
+} from './useSupplySwapOrder';
+export {
+  type TokenSwapOrderHandler,
+  type TokenSwapOrderPlan,
+  type UseTokenSwapOrderRequest,
+  useTokenSwapOrder,
+} from './useTokenSwapOrder';
+export {
+  type UseWithdrawSwapOrderRequest,
+  useWithdrawSwapOrder,
+} from './useWithdrawSwapOrder';

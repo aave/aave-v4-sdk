@@ -1,10 +1,10 @@
-import { borrowSwapQuote, preparePositionSwap } from '@aave/client/actions';
+import { prepareOrder, withdrawSwapQuote } from '@aave/client/actions';
 import type { ValidationError } from '@aave/core';
 import type {
-  BorrowSwapQuoteRequest,
   InsufficientBalanceError,
   InsufficientLiquidityError,
-  SwapReceipt,
+  OrderReceipt,
+  WithdrawSwapQuoteRequest,
 } from '@aave/graphql';
 import type { Prettify } from '@aave/types';
 
@@ -15,60 +15,48 @@ import {
   type CurrencyQueryOptions,
   cancel,
   DEFAULT_QUERY_OPTIONS,
-  type PositionSwapHandler,
-  processApprovals,
-  type SwapSignerError,
-  swapPosition,
+  type OrderSignerError,
+  type PositionOrderHandler,
+  processPositionOrderApprovals,
+  submitOrderIntent,
   trySignatureFrom,
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
 
-export type UseBorrowSwapRequest = Prettify<
-  BorrowSwapQuoteRequest & CurrencyQueryOptions
+export type UseWithdrawSwapOrderRequest = Prettify<
+  WithdrawSwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
- * Orchestrate the borrow swap execution plan.
+ * Execute a withdraw-and-swap through the Order API.
+ *
+ * The Order-API equivalent of {@link useWithdrawSwap}: it fetches a withdraw
+ * swap quote, collects the position-swap approval signatures, prepares and
+ * signs the order, then submits it — resolving to an {@link OrderReceipt}.
  *
  * ```tsx
  * const [signTypedData] = useSignTypedData(wallet);
  *
- * const [swapBorrow, { loading, error }] = useBorrowSwap((plan) => {
+ * const [withdrawAndSwap, { loading, error }] = useWithdrawSwapOrder((plan) => {
  *   switch (plan.__typename) {
  *     case 'PositionSwapAdapterContractApproval':
  *     case 'PositionSwapPositionManagerApproval':
+ *     case 'PositionSwapSetCollateralApproval':
  *       return signTypedData(plan.bySignature);
  *
- *     case 'SwapTypedData':
+ *     case 'OrderTypedData':
  *       return signTypedData(plan);
  *   }
  * });
- *
- * const result = await swapBorrow({
- *   market: {
- *     debtPosition: userBorrowItem.id,
- *     buyReserve: targetReserve.id,
- *     amount: bigDecimal('1000'),
- *     user: evmAddress('0x742d35cc…'),
- *   },
- * });
- *
- * if (result.isErr()) {
- *   console.error(result.error);
- *   return;
- * }
- *
- * // result.value: SwapReceipt
  * ```
- * @deprecated Superseded by the Order API; use {@link useBorrowSwapOrder}. The swap API remains functional but will be removed in a later release.
  */
-export function useBorrowSwap(
-  handler: PositionSwapHandler,
+export function useWithdrawSwapOrder(
+  handler: PositionOrderHandler,
 ): UseAsyncTask<
-  BorrowSwapQuoteRequest,
-  SwapReceipt,
-  | SwapSignerError
+  UseWithdrawSwapOrderRequest,
+  OrderReceipt,
+  | OrderSignerError
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
@@ -79,23 +67,22 @@ export function useBorrowSwap(
     ({
       currency = DEFAULT_QUERY_OPTIONS.currency,
       ...request
-    }: UseBorrowSwapRequest) => {
-      return borrowSwapQuote(client, request, { currency }).andThen(
-        (result) => {
-          return processApprovals(result)
+    }: UseWithdrawSwapOrderRequest) => {
+      return withdrawSwapQuote(client, request, { currency }).andThen(
+        (result) =>
+          processPositionOrderApprovals(result)
             .with(handler)
-            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((request) => prepareOrder(client, request))
             .andThen((order) =>
               handler(order.data, { cancel })
                 .andThen(trySignatureFrom)
                 .andThen((signature) =>
-                  swapPosition(client, {
+                  submitOrderIntent(client, {
                     quoteId: order.newQuoteId,
                     signature,
                   }),
                 ),
-            );
-        },
+            ),
       );
     },
     [client, handler],

@@ -64,6 +64,7 @@ export type UseRepayWithSupplyRequest = Prettify<
  *
  * // result.value: SwapReceipt
  * ```
+ * @deprecated Superseded by the Order API; use {@link useRepayWithSupplyOrder}. The swap API remains functional but will be removed in a later release.
  */
 export function useRepayWithSupply(
   handler: PositionSwapHandler,

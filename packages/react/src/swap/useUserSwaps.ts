@@ -68,6 +68,7 @@ export type UseUserSwapsArgs = Prettify<
  *   suspense: true,
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
 export function useUserSwaps(
   args: UseUserSwapsArgs & Suspendable,
@@ -86,6 +87,7 @@ export function useUserSwaps(
  *   pause: true,
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
 export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs> & Suspendable,
@@ -100,6 +102,7 @@ export function useUserSwaps(
  *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
 export function useUserSwaps(
   args: UseUserSwapsArgs,
@@ -117,6 +120,7 @@ export function useUserSwaps(
  *   pause: true,
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
 export function useUserSwaps(
   args: Pausable<UseUserSwapsArgs>,

@@ -20,6 +20,8 @@ import type {
   OrderReceipt,
   OrderStatus,
   OrderTypedData,
+  PositionSwapApproval,
+  PositionSwapByIntentApprovalsRequired,
   PrepareOrderRequest,
   SubmitOrderBySignatureInput,
 } from '@aave/graphql';
@@ -131,6 +133,65 @@ export function processOrderApprovals(
         okAsync({
           quoteId: result.quote.quoteId,
           permitSig,
+          adapterContractSignature: null,
+          positionManagerSignature: null,
+          setCollateralSignature: null,
+        }),
+      ),
+  };
+}
+
+export type PositionOrderHandler = (
+  plan: PositionSwapApproval | OrderTypedData,
+  options: OrderHandlerOptions,
+) => ResultAsync<PendingTransaction | Signature, OrderSignerError>;
+
+/**
+ * Collects the signatures a position-swap order requires, in order, into a
+ * {@link PrepareOrderRequest}.
+ *
+ * The position-swap counterpart of {@link processOrderApprovals}: the approvals
+ * arrive as `PositionSwap*Approval` nodes and the order id comes from
+ * `SwapQuote.orderQuoteId`, but they map onto the same three
+ * `PrepareOrderRequest` signature fields the Order API consumes. Position swaps
+ * carry no wallet top-up permit, so `permitSig` is always null.
+ */
+export function processPositionOrderApprovals(
+  result: PositionSwapByIntentApprovalsRequired,
+) {
+  return {
+    with: (
+      handler: PositionOrderHandler,
+    ): ResultAsync<PrepareOrderRequest, OrderSignerError> =>
+      result.approvals.reduce<
+        ResultAsync<PrepareOrderRequest, OrderSignerError>
+      >(
+        (acc, approval) =>
+          acc.andThen((request) =>
+            handler(approval, { cancel }).map((value) => {
+              switch (approval.__typename) {
+                case 'PositionSwapAdapterContractApproval':
+                  request.adapterContractSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
+                case 'PositionSwapPositionManagerApproval':
+                  request.positionManagerSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
+                case 'PositionSwapSetCollateralApproval':
+                  request.setCollateralSignature = isSignature(value)
+                    ? value
+                    : null;
+                  break;
+              }
+              return request;
+            }),
+          ),
+        okAsync({
+          quoteId: result.quote.orderQuoteId,
+          permitSig: null,
           adapterContractSignature: null,
           positionManagerSignature: null,
           setCollateralSignature: null,

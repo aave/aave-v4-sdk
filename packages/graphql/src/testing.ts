@@ -23,12 +23,15 @@ import type {
   ExchangeAmount,
   ExchangeAmountWithChange,
   HealthFactorWithChange,
+  OrderReceipt,
+  OrderTypedData,
   PaginatedUserSwapsResult,
   PercentNumber,
   PercentNumberWithChange,
   PermitTypedData,
   PositionSwapAdapterContractApproval,
   PositionSwapPositionManagerApproval,
+  PreparedOrder,
   PrepareSwapOrder,
   Spoke,
   SpokeSummary,
@@ -51,6 +54,7 @@ import type {
 } from './fragments';
 import {
   encodeSpokeId,
+  type OrderId,
   type OrderQuoteId,
   type ReserveId,
   reserveId,
@@ -483,6 +487,54 @@ export function makeSwapReceipt(): SwapReceipt {
     __typename: 'SwapReceipt',
     id: randomBase64String() as SwapId,
     createdAt: new Date(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeOrderTypedData(): OrderTypedData {
+  return {
+    __typename: 'OrderTypedData',
+    primaryType: 'Order',
+    types: {
+      Order: [
+        { name: 'amount', type: 'uint256' },
+        { name: 'deadline', type: 'uint256' },
+      ],
+    },
+    domain: {
+      __typename: 'DomainData',
+      name: 'Order',
+      version: '1',
+      chainId: DEVNET_CHAIN_ID,
+      verifyingContract: randomEvmAddress(),
+    } as DomainData,
+    message: {
+      amount: '1000000000000000000',
+      deadline: 1234567890,
+    },
+  };
+}
+
+/**
+ * @internal
+ */
+export function makePreparedOrder(): PreparedOrder {
+  return {
+    __typename: 'PreparedOrder',
+    newQuoteId: makeQuoteId() as string as OrderQuoteId,
+    data: makeOrderTypedData(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeOrderReceipt(): OrderReceipt {
+  return {
+    __typename: 'OrderReceipt',
+    orderId: randomBase64String() as OrderId,
   };
 }
 

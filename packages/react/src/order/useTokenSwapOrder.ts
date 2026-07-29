@@ -1,14 +1,18 @@
 import { supportsPermit } from '@aave/client';
-import { prepareTokenSwap, swap, tokenSwapQuote } from '@aave/client/actions';
+import {
+  prepareOrder,
+  submitOrder,
+  tokenSwapQuote,
+} from '@aave/client/actions';
 import { UnexpectedError, type ValidationError } from '@aave/core';
 import type {
   Erc20Approval,
   InsufficientBalanceError,
   InsufficientLiquidityError,
-  SwapReceipt,
-  SwapRequest,
-  SwapTransactionRequest,
-  SwapTypedData,
+  OrderReceipt,
+  OrderTransactionRequest,
+  OrderTypedData,
+  SubmitOrderRequest,
   TokenSwapQuoteRequest,
 } from '@aave/graphql';
 import type { Prettify, ResultAsync, Signature } from '@aave/types';
@@ -23,96 +27,87 @@ import {
   cancel,
   DEFAULT_QUERY_OPTIONS,
   isSignature,
+  type OrderHandlerOptions,
+  type OrderSignerError,
   okAsync,
   PendingTransaction,
-  type SwapHandlerOptions,
-  type SwapSignerError,
   trySignatureFrom,
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
 
-export type UseTokenSwapRequest = Prettify<
+export type UseTokenSwapOrderRequest = Prettify<
   TokenSwapQuoteRequest & CurrencyQueryOptions
 >;
 
-export type TokenSwapPlan =
-  | SwapTypedData
+export type TokenSwapOrderPlan =
+  | OrderTypedData
   | Erc20Approval
-  | SwapTransactionRequest;
+  | OrderTransactionRequest;
 
-export type TokenSwapHandler = (
-  plan: TokenSwapPlan,
-  options: SwapHandlerOptions,
-) => ResultAsync<PendingTransaction | Signature, SwapSignerError>;
+export type TokenSwapOrderHandler = (
+  plan: TokenSwapOrderPlan,
+  options: OrderHandlerOptions,
+) => ResultAsync<PendingTransaction | Signature, OrderSignerError>;
 
 /**
- * Orchestrate the token swap execution plan.
+ * Execute a token swap through the Order API.
+ *
+ * The Order-API equivalent of {@link useTokenSwap}: it fetches a token swap
+ * quote and, depending on the quote variant, either submits a transaction or
+ * prepares, signs, and submits an intent — handling any required ERC-20
+ * approval first — resolving to an {@link OrderReceipt}.
  *
  * ```tsx
  * const [sendTransaction] = useSendTransaction(wallet);
  * const [signTypedData] = useSignTypedData(wallet);
  *
- * const [swap, { loading, error }] = useTokenSwap((plan) => {
+ * const [swapTokens, { loading, error }] = useTokenSwapOrder((plan) => {
  *   switch (plan.__typename) {
  *     case 'Erc20Approval':
- *       if (plan.bySignature) {
- *         return signTypedData(plan.bySignature);
- *       }
- *       return sendTransaction(plan.byTransaction);
+ *       return plan.bySignature
+ *         ? signTypedData(plan.bySignature)
+ *         : sendTransaction(plan.transaction);
  *
- *     case 'SwapTransactionRequest':
+ *     case 'OrderTransactionRequest':
  *       return sendTransaction(plan.transaction);
  *
- *     case 'SwapTypedData':
+ *     case 'OrderTypedData':
  *       return signTypedData(plan);
  *   }
  * });
- *
- * const result = await swap({
- *   fromQuote: {
- *     quoteId: quote.quoteId,
- *   },
- * });
- *
- * if (result.isErr()) {
- *   console.error(result.error);
- *   return;
- * }
- *
- * // result.value: SwapReceipt
  * ```
- * @deprecated Superseded by the Order API; use {@link useTokenSwapOrder}. The swap API remains functional but will be removed in a later release.
  */
-export function useTokenSwap(
-  handler: TokenSwapHandler,
+export function useTokenSwapOrder(
+  handler: TokenSwapOrderHandler,
 ): UseAsyncTask<
-  UseTokenSwapRequest,
-  SwapReceipt,
+  UseTokenSwapOrderRequest,
+  OrderReceipt,
+  | OrderSignerError
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
 > {
   const client = useAaveClient();
 
-  const executeSwap = useCallback(
+  const executeOrder = useCallback(
     (
-      request: SwapRequest,
+      request: SubmitOrderRequest,
     ): ResultAsync<
-      SwapReceipt,
+      OrderReceipt,
       | SendTransactionError
       | PendingTransactionError
       | ValidationError<InsufficientBalanceError>
     > => {
-      return swap(client, request).andThen((plan) => {
+      return submitOrder(client, request).andThen((plan) => {
         switch (plan.__typename) {
-          case 'SwapTransactionRequest':
+          case 'OrderTransactionRequest':
             return handler(plan, { cancel })
               .andThen(PendingTransaction.tryFrom)
               .andThen((pendingTransaction) => pendingTransaction.wait())
               .andThen(() => okAsync(plan.orderReceipt));
 
-          case 'SwapReceipt':
+          case 'OrderReceipt':
             return okAsync(plan);
         }
       });
@@ -124,23 +119,23 @@ export function useTokenSwap(
     ({
       currency = DEFAULT_QUERY_OPTIONS.currency,
       ...request
-    }: UseTokenSwapRequest) =>
+    }: UseTokenSwapOrderRequest) =>
       tokenSwapQuote(client, request, { currency }).andThen((quoteResult) => {
         switch (quoteResult.__typename) {
           case 'SwapByTransaction':
-            return executeSwap({
-              transaction: { quoteId: quoteResult.quote.quoteId },
+            return executeOrder({
+              byTransaction: { quoteId: quoteResult.quote.orderQuoteId },
             });
 
           case 'SwapByIntent':
-            return prepareTokenSwap(client, {
-              quoteId: quoteResult.quote.quoteId,
+            return prepareOrder(client, {
+              quoteId: quoteResult.quote.orderQuoteId,
             }).andThen((order) =>
               handler(order.data, { cancel })
                 .andThen(trySignatureFrom)
                 .andThen((signature) =>
-                  executeSwap({
-                    intent: { quoteId: order.newQuoteId, signature },
+                  executeOrder({
+                    bySignature: { quoteId: order.newQuoteId, signature },
                   }),
                 ),
             );
@@ -151,8 +146,8 @@ export function useTokenSwap(
               return handler(approval, { cancel })
                 .andThen((result) => {
                   if (isSignature(result)) {
-                    return prepareTokenSwap(client, {
-                      quoteId: quoteResult.quote.quoteId,
+                    return prepareOrder(client, {
+                      quoteId: quoteResult.quote.orderQuoteId,
                       permitSig: {
                         deadline: approval.bySignature.message
                           .deadline as number,
@@ -162,8 +157,8 @@ export function useTokenSwap(
                   }
                   if (PendingTransaction.isInstanceOf(result)) {
                     return result.wait().andThen(() =>
-                      prepareTokenSwap(client, {
-                        quoteId: quoteResult.quote.quoteId,
+                      prepareOrder(client, {
+                        quoteId: quoteResult.quote.orderQuoteId,
                       }),
                     );
                   }
@@ -173,8 +168,8 @@ export function useTokenSwap(
                   handler(order.data, { cancel })
                     .andThen(trySignatureFrom)
                     .andThen((signature) =>
-                      executeSwap({
-                        intent: {
+                      executeOrder({
+                        bySignature: {
                           quoteId: order.newQuoteId,
                           signature,
                         },
@@ -199,16 +194,18 @@ export function useTokenSwap(
                 >,
               )
               .andThen(() =>
-                prepareTokenSwap(client, {
-                  quoteId: quoteResult.quote.quoteId,
+                prepareOrder(client, {
+                  quoteId: quoteResult.quote.orderQuoteId,
                 }),
               )
-              .andThen((order) => handler(order.data, { cancel }))
-              .andThen(trySignatureFrom)
-              .andThen((signature) =>
-                executeSwap({
-                  intent: { quoteId: quoteResult.quote.quoteId, signature },
-                }),
+              .andThen((order) =>
+                handler(order.data, { cancel })
+                  .andThen(trySignatureFrom)
+                  .andThen((signature) =>
+                    executeOrder({
+                      bySignature: { quoteId: order.newQuoteId, signature },
+                    }),
+                  ),
               );
 
           case 'SwapByTransactionWithApprovalRequired':
@@ -228,17 +225,17 @@ export function useTokenSwap(
                 >,
               )
               .andThen(() =>
-                executeSwap({
-                  transaction: { quoteId: quoteResult.quote.quoteId },
+                executeOrder({
+                  byTransaction: { quoteId: quoteResult.quote.orderQuoteId },
                 }),
               );
 
           default:
             never(
-              `Unsupported swap quote result: ${quoteResult.__typename}. To be removed from API soon.`,
+              `Unsupported token swap quote result: ${quoteResult.__typename}.`,
             );
         }
       }),
-    [client, handler, executeSwap],
+    [client, handler, executeOrder],
   );
 }
