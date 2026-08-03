@@ -43,8 +43,27 @@ export const environment =
       ? production
       : staging;
 
+function requiredEnv(name: keyof ImportMetaEnv): string {
+  const value = import.meta.env[name];
+  invariant(
+    value,
+    `Missing ${name}. Copy .env.example to .env and configure the Tenderly fork settings before running fork-backed tests.`,
+  );
+  return value;
+}
+
+function requiredIntegerEnv(name: keyof ImportMetaEnv): number {
+  const raw = requiredEnv(name);
+  const value = Number.parseInt(raw, 10);
+  invariant(
+    Number.isInteger(value) && value >= 0,
+    `${name} must be a non-negative integer. Received: ${raw}`,
+  );
+  return value;
+}
+
 export const ETHEREUM_FORK_ID = chainId(
-  Number.parseInt(import.meta.env.ETHEREUM_TENDERLY_FORK_ID, 10),
+  requiredIntegerEnv('ETHEREUM_TENDERLY_FORK_ID'),
 );
 
 // Token addresses
@@ -113,11 +132,13 @@ export const ETHEREUM_HUB_CORE_ID = encodeHubId({
   address: ETHEREUM_HUB_CORE_ADDRESS,
 });
 
-export const ETHEREUM_FORK_RPC_URL = import.meta.env
-  .ETHEREUM_TENDERLY_PUBLIC_RPC;
+export const ETHEREUM_FORK_RPC_URL = requiredEnv(
+  'ETHEREUM_TENDERLY_PUBLIC_RPC',
+);
 
-export const ETHEREUM_FORK_RPC_URL_ADMIN = import.meta.env
-  .ETHEREUM_TENDERLY_ADMIN_RPC;
+export const ETHEREUM_FORK_RPC_URL_ADMIN = requiredEnv(
+  'ETHEREUM_TENDERLY_ADMIN_RPC',
+);
 
 export const client = AaveClient.create({
   environment,
