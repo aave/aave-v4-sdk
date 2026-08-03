@@ -186,6 +186,7 @@ export const UserMerklClaimableRewardFragment = graphql(
   `fragment UserMerklClaimableReward on UserMerklClaimableReward {
     __typename
     id
+    claimChainId
     claimable {
       ...Erc20Amount
     }
