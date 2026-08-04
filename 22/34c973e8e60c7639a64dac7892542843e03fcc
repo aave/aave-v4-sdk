@@ -1,0 +1,21 @@
+.changeset/tidy-hounds-invent.md
+  s_6b33580f1315a9::t_6bcc3a01fb3683 1-7
+packages/core/src/batching.ts
+  s_6b33580f1315a9::t_48868abc2a3425 261
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "2234c973e8e60c7639a64dac7892542843e03fcc",
+  "prompts": {},
+  "sessions": {
+    "s_6b33580f1315a9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55da5946-b545-462d-8736-3aaefdeedb9c",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
