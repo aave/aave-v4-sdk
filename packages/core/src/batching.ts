@@ -258,13 +258,13 @@ export function batchFetchExchange({
             : fetchOptions || {};
 
         fetch(url, {
+          ...opts,
           method: 'POST',
           headers: {
             'content-type': 'application/json',
             ...(opts.headers || {}),
           },
           body: JSON.stringify(body),
-          ...opts,
         })
           .then((res) => res.json() as Promise<ExecutionResult[]>)
           .then((results) => {
