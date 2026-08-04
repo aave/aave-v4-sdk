@@ -212,17 +212,17 @@ export class AaveClient extends GqlClient {
         return undefined;
       }
       const vars = op.variables as UserClaimableRewardsVars;
-      const ids = new Set<RewardId>();
+      const pendingByChain = new Map<ChainId, Set<RewardId>>();
       for (const chainId of userClaimableRewardsChainIds(vars)) {
         const key = `${vars.request.user}:${chainId}`;
         const pending = this.pendingRewardRemovals.get(key);
         if (pending && Date.now() <= pending.expiresAt) {
-          for (const id of pending.ids) ids.add(id);
+          pendingByChain.set(chainId, pending.ids);
         } else if (pending) {
           this.pendingRewardRemovals.delete(key);
         }
       }
-      return ids.size > 0 ? ids : undefined;
+      return pendingByChain.size > 0 ? pendingByChain : undefined;
     };
 
     // This exchange is placed BEFORE graphcache in the pipeline so it intercepts ALL
@@ -234,11 +234,17 @@ export class AaveClient extends GqlClient {
         pipe(
           forward(ops$),
           map((result: OperationResult) => {
-            const pendingIds = pendingForOp(result.operation);
-            if (!pendingIds || !result.data?.value) return result;
+            const pendingByChain = pendingForOp(result.operation);
+            if (!pendingByChain || !result.data?.value) return result;
             const filtered = (
-              result.data.value as Array<{ id: RewardId }>
-            ).filter((r) => !pendingIds.has(r.id));
+              result.data.value as Array<{
+                id: RewardId;
+                claimChainId: ChainId;
+              }>
+            ).filter(
+              (reward) =>
+                !pendingByChain.get(reward.claimChainId)?.has(reward.id),
+            );
             return { ...result, data: { value: filtered } };
           }),
         );

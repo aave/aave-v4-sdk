@@ -228,6 +228,51 @@ describe('Given a multichain claimable rewards query', () => {
   });
 });
 
+describe('Given the same reward id on multiple claim chains', () => {
+  const client = AaveClient.create({
+    environment: testEnvironment,
+    batch: false,
+  });
+  const avalancheChainId = chainId(43114);
+  const server = setupServer(
+    api.query('UserClaimableRewards', () =>
+      msw.HttpResponse.json({
+        data: {
+          value: [
+            makeMockReward(MOCK_REWARD_ID),
+            {
+              ...makeMockReward(MOCK_REWARD_ID),
+              claimChainId: avalancheChainId,
+            },
+          ],
+        },
+      }),
+    ),
+  );
+
+  beforeAll(() => server.listen());
+  afterAll(() => server.close());
+
+  it('Then claiming one chain keeps the reward on the other chain', async () => {
+    const request = {
+      user: MOCK_USER,
+      chainIds: [MOCK_CHAIN_ID, avalancheChainId],
+    };
+    assertOk(await userClaimableRewards(client, request));
+
+    client.markRewardsClaimed(MOCK_USER, avalancheChainId, [
+      MOCK_REWARD_ID as RewardId,
+    ]);
+    const result = await userClaimableRewards(client, request, {
+      requestPolicy: 'cache-first',
+    });
+
+    assertOk(result);
+    expect(result.value).toHaveLength(1);
+    expect(result.value[0]?.claimChainId).toBe(MOCK_CHAIN_ID);
+  });
+});
+
 describe('Given the same claimable reward on different claim chains', () => {
   const client = AaveClient.create({
     environment: testEnvironment,
