@@ -28,6 +28,20 @@ export const UserClaimableRewardsQuery = graphql(
   }`,
   [UserClaimableRewardFragment],
 );
-export type UserClaimableRewardsRequest = RequestOf<
+type UserClaimableRewardsRequestInput = RequestOf<
   typeof UserClaimableRewardsQuery
 >;
+type UserClaimableRewardsRequestBase = Omit<
+  UserClaimableRewardsRequestInput,
+  'chainId' | 'chainIds'
+>;
+
+export type UserClaimableRewardsRequest =
+  | (UserClaimableRewardsRequestBase & {
+      chainId: NonNullable<UserClaimableRewardsRequestInput['chainId']>;
+      chainIds?: never;
+    })
+  | (UserClaimableRewardsRequestBase & {
+      chainId?: never;
+      chainIds: NonNullable<UserClaimableRewardsRequestInput['chainIds']>;
+    });

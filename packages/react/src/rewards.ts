@@ -30,6 +30,7 @@ export type UseUserClaimableRewardsArgs = Prettify<UserClaimableRewardsRequest>;
  * ```tsx
  * const { data } = useUserClaimableRewards({
  *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   suspense: true,
  * });
  * ```
@@ -45,6 +46,7 @@ export function useUserClaimableRewards(
  * ```tsx
  * const { data } = useUserClaimableRewards({
  *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   suspense: true,
  *   pause: true,
  * });
@@ -59,6 +61,7 @@ export function useUserClaimableRewards(
  * ```tsx
  * const { data, error, loading } = useUserClaimableRewards({
  *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(43114)],
  * });
  * ```
  */
@@ -73,6 +76,7 @@ export function useUserClaimableRewards(
  * ```tsx
  * const { data, error, loading, paused } = useUserClaimableRewards({
  *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   pause: true,
  * });
  * ```
@@ -113,6 +117,7 @@ export function useUserClaimableRewards({
  *
  * const result = await execute({
  *   user: evmAddress('0x742d35cc…'),
+ *   chainIds: [chainId(1), chainId(43114)],
  * });
  *
  * if (result.isOk()) {
