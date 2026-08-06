@@ -50,6 +50,7 @@ function makeMockReward(id: string) {
   return {
     __typename: 'UserMerklClaimableReward',
     id,
+    claimChainId: MOCK_CHAIN_ID,
     claimable: {
       __typename: 'Erc20Amount',
       token: {
@@ -179,6 +180,139 @@ describe('Given a post-claim cache-first read after markRewardsClaimed', () => {
     assertOk(result);
     expect(result.value).toHaveLength(1);
     expect(result.value[0]?.id).toBe(MOCK_REWARD_ID_2);
+  });
+});
+
+describe('Given a multichain claimable rewards query', () => {
+  const client = AaveClient.create({
+    environment: testEnvironment,
+    batch: false,
+  });
+  const avalancheChainId = chainId(43114);
+  const server = setupServer(
+    api.query('UserClaimableRewards', () =>
+      msw.HttpResponse.json({
+        data: {
+          value: [
+            makeMockReward(MOCK_REWARD_ID),
+            {
+              ...makeMockReward(MOCK_REWARD_ID_2),
+              claimChainId: avalancheChainId,
+            },
+          ],
+        },
+      }),
+    ),
+  );
+
+  beforeAll(() => server.listen());
+  afterAll(() => server.close());
+
+  it('Then a claim on one included chain is removed from the combined cache result', async () => {
+    const request = {
+      user: MOCK_USER,
+      chainIds: [MOCK_CHAIN_ID, avalancheChainId],
+    };
+    const primed = await userClaimableRewards(client, request);
+    assertOk(primed);
+
+    client.markRewardsClaimed(MOCK_USER, avalancheChainId, [
+      MOCK_REWARD_ID_2 as RewardId,
+    ]);
+    const result = await userClaimableRewards(client, request, {
+      requestPolicy: 'cache-first',
+    });
+
+    assertOk(result);
+    expect(result.value.map((reward) => reward.id)).toEqual([MOCK_REWARD_ID]);
+  });
+});
+
+describe('Given the same reward id on multiple claim chains', () => {
+  const client = AaveClient.create({
+    environment: testEnvironment,
+    batch: false,
+  });
+  const avalancheChainId = chainId(43114);
+  const server = setupServer(
+    api.query('UserClaimableRewards', () =>
+      msw.HttpResponse.json({
+        data: {
+          value: [
+            makeMockReward(MOCK_REWARD_ID),
+            {
+              ...makeMockReward(MOCK_REWARD_ID),
+              claimChainId: avalancheChainId,
+            },
+          ],
+        },
+      }),
+    ),
+  );
+
+  beforeAll(() => server.listen());
+  afterAll(() => server.close());
+
+  it('Then claiming one chain keeps the reward on the other chain', async () => {
+    const request = {
+      user: MOCK_USER,
+      chainIds: [MOCK_CHAIN_ID, avalancheChainId],
+    };
+    assertOk(await userClaimableRewards(client, request));
+
+    client.markRewardsClaimed(MOCK_USER, avalancheChainId, [
+      MOCK_REWARD_ID as RewardId,
+    ]);
+    const result = await userClaimableRewards(client, request, {
+      requestPolicy: 'cache-first',
+    });
+
+    assertOk(result);
+    expect(result.value).toHaveLength(1);
+    expect(result.value[0]?.claimChainId).toBe(MOCK_CHAIN_ID);
+  });
+});
+
+describe('Given the same claimable reward on different claim chains', () => {
+  const client = AaveClient.create({
+    environment: testEnvironment,
+    batch: false,
+  });
+  const forkChainId = chainId(123456789);
+  const server = setupServer(
+    api.query('UserClaimableRewards', ({ variables }) =>
+      msw.HttpResponse.json({
+        data: {
+          value: [
+            {
+              ...makeMockReward(MOCK_REWARD_ID),
+              claimChainId: variables.request.chainId,
+            },
+          ],
+        },
+      }),
+    ),
+  );
+
+  beforeAll(() => server.listen());
+  afterAll(() => server.close());
+
+  it('Then graphcache keeps one entity per claim chain', async () => {
+    const mainnetRequest = { user: MOCK_USER, chainId: MOCK_CHAIN_ID };
+    const forkRequest = { user: MOCK_USER, chainId: forkChainId };
+
+    assertOk(await userClaimableRewards(client, mainnetRequest));
+    assertOk(await userClaimableRewards(client, forkRequest));
+
+    const mainnetCached = client.urql.readQuery(UserClaimableRewardsQuery, {
+      request: mainnetRequest,
+    });
+    const forkCached = client.urql.readQuery(UserClaimableRewardsQuery, {
+      request: forkRequest,
+    });
+
+    expect(mainnetCached?.data?.value[0]?.claimChainId).toBe(MOCK_CHAIN_ID);
+    expect(forkCached?.data?.value[0]?.claimChainId).toBe(forkChainId);
   });
 });
 

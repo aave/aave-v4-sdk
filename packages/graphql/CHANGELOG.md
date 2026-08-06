@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 3.2.0
+
+### Minor Changes
+
+- 2dde326: **feat:** support multichain user claimable rewards queries
+
 ## 3.1.0
 
 ### Minor Changes
