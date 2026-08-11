@@ -1,5 +1,13 @@
 # @aave/client
 
+## 6.3.1
+
+### Patch Changes
+
+- 3850316: **fix:** preserve `content-type` and custom `headers` on batched GraphQL requests
+- Updated dependencies [3850316]
+  - @aave/core@1.1.1
+
 ## 6.3.0
 
 ### Minor Changes
