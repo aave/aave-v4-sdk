@@ -32,7 +32,7 @@
     "test:client:viem": "vitest --project client packages/client/src/viem.test.ts",
     "test:client": "vitest --project client",
     "test:core": "vitest --project core",
-    "test:react:swap": "vitest --project react packages/react/src/swap.test.ts",
+    "test:react:swap": "vitest --project react packages/react/src/swap/*.test.ts",
     "test:react:viem": "vitest --project react packages/react/src/viem/*.test.ts",
     "test:react": "vitest --project react",
     "test:types": "vitest --project types",
