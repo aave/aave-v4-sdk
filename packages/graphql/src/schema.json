@@ -7769,6 +7769,15 @@
             "args": []
           },
           {
+            "name": "underlyingApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "rewards",
             "type": {
               "kind": "NON_NULL",

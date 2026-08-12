@@ -71,6 +71,9 @@ export const ReserveSummaryFragment = graphql(
     borrowApy {
       ...PercentNumber
     }
+    underlyingApy {
+      ...PercentNumber
+    }
     rewards {
       ...Reward
     }
