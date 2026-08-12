@@ -169,6 +169,20 @@ export const UserPositionFragment = graphql(
     netBorrowApy {
       ...PercentNumberWithChange
     }
+    netApyBreakdown {
+      base {
+        ...PercentNumber
+      }
+      rewards {
+        ...PercentNumber
+      }
+      underlying {
+        ...PercentNumber
+      }
+      total {
+        ...PercentNumber
+      }
+    }
     healthFactor {
       ...HealthFactorWithChange
     }

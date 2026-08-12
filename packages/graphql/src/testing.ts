@@ -383,6 +383,12 @@ export function makeUserPosition({
     totalDebt: makeExchangeAmountWithChange(0),
     netSupplyApy: makePercentNumberWithChange(0),
     netBorrowApy: makePercentNumberWithChange(0),
+    netApyBreakdown: {
+      base: makePercentNumber(0),
+      rewards: makePercentNumber(0),
+      underlying: makePercentNumber(0),
+      total: makePercentNumber(0),
+    },
     healthFactor: makeHealthFactorWithChange(),
     riskPremium: makeUserPositionRiskPremium(),
     liquidationPrice: makeExchangeAmount(0),

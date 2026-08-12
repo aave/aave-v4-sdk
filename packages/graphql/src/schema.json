@@ -3648,6 +3648,61 @@
       },
       {
         "kind": "OBJECT",
+        "name": "NetApyBreakdown",
+        "fields": [
+          {
+            "name": "base",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "rewards",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "underlying",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "total",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "PaginatedActivitiesResult",
         "fields": [
           {
@@ -11411,6 +11466,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PercentNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "netApyBreakdown",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NetApyBreakdown",
                 "ofType": null
               }
             },
