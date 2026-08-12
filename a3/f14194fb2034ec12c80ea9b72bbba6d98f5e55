@@ -1,0 +1,27 @@
+.changeset/olive-pugs-relate.md
+  s_e3cde0b2cd010e::t_e264803bd72712 1-7
+packages/graphql/src/fragments/reserve.ts
+  s_e3cde0b2cd010e::t_a52cec620b1e5b 74-76
+packages/graphql/schema.graphql
+  s_e3cde0b2cd010e::t_6b4fdec236d36a 1899-1905,3187-3188,3518
+packages/graphql/src/graphql-env.d.ts
+  s_e3cde0b2cd010e::t_f777d1060dbfbb 231
+packages/graphql/src/schema.json
+  s_e3cde0b2cd010e::t_f2412140ed6082 7771-7779
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "a3f14194fb2034ec12c80ea9b72bbba6d98f5e55",
+  "prompts": {},
+  "sessions": {
+    "s_e3cde0b2cd010e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c4fea6e-172a-4666-a230-11b714dd399b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
