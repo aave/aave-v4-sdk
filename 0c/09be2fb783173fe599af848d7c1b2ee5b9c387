@@ -1,0 +1,19 @@
+packages/client/src/cache.ts
+  s_e3cde0b2cd010e::t_dd0a18cfa73c5d 468
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0c09be2fb783173fe599af848d7c1b2ee5b9c387",
+  "prompts": {},
+  "sessions": {
+    "s_e3cde0b2cd010e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c4fea6e-172a-4666-a230-11b714dd399b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
