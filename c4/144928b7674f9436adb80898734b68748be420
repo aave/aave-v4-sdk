@@ -1,0 +1,14 @@
+packages/graphql/schema.graphql
+  h_dd1a1ee57491bb 1490
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "c4144928b7674f9436adb80898734b68748be420",
+  "prompts": {},
+  "humans": {
+    "h_dd1a1ee57491bb": {
+      "author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

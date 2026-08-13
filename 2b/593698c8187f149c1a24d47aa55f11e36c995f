@@ -1,0 +1,53 @@
+packages/cli/package.json
+  ebcf0f657e8fd632 56-58
+packages/cli/src/commands/action/borrow.ts
+  ebcf0f657e8fd632 1-129
+packages/cli/src/commands/action/supply.ts
+  ebcf0f657e8fd632 116-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "2b593698c8187f149c1a24d47aa55f11e36c995f",
+  "prompts": {
+    "3808ed405f64120f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4869-01d6-7271-9a46-df42f3d1e466",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "ebcf0f657e8fd632": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4ebc-3ee9-7681-a097-98d32be0d48e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 135,
+      "total_deletions": 0,
+      "accepted_lines": 135,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 727,
+      "overriden_lines": 0
+    }
+  }
+}

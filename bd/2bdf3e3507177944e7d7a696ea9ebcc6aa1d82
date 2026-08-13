@@ -1,0 +1,52 @@
+packages/graphql/src/enums.ts
+  s_0e248f62f51a56::t_771726f4867d74 186-210
+packages/client/src/cache.ts
+  s_0e248f62f51a56::t_771726f4867d74 20,210-219,268-287,425,495-497,502-515,523,542-543
+.changeset/lucky-moons-invent.md
+  s_0e248f62f51a56::t_771726f4867d74 1-3,5-6
+  s_0e248f62f51a56::t_c6bbc2df57f363 4,7
+packages/graphql/src/graphql-env.d.ts
+  s_0e248f62f51a56::t_771726f4867d74 7,45-47,86,129-133,135,147,162,168-172,174-191,194,203,219-223,230-231,243,331-333,358,361
+packages/graphql/src/schema.json
+  s_0e248f62f51a56::t_771726f4867d74 68-71,1042-1055,2708-2939,3766,3771,3786-4675,4682,4685,4689-4690,4696,4700-4701,4707,4712,4716,4719,4723-4724,4727,4734,4737,4741-4749,4755,4760,4771,4783,5560-5592,5670-5699,7719-7741,7860-7948,10925-10928,11101-11111
+packages/graphql/src/fragments/swaps.ts
+  s_0e248f62f51a56::t_771726f4867d74 66,343-357,363-364,387-389,397
+packages/graphql/src/testing.ts
+  s_0e248f62f51a56::t_771726f4867d74 54,454-456,460,474
+packages/graphql/src/orders.ts
+  s_0e248f62f51a56::t_771726f4867d74 1-124
+packages/graphql/src/fragments/index.ts
+  s_0e248f62f51a56::t_771726f4867d74 4
+packages/graphql/src/index.ts
+  s_0e248f62f51a56::t_771726f4867d74 8
+packages/client/src/actions/index.ts
+  s_0e248f62f51a56::t_771726f4867d74 3
+packages/graphql/schema.graphql
+  s_0e248f62f51a56::t_771726f4867d74 19,263-274,561-564,902-943,957-983,1129-1165,1301-1304,1349-1383,1389-1522,1533-1537,1590-1597,1692-1713,1728-1732,1757-1761,1773,1942,1947-1951,1954-1962,2753-2767,2945,2947,2975-2979
+packages/graphql/src/graphql.ts
+  s_0e248f62f51a56::t_771726f4867d74 28,30,57-58,109,111-113
+packages/graphql/src/id.ts
+  s_0e248f62f51a56::t_771726f4867d74 294-327
+packages/graphql/src/fragments/orders.ts
+  s_0e248f62f51a56::t_771726f4867d74 1-479
+packages/graphql/src/transactions.ts
+  s_0e248f62f51a56::t_771726f4867d74 752-776,819-821,837
+packages/client/src/actions/order.ts
+  s_0e248f62f51a56::t_771726f4867d74 1-399
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "bd2bdf3e3507177944e7d7a696ea9ebcc6aa1d82",
+  "prompts": {},
+  "sessions": {
+    "s_0e248f62f51a56": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2038d66-2f23-47b9-b70d-c24063396dd4",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+packages/graphql/src/fragments/user.ts
+  5a2fa353c9285ec0 31-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "ba80152f56eb200eaf7d134179b748943728c795",
+  "prompts": {
+    "5a2fa353c9285ec0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1d701586-bb56-442f-b83c-3cc1e6ed0172",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 0,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}

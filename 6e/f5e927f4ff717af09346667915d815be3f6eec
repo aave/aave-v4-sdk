@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6ef5e927f4ff717af09346667915d815be3f6eec",
+  "prompts": {
+    "1b4f4d76c3c4082f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "273f47da-8722-453c-b637-b9cabbde778b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}

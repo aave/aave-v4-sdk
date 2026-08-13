@@ -1,0 +1,47 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.3",
+  "base_commit_sha": "47bccff47ba1ab52a2e9086ec0c4a55c33f06e73",
+  "prompts": {
+    "060a90a58b18a49b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d488a-e669-7293-ae29-a1aecd07421d",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "3808ed405f64120f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4869-01d6-7271-9a46-df42f3d1e466",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 810,
+      "overriden_lines": 0
+    }
+  }
+}

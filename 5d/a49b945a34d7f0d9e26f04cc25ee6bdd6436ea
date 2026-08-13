@@ -1,0 +1,19 @@
+.changeset/erc20-token-cache-chain-scoped-key.md
+  s_0d0b7af46444d1::t_d3a60319d01a85 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "5da49b945a34d7f0d9e26f04cc25ee6bdd6436ea",
+  "prompts": {},
+  "sessions": {
+    "s_0d0b7af46444d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13d34828-347d-4cb0-85cb-e1bcdb5aadc1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

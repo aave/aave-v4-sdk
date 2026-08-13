@@ -1,0 +1,35 @@
+packages/graphql/src/graphql-env.d.ts
+  s_48855a1f262dd7::t_4480814808cdb0 47
+packages/client/src/rewards-readquery.test.ts
+  s_48855a1f262dd7::t_57470793d6d9f0 79-87
+packages/graphql/src/fragments/common.ts
+  s_48855a1f262dd7::t_4480814808cdb0 88-90
+packages/graphql/src/testing.ts
+  s_48855a1f262dd7::t_4480814808cdb0 204,349
+packages/react/src/viem/useNetworkFee.test.ts
+  s_48855a1f262dd7::t_04782242813033 50-58
+packages/client/src/displayTransformExchange.test.ts
+  s_48855a1f262dd7::t_769839cc434e06 45-53
+.changeset/silver-dogs-cheer.md
+  s_48855a1f262dd7::t_7eb53b452ef0b5 1-5
+packages/graphql/src/schema.json
+  s_48855a1f262dd7::t_4480814808cdb0 1123-1133
+packages/graphql/schema.graphql
+  s_48855a1f262dd7::t_4480814808cdb0 271
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9a524ca9f6045c7b7460ae1371ef756dcb3da08f",
+  "prompts": {},
+  "sessions": {
+    "s_48855a1f262dd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c718f11-d14a-4af8-ad12-17e0f9253e47",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+packages/cli/README.md
+  7d295671b110ec4c 21,30-33,35,38-41,43,45,49,52-54,60-82,85-90,92-112,114-128,130,150,152,154,158,161,167,170,193,215-275,278,280,286,289-290,299
+packages/cli/src/commands/user/borrows.ts
+  7d295671b110ec4c 1-93
+packages/cli/src/commands/user/positions.ts
+  7d295671b110ec4c 1-95
+packages/cli/src/commands/reserve.ts
+  7d295671b110ec4c 1-86
+packages/cli/src/commands/user/summary.ts
+  7d295671b110ec4c 27-29,47-49
+packages/cli/src/commands/user/supplies.ts
+  7d295671b110ec4c 1-95
+packages/cli/package.json
+  7d295671b110ec4c 65-67
+packages/cli/src/common.ts
+  7d295671b110ec4c 9,17,58-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "93b7034a1b29113425b2c18ebd0e844c3ed4c673",
+  "prompts": {
+    "3808ed405f64120f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d4869-01d6-7271-9a46-df42f3d1e466",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "7d295671b110ec4c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d722a-befc-7b03-93f6-14e7db8f1e69",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 561,
+      "total_deletions": 33,
+      "accepted_lines": 561,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 727,
+      "overriden_lines": 0
+    }
+  }
+}

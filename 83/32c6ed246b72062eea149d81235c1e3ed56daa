@@ -1,0 +1,14 @@
+.changeset/free-banks-bathe.md
+  h_dd1a1ee57491bb 3-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8332c6ed246b72062eea149d81235c1e3ed56daa",
+  "prompts": {},
+  "humans": {
+    "h_dd1a1ee57491bb": {
+      "author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

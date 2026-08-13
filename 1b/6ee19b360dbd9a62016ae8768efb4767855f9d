@@ -1,0 +1,38 @@
+packages/graphql/src/protocol.ts
+  s_0e61429e0ecf5f::t_b816cca2fd241e 175-254
+packages/client/src/cache.ts
+  s_0e61429e0ecf5f::t_b816cca2fd241e 464-465
+.changeset/multichain-asset-query.md
+  s_0e61429e0ecf5f::t_165f0489044354 1-6
+  s_0e61429e0ecf5f::t_653d1ec7f509a5 7
+packages/graphql/src/graphql-env.d.ts
+  s_0e61429e0ecf5f::t_b816cca2fd241e 36,146-149,201,235,290,374,401,406,408
+packages/graphql/src/schema.json
+  s_0e61429e0ecf5f::t_b816cca2fd241e 3188-3406,5348-5356
+packages/client/src/actions/protocol.ts
+  s_0e61429e0ecf5f::t_b816cca2fd241e 15-17,63-90
+  s_0e61429e0ecf5f::t_da464d56a49f77 91-95
+packages/graphql/schema.graphql
+  s_0e61429e0ecf5f::t_b816cca2fd241e 194-199,1112-1145,1509,1948-1953,2382-2387,3055-3056,3309-3310,3365-3369,3375-3377
+packages/react/src/helpers/cache.ts
+  s_0e61429e0ecf5f::t_b816cca2fd241e 44-45,58-59
+packages/graphql/src/user.ts
+  s_0e61429e0ecf5f::t_b816cca2fd241e 136
+  s_0e61429e0ecf5f::t_9ec2827980156c 137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1b6ee19b360dbd9a62016ae8768efb4767855f9d",
+  "prompts": {},
+  "sessions": {
+    "s_0e61429e0ecf5f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ad5884f-0649-4bd7-8bed-1767c69af482",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+packages/react/src/protocol.ts
+  s_0e61429e0ecf5f::t_9ee8aed52c5200 124-214
+  s_0e61429e0ecf5f::t_19aa85465c1e02 20-22
+.changeset/multichain-asset-query.md
+  s_0e61429e0ecf5f::t_8134e00f749bd6 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2431474ca05858ad6cef29544a444fe8023e0cc9",
+  "prompts": {},
+  "sessions": {
+    "s_0e61429e0ecf5f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ad5884f-0649-4bd7-8bed-1767c69af482",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

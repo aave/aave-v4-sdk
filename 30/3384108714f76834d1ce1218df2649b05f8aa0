@@ -1,0 +1,19 @@
+packages/client/src/cache.test.ts
+  s_f7b1c51ce5b247::t_3853953f2611f7 291-292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "303384108714f76834d1ce1218df2649b05f8aa0",
+  "prompts": {},
+  "sessions": {
+    "s_f7b1c51ce5b247": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d0fb239f-1489-4e7f-bfea-1f5f4ea0c8a1",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

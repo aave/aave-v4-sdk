@@ -1,0 +1,19 @@
+packages/client/src/displayTransform.ts
+  s_ae4c68624454cb::t_173e49f6e51959 21-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3023143721f026fa2b5fe2ff05beef501c121190",
+  "prompts": {},
+  "sessions": {
+    "s_ae4c68624454cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b216bc58-b475-4e7f-8a5d-13d27d573558",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

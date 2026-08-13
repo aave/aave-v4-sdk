@@ -1,0 +1,39 @@
+.changeset/quiet-bats-cheer.md
+  40936ded27373474 1-4
+  aba40c1e1b7de11e 5
+packages/react/src/viem/useNetworkFee.ts
+  aba40c1e1b7de11e 25-26,40-47,156-160,162-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "b2ad908e44828b5ccfbfe0a32515151b51df2d1b",
+  "prompts": {
+    "40936ded27373474": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d6881-5878-71c3-a2d5-466084ea9d3b",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 209,
+      "total_deletions": 31,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "aba40c1e1b7de11e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "17f88ba7-f876-4ece-9002-55355f43c7aa",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 107,
+      "total_deletions": 57,
+      "accepted_lines": 27,
+      "overriden_lines": 0
+    }
+  }
+}

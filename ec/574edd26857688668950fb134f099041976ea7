@@ -1,0 +1,21 @@
+packages/react/src/viem/adapters.ts
+  s_e4eb2102d01da7::t_68ff95bad9992c 39-45
+.changeset/brave-foxes-sleep.md
+  s_e4eb2102d01da7::t_dcb1a916e034cb 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "ec574edd26857688668950fb134f099041976ea7",
+  "prompts": {},
+  "sessions": {
+    "s_e4eb2102d01da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aad7582e-6683-4b01-a825-6761e3a47747",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

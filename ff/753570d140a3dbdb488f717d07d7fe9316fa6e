@@ -1,0 +1,34 @@
+packages/graphql/schema.graphql
+  s_0d3c41f9ff7b02::t_23edd36a0a342f 1451,3389
+packages/client/src/actions/protocol.ts
+  s_0d3c41f9ff7b02::t_23edd36a0a342f 168
+packages/react/src/protocol.ts
+  s_0d3c41f9ff7b02::t_23edd36a0a342f 390
+.changeset/twelve-walls-grab.md
+  h_dd1a1ee57491bb 1-7
+packages/spec/query/protocolHistory.spec.ts
+  s_0d3c41f9ff7b02::t_23edd36a0a342f 1,72-87
+packages/graphql/src/graphql-env.d.ts
+  s_0d3c41f9ff7b02::t_23edd36a0a342f 195,436
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "ff753570d140a3dbdb488f717d07d7fe9316fa6e",
+  "prompts": {},
+  "humans": {
+    "h_dd1a1ee57491bb": {
+      "author": "AGMASO <agmguindo@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0d3c41f9ff7b02": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edad3-0020-7650-bc79-af2ec1588a36",
+        "model": "gpt-5.5"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

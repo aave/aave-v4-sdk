@@ -1,0 +1,35 @@
+packages/graphql/schema.graphql
+  7105999933d5902e 1903,1916-1919
+packages/graphql/src/fragments/spoke.ts
+  7105999933d5902e 3-7,9-23,34-35,38
+packages/client/src/cache.ts
+  7105999933d5902e 235-238,476
+packages/graphql/src/testing.ts
+  7105999933d5902e 337
+packages/graphql/src/schema.json
+  7105999933d5902e 7403-7451
+.changeset/spoke-liquidation-config.md
+  7105999933d5902e 1-7
+packages/graphql/src/graphql-env.d.ts
+  7105999933d5902e 234,237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "c723224ff337749927338effc464b88acd1c3c6e",
+  "prompts": {
+    "7105999933d5902e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b0fe3693-ac53-45bf-a4df-eec40ab88f75",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 15428,
+      "total_deletions": 91,
+      "accepted_lines": 97,
+      "overriden_lines": 0
+    }
+  }
+}

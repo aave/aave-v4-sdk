@@ -1,0 +1,24 @@
+packages/spec/query/chains.spec.ts
+  s_f34407fdae6fe3::t_ff6d0013633c4f 58
+  s_f34407fdae6fe3::t_e09c532ce346cb 82
+packages/spec/query/__snapshots__/chains.spec.ts.snap
+  s_f34407fdae6fe3::t_459f33e5eafefe 14,33
+packages/spec/query/__snapshots__/hubs.spec.ts.snap
+  s_f34407fdae6fe3::t_730841d1d0a114 41-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "50245736b94158b4c2c6943924eac5b39ab7f1cf",
+  "prompts": {},
+  "sessions": {
+    "s_f34407fdae6fe3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5c5ed3f3-93d6-46ba-8e13-12ff38e64cf6",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

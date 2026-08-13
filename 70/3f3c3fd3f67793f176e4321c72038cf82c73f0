@@ -1,0 +1,23 @@
+.changeset/calm-lions-snooze.md
+  1ed66c3fb62aa187 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "703f3c3fd3f67793f176e4321c72038cf82c73f0",
+  "prompts": {
+    "1ed66c3fb62aa187": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d495d-64bb-7f80-899f-eea6a3e003e6",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>",
+      "messages": [],
+      "total_additions": 31,
+      "total_deletions": 31,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    }
+  }
+}

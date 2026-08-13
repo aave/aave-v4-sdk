@@ -1,0 +1,36 @@
+packages/client/src/AaveClient.ts
+  s_ae4c68624454cb::t_1d6e1c05fb339b 151-153,169-170,173,177
+packages/client/src/config.ts
+  s_ae4c68624454cb::t_1d6e1c05fb339b 29-33,46-48,104
+packages/client/src/displayTransform.ts
+  s_ae4c68624454cb::t_1d6e1c05fb339b 11-12,22,28-33,51,62,71,75-79,81-82,86-91,108-109
+  s_ae4c68624454cb::t_9c0a7d8fc57fe3 80
+  s_ae4c68624454cb::t_9ba27dfbf91020 13-21,23-27
+packages/client/src/displayTransform.test.ts
+  s_ae4c68624454cb::t_b57288a5cb888b 276-311
+  s_ae4c68624454cb::t_94de0371da3f62 248,264
+  s_ae4c68624454cb::t_1d6e1c05fb339b 110,203-208,210-211,214-218,221-229,232-236,239-247,250-263,265-275,312-327,330-352
+.changeset/display-transform-exchange.md
+  s_ae4c68624454cb::t_1d6e1c05fb339b 9-10,12
+packages/client/src/displayTransformExchange.test.ts
+  s_ae4c68624454cb::t_ebc7a242371fdd 4-6,12,33-92,94-121,129-137,140,143-149,156,159-162,168-173,175-182,187,190-194,197-203,206-208,210-211,216,219-224,227-235,238,240,242-261,263-273,275-298,300-310,313-316
+  s_ae4c68624454cb::t_4b0af726e14041 188,204,217,241,274,311
+  s_ae4c68624454cb::t_2dc282c352928f 1-3,7-8,10-11,13-32,93,122-128,138-139,141-142,150-155,157-158,163-167,174,183-186,189,195-196,205,209,212-215,218,225-226,236-237,239,262,299,312,317-318
+  s_ae4c68624454cb::t_9d396ce69200ce 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "57945485513811ee8956bafda6651b86d4bd220e",
+  "prompts": {},
+  "sessions": {
+    "s_ae4c68624454cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b216bc58-b475-4e7f-8a5d-13d27d573558",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

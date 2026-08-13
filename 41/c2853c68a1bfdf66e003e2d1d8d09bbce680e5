@@ -1,0 +1,47 @@
+packages/client/src/cache.ts
+  s_5474bec4f5a66c::t_2a9d74b6ff04f6 427-428
+packages/client/src/actions/rewards.ts
+  s_5474bec4f5a66c::t_6ff2a348dd2648 17
+packages/spec/query/userClaimableRewards.spec.ts
+  s_5474bec4f5a66c::t_6937a51b3d1aaa 30
+packages/react/src/rewards.ts
+  s_5474bec4f5a66c::t_6ff2a348dd2648 33,49,64,79,120
+packages/react/src/helpers/cache.ts
+  s_5474bec4f5a66c::t_6937a51b3d1aaa 111-113
+packages/client/src/rewards-readquery.test.ts
+  s_5474bec4f5a66c::t_2a9d74b6ff04f6 228-229,231-273
+  s_5474bec4f5a66c::t_6937a51b3d1aaa 53,186-197,202-214,216-227
+  s_5474bec4f5a66c::t_b466505bcc07c2 198-201,215
+  s_5474bec4f5a66c::t_68d05c30ea2fa5 230
+.changeset/silver-rivers-claim.md
+  s_5474bec4f5a66c::t_6ff2a348dd2648 1-7
+packages/graphql/src/rewards.ts
+  s_5474bec4f5a66c::t_f862de88a346a8 31,34-47
+packages/client/src/AaveClient.ts
+  s_5474bec4f5a66c::t_6937a51b3d1aaa 39-55,147-150,162-163,215-223,225,237-238,241
+packages/graphql/src/fragments/rewards.ts
+  s_5474bec4f5a66c::t_f862de88a346a8 189
+packages/graphql/schema.graphql
+  s_5474bec4f5a66c::t_2a9d74b6ff04f6 3123,3141,3511
+  s_5474bec4f5a66c::t_668525c229f30c 3122
+packages/graphql/src/graphql-env.d.ts
+  s_5474bec4f5a66c::t_207317eee16957 379,382
+packages/graphql/src/schema.json
+  s_5474bec4f5a66c::t_21dcb994914927 11167-11177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "41c2853c68a1bfdf66e003e2d1d8d09bbce680e5",
+  "prompts": {},
+  "sessions": {
+    "s_5474bec4f5a66c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc5bf-3200-7bc0-b4d7-3c8b2b380cc3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

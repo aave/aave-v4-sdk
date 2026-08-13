@@ -1,0 +1,23 @@
+packages/react/src/hubs.ts
+  37a5804c472cb637 18-20,545-633
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "520d69c23e51d330cb309c5da3ebd95769c97683",
+  "prompts": {
+    "37a5804c472cb637": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af488fdf-1310-40df-8fe8-e48010b32936",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe",
+      "messages": [],
+      "total_additions": 92,
+      "total_deletions": 0,
+      "accepted_lines": 92,
+      "overriden_lines": 0
+    }
+  }
+}

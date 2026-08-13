@@ -1,0 +1,22 @@
+packages/client/src/AaveClient.ts
+  s_5474bec4f5a66c::t_cfe89aae39c5b1 246
+  s_5474bec4f5a66c::t_800b0fcf52fb83 215,220,225,237-238,240-245,247
+packages/client/src/rewards-readquery.test.ts
+  s_5474bec4f5a66c::t_800b0fcf52fb83 231-275
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "2a8935237eff2f08dacf9230513ede33783eeb76",
+  "prompts": {},
+  "sessions": {
+    "s_5474bec4f5a66c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc5bf-3200-7bc0-b4d7-3c8b2b380cc3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

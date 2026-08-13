@@ -1,0 +1,67 @@
+packages/cli/package.json
+  288d3aba2daa6d7b 59-61
+packages/cli/src/commands/action/swap/token.ts
+  dfa1ac6abf1e7a83 149
+  288d3aba2daa6d7b 1-6,8-15,17-148,150-154
+packages/cli/src/helpers/swaps.ts
+  288d3aba2daa6d7b 9,106,109,136,197,228-231,242-244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "27d9b03366b1796f1e217f23d74bd1d70787f90c",
+  "prompts": {
+    "288d3aba2daa6d7b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_274c24e95ffetWHDpgqcRd971r",
+        "model": "openai/gpt-5.3-codex"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 1259,
+      "total_deletions": 150,
+      "accepted_lines": 604,
+      "overriden_lines": 9
+    },
+    "7d295671b110ec4c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d722a-befc-7b03-93f6-14e7db8f1e69",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 283,
+      "overriden_lines": 0
+    },
+    "dfa1ac6abf1e7a83": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d8c25-cc77-76f1-bd70-e4ad78fe204b",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "f60a09fa511d8f10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d3df4-8a82-7182-8fa8-f671c5d51f45",
+        "model": "unknown"
+      },
+      "human_author": "Juan Garcia <juan@aave.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 647,
+      "overriden_lines": 0
+    }
+  }
+}

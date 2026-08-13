@@ -1,0 +1,19 @@
+.changeset/native-asset-resolution-exchange.md
+  s_9e6aeed34a3438::t_44ec62b1a59503 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "6220008ea1f3f7b7dd4e8b700ad3fc36d6077155",
+  "prompts": {},
+  "sessions": {
+    "s_9e6aeed34a3438": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55773b88-7196-4b5c-9fda-f9b262ea623e",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
