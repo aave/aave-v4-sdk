@@ -11890,6 +11890,18 @@
             "args": []
           },
           {
+            "name": "netApyBreakdown",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NetApyBreakdown",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "netAccruedInterest",
             "type": {
               "kind": "NON_NULL",

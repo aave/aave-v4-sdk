@@ -3332,6 +3332,12 @@ type UserSummary {
   netApy: PercentNumber!
 
   """
+  The same split as a position's, weighted across positions the way `net_apy` is, so the
+  dashboard headline and the position it drills into agree on where the number came from.
+  """
+  netApyBreakdown: NetApyBreakdown!
+
+  """
   Net accrued interest earned (all supply interests - all borrow interests)
   """
   netAccruedInterest(currency: Currency! = USD): ExchangeAmount!
