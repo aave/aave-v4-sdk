@@ -74,7 +74,9 @@ export function useRenounceSpokeUserPositionManager(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andThrough(() => refreshSpokePositionManagers(client, request.spoke)),
+        .andThrough(() =>
+          refreshSpokePositionManagers(client, request.spoke, request.managing),
+        ),
     [client, handler],
   );
 }
