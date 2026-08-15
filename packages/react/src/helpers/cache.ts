@@ -108,7 +108,9 @@ export function refreshUserClaimableRewards(
     UserClaimableRewardsQuery,
     (variables) =>
       variables.request.user === user &&
-      (chainId === undefined || variables.request.chainId === chainId),
+      (chainId === undefined ||
+        variables.request.chainId === chainId ||
+        variables.request.chainIds?.includes(chainId) === true),
   );
 }
 

@@ -1,4 +1,8 @@
-import type { SignTypedDataError, TypedData } from '@aave/client';
+import type {
+  SignTypedDataError,
+  TypedData,
+  UnexpectedError,
+} from '@aave/client';
 import {
   ensureChain,
   sendTransaction,
@@ -83,13 +87,31 @@ export function useSendTransaction(
  */
 export function useSignTypedData(
   walletClient: WalletClient | null | undefined,
-): UseAsyncTask<TypedData, Signature, SignTypedDataError> {
+): UseAsyncTask<TypedData, Signature, SignTypedDataError | UnexpectedError> {
+  const [fetchChain] = useChainAction();
+
   return useAsyncTask(
     (typedData: TypedData) => {
       invariant(walletClient, 'Expected a WalletClient to sign typed data');
 
-      return signTypedDataWith(walletClient, typedData);
+      // Wallets validate that the EIP-712 `domain.chainId` matches the active
+      // chain before signing (e.g. MetaMask throws "Provided chainId ... must
+      // match the active chainId ..."), so switch the wallet first — mirroring
+      // `useSendTransaction`.
+      return fetchChain({ chainId: typedData.domain.chainId })
+        .map((chain) => {
+          invariant(
+            chain,
+            `Chain ${typedData.domain.chainId} is not supported`,
+          );
+          return toViemChain(chain);
+        })
+        .andThen((viemChain) =>
+          ensureChain(walletClient, viemChain).andThen(() =>
+            signTypedDataWith(walletClient, typedData),
+          ),
+        );
     },
-    [walletClient],
+    [walletClient, fetchChain],
   );
 }

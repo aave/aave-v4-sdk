@@ -27,6 +27,7 @@ describe('Given a user who may have rewards', () => {
         expect.objectContaining({
           __typename: 'UserMerklClaimableReward',
           id: expect.any(String),
+          claimChainId: ETHEREUM_FORK_ID,
           claimable: expect.objectContaining({
             amount: expect.any(Object),
             token: expect.objectContaining({
