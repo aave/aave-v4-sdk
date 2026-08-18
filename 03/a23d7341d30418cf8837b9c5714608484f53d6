@@ -1,0 +1,42 @@
+packages/core/src/batching.test.ts
+  s_02002a9d458980::t_78c828f9201f61 1-105,132-249
+  s_02002a9d458980::t_f48571da976fbc 106-131
+packages/core/src/batching.ts
+  s_02002a9d458980::t_98b744c5312061 24
+  s_02002a9d458980::t_716cb94bb1f658 331
+  s_02002a9d458980::t_64287a3d536548 189-202
+  s_02002a9d458980::t_0793bc0bbd8c43 145-147
+  s_02002a9d458980::t_7625af9cc0007a 285-288
+  s_02002a9d458980::t_48f721bcc5cfe3 250-251,253,255,260,263-265
+  s_02002a9d458980::t_d25890338bb4b4 300-302
+  s_02002a9d458980::t_2980b03b49a6fa 213-215
+.changeset/witty-queries-coalesce.md
+  s_02002a9d458980::t_c9e2ca5949bf04 1-6
+  s_02002a9d458980::t_09c6e159271d77 7
+packages/core/src/GqlClient.ts
+  s_02002a9d458980::t_0ba53e6dda4573 279-281
+  s_02002a9d458980::t_77595bb3d6bdbd 25
+packages/core/src/dedup.test.ts
+  s_02002a9d458980::t_72b2ffa2686b3b 9
+  s_02002a9d458980::t_95cd979d84c4cb 15
+  s_02002a9d458980::t_7b0850a50b34c5 1-8,10-14,16-83,88-153
+  s_02002a9d458980::t_ef692125e2b6b3 84-87
+packages/core/src/dedup.ts
+  s_02002a9d458980::t_43e57040b63dba 1-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "03a23d7341d30418cf8837b9c5714608484f53d6",
+  "prompts": {},
+  "sessions": {
+    "s_02002a9d458980": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2835157-9ccc-46d3-a4b5-6be40065c771",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
