@@ -22,6 +22,7 @@ import {
 import { map, pipe, tap } from 'wonka';
 import { batchFetchExchange } from './batching';
 import type { Context } from './context';
+import { inFlightDedupExchange, refetching } from './dedup';
 import { UnexpectedError } from './errors';
 import { Logger, LogLevel } from './logger';
 import type { StandardData } from './types';
@@ -40,8 +41,6 @@ export type QueryOptions = {
    */
   batch?: boolean;
 };
-
-const refetching = Symbol('refetching');
 
 export class GqlClient {
   /**
@@ -277,7 +276,9 @@ export class GqlClient {
         }),
       );
     } else {
-      exchanges.push(fetchExchange);
+      // The plain fetch pipeline has no coalescing of its own, so install it
+      // here; `batchFetchExchange` handles this itself for the batched one.
+      exchanges.push(inFlightDedupExchange(), fetchExchange);
     }
 
     return exchanges;
