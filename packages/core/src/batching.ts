@@ -21,6 +21,7 @@ import {
   make,
   merge,
   mergeMap,
+  onEnd,
   pipe,
   type Source,
   share,
@@ -141,6 +142,9 @@ export type BatchFetchExchangeConfig = {
  * - Mutations and subscriptions are never batched
  * - Queries can opt-out of batching by setting `context.batch = false`
  * - Torn-down operations are automatically removed from pending batches
+ * - While a request for a given operation key is in flight, further operations
+ *   with the same key are coalesced onto it instead of issuing a duplicate
+ *   request — their subscribers receive the in-flight response when it lands
  */
 export function batchFetchExchange({
   batchInterval,
@@ -182,6 +186,20 @@ export function batchFetchExchange({
         Array<(result: OperationResult) => void>
       >();
 
+      // Keys of operations whose network request is currently in flight.
+      //
+      // urql's React bindings dispatch every query twice per hook mount (once
+      // during render to compute the initial state, once from the effect that
+      // subscribes for real) with a teardown in between. The teardown clears
+      // the Client's own dedup state, so both dispatches reach this exchange.
+      // Coalescing onto the in-flight request keeps that — and any other
+      // same-key overlap, such as several components mounting the same
+      // `cache-and-network` query — down to a single request; every
+      // subscriber's sink receives the shared response. Operations that must
+      // never be coalesced (post-transaction refreshes, poll ticks) already
+      // opt out of batching via `context.batch = false` and bypass this path.
+      const inFlight = new Set<number>();
+
       const batched$ = pipe(
         shared,
         filter(
@@ -192,7 +210,9 @@ export function batchFetchExchange({
             op.context.url === url,
             `Operation URL mismatch: expected "${url}", got "${op.context.url}"`,
           );
-          batcher.push(op);
+          if (!inFlight.has(op.key)) {
+            batcher.push(op);
+          }
           return make<OperationResult>(({ next }) => {
             const sinks = resultSinks.get(op.key);
 
@@ -227,17 +247,22 @@ export function batchFetchExchange({
 
         // Single operation → use standard fetch flow
         if (operations.length === 1) {
+          const operation = operations[0];
+          inFlight.add(operation.key);
           pipe(
-            makeSingleRequestSource(operations[0], ops$),
+            makeSingleRequestSource(operation, ops$),
             tap((result: OperationResult) => {
-              const sinks = resultSinks.get(operations[0].key);
+              const sinks = resultSinks.get(operation.key);
               if (sinks) {
                 for (const sink of sinks) {
                   sink(result);
                 }
-                resultSinks.delete(operations[0].key);
+                resultSinks.delete(operation.key);
               }
             }),
+            // Fires on completion and on teardown-triggered abort alike, so an
+            // aborted request can never leave its key stuck as in-flight.
+            onEnd(() => inFlight.delete(operation.key)),
             subscribe(() => {}), // Activate the source (Wonka sources are lazy)
           );
           return;
@@ -257,6 +282,10 @@ export function batchFetchExchange({
             ? fetchOptions()
             : fetchOptions || {};
 
+        for (const op of operations) {
+          inFlight.add(op.key);
+        }
+
         fetch(url, {
           ...opts,
           method: 'POST',
@@ -268,6 +297,9 @@ export function batchFetchExchange({
         })
           .then((res) => res.json() as Promise<ExecutionResult[]>)
           .then((results) => {
+            for (const op of operations) {
+              inFlight.delete(op.key);
+            }
             for (let i = 0; i < results.length && i < operations.length; i++) {
               const response = results[i];
               const op = operations[i];
@@ -296,6 +328,7 @@ export function batchFetchExchange({
           })
           .catch((err) => {
             for (const op of operations) {
+              inFlight.delete(op.key);
               const result: OperationResult = {
                 operation: op,
                 data: undefined,
