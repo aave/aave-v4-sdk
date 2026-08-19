@@ -445,7 +445,6 @@ export const exchange = cacheExchange({
     UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
       data.id,
     UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
-    UserMerklClaimableReward: (data: UserMerklClaimableReward) => data.id,
     UserPosition: (data: UserPosition) => data.id,
     UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
     WithdrawActivity: (data: WithdrawActivity) => data.id,
@@ -457,6 +456,8 @@ export const exchange = cacheExchange({
     // Entities with other fields as key
     Chain: (data: Chain) => data.chainId.toString(),
     NativeToken: (data: NativeToken) => data.chain.chainId.toString(),
+    UserMerklClaimableReward: (data: UserMerklClaimableReward) =>
+      `${data.claimChainId}:${data.id}`,
 
     // Value objects and result types
     ApySample: () => null,

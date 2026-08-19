@@ -3486,7 +3486,8 @@ union UserClaimableReward = UserMerklClaimableReward
 
 input UserClaimableRewardsRequest {
   user: EvmAddress!
-  chainId: ChainId!
+  chainId: ChainId @deprecated(reason: "Use chainIds instead.")
+  chainIds: [ChainId!]
 }
 
 input UserHub {
@@ -3504,6 +3505,7 @@ input UserHubInput @oneOf {
 
 type UserMerklClaimableReward {
   id: RewardId!
+  claimChainId: ChainId!
   claimable: Erc20Amount!
   startDate: DateTime!
   endDate: DateTime!

@@ -12483,6 +12483,17 @@
             "args": []
           },
           {
+            "name": "claimChainId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "claimable",
             "type": {
               "kind": "NON_NULL",

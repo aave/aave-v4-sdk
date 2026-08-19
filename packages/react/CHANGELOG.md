@@ -1,5 +1,26 @@
 # @aave/react
 
+## 6.3.1
+
+### Patch Changes
+
+- 3850316: **fix:** preserve `content-type` and custom `headers` on batched GraphQL requests
+- Updated dependencies [3850316]
+  - @aave/core@1.1.1
+  - @aave/client@6.3.1
+
+## 6.3.0
+
+### Minor Changes
+
+- 2dde326: **feat:** support multichain user claimable rewards queries
+
+### Patch Changes
+
+- Updated dependencies [2dde326]
+  - @aave/graphql@3.2.0
+  - @aave/client@6.3.0
+
 ## 6.2.1
 
 ### Patch Changes
