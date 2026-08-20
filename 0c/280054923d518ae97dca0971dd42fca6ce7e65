@@ -1,0 +1,19 @@
+packages/graphql/schema.graphql
+  s_c0ce9d5002b56d::t_6fb112aa4310d5 1919-1921
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0c280054923d518ae97dca0971dd42fca6ce7e65",
+  "prompts": {},
+  "sessions": {
+    "s_c0ce9d5002b56d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2da61fe3-2c59-4df8-b14e-30f2ea61235e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
