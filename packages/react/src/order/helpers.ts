@@ -19,6 +19,7 @@ import type {
   OrderQuote,
   OrderReceipt,
   OrderStatus,
+  OrderTransactionRequest,
   OrderTypedData,
   PositionSwapApproval,
   PositionSwapByIntentApprovalsRequired,
@@ -78,7 +79,10 @@ export type OrderSignerError = CancelError | SigningError | UnexpectedError;
 
 // ------------------------------------------------------------
 
-export type OrderPlan = OrderApproval | OrderTypedData;
+export type OrderPlan =
+  | OrderApproval
+  | OrderTypedData
+  | OrderTransactionRequest;
 
 export type OrderHandler = (
   plan: OrderPlan,
@@ -88,6 +92,22 @@ export type OrderHandler = (
 export type OrderValue = {
   quote?: OrderQuote;
 };
+
+/**
+ * Resolves a handler's approval outcome to the signature to record in the
+ * {@link PrepareOrderRequest}: the signature itself for signature-based
+ * approvals, or null for transaction-based approvals — after waiting for the
+ * approval transaction to be mined, so the order isn't prepared against
+ * on-chain state that doesn't exist yet.
+ */
+function resolveApprovalSignature(
+  value: PendingTransaction | Signature,
+): ResultAsync<Signature | null, PendingTransactionError> {
+  if (isSignature(value)) {
+    return okAsync(value);
+  }
+  return value.wait().map(() => null);
+}
 
 /**
  * Collects the signatures an order requires, in order, into a
@@ -103,32 +123,34 @@ export function processOrderApprovals(
   return {
     with: (
       handler: OrderHandler,
-    ): ResultAsync<PrepareOrderRequest, OrderSignerError> =>
+    ): ResultAsync<
+      PrepareOrderRequest,
+      OrderSignerError | PendingTransactionError
+    > =>
       result.approvals.reduce<
-        ResultAsync<PrepareOrderRequest, OrderSignerError>
+        ResultAsync<
+          PrepareOrderRequest,
+          OrderSignerError | PendingTransactionError
+        >
       >(
         (acc, approval) =>
           acc.andThen((request) =>
-            handler(approval, { cancel }).map((value) => {
-              switch (approval.__typename) {
-                case 'OrderAdapterApproval':
-                  request.adapterContractSignature = isSignature(value)
-                    ? value
-                    : null;
-                  break;
-                case 'OrderPositionManagerApproval':
-                  request.positionManagerSignature = isSignature(value)
-                    ? value
-                    : null;
-                  break;
-                case 'OrderSetCollateralApproval':
-                  request.setCollateralSignature = isSignature(value)
-                    ? value
-                    : null;
-                  break;
-              }
-              return request;
-            }),
+            handler(approval, { cancel })
+              .andThen(resolveApprovalSignature)
+              .map((signature) => {
+                switch (approval.__typename) {
+                  case 'OrderAdapterApproval':
+                    request.adapterContractSignature = signature;
+                    break;
+                  case 'OrderPositionManagerApproval':
+                    request.positionManagerSignature = signature;
+                    break;
+                  case 'OrderSetCollateralApproval':
+                    request.setCollateralSignature = signature;
+                    break;
+                }
+                return request;
+              }),
           ),
         okAsync({
           quoteId: result.quote.quoteId,
@@ -142,7 +164,7 @@ export function processOrderApprovals(
 }
 
 export type PositionOrderHandler = (
-  plan: PositionSwapApproval | OrderTypedData,
+  plan: PositionSwapApproval | OrderTypedData | OrderTransactionRequest,
   options: OrderHandlerOptions,
 ) => ResultAsync<PendingTransaction | Signature, OrderSignerError>;
 
@@ -162,32 +184,34 @@ export function processPositionOrderApprovals(
   return {
     with: (
       handler: PositionOrderHandler,
-    ): ResultAsync<PrepareOrderRequest, OrderSignerError> =>
+    ): ResultAsync<
+      PrepareOrderRequest,
+      OrderSignerError | PendingTransactionError
+    > =>
       result.approvals.reduce<
-        ResultAsync<PrepareOrderRequest, OrderSignerError>
+        ResultAsync<
+          PrepareOrderRequest,
+          OrderSignerError | PendingTransactionError
+        >
       >(
         (acc, approval) =>
           acc.andThen((request) =>
-            handler(approval, { cancel }).map((value) => {
-              switch (approval.__typename) {
-                case 'PositionSwapAdapterContractApproval':
-                  request.adapterContractSignature = isSignature(value)
-                    ? value
-                    : null;
-                  break;
-                case 'PositionSwapPositionManagerApproval':
-                  request.positionManagerSignature = isSignature(value)
-                    ? value
-                    : null;
-                  break;
-                case 'PositionSwapSetCollateralApproval':
-                  request.setCollateralSignature = isSignature(value)
-                    ? value
-                    : null;
-                  break;
-              }
-              return request;
-            }),
+            handler(approval, { cancel })
+              .andThen(resolveApprovalSignature)
+              .map((signature) => {
+                switch (approval.__typename) {
+                  case 'PositionSwapAdapterContractApproval':
+                    request.adapterContractSignature = signature;
+                    break;
+                  case 'PositionSwapPositionManagerApproval':
+                    request.positionManagerSignature = signature;
+                    break;
+                  case 'PositionSwapSetCollateralApproval':
+                    request.setCollateralSignature = signature;
+                    break;
+                }
+                return request;
+              }),
           ),
         okAsync({
           quoteId: result.quote.orderQuoteId,
@@ -203,16 +227,29 @@ export function processPositionOrderApprovals(
 export function submitOrderIntent(
   client: AaveClient,
   bySignature: SubmitOrderBySignatureInput,
+  handler: (
+    plan: OrderTransactionRequest,
+    options: OrderHandlerOptions,
+  ) => ResultAsync<PendingTransaction | Signature, OrderSignerError>,
 ): ResultAsync<
   OrderReceipt,
-  ValidationError<InsufficientBalanceError> | UnexpectedError
+  | ValidationError<InsufficientBalanceError>
+  | OrderSignerError
+  | PendingTransactionError
+  | UnexpectedError
 > {
   return submitOrder(client, { bySignature }).andThen((plan) => {
     switch (plan.__typename) {
       case 'OrderReceipt':
         return okAsync(plan);
-      default:
-        return UnexpectedError.from(plan).asResultAsync();
+      // The server may answer an intent submission with a transaction to
+      // send; the order is already registered, so the transaction must be
+      // dispatched rather than dead-ending a fully signed flow.
+      case 'OrderTransactionRequest':
+        return handler(plan, { cancel })
+          .andThen(PendingTransaction.tryFrom)
+          .andThen((pendingTransaction) => pendingTransaction.wait())
+          .map(() => plan.orderReceipt);
     }
   });
 }

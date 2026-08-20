@@ -4,7 +4,7 @@ import {
   type TimeWindowQueryOptions,
 } from '@aave/client';
 import type { UnexpectedError } from '@aave/core';
-import type { OrderStatus, OrderStatusRequest } from '@aave/graphql';
+import type { OrderId, OrderStatus, OrderStatusRequest } from '@aave/graphql';
 import { OrderStatusQuery } from '@aave/graphql';
 import type { NullishDeep, Prettify } from '@aave/types';
 import { useEffect, useState } from 'react';
@@ -101,20 +101,23 @@ export function useOrderStatus({
   pause?: boolean;
 }): SuspendableResult<OrderStatus, UnexpectedError> {
   const client = useAaveClient();
-  const [isTerminal, setIsTerminal] = useState(false);
+  // The id of the order observed in a terminal state, so polling stops for
+  // that order but resumes when the hook is pointed at a different one.
+  const [terminalOrderId, setTerminalOrderId] = useState<OrderId | null>(null);
 
   const result: SuspendableResult<OrderStatus, UnexpectedError> =
     useSuspendableQuery({
       document: OrderStatusQuery,
       variables: { request, currency, timeWindow },
       suspense,
-      pause: pause || isTerminal,
+      pause:
+        pause || (terminalOrderId !== null && terminalOrderId === request.id),
       pollInterval: client.context.environment.swapStatusInterval,
     });
 
   useEffect(() => {
     if (result.data && isTerminalOrderStatus(result.data)) {
-      setIsTerminal(true);
+      setTerminalOrderId(result.data.orderId);
     }
   }, [result.data]);
 

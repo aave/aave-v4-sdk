@@ -107,6 +107,7 @@ describe(`Given the '${useSupplySwapOrder.name}' hook`, () => {
           current: [swapSupply],
         },
       } = renderHookWithinContext(() => {
+        const [sendTransaction] = useSendTransaction(walletClient);
         const [signTypedData] = useSignTypedData(walletClient);
 
         return useSupplySwapOrder((plan) => {
@@ -118,6 +119,9 @@ describe(`Given the '${useSupplySwapOrder.name}' hook`, () => {
 
             case 'OrderTypedData':
               return signTypedData(plan);
+
+            case 'OrderTransactionRequest':
+              return sendTransaction(plan.transaction);
           }
         });
       });
@@ -149,6 +153,9 @@ describe(`Given the '${useSupplySwapOrder.name}' hook`, () => {
 
             case 'OrderTypedData':
               return signTypedData(plan);
+
+            case 'OrderTransactionRequest':
+              return sendTransaction(plan.transaction);
           }
         });
       });

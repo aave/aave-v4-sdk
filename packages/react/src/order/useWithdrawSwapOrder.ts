@@ -36,6 +36,7 @@ export type UseWithdrawSwapOrderRequest = Prettify<
  * signs the order, then submits it — resolving to an {@link OrderReceipt}.
  *
  * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
  * const [signTypedData] = useSignTypedData(wallet);
  *
  * const [withdrawAndSwap, { loading, error }] = useWithdrawSwapOrder((plan) => {
@@ -47,6 +48,9 @@ export type UseWithdrawSwapOrderRequest = Prettify<
  *
  *     case 'OrderTypedData':
  *       return signTypedData(plan);
+ *
+ *     case 'OrderTransactionRequest':
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  * ```
@@ -77,10 +81,11 @@ export function useWithdrawSwapOrder(
               handler(order.data, { cancel })
                 .andThen(trySignatureFrom)
                 .andThen((signature) =>
-                  submitOrderIntent(client, {
-                    quoteId: order.newQuoteId,
-                    signature,
-                  }),
+                  submitOrderIntent(
+                    client,
+                    { quoteId: order.newQuoteId, signature },
+                    handler,
+                  ),
                 ),
             ),
       );

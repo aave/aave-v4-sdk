@@ -4,6 +4,7 @@ export type {
   OrderPlan,
   OrderSignerError,
   OrderValue,
+  PositionOrderHandler,
 } from './helpers';
 export {
   type UseBorrowSwapOrderRequest,

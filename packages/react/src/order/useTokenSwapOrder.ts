@@ -67,7 +67,7 @@ export type TokenSwapOrderHandler = (
  *     case 'Erc20Approval':
  *       return plan.bySignature
  *         ? signTypedData(plan.bySignature)
- *         : sendTransaction(plan.transaction);
+ *         : sendTransaction(plan.byTransaction);
  *
  *     case 'OrderTransactionRequest':
  *       return sendTransaction(plan.transaction);

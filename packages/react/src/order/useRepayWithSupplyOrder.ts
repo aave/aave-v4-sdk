@@ -37,6 +37,7 @@ export type UseRepayWithSupplyOrderRequest = Prettify<
  * {@link OrderReceipt}.
  *
  * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
  * const [signTypedData] = useSignTypedData(wallet);
  *
  * const [repayWithSupply, { loading, error }] = useRepayWithSupplyOrder((plan) => {
@@ -48,6 +49,9 @@ export type UseRepayWithSupplyOrderRequest = Prettify<
  *
  *     case 'OrderTypedData':
  *       return signTypedData(plan);
+ *
+ *     case 'OrderTransactionRequest':
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  * ```
@@ -78,10 +82,11 @@ export function useRepayWithSupplyOrder(
               handler(order.data, { cancel })
                 .andThen(trySignatureFrom)
                 .andThen((signature) =>
-                  submitOrderIntent(client, {
-                    quoteId: order.newQuoteId,
-                    signature,
-                  }),
+                  submitOrderIntent(
+                    client,
+                    { quoteId: order.newQuoteId, signature },
+                    handler,
+                  ),
                 ),
             ),
       );

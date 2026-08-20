@@ -2,6 +2,7 @@ import {
   cancelOrder,
   orderStatus,
   prepareCancelOrder,
+  waitForOrderOutcome,
 } from '@aave/client/actions';
 import {
   type CancelError,
@@ -120,26 +121,38 @@ export function useCancelOrder(
                   return okAsync(plan);
                 }
 
-                return handler(plan, { cancel })
-                  .andThen(PendingTransaction.tryFrom)
-                  .andThen((pendingTransaction) => pendingTransaction.wait())
-                  .andThen(() => orderStatus(client, { id: request.id }))
-                  .andThen((status) => {
-                    if (status?.__typename === 'OrderCancelled') {
-                      return okAsync(toOrderCancelledResult(status));
-                    }
-                    return new CannotCancelOrderError(
-                      'Failed to cancel order',
-                    ).asResultAsync();
-                  });
+                return (
+                  handler(plan, { cancel })
+                    .andThen(PendingTransaction.tryFrom)
+                    .andThen((pendingTransaction) => pendingTransaction.wait())
+                    // Poll rather than read the status once: the indexer may not
+                    // have caught up with the mined cancellation yet.
+                    .andThen(() =>
+                      waitForOrderOutcome(client)({
+                        __typename: 'OrderReceipt',
+                        orderId: request.id,
+                      }),
+                    )
+                    .andThen((outcome) => {
+                      if (outcome.__typename === 'OrderCancelled') {
+                        return okAsync(toOrderCancelledResult(outcome));
+                      }
+                      return new CannotCancelOrderError(
+                        outcome.__typename === 'OrderFulfilled'
+                          ? 'Order was fulfilled before the cancellation took effect'
+                          : 'Order expired before the cancellation took effect',
+                      ).asResultAsync();
+                    })
+                );
               });
 
           case 'OrderCancelled':
             return okAsync(toOrderCancelledResult(status));
 
+          case 'OrderFulfilled':
           case 'OrderExpired':
             return new CannotCancelOrderError(
-              'Order cannot longer be cancelled',
+              'Order can no longer be cancelled',
             ).asResultAsync();
 
           default:

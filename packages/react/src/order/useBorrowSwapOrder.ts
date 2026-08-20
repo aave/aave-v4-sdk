@@ -36,6 +36,7 @@ export type UseBorrowSwapOrderRequest = Prettify<
  * order, then submits it — resolving to an {@link OrderReceipt}.
  *
  * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
  * const [signTypedData] = useSignTypedData(wallet);
  *
  * const [swapDebt, { loading, error }] = useBorrowSwapOrder((plan) => {
@@ -47,6 +48,9 @@ export type UseBorrowSwapOrderRequest = Prettify<
  *
  *     case 'OrderTypedData':
  *       return signTypedData(plan);
+ *
+ *     case 'OrderTransactionRequest':
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  * ```
@@ -76,10 +80,11 @@ export function useBorrowSwapOrder(
             handler(order.data, { cancel })
               .andThen(trySignatureFrom)
               .andThen((signature) =>
-                submitOrderIntent(client, {
-                  quoteId: order.newQuoteId,
-                  signature,
-                }),
+                submitOrderIntent(
+                  client,
+                  { quoteId: order.newQuoteId, signature },
+                  handler,
+                ),
               ),
           ),
       );

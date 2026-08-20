@@ -45,6 +45,7 @@ export type UseLeverageRequest = Prettify<
  * collateral, then borrows the debt to repay the flash loan.
  *
  * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
  * const [signTypedData] = useSignTypedData(wallet);
  *
  * const [leverage, { loading, error }] = useLeverage((plan) => {
@@ -56,6 +57,9 @@ export type UseLeverageRequest = Prettify<
  *
  *     case 'OrderTypedData':
  *       return signTypedData(plan);
+ *
+ *     case 'OrderTransactionRequest':
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
  *
@@ -103,10 +107,11 @@ export function useLeverage(
             handler(order.data, { cancel })
               .andThen(trySignatureFrom)
               .andThen((signature) =>
-                submitOrderIntent(client, {
-                  quoteId: order.newQuoteId,
-                  signature,
-                }),
+                submitOrderIntent(
+                  client,
+                  { quoteId: order.newQuoteId, signature },
+                  handler,
+                ),
               ),
           );
       });
