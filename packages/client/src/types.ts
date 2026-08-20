@@ -10,6 +10,7 @@ import type {
   HasProcessedKnownTransactionRequest,
   InsufficientBalanceError,
   OperationType,
+  OrderTypedData,
   PermitTypedData,
   SwapTypedData,
 } from '@aave/graphql';
@@ -60,7 +61,7 @@ export type SignTypedDataError = CancelError | SigningError;
 /**
  * Union type for all EIP-712 typed data structures used in the SDK.
  */
-export type TypedData = PermitTypedData | SwapTypedData;
+export type TypedData = PermitTypedData | SwapTypedData | OrderTypedData;
 
 export type TypedDataHandler = (
   data: TypedData,

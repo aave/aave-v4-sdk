@@ -5,12 +5,12 @@ import {
 } from '@aave/client';
 import type { UnexpectedError } from '@aave/core';
 import type {
-  PaginatedUserSwapsResult,
-  SwapFulfilled,
-  SwapStatus,
-  UserSwapsRequest,
+  OrderFulfilled,
+  OrderStatus,
+  PaginatedOrdersResult,
+  PendingOrdersRequest,
 } from '@aave/graphql';
-import { UserSwapsQuery } from '@aave/graphql';
+import { PendingOrdersQuery } from '@aave/graphql';
 import type { NullishDeep, Prettify } from '@aave/types';
 import { useDeferredValue, useEffect, useState } from 'react';
 
@@ -28,120 +28,117 @@ import {
 
 import {
   refreshAfterBorrowSwap,
+  refreshAfterLeverage,
   refreshAfterRepayWithSupply,
   refreshAfterSupplySwap,
   refreshAfterTokenSwap,
   refreshAfterWithdrawSwap,
 } from '../helpers/cache';
 
-import { isTerminalSwapStatus } from './helpers';
+import { isTerminalOrderStatus } from './helpers';
 
-function findNewlyFulfilledSwaps(
-  items: readonly SwapStatus[],
-  prevItems: readonly SwapStatus[],
-): SwapFulfilled[] {
+function findNewlyFulfilledOrders(
+  items: readonly OrderStatus[],
+  prevItems: readonly OrderStatus[],
+): OrderFulfilled[] {
   const prevTypenames = new Map(
-    prevItems.map((item) => [item.swapId, item.__typename]),
+    prevItems.map((item) => [item.orderId, item.__typename]),
   );
 
   return items.filter(
-    (item): item is SwapFulfilled =>
-      item.__typename === 'SwapFulfilled' &&
-      prevTypenames.get(item.swapId) !== 'SwapFulfilled',
+    (item): item is OrderFulfilled =>
+      item.__typename === 'OrderFulfilled' &&
+      prevTypenames.get(item.orderId) !== 'OrderFulfilled',
   );
 }
 
-export type UseUserSwapsArgs = Prettify<
-  UserSwapsRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+export type UsePendingOrdersArgs = Prettify<
+  PendingOrdersRequest & CurrencyQueryOptions & TimeWindowQueryOptions
 >;
 
 /**
- * Fetch the user's swap history for a specific chain.
+ * Fetch the user's orders for a specific chain.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = useUserSwaps({
+ * const { data } = usePendingOrders({
  *   chainId: chainId(1),
  *   user: evmAddress('0x742d35cc…'),
- *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   suspense: true,
  * });
  * ```
- * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
-export function useUserSwaps(
-  args: UseUserSwapsArgs & Suspendable,
-): SuspenseResult<PaginatedUserSwapsResult>;
+export function usePendingOrders(
+  args: UsePendingOrdersArgs & Suspendable,
+): SuspenseResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's swap history for a specific chain.
+ * Fetch the user's orders for a specific chain.
  *
  * Pausable suspense mode.
  *
  * ```tsx
- * const { data } = useUserSwaps({
+ * const { data } = usePendingOrders({
  *   chainId: chainId(1),
  *   user: evmAddress('0x742d35cc…'),
- *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   suspense: true,
  *   pause: true,
  * });
  * ```
- * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
-export function useUserSwaps(
-  args: Pausable<UseUserSwapsArgs> & Suspendable,
-): PausableSuspenseResult<PaginatedUserSwapsResult>;
+export function usePendingOrders(
+  args: Pausable<UsePendingOrdersArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's swap history for a specific chain.
+ * Fetch the user's orders for a specific chain.
  *
  * ```tsx
- * const { data, error, loading } = useUserSwaps({
+ * const { data, error, loading } = usePendingOrders({
  *   chainId: chainId(1),
  *   user: evmAddress('0x742d35cc…'),
- *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  * });
  * ```
- * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
-export function useUserSwaps(
-  args: UseUserSwapsArgs,
-): ReadResult<PaginatedUserSwapsResult>;
+export function usePendingOrders(
+  args: UsePendingOrdersArgs,
+): ReadResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's swap history for a specific chain.
+ * Fetch the user's orders for a specific chain.
  *
  * Pausable loading state mode.
  *
  * ```tsx
- * const { data, error, loading, paused } = useUserSwaps({
+ * const { data, error, loading, paused } = usePendingOrders({
  *   chainId: chainId(1),
  *   user: evmAddress('0x742d35cc…'),
- *   filterBy: [SwapStatusFilter.FULFILLED, SwapStatusFilter.OPEN],
+ *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   pause: true,
  * });
  * ```
- * @deprecated Superseded by the Order API; use {@link usePendingOrders}. The swap API remains functional but will be removed in a later release.
  */
-export function useUserSwaps(
-  args: Pausable<UseUserSwapsArgs>,
-): PausableReadResult<PaginatedUserSwapsResult>;
+export function usePendingOrders(
+  args: Pausable<UsePendingOrdersArgs>,
+): PausableReadResult<PaginatedOrdersResult>;
 
-export function useUserSwaps({
+export function usePendingOrders({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
   ...request
-}: NullishDeep<UseUserSwapsArgs> & {
+}: NullishDeep<UsePendingOrdersArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> {
+}): SuspendableResult<PaginatedOrdersResult, UnexpectedError> {
   const client = useAaveClient();
   const [allTerminal, setAllTerminal] = useState(false);
 
-  const result: SuspendableResult<PaginatedUserSwapsResult, UnexpectedError> =
+  const result: SuspendableResult<PaginatedOrdersResult, UnexpectedError> =
     useSuspendableQuery({
-      document: UserSwapsQuery,
+      document: PendingOrdersQuery,
       variables: { request, currency, timeWindow },
       suspense,
       pause: pause || allTerminal,
@@ -154,12 +151,12 @@ export function useUserSwaps({
   useEffect(() => {
     if (items.length === 0) return;
 
-    const allItemsTerminal = items.every(isTerminalSwapStatus);
+    const allItemsTerminal = items.every(isTerminalOrderStatus);
     if (allItemsTerminal) {
       setAllTerminal(true);
     }
 
-    for (const item of findNewlyFulfilledSwaps(items, prevItems)) {
+    for (const item of findNewlyFulfilledOrders(items, prevItems)) {
       switch (item.operation.__typename) {
         case 'TokenSwap':
           if (request.user) {
@@ -188,6 +185,12 @@ export function useUserSwaps({
         case 'WithdrawSwap':
           if (request.user) {
             refreshAfterWithdrawSwap(client, request.user);
+          }
+          break;
+
+        case 'Leverage':
+          if (request.user) {
+            refreshAfterLeverage(client, request.user);
           }
           break;
       }

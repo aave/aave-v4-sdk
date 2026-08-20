@@ -62,6 +62,7 @@ export type UseSupplySwapRequest = Prettify<
  *
  * // result.value: SwapReceipt
  * ```
+ * @deprecated Superseded by the Order API; use {@link useSupplySwapOrder}. The swap API remains functional but will be removed in a later release.
  */
 export function useSupplySwap(
   handler: PositionSwapHandler,

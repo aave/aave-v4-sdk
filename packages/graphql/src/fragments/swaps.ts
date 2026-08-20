@@ -63,6 +63,7 @@ export const SwapQuoteFragment = graphql(
     finalSell {
       ...TokenAmount
     }
+    orderQuoteId
   }`,
   [PercentNumberFragment, TokenAmountFragment, SwapQuoteCostsFragment],
 );
@@ -339,12 +340,28 @@ export const TokenSwapFragment = graphql(
 );
 export type TokenSwap = FragmentOf<typeof TokenSwapFragment>;
 
+export const LeverageFragment = graphql(
+  `fragment Leverage on Leverage {
+    __typename
+    collateral {
+      ...PositionAmount
+    }
+    debt {
+      ...PositionAmount
+    }
+    multiplier
+  }`,
+  [PositionAmountFragment],
+);
+export type Leverage = FragmentOf<typeof LeverageFragment>;
+
 export type SwapOperation =
   | SupplySwap
   | BorrowSwap
   | RepayWithSupply
   | WithdrawSwap
-  | TokenSwap;
+  | TokenSwap
+  | Leverage;
 
 export const SwapOperationFragment: FragmentDocumentFor<
   SwapOperation,
@@ -367,6 +384,9 @@ export const SwapOperationFragment: FragmentDocumentFor<
     ... on TokenSwap {
       ...TokenSwap
     }
+    ... on Leverage {
+      ...Leverage
+    }
   }`,
   [
     SupplySwapFragment,
@@ -374,6 +394,7 @@ export const SwapOperationFragment: FragmentDocumentFor<
     RepayWithSupplyFragment,
     WithdrawSwapFragment,
     TokenSwapFragment,
+    LeverageFragment,
   ],
 );
 

@@ -1,6 +1,7 @@
 export * from './assets';
 export * from './common';
 export * from './hubs';
+export * from './orders';
 export * from './permits';
 export * from './reserve';
 export * from './rewards';

@@ -330,3 +330,16 @@ export function refreshAfterWithdrawSwap(client: AaveClient, user: EvmAddress) {
     refreshUserBalances(client, user),
   ]);
 }
+
+/**
+ * @internal
+ */
+export function refreshAfterLeverage(client: AaveClient, user: EvmAddress) {
+  // Leverage supplies collateral and takes debt in one go, so both sides of the
+  // position move alongside the wallet balance (optional top-up).
+  return ResultAsync.combine([
+    refreshUserSupplies(client, user),
+    refreshUserBorrows(client, user),
+    refreshUserBalances(client, user),
+  ]);
+}

@@ -1,5 +1,6 @@
 export * from './hubs';
 export * from './misc';
+export * from './order';
 export * from './protocol';
 export * from './reserves';
 export * from './rewards';
