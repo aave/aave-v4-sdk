@@ -1916,9 +1916,9 @@ type ReserveSummary {
   borrowApy: PercentNumber!
 
   """
-  Yield the asset earns outside the pool rate, from its oracle price growing against its
-  reference asset. Null when the asset has none or the estimate is not yet trustworthy;
-  never read null as zero.
+  Yield the asset accrues outside the pool rate, read from the reserve's price source. Zero
+  when the asset accrues none; null when the rate could not be read, which is not zero and
+  must not render as 0%.
   """
   underlyingApy: PercentNumber
   rewards: [Reward!]!
