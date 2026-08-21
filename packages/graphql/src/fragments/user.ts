@@ -83,6 +83,7 @@ export const UserSummaryFragment = graphql(
       ...PercentNumber
     }
     netApyBreakdown {
+      __typename
       base {
         ...PercentNumber
       }
@@ -184,6 +185,7 @@ export const UserPositionFragment = graphql(
       ...PercentNumberWithChange
     }
     netApyBreakdown {
+      __typename
       base {
         ...PercentNumber
       }
