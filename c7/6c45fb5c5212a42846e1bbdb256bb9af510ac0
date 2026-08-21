@@ -1,0 +1,23 @@
+.changeset/brave-otters-listen.md
+  s_680b4fabcd9b10::t_2b0ae184e35e77 1-7
+packages/graphql/src/fragments/user.ts
+  s_680b4fabcd9b10::t_2444c4f16c5564 86,188
+packages/graphql/src/testing.ts
+  s_680b4fabcd9b10::t_015c12e52f3e5c 387
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c76c45fb5c5212a42846e1bbdb256bb9af510ac0",
+  "prompts": {},
+  "sessions": {
+    "s_680b4fabcd9b10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4baa561-6f39-4640-8dfd-c21584bac7a6",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
