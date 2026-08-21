@@ -82,6 +82,21 @@ export const UserSummaryFragment = graphql(
     netApy {
       ...PercentNumber
     }
+    netApyBreakdown {
+      __typename
+      base {
+        ...PercentNumber
+      }
+      rewards {
+        ...PercentNumber
+      }
+      underlying {
+        ...PercentNumber
+      }
+      total {
+        ...PercentNumber
+      }
+    }
     netAccruedInterest(currency: $currency) {
       ...ExchangeAmount
     }
@@ -168,6 +183,21 @@ export const UserPositionFragment = graphql(
     }
     netBorrowApy {
       ...PercentNumberWithChange
+    }
+    netApyBreakdown {
+      __typename
+      base {
+        ...PercentNumber
+      }
+      rewards {
+        ...PercentNumber
+      }
+      underlying {
+        ...PercentNumber
+      }
+      total {
+        ...PercentNumber
+      }
     }
     healthFactor {
       ...HealthFactorWithChange

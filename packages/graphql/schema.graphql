@@ -1205,6 +1205,24 @@ type NativeToken {
   chain: Chain!
 }
 
+"""
+Where a position's net APY comes from. Each term is value-weighted and divided by the net
+balance, so the three sum to `netApy` and a levered position can show why its headline moved.
+"""
+type NetApyBreakdown {
+  """Pool rates: what the supplies earn less what the debt costs."""
+  base: PercentNumber!
+
+  """Merkl supply rewards plus borrow discounts."""
+  rewards: PercentNumber!
+
+  """Yield the supplied assets accrue outside the pool rate."""
+  underlying: PercentNumber!
+
+  """Equal to `netApy`."""
+  total: PercentNumber!
+}
+
 scalar OnChainHubAssetId
 
 scalar OnChainReserveId
@@ -1896,6 +1914,13 @@ type ReserveSummary {
   borrowable: Erc20Amount!
   supplyApy: PercentNumber!
   borrowApy: PercentNumber!
+
+  """
+  Yield the asset accrues outside the pool rate, read from the reserve's price source. Zero
+  when the asset accrues none; null when the rate could not be read, which is not zero and
+  must not render as 0%.
+  """
+  underlyingApy: PercentNumber
   rewards: [Reward!]!
 }
 
@@ -3177,10 +3202,16 @@ type UserPosition {
 
   """
   Net supply APY weighted by USD balance. Includes the user's eligible
-  Merkl supply reward APY (`extra_apy`) on top of each reserve's base
-  supply rate.
+  Merkl supply reward APY (`extra_apy`) and the asset's underlying yield
+  on top of each reserve's base supply rate.
   """
   netSupplyApy: PercentNumberWithChange!
+
+  """
+  Net APY split into the parts it is made of. Leverage amplifies each part, so on a looped
+  position this is what explains a headline the pool rates alone cannot account for.
+  """
+  netApyBreakdown: NetApyBreakdown!
 
   """
   Net borrow APY weighted by USD debt. Subtracts the user's eligible
@@ -3299,6 +3330,12 @@ type UserSummary {
   historical campaign data.
   """
   netApy: PercentNumber!
+
+  """
+  The same split as a position's, weighted across positions the way `net_apy` is, so the
+  dashboard headline and the position it drills into agree on where the number came from.
+  """
+  netApyBreakdown: NetApyBreakdown!
 
   """
   Net accrued interest earned (all supply interests - all borrow interests)

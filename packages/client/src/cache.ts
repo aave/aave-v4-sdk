@@ -465,6 +465,7 @@ export const exchange = cacheExchange({
     MaxLiquidationBonusVariation: () => null,
     MultichainAsset: () => null,
     MultichainAssetSummary: () => null,
+    NetApyBreakdown: () => null,
     SpokeLiquidationConfig: () => null,
     SpokeConnectedHub: () => null,
     SpokeConnectedHubSummary: () => null,
