@@ -1,5 +1,16 @@
 # @aave/client
 
+## 6.4.0
+
+### Minor Changes
+
+- 9164edd: **feat:** expose `ReserveSummary.underlyingApy`, the yield an asset earns outside the pool rate
+
+### Patch Changes
+
+- Updated dependencies [9164edd]
+  - @aave/graphql@3.3.0
+
 ## 6.3.1
 
 ### Patch Changes
