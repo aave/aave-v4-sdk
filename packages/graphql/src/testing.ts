@@ -384,6 +384,7 @@ export function makeUserPosition({
     netSupplyApy: makePercentNumberWithChange(0),
     netBorrowApy: makePercentNumberWithChange(0),
     netApyBreakdown: {
+      __typename: 'NetApyBreakdown',
       base: makePercentNumber(0),
       rewards: makePercentNumber(0),
       underlying: makePercentNumber(0),
