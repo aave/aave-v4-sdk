@@ -1,0 +1,21 @@
+.changeset/unblock.md
+  s_185e701d227afd::t_bbb88449a810ab 1-2
+.changeset/zz-test.md
+  s_185e701d227afd::t_58089bad34c02c 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "18a4871051caa5c10463f93bba491001a70e8846",
+  "prompts": {},
+  "sessions": {
+    "s_185e701d227afd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "03bd2c76-19f2-448b-a7cf-111046de1021",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
