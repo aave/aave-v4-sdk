@@ -43,6 +43,7 @@ const typenameToActivityType: Record<
   [ActivityType.BorrowSwap]: 'BorrowSwapActivity',
   [ActivityType.RepayWithSupply]: 'RepayWithSupplyActivity',
   [ActivityType.WithdrawSwap]: 'WithdrawSwapActivity',
+  [ActivityType.Leverage]: 'LeverageActivity',
 };
 
 // Liquidated activities are not easily reproducible, so we skip them
