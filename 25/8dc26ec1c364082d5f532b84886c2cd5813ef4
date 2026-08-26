@@ -1,0 +1,24 @@
+packages/graphql/src/schema.json
+  s_054c71c5deaefe::t_02e6bb1c0253f6 3947-3999,9121,9123,9127-9129,12784,12786-12789,12791-12795,13202,13204-13207,13209-13213
+  s_054c71c5deaefe::t_8115c8c515e2ce 3945-3946,9122,9124-9126,12785,12790,13203,13208
+packages/client/src/cache.ts
+  s_054c71c5deaefe::t_854230a4279b40 503
+packages/graphql/src/graphql-env.d.ts
+  s_054c71c5deaefe::t_6fe7e19d1fd961 165,273,428,441
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "258dc26ec1c364082d5f532b84886c2cd5813ef4",
+  "prompts": {},
+  "sessions": {
+    "s_054c71c5deaefe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ba11f975-02a9-4022-b216-04ebb89af386",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
