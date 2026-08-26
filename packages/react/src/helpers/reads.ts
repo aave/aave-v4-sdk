@@ -8,7 +8,7 @@ import {
   type Prettify,
   type Result,
 } from '@aave/types';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createRequest, type TypedDocumentNode, useQuery } from 'urql';
 import {
   type PausableReadResult,
@@ -158,11 +158,16 @@ export function useSuspendableQuery<
     resultOperationKey: undefined,
   });
   const [loading, setLoading] = useState(true);
+  // urql keeps the previous `data` while a re-execution is in flight but drops
+  // the previous `error` on the way (the closing operation's end marker merges
+  // as an error-free update). Kept here so the previous error can be presented
+  // during the refetch, the way data is.
+  const lastError = useRef<UnexpectedError | undefined>(undefined);
   const operationId = useMemo(
     () => createRequest(document, variables as Variables).key,
     [document, variables],
   );
-  const [{ fetching, data, error, stale }, executeQuery] = useQuery({
+  const [{ fetching, data, error, stale, operation }, executeQuery] = useQuery({
     query: document,
     variables: variables as Variables,
     pause,
@@ -253,6 +258,7 @@ export function useSuspendableQuery<
 
   if (error) {
     const unexpected = UnexpectedError.from(error);
+    lastError.current = unexpected;
     if (suspense) {
       throw unexpected;
     }
@@ -264,6 +270,36 @@ export function useSuspendableQuery<
     data !== undefined,
     `Unexpected empty response from the API for '${extractDocumentName(document) ?? 'unknown'}' query`,
   );
+
+  // A rejected request leaves `data: null`; while its re-execution is in
+  // flight that null is carried over with no `error` attached (see
+  // `lastError`). Keep presenting the previous error until a settled result
+  // replaces it, so selectors never receive a null that is not an API answer.
+  if (fetching && data === null && lastError.current) {
+    const unexpected = lastError.current;
+    if (suspense) {
+      throw unexpected;
+    }
+    return ReadResult.Failure(unexpected, metadata, true);
+  }
+
+  if (!fetching) {
+    lastError.current = undefined;
+  }
+
+  // A cache-only miss is synthesised by the cache layer as `{ data: null }`
+  // with no `error`, and urql delivers it to every active subscriber of the
+  // same operation key. These hooks never issue cache-only operations, so such
+  // a result is not an API answer and must not reach the selector.
+  if (data === null && operation?.context.requestPolicy === 'cache-only') {
+    const unexpected = UnexpectedError.from(
+      `Cache miss for '${extractDocumentName(document) ?? 'unknown'}' query`,
+    );
+    if (suspense) {
+      throw unexpected;
+    }
+    return ReadResult.Failure(unexpected, metadata, reloading);
+  }
 
   // GraphQL responses can have `{ "data": null }` but urql types don't reflect this
   const responseValue = data === null ? null : data.value;
