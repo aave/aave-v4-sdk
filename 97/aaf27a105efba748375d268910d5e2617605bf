@@ -1,0 +1,40 @@
+packages/graphql/schema.graphql
+  s_054c71c5deaefe::t_dce797670d902b 4,35,563,693-695,911-915,927-930,942-943,971-974,977,981-984,1149-1153,1169-1176,1403,1430-1441,2275-2277,2319-2322
+packages/graphql/src/schema.json
+  s_054c71c5deaefe::t_dce797670d902b 4034-4037,4119-4142
+  s_054c71c5deaefe::t_2fad640712ed45 4143-4146
+packages/graphql/src/fragments/orders.ts
+  s_054c71c5deaefe::t_ec30af3eea2493 12,147-152,154-160,173-175,181
+  s_054c71c5deaefe::t_969c3ff33798c0 142-146,153
+packages/graphql/src/graphql-env.d.ts
+  s_054c71c5deaefe::t_dce797670d902b 5,8,86,135,147,170,175
+packages/graphql/src/enums.ts
+  s_054c71c5deaefe::t_ec30af3eea2493 84
+packages/client/src/cache.ts
+  s_054c71c5deaefe::t_ec30af3eea2493 507
+packages/react/src/order/helpers.ts
+  s_054c71c5deaefe::t_ec30af3eea2493 116-120,154-155,157,159-162
+  s_054c71c5deaefe::t_969c3ff33798c0 156,158
+  s_054c71c5deaefe::t_7c8e15fef0d5df 163
+.changeset/leverage-erc20-approval.md
+  s_054c71c5deaefe::t_ec30af3eea2493 1-7
+packages/react/src/order/useLeverage.ts
+  s_054c71c5deaefe::t_ec30af3eea2493 60,63-64
+  s_054c71c5deaefe::t_969c3ff33798c0 32-33,35-37,61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "97aaf27a105efba748375d268910d5e2617605bf",
+  "prompts": {},
+  "sessions": {
+    "s_054c71c5deaefe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ba11f975-02a9-4022-b216-04ebb89af386",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
