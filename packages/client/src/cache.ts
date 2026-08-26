@@ -500,6 +500,7 @@ export const exchange = cacheExchange({
     MaxLiquidationBonusVariation: () => null,
     MultichainAsset: () => null,
     MultichainAssetSummary: () => null,
+    NetApyBreakdown: () => null,
     OrderAdapterApproval: () => null,
     OrderCancelled: () => null,
     OrderCancelledResult: () => null,

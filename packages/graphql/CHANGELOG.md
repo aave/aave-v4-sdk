@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 3.3.0
+
+### Minor Changes
+
+- 9164edd: **feat:** expose `ReserveSummary.underlyingApy`, the yield an asset earns outside the pool rate
+
 ## 3.2.0
 
 ### Minor Changes

@@ -3944,6 +3944,61 @@
       },
       {
         "kind": "OBJECT",
+        "name": "NetApyBreakdown",
+        "fields": [
+          {
+            "name": "base",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "rewards",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "underlying",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "total",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "OrderAdapterApproval",
         "fields": [
           {
@@ -9064,6 +9119,15 @@
             "args": []
           },
           {
+            "name": "underlyingApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "rewards",
             "type": {
               "kind": "NON_NULL",
@@ -12718,6 +12782,18 @@
             "args": []
           },
           {
+            "name": "netApyBreakdown",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NetApyBreakdown",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "netBorrowApy",
             "type": {
               "kind": "NON_NULL",
@@ -13118,6 +13194,18 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "netApyBreakdown",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NetApyBreakdown",
                 "ofType": null
               }
             },
