@@ -1,0 +1,29 @@
+packages/react/src/helpers/reads.ts
+  s_054c71c5deaefe::t_34bcef15b59b42 11,161-165,261,274-281,283-288,290-294
+  s_054c71c5deaefe::t_1c0cffb3d61040 170,282,289,295-302
+  s_054c71c5deaefe::t_c8bcd44e1a27c8 303
+packages/react/src/helpers/reads.test.ts
+  s_054c71c5deaefe::t_c900ddb807ac2c 574-578
+  s_054c71c5deaefe::t_bc2372a711c30b 535,549,556,558-559,570-571,588,600,604-605
+  s_054c71c5deaefe::t_f07aae90bbd24c 543-544
+  s_054c71c5deaefe::t_b3d51b67254aaf 1-2,536-542,545-548,550-555,557,560-569,572-573,579-587,589-599,601-603,606-607
+  s_054c71c5deaefe::t_0a9228dff38570 608
+.changeset/reads-carry-over-error.md
+  s_054c71c5deaefe::t_37f2c8843cf104 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "9947bdc42861e63d3fcfdb40bb900ba7ca257422",
+  "prompts": {},
+  "sessions": {
+    "s_054c71c5deaefe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ba11f975-02a9-4022-b216-04ebb89af386",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
