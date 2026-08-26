@@ -113,8 +113,11 @@ function resolveApprovalSignature(
  * Collects the signatures an order requires, in order, into a
  * {@link PrepareOrderRequest}.
  *
- * `permitSig` is threaded through rather than collected: the ERC-20 top-up
- * permit is client-built, so the server never returns an approval for it.
+ * The ERC-20 top-up permit comes back as an `OrderErc20Approval`: a signature
+ * from the handler becomes `permitSig`, a transaction (no usable EIP-2612
+ * permit, or the handler chose to approve on-chain) is awaited and needs no
+ * signature. A caller-supplied `permitSig` is kept unless the server asks for
+ * one.
  */
 export function processOrderApprovals(
   result: LeverageApprovalsRequired,
@@ -147,6 +150,16 @@ export function processOrderApprovals(
                     break;
                   case 'OrderSetCollateralApproval':
                     request.setCollateralSignature = signature;
+                    break;
+                  case 'OrderErc20Approval':
+                    request.permitSig =
+                      signature && approval.byPermit
+                        ? {
+                            deadline: approval.byPermit.message
+                              .deadline as number,
+                            value: signature,
+                          }
+                        : null;
                     break;
                 }
                 return request;

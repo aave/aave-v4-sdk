@@ -9,6 +9,7 @@ import {
   PercentNumberFragment,
   TokenAmountFragment,
 } from './common';
+import { PermitTypedDataFragment } from './permits';
 import {
   type BorrowSwap,
   BorrowSwapFragment,
@@ -138,6 +139,25 @@ export type OrderSetCollateralApproval = FragmentOf<
   typeof OrderSetCollateralApprovalFragment
 >;
 
+/**
+ * `bySignature` is aliased to `byPermit`: the other `OrderApproval` members
+ * expose `bySignature: SwapTypedData!`, and GraphQL cannot merge that with this
+ * member's nullable `PermitTypedData` under one response name.
+ */
+export const OrderErc20ApprovalFragment = graphql(
+  `fragment OrderErc20Approval on OrderErc20Approval {
+    __typename
+    byTransaction {
+      ...TransactionRequest
+    }
+    byPermit: bySignature {
+      ...PermitTypedData
+    }
+  }`,
+  [TransactionRequestFragment, PermitTypedDataFragment],
+);
+export type OrderErc20Approval = FragmentOf<typeof OrderErc20ApprovalFragment>;
+
 export const OrderApprovalFragment = graphql(
   `fragment OrderApproval on OrderApproval {
     __typename
@@ -150,11 +170,15 @@ export const OrderApprovalFragment = graphql(
     ... on OrderSetCollateralApproval {
       ...OrderSetCollateralApproval
     }
+    ... on OrderErc20Approval {
+      ...OrderErc20Approval
+    }
   }`,
   [
     OrderAdapterApprovalFragment,
     OrderPositionManagerApprovalFragment,
     OrderSetCollateralApprovalFragment,
+    OrderErc20ApprovalFragment,
   ],
 );
 export type OrderApproval = FragmentOf<typeof OrderApprovalFragment>;

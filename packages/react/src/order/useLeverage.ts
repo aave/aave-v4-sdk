@@ -29,10 +29,12 @@ export type UseLeverageRequest = Prettify<
   LeverageQuoteRequest &
     CurrencyQueryOptions & {
       /**
-       * EIP-2612 permit over the collateral token, required only when the
-       * position is topped up from the wallet via `additionalCollateral`.
+       * Pre-built EIP-2612 permit over the collateral token for a wallet
+       * top-up via `additionalCollateral`.
        *
-       * Client-built: the server never returns an approval for it.
+       * Normally unnecessary: the server returns an `OrderErc20Approval` for
+       * the top-up and the handler's signature becomes the permit. When it
+       * does, that signature takes precedence over this value.
        */
       permitSig?: ERC20PermitSignature | null;
     }
@@ -54,6 +56,11 @@ export type UseLeverageRequest = Prettify<
  *     case 'OrderPositionManagerApproval':
  *     case 'OrderSetCollateralApproval':
  *       return signTypedData(plan.bySignature);
+ *
+ *     case 'OrderErc20Approval':
+ *       return plan.byPermit
+ *         ? signTypedData(plan.byPermit)
+ *         : sendTransaction(plan.byTransaction);
  *
  *     case 'OrderTypedData':
  *       return signTypedData(plan);

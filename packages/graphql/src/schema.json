@@ -4031,6 +4031,10 @@
           {
             "kind": "OBJECT",
             "name": "OrderSetCollateralApproval"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "OrderErc20Approval"
           }
         ]
       },
@@ -4106,6 +4110,34 @@
                 "kind": "SCALAR",
                 "name": "Any"
               }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OrderErc20Approval",
+        "fields": [
+          {
+            "name": "byTransaction",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TransactionRequest",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "bySignature",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PermitTypedData",
+              "ofType": null
             },
             "args": []
           }

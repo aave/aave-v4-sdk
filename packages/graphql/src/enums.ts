@@ -81,6 +81,7 @@ export enum ActivityType {
   BorrowSwap = 'BORROW_SWAP',
   RepayWithSupply = 'REPAY_WITH_SUPPLY',
   WithdrawSwap = 'WITHDRAW_SWAP',
+  Leverage = 'LEVERAGE',
 }
 
 /**

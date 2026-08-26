@@ -1,7 +1,7 @@
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM, TOKEN_TO_TOKEN_SWAP, SUPPLY_SWAP, BORROW_SWAP, REPAY_WITH_SUPPLY, WITHDRAW_SWAP]
+  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM, TOKEN_TO_TOKEN_SWAP, SUPPLY_SWAP, BORROW_SWAP, REPAY_WITH_SUPPLY, WITHDRAW_SWAP, LEVERAGE]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -32,6 +32,7 @@ enum ActivityType {
   BORROW_SWAP
   REPAY_WITH_SUPPLY
   WITHDRAW_SWAP
+  LEVERAGE
 }
 
 scalar AlwaysTrue
@@ -559,7 +560,7 @@ input FromQuoteDebtSwapQuoteInput {
 }
 
 input FromQuoteLeverageQuoteInput {
-  quoteId: SwapQuoteId!
+  quoteId: OrderQuoteId!
 }
 
 input FromQuoteRepayWithSupplyQuoteInput {
@@ -689,7 +690,9 @@ type HubAssetSettings {
   """The fee receiver"""
   feeReceiver: EvmAddress!
 
-  """The liquidity fee"""
+  """
+  The protocol's share of borrower interest, already deducted from `supplyApy`.
+  """
   liquidityFee: PercentNumber!
 
   """The ir strategy"""
@@ -905,6 +908,11 @@ The bought collateral / borrowed debt of a leverage order and its effective mult
 type Leverage {
   collateral: PositionAmount!
   debt: PositionAmount!
+
+  """
+  Exposure multiplier: target collateral over entry equity. Read `debt` for what the order
+  borrowed; a limit order can hold this exposure on less debt than the collateral is worth.
+  """
   multiplier: BigDecimal!
 }
 
@@ -916,6 +924,10 @@ type LeverageActivity {
   chain: Chain!
   collateral: PositionAmount!
   debt: PositionAmount!
+
+  """
+  Exposure multiplier: target collateral over entry equity, not debt over equity.
+  """
   multiplier: BigDecimal!
   explorerUrl: String!
   orderClass: SwapOrderClass!
@@ -927,8 +939,8 @@ type LeverageApprovalsRequired {
   approvals: [OrderApproval!]!
 
   """
-  Highest multiplier that keeps the resulting position within a safe health factor and the
-  buy reserve's supply/borrow caps.
+  Multiplier at which this position becomes liquidatable, given the debt this quote draws.
+  A hard wall, not a recommendation: sitting at it is one price tick from liquidation.
   """
   maxSafeMultiplier: BigDecimal!
 }
@@ -956,15 +968,20 @@ input LimitDebtSwapQuoteInput {
 
 """
 Limit leverage: specify the exact collateral to hold and debt to take (the limit price is implied
-by their ratio), rather than a market multiplier. The effective multiplier is derived and still
-checked against the safe ceiling.
+by their ratio), rather than a market multiplier. The effective exposure multiplier is derived
+from the collateral leg and still checked against the safe ceiling. That check assumes the debt
+leg is worth at least as much as the collateral leg, so a limit price that takes less debt is
+held to the same ceiling as a market order rather than a looser one.
 """
 input LimitLeverageQuoteInput {
-  quoteId: SwapQuoteId
+  quoteId: OrderQuoteId
   debtReserve: ReserveId!
   collateralReserve: ReserveId!
 
-  """Total collateral to hold, in the collateral asset's human units."""
+  """
+  Collateral bought by this order's swap leg, in the collateral asset's human units. Excludes
+  the user's existing collateral and `additional_collateral`, which form the equity base.
+  """
   collateralAmount: BigDecimal!
 
   """Debt to take, in the debt asset's human units."""
@@ -1129,8 +1146,11 @@ input MarketDebtSwapQuoteInput {
 """
 Open or increase a leveraged position: flash-loan the debt asset, swap it to the collateral asset,
 supply the collateral, then borrow the debt to repay the flash loan. The equity base is the user's
-existing collateral in `collateral_reserve` plus the optional wallet top-up, and `multiplier` is
-the target exposure (> 1) applied to that equity.
+collateral-enabled balance in `collateral_reserve` plus the optional wallet top-up, and
+`multiplier` is the target exposure (> 1) applied to that equity.
+
+Not previewable directly: `previewUserPosition` needs the executed swap amounts, so quote first
+and preview the resulting `quoteId` via `FromQuote`.
 """
 input MarketLeverageQuoteInput {
   """
@@ -1146,8 +1166,14 @@ input MarketLeverageQuoteInput {
   """Collateral reserve bought and supplied."""
   collateralReserve: ReserveId!
 
-  """Target exposure multiplier, must be greater than 1."""
-  multiplier: BigDecimal!
+  """
+  Target exposure multiplier (target collateral / entry equity), must be greater than 1.
+  Must stay under `maxSafeMultiplier`, the multiplier at which this position becomes
+  liquidatable. Omit it to be quoted at a health factor chosen from how closely the two legs
+  track each other, which still takes a single quote. The resolved value is implied by the
+  quote's own amounts: `multiplier = 1 + buyAmount / equity`.
+  """
+  multiplier: BigDecimal
 
   """
   Optional extra collateral pulled from the wallet (via EIP-2612) on top of the user's existing
@@ -1373,11 +1399,8 @@ type OrderAdapterApproval {
 
 """
 Approvals an order may require before submission. Sibling of `PositionSwapApproval`.
-
-No `OrderErc20Approval`: the ERC-20 top-up permit is client-built here, so the server never
-returns one (deviation from the proposal, which lists an erc20 member).
 """
-union OrderApproval = OrderAdapterApproval | OrderPositionManagerApproval | OrderSetCollateralApproval
+union OrderApproval = OrderAdapterApproval | OrderPositionManagerApproval | OrderSetCollateralApproval | OrderErc20Approval
 
 type OrderCancelled {
   orderId: OrderId!
@@ -1402,6 +1425,18 @@ enum OrderClass {
 enum OrderDirection {
   ASC
   DESC
+}
+
+"""
+ERC-20 approval for the wallet-side token pull, currently the leverage top-up. The spender is
+the order's adapter instance, whose address only the server can derive.
+
+`by_signature` is `null` when the token has no usable EIP-2612 permit, in which case the user
+must send `by_transaction`.
+"""
+type OrderErc20Approval {
+  byTransaction: TransactionRequest!
+  bySignature: PermitTypedData
 }
 
 union OrderExecutionPlan = OrderTransactionRequest | OrderReceipt | InsufficientBalanceError
@@ -2237,6 +2272,9 @@ type ReserveReward {
 }
 
 type ReserveSettings {
+  """
+  Also the liquidation boundary: V4 has no separate threshold, so a full draw sits at HF 1.0.
+  """
   collateralFactor: PercentNumber!
   maxLiquidationBonus: PercentNumber!
   liquidationFee: PercentNumber!
@@ -2278,6 +2316,10 @@ type ReserveUserState {
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
   borrowApy: PercentNumber!
+
+  """
+  Pinned to `dynamicConfigKey`, not the reserve's latest config. Also their liquidation boundary.
+  """
   collateralFactor: PercentNumber!
   maxLiquidationBonus: PercentNumber!
   liquidationFee: PercentNumber!

@@ -504,6 +504,7 @@ export const exchange = cacheExchange({
     OrderAdapterApproval: () => null,
     OrderCancelled: () => null,
     OrderCancelledResult: () => null,
+    OrderErc20Approval: () => null,
     OrderExpired: () => null,
     OrderFulfilled: () => null,
     OrderOpen: () => null,
