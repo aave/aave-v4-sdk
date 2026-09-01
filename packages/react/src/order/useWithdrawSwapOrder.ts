@@ -1,9 +1,9 @@
-import { preparePositionSwap, withdrawSwapQuote } from '@aave/client/actions';
+import { prepareOrder, withdrawSwapQuote } from '@aave/client/actions';
 import type { ValidationError } from '@aave/core';
 import type {
   InsufficientBalanceError,
   InsufficientLiquidityError,
-  SwapReceipt,
+  OrderReceipt,
   WithdrawSwapQuoteRequest,
 } from '@aave/graphql';
 import type { Prettify } from '@aave/types';
@@ -15,60 +15,52 @@ import {
   type CurrencyQueryOptions,
   cancel,
   DEFAULT_QUERY_OPTIONS,
-  type PositionSwapHandler,
-  processApprovals,
-  type SwapSignerError,
-  swapPosition,
+  type OrderSignerError,
+  type PositionOrderHandler,
+  processPositionOrderApprovals,
+  submitOrderIntent,
   trySignatureFrom,
   type UseAsyncTask,
   useAsyncTask,
 } from './helpers';
 
-export type UseWithdrawSwapRequest = Prettify<
+export type UseWithdrawSwapOrderRequest = Prettify<
   WithdrawSwapQuoteRequest & CurrencyQueryOptions
 >;
 
 /**
- * Orchestrate the withdraw swap execution plan.
+ * Execute a withdraw-and-swap through the Order API.
+ *
+ * The Order-API equivalent of {@link useWithdrawSwap}: it fetches a withdraw
+ * swap quote, collects the position-swap approval signatures, prepares and
+ * signs the order, then submits it — resolving to an {@link OrderReceipt}.
  *
  * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
  * const [signTypedData] = useSignTypedData(wallet);
  *
- * const [withdrawSwap, { loading, error }] = useWithdrawSwap((plan) => {
+ * const [withdrawAndSwap, { loading, error }] = useWithdrawSwapOrder((plan) => {
  *   switch (plan.__typename) {
  *     case 'PositionSwapAdapterContractApproval':
  *     case 'PositionSwapPositionManagerApproval':
+ *     case 'PositionSwapSetCollateralApproval':
  *       return signTypedData(plan.bySignature);
  *
- *     case 'SwapTypedData':
+ *     case 'OrderTypedData':
  *       return signTypedData(plan);
+ *
+ *     case 'OrderTransactionRequest':
+ *       return sendTransaction(plan.transaction);
  *   }
  * });
- *
- * const result = await withdrawSwap({
- *   market: {
- *     position: userSupplyItem.id,
- *     buyToken: { erc20: evmAddress('0xA0b86a33E6…') },
- *     amount: bigDecimal('1000'),
- *     user: evmAddress('0x742d35cc…'),
- *   },
- * });
- *
- * if (result.isErr()) {
- *   console.error(result.error);
- *   return;
- * }
- *
- * // result.value: SwapReceipt
  * ```
- * @deprecated Superseded by the Order API; use {@link useWithdrawSwapOrder}. The swap API remains functional but will be removed in a later release.
  */
-export function useWithdrawSwap(
-  handler: PositionSwapHandler,
+export function useWithdrawSwapOrder(
+  handler: PositionOrderHandler,
 ): UseAsyncTask<
-  WithdrawSwapQuoteRequest,
-  SwapReceipt,
-  | SwapSignerError
+  UseWithdrawSwapOrderRequest,
+  OrderReceipt,
+  | OrderSignerError
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
@@ -79,23 +71,23 @@ export function useWithdrawSwap(
     ({
       currency = DEFAULT_QUERY_OPTIONS.currency,
       ...request
-    }: UseWithdrawSwapRequest) => {
+    }: UseWithdrawSwapOrderRequest) => {
       return withdrawSwapQuote(client, request, { currency }).andThen(
-        (result) => {
-          return processApprovals(result)
+        (result) =>
+          processPositionOrderApprovals(result)
             .with(handler)
-            .andThen((request) => preparePositionSwap(client, request))
+            .andThen((request) => prepareOrder(client, request))
             .andThen((order) =>
               handler(order.data, { cancel })
                 .andThen(trySignatureFrom)
                 .andThen((signature) =>
-                  swapPosition(client, {
-                    quoteId: order.newQuoteId,
-                    signature,
-                  }),
+                  submitOrderIntent(
+                    client,
+                    { quoteId: order.newQuoteId, signature },
+                    handler,
+                  ),
                 ),
-            );
-        },
+            ),
       );
     },
     [client, handler],

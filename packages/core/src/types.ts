@@ -7,6 +7,10 @@ export type EnvironmentConfig = {
   indexingTimeout: number;
   pollingInterval: number;
   exchangeRateInterval?: number;
+  // TODO: rename to orderQuoteInterval/orderStatusInterval when the deprecated
+  // swap verbs are removed. Order is the umbrella concept now — these already
+  // govern leverage polling, which is not a swap. Deferred so the rename lands
+  // in that same major rather than costing one of its own.
   swapQuoteInterval: number;
   swapStatusInterval: number;
 };

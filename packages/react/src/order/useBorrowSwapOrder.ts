@@ -1,0 +1,94 @@
+import { borrowSwapQuote, prepareOrder } from '@aave/client/actions';
+import type { ValidationError } from '@aave/core';
+import type {
+  BorrowSwapQuoteRequest,
+  InsufficientBalanceError,
+  InsufficientLiquidityError,
+  OrderReceipt,
+} from '@aave/graphql';
+import type { Prettify } from '@aave/types';
+
+import { useAaveClient } from '../context';
+import type { PendingTransactionError, SendTransactionError } from '../helpers';
+
+import {
+  type CurrencyQueryOptions,
+  cancel,
+  DEFAULT_QUERY_OPTIONS,
+  type OrderSignerError,
+  type PositionOrderHandler,
+  processPositionOrderApprovals,
+  submitOrderIntent,
+  trySignatureFrom,
+  type UseAsyncTask,
+  useAsyncTask,
+} from './helpers';
+
+export type UseBorrowSwapOrderRequest = Prettify<
+  BorrowSwapQuoteRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Execute a borrow (debt) swap through the Order API.
+ *
+ * The Order-API equivalent of {@link useBorrowSwap}: it fetches a borrow swap
+ * quote, collects the position-swap approval signatures, prepares and signs the
+ * order, then submits it — resolving to an {@link OrderReceipt}.
+ *
+ * ```tsx
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [signTypedData] = useSignTypedData(wallet);
+ *
+ * const [swapDebt, { loading, error }] = useBorrowSwapOrder((plan) => {
+ *   switch (plan.__typename) {
+ *     case 'PositionSwapAdapterContractApproval':
+ *     case 'PositionSwapPositionManagerApproval':
+ *     case 'PositionSwapSetCollateralApproval':
+ *       return signTypedData(plan.bySignature);
+ *
+ *     case 'OrderTypedData':
+ *       return signTypedData(plan);
+ *
+ *     case 'OrderTransactionRequest':
+ *       return sendTransaction(plan.transaction);
+ *   }
+ * });
+ * ```
+ */
+export function useBorrowSwapOrder(
+  handler: PositionOrderHandler,
+): UseAsyncTask<
+  UseBorrowSwapOrderRequest,
+  OrderReceipt,
+  | OrderSignerError
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    ({
+      currency = DEFAULT_QUERY_OPTIONS.currency,
+      ...request
+    }: UseBorrowSwapOrderRequest) => {
+      return borrowSwapQuote(client, request, { currency }).andThen((result) =>
+        processPositionOrderApprovals(result)
+          .with(handler)
+          .andThen((request) => prepareOrder(client, request))
+          .andThen((order) =>
+            handler(order.data, { cancel })
+              .andThen(trySignatureFrom)
+              .andThen((signature) =>
+                submitOrderIntent(
+                  client,
+                  { quoteId: order.newQuoteId, signature },
+                  handler,
+                ),
+              ),
+          ),
+      );
+    },
+    [client, handler],
+  );
+}
