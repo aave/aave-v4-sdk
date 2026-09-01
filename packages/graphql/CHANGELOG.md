@@ -1,5 +1,22 @@
 # @aave/graphql
 
+## 3.4.0
+
+### Minor Changes
+
+- 97aaf27: **feat:** sync schema with staging: `OrderErc20Approval` joins the `OrderApproval` union (server-built ERC-20 top-up permit, handled by `useLeverage`), `ActivityType.Leverage`, leverage `quoteId` inputs typed as `OrderQuoteId`, and `MarketLeverageQuoteInput.multiplier` is optional
+- bd2bdf3: **feat:** add the Order API (`submitOrder`, `cancelOrder`, `prepareOrder`, `orderStatus`, `pendingOrders`, `prepareCancelOrder`) and leverage support (`leverageQuote`, `Leverage`, `LeverageActivity`), with matching `useLeverage`, `useLeverageQuote`, `useOrderStatus`, `usePendingOrders`, and `useCancelOrder` hooks
+- 1f0c2fd: **feat:** add Order-API execute hooks for swaps so position and token swaps run through `submitOrder`/`prepareOrder` alongside `useLeverage`:
+
+  - `useSupplySwapOrder`, `useBorrowSwapOrder`, `useRepayWithSupplyOrder`, `useWithdrawSwapOrder` — position swaps via a new `PositionOrderHandler` and `processPositionOrderApprovals`, which maps the `PositionSwap*Approval` nodes onto the same `PrepareOrderRequest` signature fields and seeds the order id from `SwapQuote.orderQuoteId`.
+  - `useTokenSwapOrder` — token swaps through `prepareOrder`/`submitOrder`, handling the by-transaction, by-intent, and ERC-20-pre-approval quote variants.
+
+  Each execute hook mirrors its `useXSwapQuote` counterpart (`useSupplySwapQuote` ↔ `useSupplySwapOrder`).
+
+  Deprecate the swap-verb hooks (`useSupplySwap`, `useBorrowSwap`, `useRepayWithSupply`, `useWithdrawSwap`, `useTokenSwap`, `useSwapStatus`, `useUserSwaps`, `useCancelSwap`) in favour of their Order equivalents. They remain fully functional and will be removed in a later release.
+
+  Add `OrderTypedData` to the signer `TypedData` union so order typed data can be signed through the viem, ethers, thirdweb, and privy adapters (previously only `SwapTypedData`/`PermitTypedData` were accepted, which also blocked signing the final leverage order).
+
 ## 3.3.0
 
 ### Minor Changes
