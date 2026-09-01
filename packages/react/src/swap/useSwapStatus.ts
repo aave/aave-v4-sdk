@@ -40,6 +40,7 @@ export type UseSwapStatusArgs = Prettify<
  *   suspense: true,
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link useOrderStatus}. The swap API remains functional but will be removed in a later release.
  */
 export function useSwapStatus(
   args: UseSwapStatusArgs & Suspendable,
@@ -56,6 +57,7 @@ export function useSwapStatus(
  *   pause: shouldPause,
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link useOrderStatus}. The swap API remains functional but will be removed in a later release.
  */
 export function useSwapStatus(
   args: Pausable<UseSwapStatusArgs> & Suspendable,
@@ -70,6 +72,7 @@ export function useSwapStatus(
  *   id: swapReceipt.id,
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link useOrderStatus}. The swap API remains functional but will be removed in a later release.
  */
 export function useSwapStatus(args: UseSwapStatusArgs): ReadResult<SwapStatus>;
 /**
@@ -83,6 +86,7 @@ export function useSwapStatus(args: UseSwapStatusArgs): ReadResult<SwapStatus>;
  *   pause: shouldPause,
  * });
  * ```
+ * @deprecated Superseded by the Order API; use {@link useOrderStatus}. The swap API remains functional but will be removed in a later release.
  */
 export function useSwapStatus(
   args: Pausable<UseSwapStatusArgs>,

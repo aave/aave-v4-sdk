@@ -292,6 +292,40 @@ export function encodeUserPositionId(
 }
 
 /**
+ * An order identifier.
+ */
+export type OrderId = Tagged<string, 'OrderId'>;
+
+/**
+ * Creates a type-safe order Id.
+ *
+ * @remarks
+ * This is meant to be used in tests and POC context. In normal circumstances
+ * use the `orderId` retrieved from another API call.
+ */
+export function orderId(value: string): OrderId {
+  invariant(isValidHexString(value), `Invalid OrderId: ${value}`);
+  return value as OrderId;
+}
+
+/**
+ * An order quote identifier.
+ */
+export type OrderQuoteId = Tagged<string, 'OrderQuoteId'>;
+
+/**
+ * Creates a type-safe Order Quote ID.
+ *
+ * @remarks
+ * This is meant to be used in tests and POC context. In normal circumstances
+ * use the `OrderQuote.quoteId` retrieved from another API call.
+ */
+export function orderQuoteId(value: string): OrderQuoteId {
+  invariant(isValidHexString(value), `Invalid OrderQuoteId: ${value}`);
+  return value as OrderQuoteId;
+}
+
+/**
  * A swap identifier.
  */
 export type SwapId = Tagged<string, 'SwapId'>;

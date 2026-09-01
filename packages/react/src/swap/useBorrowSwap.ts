@@ -61,6 +61,7 @@ export type UseBorrowSwapRequest = Prettify<
  *
  * // result.value: SwapReceipt
  * ```
+ * @deprecated Superseded by the Order API; use {@link useBorrowSwapOrder}. The swap API remains functional but will be removed in a later release.
  */
 export function useBorrowSwap(
   handler: PositionSwapHandler,

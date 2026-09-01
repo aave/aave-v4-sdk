@@ -1,4 +1,5 @@
-import { GraphQLErrorCode, UnexpectedError } from '@aave/client';
+import { AaveClient, GraphQLErrorCode, UnexpectedError } from '@aave/client';
+import { environment } from '@aave/client/testing';
 import type { StandardData } from '@aave/core';
 import { createGraphQLErrorObject } from '@aave/core/testing';
 import { err, never, ok, type Result } from '@aave/types';
@@ -529,6 +530,80 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
       expect(result.current).toMatchObject({
         reloading: false,
       });
+    });
+  });
+
+  describe('When a query errored and a cache-only read of the same operation misses', () => {
+    // Errored results are never cached, so a cache-only read of the same
+    // operation is answered with `{ data: null }` and no `error`, which urql
+    // fans out to every active subscriber of that operation key
+    const useErroringHook = ({ id }: { id: number }) =>
+      useSuspendableQuery({
+        document: TestQuery,
+        // biome-ignore lint/suspicious/noExplicitAny: testing internal API
+        variables: { id } as any,
+        suspense: false,
+        // Dereferences the value like the quote selectors do
+        selector: (value: number | null) => ok((value as number).toFixed(0)),
+      });
+
+    const failingServer = () =>
+      server.use(
+        graphql.query(TestQuery, () =>
+          HttpResponse.json({
+            data: null,
+            errors: [createGraphQLErrorObject(GraphQLErrorCode.BAD_REQUEST)],
+          }),
+        ),
+      );
+
+    it('Then it should not invoke the selector with `null` on a direct cache-only query', async () => {
+      failingServer();
+      const client = AaveClient.create({ environment });
+      const onError = vi.fn();
+      const { result } = renderHookWithinContext(useErroringHook, {
+        initialProps: { id: 1 },
+        client,
+        // biome-ignore lint/suspicious/noExplicitAny: not worth the effort
+        onCaughtError: onError as any,
+      });
+      await vi.waitUntil(() => !result.current.loading);
+      expect(result.current.error).toBeInstanceOf(UnexpectedError);
+
+      await act(async () => {
+        await client.query(
+          TestQuery,
+          { id: 1 },
+          { requestPolicy: 'cache-only' },
+        );
+      });
+
+      expect(onError).not.toHaveBeenCalled();
+      expect(result.current).toMatchObject({
+        data: undefined,
+        error: expect.any(UnexpectedError),
+        loading: false,
+      });
+    });
+
+    it('Then a `refreshQueryWhere` read should not reach the active hook', async () => {
+      failingServer();
+      const client = AaveClient.create({ environment });
+      const onError = vi.fn();
+      const { result } = renderHookWithinContext(useErroringHook, {
+        initialProps: { id: 1 },
+        client,
+        // biome-ignore lint/suspicious/noExplicitAny: not worth the effort
+        onCaughtError: onError as any,
+      });
+      await vi.waitUntil(() => !result.current.loading);
+
+      await act(async () => {
+        await client.refreshQueryWhere(TestQuery, () => true);
+      });
+
+      expect(onError).not.toHaveBeenCalled();
+      expect(result.current.error).toBeInstanceOf(UnexpectedError);
     });
   });
 });

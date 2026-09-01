@@ -88,6 +88,7 @@ export type CancelSwapError =
  * // result.value: SwapCancelledResult
  * console.log('Swap cancelled:', result.value);
  * ```
+ * @deprecated Superseded by the Order API; use {@link useCancelOrder}. The swap API remains functional but will be removed in a later release.
  */
 export function useCancelSwap(
   handler: CancelSwapHandler,

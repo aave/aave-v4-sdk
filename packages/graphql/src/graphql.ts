@@ -25,7 +25,9 @@ import type {
   CollateralMetric,
   Currency,
   OperationType,
+  OrderClass,
   OrderDirection,
+  OrderStatusFilter,
   PageSize,
   QuoteAccuracy,
   RepayWithSupplyKind,
@@ -52,6 +54,8 @@ import type {
   ID,
   OnChainHubAssetId,
   OnChainReserveId,
+  OrderId,
+  OrderQuoteId,
   ReserveId,
   RewardId,
   SpokeId,
@@ -102,7 +106,11 @@ export const graphql = initGraphQLTada<{
     OnChainHubAssetId: OnChainHubAssetId;
     OnChainReserveId: OnChainReserveId;
     OperationType: OperationType;
+    OrderClass: OrderClass;
     OrderDirection: OrderDirection;
+    OrderId: OrderId;
+    OrderQuoteId: OrderQuoteId;
+    OrderStatusFilter: OrderStatusFilter;
     PageSize: PageSize;
     QuoteAccuracy: QuoteAccuracy;
     ReserveHoldersFilter: ReserveHoldersFilter;

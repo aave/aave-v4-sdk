@@ -749,6 +749,31 @@ export type WithdrawSwapActivity = FragmentOf<
   typeof WithdrawSwapActivityFragment
 >;
 
+export const LeverageActivityFragment = graphql(
+  `fragment LeverageActivity on LeverageActivity {
+    __typename
+    id
+    user
+    timestamp
+    txHash
+    chain {
+      ...Chain
+    }
+    collateral {
+      ...PositionAmount
+    }
+    debt {
+      ...PositionAmount
+    }
+    multiplier
+    explorerUrl
+    orderClass
+    status
+  }`,
+  [ChainFragment, PositionAmountFragment],
+);
+export type LeverageActivity = FragmentOf<typeof LeverageActivityFragment>;
+
 export const ActivityItemFragment = graphql(
   `fragment ActivityItem on ActivityItem {
     __typename
@@ -791,6 +816,9 @@ export const ActivityItemFragment = graphql(
     ... on WithdrawSwapActivity {
       ...WithdrawSwapActivity
     }
+    ... on LeverageActivity {
+      ...LeverageActivity
+    }
   }`,
   [
     BorrowActivityFragment,
@@ -806,6 +834,7 @@ export const ActivityItemFragment = graphql(
     BorrowSwapActivityFragment,
     RepayWithSupplyActivityFragment,
     WithdrawSwapActivityFragment,
+    LeverageActivityFragment,
   ],
 );
 export type ActivityItem = ExtendWithOpaqueType<

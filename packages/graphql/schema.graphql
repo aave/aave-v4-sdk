@@ -1,7 +1,7 @@
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
-  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM, TOKEN_TO_TOKEN_SWAP, SUPPLY_SWAP, BORROW_SWAP, REPAY_WITH_SUPPLY, WITHDRAW_SWAP]
+  types: [ActivityType!]! = [BORROW, SUPPLY, WITHDRAW, REPAY, LIQUIDATED, SET_AS_COLLATERAL, UPDATED_DYNAMIC_CONFIG, UPDATED_RISK_PREMIUM, TOKEN_TO_TOKEN_SWAP, SUPPLY_SWAP, BORROW_SWAP, REPAY_WITH_SUPPLY, WITHDRAW_SWAP, LEVERAGE]
   pageSize: PageSize! = FIFTY
   cursor: Cursor
 }
@@ -16,7 +16,7 @@ input ActivitiesRequestQuery @oneOf {
   userPositionId: UserPositionId
 }
 
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity | LeverageActivity
 
 enum ActivityType {
   SUPPLY
@@ -32,6 +32,7 @@ enum ActivityType {
   BORROW_SWAP
   REPAY_WITH_SUPPLY
   WITHDRAW_SWAP
+  LEVERAGE
 }
 
 scalar AlwaysTrue
@@ -258,6 +259,18 @@ union BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired | Insufficie
 input CancelIntentSwapInput {
   id: SwapId!
   signature: Signature!
+}
+
+input CancelOrderBySignatureInput {
+  id: OrderId!
+  signature: Signature!
+}
+
+union CancelOrderExecutionPlan = TransactionRequest | OrderCancelledResult
+
+input CancelOrderRequest @oneOf {
+  bySignature: CancelOrderBySignatureInput
+  byTransaction: OrderId
 }
 
 union CancelSwapExecutionPlan = TransactionRequest | SwapCancelledResult
@@ -546,6 +559,10 @@ input FromQuoteDebtSwapQuoteInput {
   quoteId: SwapQuoteId!
 }
 
+input FromQuoteLeverageQuoteInput {
+  quoteId: OrderQuoteId!
+}
+
 input FromQuoteRepayWithSupplyQuoteInput {
   quoteId: SwapQuoteId!
 }
@@ -673,7 +690,9 @@ type HubAssetSettings {
   """The fee receiver"""
   feeReceiver: EvmAddress!
 
-  """The liquidity fee"""
+  """
+  The protocol's share of borrower interest, already deducted from `supplyApy`.
+  """
   liquidityFee: PercentNumber!
 
   """The ir strategy"""
@@ -883,6 +902,57 @@ type InsufficientLiquidityError {
 
 scalar JSON
 
+"""
+The bought collateral / borrowed debt of a leverage order and its effective multiplier.
+"""
+type Leverage {
+  collateral: PositionAmount!
+  debt: PositionAmount!
+
+  """
+  Exposure multiplier: target collateral over entry equity. Read `debt` for what the order
+  borrowed; a limit order can hold this exposure on less debt than the collateral is worth.
+  """
+  multiplier: BigDecimal!
+}
+
+type LeverageActivity {
+  id: ID!
+  user: EvmAddress!
+  timestamp: DateTime!
+  txHash: TxHash
+  chain: Chain!
+  collateral: PositionAmount!
+  debt: PositionAmount!
+
+  """
+  Exposure multiplier: target collateral over entry equity, not debt over equity.
+  """
+  multiplier: BigDecimal!
+  explorerUrl: String!
+  orderClass: SwapOrderClass!
+  status: SwapActivityStatus!
+}
+
+type LeverageApprovalsRequired {
+  quote: OrderQuote!
+  approvals: [OrderApproval!]!
+
+  """
+  Multiplier at which this position becomes liquidatable, given the debt this quote draws.
+  A hard wall, not a recommendation: sitting at it is one price tick from liquidation.
+  """
+  maxSafeMultiplier: BigDecimal!
+}
+
+input LeverageQuoteRequest @oneOf {
+  market: MarketLeverageQuoteInput
+  limit: LimitLeverageQuoteInput
+  fromQuote: FromQuoteLeverageQuoteInput
+}
+
+union LeverageQuoteResult = LeverageApprovalsRequired | InsufficientLiquidityError
+
 input LimitDebtSwapQuoteInput {
   quoteId: SwapQuoteId
   currentPosition: UserBorrowItemId!
@@ -893,6 +963,38 @@ input LimitDebtSwapQuoteInput {
   kind: BorrowSwapKind
 
   """Optional deadline as DateTime. If not provided, uses default expiry."""
+  deadline: DateTime
+}
+
+"""
+Limit leverage: specify the exact collateral to hold and debt to take (the limit price is implied
+by their ratio), rather than a market multiplier. The effective exposure multiplier is derived
+from the collateral leg and still checked against the safe ceiling. That check assumes the debt
+leg is worth at least as much as the collateral leg, so a limit price that takes less debt is
+held to the same ceiling as a market order rather than a looser one.
+"""
+input LimitLeverageQuoteInput {
+  quoteId: OrderQuoteId
+  debtReserve: ReserveId!
+  collateralReserve: ReserveId!
+
+  """
+  Collateral bought by this order's swap leg, in the collateral asset's human units. Excludes
+  the user's existing collateral and `additional_collateral`, which form the equity base.
+  """
+  collateralAmount: BigDecimal!
+
+  """Debt to take, in the debt asset's human units."""
+  debtAmount: BigDecimal!
+
+  """
+  Optional extra collateral pulled from the wallet (via EIP-2612), in collateral human units.
+  """
+  additionalCollateral: BigDecimal
+  enableCollateral: Boolean
+  user: EvmAddress!
+
+  """Optional deadline. If not provided, uses the default expiry."""
   deadline: DateTime
 }
 
@@ -1041,6 +1143,52 @@ input MarketDebtSwapQuoteInput {
   selectedSlippage: BigDecimal
 }
 
+"""
+Open or increase a leveraged position: flash-loan the debt asset, swap it to the collateral asset,
+supply the collateral, then borrow the debt to repay the flash loan. The equity base is the user's
+collateral-enabled balance in `collateral_reserve` plus the optional wallet top-up, and
+`multiplier` is the target exposure (> 1) applied to that equity.
+
+Not previewable directly: `previewUserPosition` needs the executed swap amounts, so quote first
+and preview the resulting `quoteId` via `FromQuote`.
+"""
+input MarketLeverageQuoteInput {
+  """
+  Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
+  """
+  accuracy: QuoteAccuracy! = ACCURATE
+
+  """
+  Debt reserve that is flash-loaned and borrowed to repay the flash loan.
+  """
+  debtReserve: ReserveId!
+
+  """Collateral reserve bought and supplied."""
+  collateralReserve: ReserveId!
+
+  """
+  Target exposure multiplier (target collateral / entry equity), must be greater than 1.
+  Must stay under `maxSafeMultiplier`, the multiplier at which this position becomes
+  liquidatable. Omit it to be quoted at a health factor chosen from how closely the two legs
+  track each other, which still takes a single quote. The resolved value is implied by the
+  quote's own amounts: `multiplier = 1 + buyAmount / equity`.
+  """
+  multiplier: BigDecimal
+
+  """
+  Optional extra collateral pulled from the wallet (via EIP-2612) on top of the user's existing
+  collateral, in the collateral asset's human units. Required when opening a fresh position.
+  """
+  additionalCollateral: BigDecimal
+
+  """
+  Whether to enable the supplied collateral as collateral on the spoke (defaults to true).
+  """
+  enableCollateral: Boolean
+  user: EvmAddress!
+  selectedSlippage: BigDecimal
+}
+
 input MarketOrderTokenSwapFromQuoteInput {
   quoteId: SwapQuoteId!
 }
@@ -1176,8 +1324,10 @@ type MultichainAssetSummary {
 type Mutation {
   """Top up a balance for a user or yourself on the fork"""
   forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
-  swap(request: SwapRequest!): SwapExecutionPlan!
-  cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan!
+  swap(request: SwapRequest!): SwapExecutionPlan! @deprecated(reason: "Use submitOrder.")
+  cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan! @deprecated(reason: "Use cancelOrder.")
+  submitOrder(request: SubmitOrderRequest!): OrderExecutionPlan!
+  cancelOrder(request: CancelOrderRequest!): CancelOrderExecutionPlan!
 
   """
   Redeem a pending withdrawal claim.
@@ -1205,6 +1355,24 @@ type NativeToken {
   chain: Chain!
 }
 
+"""
+Where a position's net APY comes from. Each term is value-weighted and divided by the net
+balance, so the three sum to `netApy` and a levered position can show why its headline moved.
+"""
+type NetApyBreakdown {
+  """Pool rates: what the supplies earn less what the debt costs."""
+  base: PercentNumber!
+
+  """Merkl supply rewards plus borrow discounts."""
+  rewards: PercentNumber!
+
+  """Yield the supplied assets accrue outside the pool rate."""
+  underlying: PercentNumber!
+
+  """Equal to `netApy`."""
+  total: PercentNumber!
+}
+
 scalar OnChainHubAssetId
 
 scalar OnChainReserveId
@@ -1222,9 +1390,187 @@ enum OperationType {
   LIQUIDATION
 }
 
+"""
+Adapter-contract approval to sign. Sibling of `PositionSwapAdapterContractApproval`.
+"""
+type OrderAdapterApproval {
+  bySignature: SwapTypedData!
+}
+
+"""
+Approvals an order may require before submission. Sibling of `PositionSwapApproval`.
+"""
+union OrderApproval = OrderAdapterApproval | OrderPositionManagerApproval | OrderSetCollateralApproval | OrderErc20Approval
+
+type OrderCancelled {
+  orderId: OrderId!
+  createdAt: DateTime!
+  cancelledAt: DateTime
+  explorerUrl: String!
+  operation: OrderOperation!
+}
+
+type OrderCancelledResult {
+  orderId: OrderId!
+}
+
+"""
+Market or limit order class. Order-canonical sibling of `SwapOrderClass`.
+"""
+enum OrderClass {
+  MARKET
+  LIMIT
+}
+
 enum OrderDirection {
   ASC
   DESC
+}
+
+"""
+ERC-20 approval for the wallet-side token pull, currently the leverage top-up. The spender is
+the order's adapter instance, whose address only the server can derive.
+
+`by_signature` is `null` when the token has no usable EIP-2612 permit, in which case the user
+must send `by_transaction`.
+"""
+type OrderErc20Approval {
+  byTransaction: TransactionRequest!
+  bySignature: PermitTypedData
+}
+
+union OrderExecutionPlan = OrderTransactionRequest | OrderReceipt | InsufficientBalanceError
+
+type OrderExpired {
+  orderId: OrderId!
+  createdAt: DateTime!
+  expiredAt: DateTime!
+  explorerUrl: String!
+  operation: OrderOperation!
+}
+
+type OrderFulfilled {
+  orderId: OrderId!
+  createdAt: DateTime!
+  fulfilledAt: DateTime!
+  txHash: String!
+  explorerUrl: String!
+  operation: OrderOperation!
+}
+
+scalar OrderId
+
+type OrderOpen {
+  orderId: OrderId!
+  createdAt: DateTime!
+  deadline: DateTime!
+  explorerUrl: String!
+  operation: OrderOperation!
+}
+
+"""
+Kind of an order. Reuses the existing swap operation product types and adds `Leverage`.
+"""
+union OrderOperation = SupplySwap | BorrowSwap | RepayWithSupply | WithdrawSwap | TokenSwap | Leverage
+
+type OrderPendingSignature {
+  orderId: OrderId!
+  createdAt: DateTime!
+  deadline: DateTime!
+  explorerUrl: String!
+  operation: OrderOperation!
+}
+
+"""
+Position-manager approval, by transaction or signature. Sibling of
+`PositionSwapPositionManagerApproval`.
+"""
+type OrderPositionManagerApproval {
+  byTransaction: TransactionRequest!
+  bySignature: SwapTypedData!
+}
+
+"""
+Order-canonical quote. Sibling of `SwapQuote`, keyed by the canonical `OrderQuoteId`.
+"""
+type OrderQuote {
+  accuracy: QuoteAccuracy!
+  quoteId: OrderQuoteId!
+  suggestedSlippage: PercentNumber!
+  selectedSlippage: PercentNumber
+  sell: TokenAmount!
+  buy: TokenAmount!
+  costs: OrderQuoteCosts!
+
+  """Final buy amount after all fees and slippage"""
+  finalBuy: TokenAmount!
+
+  """Final sell amount after all fees and slippage"""
+  finalSell: TokenAmount!
+
+  """
+  DEX direction of the underlying swap (Buy/Sell); kept Swap-flavored on purpose.
+  """
+  kind: TokenSwapKind!
+
+  """Market or limit classification of the order."""
+  class: OrderClass!
+}
+
+"""Cost breakdown of an order quote. Sibling of `SwapQuoteCosts`."""
+type OrderQuoteCosts {
+  """Network and provider costs"""
+  networkCosts: TokenAmount!
+
+  """Aave partner fee amount"""
+  partnerFee: TokenAmount!
+
+  """Protocol fee"""
+  flashloanFee: TokenAmount
+
+  """Custom Swap Provider fee"""
+  providerFee: TokenAmount!
+}
+
+scalar OrderQuoteId
+
+type OrderReceipt {
+  orderId: OrderId!
+}
+
+"""
+Set-collateral approval to sign. Sibling of `PositionSwapSetCollateralApproval`.
+"""
+type OrderSetCollateralApproval {
+  bySignature: SwapTypedData!
+}
+
+union OrderStatus = OrderOpen | OrderPendingSignature | OrderFulfilled | OrderCancelled | OrderExpired
+
+"""Filter for [`pending_orders`]; mirrors the legacy `SwapStatusFilter`."""
+enum OrderStatusFilter {
+  OPEN
+  PENDING_SIGNATURE
+  FULFILLED
+  CANCELLED
+  EXPIRED
+}
+
+input OrderStatusRequest {
+  id: OrderId!
+}
+
+type OrderTransactionRequest {
+  transaction: TransactionRequest!
+  orderReceipt: OrderReceipt!
+}
+
+"""EIP-712 typed data to sign; mirrors the legacy `SwapTypedData`."""
+type OrderTypedData {
+  types: JSON!
+  primaryType: String!
+  domain: DomainData!
+  message: JSON!
 }
 
 enum PageSize {
@@ -1234,6 +1580,11 @@ enum PageSize {
 
 type PaginatedActivitiesResult {
   items: [ActivityItem!]!
+  pageInfo: PaginatedResultInfo!
+}
+
+type PaginatedOrdersResult {
+  items: [OrderStatus!]!
   pageInfo: PaginatedResultInfo!
 }
 
@@ -1287,6 +1638,14 @@ type PaginatedStableVaultRateUsersResult {
 type PaginatedUserSwapsResult {
   items: [SwapStatus!]!
   pageInfo: PaginatedResultInfo!
+}
+
+input PendingOrdersRequest {
+  chainId: ChainId!
+  user: EvmAddress!
+  filterBy: [OrderStatusFilter!]
+  pageSize: PageSize! = FIFTY
+  cursor: Cursor
 }
 
 type PercentNumber {
@@ -1383,6 +1742,28 @@ type PreContractActionRequired {
   originalTransaction: TransactionRequest!
 }
 
+input PrepareCancelOrderRequest {
+  id: OrderId!
+}
+
+type PrepareCancelOrderResult {
+  data: OrderTypedData!
+}
+
+input PrepareOrderRequest {
+  quoteId: OrderQuoteId!
+  permitSig: ERC20PermitSignature
+
+  """
+  Action permit (WithdrawPermit for collateral swaps, BorrowPermit for debt swaps / leverage).
+  """
+  adapterContractSignature: Signature
+  positionManagerSignature: Signature
+  setCollateralSignature: Signature
+}
+
+union PrepareOrderResult = PreparedOrder | InsufficientBalanceError
+
 input PreparePositionSwapRequest {
   quoteId: SwapQuoteId!
 
@@ -1397,6 +1778,11 @@ input PreparePositionSwapRequest {
   asset is not already enabled as collateral)
   """
   setCollateralSignature: Signature
+
+  """
+  EIP-2612 permit signature on the collateral token (only for leverage with a wallet top-up)
+  """
+  erc20Signature: Signature
 }
 
 union PreparePositionSwapResult = PrepareSwapOrder | InsufficientBalanceError
@@ -1421,6 +1807,11 @@ input PrepareTokenSwapRequest {
 
 union PrepareTokenSwapResult = PrepareSwapOrder | InsufficientBalanceError
 
+type PreparedOrder {
+  newQuoteId: OrderQuoteId!
+  data: OrderTypedData!
+}
+
 input PreviewAction @oneOf {
   supply: SupplyRequest
   borrow: BorrowRequest
@@ -1432,6 +1823,7 @@ input PreviewAction @oneOf {
   borrowSwap: BorrowSwapQuoteRequest
   repayWithSupply: RepayWithSupplyQuoteRequest
   withdrawSwap: WithdrawSwapQuoteRequest
+  leverage: LeverageQuoteRequest
 }
 
 type PreviewBorrowPointsReward {
@@ -1600,16 +1992,26 @@ type Query {
   hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
   activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
   tokenSwapQuote(request: TokenSwapQuoteRequest!): TokenSwapQuoteResult!
-  prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult!
+  prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult! @deprecated(reason: "Use prepareOrder.")
   supplySwapQuote(request: SupplySwapQuoteRequest!): SupplySwapQuoteResult!
   borrowSwapQuote(request: BorrowSwapQuoteRequest!): BorrowSwapQuoteResult!
   repayWithSupplyQuote(request: RepayWithSupplyQuoteRequest!): RepayWithSupplyQuoteResult!
   withdrawSwapQuote(request: WithdrawSwapQuoteRequest!): WithdrawSwapQuoteResult!
-  preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult!
-  swapStatus(request: SwapStatusRequest!): SwapStatus
-  userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult!
-  prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult!
+  leverageQuote(request: LeverageQuoteRequest!): LeverageQuoteResult!
+  preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult! @deprecated(reason: "Use prepareOrder.")
+  swapStatus(request: SwapStatusRequest!): SwapStatus @deprecated(reason: "Use orderStatus.")
+  userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult! @deprecated(reason: "Use pendingOrders.")
+  prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult! @deprecated(reason: "Use prepareCancelOrder.")
   swappableTokens(request: SwappableTokensRequest!): [Token!]!
+
+  """
+  Prepare typed data to sign for any order. Dispatches on the quote's product; leverage lands
+  with its adapter wiring.
+  """
+  prepareOrder(request: PrepareOrderRequest!): PrepareOrderResult!
+  orderStatus(request: OrderStatusRequest!): OrderStatus
+  pendingOrders(request: PendingOrdersRequest!): PaginatedOrdersResult!
+  prepareCancelOrder(request: PrepareCancelOrderRequest!): PrepareCancelOrderResult!
 
   """Claim rewards for a user"""
   claimRewards(request: ClaimRewardsRequest!): TransactionRequest!
@@ -1870,6 +2272,9 @@ type ReserveReward {
 }
 
 type ReserveSettings {
+  """
+  Also the liquidation boundary: V4 has no separate threshold, so a full draw sits at HF 1.0.
+  """
   collateralFactor: PercentNumber!
   maxLiquidationBonus: PercentNumber!
   liquidationFee: PercentNumber!
@@ -1896,6 +2301,13 @@ type ReserveSummary {
   borrowable: Erc20Amount!
   supplyApy: PercentNumber!
   borrowApy: PercentNumber!
+
+  """
+  Yield the asset accrues outside the pool rate, read from the reserve's price source. Zero
+  when the asset accrues none; null when the rate could not be read, which is not zero and
+  must not render as 0%.
+  """
+  underlyingApy: PercentNumber
   rewards: [Reward!]!
 }
 
@@ -1904,6 +2316,10 @@ type ReserveUserState {
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
   borrowApy: PercentNumber!
+
+  """
+  Pinned to `dynamicConfigKey`, not the reserve's latest config. Also their liquidation boundary.
+  """
   collateralFactor: PercentNumber!
   maxLiquidationBonus: PercentNumber!
   liquidationFee: PercentNumber!
@@ -2401,6 +2817,21 @@ input StableVaultsRequest {
   admin: EvmAddress!
 }
 
+input SubmitOrderBySignatureInput {
+  quoteId: OrderQuoteId!
+  signature: Signature!
+}
+
+input SubmitOrderByTransactionInput {
+  quoteId: OrderQuoteId!
+  permitSig: Signature
+}
+
+input SubmitOrderRequest @oneOf {
+  bySignature: SubmitOrderBySignatureInput
+  byTransaction: SubmitOrderByTransactionInput
+}
+
 type SupplyActivity {
   id: ID!
   user: EvmAddress!
@@ -2578,11 +3009,9 @@ type SwapOpen {
   operation: SwapOperation!
 }
 
-union SwapOperation = SupplySwap | BorrowSwap | RepayWithSupply | WithdrawSwap | TokenSwap
+union SwapOperation = SupplySwap | BorrowSwap | RepayWithSupply | WithdrawSwap | TokenSwap | Leverage
 
-"""
-Order class indicating market or limit order type (mirrors types::swap_quote_id::OrderClass)
-"""
+"""Order class indicating market or limit order type."""
 enum SwapOrderClass {
   MARKET
   LIMIT
@@ -2610,6 +3039,11 @@ type SwapQuote {
 
   """Final sell amount after all fees and slippage"""
   finalSell: TokenAmount!
+
+  """
+  Same value as `quoteId`, typed as the canonical `OrderQuoteId` for the Order lifecycle verbs.
+  """
+  orderQuoteId: OrderQuoteId!
 }
 
 type SwapQuoteCosts {
@@ -3177,10 +3611,16 @@ type UserPosition {
 
   """
   Net supply APY weighted by USD balance. Includes the user's eligible
-  Merkl supply reward APY (`extra_apy`) on top of each reserve's base
-  supply rate.
+  Merkl supply reward APY (`extra_apy`) and the asset's underlying yield
+  on top of each reserve's base supply rate.
   """
   netSupplyApy: PercentNumberWithChange!
+
+  """
+  Net APY split into the parts it is made of. Leverage amplifies each part, so on a looped
+  position this is what explains a headline the pool rates alone cannot account for.
+  """
+  netApyBreakdown: NetApyBreakdown!
 
   """
   Net borrow APY weighted by USD debt. Subtracts the user's eligible
@@ -3299,6 +3739,12 @@ type UserSummary {
   historical campaign data.
   """
   netApy: PercentNumber!
+
+  """
+  The same split as a position's, weighted across positions the way `net_apy` is, so the
+  dashboard headline and the position it drills into agree on where the number came from.
+  """
+  netApyBreakdown: NetApyBreakdown!
 
   """
   Net accrued interest earned (all supply interests - all borrow interests)
