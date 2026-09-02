@@ -18,7 +18,7 @@ This section is for developers who want to contribute to the SDK.
 Clone the repository:
 
 ```bash
-git clone https://github.com/aave/aave-sdk.git
+git clone https://github.com/aave/aave-v4-sdk.git
 ```
 
 Install the dependencies:
