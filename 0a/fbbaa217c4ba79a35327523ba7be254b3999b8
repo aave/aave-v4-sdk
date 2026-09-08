@@ -1,0 +1,21 @@
+packages/core/src/dedup.test.ts
+  s_91154e73ed12de::t_e0d5b9ff8f3adc 135-149
+packages/core/src/dedup.ts
+  s_91154e73ed12de::t_e0d5b9ff8f3adc 34-39,48,63-65,69,77-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "0afbbaa217c4ba79a35327523ba7be254b3999b8",
+  "prompts": {},
+  "sessions": {
+    "s_91154e73ed12de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "463ec0d1-1316-4d2f-9d77-83cba821438d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
