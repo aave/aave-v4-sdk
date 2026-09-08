@@ -132,6 +132,21 @@ describe(`Given the '${inFlightDedupExchange.name}' exchange`, () => {
 
       expect(forwardedOps).toHaveLength(2);
     });
+
+    it('Then it keeps the key in flight until both overlapping requests have resolved', () => {
+      const op = queryOperation();
+      const refresh = queryOperation({ [refetching]: true } as never);
+      next(op);
+      next(refresh);
+
+      emitResult(resultFor(op));
+      next(queryOperation());
+      expect(forwardedOps).toHaveLength(2);
+
+      emitResult(resultFor(refresh));
+      next(queryOperation());
+      expect(forwardedOps).toHaveLength(3);
+    });
   });
 
   describe('When non-query operations are dispatched', () => {

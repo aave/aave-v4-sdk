@@ -31,9 +31,12 @@ export const refetching = Symbol('refetching');
  * - Operations marked with the {@link refetching} context symbol always pass
  *   through, and start tracking their key so later duplicates coalesce onto
  *   the fresher request
- * - A teardown releases its key: the downstream `fetchExchange` aborts the
- *   request on teardown, so no result would ever arrive to release it
- *   otherwise
+ * - Keys are reference-counted: a refresh overlapping an in-flight request
+ *   leaves two requests for one key, and the key is only released once every
+ *   one of them has delivered its final result
+ * - A teardown releases its key entirely: the downstream `fetchExchange`
+ *   aborts every request for that key on teardown, so no result would ever
+ *   arrive to release it otherwise
  * - Intended for the non-batched pipeline. `batchFetchExchange` performs its
  *   own coalescing instead, keyed to actual wire state — its batched requests
  *   survive teardowns, so releasing keys on teardown would be wrong there
@@ -42,7 +45,7 @@ export const refetching = Symbol('refetching');
  */
 export function inFlightDedupExchange(): Exchange {
   return ({ forward }) => {
-    const inFlight = new Set<number>();
+    const inFlight = new Map<number, number>();
 
     return (ops$) => {
       const forwarded$ = pipe(
@@ -57,14 +60,13 @@ export function inFlightDedupExchange(): Exchange {
             return true;
           }
 
-          if (
-            !(refetching in operation.context) &&
-            inFlight.has(operation.key)
-          ) {
+          const count = inFlight.get(operation.key) ?? 0;
+
+          if (!(refetching in operation.context) && count > 0) {
             return false;
           }
 
-          inFlight.add(operation.key);
+          inFlight.set(operation.key, count + 1);
           return true;
         }),
       );
@@ -72,7 +74,15 @@ export function inFlightDedupExchange(): Exchange {
       return pipe(
         forward(forwarded$),
         tap((result: OperationResult) => {
-          if (!result.hasNext) {
+          if (result.hasNext) {
+            return;
+          }
+
+          const count = inFlight.get(result.operation.key) ?? 0;
+
+          if (count > 1) {
+            inFlight.set(result.operation.key, count - 1);
+          } else {
             inFlight.delete(result.operation.key);
           }
         }),
