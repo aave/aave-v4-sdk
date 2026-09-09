@@ -14,6 +14,11 @@ input ActivitiesRequestQuery @oneOf {
   chainIds: [ChainId!]
   txHash: TxHashInput
   userPositionId: UserPositionId
+
+  """
+  Every activity touching one reserve, as either leg of a liquidation or swap
+  """
+  reserveId: ReserveId
 }
 
 union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity | LeverageActivity
@@ -1131,6 +1136,56 @@ type LiquidationFeeVariation {
   after: PercentNumber!
 }
 
+"""
+Liquidations in one time bucket, valued at each liquidation's own timestamp.
+"""
+type LiquidationsSample {
+  date: DateTime!
+  liquidations: Int!
+  debtLiquidated: ExchangeAmount!
+  collateralLiquidated: ExchangeAmount!
+
+  """
+  Debt-weighted gross bonus for the bucket: seized collateral over covered debt, minus one.
+  """
+  averageLiquidationBonus: PercentNumber!
+}
+
+"""
+Liquidation totals over the requested window, with the same figures bucketed over time.
+"""
+type LiquidationsSummary {
+  totalLiquidations: Int!
+  debtLiquidated: ExchangeAmount!
+  collateralLiquidated: ExchangeAmount!
+
+  """
+  Debt-weighted gross bonus over the window: seized collateral over covered debt, minus one.
+  """
+  averageLiquidationBonus: PercentNumber!
+  history: [LiquidationsSample!]!
+}
+
+input LiquidationsSummaryRequest {
+  query: LiquidationsSummaryRequestQuery!
+  currency: Currency! = USD
+
+  """
+  Totals and history both cover this window; defaults to everything since the first liquidation
+  """
+  window: TimeWindow! = ALL
+}
+
+input LiquidationsSummaryRequestQuery @oneOf {
+  spoke: SpokeInput
+  spokeId: SpokeId
+
+  """
+  Liquidations where the reserve is either the debt or the collateral leg
+  """
+  reserveId: ReserveId
+}
+
 input MarketDebtSwapQuoteInput {
   """
   Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
@@ -1991,6 +2046,9 @@ type Query {
   """
   hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
   activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
+
+  """Liquidation totals and a time series for one spoke or one reserve"""
+  liquidationsSummary(request: LiquidationsSummaryRequest!): LiquidationsSummary
   tokenSwapQuote(request: TokenSwapQuoteRequest!): TokenSwapQuoteResult!
   prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult! @deprecated(reason: "Use prepareOrder.")
   supplySwapQuote(request: SupplySwapQuoteRequest!): SupplySwapQuoteResult!
@@ -3150,6 +3208,9 @@ union TokenAmount = NativeAmount | Erc20Amount
 enum TokenCategory {
   STABLECOIN
   ETH_CORRELATED
+  BTC_CORRELATED
+  PROTOCOL_TOKEN
+  INFRASTRUCTURE_TOKEN
 }
 
 type TokenInfo {
