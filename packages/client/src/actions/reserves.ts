@@ -3,6 +3,8 @@ import {
   type ApySample,
   BorrowApyHistoryQuery,
   type BorrowApyHistoryRequest,
+  HubAssetHoldersQuery,
+  type HubAssetHoldersRequest,
   type PaginatedReserveHoldersResult,
   type Reserve,
   ReserveHoldersQuery,
@@ -11,6 +13,9 @@ import {
   type ReserveRequest,
   ReservesQuery,
   type ReservesRequest,
+  type ReserveTrailingSupplyApys,
+  ReserveTrailingSupplyApysQuery,
+  type ReserveTrailingSupplyApysRequest,
   SupplyApyHistoryQuery,
   type SupplyApyHistoryRequest,
 } from '@aave/graphql';
@@ -146,6 +151,34 @@ export function supplyApyHistory(
 }
 
 /**
+ * Fetches the trailing average supply APY over the last 7, 30 and 90 days for a reserve.
+ *
+ * ```ts
+ * const result = await reserveTrailingSupplyApys(client, {
+ *   query: { reserveId: reserveId('SGVsbG8h') },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The reserve request parameters.
+ * @param options - The query options.
+ * @returns Trailing supply APYs for the reserve, or null when it does not exist.
+ */
+export function reserveTrailingSupplyApys(
+  client: AaveClient,
+  request: ReserveTrailingSupplyApysRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<ReserveTrailingSupplyApys | null, UnexpectedError> {
+  return client.query(
+    ReserveTrailingSupplyApysQuery,
+    { request },
+    { requestPolicy },
+  );
+}
+
+/**
  * Fetches a paginated list of top holders for a specific reserve.
  *
  * ```ts
@@ -170,6 +203,36 @@ export function reserveHolders(
 ): ResultAsync<PaginatedReserveHoldersResult, UnexpectedError> {
   return client.query(
     ReserveHoldersQuery,
+    { request, currency },
+    { requestPolicy },
+  );
+}
+
+/**
+ * Fetches a paginated list of top holders for a hub asset or a single reserve.
+ *
+ * ```ts
+ * const result = await hubAssetHolders(client, {
+ *   query: { hubAssetId: hubAssetId('SGVsbG8h') },
+ *   filter: ReserveHoldersFilter.Supplied,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The holders request parameters.
+ * @param options - The query options.
+ * @returns Paginated list of holders.
+ */
+export function hubAssetHolders(
+  client: AaveClient,
+  request: HubAssetHoldersRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PaginatedReserveHoldersResult, UnexpectedError> {
+  return client.query(
+    HubAssetHoldersQuery,
     { request, currency },
     { requestPolicy },
   );

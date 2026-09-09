@@ -181,6 +181,15 @@ export const UserPositionFragment = graphql(
     netSupplyApy {
       ...PercentNumberWithChange
     }
+    collateralSupplyApy {
+      ...PercentNumberWithChange
+    }
+    collateralNetApy {
+      ...PercentNumber
+    }
+    collateralAccruedInterest(currency: $currency) {
+      ...ExchangeAmount
+    }
     netBorrowApy {
       ...PercentNumberWithChange
     }
@@ -291,10 +300,22 @@ export const UserSummaryHistoryItemFragment = graphql(
     supplies(currency: $currency) {
       ...ExchangeAmount
     }
+    collateral(currency: $currency) {
+      ...ExchangeAmount
+    }
+    netCollateral(currency: $currency) {
+      ...ExchangeAmount
+    }
+    netSupplyApy {
+      ...PercentNumber
+    }
+    collateralSupplyApy {
+      ...PercentNumber
+    }
     healthFactor
     date
   }`,
-  [ExchangeAmountFragment],
+  [ExchangeAmountFragment, PercentNumberFragment],
 );
 export type UserSummaryHistoryItem = FragmentOf<
   typeof UserSummaryHistoryItemFragment

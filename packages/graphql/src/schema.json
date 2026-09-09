@@ -2002,6 +2002,24 @@
             "args": []
           },
           {
+            "name": "exposure",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "HubExposureItem",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
             "name": "summary",
             "type": {
               "kind": "NON_NULL",
@@ -2399,6 +2417,29 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "trailingSupplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "window",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -2418,6 +2459,131 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "supplied",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralSupplied",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "earnings",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralEarnings",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "supplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "HubExposureItem",
+        "fields": [
+          {
+            "name": "asset",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "HubAsset",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "share",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "asOf",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateral",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -3497,6 +3663,72 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "MultichainAssetSummary",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MultichainAssetHistorySample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "deposits",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "borrows",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "availableLiquidity",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "utilizationRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
                 "ofType": null
               }
             },
@@ -5353,6 +5585,94 @@
         "interfaces": []
       },
       {
+        "kind": "OBJECT",
+        "name": "PlanPositionOutcome",
+        "fields": [
+          {
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "healthFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "HealthFactorVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "riskPremium",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "maxBorrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "remainingBorrowingPower",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "UNION",
         "name": "PointsCriteria",
         "possibleTypes": [
@@ -6072,6 +6392,96 @@
       },
       {
         "kind": "OBJECT",
+        "name": "PreviewPlan",
+        "fields": [
+          {
+            "name": "positions",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PreviewUserPosition",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "netBalance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "projectedEarnings",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "positionOutcomes",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PlanPositionOutcome",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "rewards",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PreviewRewardOutcome",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "PreviewReserveRates",
         "fields": [
           {
@@ -6510,6 +6920,30 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "availableLiquidity",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "utilizationRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -6658,6 +7092,35 @@
                 "kind": "OBJECT",
                 "name": "MultichainAsset",
                 "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "multichainAssetHistory",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "MultichainAssetHistorySample",
+                    "ofType": null
+                  }
+                }
               }
             },
             "args": [
@@ -6941,6 +7404,29 @@
           },
           {
             "name": "reserveHolders",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PaginatedReserveHoldersResult",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "hubAssetHolders",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -7251,6 +7737,29 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "PreviewUserPosition",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "previewPlan",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PreviewPlan",
                 "ofType": null
               }
             },
@@ -9176,6 +9685,29 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "trailingSupplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "window",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
           }
         ],
         "interfaces": []
@@ -12814,6 +13346,30 @@
             "args": []
           },
           {
+            "name": "collateralSupplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberWithChange",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralNetApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "netApyBreakdown",
             "type": {
               "kind": "NON_NULL",
@@ -12839,6 +13395,29 @@
           },
           {
             "name": "netAccruedInterest",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "collateralAccruedInterest",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -13282,6 +13861,30 @@
         "name": "UserSummaryHistoryItem",
         "fields": [
           {
+            "name": "netSupplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralSupplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
             "name": "healthFactor",
             "type": {
               "kind": "SCALAR",
@@ -13348,6 +13951,52 @@
           },
           {
             "name": "supplies",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "collateral",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "netCollateral",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

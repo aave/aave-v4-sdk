@@ -9,6 +9,7 @@ import {
   ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
+  HealthFactorVariationFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
   PaginatedResultInfoFragment,
@@ -365,6 +366,74 @@ export const PreviewQuery = graphql(
 );
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
+
+export const PlanPositionOutcomeFragment = graphql(
+  `fragment PlanPositionOutcome on PlanPositionOutcome {
+    __typename
+    id
+    healthFactor {
+      ...HealthFactorVariation
+    }
+    riskPremium {
+      ...PercentNumberVariation
+    }
+    maxBorrowingPower(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    remainingBorrowingPower(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+  }`,
+  [
+    HealthFactorVariationFragment,
+    PercentNumberVariationFragment,
+    ExchangeAmountVariationFragment,
+  ],
+);
+export type PlanPositionOutcome = FragmentOf<
+  typeof PlanPositionOutcomeFragment
+>;
+
+export const PreviewPlanFragment = graphql(
+  `fragment PreviewPlan on PreviewPlan {
+    __typename
+    positions {
+      ...PreviewUserPosition
+    }
+    positionOutcomes {
+      ...PlanPositionOutcome
+    }
+    netBalance(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    projectedEarnings {
+      ...ExchangeAmountVariation
+    }
+    rewards {
+      ...PreviewRewardOutcome
+    }
+  }`,
+  [
+    PreviewUserPositionFragment,
+    PlanPositionOutcomeFragment,
+    ExchangeAmountVariationFragment,
+    PreviewRewardOutcomeFragment,
+  ],
+);
+export type PreviewPlan = FragmentOf<typeof PreviewPlanFragment>;
+
+/**
+ * @internal
+ */
+export const PreviewPlanQuery = graphql(
+  `query PreviewPlan($request: PreviewPlanRequest!, $currency: Currency! = USD, $timeWindow: TimeWindow! = LAST_WEEK) {
+    value: previewPlan(request: $request) {
+      ...PreviewPlan
+    }
+  }`,
+  [PreviewPlanFragment],
+);
+export type PreviewPlanRequest = RequestOf<typeof PreviewPlanQuery>;
 
 export type LiquidateExactAmountWithPermit = ReturnType<
   typeof graphql.scalar<'LiquidateExactAmountWithPermit'>

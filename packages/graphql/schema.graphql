@@ -190,7 +190,14 @@ type BorrowActivity {
 }
 
 input BorrowApyHistoryRequest {
-  reserve: ReserveId!
+  """Exactly one of `reserve` or `hubAsset` must be set"""
+  reserve: ReserveId
+
+  """
+  The hub asset's rate curve; every reserve of a hub asset shares one curve.
+  Reward folding uses the hub asset's first reserve.
+  """
+  hubAsset: HubAssetId
   window: TimeWindow! = LAST_DAY
 
   """
@@ -618,6 +625,11 @@ type Hub {
   """The chain the hub is deployed on"""
   chain: Chain!
 
+  """
+  Share of this hub's collateral by asset, from a periodic snapshot, largest first
+  """
+  exposure: [HubExposureItem!]!
+
   """The hub summary"""
   summary(currency: Currency! = USD): HubSummary!
 }
@@ -641,6 +653,22 @@ type HubAsset {
   """The hub asset settings"""
   settings: HubAssetSettings!
   userState: HubAssetUserState
+}
+
+input HubAssetHoldersRequest {
+  query: HubAssetHoldersRequestQuery!
+  filter: ReserveHoldersFilter! = SUPPLIED
+  orderBy: ReserveHoldersOrderBy! = {amount: DESC}
+  pageSize: PageSize! = TEN
+  cursor: Cursor
+}
+
+input HubAssetHoldersRequestQuery @oneOf {
+  """Holders aggregated across all of the hub asset's reserves"""
+  hubAssetId: HubAssetId
+
+  """Holders of a single reserve"""
+  reserveId: ReserveId
 }
 
 scalar HubAssetId
@@ -741,11 +769,36 @@ type HubAssetSummary {
 
   """The number of active spoke reserves for this hub asset"""
   activeReservesCount: Int!
+
+  """
+  Trailing average of the organic supply rate over the window. Rewards are not folded in.
+  """
+  trailingSupplyApy(window: TimeWindow!): PercentNumber!
 }
 
 type HubAssetUserState {
-  """The hub asset balance"""
+  """The user's wallet balance of the underlying token"""
   balance: Erc20Amount!
+
+  """
+  The user's supplied balance across this hub asset's reserves, interest included
+  """
+  supplied: Erc20Amount!
+
+  """The collateral-enabled portion of `supplied`"""
+  collateralSupplied: Erc20Amount!
+
+  """Supply interest earned across this hub asset's reserves"""
+  earnings: Erc20Amount!
+
+  """The collateral-enabled portion of `earnings`"""
+  collateralEarnings: Erc20Amount!
+
+  """
+  Base supply rate plus underlying yield, weighted by the user's balances.
+  Reward APY is exposed separately on each reserve's rewards.
+  """
+  supplyApy: PercentNumber!
 }
 
 input HubAssetsRequest {
@@ -764,6 +817,29 @@ input HubAssetsRequestOrderBy @oneOf {
 input HubAssetsRequestQuery @oneOf {
   hubInput: HubInput
   hubId: HubId
+
+  """All hub assets on the given chains"""
+  chainIds: [ChainId!]
+
+  """All hub assets on the given hubs"""
+  hubIds: [HubId!]
+
+  """Hub assets for a token across chains, matched by its symbol"""
+  symbolChainIds: SymbolInput
+}
+
+type HubExposureItem {
+  """The hub asset the collateral is held in"""
+  asset: HubAsset!
+
+  """This asset's share of the hub's collateral"""
+  share: PercentNumber!
+
+  """When the snapshot was taken"""
+  asOf: DateTime!
+
+  """The USD value of collateral-enabled supplies in this asset"""
+  collateral(currency: Currency! = USD): ExchangeAmount!
 }
 
 scalar HubId
@@ -850,6 +926,11 @@ input HubSummaryHistoryRequest {
 input HubSummaryHistoryRequestQuery @oneOf {
   hubInput: HubInput
   hubId: HubId
+
+  """
+  One asset on one hub: its deposits, borrows and available liquidity over time
+  """
+  hubAssetId: HubAssetId
 }
 
 type HubSummarySample {
@@ -1286,6 +1367,21 @@ type MultichainAsset {
   summary: MultichainAssetSummary!
 }
 
+input MultichainAssetHistoryRequest {
+  query: MultichainAssetRequestQuery!
+  chainIds: [ChainId!]
+  currency: Currency! = USD
+  window: TimeWindow! = LAST_DAY
+}
+
+type MultichainAssetHistorySample {
+  date: DateTime!
+  deposits: ExchangeAmount!
+  borrows: ExchangeAmount!
+  availableLiquidity: ExchangeAmount!
+  utilizationRate: PercentNumber!
+}
+
 input MultichainAssetRequest {
   query: MultichainAssetRequestQuery!
   chainIds: [ChainId!]
@@ -1691,6 +1787,28 @@ type PermitTypedData {
   signedAmount: BigDecimal!
 }
 
+"""
+The combined end-of-plan values for one position, folded over every plan action on
+its spoke. Per-action entries in `positions` preview against current state; this is
+the number the plan's confirmation card must show.
+"""
+type PlanPositionOutcome {
+  """The position these combined values are for"""
+  id: UserPositionId!
+
+  """
+  Health factor before the plan and after every plan action on this position
+  """
+  healthFactor: HealthFactorVariation!
+
+  """
+  Risk premium before the plan and after every plan action on this position
+  """
+  riskPremium: PercentNumberVariation!
+  maxBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
+  remainingBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
+}
+
 union PointsCriteria = PointsGenericCriteria
 
 type PointsGenericCriteria {
@@ -1857,6 +1975,35 @@ type PreviewMerklSupplyReward {
   reserve: ReserveInfo!
 }
 
+type PreviewPlan {
+  """One preview per affected position, in the order the actions were given"""
+  positions: [PreviewUserPosition!]!
+
+  """Net balance across the plan's positions, before and after every action"""
+  netBalance(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """Projected yearly earnings across the plan's positions"""
+  projectedEarnings: ExchangeAmountVariation!
+
+  """
+  Combined end-of-plan health factor, borrowing power and risk premium per position,
+  folded over every plan action on its spoke. The per-action `positions` entries
+  preview against current state; this is what the confirmation card must read.
+  """
+  positionOutcomes: [PlanPositionOutcome!]!
+
+  """Rewards abandoned and acquired across the plan's positions"""
+  rewards: PreviewRewardOutcome!
+}
+
+input PreviewPlanRequest {
+  """
+  The plan's actions, in execution order: at most one per reserve, and a swap or
+  leverage action must be the only health-affecting action on its spoke
+  """
+  actions: [PreviewAction!]!
+}
+
 input PreviewRequest {
   action: PreviewAction!
 }
@@ -1918,6 +2065,8 @@ type ProtocolHistorySample {
   date: DateTime!
   deposits: ExchangeAmount!
   borrows: ExchangeAmount!
+  availableLiquidity: ExchangeAmount!
+  utilizationRate: PercentNumber!
 }
 
 type Query {
@@ -1930,6 +2079,12 @@ type Query {
   protocolHistory(request: ProtocolHistoryRequest!): [ProtocolHistorySample!]!
   asset(request: AssetRequest!): Asset
   multichainAsset(request: MultichainAssetRequest!): MultichainAsset!
+
+  """
+  Deposits, borrows, available liquidity and utilization for one asset across chains,
+  bucketed over the window. Grouping matches `multichainAsset`.
+  """
+  multichainAssetHistory(request: MultichainAssetHistoryRequest!): [MultichainAssetHistorySample!]!
   assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
   assetBorrowHistory(request: AssetBorrowHistoryRequest!): [AssetBorrowSample!]!
   assetPriceHistory(request: AssetPriceHistoryRequest!): [AssetPriceSample!]!
@@ -1947,7 +2102,8 @@ type Query {
   """
   hubSpokeConfigs(request: HubSpokeConfigsRequest!): [HubSpokeConfig!]!
   reserve(request: ReserveRequest!): Reserve
-  reserveHolders(request: PaginatedReserveHoldersRequest!): PaginatedReserveHoldersResult!
+  reserveHolders(request: PaginatedReserveHoldersRequest!): PaginatedReserveHoldersResult! @deprecated(reason: "Use hubAssetHolders with query.reserveId.")
+  hubAssetHolders(request: HubAssetHoldersRequest!): PaginatedReserveHoldersResult!
   reserves(request: ReservesRequest!): [Reserve!]!
   supply(request: SupplyRequest!): ExecutionPlan!
   borrow(request: BorrowRequest!): ExecutionPlan!
@@ -1961,6 +2117,14 @@ type Query {
   liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
   updateUserPositionConditions(request: UpdateUserPositionConditionsRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPosition!
+
+  """
+  Previews a multi-transaction plan, at most one action per reserve. Entries in
+  `positions` preview each action against current state; `positionOutcomes` folds
+  every action on a spoke, in order, into that position's combined health factor,
+  borrowing power and risk premium.
+  """
+  previewPlan(request: PreviewPlanRequest!): PreviewPlan!
   borrowApyHistory(request: BorrowApyHistoryRequest!): [ApySample!]!
   supplyApyHistory(request: SupplyApyHistoryRequest!): [ApySample!]!
   spoke(request: SpokeRequest!): Spoke
@@ -2309,6 +2473,11 @@ type ReserveSummary {
   """
   underlyingApy: PercentNumber
   rewards: [Reward!]!
+
+  """
+  Trailing average of the organic supply rate over the window. Rewards are not folded in.
+  """
+  trailingSupplyApy(window: TimeWindow!): PercentNumber!
 }
 
 type ReserveUserState {
@@ -2522,6 +2691,9 @@ input SpokeSummaryHistoryRequest {
 input SpokeSummaryHistoryRequestQuery @oneOf {
   spokeInput: SpokeInput
   spokeId: SpokeId
+
+  """One reserve: its own deposits and borrows over time"""
+  reserveId: ReserveId
 }
 
 type SpokeSummarySample {
@@ -2844,7 +3016,14 @@ type SupplyActivity {
 }
 
 input SupplyApyHistoryRequest {
-  reserve: ReserveId!
+  """Exactly one of `reserve` or `hubAsset` must be set"""
+  reserve: ReserveId
+
+  """
+  The hub asset's rate curve; every reserve of a hub asset shares one curve.
+  Reward folding uses the hub asset's first reserve.
+  """
+  hubAsset: HubAssetId
   window: TimeWindow! = LAST_DAY
 
   """
@@ -3135,9 +3314,11 @@ input SymbolInput {
 }
 
 enum TimeWindow {
+  LAST_HOUR
   LAST_DAY
   LAST_WEEK
   LAST_MONTH
+  LAST_NINETY_DAYS
   LAST_SIX_MONTHS
   LAST_YEAR
   ALL
@@ -3616,6 +3797,14 @@ type UserPosition {
   """
   netSupplyApy: PercentNumberWithChange!
 
+  """Supply APY weighted over collateral-enabled supplies only."""
+  collateralSupplyApy: PercentNumberWithChange!
+
+  """
+  Net APY over collateral-enabled supplies, retaining the position's full debt.
+  """
+  collateralNetApy: PercentNumber!
+
   """
   Net APY split into the parts it is made of. Leverage amplifies each part, so on a looped
   position this is what explains a headline the pool rates alone cannot account for.
@@ -3633,6 +3822,11 @@ type UserPosition {
   Net accrued interest earned (all supply interests - all borrow interests)
   """
   netAccruedInterest(currency: Currency! = USD): ExchangeAmount!
+
+  """
+  Interest earned by collateral-enabled supplies minus all borrow interest.
+  """
+  collateralAccruedInterest(currency: Currency! = USD): ExchangeAmount!
   healthFactor: HealthFactorWithChange!
   riskPremium: UserPositionRiskPremium
 
@@ -3763,6 +3957,13 @@ input UserSummaryFilter @oneOf {
 }
 
 type UserSummaryHistoryItem {
+  """
+  The aggregated supply APY for the time period, weighted by USD supplied
+  """
+  netSupplyApy: PercentNumber!
+
+  """The supply APY weighted over collateral-enabled supplies only"""
+  collateralSupplyApy: PercentNumber!
   healthFactor: BigDecimal
   date: DateTime!
 
@@ -3774,6 +3975,12 @@ type UserSummaryHistoryItem {
 
   """The aggregated supplies for the time period"""
   supplies(currency: Currency! = USD): ExchangeAmount!
+
+  """The aggregated collateral-enabled supplies for the time period"""
+  collateral(currency: Currency! = USD): ExchangeAmount!
+
+  """The aggregated collateral minus debt for the time period"""
+  netCollateral(currency: Currency! = USD): ExchangeAmount!
 }
 
 input UserSummaryHistoryRequest {

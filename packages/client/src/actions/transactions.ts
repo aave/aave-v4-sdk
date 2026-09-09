@@ -10,6 +10,9 @@ import {
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
   type PaginatedActivitiesResult,
+  type PreviewPlan,
+  PreviewPlanQuery,
+  type PreviewPlanRequest,
   PreviewQuery,
   type PreviewRequest,
   type PreviewUserPosition,
@@ -372,6 +375,52 @@ export function preview(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PreviewUserPosition, UnexpectedError> {
   return client.query(PreviewQuery, { request, currency }, { requestPolicy });
+}
+
+/**
+ * Preview the impact of a multi-transaction plan on a user's positions.
+ *
+ * ```ts
+ * const result = await previewPlan(client, {
+ *   actions: [
+ *     {
+ *       setUserSuppliesAsCollateral: {
+ *         changes: [{ reserve: reserveId('SGVsbG8h'), enableCollateral: true }],
+ *         sender: evmAddress('0x9abc…'),
+ *       },
+ *     },
+ *     {
+ *       borrow: {
+ *         reserve: reserveId('SGVsbG8h'),
+ *         amount: { erc20: { value: '1000' } },
+ *         sender: evmAddress('0x9abc…'),
+ *       },
+ *     },
+ *   ],
+ * });
+ * ```
+ *
+ * `positions` previews each action against current state, while `positionOutcomes`
+ * folds every action on a spoke into that position's combined values.
+ *
+ * @param client - Aave client.
+ * @param request - The plan's actions, in execution order.
+ * @param options - The query options.
+ * @returns The plan preview showing per-action and combined position changes.
+ */
+export function previewPlan(
+  client: AaveClient,
+  request: PreviewPlanRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<PreviewPlan, UnexpectedError> {
+  return client.query(
+    PreviewPlanQuery,
+    { request, currency },
+    { requestPolicy },
+  );
 }
 
 /**

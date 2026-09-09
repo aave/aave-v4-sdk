@@ -11,6 +11,11 @@ export {
   usePreview,
   usePreviewAction,
 } from './usePreview';
+export {
+  type UsePreviewPlanArgs,
+  usePreviewPlan,
+  usePreviewPlanAction,
+} from './usePreviewPlan';
 export { useRenounceSpokeUserPositionManager } from './useRenounceSpokeUserPositionManager';
 export { useRepay } from './useRepay';
 export { useSetSpokeUserPositionManager } from './useSetSpokeUserPositionManager';
