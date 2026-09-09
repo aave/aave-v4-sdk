@@ -1,0 +1,61 @@
+.changeset/earn-borrow-refactor-surface.md
+  s_51de072e05345c::t_3e8d3fe6c8191f 1-7
+packages/client/src/actions/hubs.ts
+  s_51de072e05345c::t_e2f6556cb65996 10-18,74-102,169-230
+packages/client/src/actions/protocol.ts
+  s_51de072e05345c::t_08756e03ce7e2e 16-18,232-262
+packages/client/src/actions/reserves.ts
+  s_51de072e05345c::t_e555e419189bab 6-7,16-18,153-180,210-239
+packages/client/src/actions/transactions.ts
+  s_51de072e05345c::t_caf73358e4d5fe 13-15,380-425
+packages/client/src/cache.ts
+  s_51de072e05345c::t_93b9aa7b9fae9e 162-167,499,501,559-560
+packages/graphql/schema.graphql
+  s_51de072e05345c::t_7648ca8e447a75 193-200,628-632,658-673,772-776,780,782-801,820-842,929-933,1370-1384,1790-1811,1978-2006,2068-2069,2082-2087,2105-2106,2120-2127,2476-2480,2694-2696,3019-3026,3317,3321,3800-3807,3825-3829,3960-3966,3978-3983
+packages/graphql/src/fragments/assets.ts
+  s_51de072e05345c::t_32dfe8133991a4 77-103
+packages/graphql/src/fragments/hubs.ts
+  s_51de072e05345c::t_9cd27a67256f9c 37-51
+packages/graphql/src/fragments/user.ts
+  s_51de072e05345c::t_92e7ace8a05315 184-192,303-314,318
+packages/graphql/src/graphql-env.d.ts
+  s_51de072e05345c::t_2c31e6f862f52f 36,96,98-99,106-107,110-111,121,162-163,216,243-244,252-253,282,305,345,387,437,452
+packages/graphql/src/hub.ts
+  s_51de072e05345c::t_4b674fad465bd2 4,7-8,13,32-57,88-147
+packages/graphql/src/protocol.ts
+  s_51de072e05345c::t_cb1cde254a02d0 317-322,324,342-379
+packages/graphql/src/reserve.ts
+  s_51de072e05345c::t_a0fb6942ee05ec 1,5,37-74,134-155
+packages/graphql/src/schema.json
+  s_51de072e05345c::t_6b661bdd6387b8 2004-2021,2420-2442,2462-2586,3674-3739,5587-5674,6342-6421,6425-6436,6439,6444,6451,6459-6460,6469,6474,6923-6946,7110-7138,7428-7450,7756-7778,9688-9710,13348-13371,13419-13441,13863-13886,13974-14019
+packages/graphql/src/testing.ts
+  s_51de072e05345c::t_f0483f6db1d260 390-392
+packages/graphql/src/transactions.ts
+  s_51de072e05345c::t_dc89ca41671f3a 12,370-437
+packages/react/src/hubs.ts
+  s_51de072e05345c::t_f61702b601bf95 4-12,643-837
+packages/react/src/protocol.ts
+  s_51de072e05345c::t_67e8876e12b226 4-6,562-621
+packages/react/src/reserves.ts
+  s_51de072e05345c::t_3ad7fbb2b73b58 4-8,629-750
+packages/react/src/transactions/index.ts
+  s_51de072e05345c::t_74f11698253c80 14-18
+packages/react/src/transactions/usePreviewPlan.ts
+  s_51de072e05345c::t_9157006c82159c 1-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "e89fd163902e94c7d38e8cfc22806cd00bb46132",
+  "prompts": {},
+  "sessions": {
+    "s_51de072e05345c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ef55b23-983e-4ae4-8bb7-212b6eb5dd55",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
