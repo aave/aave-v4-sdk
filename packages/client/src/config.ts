@@ -1,4 +1,5 @@
 import type { Context } from '@aave/core';
+import { invariant } from '@aave/types';
 import { type SSRData, ssrExchange } from '@urql/core';
 import type { EnvironmentConfig } from '../../core/src/types';
 import { exchange } from './cache';
@@ -71,6 +72,15 @@ export type ClientConfig = {
    */
   environment?: EnvironmentConfig;
   /**
+   * The URL of the Aave API GraphQL endpoint.
+   *
+   * Use it to point the client at a proxy of the Aave API, for example to
+   * inject credentials or add caching in front of it.
+   *
+   * @defaultValue `https://api.aave.com/graphql`
+   */
+  apiUrl?: string;
+  /**
    * @internal
    */
   headers?: Record<string, string>;
@@ -107,11 +117,28 @@ export type ClientConfig = {
   display?: DisplayConfig;
 };
 
+function isAbsoluteUrl(value: string): boolean {
+  try {
+    return Boolean(new URL(value));
+  } catch {
+    return false;
+  }
+}
+
+function assertValidApiUrl(apiUrl: string): string {
+  invariant(
+    isAbsoluteUrl(apiUrl),
+    `Invalid \`apiUrl\` provided to AaveClient.create(): ${apiUrl}. Expected an absolute URL (e.g. https://api.aave.com/graphql).`,
+  );
+  return apiUrl;
+}
+
 /**
  * @internal
  */
 export function configureContext({
   environment = production,
+  apiUrl,
   headers,
   cache = true,
   batch = true,
@@ -120,7 +147,9 @@ export function configureContext({
 }: ClientConfig): Context {
   return {
     displayName: 'AaveClient',
-    environment,
+    environment: apiUrl
+      ? { ...environment, backend: assertValidApiUrl(apiUrl) }
+      : environment,
     headers,
     cache: cache ? exchange : null,
     ssr: ssr

@@ -67,8 +67,14 @@ export class AaveClient extends GqlClient {
    * Create a new instance of the {@link AaveClient}.
    *
    * ```ts
+   * const client = AaveClient.create();
+   * ```
+   *
+   * Optionally point it at a different Aave API endpoint, for example your own proxy:
+   *
+   * ```ts
    * const client = AaveClient.create({
-   *   environment: production,
+   *   apiUrl: 'https://my-proxy.example.com/graphql',
    * });
    * ```
    *
