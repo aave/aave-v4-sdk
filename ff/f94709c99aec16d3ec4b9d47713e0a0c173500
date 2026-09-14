@@ -1,0 +1,70 @@
+packages/client/src/displayTransform.ts
+  s_0f31fdd334493f::t_52a7342d49d35f 20
+  s_0f31fdd334493f::t_53841b932df680 125-145,154-169
+  s_0f31fdd334493f::t_331ee2f8b56d6e 3-11,16-19,21-22
+packages/client/src/viem.ts
+  s_0f31fdd334493f::t_6aa25e5ea0ea48 119-121
+  s_0f31fdd334493f::t_d5aea551bcc4f8 45
+  s_0f31fdd334493f::t_5920d6b565e61b 100-104
+packages/spec/query/chains.spec.ts
+  s_0f31fdd334493f::t_f810ce0c1ccdc9 56,81
+packages/react/src/viem/useNetworkFee.ts
+  s_0f31fdd334493f::t_7547b72d4afe3f 210-215,218-220,223,232
+  s_0f31fdd334493f::t_2c0214015468de 1-5
+packages/graphql/src/schema.json
+  s_0f31fdd334493f::t_84f6359eef7c04 1129-1137,3923-3936,9330-9359,13917-13965
+  s_0f31fdd334493f::t_b100223a247021 13966
+.changeset/olive-pumas-repeat.md
+  s_0f31fdd334493f::t_7101bdefbe1328 1-7
+packages/client/src/rewards-readquery.test.ts
+  s_0f31fdd334493f::t_d5aea551bcc4f8 100-101
+  s_0f31fdd334493f::t_2c961c52fdc1d6 78-99,102-103
+packages/graphql/src/graphql-env.d.ts
+  s_0f31fdd334493f::t_02c82553938112 50,164,285,468
+packages/graphql/src/fragments/common.ts
+  s_0f31fdd334493f::t_ffe5dcd79524c4 76-96,107-110,120
+packages/client/src/thirdweb.ts
+  s_0f31fdd334493f::t_6aa25e5ea0ea48 68-70
+  s_0f31fdd334493f::t_5920d6b565e61b 49-53
+  s_0f31fdd334493f::t_d5aea551bcc4f8 36
+packages/client/src/nativeAsset.test.ts
+  s_0f31fdd334493f::t_1c07ef1a388dfd 1-102
+packages/client/src/nativeAsset.ts
+  s_0f31fdd334493f::t_8253ce1022e1e6 1-78
+packages/client/src/index.ts
+  s_0f31fdd334493f::t_7af083d4fc3485 14
+packages/client/src/displayTransform.test.ts
+  s_0f31fdd334493f::t_7e7548417c2da1 27-38,53-61
+  s_0f31fdd334493f::t_384d603a9f081a 145-207
+  s_0f31fdd334493f::t_50de71a0c98932 62
+packages/react/src/viem/useNetworkFee.test.ts
+  s_0f31fdd334493f::t_2c961c52fdc1d6 45-69
+packages/client/src/cache.ts
+  s_0f31fdd334493f::t_f4977f8321b785 561,602
+packages/graphql/schema.graphql
+  s_0f31fdd334493f::t_b100223a247021 4000
+  s_0f31fdd334493f::t_84f6359eef7c04 289-302,1363-1368,2453-2464,3985-3999,4001-4003
+packages/graphql/src/testing.ts
+  s_0f31fdd334493f::t_3cddbfe1f1ae8e 198-203,215-231
+  s_0f31fdd334493f::t_41bc89fa1d8dc7 26
+  s_0f31fdd334493f::t_a934042ecd6ff0 204-214
+  s_0f31fdd334493f::t_2050c508ce26b6 247,393
+packages/client/src/displayTransformExchange.test.ts
+  s_0f31fdd334493f::t_2c961c52fdc1d6 42-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fff94709c99aec16d3ec4b9d47713e0a0c173500",
+  "prompts": {},
+  "sessions": {
+    "s_0f31fdd334493f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "434fafa5-67de-4308-ac1d-3953f513c180",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
