@@ -1,0 +1,25 @@
+packages/client/src/nativeAsset.ts
+  s_0f31fdd334493f::t_6177bc98766ff7 49-63
+  s_0f31fdd334493f::t_5fb1d3b65afee7 1-7
+  s_0f31fdd334493f::t_0205dcb703ae9c 48
+packages/graphql/src/fragments/common.ts
+  s_0f31fdd334493f::t_fa063edcd33258 124-182
+packages/graphql/src/misc.ts
+  s_0f31fdd334493f::t_fa063edcd33258 1,10,13,23,26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "20942784d8676d1bfb454dfdc3aa8e3906e48ca1",
+  "prompts": {},
+  "sessions": {
+    "s_0f31fdd334493f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "434fafa5-67de-4308-ac1d-3953f513c180",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
