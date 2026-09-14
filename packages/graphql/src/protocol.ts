@@ -314,8 +314,14 @@ export const ProtocolHistorySampleFragment = graphql(
     borrows {
       ...ExchangeAmount
     }
+    availableLiquidity {
+      ...ExchangeAmount
+    }
+    utilizationRate {
+      ...PercentNumber
+    }
   }`,
-  [ExchangeAmountFragment],
+  [ExchangeAmountFragment, PercentNumberFragment],
 );
 export type ProtocolHistorySample = FragmentOf<
   typeof ProtocolHistorySampleFragment
@@ -333,3 +339,41 @@ export const ProtocolHistoryQuery = graphql(
   [ProtocolHistorySampleFragment],
 );
 export type ProtocolHistoryRequest = RequestOf<typeof ProtocolHistoryQuery>;
+
+export const MultichainAssetHistorySampleFragment = graphql(
+  `fragment MultichainAssetHistorySample on MultichainAssetHistorySample {
+    __typename
+    date
+    deposits {
+      ...ExchangeAmount
+    }
+    borrows {
+      ...ExchangeAmount
+    }
+    availableLiquidity {
+      ...ExchangeAmount
+    }
+    utilizationRate {
+      ...PercentNumber
+    }
+  }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type MultichainAssetHistorySample = FragmentOf<
+  typeof MultichainAssetHistorySampleFragment
+>;
+
+/**
+ * @internal
+ */
+export const MultichainAssetHistoryQuery = graphql(
+  `query MultichainAssetHistory($request: MultichainAssetHistoryRequest!) {
+      value: multichainAssetHistory(request: $request) {
+        ...MultichainAssetHistorySample
+      }
+    }`,
+  [MultichainAssetHistorySampleFragment],
+);
+export type MultichainAssetHistoryRequest = RequestOf<
+  typeof MultichainAssetHistoryQuery
+>;

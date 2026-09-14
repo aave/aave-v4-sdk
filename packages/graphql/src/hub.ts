@@ -1,13 +1,16 @@
 import type { FragmentOf } from 'gql.tada';
 import {
   Erc20AmountFragment,
+  Erc20TokenFragment,
   ExchangeAmountFragment,
   HubAssetFragment,
+  HubAssetUserSuppliesFragment,
+  HubExposureItemFragment,
   PercentNumberFragment,
 } from './fragments';
 import { HubFragment } from './fragments/hubs';
 import { SpokeFragment } from './fragments/spoke';
-import { graphql, type RequestOf } from './graphql';
+import { graphql, type RequestOf, type ResultOf } from './graphql';
 
 /**
  * @internal
@@ -25,6 +28,32 @@ export type HubRequest = RequestOf<typeof HubQuery>;
 export type HubRequestQuery = ReturnType<
   typeof graphql.scalar<'HubRequestQuery'>
 >;
+
+/**
+ * @internal
+ */
+export const HubExposureQuery = graphql(
+  `query HubExposure($request: HubRequest!, $currency: Currency!) {
+      value: hub(request: $request) {
+        __typename
+        id
+        exposure {
+          ...HubExposureItem
+          asset {
+            __typename
+            id
+            underlying {
+              ...Erc20Token
+            }
+          }
+        }
+      }
+    }`,
+  [HubExposureItemFragment, Erc20TokenFragment],
+);
+export type HubExposureRequest = RequestOf<typeof HubExposureQuery>;
+
+export type HubExposure = ResultOf<typeof HubExposureQuery>['value'];
 
 /**
  * @internal
@@ -54,6 +83,66 @@ export type HubAssetsRequest = RequestOf<typeof HubAssetsQuery>;
 
 export type HubAssetsRequestQuery = ReturnType<
   typeof graphql.scalar<'HubAssetsRequestQuery'>
+>;
+
+/**
+ * @internal
+ */
+export const HubAssetsWithUserSuppliesQuery = graphql(
+  `query HubAssetsWithUserSupplies($request: HubAssetsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
+      value: hubAssets(request: $request) {
+        ...HubAsset
+        userState {
+          ...HubAssetUserSupplies
+        }
+      }
+    }`,
+  [HubAssetFragment, HubAssetUserSuppliesFragment],
+);
+export type HubAssetsWithUserSuppliesRequest = RequestOf<
+  typeof HubAssetsWithUserSuppliesQuery
+>;
+
+export type HubAssetWithUserSupplies = ResultOf<
+  typeof HubAssetsWithUserSuppliesQuery
+>['value'][number];
+
+export const HubAssetTrailingSupplyApysFragment = graphql(
+  `fragment HubAssetTrailingSupplyApys on HubAsset {
+      __typename
+      id
+      summary {
+        __typename
+        last7Days: trailingSupplyApy(window: LAST_WEEK) {
+          ...PercentNumber
+        }
+        last30Days: trailingSupplyApy(window: LAST_MONTH) {
+          ...PercentNumber
+        }
+        last90Days: trailingSupplyApy(window: LAST_NINETY_DAYS) {
+          ...PercentNumber
+        }
+      }
+    }`,
+  [PercentNumberFragment],
+);
+export type HubAssetTrailingSupplyApys = FragmentOf<
+  typeof HubAssetTrailingSupplyApysFragment
+>;
+
+/**
+ * @internal
+ */
+export const HubAssetTrailingSupplyApysQuery = graphql(
+  `query HubAssetTrailingSupplyApys($request: HubAssetsRequest!) {
+      value: hubAssets(request: $request) {
+        ...HubAssetTrailingSupplyApys
+      }
+    }`,
+  [HubAssetTrailingSupplyApysFragment],
+);
+export type HubAssetTrailingSupplyApysRequest = RequestOf<
+  typeof HubAssetTrailingSupplyApysQuery
 >;
 
 export type HubsRequestQuery = ReturnType<

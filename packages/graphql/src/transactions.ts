@@ -366,6 +366,62 @@ export const PreviewQuery = graphql(
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
+export const PreviewWarningFragment = graphql(
+  `fragment PreviewWarning on PreviewWarning {
+    __typename
+    code
+    reserve
+    requested
+    available
+  }`,
+);
+export type PreviewWarning = FragmentOf<typeof PreviewWarningFragment>;
+
+export const MultiStepPreviewStepFragment = graphql(
+  `fragment MultiStepPreviewStep on MultiStepPreviewStep {
+    __typename
+    index
+    status
+    preview {
+      ...PreviewUserPosition
+    }
+    warnings {
+      ...PreviewWarning
+    }
+  }`,
+  [PreviewUserPositionFragment, PreviewWarningFragment],
+);
+export type MultiStepPreviewStep = FragmentOf<
+  typeof MultiStepPreviewStepFragment
+>;
+
+export const MultiStepPreviewFragment = graphql(
+  `fragment MultiStepPreview on MultiStepPreview {
+    __typename
+    steps {
+      ...MultiStepPreviewStep
+    }
+    warnings {
+      ...PreviewWarning
+    }
+  }`,
+  [MultiStepPreviewStepFragment, PreviewWarningFragment],
+);
+export type MultiStepPreview = FragmentOf<typeof MultiStepPreviewFragment>;
+
+/**
+ * @internal
+ */
+export const MultiStepPreviewQuery = graphql(
+  `query MultiStepPreview($request: MultiStepPreviewRequest!, $currency: Currency! = USD, $timeWindow: TimeWindow! = LAST_WEEK) {
+    value: multiStepPreview(request: $request) {
+      ...MultiStepPreview
+    }
+  }`,
+  [MultiStepPreviewFragment],
+);
+export type MultiStepPreviewRequest = RequestOf<typeof MultiStepPreviewQuery>;
+
 export type LiquidateExactAmountWithPermit = ReturnType<
   typeof graphql.scalar<'LiquidateExactAmountWithPermit'>
 >;

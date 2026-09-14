@@ -1,6 +1,8 @@
+import type { FragmentOf } from 'gql.tada';
 import {
   ApySampleFragment,
   PaginatedResultInfoFragment,
+  PercentNumberFragment,
   ReserveFragment,
   ReserveHolderFragment,
 } from './fragments';
@@ -31,6 +33,44 @@ export const SupplyApyHistoryQuery = graphql(
   [ApySampleFragment],
 );
 export type SupplyApyHistoryRequest = RequestOf<typeof SupplyApyHistoryQuery>;
+
+export const ReserveTrailingSupplyApysFragment = graphql(
+  `fragment ReserveTrailingSupplyApys on Reserve {
+    __typename
+    id
+    summary {
+      __typename
+      last7Days: trailingSupplyApy(window: LAST_WEEK) {
+        ...PercentNumber
+      }
+      last30Days: trailingSupplyApy(window: LAST_MONTH) {
+        ...PercentNumber
+      }
+      last90Days: trailingSupplyApy(window: LAST_NINETY_DAYS) {
+        ...PercentNumber
+      }
+    }
+  }`,
+  [PercentNumberFragment],
+);
+export type ReserveTrailingSupplyApys = FragmentOf<
+  typeof ReserveTrailingSupplyApysFragment
+>;
+
+/**
+ * @internal
+ */
+export const ReserveTrailingSupplyApysQuery = graphql(
+  `query ReserveTrailingSupplyApys($request: ReserveRequest!) {
+    value: reserve(request: $request) {
+      ...ReserveTrailingSupplyApys
+    }
+  }`,
+  [ReserveTrailingSupplyApysFragment],
+);
+export type ReserveTrailingSupplyApysRequest = RequestOf<
+  typeof ReserveTrailingSupplyApysQuery
+>;
 
 export const ReserveQuery = graphql(
   `query Reserve($request: ReserveRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
@@ -91,3 +131,25 @@ export type ReserveHoldersOrderBy = ReturnType<
 export type PaginatedReserveHoldersResult = ResultOf<
   typeof ReserveHoldersQuery
 >['value'];
+
+/**
+ * @internal
+ */
+export const HubAssetHoldersQuery = graphql(
+  `query HubAssetHolders($request: HubAssetHoldersRequest!, $currency: Currency!) {
+    value: hubAssetHolders(request: $request) {
+      items {
+        ...ReserveHolder
+      }
+      pageInfo {
+        ...PaginatedResultInfo
+      }
+    }
+  }`,
+  [ReserveHolderFragment, PaginatedResultInfoFragment],
+);
+export type HubAssetHoldersRequest = RequestOf<typeof HubAssetHoldersQuery>;
+
+export type HubAssetHoldersRequestQuery = ReturnType<
+  typeof graphql.scalar<'HubAssetHoldersRequestQuery'>
+>;

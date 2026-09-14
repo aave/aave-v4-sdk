@@ -7,6 +7,15 @@ import {
   type HubAssetInterestRateModelRequest,
   HubAssetsQuery,
   type HubAssetsRequest,
+  HubAssetsWithUserSuppliesQuery,
+  type HubAssetsWithUserSuppliesRequest,
+  type HubAssetTrailingSupplyApys,
+  HubAssetTrailingSupplyApysQuery,
+  type HubAssetTrailingSupplyApysRequest,
+  type HubAssetWithUserSupplies,
+  type HubExposure,
+  HubExposureQuery,
+  type HubExposureRequest,
   HubQuery,
   type HubRequest,
   type HubSpokeConfig,
@@ -59,6 +68,35 @@ export function hub(
       requestPolicy:
         options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
     },
+  );
+}
+
+/**
+ * Fetches a hub's collateral composition by asset, from a periodic snapshot.
+ *
+ * ```ts
+ * const result = await hubExposure(client, {
+ *   query: { hubId: hubId('SGVsbG8h') },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub request parameters.
+ * @param options - The query options.
+ * @returns The hub with its exposure items, or null when the hub does not exist.
+ */
+export function hubExposure(
+  client: AaveClient,
+  request: HubExposureRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<HubExposure, UnexpectedError> {
+  return client.query(
+    HubExposureQuery,
+    { request, currency },
+    { requestPolicy },
   );
 }
 
@@ -124,6 +162,68 @@ export function hubAssets(
   return client.query(
     HubAssetsQuery,
     { request, currency, timeWindow },
+    { requestPolicy },
+  );
+}
+
+/**
+ * Fetches hub assets together with the requesting user's supplied balances,
+ * split into the collateral-enabled portion and its earnings.
+ *
+ * ```ts
+ * const result = await hubAssetsWithUserSupplies(client, {
+ *   query: { chainIds: [chainId(1)] },
+ *   user: evmAddress('0x9abc…'),
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub assets request parameters.
+ * @param options - The query options.
+ * @returns Hub assets with the user's supply view.
+ */
+export function hubAssetsWithUserSupplies(
+  client: AaveClient,
+  request: HubAssetsWithUserSuppliesRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions &
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<HubAssetWithUserSupplies[], UnexpectedError> {
+  return client.query(
+    HubAssetsWithUserSuppliesQuery,
+    { request, currency, timeWindow },
+    { requestPolicy },
+  );
+}
+
+/**
+ * Fetches the trailing average supply APY over the last 7, 30 and 90 days for hub assets.
+ *
+ * ```ts
+ * const result = await hubAssetTrailingSupplyApys(client, {
+ *   query: { hubId: hubId('SGVsbG8h') },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The hub assets request parameters.
+ * @param options - The query options.
+ * @returns Trailing supply APYs per hub asset.
+ */
+export function hubAssetTrailingSupplyApys(
+  client: AaveClient,
+  request: HubAssetTrailingSupplyApysRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<HubAssetTrailingSupplyApys[], UnexpectedError> {
+  return client.query(
+    HubAssetTrailingSupplyApysQuery,
+    { request },
     { requestPolicy },
   );
 }
