@@ -121,6 +121,65 @@ export const ChainFragment = graphql(
 );
 export type Chain = FragmentOf<typeof ChainFragment>;
 
+/**
+ * The chain's native asset including the wrapper's own `TokenInfo`.
+ *
+ * Kept out of {@link NativeAssetFragment} deliberately: `Chain` reaches nearly
+ * every document through `Erc20Token.chain`, and a third `TokenInfo` there
+ * expands into all of them and trips TS7056. Selected only where a chain is
+ * fetched directly, which is where the wrapper's info is actually wanted.
+ */
+export const NativeAssetDetailsFragment = graphql(
+  `fragment NativeAssetDetails on NativeAsset {
+    __typename
+    ... on WrappedNativeAsset {
+      nativeToken {
+        ...TokenInfo
+      }
+      wrappedNativeToken {
+        ...TokenInfo
+      }
+      wrappedNativeTokenAddress
+      gateway
+    }
+    ... on SharedBalanceNativeAsset {
+      nativeToken {
+        ...TokenInfo
+      }
+      erc20Address
+    }
+  }`,
+  [TokenInfoFragment],
+);
+export type NativeAssetDetails = FragmentOf<typeof NativeAssetDetailsFragment>;
+
+export const ChainDetailsFragment = graphql(
+  `fragment ChainDetails on Chain {
+    __typename
+    name
+    icon
+    chainId
+    rpcUrl
+    explorerUrl
+    isTestnet
+    isFork
+    signatureGateway
+    nativeAsset {
+      ...NativeAssetDetails
+    }
+    nativeWrappedToken
+    nativeGateway
+    nativeWrappedInfo {
+      ...TokenInfo
+    }
+    nativeInfo {
+      ...TokenInfo
+    }
+  }`,
+  [TokenInfoFragment, NativeAssetDetailsFragment],
+);
+export type ChainDetails = FragmentOf<typeof ChainDetailsFragment>;
+
 export const Erc20TokenFragment = graphql(
   `fragment Erc20Token on Erc20Token {
     __typename

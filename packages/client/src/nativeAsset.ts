@@ -1,4 +1,10 @@
-import type { Chain, TokenAmount, TokenInfo, UserBalance } from '@aave/graphql';
+import type {
+  Chain,
+  ChainDetails,
+  TokenAmount,
+  TokenInfo,
+  UserBalance,
+} from '@aave/graphql';
 import { bigDecimal, type EvmAddress } from '@aave/types';
 
 /**
@@ -37,6 +43,22 @@ export function nativeErc20Address(chain: Chain): EvmAddress | null {
     default:
       return null;
   }
+}
+
+/**
+ * The wrapped native token's own info, or `null` when this chain has no wrapper.
+ *
+ * Takes {@link ChainDetails} rather than {@link Chain}: the wrapper's `TokenInfo`
+ * is selected only where a chain is fetched directly (`chain`, `chains`), not on
+ * the chain embedded in every token. A `Chain` from a token simply does not
+ * carry it.
+ *
+ * This is the replacement for the deprecated `Chain.nativeWrappedInfo`.
+ */
+export function wrappedNativeTokenInfo(chain: ChainDetails): TokenInfo | null {
+  return chain.nativeAsset?.__typename === 'WrappedNativeAsset'
+    ? chain.nativeAsset.wrappedNativeToken
+    : null;
 }
 
 /**
