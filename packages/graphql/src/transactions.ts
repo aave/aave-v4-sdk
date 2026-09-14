@@ -9,7 +9,6 @@ import {
   ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
-  HealthFactorVariationFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
   PaginatedResultInfoFragment,
@@ -367,73 +366,61 @@ export const PreviewQuery = graphql(
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
 
-export const PlanPositionOutcomeFragment = graphql(
-  `fragment PlanPositionOutcome on PlanPositionOutcome {
+export const PreviewWarningFragment = graphql(
+  `fragment PreviewWarning on PreviewWarning {
     __typename
-    id
-    healthFactor {
-      ...HealthFactorVariation
-    }
-    riskPremium {
-      ...PercentNumberVariation
-    }
-    maxBorrowingPower(currency: $currency) {
-      ...ExchangeAmountVariation
-    }
-    remainingBorrowingPower(currency: $currency) {
-      ...ExchangeAmountVariation
-    }
+    code
+    reserve
+    requested
+    available
   }`,
-  [
-    HealthFactorVariationFragment,
-    PercentNumberVariationFragment,
-    ExchangeAmountVariationFragment,
-  ],
 );
-export type PlanPositionOutcome = FragmentOf<
-  typeof PlanPositionOutcomeFragment
->;
+export type PreviewWarning = FragmentOf<typeof PreviewWarningFragment>;
 
-export const PreviewPlanFragment = graphql(
-  `fragment PreviewPlan on PreviewPlan {
+export const MultiStepPreviewStepFragment = graphql(
+  `fragment MultiStepPreviewStep on MultiStepPreviewStep {
     __typename
-    positions {
+    index
+    status
+    preview {
       ...PreviewUserPosition
     }
-    positionOutcomes {
-      ...PlanPositionOutcome
-    }
-    netBalance(currency: $currency) {
-      ...ExchangeAmountVariation
-    }
-    projectedEarnings {
-      ...ExchangeAmountVariation
-    }
-    rewards {
-      ...PreviewRewardOutcome
+    warnings {
+      ...PreviewWarning
     }
   }`,
-  [
-    PreviewUserPositionFragment,
-    PlanPositionOutcomeFragment,
-    ExchangeAmountVariationFragment,
-    PreviewRewardOutcomeFragment,
-  ],
+  [PreviewUserPositionFragment, PreviewWarningFragment],
 );
-export type PreviewPlan = FragmentOf<typeof PreviewPlanFragment>;
+export type MultiStepPreviewStep = FragmentOf<
+  typeof MultiStepPreviewStepFragment
+>;
+
+export const MultiStepPreviewFragment = graphql(
+  `fragment MultiStepPreview on MultiStepPreview {
+    __typename
+    steps {
+      ...MultiStepPreviewStep
+    }
+    warnings {
+      ...PreviewWarning
+    }
+  }`,
+  [MultiStepPreviewStepFragment, PreviewWarningFragment],
+);
+export type MultiStepPreview = FragmentOf<typeof MultiStepPreviewFragment>;
 
 /**
  * @internal
  */
-export const PreviewPlanQuery = graphql(
-  `query PreviewPlan($request: PreviewPlanRequest!, $currency: Currency! = USD, $timeWindow: TimeWindow! = LAST_WEEK) {
-    value: previewPlan(request: $request) {
-      ...PreviewPlan
+export const MultiStepPreviewQuery = graphql(
+  `query MultiStepPreview($request: MultiStepPreviewRequest!, $currency: Currency! = USD, $timeWindow: TimeWindow! = LAST_WEEK) {
+    value: multiStepPreview(request: $request) {
+      ...MultiStepPreview
     }
   }`,
-  [PreviewPlanFragment],
+  [MultiStepPreviewFragment],
 );
-export type PreviewPlanRequest = RequestOf<typeof PreviewPlanQuery>;
+export type MultiStepPreviewRequest = RequestOf<typeof MultiStepPreviewQuery>;
 
 export type LiquidateExactAmountWithPermit = ReturnType<
   typeof graphql.scalar<'LiquidateExactAmountWithPermit'>

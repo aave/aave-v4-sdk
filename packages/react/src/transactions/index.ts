@@ -7,15 +7,15 @@ export { useBorrow } from './useBorrow';
 export { useClaimRewards } from './useClaimRewards';
 export { useLiquidatePosition } from './useLiquidatePosition';
 export {
+  type UseMultiStepPreviewArgs,
+  useMultiStepPreview,
+  useMultiStepPreviewAction,
+} from './useMultiStepPreview';
+export {
   type UsePreviewArgs,
   usePreview,
   usePreviewAction,
 } from './usePreview';
-export {
-  type UsePreviewPlanArgs,
-  usePreviewPlan,
-  usePreviewPlanAction,
-} from './usePreviewPlan';
 export { useRenounceSpokeUserPositionManager } from './useRenounceSpokeUserPositionManager';
 export { useRepay } from './useRepay';
 export { useSetSpokeUserPositionManager } from './useSetSpokeUserPositionManager';

@@ -3,11 +3,11 @@ import {
   DEFAULT_QUERY_OPTIONS,
   type UnexpectedError,
 } from '@aave/client';
-import { previewPlan } from '@aave/client/actions';
+import { multiStepPreview } from '@aave/client/actions';
 import {
-  type PreviewPlan,
-  PreviewPlanQuery,
-  type PreviewPlanRequest,
+  type MultiStepPreview,
+  MultiStepPreviewQuery,
+  type MultiStepPreviewRequest,
 } from '@aave/graphql';
 import type { NullishDeep, Prettify } from '@aave/types';
 
@@ -26,13 +26,14 @@ import {
 } from '../helpers';
 
 /**
- * Preview the impact of a multi-transaction plan on a user's positions.
+ * Preview a plan of one or more actions, folded through the protocol state.
  *
- * `positions` previews each action against current state, while `positionOutcomes`
- * carries the combined values per position once every action in the plan has run.
+ * Each step is evaluated against what the steps before it produced, and
+ * `steps[i].preview` is the same shape a single-action preview returns. A step that
+ * cannot execute comes back `BLOCKED` with the reason and is not applied.
  *
  * ```tsx
- * const [getPreview, previewing] = usePreviewPlanAction();
+ * const [getPreview, previewing] = useMultiStepPreviewAction();
  *
  * const result = await getPreview({
  *   actions: [
@@ -60,14 +61,14 @@ import {
  * console.log('Plan preview:', result.value);
  * ```
  */
-export function usePreviewPlanAction(
+export function useMultiStepPreviewAction(
   options: Required<CurrencyQueryOptions> = DEFAULT_QUERY_OPTIONS,
-): UseAsyncTask<PreviewPlanRequest, PreviewPlan, UnexpectedError> {
+): UseAsyncTask<MultiStepPreviewRequest, MultiStepPreview, UnexpectedError> {
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: PreviewPlanRequest) =>
-      previewPlan(client, request, {
+    (request: MultiStepPreviewRequest) =>
+      multiStepPreview(client, request, {
         currency: options.currency,
         requestPolicy: 'network-only',
       }),
@@ -75,17 +76,17 @@ export function usePreviewPlanAction(
   );
 }
 
-export type UsePreviewPlanArgs = Prettify<
-  PreviewPlanRequest & CurrencyQueryOptions
+export type UseMultiStepPreviewArgs = Prettify<
+  MultiStepPreviewRequest & CurrencyQueryOptions
 >;
 
 /**
- * Fetch a preview of a multi-transaction plan.
+ * Fetch a preview of a plan of one or more actions.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
- * const { data } = usePreviewPlan({
+ * const { data } = useMultiStepPreview({
  *   actions: [
  *     {
  *       withdraw: {
@@ -99,30 +100,30 @@ export type UsePreviewPlanArgs = Prettify<
  * });
  * ```
  */
-export function usePreviewPlan(
-  args: UsePreviewPlanArgs & Suspendable,
-): SuspenseResult<PreviewPlan>;
+export function useMultiStepPreview(
+  args: UseMultiStepPreviewArgs & Suspendable,
+): SuspenseResult<MultiStepPreview>;
 /**
- * Fetch a preview of a multi-transaction plan.
+ * Fetch a preview of a plan of one or more actions.
  *
  * Pausable suspense mode.
  *
  * ```tsx
- * const { data } = usePreviewPlan({
+ * const { data } = useMultiStepPreview({
  *   actions: [],
  *   suspense: true,
  *   pause: true,
  * });
  * ```
  */
-export function usePreviewPlan(
-  args: Pausable<UsePreviewPlanArgs> & Suspendable,
-): PausableSuspenseResult<PreviewPlan>;
+export function useMultiStepPreview(
+  args: Pausable<UseMultiStepPreviewArgs> & Suspendable,
+): PausableSuspenseResult<MultiStepPreview>;
 /**
- * Fetch a preview of a multi-transaction plan.
+ * Fetch a preview of a plan of one or more actions.
  *
  * ```tsx
- * const { data, error, loading } = usePreviewPlan({
+ * const { data, error, loading } = useMultiStepPreview({
  *   actions: [
  *     {
  *       withdraw: {
@@ -135,36 +136,36 @@ export function usePreviewPlan(
  * });
  * ```
  */
-export function usePreviewPlan(
-  args: UsePreviewPlanArgs,
-): ReadResult<PreviewPlan>;
+export function useMultiStepPreview(
+  args: UseMultiStepPreviewArgs,
+): ReadResult<MultiStepPreview>;
 /**
- * Fetch a preview of a multi-transaction plan.
+ * Fetch a preview of a plan of one or more actions.
  *
  * Pausable loading state mode.
  *
  * ```tsx
- * const { data, error, loading, paused } = usePreviewPlan({
+ * const { data, error, loading, paused } = useMultiStepPreview({
  *   actions: [],
  *   pause: true,
  * });
  * ```
  */
-export function usePreviewPlan(
-  args: Pausable<UsePreviewPlanArgs>,
-): PausableReadResult<PreviewPlan>;
+export function useMultiStepPreview(
+  args: Pausable<UseMultiStepPreviewArgs>,
+): PausableReadResult<MultiStepPreview>;
 
-export function usePreviewPlan({
+export function useMultiStepPreview({
   suspense = false,
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   ...request
-}: NullishDeep<UsePreviewPlanArgs> & {
+}: NullishDeep<UseMultiStepPreviewArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<PreviewPlan, UnexpectedError> {
+}): SuspendableResult<MultiStepPreview, UnexpectedError> {
   return useSuspendableQuery({
-    document: PreviewPlanQuery,
+    document: MultiStepPreviewQuery,
     variables: {
       request,
       currency,

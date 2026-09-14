@@ -9,10 +9,10 @@ import {
   type ExecutionPlan,
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
+  type MultiStepPreview,
+  MultiStepPreviewQuery,
+  type MultiStepPreviewRequest,
   type PaginatedActivitiesResult,
-  type PreviewPlan,
-  PreviewPlanQuery,
-  type PreviewPlanRequest,
   PreviewQuery,
   type PreviewRequest,
   type PreviewUserPosition,
@@ -378,10 +378,10 @@ export function preview(
 }
 
 /**
- * Preview the impact of a multi-transaction plan on a user's positions.
+ * Preview a plan of one or more actions, folded through the protocol state.
  *
  * ```ts
- * const result = await previewPlan(client, {
+ * const result = await multiStepPreview(client, {
  *   actions: [
  *     {
  *       setUserSuppliesAsCollateral: {
@@ -400,24 +400,25 @@ export function preview(
  * });
  * ```
  *
- * `positions` previews each action against current state, while `positionOutcomes`
- * folds every action on a spoke into that position's combined values.
+ * Each step is evaluated against what the steps before it produced, and
+ * `steps[i].preview` is the same shape a single-action preview returns. A step that
+ * cannot execute comes back `BLOCKED` with the reason and is not applied.
  *
  * @param client - Aave client.
  * @param request - The plan's actions, in execution order.
  * @param options - The query options.
- * @returns The plan preview showing per-action and combined position changes.
+ * @returns The per-step previews and the plan's warnings.
  */
-export function previewPlan(
+export function multiStepPreview(
   client: AaveClient,
-  request: PreviewPlanRequest,
+  request: MultiStepPreviewRequest,
   {
     currency = DEFAULT_QUERY_OPTIONS.currency,
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<PreviewPlan, UnexpectedError> {
+): ResultAsync<MultiStepPreview, UnexpectedError> {
   return client.query(
-    PreviewPlanQuery,
+    MultiStepPreviewQuery,
     { request, currency },
     { requestPolicy },
   );
