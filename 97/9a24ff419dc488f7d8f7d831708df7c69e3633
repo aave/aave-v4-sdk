@@ -1,0 +1,23 @@
+packages/graphql/schema.graphql
+  s_51de072e05345c::t_bb905a5df52c36 286-297,1356-1361,2420-2430,3837-3851
+packages/graphql/src/graphql-env.d.ts
+  s_51de072e05345c::t_50b275b5888400 50,172,295,479
+packages/graphql/src/schema.json
+  s_51de072e05345c::t_2de276c4d56095 1129-1137,4257-4270,9828-9857,14532-14581
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "979a24ff419dc488f7d8f7d831708df7c69e3633",
+  "prompts": {},
+  "sessions": {
+    "s_51de072e05345c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ef55b23-983e-4ae4-8bb7-212b6eb5dd55",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
