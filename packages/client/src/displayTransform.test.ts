@@ -24,6 +24,18 @@ const makeToken = (
   address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
   chain: {
     chainId: 1,
+    nativeAsset: {
+      __typename: 'WrappedNativeAsset',
+      nativeToken: {
+        __typename: 'TokenInfo',
+        id: 'native-token-info-id',
+        name: 'Ether',
+        symbol: 'ETH',
+        canonicalSymbol: 'ETH',
+        decimals: 18,
+        icon: 'eth.svg',
+      },
+    },
     nativeInfo: {
       __typename: 'TokenInfo',
       id: 'native-token-info-id',
@@ -37,6 +49,16 @@ const makeToken = (
   isWrappedNativeToken: true,
   ...overrides,
 });
+
+const NATIVE_INFO = {
+  __typename: 'TokenInfo',
+  id: 'native-token-info-id',
+  name: 'Ether',
+  symbol: 'ETH',
+  canonicalSymbol: 'ETH',
+  decimals: 18,
+  icon: 'eth.svg',
+} as const;
 
 describe('isErc20Token', () => {
   it('returns true for a valid Erc20Token shape', () => {
@@ -119,6 +141,69 @@ describe('transformErc20Token', () => {
       const token = makeToken({ isWrappedNativeToken: false });
       const result = transformErc20Token(token, true, null);
       expect(result).toBe(token);
+    });
+
+    it('leaves a shared-balance chain untouched even when isWrappedNativeToken is set', () => {
+      // On a chain whose native token *is* an ERC20 (USDC on Arc) there is no
+      // wrapper to stand in for. Substituting would dress a 6-decimal asset in
+      // the 18-decimal native info and rescale every amount formatted from it.
+      const token = makeToken({
+        info: {
+          __typename: 'TokenInfo',
+          id: 'arc-usdc-info-id',
+          name: 'USDC',
+          symbol: 'USDC',
+          canonicalSymbol: 'USDC',
+          decimals: 6,
+          icon: 'usdc.svg',
+        },
+        chain: {
+          chainId: 5042,
+          nativeAsset: {
+            __typename: 'SharedBalanceNativeAsset',
+            nativeToken: { ...NATIVE_INFO, name: 'USD Coin', symbol: 'USDC' },
+          },
+        },
+        isWrappedNativeToken: true,
+      });
+
+      const result = transformErc20Token(token, true, null);
+
+      expect(result).toBe(token);
+      expect(result.info.decimals).toBe(6);
+    });
+
+    it('leaves the token untouched when the chain has no native asset', () => {
+      const token = makeToken({
+        chain: { chainId: 1, nativeAsset: null },
+      });
+      expect(transformErc20Token(token, true, null)).toBe(token);
+    });
+
+    it('falls back to nativeInfo on a payload that predates nativeAsset', () => {
+      const token = makeToken({
+        chain: { chainId: 1, nativeInfo: { ...NATIVE_INFO } },
+      });
+      const result = transformErc20Token(token, true, null);
+      expect(result.info.symbol).toBe('ETH');
+    });
+
+    it('never rescales: the ERC20 keeps its own decimals', () => {
+      // A wrapper's decimals always equal its native token's, so this is a
+      // no-op today. It is asserted so the transform cannot start rescaling if
+      // that invariant ever breaks.
+      const token = makeToken({
+        chain: {
+          chainId: 1,
+          nativeAsset: {
+            __typename: 'WrappedNativeAsset',
+            nativeToken: { ...NATIVE_INFO, decimals: 8 },
+          },
+        },
+      });
+      const result = transformErc20Token(token, true, null);
+      expect(result.info.decimals).toBe(18);
+      expect(result.info.symbol).toBe('ETH');
     });
   });
 

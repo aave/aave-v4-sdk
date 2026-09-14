@@ -1,4 +1,8 @@
-import { type AaveClient, UnexpectedError } from '@aave/client';
+import {
+  type AaveClient,
+  nativeTokenInfo,
+  UnexpectedError,
+} from '@aave/client';
 import { chain as fetchChain } from '@aave/client/actions';
 import { toViemChain } from '@aave/client/viem';
 import {
@@ -203,14 +207,20 @@ function createNetworkFeeAmount(
   details: ExecutionDetails,
   rate: ExchangeAmount,
 ): NativeAmount {
-  const gasCostInWei = details.gasPrice * details.gasUnits;
-  const gasCost = bigDecimal(gasCostInWei).rescale(
-    -details.chain.nativeInfo.decimals,
+  // Gas is denominated in the chain's native token, at its own precision — on a
+  // shared-balance chain that is the 18-decimal native view, not the ERC20's.
+  const nativeToken = nativeTokenInfo(details.chain);
+  invariant(
+    nativeToken,
+    `Chain ${details.chain.chainId} has no native token to price gas in`,
   );
+
+  const gasCostInWei = details.gasPrice * details.gasUnits;
+  const gasCost = bigDecimal(gasCostInWei).rescale(-nativeToken.decimals);
 
   const amount: DecimalNumber = {
     __typename: 'DecimalNumber',
-    decimals: details.chain.nativeInfo.decimals,
+    decimals: nativeToken.decimals,
     onChainValue: gasCostInWei,
     value: gasCost,
   };
@@ -219,7 +229,7 @@ function createNetworkFeeAmount(
     __typename: 'NativeAmount',
     token: {
       __typename: 'NativeToken',
-      info: details.chain.nativeInfo,
+      info: nativeToken,
       chain: details.chain,
     },
     amount,

@@ -73,6 +73,27 @@ export const TokenInfoFragment = graphql(
 );
 export type TokenInfo = FragmentOf<typeof TokenInfoFragment>;
 
+export const NativeAssetFragment = graphql(
+  `fragment NativeAsset on NativeAsset {
+    __typename
+    ... on WrappedNativeAsset {
+      nativeToken {
+        ...TokenInfo
+      }
+      wrappedNativeTokenAddress
+      gateway
+    }
+    ... on SharedBalanceNativeAsset {
+      nativeToken {
+        ...TokenInfo
+      }
+      erc20Address
+    }
+  }`,
+  [TokenInfoFragment],
+);
+export type NativeAsset = FragmentOf<typeof NativeAssetFragment>;
+
 export const ChainFragment = graphql(
   `fragment Chain on Chain {
     __typename
@@ -83,9 +104,12 @@ export const ChainFragment = graphql(
     explorerUrl
     isTestnet
     isFork
+    signatureGateway
+    nativeAsset {
+      ...NativeAsset
+    }
     nativeWrappedToken
     nativeGateway
-    signatureGateway
     nativeWrappedInfo {
       ...TokenInfo
     }
@@ -93,7 +117,7 @@ export const ChainFragment = graphql(
       ...TokenInfo
     }
   }`,
-  [TokenInfoFragment],
+  [TokenInfoFragment, NativeAssetFragment],
 );
 export type Chain = FragmentOf<typeof ChainFragment>;
 
