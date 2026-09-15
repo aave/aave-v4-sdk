@@ -41,7 +41,6 @@ export function WithdrawForm({ supply, walletClient }: WithdrawFormProps) {
           }),
         );
 
-      case 'Erc20ApprovalRequired':
       case 'PreContractActionRequired':
         setStatus({
           kind: KIND.info,
