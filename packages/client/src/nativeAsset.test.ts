@@ -84,6 +84,30 @@ describe('Given a chain with no native asset', () => {
     expect(nativeGatewayAddress(chain)).toBeNull();
     expect(hasDistinctWrappedNative(chain)).toBe(false);
   });
+
+  it('Then there is no native token, even though the legacy field still answers', () => {
+    // `nativeInfo` is non-nullable, so it stays populated on a chain that has
+    // no native token. The absence has to come from `nativeAsset`; reading the
+    // deprecated field here would hand back a placeholder and defeat the null
+    // checks in `toViemChain`, `toThirdwebChain` and the network fee.
+    const chain: Chain = { ...makeChain(), nativeAsset: null };
+
+    expect(chain.nativeInfo).toBeDefined();
+    expect(nativeTokenInfo(chain)).toBeNull();
+  });
+});
+
+describe('Given a chain whose native asset is a union member this version predates', () => {
+  it('Then the deprecated field still describes the native token', () => {
+    // Forward compatibility: an unrecognised member is not the same as absence.
+    // Such a chain does have a native token, so `nativeInfo` remains the answer.
+    const chain = {
+      ...makeChain(),
+      nativeAsset: { __typename: 'NoNativeAsset' },
+    } as unknown as Chain;
+
+    expect(nativeTokenInfo(chain)).toBe(chain.nativeInfo);
+  });
 });
 
 describe('Given a chain whose native gateway is not deployed', () => {

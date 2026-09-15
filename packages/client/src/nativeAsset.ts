@@ -14,13 +14,20 @@ import { bigDecimal, type EvmAddress } from '@aave/types';
  * in ordinary ERC20s. No such chain is supported today.
  */
 export function nativeTokenInfo(chain: Chain): TokenInfo | null {
+  // An explicit `null` is the schema saying this chain has no native token.
+  // `nativeInfo` is non-nullable and still answers on such a chain, so falling
+  // through to it would hand back a placeholder — with a zero `decimals` — in
+  // place of the absence callers are checking for.
+  if (chain.nativeAsset === null) return null;
+
   switch (chain.nativeAsset?.__typename) {
     case 'WrappedNativeAsset':
     case 'SharedBalanceNativeAsset':
       return chain.nativeAsset.nativeToken;
     default:
-      // Either the chain has no native asset, or the union gained a member this
-      // version predates. Both are "no native token we can describe".
+      // The field was not selected (a payload predating `nativeAsset`), or the
+      // union gained a member this version predates. Both describe a chain that
+      // does have a native token, so the deprecated field is still the answer.
       return chain.nativeInfo ?? null;
   }
 }
