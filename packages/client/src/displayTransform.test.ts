@@ -125,7 +125,7 @@ describe('transformErc20Token', () => {
       const token = makeToken();
       const result = transformErc20Token(token, true, null);
       expect(result.info).toEqual({
-        ...token.chain.nativeInfo,
+        ...NATIVE_INFO,
         id: token.info.id,
       });
     });
@@ -134,7 +134,7 @@ describe('transformErc20Token', () => {
       const token = makeToken();
       const result = transformErc20Token(token, true, null);
       expect(result.info.id).toBe(token.info.id);
-      expect(result.info.id).not.toBe(token.chain.nativeInfo.id);
+      expect(result.info.id).not.toBe(NATIVE_INFO.id);
     });
 
     it('does not modify a non-wrapped token', () => {
@@ -278,7 +278,7 @@ describe('transformErc20Token', () => {
       const overrideMap = buildAssetOverrideMap(overrides);
       const result = transformErc20Token(token, true, overrideMap);
       // nativeInfo applied first, then override patches symbol
-      expect(result.info.name).toBe(token.chain.nativeInfo.name);
+      expect(result.info.name).toBe(NATIVE_INFO.name);
       expect(result.info.symbol).toBe('OVERRIDE');
     });
   });
@@ -321,7 +321,7 @@ describe('deepTransformTokens', () => {
       const data = { __typename: 'HubAsset', underlying: token };
       const result = deepTransformTokens(data, true, null) as typeof data;
       expect((result.underlying as Erc20TokenShape).info).toEqual({
-        ...token.chain.nativeInfo,
+        ...NATIVE_INFO,
         id: token.info.id,
       });
       expect(result).not.toBe(data);
