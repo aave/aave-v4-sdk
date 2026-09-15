@@ -1,0 +1,14 @@
+.changeset/olive-pumas-repeat.md
+  h_be8c3c572e9983 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6257cfe959e3b53cdcbb7b3b238d2d1485fa0355",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
