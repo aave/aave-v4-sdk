@@ -1,0 +1,21 @@
+packages/client/src/nativeAsset.ts
+  s_0f31fdd334493f::t_f546fbd5d718d7 17-22,28-30
+packages/client/src/nativeAsset.test.ts
+  s_0f31fdd334493f::t_95a7a619bd0ea2 87-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7d599d81e2f4f77f96fee95d4713a07717d4d7bd",
+  "prompts": {},
+  "sessions": {
+    "s_0f31fdd334493f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "434fafa5-67de-4308-ac1d-3953f513c180",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
