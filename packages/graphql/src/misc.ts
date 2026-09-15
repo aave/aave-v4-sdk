@@ -1,4 +1,4 @@
-import { ChainFragment, ExchangeAmountFragment } from './fragments';
+import { ChainDetailsFragment, ExchangeAmountFragment } from './fragments';
 import { graphql, type RequestOf } from './graphql';
 
 /**
@@ -7,10 +7,10 @@ import { graphql, type RequestOf } from './graphql';
 export const ChainQuery = graphql(
   `query Chain($request: ChainRequest!) {
     value: chain(request: $request) {
-      ...Chain
+      ...ChainDetails
     }
   }`,
-  [ChainFragment],
+  [ChainDetailsFragment],
 );
 export type ChainRequest = RequestOf<typeof ChainQuery>;
 
@@ -20,10 +20,10 @@ export type ChainRequest = RequestOf<typeof ChainQuery>;
 export const ChainsQuery = graphql(
   `query Chains($request: ChainsRequest!) {
     value: chains(request: $request) {
-      ...Chain
+      ...ChainDetails
     }
   }`,
-  [ChainFragment],
+  [ChainDetailsFragment],
 );
 export type ChainsRequest = RequestOf<typeof ChainsQuery>;
 

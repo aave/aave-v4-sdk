@@ -1127,6 +1127,15 @@
             "args": []
           },
           {
+            "name": "nativeAsset",
+            "type": {
+              "kind": "UNION",
+              "name": "NativeAsset",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "nativeWrappedToken",
             "type": {
               "kind": "NON_NULL",
@@ -3910,6 +3919,20 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "NativeAsset",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "WrappedNativeAsset"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "SharedBalanceNativeAsset"
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -9306,6 +9329,36 @@
       },
       {
         "kind": "OBJECT",
+        "name": "SharedBalanceNativeAsset",
+        "fields": [
+          {
+            "name": "nativeToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TokenInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "erc20Address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "Spoke",
         "fields": [
           {
@@ -13860,6 +13913,56 @@
             "name": "InsufficientLiquidityError"
           }
         ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "WrappedNativeAsset",
+        "fields": [
+          {
+            "name": "nativeToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TokenInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "wrappedNativeToken",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TokenInfo",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "wrappedNativeTokenAddress",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "gateway",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "SCALAR",
