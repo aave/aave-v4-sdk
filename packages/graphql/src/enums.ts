@@ -226,6 +226,9 @@ export enum SwapStatusFilter {
 export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
+  BtcCorrelated = 'BTC_CORRELATED',
+  ProtocolToken = 'PROTOCOL_TOKEN',
+  InfrastructureToken = 'INFRASTRUCTURE_TOKEN',
 }
 
 /**

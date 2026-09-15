@@ -3180,6 +3180,143 @@
       },
       {
         "kind": "OBJECT",
+        "name": "LiquidationsSample",
+        "fields": [
+          {
+            "name": "date",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "liquidations",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "debtLiquidated",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralLiquidated",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "averageLiquidationBonus",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "LiquidationsSummary",
+        "fields": [
+          {
+            "name": "totalLiquidations",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "debtLiquidated",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateralLiquidated",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "averageLiquidationBonus",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "history",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "LiquidationsSample",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "MaxLiquidationBonusVariation",
         "fields": [
           {
@@ -7651,6 +7788,26 @@
                 "name": "PaginatedActivitiesResult",
                 "ofType": null
               }
+            },
+            "args": [
+              {
+                "name": "request",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "liquidationsSummary",
+            "type": {
+              "kind": "OBJECT",
+              "name": "LiquidationsSummary",
+              "ofType": null
             },
             "args": [
               {

@@ -9,6 +9,9 @@ import {
   type ExecutionPlan,
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
+  type LiquidationsSummary,
+  LiquidationsSummaryQuery,
+  type LiquidationsSummaryRequest,
   type PaginatedActivitiesResult,
   PreviewQuery,
   type PreviewRequest,
@@ -463,4 +466,30 @@ export function activities(
     { request, currency, timeWindow },
     { requestPolicy },
   );
+}
+
+/**
+ * Fetches liquidation totals and a time series for a spoke or a reserve.
+ *
+ * ```ts
+ * const result = await liquidationsSummary(client, {
+ *   query: { spokeId: spokeId('SGVsbG8h') },
+ *   currency: Currency.Usd,
+ *   window: TimeWindow.LastMonth,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The liquidations summary request parameters.
+ * @param options - The query options.
+ * @returns The liquidations summary, or `null` if the spoke or reserve is unknown.
+ */
+export function liquidationsSummary(
+  client: AaveClient,
+  request: LiquidationsSummaryRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<LiquidationsSummary | null, UnexpectedError> {
+  return client.query(LiquidationsSummaryQuery, { request }, { requestPolicy });
 }

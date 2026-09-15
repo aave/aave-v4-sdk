@@ -6,6 +6,7 @@ import {
   type Erc20ApprovalRequired,
   Erc20ApprovalRequiredFragment,
   Erc20TokenFragment,
+  ExchangeAmountFragment,
   ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
@@ -872,4 +873,65 @@ export type ActivitiesRequest = RequestOf<typeof ActivitiesQuery>;
 
 export type ActivitiesRequestQuery = ReturnType<
   typeof graphql.scalar<'ActivitiesRequestQuery'>
+>;
+
+export const LiquidationsSampleFragment = graphql(
+  `fragment LiquidationsSample on LiquidationsSample {
+    __typename
+    date
+    liquidations
+    debtLiquidated {
+      ...ExchangeAmount
+    }
+    collateralLiquidated {
+      ...ExchangeAmount
+    }
+    averageLiquidationBonus {
+      ...PercentNumber
+    }
+  }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type LiquidationsSample = FragmentOf<typeof LiquidationsSampleFragment>;
+
+export const LiquidationsSummaryFragment = graphql(
+  `fragment LiquidationsSummary on LiquidationsSummary {
+    __typename
+    totalLiquidations
+    debtLiquidated {
+      ...ExchangeAmount
+    }
+    collateralLiquidated {
+      ...ExchangeAmount
+    }
+    averageLiquidationBonus {
+      ...PercentNumber
+    }
+    history {
+      ...LiquidationsSample
+    }
+  }`,
+  [ExchangeAmountFragment, PercentNumberFragment, LiquidationsSampleFragment],
+);
+export type LiquidationsSummary = FragmentOf<
+  typeof LiquidationsSummaryFragment
+>;
+
+/**
+ * @internal
+ */
+export const LiquidationsSummaryQuery = graphql(
+  `query LiquidationsSummary($request: LiquidationsSummaryRequest!) {
+    value: liquidationsSummary(request: $request) {
+      ...LiquidationsSummary
+    }
+  }`,
+  [LiquidationsSummaryFragment],
+);
+export type LiquidationsSummaryRequest = RequestOf<
+  typeof LiquidationsSummaryQuery
+>;
+
+export type LiquidationsSummaryRequestQuery = ReturnType<
+  typeof graphql.scalar<'LiquidationsSummaryRequestQuery'>
 >;
