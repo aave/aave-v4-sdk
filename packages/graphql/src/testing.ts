@@ -23,6 +23,7 @@ import type {
   ExchangeAmount,
   ExchangeAmountWithChange,
   HealthFactorWithChange,
+  NativeAsset,
   OrderReceipt,
   OrderTypedData,
   PaginatedUserSwapsResult,
@@ -194,6 +195,40 @@ export function makeTokenInfo(symbol: keyof typeof TestTokens): TokenInfo {
   };
 }
 
+/**
+ * A chain whose native token has a real wrapper, e.g. ETH and WETH on Ethereum.
+ */
+export function makeWrappedNativeAsset(): NativeAsset {
+  return {
+    __typename: 'WrappedNativeAsset',
+    nativeToken: {
+      __typename: 'TokenInfo',
+      id: tokenInfoId(randomBase64String()),
+      name: 'Ether',
+      symbol: 'ETH',
+      canonicalSymbol: 'ETH',
+      // A wrapper's decimals always equal its native token's.
+      decimals: TestTokens.WETH.decimals,
+      icon: 'https://example.com/icon.png',
+      categories: [],
+    },
+    wrappedNativeTokenAddress: randomEvmAddress(),
+    gateway: randomEvmAddress(),
+  };
+}
+
+/**
+ * A chain whose native token *is* an ERC20, e.g. USDC on Arc. The native view
+ * and the ERC20 view are one balance at two precisions, never two balances.
+ */
+export function makeSharedBalanceNativeAsset(): NativeAsset {
+  return {
+    __typename: 'SharedBalanceNativeAsset',
+    nativeToken: { ...makeTokenInfo('USDC'), decimals: 18 },
+    erc20Address: randomEvmAddress(),
+  };
+}
+
 export function makeChain(): Chain {
   return {
     __typename: 'Chain',
@@ -209,6 +244,7 @@ export function makeChain(): Chain {
     signatureGateway: randomEvmAddress(),
     nativeWrappedInfo: makeTokenInfo('WETH'),
     nativeInfo: makeTokenInfo('WETH'),
+    nativeAsset: makeWrappedNativeAsset(),
   };
 }
 
@@ -354,6 +390,7 @@ function makeSpoke({
       signatureGateway: randomEvmAddress(),
       nativeWrappedInfo: makeTokenInfo('WETH'),
       nativeInfo: makeTokenInfo('WETH'),
+      nativeAsset: makeWrappedNativeAsset(),
     },
     liquidationConfig: null,
     summary: makeSpokeSummary(),

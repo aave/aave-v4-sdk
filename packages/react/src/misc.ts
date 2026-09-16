@@ -1,7 +1,11 @@
 import type { CurrencyQueryOptions } from '@aave/client';
 import { exchangeRate, chain as fetchChain } from '@aave/client/actions';
 import type { UnexpectedError } from '@aave/core';
-import type { Chain, ExchangeAmount, ExchangeRateRequest } from '@aave/graphql';
+import type {
+  ChainDetails,
+  ExchangeAmount,
+  ExchangeRateRequest,
+} from '@aave/graphql';
 import {
   type ActivityItem,
   ChainQuery,
@@ -39,12 +43,12 @@ export type UseChainArgs = ChainRequest;
  *   chainId: chainId(1),
  *   suspense: true,
  * });
- * // data will be Chain | null
+ * // data will be ChainDetails | null
  * ```
  */
 export function useChain(
   args: UseChainArgs & Suspendable,
-): SuspenseResult<Chain | null>;
+): SuspenseResult<ChainDetails | null>;
 /**
  * Fetch a specific chain by chain ID.
  *
@@ -60,7 +64,7 @@ export function useChain(
  */
 export function useChain(
   args: Pausable<UseChainArgs> & Suspendable,
-): PausableSuspenseResult<Chain | null>;
+): PausableSuspenseResult<ChainDetails | null>;
 /**
  * Fetch a specific chain by chain ID.
  *
@@ -68,10 +72,10 @@ export function useChain(
  * const { data, error, loading } = useChain({
  *   chainId: chainId(1),
  * });
- * // data will be Chain | null
+ * // data will be ChainDetails | null
  * ```
  */
-export function useChain(args: UseChainArgs): ReadResult<Chain | null>;
+export function useChain(args: UseChainArgs): ReadResult<ChainDetails | null>;
 /**
  * Fetch a specific chain by chain ID.
  *
@@ -86,7 +90,7 @@ export function useChain(args: UseChainArgs): ReadResult<Chain | null>;
  */
 export function useChain(
   args: Pausable<UseChainArgs>,
-): PausableReadResult<Chain | null>;
+): PausableReadResult<ChainDetails | null>;
 
 export function useChain({
   suspense = false,
@@ -95,7 +99,7 @@ export function useChain({
 }: NullishDeep<UseChainArgs> & {
   suspense?: boolean;
   pause?: boolean;
-}): SuspendableResult<Chain | null, UnexpectedError> {
+}): SuspendableResult<ChainDetails | null, UnexpectedError> {
   return useSuspendableQuery({
     document: ChainQuery,
     variables: {
@@ -125,7 +129,7 @@ export function useChain({
  * });
  *
  * if (result.isOk()) {
- *   console.log(result.value); // Chain | null
+ *   console.log(result.value); // ChainDetails | null
  * } else {
  *   console.error(result.error);
  * }
@@ -133,7 +137,7 @@ export function useChain({
  */
 export function useChainAction(): UseAsyncTask<
   ChainRequest,
-  Chain | null,
+  ChainDetails | null,
   UnexpectedError
 > {
   const client = useAaveClient();
@@ -163,7 +167,7 @@ export type UseChainsArgs = ChainsRequest;
  */
 export function useChains(
   args: UseChainsArgs & Suspendable,
-): SuspenseResult<Chain[]>;
+): SuspenseResult<ChainDetails[]>;
 /**
  * Fetches the list of supported chains.
  *
@@ -179,7 +183,7 @@ export function useChains(
  */
 export function useChains(
   args: Pausable<UseChainsArgs> & Suspendable,
-): PausableSuspenseResult<Chain[]>;
+): PausableSuspenseResult<ChainDetails[]>;
 /**
  * Fetches the list of supported chains.
  *
@@ -189,7 +193,7 @@ export function useChains(
  * });
  * ```
  */
-export function useChains(args?: UseChainsArgs): ReadResult<Chain[]>;
+export function useChains(args?: UseChainsArgs): ReadResult<ChainDetails[]>;
 /**
  * Fetches the list of supported chains.
  *
@@ -204,7 +208,7 @@ export function useChains(args?: UseChainsArgs): ReadResult<Chain[]>;
  */
 export function useChains(
   args?: Pausable<UseChainsArgs>,
-): PausableReadResult<Chain[]>;
+): PausableReadResult<ChainDetails[]>;
 
 export function useChains(
   {
@@ -215,7 +219,7 @@ export function useChains(
     suspense?: boolean;
     pause?: boolean;
   } = { query: { filter: ChainsFilter.ALL } },
-): SuspendableResult<Chain[], UnexpectedError> {
+): SuspendableResult<ChainDetails[], UnexpectedError> {
   return useSuspendableQuery({
     document: ChainsQuery,
     variables: { request },

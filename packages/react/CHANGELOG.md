@@ -1,5 +1,20 @@
 # @aave/react
 
+## 6.6.0
+
+### Minor Changes
+
+- 41678e8: **feat:** expose `Chain.nativeAsset`, return the richer `ChainDetails` from `chain`/`chains`, gate the wrapped-native display transform on chains that actually have a wrapped native asset, and add `collapseNativeErc20Balances` so a chain whose native token is itself an ERC20 is neither transformed nor counted twice
+
+### Patch Changes
+
+- 03a23d7: **fix:** coalesce same-key query operations onto in-flight network requests instead of issuing duplicates, in both the batched (`batchFetchExchange`) and non-batched (`inFlightDedupExchange` + `fetchExchange`) pipelines
+- Updated dependencies [41678e8]
+- Updated dependencies [03a23d7]
+  - @aave/graphql@3.5.0
+  - @aave/client@6.6.0
+  - @aave/core@1.1.2
+
 ## 6.5.0
 
 ### Minor Changes

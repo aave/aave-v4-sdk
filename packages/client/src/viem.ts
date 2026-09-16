@@ -42,6 +42,7 @@ import {
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
 import { supportsPermit } from './adapters';
+import { nativeTokenInfo } from './nativeAsset';
 import { resolveTxHash } from './safe';
 import type {
   ExecutionPlanHandler,
@@ -96,6 +97,11 @@ function signTypedData(
  * @internal
  */
 export function toViemChain(chain: Chain): ViemChain {
+  // A chain with no native token cannot describe a `nativeCurrency`; none is
+  // supported today, so this asserts rather than inventing a placeholder.
+  const nativeToken = nativeTokenInfo(chain);
+  invariant(nativeToken, `Chain ${chain.chainId} has no native token`);
+
   // known chains
   switch (chain.chainId) {
     case chainId(mainnet.id):
@@ -110,9 +116,9 @@ export function toViemChain(chain: Chain): ViemChain {
     id: chain.chainId,
     name: chain.name,
     nativeCurrency: {
-      name: chain.nativeInfo.name,
-      symbol: chain.nativeInfo.symbol,
-      decimals: chain.nativeInfo.decimals,
+      name: nativeToken.name,
+      symbol: nativeToken.symbol,
+      decimals: nativeToken.decimals,
     },
     rpcUrls: { default: { http: [chain.rpcUrl] } },
     blockExplorers: {

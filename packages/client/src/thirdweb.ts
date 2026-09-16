@@ -33,6 +33,7 @@ import { mainnet, sepolia } from 'thirdweb/chains';
 import type { AaveClient } from './AaveClient';
 import { chain as fetchChain } from './actions';
 import { supportsPermit } from './adapters';
+import { nativeTokenInfo } from './nativeAsset';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -45,6 +46,11 @@ import type {
  * @internal
  */
 export function toThirdwebChain(chain: Chain): ThirdwebChain {
+  // A chain with no native token cannot describe a `nativeCurrency`; none is
+  // supported today, so this asserts rather than inventing a placeholder.
+  const nativeToken = nativeTokenInfo(chain);
+  invariant(nativeToken, `Chain ${chain.chainId} has no native token`);
+
   // known chains
   switch (chain.chainId) {
     case chainId(mainnet.id):
@@ -59,9 +65,9 @@ export function toThirdwebChain(chain: Chain): ThirdwebChain {
     id: chain.chainId,
     name: chain.name,
     nativeCurrency: {
-      name: chain.nativeInfo.name,
-      symbol: chain.nativeInfo.symbol,
-      decimals: chain.nativeInfo.decimals,
+      name: nativeToken.name,
+      symbol: nativeToken.symbol,
+      decimals: nativeToken.decimals,
     },
     rpcUrls: { default: { http: [chain.rpcUrl] } },
     blockExplorers: {
