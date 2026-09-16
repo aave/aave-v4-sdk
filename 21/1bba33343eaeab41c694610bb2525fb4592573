@@ -1,0 +1,87 @@
+packages/cli/CHANGELOG.md
+  s_51de072e05345c::t_8a1cafb8868137 3-10
+packages/cli/package.json
+  s_51de072e05345c::t_162e6f39f6fb73 3
+packages/client/CHANGELOG.md
+  s_51de072e05345c::t_8907366fe70487 3-16
+packages/client/package.json
+  s_51de072e05345c::t_7fd1c8d0a3d5da 3
+packages/client/src/actions/misc.ts
+  s_51de072e05345c::t_40ae8fff2269a9 3,34-35,44,70
+packages/client/src/cache.ts
+  s_51de072e05345c::t_bc72799ecf3846 572,613
+packages/client/src/collapseNativeErc20Balances.test.ts
+  s_51de072e05345c::t_3f12fae28a690d 1-205
+packages/client/src/displayTransform.test.ts
+  s_51de072e05345c::t_70271f938b7fb8 27-38,53-62,128,137,145-207,281,324
+packages/client/src/displayTransform.ts
+  s_51de072e05345c::t_b7de8e0d5af47a 3-11,16-22,125-145,154-169
+packages/client/src/displayTransformExchange.test.ts
+  s_51de072e05345c::t_90582f22be5b86 42-66
+packages/client/src/index.ts
+  s_51de072e05345c::t_ebb54a8963eab7 14
+packages/client/src/nativeAsset.test.ts
+  s_51de072e05345c::t_79dc3ffc569101 1-126
+packages/client/src/nativeAsset.ts
+  s_51de072e05345c::t_a4f05b73f8c30d 1-202
+packages/client/src/rewards-readquery.test.ts
+  s_51de072e05345c::t_009d8c763bb5af 78-103
+packages/client/src/thirdweb.ts
+  s_51de072e05345c::t_7f5ad43752b400 36,49-53,68-70
+packages/client/src/viem.ts
+  s_51de072e05345c::t_ef6f0dee0e00c5 45,100-104,119-121
+packages/core/CHANGELOG.md
+  s_51de072e05345c::t_d825e3bc41d6cc 3-8
+packages/core/package.json
+  s_51de072e05345c::t_2e1a14912bd002 3
+packages/core/src/GqlClient.ts
+  s_51de072e05345c::t_b40deff3268dd4 25,279-281
+packages/core/src/batching.test.ts
+  s_51de072e05345c::t_3d984ed6f70e2b 1-249
+packages/core/src/batching.ts
+  s_51de072e05345c::t_2aeda638da149f 24,145-147,189-202,213-215,250-251,253,255,260,263-265,285-288,300-302,331
+packages/core/src/dedup.test.ts
+  s_51de072e05345c::t_b9b47731c558eb 1-168
+packages/core/src/dedup.ts
+  s_51de072e05345c::t_e2503042c0435a 1-92
+packages/graphql/CHANGELOG.md
+  s_51de072e05345c::t_0e89eec148750f 3-8
+packages/graphql/package.json
+  s_51de072e05345c::t_c1c7684058bcca 3
+packages/graphql/src/fragments/common.ts
+  s_51de072e05345c::t_1ab55f7d8a41dd 76-96,107-110,120,124-182
+packages/graphql/src/misc.ts
+  s_51de072e05345c::t_4d8fb2dbe6799e 1,10,13,23,26
+packages/graphql/src/testing.ts
+  s_51de072e05345c::t_71b7ac089df081 26,198-231,247,393
+packages/react/CHANGELOG.md
+  s_51de072e05345c::t_759a1080116769 3-17
+packages/react/package.json
+  s_51de072e05345c::t_85f1495c3c3e98 3
+packages/react/src/misc.ts
+  s_51de072e05345c::t_0bbbbd0c98201a 4-8,46,51,67,75,78,93,102,132,140,170,186,196,211,222
+packages/react/src/viem/useNetworkFee.test.ts
+  s_51de072e05345c::t_be4f0e889cc07f 45-59
+packages/react/src/viem/useNetworkFee.ts
+  s_51de072e05345c::t_9434e5b8525aaa 1-5,210-215,218-220,223,232
+packages/spec/query/__snapshots__/chains.spec.ts.snap
+  s_51de072e05345c::t_8a27ae02dfd047 12,32
+packages/spec/query/chains.spec.ts
+  s_51de072e05345c::t_06b80a83a1b83a 56,81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "211bba33343eaeab41c694610bb2525fb4592573",
+  "prompts": {},
+  "sessions": {
+    "s_51de072e05345c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ef55b23-983e-4ae4-8bb7-212b6eb5dd55",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
