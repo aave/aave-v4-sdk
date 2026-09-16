@@ -398,6 +398,7 @@ export type MultiStepPreviewStep = FragmentOf<
 export const MultiStepPreviewFragment = graphql(
   `fragment MultiStepPreview on MultiStepPreview {
     __typename
+    status
     steps {
       ...MultiStepPreviewStep
     }

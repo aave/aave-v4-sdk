@@ -1254,8 +1254,12 @@ type MerklSupplyReward {
 }
 
 type MultiStepPreview {
+  """Whether the plan as submitted passes protocol validation."""
+  status: PlanStatus!
   steps: [MultiStepPreviewStep!]!
-  """Warnings about the plan as a whole rather than one step."""
+  """
+  Observations about the plan as a whole. Not blocking, unlike the per-step warnings.
+  """
   warnings: [PreviewWarning!]!
 }
 
@@ -1269,8 +1273,12 @@ type MultiStepPreviewStep {
   status: StepStatus!
   """
   The same shape a single-action preview returns, against the state this step starts from.
+  Absent only on a `NOT_EVALUATED` step, which has no state to preview against.
   """
-  preview: PreviewUserPosition!
+  preview: PreviewUserPosition
+  """
+  Why the step is blocked. Every code here refuses the action at protocol level.
+  """
   warnings: [PreviewWarning!]!
 }
 
@@ -1683,6 +1691,21 @@ type PermitTypedData {
   signedAmount: BigDecimal!
 }
 
+"""
+Whether the plan as submitted passes protocol validation.
+
+`Valid` means every step passes the checks the evaluator implements, assuming the amounts
+can be funded. It does not certify wallet balance or gas, which stay with the caller.
+"""
+enum PlanStatus {
+  VALID
+  BLOCKED
+  """
+  A step could not be evaluated, so the plan is neither proven nor refused.
+  """
+  INCOMPLETE
+}
+
 union PointsCriteria = PointsGenericCriteria
 
 type PointsGenericCriteria {
@@ -1922,6 +1945,7 @@ enum PreviewWarningCode {
   DRAW_CAP_EXCEEDED
   AMOUNT_EXCEEDS_DEBT
   AMOUNT_MUST_BE_POSITIVE
+  HEALTH_FACTOR_BELOW_THRESHOLD
   SPLIT_POSITION_WOULD_RESULT
 }
 
@@ -1987,9 +2011,10 @@ type Query {
   Previews a plan of one or more actions by folding them through the protocol state,
   so each step is evaluated against what the steps before it produced.
   
-  A step that cannot execute is returned `BLOCKED` with the reason and is not applied;
-  the remaining steps continue without it. Whether that blocks the flow is the caller's
-  decision, since the same shortfall blocks moving a position but only warns on a deposit.
+  Every step is required, so the first that cannot execute is returned `BLOCKED` with the
+  reason and the rest come back `NOT_EVALUATED`. `status` is the protocol-level verdict on
+  the plan as submitted: it assumes the amounts can be funded and certifies neither wallet
+  balance nor gas.
   """
   multiStepPreview(request: MultiStepPreviewRequest!): MultiStepPreview!
   borrowApyHistory(request: BorrowApyHistoryRequest!): [ApySample!]!
@@ -2770,6 +2795,11 @@ input StableVaultsRequest {
 enum StepStatus {
   APPLIED
   BLOCKED
+  """
+  A step after the one that blocked. Every step in a plan is required, so evaluation
+  stops rather than reporting a sequence the caller never intended to execute.
+  """
+  NOT_EVALUATED
 }
 
 input SubmitOrderBySignatureInput {

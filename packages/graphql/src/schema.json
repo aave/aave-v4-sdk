@@ -3648,6 +3648,17 @@
         "name": "MultiStepPreview",
         "fields": [
           {
+            "name": "status",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "steps",
             "type": {
               "kind": "NON_NULL",
@@ -3715,12 +3726,9 @@
           {
             "name": "preview",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PreviewUserPosition",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "PreviewUserPosition",
+              "ofType": null
             },
             "args": []
           },
