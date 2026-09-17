@@ -165,8 +165,17 @@ export const HubSummarySampleFragment = graphql(
       utilizationRate {
         ...PercentNumber
       }
+      depositsAmount {
+        ...Erc20Amount
+      }
+      borrowsAmount {
+        ...Erc20Amount
+      }
+      availableLiquidityAmount {
+        ...Erc20Amount
+      }
     }`,
-  [ExchangeAmountFragment, PercentNumberFragment],
+  [ExchangeAmountFragment, PercentNumberFragment, Erc20AmountFragment],
 );
 export type HubSummarySample = FragmentOf<typeof HubSummarySampleFragment>;
 
@@ -174,7 +183,7 @@ export type HubSummarySample = FragmentOf<typeof HubSummarySampleFragment>;
  * @internal
  */
 export const HubSummaryHistoryQuery = graphql(
-  `query HubSummaryHistory($request: HubSummaryHistoryRequest!) {
+  `query HubSummaryHistory($request: HubSummaryHistoryRequest!, $currency: Currency! = USD) {
       value: hubSummaryHistory(request: $request) {
         ...HubSummarySample
       }

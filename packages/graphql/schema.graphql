@@ -399,6 +399,31 @@ input ERC20PermitSignature {
   deadline: Int!
 }
 
+"""
+One Earn row before the plan and after all of it.
+
+The row is every collateral-disabled supply of one hub asset, across all the spokes that list
+it, so no single position preview represents it.
+"""
+type EarnScopePreview {
+  hubAsset: HubAssetId!
+  """
+  Supplied balance across the row, interest included. Null only when the row is empty on
+  both sides, where there is no reserve to take the token and its decimals from.
+  """
+  balance: Erc20AmountVariation
+  """
+  Supply interest earned across the row. Null on the same terms as `balance`.
+  """
+  earnings: Erc20AmountVariation
+  value(currency: Currency! = USD): ExchangeAmountVariation!
+  """
+  Base supply rate plus underlying yield, weighted by balance. Reward APY is exposed on
+  each reserve's own rewards rather than folded in here.
+  """
+  supplyApy: PercentNumberVariation!
+}
+
 type Erc20Amount {
   """The value"""
   amount: DecimalNumber!
@@ -408,6 +433,14 @@ type Erc20Amount {
   exchangeRate(currency: Currency! = USD): DecimalNumber!
   isWrappedNative: Boolean!
   token: Erc20Token!
+}
+
+"""
+An `Erc20Amount` before and after, for the token-denominated sides of a scoped preview.
+"""
+type Erc20AmountVariation {
+  current: Erc20Amount!
+  after: Erc20Amount!
 }
 
 type Erc20Approval {
@@ -858,6 +891,19 @@ type HubSummarySample {
   borrows: ExchangeAmount!
   availableLiquidity: ExchangeAmount!
   utilizationRate: PercentNumber!
+  """
+  Deposits in the underlying token. Present only where the criteria resolves to a single
+  token, so a query spanning assets or chains has no token to denominate the sum in.
+  """
+  depositsAmount: Erc20Amount
+  """
+  Borrows in the underlying token, on the same terms as `depositsAmount`.
+  """
+  borrowsAmount: Erc20Amount
+  """
+  Available liquidity in the underlying token, on the same terms as `depositsAmount`.
+  """
+  availableLiquidityAmount: Erc20Amount
 }
 
 input HubTokenInput {
@@ -1193,6 +1239,29 @@ input MarketRepayWithSupplyQuoteInput {
   kind: RepayWithSupplyKind
 }
 
+"""
+One Market before the plan and after all of it.
+
+A side with no position reads as zero rather than as absent, so a Market the user is entering
+for the first time still has a before to compare against.
+"""
+type MarketScopePreview {
+  spoke: SpokeId!
+  """Collateral-enabled supplies, before the plan and after all of it."""
+  collateral(currency: Currency! = USD): ExchangeAmountVariation!
+  """The Market's full debt, which Earn supplies never offset."""
+  debt(currency: Currency! = USD): ExchangeAmountVariation!
+  """Collateral minus debt."""
+  netBalance(currency: Currency! = USD): ExchangeAmountVariation!
+  """Supply APY weighted over collateral-enabled supplies only."""
+  supplyApy: PercentNumberVariation!
+  """
+  Net APY over collateral-enabled supplies, retaining the Market's full debt.
+  """
+  netApy: PercentNumberVariation!
+  healthFactor: HealthFactorVariation!
+}
+
 input MarketSupplySwapQuoteInput {
   """
   Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
@@ -1261,11 +1330,22 @@ type MultiStepPreview {
   Observations about the plan as a whole. Not blocking, unlike the per-step warnings.
   """
   warnings: [PreviewWarning!]!
+  """
+  The selected product surface before the plan and after all of it. Absent when no scope
+  was asked for, and when the plan is not `VALID`, since a partly applied plan is not an
+  operation that happened.
+  """
+  scope: PreviewScopeResult
 }
 
 input MultiStepPreviewRequest {
   """The plan's actions, in execution order."""
   actions: [PreviewAction!]!
+  """
+  The product surface the confirmation card is about, read before the plan and after all
+  of it. Validation always covers every action, whatever the scope.
+  """
+  previewScope: PreviewScope
 }
 
 type MultiStepPreviewStep {
@@ -1882,6 +1962,22 @@ type PreviewRewardOutcome {
   lost: [PreviewReward!]! @deprecated(reason: "Use abandoned with ReserveReward instead.")
   gained: [PreviewReward!]! @deprecated(reason: "Use acquired with ReserveReward instead.")
 }
+
+"""
+The product surface a plan's confirmation card is about.
+
+A Market is one spoke, read over its collateral-enabled supplies and its full debt. An Earn
+row is one hub asset, read over the collateral-disabled supplies of every spoke holding it.
+The same hub asset can sit on both sides at once, which is why the caller names which one.
+"""
+input PreviewScope @oneOf {
+  """The Borrow Market, by its spoke."""
+  market: SpokeId
+  """The Earn row, by its hub asset."""
+  earn: HubAssetId
+}
+
+union PreviewScopeResult = MarketScopePreview | EarnScopePreview
 
 type PreviewSupplyPointsReward {
   id: RewardId!

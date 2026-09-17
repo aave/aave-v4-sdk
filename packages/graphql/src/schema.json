@@ -1406,6 +1406,77 @@
       },
       {
         "kind": "OBJECT",
+        "name": "EarnScopePreview",
+        "fields": [
+          {
+            "name": "hubAsset",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "balance",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Erc20AmountVariation",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "earnings",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Erc20AmountVariation",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "value",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "supplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "Erc20Amount",
         "fields": [
           {
@@ -1484,6 +1555,37 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Erc20Token",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Erc20AmountVariation",
+        "fields": [
+          {
+            "name": "current",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "after",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Erc20Amount",
                 "ofType": null
               }
             },
@@ -2827,6 +2929,33 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "depositsAmount",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Erc20Amount",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "borrowsAmount",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Erc20Amount",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "availableLiquidityAmount",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Erc20Amount",
+              "ofType": null
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -3355,6 +3484,129 @@
       },
       {
         "kind": "OBJECT",
+        "name": "MarketScopePreview",
+        "fields": [
+          {
+            "name": "spoke",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "collateral",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "debt",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "netBalance",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExchangeAmountVariation",
+                "ofType": null
+              }
+            },
+            "args": [
+              {
+                "name": "currency",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Any"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "supplyApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "netApy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumberVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "healthFactor",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "HealthFactorVariation",
+                "ofType": null
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "MaxLiquidationBonusVariation",
         "fields": [
           {
@@ -3691,6 +3943,15 @@
                   }
                 }
               }
+            },
+            "args": []
+          },
+          {
+            "name": "scope",
+            "type": {
+              "kind": "UNION",
+              "name": "PreviewScopeResult",
+              "ofType": null
             },
             "args": []
           }
@@ -6560,6 +6821,20 @@
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "UNION",
+        "name": "PreviewScopeResult",
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "MarketScopePreview"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "EarnScopePreview"
+          }
+        ]
       },
       {
         "kind": "OBJECT",

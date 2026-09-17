@@ -9,6 +9,7 @@ import {
   ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
+  HealthFactorVariationFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
   PaginatedResultInfoFragment,
@@ -395,6 +396,78 @@ export type MultiStepPreviewStep = FragmentOf<
   typeof MultiStepPreviewStepFragment
 >;
 
+export const MarketScopePreviewFragment = graphql(
+  `fragment MarketScopePreview on MarketScopePreview {
+    __typename
+    spoke
+    collateral(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    debt(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    netBalance(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    supplyApy {
+      ...PercentNumberVariation
+    }
+    netApy {
+      ...PercentNumberVariation
+    }
+    healthFactor {
+      ...HealthFactorVariation
+    }
+  }`,
+  [
+    ExchangeAmountVariationFragment,
+    PercentNumberVariationFragment,
+    HealthFactorVariationFragment,
+  ],
+);
+export type MarketScopePreview = FragmentOf<typeof MarketScopePreviewFragment>;
+
+export const Erc20AmountVariationFragment = graphql(
+  `fragment Erc20AmountVariation on Erc20AmountVariation {
+    __typename
+    current {
+      ...Erc20Amount
+    }
+    after {
+      ...Erc20Amount
+    }
+  }`,
+  [Erc20AmountFragment],
+);
+export type Erc20AmountVariation = FragmentOf<
+  typeof Erc20AmountVariationFragment
+>;
+
+export const EarnScopePreviewFragment = graphql(
+  `fragment EarnScopePreview on EarnScopePreview {
+    __typename
+    hubAsset
+    balance {
+      ...Erc20AmountVariation
+    }
+    earnings {
+      ...Erc20AmountVariation
+    }
+    value(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    supplyApy {
+      ...PercentNumberVariation
+    }
+  }`,
+  [
+    Erc20AmountVariationFragment,
+    ExchangeAmountVariationFragment,
+    PercentNumberVariationFragment,
+  ],
+);
+export type EarnScopePreview = FragmentOf<typeof EarnScopePreviewFragment>;
+
 export const MultiStepPreviewFragment = graphql(
   `fragment MultiStepPreview on MultiStepPreview {
     __typename
@@ -405,8 +478,21 @@ export const MultiStepPreviewFragment = graphql(
     warnings {
       ...PreviewWarning
     }
+    scope {
+      ...on MarketScopePreview {
+        ...MarketScopePreview
+      }
+      ...on EarnScopePreview {
+        ...EarnScopePreview
+      }
+    }
   }`,
-  [MultiStepPreviewStepFragment, PreviewWarningFragment],
+  [
+    MultiStepPreviewStepFragment,
+    PreviewWarningFragment,
+    MarketScopePreviewFragment,
+    EarnScopePreviewFragment,
+  ],
 );
 export type MultiStepPreview = FragmentOf<typeof MultiStepPreviewFragment>;
 
