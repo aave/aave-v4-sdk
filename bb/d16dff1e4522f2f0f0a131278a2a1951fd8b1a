@@ -1,0 +1,27 @@
+packages/graphql/schema.graphql
+  s_51de072e05345c::t_02ca5aacbf347c 402-426,438-445,894-906,1242-1264,1333-1338,1344-1348,1966-1981
+packages/graphql/src/graphql-env.d.ts
+  s_51de072e05345c::t_41a8ccd467b4ba 69,71,124,156,164-165,254-255
+packages/graphql/src/hub.ts
+  s_51de072e05345c::t_17dbe93bc84ea6 168-176,178,186
+packages/graphql/src/schema.json
+  s_51de072e05345c::t_20d097bb3336a2 1407-1477,1566-1596,2932-2958,3485-3607,3948-3956,6825-6838
+packages/graphql/src/transactions.ts
+  s_51de072e05345c::t_7662d3de96f10b 12,399-470,481-488,490-495
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "bbd16dff1e4522f2f0f0a131278a2a1951fd8b1a",
+  "prompts": {},
+  "sessions": {
+    "s_51de072e05345c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ef55b23-983e-4ae4-8bb7-212b6eb5dd55",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
