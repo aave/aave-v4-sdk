@@ -1,10 +1,25 @@
 import type { AssetOverride } from './config';
 
+/**
+ * A `Chain.nativeAsset` union member as it arrives on the wire. Loosely typed
+ * because this transform walks raw response data, not fragment types.
+ */
+export type NativeAssetShape = {
+  __typename?: string;
+  nativeToken?: Record<string, unknown>;
+};
+
 export type Erc20TokenShape = {
   __typename: 'Erc20Token';
   info: Record<string, unknown>;
   address: string;
-  chain: { chainId: number; nativeInfo: Record<string, unknown> };
+  chain: {
+    chainId: number;
+    /** Absent on a payload that predates `nativeAsset`; `null` on a chain with no native token. */
+    nativeAsset?: NativeAssetShape | null;
+    /** Superseded by `nativeAsset`; still read as a fallback for older payloads. */
+    nativeInfo?: Record<string, unknown>;
+  };
   isWrappedNativeToken: boolean;
 };
 
@@ -107,6 +122,27 @@ export function deepTransformTokens(
   return changed ? result : data;
 }
 
+/**
+ * The native token info this ERC20 may be displayed as, or `null` when the
+ * substitution is not licensed on this chain.
+ *
+ * Only a real wrapper licenses it. On a shared-balance chain the ERC20 *is* the
+ * native token viewed at its own, lower precision — substituting there would
+ * dress a 6-decimal asset in 18-decimal info.
+ */
+function wrappedNativeDisplayInfo(
+  chain: Erc20TokenShape['chain'],
+): Record<string, unknown> | null {
+  // `undefined` means the payload predates `nativeAsset`; `null` means the chain
+  // genuinely has no native token to borrow from.
+  if (chain.nativeAsset === undefined) return chain.nativeInfo ?? null;
+  if (chain.nativeAsset === null) return null;
+
+  return chain.nativeAsset.__typename === 'WrappedNativeAsset'
+    ? (chain.nativeAsset.nativeToken ?? null)
+    : null;
+}
+
 export function transformErc20Token(
   token: Erc20TokenShape,
   applyWrappedNative: boolean,
@@ -115,12 +151,22 @@ export function transformErc20Token(
   let current = token;
 
   if (applyWrappedNative && token.isWrappedNativeToken) {
-    current = {
-      ...current,
-      // Preserve the original info.id so consumer-facing token identity is stable
-      // across the native transform (e.g. React keys, downstream identity checks).
-      info: { ...token.chain.nativeInfo, id: token.info.id },
-    };
+    const nativeInfo = wrappedNativeDisplayInfo(token.chain);
+    if (nativeInfo) {
+      current = {
+        ...current,
+        info: {
+          ...nativeInfo,
+          // Preserve the original info.id so consumer-facing token identity is stable
+          // across the native transform (e.g. React keys, downstream identity checks).
+          id: token.info.id,
+          // Keep the ERC20's own scale. A wrapper's decimals always equal its
+          // native token's, so this is a no-op today — it exists so the transform
+          // can never rescale an amount, whatever the backend sends.
+          decimals: token.info.decimals,
+        },
+      };
+    }
   }
 
   if (overrideMap) {

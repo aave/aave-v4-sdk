@@ -1,6 +1,6 @@
 import type { UnexpectedError } from '@aave/core';
 import {
-  type Chain,
+  type ChainDetails,
   ChainQuery,
   type ChainRequest,
   ChainsQuery,
@@ -31,7 +31,8 @@ import {
  * @param client - Aave client.
  * @param request - The chain request parameters.
  * @param options - The query options.
- * @returns The chain data, or null if not found.
+ * @returns The chain data, or null if not found. `ChainDetails` carries the
+ * wrapper's own `TokenInfo`, which the chain embedded in a token does not.
  */
 export function chain(
   client: AaveClient,
@@ -40,7 +41,7 @@ export function chain(
     batch = DEFAULT_QUERY_OPTIONS.batch,
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: BatchOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
-): ResultAsync<Chain | null, UnexpectedError> {
+): ResultAsync<ChainDetails | null, UnexpectedError> {
   return client.query(ChainQuery, { request }, { batch, requestPolicy });
 }
 
@@ -66,7 +67,7 @@ export function chain(
 export function chains(
   client: AaveClient,
   request: ChainsRequest,
-): ResultAsync<Chain[], UnexpectedError> {
+): ResultAsync<ChainDetails[], UnexpectedError> {
   return client.query(ChainsQuery, { request });
 }
 

@@ -1,5 +1,11 @@
 # @aave/core
 
+## 1.1.2
+
+### Patch Changes
+
+- 03a23d7: **fix:** coalesce same-key query operations onto in-flight network requests instead of issuing duplicates, in both the batched (`batchFetchExchange`) and non-batched (`inFlightDedupExchange` + `fetchExchange`) pipelines
+
 ## 1.1.1
 
 ### Patch Changes
