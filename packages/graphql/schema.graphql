@@ -416,10 +416,26 @@ type EarnScopePreview {
   Supply interest earned across the row. Null on the same terms as `balance`.
   """
   earnings: Erc20AmountVariation
+  """
+  Rewards the whole plan gains or gives up across the row, asked of every spoke holding it.
+  """
+  rewards: PreviewRewardOutcome!
+  """
+  The hub asset's base rates. Every reserve of a hub asset shares one curve, so the row has
+  a single pair however many spokes hold it.
+  """
+  reserveRates: ScopedReserveRates
   value(currency: Currency! = USD): ExchangeAmountVariation!
   """
-  Base supply rate plus underlying yield, weighted by balance. Reward APY is exposed on
-  each reserve's own rewards rather than folded in here.
+  Yearly earnings at the row's APY, which is the rate applied to the balance rather than
+  the interest already accrued that `earnings` reports.
+  """
+  projectedEarnings: ExchangeAmountVariation!
+  """
+  Effective supply APY: base rate, underlying yield and the Merkl rewards this state is
+  eligible for, weighted by balance. Eligibility is read off each side's own state, since
+  enabling collateral or clearing debt can change what the user qualifies for. Points carry
+  no APY and are not folded in.
   """
   supplyApy: PercentNumberVariation!
 }
@@ -668,10 +684,12 @@ scalar HubAssetId
 type HubAssetInterestRateModelPoint {
   """The utilization rate at this point on the curve"""
   utilizationRate: PercentNumber!
-  """The variable borrow rate at this utilization level"""
+  """
+  The borrow rate at this utilization level, compounded so the curve meets `borrowApy`
+  """
   borrowRate: PercentNumber!
   """
-  The supply rate at this utilization level (borrow_rate × utilization × (1 − fee))
+  Nominal borrow rate × utilization × (1 − fee) at this utilization level, then compounded
   """
   supplyRate: PercentNumber!
   """
@@ -730,9 +748,9 @@ type HubAssetSummary {
   borrowed: Erc20Amount!
   """The available liquidity"""
   availableLiquidity: Erc20Amount!
-  """The supply apy"""
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
-  """The borrow apy"""
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
   """The net apy"""
   netApy: PercentNumber!
@@ -1259,6 +1277,40 @@ type MarketScopePreview {
   Net APY over collateral-enabled supplies, retaining the Market's full debt.
   """
   netApy: PercentNumberVariation!
+  """
+  The premium the position pays on top of the base borrow rate.
+  
+  A side with no debt has no premium, which reads as zero rather than as absent so the two
+  sides stay comparable.
+  """
+  riskPremium: PercentNumberVariation!
+  """What the position could borrow in total against its collateral."""
+  maxBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
+  """
+  What is left of that capacity once the position's debt is taken off it.
+  """
+  remainingBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
+  """
+  Yearly earnings at the net APY the position ends on, which is the rate applied to the
+  balance rather than interest already accrued.
+  """
+  projectedEarnings: ExchangeAmountVariation!
+  """
+  Rewards the whole plan gains or gives up on this Market.
+  
+  Eligibility either side comes from that state, so a reward dropped by one step and
+  regained by a later one does not show up on both lists.
+  """
+  rewards: PreviewRewardOutcome!
+  """
+  Every reserve on this Market whose pinned risk config the plan moves.
+  
+  Compares the two projected states rather than the actions, so a re-pin an action caused
+  indirectly is reported the same as one it asked for.
+  """
+  otherConditions: [UserPositionConditionVariation!]!
+  """Base rates per reserve the Market holds, in reserve id order."""
+  reserveRates: [ScopedReserveRates!]!
   healthFactor: HealthFactorVariation!
 }
 
@@ -2422,7 +2474,9 @@ type ReserveSummary {
   borrowed: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
   """
   Yield the asset accrues outside the pool rate, read from the reserve's price source. Zero
@@ -2441,6 +2495,7 @@ type ReserveUserState {
   balance: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+  """Compounded yearly cost including the user's risk premium."""
   borrowApy: PercentNumber!
   """
   Pinned to `dynamicConfigKey`, not the reserve's latest config. Also their liquidation boundary.
@@ -2517,6 +2572,16 @@ input ReservesRequestQuery @oneOf {
 union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
 
 scalar RewardId
+
+"""
+A reserve's own base rates either side of the plan, which the scope's weighted APY does not
+substitute: that one answers what the user earns, this one what the reserve pays.
+"""
+type ScopedReserveRates {
+  reserve: ReserveId!
+  supplyApy: PercentNumberVariation!
+  borrowApy: PercentNumberVariation!
+}
 
 input SetSpokeUserPositionManagerRequest {
   """The spoke id"""

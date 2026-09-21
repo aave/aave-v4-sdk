@@ -396,6 +396,21 @@ export type MultiStepPreviewStep = FragmentOf<
   typeof MultiStepPreviewStepFragment
 >;
 
+export const ScopedReserveRatesFragment = graphql(
+  `fragment ScopedReserveRates on ScopedReserveRates {
+    __typename
+    reserve
+    supplyApy {
+      ...PercentNumberVariation
+    }
+    borrowApy {
+      ...PercentNumberVariation
+    }
+  }`,
+  [PercentNumberVariationFragment],
+);
+export type ScopedReserveRates = FragmentOf<typeof ScopedReserveRatesFragment>;
+
 export const MarketScopePreviewFragment = graphql(
   `fragment MarketScopePreview on MarketScopePreview {
     __typename
@@ -415,6 +430,27 @@ export const MarketScopePreviewFragment = graphql(
     netApy {
       ...PercentNumberVariation
     }
+    riskPremium {
+      ...PercentNumberVariation
+    }
+    maxBorrowingPower(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    remainingBorrowingPower(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    projectedEarnings {
+      ...ExchangeAmountVariation
+    }
+    rewards {
+      ...PreviewRewardOutcome
+    }
+    reserveRates {
+      ...ScopedReserveRates
+    }
+    otherConditions {
+      ...UserPositionConditionVariation
+    }
     healthFactor {
       ...HealthFactorVariation
     }
@@ -423,6 +459,9 @@ export const MarketScopePreviewFragment = graphql(
     ExchangeAmountVariationFragment,
     PercentNumberVariationFragment,
     HealthFactorVariationFragment,
+    PreviewRewardOutcomeFragment,
+    ScopedReserveRatesFragment,
+    UserPositionConditionVariationFragment,
   ],
 );
 export type MarketScopePreview = FragmentOf<typeof MarketScopePreviewFragment>;
@@ -456,6 +495,15 @@ export const EarnScopePreviewFragment = graphql(
     value(currency: $currency) {
       ...ExchangeAmountVariation
     }
+    projectedEarnings {
+      ...ExchangeAmountVariation
+    }
+    rewards {
+      ...PreviewRewardOutcome
+    }
+    reserveRates {
+      ...ScopedReserveRates
+    }
     supplyApy {
       ...PercentNumberVariation
     }
@@ -464,6 +512,8 @@ export const EarnScopePreviewFragment = graphql(
     Erc20AmountVariationFragment,
     ExchangeAmountVariationFragment,
     PercentNumberVariationFragment,
+    PreviewRewardOutcomeFragment,
+    ScopedReserveRatesFragment,
   ],
 );
 export type EarnScopePreview = FragmentOf<typeof EarnScopePreviewFragment>;
