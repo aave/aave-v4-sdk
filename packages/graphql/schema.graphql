@@ -291,10 +291,20 @@ type Chain {
   chainId: ChainId!
   explorerUrl: String!
   isTestnet: Boolean!
-  nativeWrappedToken: EvmAddress!
-  nativeWrappedInfo: TokenInfo!
-  nativeInfo: TokenInfo!
-  nativeGateway: EvmAddress!
+
+  """
+  Null on a chain with no native token at all. Gas is a separate concern: such a chain
+  still pays fees, in ordinary ERC20s.
+  """
+  nativeAsset: NativeAsset
+  nativeWrappedToken: EvmAddress! @deprecated(reason: "Use nativeAsset { ... on WrappedNativeAsset { wrappedNativeTokenAddress } }.")
+  nativeWrappedInfo: TokenInfo! @deprecated(reason: "Use nativeAsset { ... on WrappedNativeAsset { wrappedNativeToken } }.")
+  nativeInfo: TokenInfo! @deprecated(reason: "Use nativeAsset { ... on WrappedNativeAsset { nativeToken } ... on SharedBalanceNativeAsset { nativeToken } }.")
+
+  """
+  Zero when no gateway is deployed; the honest optional value is `WrappedNativeAsset.gateway`.
+  """
+  nativeGateway: EvmAddress! @deprecated(reason: "Use nativeAsset { ... on WrappedNativeAsset { gateway } }.")
   signatureGateway: EvmAddress!
   rpcUrl: String!
   isFork: Boolean!
@@ -1405,6 +1415,12 @@ type NativeAmount {
   exchangeRate(currency: Currency! = USD): DecimalNumber!
 }
 
+"""
+How a chain's native token relates to an ERC20. Match non-exhaustively: further members
+may be added.
+"""
+union NativeAsset = WrappedNativeAsset | SharedBalanceNativeAsset
+
 type NativeToken {
   info: TokenInfo!
   chain: Chain!
@@ -2490,6 +2506,18 @@ input SetUserSuppliesAsCollateralRequest {
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
+}
+
+"""A chain whose native token *is* an ERC20."""
+type SharedBalanceNativeAsset {
+  """The native token as `eth_getBalance` reports it, at full precision."""
+  nativeToken: TokenInfo!
+
+  """
+  Where `balanceOf` reads the same balance, at that ERC20's own decimals: a truncating
+  view of `nativeToken`, never a second asset. Its token info resolves via the ERC20 path.
+  """
+  erc20Address: EvmAddress!
 }
 
 scalar Signature
@@ -4016,3 +4044,21 @@ input WithdrawSwapQuoteRequest @oneOf {
 }
 
 union WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
+
+"""A native token with an ERC20 wrapper."""
+type WrappedNativeAsset {
+  """The chain's native token, and what gas is paid in."""
+  nativeToken: TokenInfo!
+
+  """
+  The wrapper: a distinct asset, redeemable 1:1 for `nativeToken`. Its `decimals` always
+  equals `nativeToken.decimals`.
+  """
+  wrappedNativeToken: TokenInfo!
+
+  """The wrapped native token's address."""
+  wrappedNativeTokenAddress: EvmAddress!
+
+  """Null when no native gateway is deployed."""
+  gateway: EvmAddress
+}

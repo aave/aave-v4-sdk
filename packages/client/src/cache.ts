@@ -563,6 +563,7 @@ export const exchange = cacheExchange({
     ReserveStatus: () => null,
     ReserveSummary: () => null,
     ReserveUserState: () => null,
+    SharedBalanceNativeAsset: () => null,
     SpokePositionManager: () => null,
     SpokeUserPositionManager: () => null,
     StableVaultPendingAvailability: () => null,
@@ -603,5 +604,6 @@ export const exchange = cacheExchange({
     UserSupplyItem: () => null,
     WithdrawSwap: () => null,
     WithdrawSwapQuoteResult: () => null,
+    WrappedNativeAsset: () => null,
   },
 });

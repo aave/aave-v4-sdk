@@ -11,6 +11,7 @@ export type {
   SSRConfig,
 } from './config';
 export * from './environments';
+export * from './nativeAsset';
 export * from './options';
 export type * from './types';
 export { transactionReceipt } from './types';
