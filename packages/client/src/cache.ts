@@ -169,6 +169,9 @@ export const exchange = cacheExchange({
     LiquidationsSample: {
       date: transformToDate,
     },
+    LiquidationsSampleItem: {
+      timestamp: transformToDate,
+    },
     MerklBorrowReward: {
       startDate: transformToDate,
       endDate: transformToDate,
@@ -501,6 +504,7 @@ export const exchange = cacheExchange({
     LeverageQuoteResult: () => null,
     LiquidationFeeVariation: () => null,
     LiquidationsSample: () => null,
+    LiquidationsSampleItem: () => null,
     LiquidationsSummary: () => null,
     MaxLiquidationBonusVariation: () => null,
     MultichainAsset: () => null,

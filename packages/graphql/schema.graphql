@@ -665,11 +665,13 @@ type HubAssetInterestRateModelPoint {
   """The utilization rate at this point on the curve"""
   utilizationRate: PercentNumber!
 
-  """The variable borrow rate at this utilization level"""
+  """
+  The borrow rate at this utilization level, compounded so the curve meets `borrowApy`
+  """
   borrowRate: PercentNumber!
 
   """
-  The supply rate at this utilization level (borrow_rate × utilization × (1 − fee))
+  Nominal borrow rate × utilization × (1 − fee) at this utilization level, then compounded
   """
   supplyRate: PercentNumber!
 
@@ -739,10 +741,10 @@ type HubAssetSummary {
   """The available liquidity"""
   availableLiquidity: Erc20Amount!
 
-  """The supply apy"""
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
 
-  """The borrow apy"""
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
 
   """The net apy"""
@@ -1159,6 +1161,28 @@ type LiquidationsSample {
   Debt-weighted gross bonus for the bucket: seized collateral over covered debt, minus one.
   """
   averageLiquidationBonus: PercentNumber!
+
+  """
+  Priced liquidations in this bucket, largest debt first, at most `limit` (capped at 50).
+  """
+  items(limit: Int! = 50): [LiquidationsSampleItem!]!
+}
+
+"""One liquidation inside a bucket, valued at its own timestamp."""
+type LiquidationsSampleItem {
+  """The same id the liquidation carries in `activities`."""
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  user: EvmAddress!
+  liquidator: EvmAddress!
+  debtReserveId: ReserveId!
+  collateralReserveId: ReserveId!
+  debtLiquidated: ExchangeAmount!
+  collateralLiquidated: ExchangeAmount!
+
+  """Seized collateral over covered debt, minus one."""
+  liquidationBonus: PercentNumber!
 }
 
 """
@@ -2373,7 +2397,11 @@ type ReserveSummary {
   borrowed: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
+
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
 
   """
@@ -2389,6 +2417,8 @@ type ReserveUserState {
   balance: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+
+  """Compounded yearly cost including the user's risk premium."""
   borrowApy: PercentNumber!
 
   """

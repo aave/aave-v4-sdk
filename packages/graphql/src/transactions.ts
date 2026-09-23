@@ -875,6 +875,32 @@ export type ActivitiesRequestQuery = ReturnType<
   typeof graphql.scalar<'ActivitiesRequestQuery'>
 >;
 
+export const LiquidationsSampleItemFragment = graphql(
+  `fragment LiquidationsSampleItem on LiquidationsSampleItem {
+    __typename
+    id
+    timestamp
+    txHash
+    user
+    liquidator
+    debtReserveId
+    collateralReserveId
+    debtLiquidated {
+      ...ExchangeAmount
+    }
+    collateralLiquidated {
+      ...ExchangeAmount
+    }
+    liquidationBonus {
+      ...PercentNumber
+    }
+  }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type LiquidationsSampleItem = FragmentOf<
+  typeof LiquidationsSampleItemFragment
+>;
+
 export const LiquidationsSampleFragment = graphql(
   `fragment LiquidationsSample on LiquidationsSample {
     __typename
@@ -889,8 +915,15 @@ export const LiquidationsSampleFragment = graphql(
     averageLiquidationBonus {
       ...PercentNumber
     }
+    items {
+      ...LiquidationsSampleItem
+    }
   }`,
-  [ExchangeAmountFragment, PercentNumberFragment],
+  [
+    ExchangeAmountFragment,
+    PercentNumberFragment,
+    LiquidationsSampleItemFragment,
+  ],
 );
 export type LiquidationsSample = FragmentOf<typeof LiquidationsSampleFragment>;
 
