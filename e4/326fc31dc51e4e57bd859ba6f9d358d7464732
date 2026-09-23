@@ -1,0 +1,36 @@
+.changeset/rough-plan-network-fees.md
+  s_6a7fe5cb612d10::t_b6625ce43528c0 1-5
+packages/react/src/viem/useNetworkFee.plan.test.ts
+  s_6a7fe5cb612d10::t_5ad873e8602ddb 7-11,13,16,52-60,76-88,97,103-109,120,130,133,140-144,150-152,154-162,169-185,187-190,203-205,207-210,213,215-217,225-240,242-262
+  s_6a7fe5cb612d10::t_b6625ce43528c0 1-6,12,14-15,17-51,61-75,89-96,98-102,110-119,121-129,131-132,134-139,145-149,153,163-168,186,191-202,206,211-212,214,218-224,241,263-264
+  s_6a7fe5cb612d10::t_19406f7d9d403d 265-313
+packages/react/src/viem/useNetworkFee.ts
+  h_dd1a1ee57491bb 9,22,26,31,67-69,111-118,120-136,138-147,153,155-156,158,202,211,275-279,295-309,316,319-320,325,331-335,339,349
+  s_6a7fe5cb612d10::t_012b92a53033d7 162,169,194,208,217,310-312,327-330,348,364
+  s_6a7fe5cb612d10::t_5ad873e8602ddb 137
+  s_6a7fe5cb612d10::t_f241681aed6d99 347
+  h_dd1a1ee57491bb 119,350-352
+packages/react/src/misc.ts
+  h_dd1a1ee57491bb 383-389
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e4326fc31dc51e4e57bd859ba6f9d358d7464732",
+  "prompts": {},
+  "humans": {
+    "h_dd1a1ee57491bb": {
+      "author": "AGMASO <agmguindo@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6a7fe5cb612d10": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0a966-f106-79e3-942f-135722793033",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

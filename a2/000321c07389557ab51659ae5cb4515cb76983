@@ -1,0 +1,19 @@
+packages/spec/query/activities.spec.ts
+  s_054c71c5deaefe::t_2d1375e5c420d8 46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "a2000321c07389557ab51659ae5cb4515cb76983",
+  "prompts": {},
+  "sessions": {
+    "s_054c71c5deaefe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ba11f975-02a9-4022-b216-04ebb89af386",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

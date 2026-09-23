@@ -1,0 +1,26 @@
+packages/client/src/collapseNativeErc20Balances.test.ts
+  s_0f31fdd334493f::t_008fc44f50971c 91
+  s_0f31fdd334493f::t_fa2cb6cb076713 1-76,81-90,92-205
+  s_0f31fdd334493f::t_4fbd2080590755 77-80
+.changeset/olive-pumas-repeat.md
+  s_0f31fdd334493f::t_6a86a18c4cb7c9 7
+packages/client/src/nativeAsset.ts
+  s_0f31fdd334493f::t_695a5ea9a81383 1
+  s_0f31fdd334493f::t_0db4e2ec72e92d 2,79-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "05ba48c35377245a108bb8ce342997973156c0e2",
+  "prompts": {},
+  "sessions": {
+    "s_0f31fdd334493f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "434fafa5-67de-4308-ac1d-3953f513c180",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+packages/client/src/config.ts
+  s_02002a9d458980::t_ae3cc7e35c9abb 96-106
+  s_02002a9d458980::t_cf206abadb7c84 132,138
+  s_02002a9d458980::t_922e32e3096649 95
+.changeset/fresh-cache-window.md
+  s_02002a9d458980::t_97198ddccb9e37 1-7
+packages/core/src/ssr.test.ts
+  s_02002a9d458980::t_67618d13abbf71 46
+packages/core/src/GqlClient.test.ts
+  s_02002a9d458980::t_3843df3c052c2c 326-382
+  s_02002a9d458980::t_67618d13abbf71 45
+packages/core/package.json
+  s_02002a9d458980::t_f67a9e772174cd 45
+packages/core/src/context.ts
+  s_02002a9d458980::t_743c10ba3c8619 15-21
+packages/core/src/GqlClient.ts
+  s_02002a9d458980::t_e6ac3855486fcb 76
+  s_02002a9d458980::t_cbac6fc0c12fd1 22
+  s_02002a9d458980::t_93f3d17f57118c 257-270,277-281
+pnpm-lock.yaml
+  s_02002a9d458980::t_20c02a03463d06 164-166,1700,2278,2309,2788-2792,2869,6081,6086,6091,10024-10028
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b155e55095c55efad1c4a64034df6349d44ea9fb",
+  "prompts": {},
+  "sessions": {
+    "s_02002a9d458980": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2835157-9ccc-46d3-a4b5-6be40065c771",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

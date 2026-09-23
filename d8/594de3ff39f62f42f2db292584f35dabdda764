@@ -1,0 +1,19 @@
+packages/spec/query/__snapshots__/chains.spec.ts.snap
+  s_0f31fdd334493f::t_22cfc3118d6b7f 12,32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d8594de3ff39f62f42f2db292584f35dabdda764",
+  "prompts": {},
+  "sessions": {
+    "s_0f31fdd334493f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "434fafa5-67de-4308-ac1d-3953f513c180",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

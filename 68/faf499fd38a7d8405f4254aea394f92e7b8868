@@ -1,0 +1,26 @@
+.changeset/olive-moons-repeat.md
+  s_49e1f876a97ee5::t_9d99660e175ef0 1-6
+packages/client/src/config.ts
+  s_49e1f876a97ee5::t_742b494a20dc26 2,74-82,128-129,131-135,141,150-152
+  s_49e1f876a97ee5::t_94b7d9ceefc454 120-127,130
+packages/client/src/AaveClient.ts
+  s_49e1f876a97ee5::t_9d99660e175ef0 70-75,77
+packages/client/src/config.test.ts
+  s_49e1f876a97ee5::t_5e58fdc4ff65ef 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "68faf499fd38a7d8405f4254aea394f92e7b8868",
+  "prompts": {},
+  "sessions": {
+    "s_49e1f876a97ee5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "102fc9ad-1298-46e4-964c-c595182d827b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+packages/react/src/misc.ts
+  s_0f31fdd334493f::t_dcb88c17985b1b 4-8
+  s_0f31fdd334493f::t_526dfd85216440 46,51,67,75,78,93,102,132,140,170,186,196,211,222
+packages/client/src/actions/misc.ts
+  s_0f31fdd334493f::t_57fa0ab6f7ef5a 3,34-35,44,70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "497c276e4f5d7166969d5817c7880646457f4e8b",
+  "prompts": {},
+  "sessions": {
+    "s_0f31fdd334493f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "434fafa5-67de-4308-ac1d-3953f513c180",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

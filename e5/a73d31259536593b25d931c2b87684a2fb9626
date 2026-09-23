@@ -1,0 +1,61 @@
+packages/react/src/order/index.ts
+  s_5b07274d9fa56f::t_83ad0c4a4e18f9 7
+packages/react/src/order/helpers.ts
+  s_5b07274d9fa56f::t_d1b551e365ab65 82-85
+  s_5b07274d9fa56f::t_13fa2b93c19140 97-111
+  s_5b07274d9fa56f::t_53e6cda43c8fd6 167
+  s_5b07274d9fa56f::t_d8f1a21138de79 22
+  s_5b07274d9fa56f::t_004c989952cfcd 230-233,236-239,245-252
+  s_5b07274d9fa56f::t_5dd4617cb543b2 126-129,131-134,138-153
+  s_5b07274d9fa56f::t_6400bbaa13aa88 187-190,192-195,199-214
+  s_5b07274d9fa56f::t_bc505079e7d697 96
+packages/react/src/order/useSupplySwapOrder.ts
+  s_5b07274d9fa56f::t_d1b551e365ab65 101-104
+  s_5b07274d9fa56f::t_5bff23ef38d2e3 39,51-53
+  s_5b07274d9fa56f::t_4d0b6d994794f4 100
+packages/react/src/order/useLeverage.ts
+  s_5b07274d9fa56f::t_4d0b6d994794f4 110
+  s_5b07274d9fa56f::t_d1b551e365ab65 111-114
+  s_5b07274d9fa56f::t_5bff23ef38d2e3 48,60-62
+packages/react/src/order/useSupplySwapOrder.test.ts
+  s_5b07274d9fa56f::t_5ec283074d879d 110,156-158
+  s_5b07274d9fa56f::t_5a703c7338619c 122-124
+packages/react/src/order/useWithdrawSwapOrder.ts
+  s_5b07274d9fa56f::t_4d0b6d994794f4 84
+  s_5b07274d9fa56f::t_d1b551e365ab65 85-88
+  s_5b07274d9fa56f::t_5bff23ef38d2e3 39,51-53
+packages/react/src/order/useTokenSwapOrder.ts
+  s_5b07274d9fa56f::t_36a1062637749e 70
+packages/react/src/order/useBorrowSwapOrder.ts
+  s_5b07274d9fa56f::t_5bff23ef38d2e3 39,51-53
+  s_5b07274d9fa56f::t_4d0b6d994794f4 83
+  s_5b07274d9fa56f::t_d1b551e365ab65 84-87
+packages/react/src/order/useOrderStatus.ts
+  s_5b07274d9fa56f::t_59f1f6a54e62ab 113-114
+  s_5b07274d9fa56f::t_20740b0b003087 7
+  s_5b07274d9fa56f::t_50638ce52bc1f8 104-106,120
+packages/react/src/order/useCancelOrder.ts
+  s_5b07274d9fa56f::t_d4f5d715175195 152,155
+  s_5b07274d9fa56f::t_489ffc6b53234e 5
+  s_5b07274d9fa56f::t_5cfc67227ee6e7 124-146
+packages/react/src/order/useRepayWithSupplyOrder.ts
+  s_5b07274d9fa56f::t_d1b551e365ab65 86-89
+  s_5b07274d9fa56f::t_5bff23ef38d2e3 40,52-54
+  s_5b07274d9fa56f::t_4d0b6d994794f4 85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e5a73d31259536593b25d931c2b87684a2fb9626",
+  "prompts": {},
+  "sessions": {
+    "s_5b07274d9fa56f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3dd45558-362f-46f5-905c-63e6fbb51c82",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
