@@ -1,0 +1,33 @@
+packages/react/src/transactions/useLiquidationsSummary.ts
+  s_9f9a6915a415a4::t_fe3ec2057a226b 1-102
+.changeset/liquidations-summary-reserve-activities.md
+  s_9f9a6915a415a4::t_0a3d6506a89a72 4,7
+packages/client/src/cache.ts
+  s_9f9a6915a415a4::t_047f8d14dc2191 172-174,507
+packages/graphql/schema.graphql
+  s_9f9a6915a415a4::t_610f38ea456647 668-670,674,744,747,1164-1185,2400-2401,2403-2404,2420-2421
+packages/graphql/src/graphql-env.d.ts
+  s_9f9a6915a415a4::t_cb4d7109265bab 146-147
+packages/graphql/src/schema.json
+  s_9f9a6915a415a4::t_3bcf72563692d6 3251-3399
+packages/graphql/src/transactions.ts
+  s_9f9a6915a415a4::t_5478fae90203e1 878-903,918-920,922-926
+packages/react/src/transactions/index.ts
+  s_9f9a6915a415a4::t_74f4bdba5efce4 9-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a0c72de9ad7c700e683bfc561f89cfcc55d1f640",
+  "prompts": {},
+  "sessions": {
+    "s_9f9a6915a415a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "985f1b24-a0bd-4fee-9dcc-d57e810ad1e0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
