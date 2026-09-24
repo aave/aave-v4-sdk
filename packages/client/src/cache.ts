@@ -40,7 +40,12 @@ import {
   type TokenMovementRecord,
   type TokenSwapActivity,
   type UpdatedDynamicConfigActivity,
+  type UpdatedLiquidationConfigActivity,
+  type UpdatedPositionManagerActivity,
+  type UpdatedPriceSourceActivity,
+  type UpdatedReserveConfigActivity,
   type UpdatedRiskPremiumActivity,
+  type UpdatedSpokeConfigActivity,
   type UserMerklClaimableReward,
   type UserPosition,
   type UserPositionQuery,
@@ -196,6 +201,21 @@ export const exchange = cacheExchange({
       timestamp: transformToDate,
     },
     UpdatedRiskPremiumActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedLiquidationConfigActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedPriceSourceActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedReserveConfigActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedSpokeConfigActivity: {
+      timestamp: transformToDate,
+    },
+    UpdatedPositionManagerActivity: {
       timestamp: transformToDate,
     },
     TokenSwapActivity: {
@@ -450,7 +470,16 @@ export const exchange = cacheExchange({
     TokenSwapActivity: (data: TokenSwapActivity) => data.id,
     UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
       data.id,
+    UpdatedLiquidationConfigActivity: (
+      data: UpdatedLiquidationConfigActivity,
+    ) => data.id,
+    UpdatedPositionManagerActivity: (data: UpdatedPositionManagerActivity) =>
+      data.id,
+    UpdatedPriceSourceActivity: (data: UpdatedPriceSourceActivity) => data.id,
+    UpdatedReserveConfigActivity: (data: UpdatedReserveConfigActivity) =>
+      data.id,
     UpdatedRiskPremiumActivity: (data: UpdatedRiskPremiumActivity) => data.id,
+    UpdatedSpokeConfigActivity: (data: UpdatedSpokeConfigActivity) => data.id,
     UserPosition: (data: UserPosition) => data.id,
     UsingAsCollateralActivity: (data: UsingAsCollateralActivity) => data.id,
     WithdrawActivity: (data: WithdrawActivity) => data.id,
@@ -542,6 +571,10 @@ export const exchange = cacheExchange({
     PaginatedUserSwapsResult: () => null,
     PercentNumber: () => null,
     PercentNumberChangeSnapshot: () => null,
+    BooleanChangeSnapshot: () => null,
+    PriceSourceChangeSnapshot: () => null,
+    ReserveConfigSnapshot: () => null,
+    SpokeConfigSnapshot: () => null,
     PercentNumberVariation: () => null,
     PercentNumberWithChange: () => null,
     PermitTypedData: () => null,

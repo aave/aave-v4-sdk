@@ -21,7 +21,7 @@ input ActivitiesRequestQuery @oneOf {
   reserveId: ReserveId
 }
 
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity | LeverageActivity
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | UpdatedLiquidationConfigActivity | UpdatedPriceSourceActivity | UpdatedReserveConfigActivity | UpdatedSpokeConfigActivity | UpdatedPositionManagerActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity | LeverageActivity
 
 enum ActivityType {
   SUPPLY
@@ -32,6 +32,11 @@ enum ActivityType {
   SET_AS_COLLATERAL
   UPDATED_DYNAMIC_CONFIG
   UPDATED_RISK_PREMIUM
+  UPDATED_LIQUIDATION_CONFIG
+  UPDATED_PRICE_SOURCE
+  UPDATED_RESERVE_CONFIG
+  UPDATED_SPOKE_CONFIG
+  UPDATED_POSITION_MANAGER
   TOKEN_TO_TOKEN_SWAP
   SUPPLY_SWAP
   BORROW_SWAP
@@ -166,6 +171,11 @@ scalar BigDecimal
 scalar BigInt
 
 scalar BlockchainData
+
+type BooleanChangeSnapshot {
+  before: Boolean!
+  after: Boolean!
+}
 
 type BoostedRate {
   """The unique identifier for this boosted rate tier"""
@@ -2003,6 +2013,11 @@ type PreviewUserPosition {
   otherConditions: [UserPositionConditionVariation!]!
 }
 
+type PriceSourceChangeSnapshot {
+  before: EvmAddress!
+  after: EvmAddress!
+}
+
 input ProtocolHistoryRequest {
   currency: Currency! = USD
   window: TimeWindow! = LAST_DAY
@@ -2303,6 +2318,14 @@ input ReserveAmountInputWithPermit @oneOf {
   erc20: ReserveErc20AmountInputWithPermit
 }
 
+type ReserveConfigSnapshot {
+  frozen: Boolean!
+  paused: Boolean!
+  borrowable: Boolean!
+  receiveSharesEnabled: Boolean!
+  collateralRisk: PercentNumber!
+}
+
 input ReserveErc20AmountInput {
   """
   Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
@@ -2567,6 +2590,16 @@ type Spoke {
   liquidationConfig: SpokeLiquidationConfig
   summary(currency: Currency! = USD): SpokeSummary!
   connectedHubs(currency: Currency! = USD): [SpokeConnectedHub!]!
+}
+
+type SpokeConfigSnapshot {
+  supplyCap: Erc20Amount!
+  borrowCap: Erc20Amount!
+  active: Boolean!
+  halted: Boolean!
+
+  """Null when the change predates the indexer recording the threshold"""
+  riskPremiumThreshold: PercentNumber
 }
 
 type SpokeConnectedHub {
@@ -3460,6 +3493,59 @@ type UpdatedDynamicConfigActivity {
   chain: Chain!
 }
 
+"""
+A governance change to the spoke-wide liquidation parameters. Has no acting user.
+"""
+type UpdatedLiquidationConfigActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  before: SpokeLiquidationConfig!
+  after: SpokeLiquidationConfig!
+  chain: Chain!
+}
+
+"""
+A governance change activating or deactivating a position manager on a spoke. Has no acting user.
+"""
+type UpdatedPositionManagerActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  positionManager: EvmAddress!
+  active: BooleanChangeSnapshot!
+  chain: Chain!
+}
+
+"""
+A governance change to a reserve's oracle price source. Has no acting user.
+"""
+type UpdatedPriceSourceActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  reserve: ReserveInfo!
+  priceSource: PriceSourceChangeSnapshot!
+  chain: Chain!
+}
+
+"""
+A governance change to a reserve's status flags or collateral risk. Has no acting user.
+"""
+type UpdatedReserveConfigActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  reserve: ReserveInfo!
+  before: ReserveConfigSnapshot!
+  after: ReserveConfigSnapshot!
+  chain: Chain!
+}
+
 type UpdatedRiskPremiumActivity {
   id: ID!
   user: EvmAddress!
@@ -3467,6 +3553,20 @@ type UpdatedRiskPremiumActivity {
   txHash: TxHash!
   spoke: Spoke!
   premium: PercentNumberChangeSnapshot!
+  chain: Chain!
+}
+
+"""
+A governance change to a spoke's caps and status on one hub asset. Has no acting user.
+"""
+type UpdatedSpokeConfigActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  hubAssetId: HubAssetId!
+  before: SpokeConfigSnapshot!
+  after: SpokeConfigSnapshot!
   chain: Chain!
 }
 
