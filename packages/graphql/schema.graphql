@@ -422,7 +422,7 @@ type EarnScopePreview {
   rewards: PreviewRewardOutcome!
   """
   The hub asset's base rates. Every reserve of a hub asset shares one curve, so the row has
-  a single pair however many spokes hold it.
+  a single pair however many spokes hold it, read from each state rather than the balances.
   """
   reserveRates: ScopedReserveRates
   value(currency: Currency! = USD): ExchangeAmountVariation!
@@ -1280,7 +1280,8 @@ type MarketScopePreview {
   """
   The premium the position pays on top of the base borrow rate.
   
-  A side with no debt has no premium, which reads as zero rather than as absent so the two
+  Only a health-decreasing step re-prices it on chain, so a plan of supplies and repayments
+  leaves it where it was. A side with no debt reads as zero rather than as absent so the two
   sides stay comparable.
   """
   riskPremium: PercentNumberVariation!
@@ -1309,7 +1310,12 @@ type MarketScopePreview {
   indirectly is reported the same as one it asked for.
   """
   otherConditions: [UserPositionConditionVariation!]!
-  """Base rates per reserve the Market holds, in reserve id order."""
+  """
+  Base rates per reserve the Market holds, in reserve id order.
+  
+  Read from each state's own reserves, so a reserve the user opens or closes during the
+  plan still reports what it pays on the side where they hold nothing.
+  """
   reserveRates: [ScopedReserveRates!]!
   healthFactor: HealthFactorVariation!
 }
@@ -2094,6 +2100,7 @@ enum PreviewWarningCode {
   AMOUNT_EXCEEDS_DEBT
   AMOUNT_MUST_BE_POSITIVE
   HEALTH_FACTOR_BELOW_THRESHOLD
+  QUOTE_REQUIRED
   SPLIT_POSITION_WOULD_RESULT
 }
 
@@ -3685,8 +3692,8 @@ type UserPosition {
   netCollateral(currency: Currency! = USD): ExchangeAmountWithChange!
   """
   Net APY across the user's supplies and borrows. Composes
-  [`net_supply_apy`] and [`net_borrow_apy`], both of which include the
-  user's eligible Merkl reward APY on top of base supply / borrow rates.
+  [`net_supply_apy`] and [`net_borrow_apy`]: each reserve's rate, with the user's risk
+  premium on the borrow side, plus their eligible Merkl reward APY.
   """
   netApy: PercentNumber!
   """
@@ -3707,9 +3714,8 @@ type UserPosition {
   """
   netApyBreakdown: NetApyBreakdown!
   """
-  Net borrow APY weighted by USD debt. Subtracts the user's eligible
-  Merkl borrow reward APY (`discount_apy`) from each reserve's base
-  borrow rate.
+  Net borrow APY weighted by USD debt: each reserve's rate with the premium the spoke
+  charges, less the user's eligible Merkl borrow reward APY.
   """
   netBorrowApy: PercentNumberWithChange!
   """
