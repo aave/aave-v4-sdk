@@ -376,6 +376,8 @@ export function useHubSummaryHistory({
     document: HubSummaryHistoryQuery,
     variables: {
       request,
+      // the token amounts' exchange values follow the currency the totals are in
+      currency: request.currency ?? DEFAULT_QUERY_OPTIONS.currency,
     },
     suspense,
     pause,

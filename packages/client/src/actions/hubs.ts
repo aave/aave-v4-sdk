@@ -251,7 +251,12 @@ export function hubSummaryHistory(
     requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
   }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<HubSummarySample[], UnexpectedError> {
-  return client.query(HubSummaryHistoryQuery, { request }, { requestPolicy });
+  return client.query(
+    HubSummaryHistoryQuery,
+    // the token amounts' exchange values follow the currency the totals are in
+    { request, currency: request.currency ?? DEFAULT_QUERY_OPTIONS.currency },
+    { requestPolicy },
+  );
 }
 
 /**
