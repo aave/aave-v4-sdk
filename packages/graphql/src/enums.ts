@@ -76,6 +76,11 @@ export enum ActivityType {
   SetAsCollateral = 'SET_AS_COLLATERAL',
   UpdatedDynamicConfig = 'UPDATED_DYNAMIC_CONFIG',
   UpdatedRiskPremium = 'UPDATED_RISK_PREMIUM',
+  UpdatedLiquidationConfig = 'UPDATED_LIQUIDATION_CONFIG',
+  UpdatedPriceSource = 'UPDATED_PRICE_SOURCE',
+  UpdatedReserveConfig = 'UPDATED_RESERVE_CONFIG',
+  UpdatedSpokeConfig = 'UPDATED_SPOKE_CONFIG',
+  UpdatedPositionManager = 'UPDATED_POSITION_MANAGER',
   TokenToTokenSwap = 'TOKEN_TO_TOKEN_SWAP',
   SupplySwap = 'SUPPLY_SWAP',
   BorrowSwap = 'BORROW_SWAP',
@@ -226,6 +231,9 @@ export enum SwapStatusFilter {
 export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
+  BtcCorrelated = 'BTC_CORRELATED',
+  ProtocolToken = 'PROTOCOL_TOKEN',
+  InfrastructureToken = 'INFRASTRUCTURE_TOKEN',
 }
 
 /**
