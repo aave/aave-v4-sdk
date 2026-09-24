@@ -187,8 +187,7 @@ input BorrowApyHistoryRequest {
   """Exactly one of `reserve` or `hubAsset` must be set"""
   reserve: ReserveId
   """
-  The hub asset's rate curve; every reserve of a hub asset shares one curve.
-  Reward folding uses the hub asset's first reserve.
+  The hub asset's shared rate curve; reward folding uses its first reserve.
   """
   hubAsset: HubAssetId
   window: TimeWindow! = LAST_DAY
@@ -400,42 +399,31 @@ input ERC20PermitSignature {
 }
 
 """
-One Earn row before the plan and after all of it.
-
-The row is every collateral-disabled supply of one hub asset, across all the spokes that list
-it, so no single position preview represents it.
+One hub asset's Earn row across every spoke listing it, which no single position covers.
 """
 type EarnScopePreview {
   hubAsset: HubAssetId!
   """
-  Supplied balance across the row, interest included. Null only when the row is empty on
-  both sides, where there is no reserve to take the token and its decimals from.
+  Supplied balance with interest; null only when the row is empty on both sides.
   """
   balance: Erc20AmountVariation
   """
   Supply interest earned across the row. Null on the same terms as `balance`.
   """
   earnings: Erc20AmountVariation
-  """
-  Rewards the whole plan gains or gives up across the row, asked of every spoke holding it.
-  """
+  """Supply rewards the plan gains or gives up on the row's own reserves."""
   rewards: PreviewRewardOutcome!
   """
-  The hub asset's base rates. Every reserve of a hub asset shares one curve, so the row has
-  a single pair however many spokes hold it, read from each state rather than the balances.
+  The hub asset's base rates, one pair since all its reserves share one curve.
   """
   reserveRates: ScopedReserveRates
   value(currency: Currency! = USD): ExchangeAmountVariation!
   """
-  Yearly earnings at the row's APY, which is the rate applied to the balance rather than
-  the interest already accrued that `earnings` reports.
+  Yearly earnings at the row's APY, not the accrued interest `earnings` reports.
   """
   projectedEarnings: ExchangeAmountVariation!
   """
-  Effective supply APY: base rate, underlying yield and the Merkl rewards this state is
-  eligible for, weighted by balance. Eligibility is read off each side's own state, since
-  enabling collateral or clearing debt can change what the user qualifies for. Points carry
-  no APY and are not folded in.
+  Base rate, underlying yield and the Merkl APY each side is eligible for, weighted by value.
   """
   supplyApy: PercentNumberVariation!
 }
@@ -780,8 +768,7 @@ type HubAssetUserState {
   """The collateral-enabled portion of `earnings`"""
   collateralEarnings: Erc20Amount!
   """
-  Base supply rate plus underlying yield, weighted by the user's balances.
-  Reward APY is exposed separately on each reserve's rewards.
+  Base rate plus underlying yield, weighted by balance; rewards sit on each reserve.
   """
   supplyApy: PercentNumber!
 }
@@ -910,8 +897,7 @@ type HubSummarySample {
   availableLiquidity: ExchangeAmount!
   utilizationRate: PercentNumber!
   """
-  Deposits in the underlying token. Present only where the criteria resolves to a single
-  token, so a query spanning assets or chains has no token to denominate the sum in.
+  Deposits in the underlying token, null when the criteria spans more than one token.
   """
   depositsAmount: Erc20Amount
   """
@@ -1258,10 +1244,7 @@ input MarketRepayWithSupplyQuoteInput {
 }
 
 """
-One Market before the plan and after all of it.
-
-A side with no position reads as zero rather than as absent, so a Market the user is entering
-for the first time still has a before to compare against.
+A side with no position reads as zero, except its health factor, which is null.
 """
 type MarketScopePreview {
   spoke: SpokeId!
@@ -1277,13 +1260,7 @@ type MarketScopePreview {
   Net APY over collateral-enabled supplies, retaining the Market's full debt.
   """
   netApy: PercentNumberVariation!
-  """
-  The premium the position pays on top of the base borrow rate.
-  
-  Only a health-decreasing step re-prices it on chain, so a plan of supplies and repayments
-  leaves it where it was. A side with no debt reads as zero rather than as absent so the two
-  sides stay comparable.
-  """
+  """Premium over the base borrow rate, zero on a side with no debt."""
   riskPremium: PercentNumberVariation!
   """What the position could borrow in total against its collateral."""
   maxBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
@@ -1291,31 +1268,15 @@ type MarketScopePreview {
   What is left of that capacity once the position's debt is taken off it.
   """
   remainingBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
-  """
-  Yearly earnings at the net APY the position ends on, which is the rate applied to the
-  balance rather than interest already accrued.
-  """
+  """Yearly earnings at each side's net APY, not interest already accrued."""
   projectedEarnings: ExchangeAmountVariation!
-  """
-  Rewards the whole plan gains or gives up on this Market.
-  
-  Eligibility either side comes from that state, so a reward dropped by one step and
-  regained by a later one does not show up on both lists.
-  """
+  """Rewards the plan gains or gives up, judged on its two end states only."""
   rewards: PreviewRewardOutcome!
   """
-  Every reserve on this Market whose pinned risk config the plan moves.
-  
-  Compares the two projected states rather than the actions, so a re-pin an action caused
-  indirectly is reported the same as one it asked for.
+  Reserves whose pinned risk config the plan moves, indirect re-pins included.
   """
   otherConditions: [UserPositionConditionVariation!]!
-  """
-  Base rates per reserve the Market holds, in reserve id order.
-  
-  Read from each state's own reserves, so a reserve the user opens or closes during the
-  plan still reports what it pays on the side where they hold nothing.
-  """
+  """Base rates of every reserve held on either side, in reserve id order."""
   reserveRates: [ScopedReserveRates!]!
   healthFactor: HealthFactorVariation!
 }
@@ -1389,9 +1350,7 @@ type MultiStepPreview {
   """
   warnings: [PreviewWarning!]!
   """
-  The selected product surface before the plan and after all of it. Absent when no scope
-  was asked for, and when the plan is not `VALID`, since a partly applied plan is not an
-  operation that happened.
+  Null unless a scope was asked for and the plan is `VALID`, since a partial plan never runs.
   """
   scope: PreviewScopeResult
 }
@@ -1400,8 +1359,7 @@ input MultiStepPreviewRequest {
   """The plan's actions, in execution order."""
   actions: [PreviewAction!]!
   """
-  The product surface the confirmation card is about, read before the plan and after all
-  of it. Validation always covers every action, whatever the scope.
+  Selects what `scope` reports; validation covers every action either way.
   """
   previewScope: PreviewScope
 }
@@ -1410,8 +1368,7 @@ type MultiStepPreviewStep {
   index: Int!
   status: StepStatus!
   """
-  The same shape a single-action preview returns, against the state this step starts from.
-  Absent only on a `NOT_EVALUATED` step, which has no state to preview against.
+  Null only on a `NOT_EVALUATED` step; otherwise read against the state it starts from.
   """
   preview: PreviewUserPosition
   """
@@ -1830,10 +1787,7 @@ type PermitTypedData {
 }
 
 """
-Whether the plan as submitted passes protocol validation.
-
-`Valid` means every step passes the checks the evaluator implements, assuming the amounts
-can be funded. It does not certify wallet balance or gas, which stay with the caller.
+Protocol validation only: it assumes the amounts can be funded and ignores gas.
 """
 enum PlanStatus {
   VALID
@@ -2022,16 +1976,14 @@ type PreviewRewardOutcome {
 }
 
 """
-The product surface a plan's confirmation card is about.
-
-A Market is one spoke, read over its collateral-enabled supplies and its full debt. An Earn
-row is one hub asset, read over the collateral-disabled supplies of every spoke holding it.
-The same hub asset can sit on both sides at once, which is why the caller names which one.
+Which side a plan preview reads, since one hub asset can sit in Earn and a Market at once.
 """
 input PreviewScope @oneOf {
-  """The Borrow Market, by its spoke."""
+  """One spoke's collateral-enabled supplies and its full debt."""
   market: SpokeId
-  """The Earn row, by its hub asset."""
+  """
+  One hub asset's collateral-disabled supplies, across every spoke listing it.
+  """
   earn: HubAssetId
 }
 
@@ -2081,10 +2033,7 @@ type PreviewWarning {
 }
 
 """
-Why an action cannot execute, as a bounded code plus the numbers behind it.
-
-Severity is the client's call: the same shortfall blocks moving a position but only warns
-on a deposit, where a temporary split position is accepted to keep the deposit available.
+Why an action cannot execute; whether that blocks or warns is the client's call per flow.
 """
 enum PreviewWarningCode {
   RESERVE_NOT_FOUND
@@ -2099,6 +2048,8 @@ enum PreviewWarningCode {
   DRAW_CAP_EXCEEDED
   AMOUNT_EXCEEDS_DEBT
   AMOUNT_MUST_BE_POSITIVE
+  AMOUNT_TOO_SMALL_FOR_SHARES
+  COLLATERAL_STATUS_ALREADY_SET
   HEALTH_FACTOR_BELOW_THRESHOLD
   QUOTE_REQUIRED
   SPLIT_POSITION_WOULD_RESULT
@@ -2128,8 +2079,7 @@ type Query {
   asset(request: AssetRequest!): Asset
   multichainAsset(request: MultichainAssetRequest!): MultichainAsset!
   """
-  Deposits, borrows, available liquidity and utilization for one asset across chains,
-  bucketed over the window. Grouping matches `multichainAsset`.
+  One asset's totals across chains per bucket, grouped the way `multichainAsset` groups.
   """
   multichainAssetHistory(request: MultichainAssetHistoryRequest!): [MultichainAssetHistorySample!]!
   assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
@@ -2162,15 +2112,7 @@ type Query {
   liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
   updateUserPositionConditions(request: UpdateUserPositionConditionsRequest!): TransactionRequest!
   preview(request: PreviewRequest!): PreviewUserPosition!
-  """
-  Previews a plan of one or more actions by folding them through the protocol state,
-  so each step is evaluated against what the steps before it produced.
-  
-  Every step is required, so the first that cannot execute is returned `BLOCKED` with the
-  reason and the rest come back `NOT_EVALUATED`. `status` is the protocol-level verdict on
-  the plan as submitted: it assumes the amounts can be funded and certifies neither wallet
-  balance nor gas.
-  """
+  """Previews a plan, each step against the state the steps before it left."""
   multiStepPreview(request: MultiStepPreviewRequest!): MultiStepPreview!
   borrowApyHistory(request: BorrowApyHistoryRequest!): [ApySample!]!
   supplyApyHistory(request: SupplyApyHistoryRequest!): [ApySample!]!
@@ -2581,8 +2523,7 @@ union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | Borr
 scalar RewardId
 
 """
-A reserve's own base rates either side of the plan, which the scope's weighted APY does not
-substitute: that one answers what the user earns, this one what the reserve pays.
+What the reserve pays, as opposed to the scope's APY, which is what the user earns.
 """
 type ScopedReserveRates {
   reserve: ReserveId!
@@ -2964,8 +2905,7 @@ enum StepStatus {
   APPLIED
   BLOCKED
   """
-  A step after the one that blocked. Every step in a plan is required, so evaluation
-  stops rather than reporting a sequence the caller never intended to execute.
+  After a blocked step: every step is required, so the rest are not evaluated.
   """
   NOT_EVALUATED
 }
@@ -3000,8 +2940,7 @@ input SupplyApyHistoryRequest {
   """Exactly one of `reserve` or `hubAsset` must be set"""
   reserve: ReserveId
   """
-  The hub asset's rate curve; every reserve of a hub asset shares one curve.
-  Reward folding uses the hub asset's first reserve.
+  The hub asset's shared rate curve; reward folding uses its first reserve.
   """
   hubAsset: HubAssetId
   window: TimeWindow! = LAST_DAY
@@ -3691,9 +3630,7 @@ type UserPosition {
   """The net collateral which is `totalCollateral` - `totalDebt`"""
   netCollateral(currency: Currency! = USD): ExchangeAmountWithChange!
   """
-  Net APY across the user's supplies and borrows. Composes
-  [`net_supply_apy`] and [`net_borrow_apy`]: each reserve's rate, with the user's risk
-  premium on the borrow side, plus their eligible Merkl reward APY.
+  Net APY with the premium on the borrow side and eligible Merkl rewards on both.
   """
   netApy: PercentNumber!
   """
@@ -3714,8 +3651,7 @@ type UserPosition {
   """
   netApyBreakdown: NetApyBreakdown!
   """
-  Net borrow APY weighted by USD debt: each reserve's rate with the premium the spoke
-  charges, less the user's eligible Merkl borrow reward APY.
+  Weighted by USD debt, each reserve at the premium the spoke charges less borrow rewards.
   """
   netBorrowApy: PercentNumberWithChange!
   """
