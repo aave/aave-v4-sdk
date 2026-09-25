@@ -13853,7 +13853,7 @@
             "args": []
           },
           {
-            "name": "collateralNetApy",
+            "name": "netCollateralApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -13912,7 +13912,7 @@
             ]
           },
           {
-            "name": "collateralAccruedInterest",
+            "name": "netCollateralAccruedInterest",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

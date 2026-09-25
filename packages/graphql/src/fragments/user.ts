@@ -184,10 +184,10 @@ export const UserPositionFragment = graphql(
     collateralSupplyApy {
       ...PercentNumberWithChange
     }
-    collateralNetApy {
+    netCollateralApy {
       ...PercentNumber
     }
-    collateralAccruedInterest(currency: $currency) {
+    netCollateralAccruedInterest(currency: $currency) {
       ...ExchangeAmount
     }
     netBorrowApy {

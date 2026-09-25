@@ -3644,7 +3644,7 @@ type UserPosition {
   """
   Net APY over collateral-enabled supplies, retaining the position's full debt.
   """
-  collateralNetApy: PercentNumber!
+  netCollateralApy: PercentNumber!
   """
   Net APY split into the parts it is made of. Leverage amplifies each part, so on a looped
   position this is what explains a headline the pool rates alone cannot account for.
@@ -3661,7 +3661,7 @@ type UserPosition {
   """
   Interest earned by collateral-enabled supplies minus all borrow interest.
   """
-  collateralAccruedInterest(currency: Currency! = USD): ExchangeAmount!
+  netCollateralAccruedInterest(currency: Currency! = USD): ExchangeAmount!
   healthFactor: HealthFactorWithChange!
   riskPremium: UserPositionRiskPremium
   """

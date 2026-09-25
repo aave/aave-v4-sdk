@@ -425,8 +425,8 @@ export function makeUserPosition({
     totalDebt: makeExchangeAmountWithChange(0),
     netSupplyApy: makePercentNumberWithChange(0),
     collateralSupplyApy: makePercentNumberWithChange(0),
-    collateralNetApy: makePercentNumber(0),
-    collateralAccruedInterest: makeExchangeAmount(0),
+    netCollateralApy: makePercentNumber(0),
+    netCollateralAccruedInterest: makeExchangeAmount(0),
     netBorrowApy: makePercentNumberWithChange(0),
     netApyBreakdown: {
       __typename: 'NetApyBreakdown',
