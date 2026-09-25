@@ -34,6 +34,21 @@ export const HubSummaryFragment = graphql(
 );
 export type HubSummary = FragmentOf<typeof HubSummaryFragment>;
 
+export const HubExposureItemFragment = graphql(
+  `fragment HubExposureItem on HubExposureItem {
+    __typename
+    share {
+      ...PercentNumber
+    }
+    collateral(currency: $currency) {
+      ...ExchangeAmount
+    }
+    asOf
+  }`,
+  [PercentNumberFragment, ExchangeAmountFragment],
+);
+export type HubExposureItem = FragmentOf<typeof HubExposureItemFragment>;
+
 export const HubFragment = graphql(
   `fragment Hub on Hub {
       __typename

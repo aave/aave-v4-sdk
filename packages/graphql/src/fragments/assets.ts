@@ -74,6 +74,33 @@ export const HubAssetUserStateFragment = graphql(
 );
 export type HubAssetUserState = FragmentOf<typeof HubAssetUserStateFragment>;
 
+// Kept out of HubAssetUserState: that fragment is embedded in Reserve, and through it in the
+// order and swap unions, whose inferred types are already at the TypeScript serialization limit.
+export const HubAssetUserSuppliesFragment = graphql(
+  `fragment HubAssetUserSupplies on HubAssetUserState {
+      __typename
+      supplied {
+        ...Erc20Amount
+      }
+      collateralSupplied {
+        ...Erc20Amount
+      }
+      earnings {
+        ...Erc20Amount
+      }
+      collateralEarnings {
+        ...Erc20Amount
+      }
+      supplyApy {
+        ...PercentNumber
+      }
+    }`,
+  [Erc20AmountFragment, PercentNumberFragment],
+);
+export type HubAssetUserSupplies = FragmentOf<
+  typeof HubAssetUserSuppliesFragment
+>;
+
 export const HubAssetFragment = graphql(
   `fragment HubAsset on HubAsset {
       __typename

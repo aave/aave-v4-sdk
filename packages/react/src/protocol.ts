@@ -1,6 +1,9 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  MultichainAssetHistoryQuery,
+  type MultichainAssetHistoryRequest,
+  type MultichainAssetHistorySample,
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
@@ -554,5 +557,65 @@ export function useProtocolHistory({
     suspense,
     pause,
     batch: false, // Do not batch this since it's a slower than average query
+  });
+}
+
+export type UseMultichainAssetHistoryArgs = MultichainAssetHistoryRequest;
+
+/**
+ * Fetch deposits, borrows, available liquidity and utilization for one asset across chains.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useMultichainAssetHistory({ …, suspense: true });
+ * ```
+ */
+export function useMultichainAssetHistory(
+  args: UseMultichainAssetHistoryArgs & Suspendable,
+): SuspenseResult<MultichainAssetHistorySample[]>;
+/**
+ * Fetch deposits, borrows, available liquidity and utilization for one asset across chains.
+ *
+ * Pausable suspense mode.
+ */
+export function useMultichainAssetHistory(
+  args: Pausable<UseMultichainAssetHistoryArgs> & Suspendable,
+): PausableSuspenseResult<MultichainAssetHistorySample[]>;
+/**
+ * Fetch deposits, borrows, available liquidity and utilization for one asset across chains.
+ *
+ * ```tsx
+ * const { data, error, loading } = useMultichainAssetHistory({ … });
+ * ```
+ */
+export function useMultichainAssetHistory(
+  args: UseMultichainAssetHistoryArgs,
+): ReadResult<MultichainAssetHistorySample[]>;
+/**
+ * Fetch deposits, borrows, available liquidity and utilization for one asset across chains.
+ *
+ * Pausable loading state mode.
+ */
+export function useMultichainAssetHistory(
+  args: Pausable<UseMultichainAssetHistoryArgs>,
+): PausableReadResult<MultichainAssetHistorySample[]>;
+
+export function useMultichainAssetHistory({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseMultichainAssetHistoryArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<MultichainAssetHistorySample[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: MultichainAssetHistoryQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    batch: false, // slower than average query
   });
 }

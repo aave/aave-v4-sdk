@@ -1,6 +1,11 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  HubAssetHoldersQuery,
+  type HubAssetHoldersRequest,
+  type ReserveTrailingSupplyApys,
+  ReserveTrailingSupplyApysQuery,
+  type ReserveTrailingSupplyApysRequest,
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
@@ -620,4 +625,126 @@ export function useReserveHoldersAction(
       }),
     [client, options.currency],
   );
+}
+
+export type UseHubAssetHoldersArgs = Prettify<
+  HubAssetHoldersRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch a paginated list of top holders for a hub asset or a single reserve.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubAssetHolders({ …, suspense: true });
+ * ```
+ */
+export function useHubAssetHolders(
+  args: UseHubAssetHoldersArgs & Suspendable,
+): SuspenseResult<PaginatedReserveHoldersResult>;
+/**
+ * Fetch a paginated list of top holders for a hub asset or a single reserve.
+ *
+ * Pausable suspense mode.
+ */
+export function useHubAssetHolders(
+  args: Pausable<UseHubAssetHoldersArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedReserveHoldersResult>;
+/**
+ * Fetch a paginated list of top holders for a hub asset or a single reserve.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubAssetHolders({ … });
+ * ```
+ */
+export function useHubAssetHolders(
+  args: UseHubAssetHoldersArgs,
+): ReadResult<PaginatedReserveHoldersResult>;
+/**
+ * Fetch a paginated list of top holders for a hub asset or a single reserve.
+ *
+ * Pausable loading state mode.
+ */
+export function useHubAssetHolders(
+  args: Pausable<UseHubAssetHoldersArgs>,
+): PausableReadResult<PaginatedReserveHoldersResult>;
+
+export function useHubAssetHolders({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseHubAssetHoldersArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<PaginatedReserveHoldersResult, UnexpectedError> {
+  return useSuspendableQuery({
+    document: HubAssetHoldersQuery,
+    variables: {
+      request,
+      currency,
+    },
+    suspense,
+    pause,
+  });
+}
+
+export type UseReserveTrailingSupplyApysArgs = ReserveTrailingSupplyApysRequest;
+
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for a reserve.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useReserveTrailingSupplyApys({ …, suspense: true });
+ * ```
+ */
+export function useReserveTrailingSupplyApys(
+  args: UseReserveTrailingSupplyApysArgs & Suspendable,
+): SuspenseResult<ReserveTrailingSupplyApys | null>;
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for a reserve.
+ *
+ * Pausable suspense mode.
+ */
+export function useReserveTrailingSupplyApys(
+  args: Pausable<UseReserveTrailingSupplyApysArgs> & Suspendable,
+): PausableSuspenseResult<ReserveTrailingSupplyApys | null>;
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for a reserve.
+ *
+ * ```tsx
+ * const { data, error, loading } = useReserveTrailingSupplyApys({ … });
+ * ```
+ */
+export function useReserveTrailingSupplyApys(
+  args: UseReserveTrailingSupplyApysArgs,
+): ReadResult<ReserveTrailingSupplyApys | null>;
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for a reserve.
+ *
+ * Pausable loading state mode.
+ */
+export function useReserveTrailingSupplyApys(
+  args: Pausable<UseReserveTrailingSupplyApysArgs>,
+): PausableReadResult<ReserveTrailingSupplyApys | null>;
+
+export function useReserveTrailingSupplyApys({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseReserveTrailingSupplyApysArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<ReserveTrailingSupplyApys | null, UnexpectedError> {
+  return useSuspendableQuery({
+    document: ReserveTrailingSupplyApysQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+  });
 }

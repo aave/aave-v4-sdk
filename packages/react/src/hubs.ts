@@ -1,6 +1,15 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  HubAssetsWithUserSuppliesQuery,
+  type HubAssetsWithUserSuppliesRequest,
+  type HubAssetTrailingSupplyApys,
+  HubAssetTrailingSupplyApysQuery,
+  type HubAssetTrailingSupplyApysRequest,
+  type HubAssetWithUserSupplies,
+  type HubExposure,
+  HubExposureQuery,
+  type HubExposureRequest,
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
@@ -367,6 +376,8 @@ export function useHubSummaryHistory({
     document: HubSummaryHistoryQuery,
     variables: {
       request,
+      // the token amounts' exchange values follow the currency the totals are in
+      currency: request.currency ?? DEFAULT_QUERY_OPTIONS.currency,
     },
     suspense,
     pause,
@@ -626,6 +637,201 @@ export function useHubSpokeConfigs({
       request,
       currency,
       timeWindow,
+    },
+    suspense,
+    pause,
+  });
+}
+
+export type UseHubAssetsWithUserSuppliesArgs = Prettify<
+  HubAssetsWithUserSuppliesRequest &
+    CurrencyQueryOptions &
+    TimeWindowQueryOptions
+>;
+
+/**
+ * Fetch hub assets together with the user's supplied balances and their collateral-enabled portion.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubAssetsWithUserSupplies({ …, suspense: true });
+ * ```
+ */
+export function useHubAssetsWithUserSupplies(
+  args: UseHubAssetsWithUserSuppliesArgs & Suspendable,
+): SuspenseResult<HubAssetWithUserSupplies[]>;
+/**
+ * Fetch hub assets together with the user's supplied balances and their collateral-enabled portion.
+ *
+ * Pausable suspense mode.
+ */
+export function useHubAssetsWithUserSupplies(
+  args: Pausable<UseHubAssetsWithUserSuppliesArgs> & Suspendable,
+): PausableSuspenseResult<HubAssetWithUserSupplies[]>;
+/**
+ * Fetch hub assets together with the user's supplied balances and their collateral-enabled portion.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubAssetsWithUserSupplies({ … });
+ * ```
+ */
+export function useHubAssetsWithUserSupplies(
+  args: UseHubAssetsWithUserSuppliesArgs,
+): ReadResult<HubAssetWithUserSupplies[]>;
+/**
+ * Fetch hub assets together with the user's supplied balances and their collateral-enabled portion.
+ *
+ * Pausable loading state mode.
+ */
+export function useHubAssetsWithUserSupplies(
+  args: Pausable<UseHubAssetsWithUserSuppliesArgs>,
+): PausableReadResult<HubAssetWithUserSupplies[]>;
+
+export function useHubAssetsWithUserSupplies({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  ...request
+}: NullishDeep<UseHubAssetsWithUserSuppliesArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<HubAssetWithUserSupplies[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: HubAssetsWithUserSuppliesQuery,
+    variables: {
+      request,
+      currency,
+      timeWindow,
+    },
+    suspense,
+    pause,
+  });
+}
+
+export type UseHubAssetTrailingSupplyApysArgs =
+  HubAssetTrailingSupplyApysRequest;
+
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for hub assets.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubAssetTrailingSupplyApys({ …, suspense: true });
+ * ```
+ */
+export function useHubAssetTrailingSupplyApys(
+  args: UseHubAssetTrailingSupplyApysArgs & Suspendable,
+): SuspenseResult<HubAssetTrailingSupplyApys[]>;
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for hub assets.
+ *
+ * Pausable suspense mode.
+ */
+export function useHubAssetTrailingSupplyApys(
+  args: Pausable<UseHubAssetTrailingSupplyApysArgs> & Suspendable,
+): PausableSuspenseResult<HubAssetTrailingSupplyApys[]>;
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for hub assets.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubAssetTrailingSupplyApys({ … });
+ * ```
+ */
+export function useHubAssetTrailingSupplyApys(
+  args: UseHubAssetTrailingSupplyApysArgs,
+): ReadResult<HubAssetTrailingSupplyApys[]>;
+/**
+ * Fetch the trailing average supply APY over the last 7, 30 and 90 days for hub assets.
+ *
+ * Pausable loading state mode.
+ */
+export function useHubAssetTrailingSupplyApys(
+  args: Pausable<UseHubAssetTrailingSupplyApysArgs>,
+): PausableReadResult<HubAssetTrailingSupplyApys[]>;
+
+export function useHubAssetTrailingSupplyApys({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseHubAssetTrailingSupplyApysArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<HubAssetTrailingSupplyApys[], UnexpectedError> {
+  return useSuspendableQuery({
+    document: HubAssetTrailingSupplyApysQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+  });
+}
+
+export type UseHubExposureArgs = Prettify<
+  HubExposureRequest & CurrencyQueryOptions
+>;
+
+/**
+ * Fetch a hub's collateral composition by asset.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useHubExposure({
+ *   query: { hubId: hubId('SGVsbG8h') },
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useHubExposure(
+  args: UseHubExposureArgs & Suspendable,
+): SuspenseResult<HubExposure>;
+/**
+ * Fetch a hub's collateral composition by asset.
+ *
+ * Pausable suspense mode.
+ */
+export function useHubExposure(
+  args: Pausable<UseHubExposureArgs> & Suspendable,
+): PausableSuspenseResult<HubExposure>;
+/**
+ * Fetch a hub's collateral composition by asset.
+ *
+ * ```tsx
+ * const { data, error, loading } = useHubExposure({
+ *   query: { hubId: hubId('SGVsbG8h') },
+ * });
+ * ```
+ */
+export function useHubExposure(
+  args: UseHubExposureArgs,
+): ReadResult<HubExposure>;
+/**
+ * Fetch a hub's collateral composition by asset.
+ *
+ * Pausable loading state mode.
+ */
+export function useHubExposure(
+  args: Pausable<UseHubExposureArgs>,
+): PausableReadResult<HubExposure>;
+
+export function useHubExposure({
+  suspense = false,
+  pause = false,
+  currency = DEFAULT_QUERY_OPTIONS.currency,
+  ...request
+}: NullishDeep<UseHubExposureArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<HubExposure, UnexpectedError> {
+  return useSuspendableQuery({
+    document: HubExposureQuery,
+    variables: {
+      request,
+      currency,
     },
     suspense,
     pause,

@@ -9,6 +9,7 @@ import {
   ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
+  HealthFactorVariationFragment,
   type InsufficientBalanceError,
   InsufficientBalanceErrorFragment,
   PaginatedResultInfoFragment,
@@ -365,6 +366,198 @@ export const PreviewQuery = graphql(
 );
 export type PreviewAction = ReturnType<typeof graphql.scalar<'PreviewAction'>>;
 export type PreviewRequest = RequestOf<typeof PreviewQuery>;
+
+export const PreviewWarningFragment = graphql(
+  `fragment PreviewWarning on PreviewWarning {
+    __typename
+    code
+    reserve
+    requested
+    available
+  }`,
+);
+export type PreviewWarning = FragmentOf<typeof PreviewWarningFragment>;
+
+export const MultiStepPreviewStepFragment = graphql(
+  `fragment MultiStepPreviewStep on MultiStepPreviewStep {
+    __typename
+    index
+    status
+    preview {
+      ...PreviewUserPosition
+    }
+    warnings {
+      ...PreviewWarning
+    }
+  }`,
+  [PreviewUserPositionFragment, PreviewWarningFragment],
+);
+export type MultiStepPreviewStep = FragmentOf<
+  typeof MultiStepPreviewStepFragment
+>;
+
+export const ScopedReserveRatesFragment = graphql(
+  `fragment ScopedReserveRates on ScopedReserveRates {
+    __typename
+    reserve
+    supplyApy {
+      ...PercentNumberVariation
+    }
+    borrowApy {
+      ...PercentNumberVariation
+    }
+  }`,
+  [PercentNumberVariationFragment],
+);
+export type ScopedReserveRates = FragmentOf<typeof ScopedReserveRatesFragment>;
+
+export const MarketScopePreviewFragment = graphql(
+  `fragment MarketScopePreview on MarketScopePreview {
+    __typename
+    spoke
+    collateral(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    debt(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    netBalance(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    supplyApy {
+      ...PercentNumberVariation
+    }
+    netApy {
+      ...PercentNumberVariation
+    }
+    riskPremium {
+      ...PercentNumberVariation
+    }
+    maxBorrowingPower(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    remainingBorrowingPower(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    projectedEarnings {
+      ...ExchangeAmountVariation
+    }
+    rewards {
+      ...PreviewRewardOutcome
+    }
+    reserveRates {
+      ...ScopedReserveRates
+    }
+    otherConditions {
+      ...UserPositionConditionVariation
+    }
+    healthFactor {
+      ...HealthFactorVariation
+    }
+  }`,
+  [
+    ExchangeAmountVariationFragment,
+    PercentNumberVariationFragment,
+    HealthFactorVariationFragment,
+    PreviewRewardOutcomeFragment,
+    ScopedReserveRatesFragment,
+    UserPositionConditionVariationFragment,
+  ],
+);
+export type MarketScopePreview = FragmentOf<typeof MarketScopePreviewFragment>;
+
+export const Erc20AmountVariationFragment = graphql(
+  `fragment Erc20AmountVariation on Erc20AmountVariation {
+    __typename
+    current {
+      ...Erc20Amount
+    }
+    after {
+      ...Erc20Amount
+    }
+  }`,
+  [Erc20AmountFragment],
+);
+export type Erc20AmountVariation = FragmentOf<
+  typeof Erc20AmountVariationFragment
+>;
+
+export const EarnScopePreviewFragment = graphql(
+  `fragment EarnScopePreview on EarnScopePreview {
+    __typename
+    hubAsset
+    balance {
+      ...Erc20AmountVariation
+    }
+    earnings {
+      ...Erc20AmountVariation
+    }
+    value(currency: $currency) {
+      ...ExchangeAmountVariation
+    }
+    projectedEarnings {
+      ...ExchangeAmountVariation
+    }
+    rewards {
+      ...PreviewRewardOutcome
+    }
+    reserveRates {
+      ...ScopedReserveRates
+    }
+    supplyApy {
+      ...PercentNumberVariation
+    }
+  }`,
+  [
+    Erc20AmountVariationFragment,
+    ExchangeAmountVariationFragment,
+    PercentNumberVariationFragment,
+    PreviewRewardOutcomeFragment,
+    ScopedReserveRatesFragment,
+  ],
+);
+export type EarnScopePreview = FragmentOf<typeof EarnScopePreviewFragment>;
+
+export const MultiStepPreviewFragment = graphql(
+  `fragment MultiStepPreview on MultiStepPreview {
+    __typename
+    status
+    steps {
+      ...MultiStepPreviewStep
+    }
+    warnings {
+      ...PreviewWarning
+    }
+    scope {
+      ...on MarketScopePreview {
+        ...MarketScopePreview
+      }
+      ...on EarnScopePreview {
+        ...EarnScopePreview
+      }
+    }
+  }`,
+  [
+    MultiStepPreviewStepFragment,
+    PreviewWarningFragment,
+    MarketScopePreviewFragment,
+    EarnScopePreviewFragment,
+  ],
+);
+export type MultiStepPreview = FragmentOf<typeof MultiStepPreviewFragment>;
+
+/**
+ * @internal
+ */
+export const MultiStepPreviewQuery = graphql(
+  `query MultiStepPreview($request: MultiStepPreviewRequest!, $currency: Currency! = USD, $timeWindow: TimeWindow! = LAST_WEEK) {
+    value: multiStepPreview(request: $request) {
+      ...MultiStepPreview
+    }
+  }`,
+  [MultiStepPreviewFragment],
+);
+export type MultiStepPreviewRequest = RequestOf<typeof MultiStepPreviewQuery>;
 
 export type LiquidateExactAmountWithPermit = ReturnType<
   typeof graphql.scalar<'LiquidateExactAmountWithPermit'>

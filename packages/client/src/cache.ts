@@ -61,6 +61,14 @@ const transformToBigInt: Resolver = (parent, _args, _cache, info) => {
   return BigInt(parent[info.fieldName] as string) as unknown as Scalar;
 };
 
+const transformToNullableBigInt: Resolver = (parent, _args, _cache, info) => {
+  const value = parent[info.fieldName];
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return transformToBigInt(parent, _args, _cache, info);
+};
+
 const transformToBigDecimal: Resolver = (parent, _args, _cache, info) => {
   return BigDecimal.new(parent[info.fieldName] as string);
 };
@@ -123,6 +131,10 @@ export const exchange = cacheExchange({
     HealthFactorWithChange: {
       current: transformToNullableBigDecimal,
     },
+    PreviewWarning: {
+      requested: transformToNullableBigInt,
+      available: transformToNullableBigInt,
+    },
     UserSummary: {
       lowestHealthFactor: transformToNullableBigDecimal,
     },
@@ -158,6 +170,12 @@ export const exchange = cacheExchange({
     },
     ProtocolHistorySample: {
       date: transformToDate,
+    },
+    MultichainAssetHistorySample: {
+      date: transformToDate,
+    },
+    HubExposureItem: {
+      asOf: transformToDate,
     },
     BorrowActivity: {
       timestamp: transformToDate,
@@ -490,7 +508,9 @@ export const exchange = cacheExchange({
     HubAssetUserState: () => null,
     HubSpokeConfig: () => null,
     HubSummary: () => null,
+    HubExposureItem: () => null,
     HubSummarySample: () => null,
+    MultichainAssetHistorySample: () => null,
     InsufficientBalanceError: () => null,
     InsufficientLiquidityError: () => null,
     Leverage: () => null,
@@ -521,6 +541,8 @@ export const exchange = cacheExchange({
     SpokeConnectedHubSummary: () => null,
     SpokeSummary: () => null,
     SpokeSummarySample: () => null,
+    MultiStepPreview: () => null,
+    MultiStepPreviewStep: () => null,
     NativeAmount: () => null,
     PaginatedActivitiesResult: () => null,
     PaginatedOrdersResult: () => null,
@@ -549,6 +571,7 @@ export const exchange = cacheExchange({
     PreviewReserveRates: () => null,
     PreviewRewardOutcome: () => null,
     PreviewUserPosition: () => null,
+    PreviewWarning: () => null,
     ProtocolHistorySample: () => null,
     RepayWithSupply: () => null,
     RepayWithSupplyQuoteResult: () => null,
