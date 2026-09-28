@@ -408,7 +408,7 @@ type EarnScopePreview {
   """
   supplied: Erc20AmountVariation
   """
-  Supply interest earned across the row. Null on the same terms as `balance`.
+  Supply interest earned across the row. Null on the same terms as `supplied`.
   """
   earnings: Erc20AmountVariation
   """Supply rewards the plan gains or gives up on the row's own reserves."""
@@ -1271,7 +1271,9 @@ type MarketScopePreview {
   remainingBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
   """Yearly earnings at each side's net APY, not interest already accrued."""
   projectedEarnings(currency: Currency! = USD): ExchangeAmountVariation!
-  """Rewards the plan gains or gives up, judged on its two end states only."""
+  """
+  Rewards the plan gains or gives up on the Market's collateral and debt, judged on its end states.
+  """
   rewards: PreviewRewardOutcome!
   """
   Reserves whose pinned risk config the plan moves, indirect re-pins included.
