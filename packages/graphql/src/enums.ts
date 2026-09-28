@@ -35,7 +35,7 @@ export enum TimeWindow {
   LastDay = 'LAST_DAY',
   LastWeek = 'LAST_WEEK',
   LastMonth = 'LAST_MONTH',
-  LastNinetyDays = 'LAST_NINETY_DAYS',
+  LastThreeMonths = 'LAST_THREE_MONTHS',
   LastSixMonths = 'LAST_SIX_MONTHS',
   LastYear = 'LAST_YEAR',
   All = 'ALL',

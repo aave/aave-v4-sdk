@@ -3577,7 +3577,7 @@
             ]
           },
           {
-            "name": "netBalance",
+            "name": "netCollateral",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3612,7 +3612,7 @@
             "args": []
           },
           {
-            "name": "netApy",
+            "name": "netCollateralApy",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

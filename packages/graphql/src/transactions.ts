@@ -421,13 +421,13 @@ export const MarketScopePreviewFragment = graphql(
     debt(currency: $currency) {
       ...ExchangeAmountVariation
     }
-    netBalance(currency: $currency) {
+    netCollateral(currency: $currency) {
       ...ExchangeAmountVariation
     }
     supplyApy {
       ...PercentNumberVariation
     }
-    netApy {
+    netCollateralApy {
       ...PercentNumberVariation
     }
     riskPremium {

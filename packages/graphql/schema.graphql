@@ -1253,13 +1253,13 @@ type MarketScopePreview {
   """The Market's full debt, which Earn supplies never offset."""
   debt(currency: Currency! = USD): ExchangeAmountVariation!
   """Collateral minus debt."""
-  netBalance(currency: Currency! = USD): ExchangeAmountVariation!
+  netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
   """Supply APY weighted over collateral-enabled supplies only."""
   supplyApy: PercentNumberVariation!
   """
   Net APY over collateral-enabled supplies, retaining the Market's full debt.
   """
-  netApy: PercentNumberVariation!
+  netCollateralApy: PercentNumberVariation!
   """Premium over the base borrow rate, zero on a side with no debt."""
   riskPremium: PercentNumberVariation!
   """What the position could borrow in total against its collateral."""
@@ -3223,7 +3223,7 @@ enum TimeWindow {
   LAST_DAY
   LAST_WEEK
   LAST_MONTH
-  LAST_NINETY_DAYS
+  LAST_THREE_MONTHS
   LAST_SIX_MONTHS
   LAST_YEAR
   ALL

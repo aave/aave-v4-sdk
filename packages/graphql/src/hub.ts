@@ -119,7 +119,7 @@ export const HubAssetTrailingSupplyApysFragment = graphql(
         last30Days: trailingSupplyApy(window: LAST_MONTH) {
           ...PercentNumber
         }
-        last90Days: trailingSupplyApy(window: LAST_NINETY_DAYS) {
+        last90Days: trailingSupplyApy(window: LAST_THREE_MONTHS) {
           ...PercentNumber
         }
       }
