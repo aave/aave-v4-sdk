@@ -1,0 +1,33 @@
+packages/graphql/src/fragments/reserve.ts
+  s_b02d562d554822::t_52eff1e51a8343 7
+  s_b02d562d554822::t_28848cfe3ea053 185-217
+packages/client/src/actions/reserves.ts
+  s_b02d562d554822::t_d90ab26cb9f5cb 100-101
+  s_b02d562d554822::t_d5ebaf5e4b4aa1 115
+  s_b02d562d554822::t_1c396ed97726ca 102-106,108-114,116,118-123,125-127
+  s_b02d562d554822::t_4102808ad0191d 10-11,107,117,124
+packages/graphql/src/reserve.ts
+  s_b02d562d554822::t_1231914edd040e 6
+  s_b02d562d554822::t_94aa7b058f035e 70-78
+packages/client/src/displayTransformExchange.test.ts
+  s_b02d562d554822::t_455523a3726ee3 14
+  s_b02d562d554822::t_51917803d9d927 386-456
+.changeset/reserve-ids.md
+  s_b02d562d554822::t_70a176a233980c 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b8ed96c293d57b588849d9418e91a5b30de3fbae",
+  "prompts": {},
+  "sessions": {
+    "s_b02d562d554822": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7f7d642-3640-4471-a56a-31bd3cb347a0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
