@@ -40,7 +40,7 @@ export const HubExposureItemFragment = graphql(
     share {
       ...PercentNumber
     }
-    collateral(currency: $currency) {
+    totalCollateral(currency: $currency) {
       ...ExchangeAmount
     }
     asOf

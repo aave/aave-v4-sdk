@@ -406,7 +406,7 @@ type EarnScopePreview {
   """
   Supplied balance with interest; null only when the row is empty on both sides.
   """
-  balance: Erc20AmountVariation
+  supplied: Erc20AmountVariation
   """
   Supply interest earned across the row. Null on the same terms as `balance`.
   """
@@ -417,11 +417,12 @@ type EarnScopePreview {
   The hub asset's base rates, one pair since all its reserves share one curve.
   """
   reserveRates: ScopedReserveRates
-  value(currency: Currency! = USD): ExchangeAmountVariation!
+  """The row's supplies in USD, before and after the plan."""
+  totalSupplied(currency: Currency! = USD): ExchangeAmountVariation!
   """
   Yearly earnings at the row's APY, not the accrued interest `earnings` reports.
   """
-  projectedEarnings: ExchangeAmountVariation!
+  projectedEarnings(currency: Currency! = USD): ExchangeAmountVariation!
   """
   Base rate, underlying yield and the Merkl APY each side is eligible for, weighted by value.
   """
@@ -751,7 +752,7 @@ type HubAssetSummary {
   """
   Trailing average of the organic supply rate over the window. Rewards are not folded in.
   """
-  trailingSupplyApy(window: TimeWindow!): PercentNumber!
+  trailingSupplyApy(window: TimeWindow! = LAST_DAY): PercentNumber!
 }
 
 type HubAssetUserState {
@@ -768,7 +769,7 @@ type HubAssetUserState {
   """The collateral-enabled portion of `earnings`"""
   collateralEarnings: Erc20Amount!
   """
-  Base rate plus underlying yield, weighted by balance; rewards sit on each reserve.
+  Base rate, underlying yield and the Merkl rewards the user is eligible for, by balance.
   """
   supplyApy: PercentNumber!
 }
@@ -805,7 +806,7 @@ type HubExposureItem {
   """When the snapshot was taken"""
   asOf: DateTime!
   """The USD value of collateral-enabled supplies in this asset"""
-  collateral(currency: Currency! = USD): ExchangeAmount!
+  totalCollateral(currency: Currency! = USD): ExchangeAmount!
 }
 
 scalar HubId
@@ -1249,13 +1250,13 @@ A side with no position reads as zero, except its health factor, which is null.
 type MarketScopePreview {
   spoke: SpokeId!
   """Collateral-enabled supplies, before the plan and after all of it."""
-  collateral(currency: Currency! = USD): ExchangeAmountVariation!
+  totalCollateral(currency: Currency! = USD): ExchangeAmountVariation!
   """The Market's full debt, which Earn supplies never offset."""
-  debt(currency: Currency! = USD): ExchangeAmountVariation!
+  totalDebt(currency: Currency! = USD): ExchangeAmountVariation!
   """Collateral minus debt."""
   netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
   """Supply APY weighted over collateral-enabled supplies only."""
-  supplyApy: PercentNumberVariation!
+  collateralSupplyApy: PercentNumberVariation!
   """
   Net APY over collateral-enabled supplies, retaining the Market's full debt.
   """
@@ -1269,7 +1270,7 @@ type MarketScopePreview {
   """
   remainingBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
   """Yearly earnings at each side's net APY, not interest already accrued."""
-  projectedEarnings: ExchangeAmountVariation!
+  projectedEarnings(currency: Currency! = USD): ExchangeAmountVariation!
   """Rewards the plan gains or gives up, judged on its two end states only."""
   rewards: PreviewRewardOutcome!
   """
@@ -1343,10 +1344,10 @@ type MerklSupplyReward {
 
 type MultiStepPreview {
   """Whether the plan as submitted passes protocol validation."""
-  status: PlanStatus!
+  status: MultiStepPreviewStatus!
   steps: [MultiStepPreviewStep!]!
   """
-  Observations about the plan as a whole. Not blocking, unlike the per-step warnings.
+  Observations about the plan as a whole, never blocking, unlike a step's blockers.
   """
   warnings: [PreviewWarning!]!
   """
@@ -1361,20 +1362,41 @@ input MultiStepPreviewRequest {
   """
   Selects what `scope` reports; validation covers every action either way.
   """
-  previewScope: PreviewScope
+  scope: PreviewScope
+}
+
+"""
+Protocol validation only: it assumes the amounts can be funded and ignores gas.
+"""
+enum MultiStepPreviewStatus {
+  VALID
+  BLOCKED
+  """
+  A step could not be evaluated, so the plan is neither proven nor refused.
+  """
+  INCOMPLETE
 }
 
 type MultiStepPreviewStep {
   index: Int!
-  status: StepStatus!
+  status: MultiStepPreviewStepStatus!
   """
-  Null only on a `NOT_EVALUATED` step; otherwise read against the state it starts from.
+  Null on a `NOT_EVALUATED` step, and on a `BLOCKED` one with no amount to preview.
   """
   preview: PreviewUserPosition
   """
-  Why the step is blocked. Every code here refuses the action at protocol level.
+  Why the step is blocked; every code here refuses the action at protocol level.
   """
-  warnings: [PreviewWarning!]!
+  blockers: [PreviewWarning!]!
+}
+
+enum MultiStepPreviewStepStatus {
+  APPLIED
+  BLOCKED
+  """
+  After a blocked step: every step is required, so the rest are not evaluated.
+  """
+  NOT_EVALUATED
 }
 
 type MultichainAsset {
@@ -1786,18 +1808,6 @@ type PermitTypedData {
   signedAmount: BigDecimal!
 }
 
-"""
-Protocol validation only: it assumes the amounts can be funded and ignores gas.
-"""
-enum PlanStatus {
-  VALID
-  BLOCKED
-  """
-  A step could not be evaluated, so the plan is neither proven nor refused.
-  """
-  INCOMPLETE
-}
-
 union PointsCriteria = PointsGenericCriteria
 
 type PointsGenericCriteria {
@@ -2025,11 +2035,11 @@ type PreviewWarning {
   """
   The reserve the warning is about; for a split position, the leftover Earn side.
   """
-  reserve: ReserveId
+  reserveId: ReserveId
   """What the action asked for, in the reserve's underlying."""
-  requested: BigInt
+  requested: Erc20Amount
   """What was available, in the reserve's underlying."""
-  available: BigInt
+  available: Erc20Amount
 }
 
 """
@@ -2045,7 +2055,7 @@ enum PreviewWarningCode {
   INSUFFICIENT_SUPPLY_BALANCE
   INSUFFICIENT_LIQUIDITY
   SUPPLY_CAP_EXCEEDED
-  DRAW_CAP_EXCEEDED
+  BORROW_CAP_EXCEEDED
   AMOUNT_EXCEEDS_DEBT
   AMOUNT_MUST_BE_POSITIVE
   AMOUNT_TOO_SMALL_FOR_SHARES
@@ -2437,7 +2447,7 @@ type ReserveSummary {
   """
   Trailing average of the organic supply rate over the window. Rewards are not folded in.
   """
-  trailingSupplyApy(window: TimeWindow!): PercentNumber!
+  trailingSupplyApy(window: TimeWindow! = LAST_DAY): PercentNumber!
 }
 
 type ReserveUserState {
@@ -2526,7 +2536,7 @@ scalar RewardId
 What the reserve pays, as opposed to the scope's APY, which is what the user earns.
 """
 type ScopedReserveRates {
-  reserve: ReserveId!
+  reserveId: ReserveId!
   supplyApy: PercentNumberVariation!
   borrowApy: PercentNumberVariation!
 }
@@ -2899,15 +2909,6 @@ input StableVaultWithdrawRequest {
 input StableVaultsRequest {
   """The admin address to filter vaults by"""
   admin: EvmAddress!
-}
-
-enum StepStatus {
-  APPLIED
-  BLOCKED
-  """
-  After a blocked step: every step is required, so the rest are not evaluated.
-  """
-  NOT_EVALUATED
 }
 
 input SubmitOrderBySignatureInput {
@@ -3784,7 +3785,7 @@ type UserSummaryHistoryItem {
   """
   The aggregated supply APY for the time period, weighted by USD supplied
   """
-  netSupplyApy: PercentNumber!
+  supplyApy: PercentNumber!
   """The supply APY weighted over collateral-enabled supplies only"""
   collateralSupplyApy: PercentNumber!
   healthFactor: BigDecimal

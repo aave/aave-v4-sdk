@@ -61,14 +61,6 @@ const transformToBigInt: Resolver = (parent, _args, _cache, info) => {
   return BigInt(parent[info.fieldName] as string) as unknown as Scalar;
 };
 
-const transformToNullableBigInt: Resolver = (parent, _args, _cache, info) => {
-  const value = parent[info.fieldName];
-  if (value === null || value === undefined) {
-    return null;
-  }
-  return transformToBigInt(parent, _args, _cache, info);
-};
-
 const transformToBigDecimal: Resolver = (parent, _args, _cache, info) => {
   return BigDecimal.new(parent[info.fieldName] as string);
 };
@@ -130,10 +122,6 @@ export const exchange = cacheExchange({
     },
     HealthFactorWithChange: {
       current: transformToNullableBigDecimal,
-    },
-    PreviewWarning: {
-      requested: transformToNullableBigInt,
-      available: transformToNullableBigInt,
     },
     UserSummary: {
       lowestHealthFactor: transformToNullableBigDecimal,

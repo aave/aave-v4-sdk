@@ -306,7 +306,7 @@ export const UserSummaryHistoryItemFragment = graphql(
     netCollateral(currency: $currency) {
       ...ExchangeAmount
     }
-    netSupplyApy {
+    supplyApy {
       ...PercentNumber
     }
     collateralSupplyApy {

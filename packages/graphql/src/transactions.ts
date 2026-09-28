@@ -371,10 +371,15 @@ export const PreviewWarningFragment = graphql(
   `fragment PreviewWarning on PreviewWarning {
     __typename
     code
-    reserve
-    requested
-    available
+    reserveId
+    requested {
+      ...Erc20Amount
+    }
+    available {
+      ...Erc20Amount
+    }
   }`,
+  [Erc20AmountFragment],
 );
 export type PreviewWarning = FragmentOf<typeof PreviewWarningFragment>;
 
@@ -386,7 +391,7 @@ export const MultiStepPreviewStepFragment = graphql(
     preview {
       ...PreviewUserPosition
     }
-    warnings {
+    blockers {
       ...PreviewWarning
     }
   }`,
@@ -399,7 +404,7 @@ export type MultiStepPreviewStep = FragmentOf<
 export const ScopedReserveRatesFragment = graphql(
   `fragment ScopedReserveRates on ScopedReserveRates {
     __typename
-    reserve
+    reserveId
     supplyApy {
       ...PercentNumberVariation
     }
@@ -415,16 +420,16 @@ export const MarketScopePreviewFragment = graphql(
   `fragment MarketScopePreview on MarketScopePreview {
     __typename
     spoke
-    collateral(currency: $currency) {
+    totalCollateral(currency: $currency) {
       ...ExchangeAmountVariation
     }
-    debt(currency: $currency) {
+    totalDebt(currency: $currency) {
       ...ExchangeAmountVariation
     }
     netCollateral(currency: $currency) {
       ...ExchangeAmountVariation
     }
-    supplyApy {
+    collateralSupplyApy {
       ...PercentNumberVariation
     }
     netCollateralApy {
@@ -439,7 +444,7 @@ export const MarketScopePreviewFragment = graphql(
     remainingBorrowingPower(currency: $currency) {
       ...ExchangeAmountVariation
     }
-    projectedEarnings {
+    projectedEarnings(currency: $currency) {
       ...ExchangeAmountVariation
     }
     rewards {
@@ -486,16 +491,16 @@ export const EarnScopePreviewFragment = graphql(
   `fragment EarnScopePreview on EarnScopePreview {
     __typename
     hubAsset
-    balance {
+    supplied {
       ...Erc20AmountVariation
     }
     earnings {
       ...Erc20AmountVariation
     }
-    value(currency: $currency) {
+    totalSupplied(currency: $currency) {
       ...ExchangeAmountVariation
     }
-    projectedEarnings {
+    projectedEarnings(currency: $currency) {
       ...ExchangeAmountVariation
     }
     rewards {
