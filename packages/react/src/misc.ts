@@ -380,6 +380,13 @@ export type UseNetworkFeeRequestQuery =
     }
   | {
       estimate: PreviewAction;
+    }
+  | {
+      /**
+       * Rough budget for separate same-chain transactions, including fixed supply/repay
+       * approval allowances, without an additional margin. Excludes native value.
+       */
+      estimatePlan: { actions: readonly PreviewAction[] };
     };
 
 export type UseNetworkFeeArgs = Prettify<

@@ -7,6 +7,11 @@ export { useBorrow } from './useBorrow';
 export { useClaimRewards } from './useClaimRewards';
 export { useLiquidatePosition } from './useLiquidatePosition';
 export {
+  type UseMultiStepPreviewArgs,
+  useMultiStepPreview,
+  useMultiStepPreviewAction,
+} from './useMultiStepPreview';
+export {
   type UsePreviewArgs,
   usePreview,
   usePreviewAction,
