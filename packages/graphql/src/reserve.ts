@@ -3,6 +3,7 @@ import {
   PaginatedResultInfoFragment,
   ReserveFragment,
   ReserveHolderFragment,
+  ReserveIdentityFragment,
 } from './fragments';
 import { graphql, type RequestOf, type ResultOf } from './graphql';
 
@@ -65,6 +66,15 @@ export type ReservesRequestQuery = ReturnType<
 export type ChainTokenCategories = ReturnType<
   typeof graphql.scalar<'ChainTokenCategories'>
 >;
+
+export const ReserveIdsQuery = graphql(
+  `query ReserveIds($request: ReservesRequest!) {
+    value: reserves(request: $request) {
+      ...ReserveIdentity
+    }
+  }`,
+  [ReserveIdentityFragment],
+);
 
 /**
  * @internal

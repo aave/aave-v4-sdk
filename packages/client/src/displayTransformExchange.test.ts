@@ -11,7 +11,7 @@ import * as msw from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { AaveClient } from './AaveClient';
-import { hubAssets } from './actions';
+import { hubAssets, reserveIds } from './actions';
 
 const TEST_BACKEND = 'https://api.test-display-transform.aave.com/graphql';
 
@@ -381,5 +381,76 @@ describe('displayTransformExchange — showWrappedNativeReserveAsNative + assetO
     const token = result.value[0]!.underlying;
     expect(token.info.name).toBe('Ether');
     expect(token.info.symbol).toBe('OVERRIDE');
+  });
+});
+
+function makeReserveIdentity() {
+  return {
+    __typename: 'Reserve',
+    id: 'reserve-weth',
+    onChainId: '1',
+    chain: MOCK_CHAIN,
+    spoke: {
+      __typename: 'Spoke',
+      id: 'spoke-1',
+      name: 'Main',
+      address: '0x0000000000000000000000000000000000000002',
+    },
+    asset: {
+      __typename: 'HubAsset',
+      id: 'hub-asset-weth',
+      onchainAssetId: 'onchain-weth',
+      hub: {
+        __typename: 'Hub',
+        id: 'hub-1',
+        name: 'Core',
+        address: '0x0000000000000000000000000000000000000001',
+      },
+      underlying: makeWethToken(),
+    },
+  };
+}
+
+describe('displayTransformExchange — reserveIds', () => {
+  const server = setupServer(
+    api.query('ReserveIds', () =>
+      msw.HttpResponse.json({ data: { value: [makeReserveIdentity()] } }),
+    ),
+  );
+
+  beforeAll(() => server.listen());
+  afterAll(() => server.close());
+
+  it('transforms WETH to ETH for the underlying token', async () => {
+    const client = AaveClient.create({
+      environment: testEnvironment,
+      batch: false,
+      display: { showWrappedNativeReserveAsNative: true },
+    });
+    const result = await reserveIds(client, {
+      query: { chainIds: [CHAIN_ID] },
+    });
+    assertOk(result);
+    const reserve = result.value[0]!;
+    expect(reserve.asset.underlying.info.symbol).toBe('ETH');
+    expect(reserve.spoke.name).toBe('Main');
+    expect(reserve.asset.hub.name).toBe('Core');
+  });
+
+  it('applies asset overrides to the underlying token', async () => {
+    const client = AaveClient.create({
+      environment: testEnvironment,
+      batch: false,
+      display: {
+        assetOverrides: [
+          { chainId: 1, address: WETH_ADDRESS, display: { symbol: 'cETH' } },
+        ],
+      },
+    });
+    const result = await reserveIds(client, {
+      query: { chainIds: [CHAIN_ID] },
+    });
+    assertOk(result);
+    expect(result.value[0]!.asset.underlying.info.symbol).toBe('cETH');
   });
 });

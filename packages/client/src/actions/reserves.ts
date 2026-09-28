@@ -7,6 +7,8 @@ import {
   type Reserve,
   ReserveHoldersQuery,
   type ReserveHoldersRequest,
+  type ReserveIdentity,
+  ReserveIdsQuery,
   ReserveQuery,
   type ReserveRequest,
   ReservesQuery,
@@ -93,6 +95,34 @@ export function reserves(
     { request, currency, timeWindow },
     { requestPolicy },
   );
+}
+
+/**
+ * Fetches the id of each reserve matching the criteria, with the chain, spoke,
+ * hub and underlying token that name it. No rates, caps or user state.
+ *
+ * Use it over {@link reserves} to look a reserve up by name or build links to
+ * it. On a chain with many reserves the full data runs to megabytes.
+ *
+ * ```ts
+ * const result = await reserveIds(client, {
+ *   query: { chainIds: [chainId(1)] },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The reserves request parameters.
+ * @param options - The query options.
+ * @returns The id and names of each reserve matching the criteria.
+ */
+export function reserveIds(
+  client: AaveClient,
+  request: ReservesRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<ReserveIdentity[], UnexpectedError> {
+  return client.query(ReserveIdsQuery, { request }, { requestPolicy });
 }
 
 /**
