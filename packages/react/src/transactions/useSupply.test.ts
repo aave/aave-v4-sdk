@@ -1,4 +1,4 @@
-import { AaveClient } from '@aave/client';
+import { AaveClient, batchUnavailable } from '@aave/client';
 import { reserveHolders, userPositions } from '@aave/client/actions';
 import {
   createNewWallet,
@@ -29,6 +29,8 @@ import {
   assertTypename,
   bigDecimal,
   evmAddress,
+  okAsync,
+  txHash,
 } from '@aave/types';
 import * as msw from 'msw';
 import { setupServer } from 'msw/node';
@@ -40,7 +42,9 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from 'vitest';
+import { type BatchSender, PendingTransaction } from '../helpers';
 import { renderHookWithinContext } from '../test-utils';
 import { useSendTransaction } from '../viem';
 import { useSupply } from './useSupply';
@@ -354,5 +358,121 @@ describe(`Given the '${useSupply.name}' hook`, () => {
       assertErr(result);
       expect(result.error).toBeInstanceOf(TimeoutError);
     }, 90_000);
+  });
+
+  describe('When a batch sender is provided and the plan has a pre-contract action', () => {
+    const preAction = makeTransactionRequest({
+      chainId: ETHEREUM_FORK_ID,
+      from: sender,
+    });
+
+    const pending = new PendingTransaction(() =>
+      okAsync({
+        txHash: txHash(`0x${'ab'.repeat(32)}`),
+        operations: [OperationType.SpokeSupply],
+      }),
+    );
+
+    function batchSender(supported: boolean): BatchSender {
+      return {
+        supports: vi.fn(() => okAsync(supported)),
+        send: vi.fn(() => okAsync(pending)),
+      };
+    }
+
+    beforeEach(() => {
+      server.use(
+        api.query(SupplyQuery, () =>
+          msw.HttpResponse.json({
+            data: {
+              value: {
+                __typename: 'PreContractActionRequired',
+                transaction: preAction,
+                reason: 'Approve the native gateway as position manager',
+                originalTransaction: transactionRequest,
+              },
+            },
+          }),
+        ),
+        api.query(HasProcessedKnownTransactionQuery, () =>
+          msw.HttpResponse.json({
+            data: { value: true },
+          }),
+        ),
+      );
+    });
+
+    it('Then it should send both as one BatchRequest through a single handler call', async () => {
+      const batch = batchSender(true);
+      const handler = vi.fn((plan: { __typename: string }) =>
+        plan.__typename === 'BatchRequest'
+          ? batch.send(plan as never)
+          : okAsync(pending),
+      );
+
+      const {
+        result: {
+          current: [supply],
+        },
+      } = renderHookWithinContext(() => useSupply(handler, { batch }));
+
+      const result = await supply(supplyRequest);
+
+      assertOk(result);
+      expect(handler).toHaveBeenCalledOnce();
+      expect(handler.mock.calls[0]?.[0]).toMatchObject({
+        __typename: 'BatchRequest',
+        requests: [
+          expect.objectContaining({ data: preAction.data }),
+          expect.objectContaining({ data: transactionRequest.data }),
+        ],
+      });
+    });
+
+    it('Then it should send the steps one by one when the wallet cannot batch', async () => {
+      const batch = batchSender(false);
+      const handler = vi.fn((_plan: { __typename: string }) =>
+        okAsync(pending),
+      );
+
+      const {
+        result: {
+          current: [supply],
+        },
+      } = renderHookWithinContext(() => useSupply(handler, { batch }));
+
+      const result = await supply(supplyRequest);
+
+      assertOk(result);
+      expect(handler.mock.calls.map(([plan]) => plan.__typename)).toEqual([
+        'PreContractActionRequired',
+        'TransactionRequest',
+      ]);
+      expect(batch.send).not.toHaveBeenCalled();
+    });
+
+    it('Then it should fall back to the steps through the handler when the batch is unavailable', async () => {
+      const batch = batchSender(true);
+      const handler = vi.fn((plan: { __typename: string }) =>
+        plan.__typename === 'BatchRequest'
+          ? okAsync(batchUnavailable)
+          : okAsync(pending),
+      );
+
+      const {
+        result: {
+          current: [supply],
+        },
+      } = renderHookWithinContext(() => useSupply(handler, { batch }));
+
+      const result = await supply(supplyRequest);
+
+      assertOk(result);
+      expect(handler.mock.calls.map(([plan]) => plan.__typename)).toEqual([
+        'BatchRequest',
+        'PreContractActionRequired',
+        'TransactionRequest',
+      ]);
+    });
   });
 });
