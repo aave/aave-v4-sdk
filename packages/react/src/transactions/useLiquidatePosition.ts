@@ -1,4 +1,8 @@
-import { supportsPermit, type TransactionReceipt } from '@aave/client';
+import {
+  type BatchUnavailable,
+  supportsPermit,
+  type TransactionReceipt,
+} from '@aave/client';
 import { liquidatePosition } from '@aave/client/actions';
 import { ValidationError } from '@aave/core';
 import type {
@@ -9,10 +13,12 @@ import type {
   PreContractActionRequired,
   TransactionRequest,
 } from '@aave/graphql';
-import { errAsync, type Signature } from '@aave/types';
+import { errAsync, okAsync, type Signature } from '@aave/types';
 
 import { useAaveClient } from '../context';
 import {
+  type BatchOptions,
+  type BatchRequest,
   cancel,
   type ExecutionPlanHandler,
   PendingTransaction,
@@ -24,6 +30,21 @@ import {
 } from '../helpers';
 
 import { handleSingleApproval, sendApprovalTransactions } from './approvals';
+
+import { asStepHandler, type MaybeBatchHandler, sendAsBatch } from './batch';
+
+type LiquidatePositionStep =
+  | TransactionRequest
+  | Erc20Approval
+  | PreContractActionRequired;
+
+type LiquidatePositionResult = UseAsyncTask<
+  LiquidatePositionRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+>;
 
 function injectLiquidatePermitSignature(
   request: LiquidatePositionRequest,
@@ -108,44 +129,78 @@ function injectLiquidatePermitSignature(
  */
 export function useLiquidatePosition(
   handler: ExecutionPlanHandler<
-    TransactionRequest | Erc20Approval | PreContractActionRequired,
+    LiquidatePositionStep,
     PendingTransaction | Signature
   >,
-): UseAsyncTask<
-  LiquidatePositionRequest,
-  TransactionReceipt,
-  | SendTransactionError
-  | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
-> {
+): LiquidatePositionResult;
+/**
+ * A hook that provides a way to liquidate a position, sending any approval or pre-
+ * contract-action steps together with the transaction as one atomic batch when the
+ * wallet supports it.
+ *
+ * The handler then also receives a `BatchRequest`, which it sends with `batch.send`.
+ * A successful batch is a single handler call; if the wallet can't batch, the hook
+ * falls back to calling the handler once per step. See `useSupply` for an example.
+ *
+ * @param handler - The handler that will be used to handle the transactions.
+ * @param options - The batch sender to use.
+ */
+export function useLiquidatePosition(
+  handler: ExecutionPlanHandler<
+    LiquidatePositionStep | BatchRequest,
+    PendingTransaction | Signature | BatchUnavailable
+  >,
+  options: BatchOptions,
+): LiquidatePositionResult;
+export function useLiquidatePosition(
+  handler: MaybeBatchHandler<
+    LiquidatePositionStep,
+    PendingTransaction | Signature
+  >,
+  options?: BatchOptions,
+): LiquidatePositionResult {
   const client = useAaveClient();
 
+  const batch = options?.batch;
+
   return useAsyncTask(
-    (request: LiquidatePositionRequest) =>
-      liquidatePosition(client, request)
+    (request: LiquidatePositionRequest) => {
+      const steps = asStepHandler(handler);
+
+      return liquidatePosition(client, request)
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel });
+              return steps(plan, { cancel });
 
             case 'Erc20ApprovalRequired':
-              if (supportsPermit(plan)) {
-                return handleSingleApproval(plan, handler, (permitSig) =>
-                  liquidatePosition(
-                    client,
-                    injectLiquidatePermitSignature(request, permitSig),
-                  ),
-                ).andThen((transaction) => handler(transaction, { cancel }));
-              }
-              return sendApprovalTransactions(plan, handler).andThen(
-                (transaction) => handler(transaction, { cancel }),
-              );
+              return sendAsBatch(plan, handler, batch).andThen((pending) => {
+                if (pending) {
+                  return okAsync(pending);
+                }
+                if (supportsPermit(plan)) {
+                  return handleSingleApproval(plan, steps, (permitSig) =>
+                    liquidatePosition(
+                      client,
+                      injectLiquidatePermitSignature(request, permitSig),
+                    ),
+                  ).andThen((transaction) => steps(transaction, { cancel }));
+                }
+                return sendApprovalTransactions(plan, steps).andThen(
+                  (transaction) => steps(transaction, { cancel }),
+                );
+              });
 
             case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen(PendingTransaction.tryFrom)
-                .andThen((pending) => pending.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }));
+              return sendAsBatch(plan, handler, batch).andThen((pending) => {
+                if (pending) {
+                  return okAsync(pending);
+                }
+                return steps(plan, { cancel })
+                  .andThen(PendingTransaction.tryFrom)
+                  .andThen((pending) => pending.wait())
+                  .andThen(() => steps(plan.originalTransaction, { cancel }));
+              });
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
@@ -154,7 +209,8 @@ export function useLiquidatePosition(
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andThrough(() => refreshUserBalances(client, request.liquidator)),
-    [client, handler],
+        .andThrough(() => refreshUserBalances(client, request.liquidator));
+    },
+    [client, handler, batch],
   );
 }

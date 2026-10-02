@@ -1,4 +1,8 @@
-import { supportsPermit, type TransactionReceipt } from '@aave/client';
+import {
+  type BatchUnavailable,
+  supportsPermit,
+  type TransactionReceipt,
+} from '@aave/client';
 import {
   stableVaultDeposit,
   stableVaultWithdraw,
@@ -28,10 +32,17 @@ import {
   StableVaultUserPositionsQuery,
   type StableVaultUserPositionsRequest,
 } from '@aave/graphql';
-import { errAsync, type NullishDeep, type Signature } from '@aave/types';
+import {
+  errAsync,
+  type NullishDeep,
+  okAsync,
+  type Signature,
+} from '@aave/types';
 
 import { useAaveClient } from './context';
 import {
+  type BatchOptions,
+  type BatchRequest,
   cancel,
   type ExecutionPlanHandler,
   type Pausable,
@@ -52,6 +63,22 @@ import {
   handleSingleApproval,
   sendApprovalTransactions,
 } from './transactions/approvals';
+
+import {
+  asStepHandler,
+  type MaybeBatchHandler,
+  sendAsBatch,
+} from './transactions/batch';
+
+type StableVaultDepositStep = TransactionRequest | Erc20Approval;
+
+type StableVaultDepositResult = UseAsyncTask<
+  StableVaultDepositRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+>;
 
 function injectDepositPermitSignature(
   request: StableVaultDepositRequest,
@@ -87,38 +114,67 @@ function injectDepositPermitSignature(
  */
 export function useStableVaultDeposit(
   handler: ExecutionPlanHandler<
-    TransactionRequest | Erc20Approval,
+    StableVaultDepositStep,
     Signature | PendingTransaction
   >,
-): UseAsyncTask<
-  StableVaultDepositRequest,
-  TransactionReceipt,
-  | SendTransactionError
-  | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
-> {
+): StableVaultDepositResult;
+/**
+ * A hook that provides a way to deposit assets into a stable vault, sending any
+ * approval or pre-contract-action steps together with the transaction as one
+ * atomic batch when the wallet supports it.
+ *
+ * The handler then also receives a `BatchRequest`, which it sends with `batch.send`.
+ * A successful batch is a single handler call; if the wallet can't batch, the hook
+ * falls back to calling the handler once per step. See `useSupply` for an example.
+ *
+ * @param handler - The handler that will be used to handle the transactions.
+ * @param options - The batch sender to use.
+ */
+export function useStableVaultDeposit(
+  handler: ExecutionPlanHandler<
+    StableVaultDepositStep | BatchRequest,
+    Signature | PendingTransaction | BatchUnavailable
+  >,
+  options: BatchOptions,
+): StableVaultDepositResult;
+export function useStableVaultDeposit(
+  handler: MaybeBatchHandler<
+    StableVaultDepositStep,
+    Signature | PendingTransaction
+  >,
+  options?: BatchOptions,
+): StableVaultDepositResult {
   const client = useAaveClient();
 
+  const batch = options?.batch;
+
   return useAsyncTask(
-    (request: StableVaultDepositRequest) =>
-      stableVaultDeposit(client, request)
+    (request: StableVaultDepositRequest) => {
+      const steps = asStepHandler(handler);
+
+      return stableVaultDeposit(client, request)
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel });
+              return steps(plan, { cancel });
 
             case 'Erc20ApprovalRequired':
-              if (supportsPermit(plan)) {
-                return handleSingleApproval(plan, handler, (permitSig) =>
-                  stableVaultDeposit(
-                    client,
-                    injectDepositPermitSignature(request, permitSig),
-                  ),
-                ).andThen((transaction) => handler(transaction, { cancel }));
-              }
-              return sendApprovalTransactions(plan, handler).andThen(
-                (transaction) => handler(transaction, { cancel }),
-              );
+              return sendAsBatch(plan, handler, batch).andThen((pending) => {
+                if (pending) {
+                  return okAsync(pending);
+                }
+                if (supportsPermit(plan)) {
+                  return handleSingleApproval(plan, steps, (permitSig) =>
+                    stableVaultDeposit(
+                      client,
+                      injectDepositPermitSignature(request, permitSig),
+                    ),
+                  ).andThen((transaction) => steps(transaction, { cancel }));
+                }
+                return sendApprovalTransactions(plan, steps).andThen(
+                  (transaction) => steps(transaction, { cancel }),
+                );
+              });
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
@@ -129,8 +185,9 @@ export function useStableVaultDeposit(
         .andThen(client.waitForTransaction)
         .andThrough(() =>
           refreshStableVaultUserPositions(client, request.user),
-        ),
-    [client, handler],
+        );
+    },
+    [client, handler, batch],
   );
 }
 

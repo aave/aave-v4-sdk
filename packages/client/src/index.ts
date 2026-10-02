@@ -14,4 +14,8 @@ export * from './environments';
 export * from './nativeAsset';
 export * from './options';
 export type * from './types';
-export { transactionReceipt } from './types';
+export {
+  batchUnavailable,
+  isBatchUnavailable,
+  transactionReceipt,
+} from './types';

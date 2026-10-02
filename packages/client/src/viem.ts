@@ -1,6 +1,7 @@
 import {
   CancelError,
   SigningError,
+  type TimeoutError,
   TransactionError,
   UnexpectedError,
   ValidationError,
@@ -29,7 +30,6 @@ import {
   type ProviderRpcError,
   type RpcError,
   SwitchChainError,
-  TransactionExecutionError,
   type Transport,
   UserRejectedRequestError,
   type Chain as ViemChain,
@@ -42,14 +42,25 @@ import {
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
 import { supportsPermit } from './adapters';
+import {
+  type CallsId,
+  canSendCalls,
+  decodeFallbackCallsId,
+  getWalletCapabilities,
+  sendCalls,
+  toSendError,
+  type WaitForResult,
+  waitForCallsResult,
+} from './eip5792';
 import { nativeTokenInfo } from './nativeAsset';
 import { resolveTxHash } from './safe';
-import type {
-  ExecutionPlanHandler,
-  SignTypedDataError,
-  TransactionResult,
-  TypedData,
-  TypedDataHandler,
+import {
+  type ExecutionPlanHandler,
+  isBatchUnavailable,
+  type SignTypedDataError,
+  type TransactionResult,
+  type TypedData,
+  type TypedDataHandler,
 } from './types';
 
 function isRpcError(err: unknown): err is RpcError {
@@ -211,18 +222,7 @@ function sendEip1559Transaction(
           chain: walletClient.chain,
           gas,
         }),
-        (err) => {
-          if (err instanceof TransactionExecutionError) {
-            const rejected = err.walk(
-              (err) => err instanceof UserRejectedRequestError,
-            );
-
-            if (rejected) {
-              return CancelError.from(rejected);
-            }
-          }
-          return SigningError.from(err);
-        },
+        toSendError,
       ),
     )
     .map(txHash);
@@ -303,15 +303,54 @@ export function waitForTransactionResult(
   );
 }
 
+/**
+ * Returns the wait for calls sent via `sendCalls`. A synthetic id from viem's
+ * `eth_sendTransaction` fallback is waited on like a legacy transaction.
+ *
+ * @internal
+ */
+export function waitForSentCalls(
+  walletClient: WalletClient,
+  requests: TransactionRequest[],
+  id: CallsId,
+): WaitForResult {
+  const [first] = requests;
+  invariant(first, 'Expected at least one transaction request');
+
+  const fallbackHash =
+    requests.length === 1 ? decodeFallbackCallsId(id, first.chainId) : null;
+
+  if (fallbackHash) {
+    return () => waitForTransactionResult(walletClient, first, fallbackHash);
+  }
+  return () => waitForCallsResult(walletClient, requests, id);
+}
+
 function sendTransactionAndWait(
   walletClient: WalletClient,
   request: TransactionRequest,
 ): ResultAsync<
   TransactionResult,
-  CancelError | SigningError | TransactionError | UnexpectedError
+  CancelError | SigningError | TimeoutError | TransactionError | UnexpectedError
 > {
-  return sendTransaction(walletClient, request).andThen((hash) =>
-    waitForTransactionResult(walletClient, request, hash),
+  return getWalletCapabilities(walletClient, request.chainId).andThen(
+    (capabilities) => {
+      if (!canSendCalls(capabilities)) {
+        return sendTransaction(walletClient, request).andThen((hash) =>
+          waitForTransactionResult(walletClient, request, hash),
+        );
+      }
+
+      return sendCalls(walletClient, [request]).andThen((id) => {
+        // A single call is never sent atomically, so this can't happen.
+        if (isBatchUnavailable(id)) {
+          return UnexpectedError.from(
+            'Unexpected BatchUnavailable for a single call',
+          ).asResultAsync();
+        }
+        return waitForSentCalls(walletClient, [request], id)();
+      });
+    },
   );
 }
 
@@ -364,6 +403,82 @@ export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   return result
     ? executePlan(walletClient, result)
     : executePlan.bind(null, walletClient);
+}
+
+function batchRequestsOf(plan: ExecutionPlan): TransactionRequest[] | null {
+  switch (plan.__typename) {
+    case 'Erc20ApprovalRequired':
+      return [
+        ...plan.approvals.map((approval) => approval.byTransaction),
+        plan.originalTransaction,
+      ];
+
+    case 'PreContractActionRequired':
+      return [plan.transaction, plan.originalTransaction];
+
+    default:
+      return null;
+  }
+}
+
+function executeBatchPlan(
+  walletClient: WalletClient,
+  result: ExecutionPlan,
+): ReturnType<ExecutionPlanHandler> {
+  const requests = batchRequestsOf(result);
+  const first = requests?.[0];
+
+  if (!requests || !first) {
+    return executePlan(walletClient, result);
+  }
+
+  return getWalletCapabilities(walletClient, first.chainId).andThen(
+    (capabilities) => {
+      if (!canSendCalls(capabilities)) {
+        return executePlan(walletClient, result);
+      }
+
+      return sendCalls(walletClient, requests).andThen((id) =>
+        // The wallet can't execute the Batch atomically; nothing was submitted.
+        isBatchUnavailable(id)
+          ? executePlan(walletClient, result)
+          : waitForSentCalls(walletClient, requests, id)(),
+      );
+    },
+  );
+}
+
+/**
+ * Creates an execution plan handler that sends approval or pre-contract-action steps
+ * together with the original transaction as one atomic batch, when the wallet reports
+ * EIP-5792 atomic support (`atomic: 'supported'`) for the chain. Otherwise it behaves
+ * exactly like {@link sendWith}, sending the steps one by one.
+ *
+ * ```ts
+ * const result = await supply(client, request)
+ *   .andThen(sendBatchWith(walletClient))
+ *   .andThen(client.waitForTransaction);
+ * ```
+ *
+ * When composed after {@link permitWith}, a permit-capable approval is resolved by
+ * signature first, so only the remaining steps are batched.
+ */
+export function sendBatchWith(walletClient: WalletClient): ExecutionPlanHandler;
+/**
+ * Sends execution plan transactions as one atomic batch when the wallet supports it,
+ * otherwise one by one. See {@link sendBatchWith}.
+ */
+export function sendBatchWith<T extends ExecutionPlan = ExecutionPlan>(
+  walletClient: WalletClient,
+  result: T,
+): ReturnType<ExecutionPlanHandler<T>>;
+export function sendBatchWith<T extends ExecutionPlan = ExecutionPlan>(
+  walletClient: WalletClient,
+  result?: T,
+): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
+  return result
+    ? executeBatchPlan(walletClient, result)
+    : executeBatchPlan.bind(null, walletClient);
 }
 
 /**
@@ -446,3 +561,14 @@ export function permitWith<E>(
     return okAsync(result);
   });
 }
+
+export {
+  type AtomicStatus,
+  type CallsId,
+  canSendCalls,
+  getWalletCapabilities,
+  sendCalls,
+  type WaitForResult,
+  type WalletCapabilities,
+  waitForCallsResult,
+} from './eip5792';

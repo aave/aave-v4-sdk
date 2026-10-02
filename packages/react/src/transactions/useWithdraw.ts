@@ -1,4 +1,8 @@
-import { type TransactionReceipt, UnexpectedError } from '@aave/client';
+import {
+  type BatchUnavailable,
+  type TransactionReceipt,
+  UnexpectedError,
+} from '@aave/client';
 import { withdraw } from '@aave/client/actions';
 import { ValidationError } from '@aave/core';
 import type {
@@ -7,10 +11,12 @@ import type {
   TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql';
-import { errAsync } from '@aave/types';
+import { errAsync, okAsync } from '@aave/types';
 
 import { useAaveClient } from '../context';
 import {
+  type BatchOptions,
+  type BatchRequest,
   cancel,
   type ExecutionPlanHandler,
   type PendingTransaction,
@@ -20,6 +26,17 @@ import {
   type UseAsyncTask,
   useAsyncTask,
 } from '../helpers';
+import { asStepHandler, type MaybeBatchHandler, sendAsBatch } from './batch';
+
+type WithdrawStep = TransactionRequest | PreContractActionRequired;
+
+type WithdrawResult = UseAsyncTask<
+  WithdrawRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+>;
 
 /**
  * A hook that provides a way to withdraw supplied assets from an Aave reserve.
@@ -75,31 +92,53 @@ import {
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useWithdraw(
+  handler: ExecutionPlanHandler<WithdrawStep, PendingTransaction>,
+): WithdrawResult;
+/**
+ * A hook that provides a way to withdraw assets from an Aave reserve, sending a pre-contract action (e.g. approving
+ * the native gateway as position manager) together with the transaction as one atomic
+ * batch when the wallet supports it.
+ *
+ * The handler then also receives a `BatchRequest`, which it sends with `batch.send`.
+ * See `useSupply` for an example.
+ *
+ * @param handler - The handler that will be used to handle the transactions.
+ * @param options - The batch sender to use.
+ */
+export function useWithdraw(
   handler: ExecutionPlanHandler<
-    TransactionRequest | PreContractActionRequired,
-    PendingTransaction
+    WithdrawStep | BatchRequest,
+    PendingTransaction | BatchUnavailable
   >,
-): UseAsyncTask<
-  WithdrawRequest,
-  TransactionReceipt,
-  | SendTransactionError
-  | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
-> {
+  options: BatchOptions,
+): WithdrawResult;
+export function useWithdraw(
+  handler: MaybeBatchHandler<WithdrawStep, PendingTransaction>,
+  options?: BatchOptions,
+): WithdrawResult {
   const client = useAaveClient();
+  const batch = options?.batch;
 
   return useAsyncTask(
-    (request: WithdrawRequest) =>
-      withdraw(client, request)
+    (request: WithdrawRequest) => {
+      const steps = asStepHandler(handler);
+
+      return withdraw(client, request)
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel });
+              return steps(plan, { cancel });
 
             case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen((pending) => pending.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }));
+              return sendAsBatch(plan, handler, batch).andThen((pending) =>
+                pending
+                  ? okAsync(pending)
+                  : steps(plan, { cancel })
+                      .andThen((pending) => pending.wait())
+                      .andThen(() =>
+                        steps(plan.originalTransaction, { cancel }),
+                      ),
+              );
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
@@ -110,7 +149,8 @@ export function useWithdraw(
         })
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andThrough(() => refreshQueriesForReserveChange(client, request)),
-    [client, handler],
+        .andThrough(() => refreshQueriesForReserveChange(client, request));
+    },
+    [client, handler, batch],
   );
 }

@@ -1,4 +1,4 @@
-import type { TransactionResult } from '@aave/client';
+import type { BatchUnavailable, TransactionResult } from '@aave/client';
 import {
   CancelError,
   type SigningError,
@@ -7,7 +7,7 @@ import {
   UnexpectedError,
 } from '@aave/core';
 import type { TransactionRequest } from '@aave/graphql';
-import type { ResultAsync, Signature } from '@aave/types';
+import type { ChainId, ResultAsync, Signature } from '@aave/types';
 import { isSignature, okAsync } from '@aave/types';
 import type { UseAsyncTask } from './tasks';
 
@@ -84,11 +84,61 @@ export type UseSendTransactionResult = UseAsyncTask<
  */
 export type ExecutionPlanHandler<
   T,
-  R extends Signature | PendingTransaction,
+  R extends Signature | PendingTransaction | BatchUnavailable,
 > = (
   plan: T,
   options: TransactionHandlerOptions,
 ) => ResultAsync<R, SendTransactionError>;
+
+/**
+ * A plan step that sends several transactions as one atomic batch.
+ *
+ * Only passed to the handler of a hook that was given `{ batch }`, when the wallet
+ * supports atomic batching. Send it with `batch.send(plan)`.
+ */
+export type BatchRequest = {
+  __typename: 'BatchRequest';
+  /**
+   * The transactions to execute atomically, in order: the approval or
+   * pre-contract-action steps, then the original transaction.
+   */
+  requests: TransactionRequest[];
+};
+
+/**
+ * Sends a {@link BatchRequest} through a wallet that supports atomic batching.
+ *
+ * Obtain one from the wallet adapter (e.g. `useSendCalls` in `@aave/react/viem`) and
+ * pass it to a hook as `{ batch }`.
+ */
+export type BatchSender = {
+  /**
+   * @internal Whether the wallet can batch on the given chain. Used by the hooks.
+   */
+  readonly supports: (chainId: ChainId) => ResultAsync<boolean, never>;
+
+  /**
+   * Sends the batch. Resolves to a `PendingTransaction`, or to `BatchUnavailable`
+   * when the wallet turned out not to support atomic execution (nothing was
+   * submitted; the hook then sends the steps one by one). Return the result
+   * unchanged from the handler.
+   */
+  readonly send: (
+    plan: BatchRequest,
+  ) => ResultAsync<PendingTransaction | BatchUnavailable, SendTransactionError>;
+};
+
+/**
+ * Options for hooks that can batch approval steps with the original transaction.
+ */
+export type BatchOptions = {
+  /**
+   * Sends approval or pre-contract-action steps together with the original
+   * transaction as one atomic batch when the wallet supports it. Omit (or pass
+   * `undefined`) to always send the steps one by one.
+   */
+  batch: BatchSender | null | undefined;
+};
 
 /**
  * Tries to create a Signature from an unknown value.

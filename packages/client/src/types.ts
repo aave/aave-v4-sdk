@@ -1,6 +1,7 @@
 import type {
   CancelError,
   SigningError,
+  TimeoutError,
   TransactionError,
   UnexpectedError,
   ValidationError,
@@ -48,6 +49,7 @@ export function transactionReceipt(txHash: TxHash): TransactionReceipt {
 export type SendWithError =
   | CancelError
   | SigningError
+  | TimeoutError
   | TransactionError
   | ValidationError<InsufficientBalanceError>
   | UnexpectedError;
@@ -66,3 +68,26 @@ export type TypedData = PermitTypedData | SwapTypedData | OrderTypedData;
 export type TypedDataHandler = (
   data: TypedData,
 ) => ResultAsync<Signature, SignTypedDataError>;
+
+/**
+ * Returned instead of a Calls ID when the wallet turns out not to support
+ * atomic execution of a Batch. Nothing was submitted; the steps should be sent
+ * one by one instead.
+ *
+ * @internal
+ */
+export type BatchUnavailable = { readonly __typename: 'BatchUnavailable' };
+
+/**
+ * @internal
+ */
+export const batchUnavailable: BatchUnavailable = Object.freeze({
+  __typename: 'BatchUnavailable',
+});
+
+/**
+ * @internal
+ */
+export function isBatchUnavailable(value: unknown): value is BatchUnavailable {
+  return value === batchUnavailable;
+}

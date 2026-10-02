@@ -1,4 +1,8 @@
-import { supportsPermit, type TransactionReceipt } from '@aave/client';
+import {
+  type BatchUnavailable,
+  supportsPermit,
+  type TransactionReceipt,
+} from '@aave/client';
 import { repay } from '@aave/client/actions';
 import { ValidationError } from '@aave/core';
 import type {
@@ -9,10 +13,17 @@ import type {
   RepayRequest,
   TransactionRequest,
 } from '@aave/graphql';
-import { type BigDecimal, errAsync, type Signature } from '@aave/types';
+import {
+  type BigDecimal,
+  errAsync,
+  okAsync,
+  type Signature,
+} from '@aave/types';
 
 import { useAaveClient } from '../context';
 import {
+  type BatchOptions,
+  type BatchRequest,
   cancel,
   type ExecutionPlanHandler,
   PendingTransaction,
@@ -23,6 +34,18 @@ import {
   useAsyncTask,
 } from '../helpers';
 import { handleSingleApproval, sendApprovalTransactions } from './approvals';
+
+import { asStepHandler, type MaybeBatchHandler, sendAsBatch } from './batch';
+
+type RepayStep = TransactionRequest | Erc20Approval | PreContractActionRequired;
+
+type RepayResult = UseAsyncTask<
+  RepayRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+>;
 
 function injectRepayPermitSignature(
   request: RepayRequest,
@@ -100,49 +123,77 @@ function injectRepayPermitSignature(
  * @param handler - The handler that will be used to handle the transactions.
  */
 export function useRepay(
+  handler: ExecutionPlanHandler<RepayStep, Signature | PendingTransaction>,
+): RepayResult;
+/**
+ * A hook that provides a way to repay borrowed assets, sending any approval or
+ * pre-contract-action steps together with the transaction as one atomic batch when
+ * the wallet supports it.
+ *
+ * The handler then also receives a `BatchRequest`, which it sends with `batch.send`.
+ * A successful batch is a single handler call; if the wallet can't batch, the hook
+ * falls back to calling the handler once per step. See `useSupply` for an example.
+ *
+ * @param handler - The handler that will be used to handle the transactions.
+ * @param options - The batch sender to use.
+ */
+export function useRepay(
   handler: ExecutionPlanHandler<
-    TransactionRequest | Erc20Approval | PreContractActionRequired,
-    Signature | PendingTransaction
+    RepayStep | BatchRequest,
+    Signature | PendingTransaction | BatchUnavailable
   >,
-): UseAsyncTask<
-  RepayRequest,
-  TransactionReceipt,
-  | SendTransactionError
-  | PendingTransactionError
-  | ValidationError<InsufficientBalanceError>
-> {
+  options: BatchOptions,
+): RepayResult;
+export function useRepay(
+  handler: MaybeBatchHandler<RepayStep, Signature | PendingTransaction>,
+  options?: BatchOptions,
+): RepayResult {
   const client = useAaveClient();
 
+  const batch = options?.batch;
+
   return useAsyncTask(
-    (request: RepayRequest) =>
-      repay(client, request)
+    (request: RepayRequest) => {
+      const steps = asStepHandler(handler);
+
+      return repay(client, request)
         .andThen((plan) => {
           switch (plan.__typename) {
             case 'TransactionRequest':
-              return handler(plan, { cancel });
+              return steps(plan, { cancel });
 
             case 'Erc20ApprovalRequired':
-              if (supportsPermit(plan)) {
-                return handleSingleApproval(plan, handler, (permitSig) =>
-                  repay(
-                    client,
-                    injectRepayPermitSignature(
-                      request,
-                      permitSig,
-                      plan.approvals[0].bySignature.signedAmount,
+              return sendAsBatch(plan, handler, batch).andThen((pending) => {
+                if (pending) {
+                  return okAsync(pending);
+                }
+                if (supportsPermit(plan)) {
+                  return handleSingleApproval(plan, steps, (permitSig) =>
+                    repay(
+                      client,
+                      injectRepayPermitSignature(
+                        request,
+                        permitSig,
+                        plan.approvals[0].bySignature.signedAmount,
+                      ),
                     ),
-                  ),
-                ).andThen((transaction) => handler(transaction, { cancel }));
-              }
-              return sendApprovalTransactions(plan, handler).andThen(
-                (transaction) => handler(transaction, { cancel }),
-              );
+                  ).andThen((transaction) => steps(transaction, { cancel }));
+                }
+                return sendApprovalTransactions(plan, steps).andThen(
+                  (transaction) => steps(transaction, { cancel }),
+                );
+              });
 
             case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen(PendingTransaction.tryFrom)
-                .andThen((pending) => pending.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }));
+              return sendAsBatch(plan, handler, batch).andThen((pending) => {
+                if (pending) {
+                  return okAsync(pending);
+                }
+                return steps(plan, { cancel })
+                  .andThen(PendingTransaction.tryFrom)
+                  .andThen((pending) => pending.wait())
+                  .andThen(() => steps(plan.originalTransaction, { cancel }));
+              });
 
             case 'InsufficientBalanceError':
               return errAsync(ValidationError.fromGqlNode(plan));
@@ -151,7 +202,8 @@ export function useRepay(
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andThrough(() => refreshQueriesForReserveChange(client, request)),
-    [client, handler],
+        .andThrough(() => refreshQueriesForReserveChange(client, request));
+    },
+    [client, handler, batch],
   );
 }
