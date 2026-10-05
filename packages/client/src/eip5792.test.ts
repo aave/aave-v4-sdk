@@ -375,6 +375,15 @@ describe('Given the EIP-5792 helpers', () => {
       expect(methodsCalled(request, 'wallet_getCallsStatus')).toBe(1);
     });
 
+    it('Then it fails with a TimeoutError when a status request never settles', async () => {
+      const { result } = waitWith([() => new Promise(() => {})], 20);
+
+      const outcome = await result;
+
+      assertErr(outcome);
+      expect(outcome.error).toBeInstanceOf(TimeoutError);
+    });
+
     it('Then it fails with a TimeoutError carrying the Calls ID when still pending at the deadline', async () => {
       const { result } = waitWith([() => callsStatus(100)], 20);
 

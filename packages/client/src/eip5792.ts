@@ -356,6 +356,27 @@ function callsTransactionError(
   return TransactionError.new({ txHash: hash, request, link });
 }
 
+const DEADLINE_REACHED = Symbol('DeadlineReached');
+
+/**
+ * Settles with the promise, or with `DEADLINE_REACHED` once `deadline` passes. The
+ * `custom` transport applies no request timeout, so a stalled wallet request would
+ * otherwise never settle. The timer is cleared so it can't keep the process alive.
+ */
+function beforeDeadline<T>(
+  promise: Promise<T>,
+  deadline: number,
+): Promise<T | typeof DEADLINE_REACHED> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<typeof DEADLINE_REACHED>((resolve) => {
+    timer = setTimeout(
+      () => resolve(DEADLINE_REACHED),
+      Math.max(0, deadline - Date.now()),
+    );
+  });
+  return Promise.race([promise, expired]).finally(() => clearTimeout(timer));
+}
+
 type PollOutcome =
   | { kind: 'ok'; result: TransactionResult }
   | { kind: 'error'; error: TimeoutError | TransactionError | UnexpectedError };
@@ -373,7 +394,14 @@ async function pollCallsStatus(
   while (Date.now() < deadline) {
     let status: Awaited<ReturnType<typeof getCallsStatus>>;
     try {
-      status = await getCallsStatus(walletClient, { id });
+      const next = await beforeDeadline(
+        getCallsStatus(walletClient, { id }),
+        deadline,
+      );
+      if (next === DEADLINE_REACHED) {
+        break;
+      }
+      status = next;
     } catch (err) {
       if (isTerminalStatusError(err)) {
         return { kind: 'error', error: UnexpectedError.from(err) };
