@@ -4,6 +4,7 @@ import { HubAssetFragment } from './assets';
 import {
   ChainFragment,
   Erc20AmountFragment,
+  Erc20TokenFragment,
   PercentNumberFragment,
 } from './common';
 import { RewardFragment } from './rewards';
@@ -181,3 +182,36 @@ export const ReserveInfoFragment = graphql(
   [HubAssetFragment],
 );
 export type ReserveInfo = FragmentOf<typeof ReserveInfoFragment>;
+
+export const ReserveIdentityFragment = graphql(
+  `fragment ReserveIdentity on Reserve {
+    __typename
+    id
+    onChainId
+    chain {
+      ...Chain
+    }
+    spoke {
+      __typename
+      id
+      name
+      address
+    }
+    asset {
+      __typename
+      id
+      onchainAssetId
+      hub {
+        __typename
+        id
+        name
+        address
+      }
+      underlying {
+        ...Erc20Token
+      }
+    }
+  }`,
+  [ChainFragment, Erc20TokenFragment],
+);
+export type ReserveIdentity = FragmentOf<typeof ReserveIdentityFragment>;

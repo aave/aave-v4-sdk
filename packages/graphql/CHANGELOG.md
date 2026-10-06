@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 3.6.0
+
+### Minor Changes
+
+- 83bac7e: **feat:** `reserveIds` action, returning each reserve's id, chain, spoke, hub and underlying token without rates, caps or user state, for looking reserves up by name or linking to them without fetching the full `Reserve`
+
 ## 3.5.0
 
 ### Minor Changes
