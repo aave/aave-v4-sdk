@@ -7,17 +7,24 @@ import {
 } from '@aave/core';
 import type { HasProcessedKnownTransactionRequest } from '@aave/graphql';
 import {
+  normalizeVariables,
   type RewardId,
   UserClaimableRewardsQuery,
   type VariablesOf,
 } from '@aave/graphql';
 import {
+  type AnyVariables,
   type ChainId,
   type EvmAddress,
   invariant,
   ResultAsync,
 } from '@aave/types';
-import type { Exchange, Operation, OperationResult } from '@urql/core';
+import type {
+  Exchange,
+  Operation,
+  OperationResult,
+  TypedDocumentNode,
+} from '@urql/core';
 import { map, pipe } from 'wonka';
 import { hasProcessedKnownTransaction } from './actions';
 import {
@@ -163,6 +170,13 @@ export class AaveClient extends GqlClient {
           userClaimableRewardsIncludesChain(vars, chainId),
       );
     }, 30_000);
+  }
+
+  protected override normalizeVariables<TVariables extends AnyVariables>(
+    document: TypedDocumentNode<unknown, TVariables>,
+    variables: TVariables,
+  ): TVariables {
+    return normalizeVariables(document, variables);
   }
 
   protected override additionalExchanges(): Exchange[] {
