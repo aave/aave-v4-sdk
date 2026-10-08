@@ -1,0 +1,27 @@
+.changeset/quiet-supply-flags.md
+  s_9d14668ccc13f7::t_0ea34a0f062b67 1-8
+packages/cli/src/commands/action/supply.ts
+  s_9d14668ccc13f7::t_64c43207769298 41,43,52,92
+packages/client/src/actions/transactions.ts
+  s_9d14668ccc13f7::t_2538f47a147c4b 92
+packages/graphql/schema.graphql
+  s_9d14668ccc13f7::t_8cfc1670a73d72 2974,2977-2980
+packages/graphql/src/graphql-env.d.ts
+  s_9d14668ccc13f7::t_f3f09b8ffb9579 359
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d25158c7512b333ad1ccf029d8299c0b415272cb",
+  "prompts": {},
+  "sessions": {
+    "s_9d14668ccc13f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2760e1c-42f5-4140-b6a8-88133643eea5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
