@@ -27,6 +27,8 @@ import {
 } from '@aave/types';
 import {
   type Account,
+  createClient,
+  custom,
   defineChain,
   isAddressEqual,
   type ProviderRpcError,
@@ -290,6 +292,29 @@ type SubmissionOutcome =
   | { status: 'receipt-error'; error: unknown };
 
 /**
+ * Returns a client over `walletClient` that rejects every request once `signal`
+ * aborts. viem's `waitForTransactionReceipt` cannot be cancelled; on this
+ * client it stops sending requests after settlement instead of polling the
+ * wallet until its timeout.
+ */
+function clientUntil(walletClient: WalletClient, signal: AbortSignal) {
+  return createClient({
+    account: walletClient.account,
+    chain: walletClient.chain,
+    pollingInterval: walletClient.pollingInterval,
+    transport: custom(
+      {
+        request: (args) =>
+          signal.aborted
+            ? Promise.reject(new Error('Submission settled'))
+            : walletClient.request(args),
+      },
+      { retryCount: 0 }, // walletClient's transport already retries
+    ),
+  });
+}
+
+/**
  * Tracks a submitted transaction with two pollers through the wallet transport:
  *
  * - (a) `eth_getTransactionReceipt`, for EOAs and wallets returning an on-chain hash.
@@ -351,8 +376,8 @@ function trackSubmission(
       }
     };
 
-    // (a) cannot be cancelled: it may keep polling after settlement, bounded by its timeout.
-    waitForTransactionReceipt(walletClient, {
+    // (a)
+    waitForTransactionReceipt(clientUntil(walletClient, controller.signal), {
       hash,
       timeout: SUBMISSION_TIMEOUT,
     }).then(

@@ -86,12 +86,22 @@ function track<T, E>(result: ResultAsync<T, E>): Settled<T, E> {
   return settled;
 }
 
-function expectNoFurtherCalls(provider: ScriptedWallet, method: string) {
-  const before = provider.calls(method);
-  return vi.advanceTimersByTimeAsync(60_000).then(() => {
-    expect(provider.calls(method)).toBe(before);
-  });
+async function expectNoFurtherCalls(
+  provider: ScriptedWallet,
+  methods: string[],
+) {
+  const calls = () => methods.map((method) => provider.calls(method));
+  const before = calls();
+  await vi.advanceTimersByTimeAsync(60_000);
+  expect(calls()).toEqual(before);
 }
+
+const receiptPollerMethods = [
+  'eth_blockNumber',
+  'eth_getBlockByNumber',
+  'eth_getTransactionByHash',
+  'eth_getTransactionReceipt',
+];
 
 describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
   beforeEach(() => {
@@ -417,7 +427,45 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       await vi.advanceTimersByTimeAsync(10_000);
       expect(result.current?.isOk()).toBe(true);
 
-      await expectNoFurtherCalls(provider, 'wallet_getCallsStatus');
+      await expectNoFurtherCalls(provider, ['wallet_getCallsStatus']);
+    });
+
+    it('Then it stops polling for a receipt once wallet_getCallsStatus settles it', async () => {
+      const { provider, walletClient } = setup({
+        eth_getTransactionReceipt: noReceipt,
+        wallet_getCallsStatus: [pending, executedStatus()],
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
+      expect(provider.calls('eth_blockNumber')).toBeGreaterThan(0);
+
+      await expectNoFurtherCalls(provider, receiptPollerMethods);
+    });
+
+    it('Then it sends nothing more once an EOA receipt settles it', async () => {
+      const { provider, walletClient } = setup({
+        wallet_getCallsStatus: { error: rpcErrors.methodNotFound },
+        eth_getTransactionReceipt: after(
+          8_000,
+          receiptOf(submitted),
+          noReceipt,
+        ),
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(20_000);
+      expect(result.current?._unsafeUnwrap().txHash).toBe(submitted);
+
+      await expectNoFurtherCalls(provider, [
+        ...receiptPollerMethods,
+        'wallet_getCallsStatus',
+      ]);
     });
   });
 
