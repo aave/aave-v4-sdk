@@ -1,0 +1,26 @@
+packages/client/src/viem.test.ts
+  s_81391ecf4f4a67::t_194931666b1431 89-96,99-105,430-468
+packages/client/src/viem.ts
+  s_81391ecf4f4a67::t_7668477ebf623b 30-31,294-316,379-380
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "74c276e375cd25b2735abbe38a09cba613eb1d99",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_81391ecf4f4a67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e163a4af-2968-440a-997c-f796a3a34da2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
