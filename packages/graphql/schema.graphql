@@ -2971,9 +2971,13 @@ input SupplyRequest {
   """The amount supplying"""
   amount: ReserveAmountInputWithPermit!
   """If you wish to enable collateral with it meaning you can borrow"""
-  enableCollateral: AlwaysTrue
+  enableCollateral: AlwaysTrue @deprecated(reason: "Use useAsCollateral instead.")
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
+  """
+  The reserve's collateral status after the supply. Omit to leave it unchanged.
+  """
+  useAsCollateral: Boolean
 }
 
 type SupplySwap {
