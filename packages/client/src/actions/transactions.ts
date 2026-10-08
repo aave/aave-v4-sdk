@@ -89,7 +89,7 @@ export function borrow(
  *       value: bigDecimal('1000'),
  *     },
  *   },
- *   enableCollateral: true, // Optional, defaults to true
+ *   useAsCollateral: false, // Optional, omit to leave the collateral flag unchanged
  *   sender: evmAddress('0x9abc…'),
  * });
  *

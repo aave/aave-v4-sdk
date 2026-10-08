@@ -38,9 +38,9 @@ export default class ActionSupply extends common.V4Command {
     }),
     'enable-collateral': Flags.boolean({
       required: false,
-      default: false,
+      allowNo: true,
       description:
-        'If provided, the supplied position is enabled as collateral',
+        'Enable (--enable-collateral) or disable (--no-enable-collateral) the reserve as collateral. Omit to leave it unchanged.',
     }),
   };
 
@@ -49,7 +49,7 @@ export default class ActionSupply extends common.V4Command {
       request: SupplyRequest;
       reserve: Reserve;
       amount: string;
-      collateralEnabled: boolean;
+      collateralEnabled: boolean | undefined;
       privateKey: `0x${string}`;
     },
     InvariantError | UnexpectedError
@@ -89,7 +89,7 @@ export default class ActionSupply extends common.V4Command {
               },
             },
             sender,
-            enableCollateral: collateralEnabled ? (true as const) : null,
+            useAsCollateral: collateralEnabled ?? null,
           },
           reserve: reserveData,
           amount,
