@@ -29,39 +29,26 @@ const testEnvironment = {
 const user = evmAddress('0x742d35Cc6634C0532925a3b844Bc454e4438f44e');
 
 describe('Given the normalizeVariables helper', () => {
-  describe('When a request field equals its schema default', () => {
-    it('Then it is removed', () => {
+  describe('When a request field with a schema default is left out', () => {
+    it('Then the default is filled in', () => {
       const result = normalizeVariables(ReservesQuery, {
+        request: { query: { chainIds: [chainId(1)] } },
+      });
+
+      expect(result).toEqual({
         request: {
           query: { chainIds: [chainId(1)] },
           filter: ReservesRequestFilter.All,
+          orderBy: { assetName: 'ASC' },
         },
-      });
-
-      expect(result).toEqual({
-        request: { query: { chainIds: [chainId(1)] } },
       });
     });
 
-    it('Then object defaults are removed too', () => {
-      const result = normalizeVariables(UserBalancesQuery, {
-        request: {
-          user,
-          filter: { chains: { chainIds: [chainId(1)] } },
-          orderBy: { balance: 'DESC' },
-          includeZeroBalances: false,
-        },
-      });
-
-      expect(result).toEqual({
+    it('Then it matches the request that spells the defaults out', () => {
+      const omitted = normalizeVariables(UserBalancesQuery, {
         request: { user, filter: { chains: { chainIds: [chainId(1)] } } },
       });
-    });
-  });
-
-  describe('When a nested input field equals its schema default', () => {
-    it('Then it is removed', () => {
-      const result = normalizeVariables(UserBalancesQuery, {
+      const explicit = normalizeVariables(UserBalancesQuery, {
         request: {
           user,
           filter: {
@@ -70,43 +57,98 @@ describe('Given the normalizeVariables helper', () => {
               byReservesType: ReservesRequestFilter.All,
             },
           },
+          orderBy: { balance: 'DESC' },
+          includeZeroBalances: false,
         },
       });
 
-      expect(result).toEqual({
+      expect(omitted).toEqual(explicit);
+    });
+  });
+
+  describe('When a nested input with a schema default is passed', () => {
+    it('Then its defaults are filled in', () => {
+      const result = normalizeVariables(UserBalancesQuery, {
         request: { user, filter: { chains: { chainIds: [chainId(1)] } } },
+      });
+
+      expect(result).toMatchObject({
+        request: {
+          filter: {
+            chains: {
+              chainIds: [chainId(1)],
+              byReservesType: ReservesRequestFilter.All,
+            },
+          },
+        },
       });
     });
   });
 
-  describe('When a request field differs from its schema default', () => {
-    it('Then it is kept', () => {
-      const variables = {
+  describe('When an optional input is left out', () => {
+    it('Then it is not created to carry its defaults', () => {
+      const result = normalizeVariables(UserBalancesQuery, {
+        request: { user, filter: { hubId: 'hub-id' } },
+      });
+
+      expect(result).toEqual({
         request: {
-          query: { chainIds: [chainId(1)] },
-          filter: ReservesRequestFilter.Supply,
+          user,
+          filter: { hubId: 'hub-id' },
+          orderBy: { balance: 'DESC' },
+          includeZeroBalances: false,
         },
-      };
-
-      expect(normalizeVariables(ReservesQuery, variables)).toBe(variables);
+      });
     });
+  });
 
-    it('Then a list in a different order than the default is kept', () => {
-      const variables = {
+  describe('When a request field is set', () => {
+    it('Then its value is kept', () => {
+      const result = normalizeVariables(ActivitiesQuery, {
         request: {
           query: { chainIds: [chainId(1)] },
           types: [ActivityType.Supply, ActivityType.Borrow],
           pageSize: PageSize.Ten,
         },
-      };
+      });
 
-      expect(normalizeVariables(ActivitiesQuery, variables)).toBe(variables);
+      expect(result).toEqual({
+        request: {
+          query: { chainIds: [chainId(1)] },
+          types: [ActivityType.Supply, ActivityType.Borrow],
+          pageSize: PageSize.Ten,
+        },
+      });
+    });
+
+    it('Then an explicit null is kept', () => {
+      const result = normalizeVariables(ReservesQuery, {
+        request: {
+          query: { chainIds: [chainId(1)] },
+          filter: null,
+          orderBy: { assetName: 'ASC' },
+        },
+      });
+
+      expect(result).toEqual({
+        request: {
+          query: { chainIds: [chainId(1)] },
+          filter: null,
+          orderBy: { assetName: 'ASC' },
+        },
+      });
     });
   });
 
-  describe('When nothing equals a schema default', () => {
+  describe('When every default is already set', () => {
     it('Then the same object is returned', () => {
-      const variables = { request: { query: { chainIds: [chainId(1)] } } };
+      const variables = {
+        request: {
+          query: { chainIds: [chainId(1)] },
+          filter: ReservesRequestFilter.Supply,
+          orderBy: { assetName: 'ASC' },
+        },
+      };
 
       expect(normalizeVariables(ReservesQuery, variables)).toBe(variables);
     });
@@ -129,8 +171,8 @@ describe('Given an AaveClient', () => {
   });
   afterAll(() => server.close());
 
-  describe('When a query is sent with a schema default', () => {
-    it('Then the default is left out of the request', async () => {
+  describe('When a query leaves out a schema default', () => {
+    it('Then the default is sent in the request', async () => {
       const client = AaveClient.create({
         environment: testEnvironment,
         batch: false,
@@ -138,19 +180,15 @@ describe('Given an AaveClient', () => {
 
       const result = await reserves(
         client,
-        {
-          query: { chainIds: [chainId(1)] },
-          filter: ReservesRequestFilter.All,
-        },
+        { query: { chainIds: [chainId(1)] } },
         { requestPolicy: 'network-only' },
       );
 
       assertOk(result);
       expect(requests).toHaveLength(1);
       expect(requests[0]).toMatchObject({
-        request: { query: { chainIds: [1] } },
+        request: { query: { chainIds: [1] }, filter: 'ALL' },
       });
-      expect(requests[0]).not.toHaveProperty('request.filter');
     });
   });
 });

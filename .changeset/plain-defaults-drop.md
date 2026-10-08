@@ -5,4 +5,4 @@
 "@aave/react": minor
 ---
 
-**feat:** omit request fields equal to their schema default so equivalent queries share one operation key and network request
+**feat:** fill in schema defaults for omitted request fields so equivalent queries share one operation key and network request

@@ -61,7 +61,7 @@ describe('Given two read hooks with equivalent requests', () => {
       });
 
       expect(requests).toHaveLength(1);
-      expect(requests[0]).not.toHaveProperty('request.filter');
+      expect(requests[0]).toHaveProperty('request.filter', 'ALL');
     });
   });
 });

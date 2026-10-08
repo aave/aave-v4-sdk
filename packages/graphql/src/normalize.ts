@@ -28,25 +28,6 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-
-  if (Array.isArray(a) && Array.isArray(b)) {
-    return a.length === b.length && a.every((item, i) => isEqual(item, b[i]));
-  }
-
-  if (isPlainObject(a) && isPlainObject(b)) {
-    const keys = Object.keys(a).filter((key) => a[key] !== undefined);
-    return (
-      keys.length ===
-        Object.keys(b).filter((key) => b[key] !== undefined).length &&
-      keys.every((key) => isEqual(a[key], b[key]))
-    );
-  }
-
-  return false;
-}
-
 function normalizeValue(value: unknown, typeName: string): unknown {
   const type = inputDefaults[typeName];
   if (!type) return value;
@@ -64,26 +45,34 @@ function normalizeValue(value: unknown, typeName: string): unknown {
   if (!isPlainObject(value)) return value;
 
   let changed = false;
-  const result: Record<string, unknown> = {};
+  const result: Record<string, unknown> = { ...value };
 
-  for (const [key, field] of Object.entries(value)) {
-    if (key in type.defaults && isEqual(field, type.defaults[key])) {
+  for (const [key, fallback] of Object.entries(type.defaults)) {
+    // An explicit null is kept: GraphQL treats it differently from an omitted field
+    if (result[key] === undefined) {
+      result[key] = fallback;
       changed = true;
-      continue;
     }
+  }
 
-    const fieldType = type.fields[key];
-    const normalized = fieldType ? normalizeValue(field, fieldType) : field;
-    if (normalized !== field) changed = true;
-    result[key] = normalized;
+  for (const [key, fieldType] of Object.entries(type.fields)) {
+    const field = result[key];
+    if (field === undefined || field === null) continue;
+
+    const normalized = normalizeValue(field, fieldType);
+    if (normalized !== field) {
+      result[key] = normalized;
+      changed = true;
+    }
   }
 
   return changed ? result : value;
 }
 
 /**
- * Removes input fields whose value equals their schema default, so equivalent
- * requests share the same operation key and cache entry.
+ * Fills in schema defaults for input fields the caller left out, so equivalent
+ * requests share the same operation key and cache entry, and every request
+ * carries the defaults of the SDK version that built it.
  *
  * @internal
  */
