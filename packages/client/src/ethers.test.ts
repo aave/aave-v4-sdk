@@ -3,9 +3,10 @@ import type { TransactionRequest } from '@aave/graphql';
 import { assertErr, type BlockchainData, evmAddress } from '@aave/types';
 import { BrowserProvider, type Eip1193Provider, Wallet } from 'ethers';
 import { UserRejectedRequestError } from 'viem';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { sendWith } from './ethers';
 import {
+  createScriptedWallet,
   ETHEREUM_FORK_ID,
   fundNativeAddress,
   setupEip1193Interceptor,
@@ -96,6 +97,53 @@ describe('Given an ethers Signer instance', () => {
         assertErr(result);
         expect(result.error).toBeInstanceOf(CancelError);
       });
+    });
+  });
+});
+
+describe('Given an ethers Signer connected to a Smart Account', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('When the wallet returns an id that never appears on-chain (e.g. Safe mobile safeTxHash)', () => {
+    // Update deliberately when ethers support for Smart Accounts lands.
+    it('Then sending blocks while ethers polls for the transaction (known limitation, see sc-wallet-txs.md)', async () => {
+      const safeTxHash = `0x${'a'.repeat(64)}`;
+      const provider = createScriptedWallet({
+        eth_chainId: { result: `0x${ETHEREUM_FORK_ID.toString(16)}` },
+        eth_accounts: { result: [wallet.address] },
+        eth_estimateGas: { result: '0x5208' },
+        eth_sendTransaction: { result: safeTxHash },
+        eth_getTransactionByHash: { result: null },
+        eth_blockNumber: { result: '0x1' },
+      });
+      const signer = await new BrowserProvider(
+        provider as unknown as Eip1193Provider,
+      ).getSigner();
+      vi.useFakeTimers();
+
+      const request: TransactionRequest = {
+        __typename: 'TransactionRequest',
+        to: evmAddress(wallet.address),
+        from: evmAddress(wallet.address),
+        data: '0x' as BlockchainData,
+        value: 0n,
+        chainId: ETHEREUM_FORK_ID,
+        operations: [],
+      };
+
+      let settled = false;
+      void sendWith(signer, request).then(() => {
+        settled = true;
+      });
+      await vi.advanceTimersByTimeAsync(60_000);
+
+      expect(settled).toBe(false);
+      expect(provider.calls('eth_getTransactionByHash')).toBeGreaterThanOrEqual(
+        5,
+      );
+      expect(provider.calls('wallet_getCallsStatus')).toBe(0);
     });
   });
 });

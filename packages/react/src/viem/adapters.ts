@@ -32,6 +32,13 @@ import { useChainAction } from '../misc';
  * const [sendTransaction] = useSendTransaction(wallet);
  * ```
  *
+ * With a Smart Account (e.g. a Safe multisig), the transaction stays pending
+ * while co-signers sign. If it has not executed after 30 minutes, the
+ * pending transaction fails with a `TimeoutError` that is a
+ * `SubmissionUnresolvedError`: it may still execute, so check
+ * `SubmissionUnresolvedError.is(error)` and do not resend it blindly. Some
+ * wallets keep their prompt open until the transaction executes.
+ *
  * @param walletClient - The wallet client to use for sending transactions.
  */
 export function useSendTransaction(

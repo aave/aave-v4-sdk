@@ -482,3 +482,4 @@ export function setupEip1193Interceptor(
     },
   };
 }
+export * from './testing-wallet';

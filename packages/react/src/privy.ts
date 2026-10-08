@@ -54,6 +54,13 @@ function isUserRejection(err: unknown): boolean {
  * ```ts
  * const [sendTransaction, { loading, error, data }] = useSendTransaction();
  * ```
+ *
+ * With a Smart Account (e.g. a Safe multisig), the transaction stays pending
+ * while co-signers sign. If it has not executed after 30 minutes, the
+ * pending transaction fails with a `TimeoutError` that is a
+ * `SubmissionUnresolvedError`: it may still execute, so check
+ * `SubmissionUnresolvedError.is(error)` and do not resend it blindly. Some
+ * wallets keep their prompt open until the transaction executes.
  */
 export function useSendTransaction(): UseSendTransactionResult {
   const { wallets } = useWallets();
