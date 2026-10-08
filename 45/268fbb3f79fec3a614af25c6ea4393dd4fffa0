@@ -1,0 +1,21 @@
+packages/client/src/eip5792.test.ts
+  s_431c39d0696833::t_75381e372a31eb 123-150
+packages/client/src/eip5792.ts
+  s_431c39d0696833::t_75381e372a31eb 77-78,120-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "45268fbb3f79fec3a614af25c6ea4393dd4fffa0",
+  "prompts": {},
+  "sessions": {
+    "s_431c39d0696833": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88c1cd0b-ad60-4a0c-b5cc-298072b88fe2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
