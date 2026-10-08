@@ -1,0 +1,70 @@
+packages/react/src/transactions/batch.test.ts
+  s_7e9dc91b3dfb5a::t_439b072e96fd33 1-155
+packages/react/src/viem/adapters.ts
+  s_7e9dc91b3dfb5a::t_2b1d8cc70f85c7 1-5,20-27,30-31,33,152-232
+  s_7e9dc91b3dfb5a::t_90d1a7d3c46e7d 8,10-11,15,18,72-76,82-102,104-106
+  s_7e9dc91b3dfb5a::t_f8ef9ef224265a 233-235
+packages/client/src/types.ts
+  s_7e9dc91b3dfb5a::t_078fbce5085f14 4,52
+  s_7e9dc91b3dfb5a::t_31bfcaba0edb06 71-93
+packages/react/src/transactions/useSupply.ts
+  s_7e9dc91b3dfb5a::t_8bc02c0f5258a4 1-5,16,20-21,32-45,121-158,161-162,164-169,171,174-177,181,184-199,202-211,220-222
+packages/react/src/transactions/batch.ts
+  s_7e9dc91b3dfb5a::t_492213840a96da 1-105,118-120
+  s_7e9dc91b3dfb5a::t_8d99419c22300b 106-117
+packages/react/src/helpers/writes.ts
+  s_7e9dc91b3dfb5a::t_492213840a96da 1,10,87,93-141
+  s_7e9dc91b3dfb5a::t_3a2cc0b79b8fd0 142
+packages/react/src/transactions/useWithdraw.ts
+  s_7e9dc91b3dfb5a::t_1050c153db719c 1-5,14,18-19,29-39,94-107,110-111,113-118,120,123-126,130,133-141,152-154
+packages/react/src/transactions/useRepay.ts
+  s_7e9dc91b3dfb5a::t_e1c6a6432a81d1 129-131
+  s_7e9dc91b3dfb5a::t_99e59eb06698c8 1-5,16-21,25-26,38-49,125-128,132-139,142-143,145-150,153-154,156-159,163,166-178,180-185,188-196,205-207
+packages/react/src/vaults.ts
+  s_7e9dc91b3dfb5a::t_e1c6a6432a81d1 122-124
+  s_7e9dc91b3dfb5a::t_99e59eb06698c8 1-5,35-40,44-45,67-82,117,120-121,125-146,149-150,152-155,159,162-177,188-190
+packages/client/src/index.ts
+  s_7e9dc91b3dfb5a::t_08561c88f2c009 17-21
+packages/client/src/sendBatchWith.test.ts
+  s_7e9dc91b3dfb5a::t_23bcad0f1a5b5e 1-111
+.changeset/quiet-safes-send.md
+  s_7e9dc91b3dfb5a::t_65ef60c9af9552 1-6
+packages/client/src/viem.ts
+  s_7e9dc91b3dfb5a::t_078fbce5085f14 4,45-54,225,306-328,334,336-353,564-574
+  s_7e9dc91b3dfb5a::t_31bfcaba0edb06 57-63
+  s_7e9dc91b3dfb5a::t_c33de8495112eb 408-483
+.changeset/brave-batches-bundle.md
+  s_7e9dc91b3dfb5a::t_65ef60c9af9552 1-6
+packages/react/src/transactions/useLiquidatePosition.ts
+  s_7e9dc91b3dfb5a::t_99e59eb06698c8 1-5,16,20-21,34-48,132,135-136,140-161,164-165,167-170,174,177-192,195-203,212-214
+  s_7e9dc91b3dfb5a::t_e1c6a6432a81d1 137-139
+packages/react/src/index.ts
+  s_7e9dc91b3dfb5a::t_492213840a96da 11-13
+packages/client/src/eip5792.ts
+  s_7e9dc91b3dfb5a::t_84663d2636b1c5 1-36,42-224,226-244,246-251,257-259,261-263,265-284,286,288-368,371-406,410-461
+  s_7e9dc91b3dfb5a::t_e6f9a096924b3a 225,407-409
+  s_7e9dc91b3dfb5a::t_31bfcaba0edb06 37-41
+  s_7e9dc91b3dfb5a::t_60288ee38fba2b 245,252-256,260,264,285,287,369-370
+packages/react/src/transactions/useBorrow.ts
+  s_7e9dc91b3dfb5a::t_1050c153db719c 1-5,14,18-19,29-39,94-107,110-111,113-118,120,123-126,130,133-141,152-154
+packages/client/src/eip5792.test.ts
+  s_7e9dc91b3dfb5a::t_28fe19cd9a17eb 155-156,161-163
+  s_7e9dc91b3dfb5a::t_08561c88f2c009 26
+  s_7e9dc91b3dfb5a::t_6987bae92bddd6 1-25,27-154,157-160,164-388
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2bccf1e2c86eb8d700d00e81c45339f70b0156e7",
+  "prompts": {},
+  "sessions": {
+    "s_7e9dc91b3dfb5a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b3190d3-1dbc-475a-8551-653b7df790cc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

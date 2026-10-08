@@ -1,0 +1,27 @@
+packages/react/src/transactions/batch.test-d.ts
+  s_7e9dc91b3dfb5a::t_3546695b2ae132 24-27
+  s_7e9dc91b3dfb5a::t_44e3beb12f7706 1-23,28-91
+packages/react/src/transactions/useSupply.test.ts
+  s_7e9dc91b3dfb5a::t_90c21deb2bfd42 1,32-33,45,47,362-433,437-476
+  s_7e9dc91b3dfb5a::t_52233c3e22d5b0 434-436
+  s_7e9dc91b3dfb5a::t_4612e0ae9e8a98 477
+packages/react/src/viem/adapters.test.ts
+  s_7e9dc91b3dfb5a::t_c0b35d4ef0a715 362-363,371-373,484-492
+  s_7e9dc91b3dfb5a::t_2e16baf65569d8 1,28,30,345-361,364-370,374-483,493-549
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "50d9e69ba7f9a30a3d012ea7e7de21a550fc04d8",
+  "prompts": {},
+  "sessions": {
+    "s_7e9dc91b3dfb5a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b3190d3-1dbc-475a-8551-653b7df790cc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

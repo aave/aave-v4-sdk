@@ -1,0 +1,19 @@
+CONTEXT.md
+  s_7e9dc91b3dfb5a::t_6f36e622b5ee90 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "00fb70bec5654f3f0f9b5805ea430c1ac43bfba2",
+  "prompts": {},
+  "sessions": {
+    "s_7e9dc91b3dfb5a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b3190d3-1dbc-475a-8551-653b7df790cc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
