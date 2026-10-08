@@ -28,6 +28,7 @@ import {
 import {
   type Account,
   defineChain,
+  isAddressEqual,
   type ProviderRpcError,
   type RpcError,
   SwitchChainError,
@@ -295,9 +296,12 @@ type SubmissionOutcome =
  * - (b) `wallet_getCallsStatus`, for wallets returning their own id (e.g. a Safe
  *   `safeTxHash`), which may need more signatures before executing.
  *
- * Once the wallet recognises the id, (b) decides. (a)'s results are held until
- * (b)'s first probe answers, because the Safe iframe provider echoes the
- * `safeTxHash` as the receipt's `transactionHash`.
+ * Once the wallet recognises the id, (b) decides. Otherwise (a) decides, but a
+ * receipt is held until (b)'s first probe completes, because the Safe iframe
+ * provider echoes the `safeTxHash` as the receipt's `transactionHash`. Such a
+ * receipt comes from the executor, not the account, so an indirect receipt is
+ * held until `FIRST_PROBE_TIMEOUT` even when the first probe fails: a single
+ * failed probe must not let it through.
  */
 function trackSubmission(
   walletClient: WalletClient,
@@ -305,8 +309,10 @@ function trackSubmission(
 ): Promise<SubmissionOutcome> {
   return new Promise((resolve) => {
     const controller = new AbortController();
+    const account = walletClient.account?.address;
     let settled = false;
     let firstProbeDone = false;
+    let capReached = false;
     let recognized = false;
     let held: SubmissionOutcome | undefined;
 
@@ -318,17 +324,27 @@ function trackSubmission(
       resolve(outcome);
     };
 
+    // a receipt not sent by the account: Smart Account execution or bundle
+    const isIndirect = (outcome: SubmissionOutcome) =>
+      outcome.status === 'receipt' &&
+      account !== undefined &&
+      !isAddressEqual(outcome.receipt.from, account);
+
+    const canRelease = (outcome: SubmissionOutcome) =>
+      !recognized && (capReached || (firstProbeDone && !isIndirect(outcome)));
+
     const releaseHeld = () => {
-      if (firstProbeDone) return;
-      firstProbeDone = true;
-      if (held && !recognized) settle(held);
+      if (held && canRelease(held)) settle(held);
     };
 
-    const firstProbeCap = setTimeout(releaseHeld, FIRST_PROBE_TIMEOUT);
+    const firstProbeCap = setTimeout(() => {
+      capReached = true;
+      releaseHeld();
+    }, FIRST_PROBE_TIMEOUT);
 
     const onReceiptOutcome = (outcome: SubmissionOutcome) => {
       if (recognized) return;
-      if (firstProbeDone) {
+      if (canRelease(outcome)) {
         settle(outcome);
       } else {
         held = outcome;
@@ -354,6 +370,7 @@ function trackSubmission(
       signal: controller.signal,
       onProbe: (isRecognized) => {
         recognized ||= isRecognized;
+        firstProbeDone = true;
         releaseHeld();
       },
     }).then((outcome) => {

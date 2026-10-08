@@ -29,6 +29,7 @@ import {
 import { SUBMISSION_TIMEOUT, sendWith, waitForTransactionResult } from './viem';
 
 const account = evmAddress('0x1111111111111111111111111111111111111111');
+const executor = evmAddress('0x2222222222222222222222222222222222222222');
 const testChainId = chainId(1);
 
 const submitted = txHash(`0x${'a'.repeat(64)}`); // what eth_sendTransaction returns
@@ -56,6 +57,10 @@ const receiptOf = (
   status: 'success' | 'reverted' = 'success',
 ) => ({ result: makeReceipt({ hash, from: account, status }) });
 const noReceipt = { result: null };
+// the Safe iframe's receipt: the executor's real receipt, hash overwritten with the safeTxHash
+const echoedReceipt = {
+  result: makeReceipt({ hash: submitted, from: executor, status: 'success' }),
+};
 
 function setup(script: Partial<Record<string, ScriptEntry>>) {
   const provider = createScriptedWallet({
@@ -183,7 +188,7 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
   describe('When the Safe iframe echoes the safeTxHash as the receipt hash', () => {
     it('Then it ignores the echoed receipt and resolves with the real hash', async () => {
       const { walletClient } = setup({
-        eth_getTransactionReceipt: receiptOf(submitted),
+        eth_getTransactionReceipt: echoedReceipt,
         wallet_getCallsStatus: [pending, executedStatus()],
       });
 
@@ -197,7 +202,7 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
 
     it('Then it holds an echoed receipt that arrives before the first status answer', async () => {
       const { walletClient } = setup({
-        eth_getTransactionReceipt: receiptOf(submitted),
+        eth_getTransactionReceipt: echoedReceipt,
         wallet_getCallsStatus: { delayMs: 50, respond: executedStatus() },
       });
 
@@ -207,6 +212,57 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       await vi.advanceTimersByTimeAsync(10_000);
 
       expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
+    });
+
+    it('Then a failed first status probe does not release the echoed receipt', async () => {
+      const { walletClient } = setup({
+        eth_getTransactionReceipt: echoedReceipt,
+        wallet_getCallsStatus: [
+          { error: rpcErrors.transport },
+          executedStatus(),
+        ],
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
+    });
+  });
+
+  describe('When an indirect receipt arrives and wallet_getCallsStatus keeps failing (e.g. ERC-4337 bundle)', () => {
+    it('Then it releases the receipt at the first-probe cap', async () => {
+      const { walletClient } = setup({
+        eth_getTransactionReceipt: echoedReceipt,
+        wallet_getCallsStatus: { error: rpcErrors.transport },
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(4_900);
+      expect(result.current).toBeUndefined();
+
+      await vi.advanceTimersByTimeAsync(200);
+      expect(result.current?._unsafeUnwrap().txHash).toBe(submitted);
+    });
+  });
+
+  describe("When an EOA's first status probe fails", () => {
+    it('Then it resolves from the receipt without waiting for the first-probe cap', async () => {
+      const { walletClient } = setup({
+        eth_getTransactionReceipt: receiptOf(submitted),
+        wallet_getCallsStatus: { error: rpcErrors.transport },
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(100);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(submitted);
     });
   });
 
