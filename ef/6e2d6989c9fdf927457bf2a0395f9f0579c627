@@ -1,0 +1,47 @@
+packages/graphql/package.json
+  s_cfaf92aeed8287::t_fe8f4a8b1e573d 53-55
+packages/graphql/src/defaults.ts
+  s_cfaf92aeed8287::t_4b4ed42672ef4c 1-67,69,72-74,76,80-371
+  s_cfaf92aeed8287::t_c061fb27b38d58 68,70-71,75,77-79
+packages/react/src/helpers/reads.ts
+  s_cfaf92aeed8287::t_d4ed73b16d15a1 3,167-168,171-174,177
+packages/graphql/scripts/generate-defaults.ts
+  s_cfaf92aeed8287::t_c061fb27b38d58 49-66,71-72,74-77,79
+  s_cfaf92aeed8287::t_7d404ee2a1192e 1-14,18-48,67-70,73,78,80-93
+  s_cfaf92aeed8287::t_4b4ed42672ef4c 15-17
+packages/graphql/src/normalize.ts
+  s_cfaf92aeed8287::t_4b4ed42672ef4c 2-7,22-24,97-99
+  s_cfaf92aeed8287::t_0365ad6066406c 1,8-21,25-96,100-119
+packages/core/src/GqlClient.ts
+  s_cfaf92aeed8287::t_54e768ef08e979 108-111,243-252
+  s_cfaf92aeed8287::t_49a5e2a76a06da 253-254
+packages/client/src/AaveClient.ts
+  s_cfaf92aeed8287::t_d4ed73b16d15a1 10,16,22-27,175-179
+  s_cfaf92aeed8287::t_5cfc5f49f95105 180-181
+packages/react/src/helpers/normalizedReads.test.tsx
+  s_cfaf92aeed8287::t_74f2f0dc421044 1-67
+packages/client/src/normalizeVariables.test.ts
+  s_cfaf92aeed8287::t_d8385572b5a5f4 1-156
+.changeset/plain-defaults-drop.md
+  s_cfaf92aeed8287::t_d52f5cb1b96fb4 1-8
+.claude/skills/schema-update/SKILL.md
+  s_cfaf92aeed8287::t_d52f5cb1b96fb4 29
+packages/graphql/src/index.ts
+  s_cfaf92aeed8287::t_fe8f4a8b1e573d 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ef6e2d6989c9fdf927457bf2a0395f9f0579c627",
+  "prompts": {},
+  "sessions": {
+    "s_cfaf92aeed8287": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "58355678-76a1-48a3-9a21-c5b0672935f4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
