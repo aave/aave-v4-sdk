@@ -257,6 +257,32 @@ export function makeCallsStatus({
 }
 
 /**
+ * Default responses for the chain reads viem makes while sending and waiting:
+ * chain id, an advancing block number, the sent transaction, blocks and gas.
+ */
+export function chainScript({
+  account,
+  chainId,
+}: {
+  account: EvmAddress;
+  chainId: ChainId;
+}): Partial<Record<string, ScriptEntry>> {
+  return {
+    eth_chainId: { result: `0x${chainId.toString(16)}` },
+    eth_blockNumber: advancingBlockNumber,
+    eth_getTransactionByHash: (params) => {
+      const [hash] = params as [HexString];
+      return { result: makeTransaction({ hash, from: account }) };
+    },
+    eth_getBlockByNumber: (params) => {
+      const [number] = params as [HexString];
+      return { result: makeBlock({ number }) };
+    },
+    eth_estimateGas: { result: '0x5208' },
+  };
+}
+
+/**
  * Common wallet errors.
  */
 export const rpcErrors = {

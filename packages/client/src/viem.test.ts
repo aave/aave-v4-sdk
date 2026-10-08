@@ -16,13 +16,11 @@ import {
 } from '@aave/types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  advancingBlockNumber,
   after,
+  chainScript,
   createScriptedWallet,
-  makeBlock,
   makeCallsStatus,
   makeReceipt,
-  makeTransaction,
   rpcErrors,
   type ScriptEntry,
   type ScriptedWallet,
@@ -61,17 +59,7 @@ const noReceipt = { result: null };
 
 function setup(script: Partial<Record<string, ScriptEntry>>) {
   const provider = createScriptedWallet({
-    eth_chainId: { result: '0x1' },
-    eth_blockNumber: advancingBlockNumber,
-    eth_getTransactionByHash: (params) => {
-      const [hash] = params as [HexString];
-      return { result: makeTransaction({ hash, from: account }) };
-    },
-    eth_getBlockByNumber: (params) => {
-      const [number] = params as [HexString];
-      return { result: makeBlock({ number }) };
-    },
-    eth_estimateGas: { result: '0x5208' },
+    ...chainScript({ account, chainId: testChainId }),
     ...script,
   });
   const walletClient = walletClientFor(provider, {
