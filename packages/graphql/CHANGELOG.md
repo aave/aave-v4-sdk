@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 3.7.0
+
+### Minor Changes
+
+- ef6e2d6: **feat:** fill in schema defaults for omitted request fields so equivalent queries share one operation key and network request
+
 ## 3.6.0
 
 ### Minor Changes

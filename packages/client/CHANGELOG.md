@@ -1,5 +1,17 @@
 # @aave/client
 
+## 6.8.0
+
+### Minor Changes
+
+- ef6e2d6: **feat:** fill in schema defaults for omitted request fields so equivalent queries share one operation key and network request
+
+### Patch Changes
+
+- Updated dependencies [ef6e2d6]
+  - @aave/graphql@3.7.0
+  - @aave/core@1.2.0
+
 ## 6.7.0
 
 ### Minor Changes
