@@ -9,6 +9,9 @@ import {
   type ExecutionPlan,
   LiquidatePositionQuery,
   type LiquidatePositionRequest,
+  type MultiStepPreview,
+  MultiStepPreviewQuery,
+  type MultiStepPreviewRequest,
   type PaginatedActivitiesResult,
   PreviewQuery,
   type PreviewRequest,
@@ -372,6 +375,53 @@ export function preview(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<PreviewUserPosition, UnexpectedError> {
   return client.query(PreviewQuery, { request, currency }, { requestPolicy });
+}
+
+/**
+ * Preview a plan of one or more actions, folded through the protocol state.
+ *
+ * ```ts
+ * const result = await multiStepPreview(client, {
+ *   actions: [
+ *     {
+ *       setUserSuppliesAsCollateral: {
+ *         changes: [{ reserve: reserveId('SGVsbG8h'), enableCollateral: true }],
+ *         sender: evmAddress('0x9abc…'),
+ *       },
+ *     },
+ *     {
+ *       borrow: {
+ *         reserve: reserveId('SGVsbG8h'),
+ *         amount: { erc20: { value: '1000' } },
+ *         sender: evmAddress('0x9abc…'),
+ *       },
+ *     },
+ *   ],
+ * });
+ * ```
+ *
+ * Each step is evaluated against what the steps before it produced, and
+ * `steps[i].preview` is the same shape a single-action preview returns. A step that
+ * cannot execute comes back `BLOCKED` with the reason and is not applied.
+ *
+ * @param client - Aave client.
+ * @param request - The plan's actions, in execution order.
+ * @param options - The query options.
+ * @returns The per-step previews and the plan's warnings.
+ */
+export function multiStepPreview(
+  client: AaveClient,
+  request: MultiStepPreviewRequest,
+  {
+    currency = DEFAULT_QUERY_OPTIONS.currency,
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<MultiStepPreview, UnexpectedError> {
+  return client.query(
+    MultiStepPreviewQuery,
+    { request, currency },
+    { requestPolicy },
+  );
 }
 
 /**

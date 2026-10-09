@@ -31,9 +31,11 @@ export enum PageSize {
  * The time window for the historical data.
  */
 export enum TimeWindow {
+  LastHour = 'LAST_HOUR',
   LastDay = 'LAST_DAY',
   LastWeek = 'LAST_WEEK',
   LastMonth = 'LAST_MONTH',
+  LastThreeMonths = 'LAST_THREE_MONTHS',
   LastSixMonths = 'LAST_SIX_MONTHS',
   LastYear = 'LAST_YEAR',
   All = 'ALL',

@@ -159,6 +159,12 @@ export const exchange = cacheExchange({
     ProtocolHistorySample: {
       date: transformToDate,
     },
+    MultichainAssetHistorySample: {
+      date: transformToDate,
+    },
+    HubExposureItem: {
+      asOf: transformToDate,
+    },
     BorrowActivity: {
       timestamp: transformToDate,
     },
@@ -490,7 +496,9 @@ export const exchange = cacheExchange({
     HubAssetUserState: () => null,
     HubSpokeConfig: () => null,
     HubSummary: () => null,
+    HubExposureItem: () => null,
     HubSummarySample: () => null,
+    MultichainAssetHistorySample: () => null,
     InsufficientBalanceError: () => null,
     InsufficientLiquidityError: () => null,
     Leverage: () => null,
@@ -521,6 +529,8 @@ export const exchange = cacheExchange({
     SpokeConnectedHubSummary: () => null,
     SpokeSummary: () => null,
     SpokeSummarySample: () => null,
+    MultiStepPreview: () => null,
+    MultiStepPreviewStep: () => null,
     NativeAmount: () => null,
     PaginatedActivitiesResult: () => null,
     PaginatedOrdersResult: () => null,
@@ -549,6 +559,7 @@ export const exchange = cacheExchange({
     PreviewReserveRates: () => null,
     PreviewRewardOutcome: () => null,
     PreviewUserPosition: () => null,
+    PreviewWarning: () => null,
     ProtocolHistorySample: () => null,
     RepayWithSupply: () => null,
     RepayWithSupplyQuoteResult: () => null,
