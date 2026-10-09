@@ -32,6 +32,7 @@ import {
   defineChain,
   isAddressEqual,
   type ProviderRpcError,
+  type ReplacementReason,
   type RpcError,
   SwitchChainError,
   TransactionExecutionError,
@@ -288,7 +289,11 @@ export const FIRST_PROBE_TIMEOUT = 5_000;
 
 type SubmissionOutcome =
   | Exclude<CallsStatusOutcome, { status: 'aborted' }>
-  | { status: 'receipt'; receipt: TransactionReceipt }
+  | {
+      status: 'receipt';
+      receipt: TransactionReceipt;
+      replaced?: ReplacementReason;
+    }
   | { status: 'receipt-error'; error: unknown };
 
 /**
@@ -377,11 +382,15 @@ function trackSubmission(
     };
 
     // (a)
+    let replaced: ReplacementReason | undefined;
     waitForTransactionReceipt(clientUntil(walletClient, controller.signal), {
       hash,
       timeout: SUBMISSION_TIMEOUT,
+      onReplaced: ({ reason }) => {
+        replaced = reason;
+      },
     }).then(
-      (receipt) => onReceiptOutcome({ status: 'receipt', receipt }),
+      (receipt) => onReceiptOutcome({ status: 'receipt', receipt, replaced }),
       (error) => {
         // the shared timeout is owned by (b)
         if (error instanceof WaitForTransactionReceiptTimeoutError) return;
@@ -422,6 +431,21 @@ export function waitForTransactionResult(
       case 'receipt': {
         const hash = txHash(outcome.receipt.transactionHash);
 
+        // A cancel mines as a successful 0-value self-transfer, so its receipt status can't tell
+        if (
+          outcome.replaced === 'cancelled' ||
+          outcome.replaced === 'replaced'
+        ) {
+          return errAsync(
+            CancelError.from(`Transaction ${outcome.replaced} by ${hash}`),
+          );
+        }
+        if (
+          outcome.replaced === 'repriced' &&
+          outcome.receipt.status === 'reverted'
+        ) {
+          return errAsync(transactionError(walletClient.chain, hash, request));
+        }
         if (outcome.receipt.status === 'success') {
           return okAsync({ txHash: hash, operations: request.operations });
         }

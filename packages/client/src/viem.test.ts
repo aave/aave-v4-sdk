@@ -19,8 +19,10 @@ import {
   after,
   chainScript,
   createScriptedWallet,
+  makeBlock,
   makeCallsStatus,
   makeReceipt,
+  makeTransaction,
   rpcErrors,
   type ScriptEntry,
   type ScriptedWallet,
@@ -34,6 +36,8 @@ const testChainId = chainId(1);
 
 const submitted = txHash(`0x${'a'.repeat(64)}`); // what eth_sendTransaction returns
 const executed = txHash(`0x${'e'.repeat(64)}`); // the real on-chain hash
+const replacement = txHash(`0x${'f'.repeat(64)}`); // a speed-up or cancel at the same nonce
+const contract = evmAddress('0x3333333333333333333333333333333333333333');
 
 const request: TransactionRequest = {
   __typename: 'TransactionRequest',
@@ -411,6 +415,113 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       const error = result.current?._unsafeUnwrapErr();
       expect(error).toBeInstanceOf(TransactionError);
       expect((error as TransactionError).txHash).toBe(submitted);
+    });
+  });
+
+  describe('When the EOA transaction is replaced at the same nonce', () => {
+    // The original stays pending; the next block holds `mined` from the same account and nonce
+    function replacedBy({
+      to,
+      input,
+      status = 'success',
+    }: {
+      to: typeof account;
+      input: HexString;
+      status?: 'success' | 'reverted';
+    }) {
+      const original = makeTransaction({
+        hash: submitted,
+        from: account,
+        to: contract,
+        input: '0xdeadbeef',
+      });
+      const mined = makeTransaction({
+        hash: replacement,
+        from: account,
+        to,
+        input,
+        blockNumber: '0x1',
+      });
+      return setup({
+        wallet_getCallsStatus: { error: rpcErrors.unknownBundle },
+        eth_getTransactionByHash: (params) => {
+          const [hash] = params as [HexString];
+          return { result: hash === submitted ? original : mined };
+        },
+        eth_getTransactionReceipt: (params) => {
+          const [hash] = params as [HexString];
+          return hash === replacement
+            ? {
+                result: makeReceipt({
+                  hash: replacement,
+                  from: account,
+                  status,
+                }),
+              }
+            : noReceipt;
+        },
+        eth_getBlockByNumber: (params) => {
+          const [number, full] = params as [HexString, boolean];
+          return {
+            result: makeBlock({ number, transactions: full ? [mined] : [] }),
+          };
+        },
+      });
+    }
+
+    it('Then a speed-up resolves with the replacement hash', async () => {
+      const { walletClient } = replacedBy({
+        to: contract,
+        input: '0xdeadbeef',
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(replacement);
+    });
+
+    it(`Then a cancel fails with a ${CancelError.name} although it mined successfully`, async () => {
+      const { walletClient } = replacedBy({ to: account, input: '0x' });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      const error = result.current?._unsafeUnwrapErr();
+      expect(error).toBeInstanceOf(CancelError);
+      expect(error?.message).toContain(replacement);
+    });
+
+    it(`Then a different transaction at the same nonce fails with a ${CancelError.name}`, async () => {
+      const { walletClient } = replacedBy({ to: contract, input: '0x1234' });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(CancelError);
+    });
+
+    it(`Then a speed-up that reverts fails with a ${TransactionError.name} for the replacement`, async () => {
+      const { walletClient } = replacedBy({
+        to: contract,
+        input: '0xdeadbeef',
+        status: 'reverted',
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      const error = result.current?._unsafeUnwrapErr();
+      expect(error).toBeInstanceOf(TransactionError);
+      expect((error as TransactionError).txHash).toBe(replacement);
     });
   });
 

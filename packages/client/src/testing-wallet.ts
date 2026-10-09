@@ -160,31 +160,41 @@ export function makeReceipt({
 }
 
 /**
- * Creates a pending RPC transaction.
+ * Creates an RPC transaction, pending unless `blockNumber` is given.
  */
 export function makeTransaction({
   hash,
   from,
+  to = from,
+  input = '0x',
+  value = '0x0',
+  nonce = '0x0',
+  blockNumber = null,
 }: {
   hash: HexString;
   from: EvmAddress;
+  to?: EvmAddress;
+  input?: HexString;
+  value?: HexString;
+  nonce?: HexString;
+  blockNumber?: HexString | null;
 }) {
   return {
     hash,
     from,
-    to: from,
-    nonce: '0x0',
-    value: '0x0',
-    input: '0x',
+    to,
+    nonce,
+    value,
+    input,
     gas: '0x5208',
     maxFeePerGas: '0x1',
     maxPriorityFeePerGas: '0x1',
     type: '0x2',
     chainId: '0x1',
     accessList: [],
-    blockHash: null,
-    blockNumber: null,
-    transactionIndex: null,
+    blockHash: blockNumber ? `0x${'b'.repeat(64)}` : null,
+    blockNumber,
+    transactionIndex: blockNumber ? '0x0' : null,
     r: '0x1',
     s: '0x1',
     v: '0x0',
@@ -193,9 +203,15 @@ export function makeTransaction({
 }
 
 /**
- * Creates an RPC block without transactions.
+ * Creates an RPC block, empty unless `transactions` is given.
  */
-export function makeBlock({ number }: { number: HexString }) {
+export function makeBlock({
+  number,
+  transactions = [],
+}: {
+  number: HexString;
+  transactions?: unknown[];
+}) {
   return {
     number,
     hash: `0x${'c'.repeat(64)}`,
@@ -214,7 +230,7 @@ export function makeBlock({ number }: { number: HexString }) {
     sha3Uncles: `0x${'0'.repeat(64)}`,
     size: '0x0',
     baseFeePerGas: '0x1',
-    transactions: [],
+    transactions,
     uncles: [],
   };
 }
