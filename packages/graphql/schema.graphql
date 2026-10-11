@@ -14,9 +14,14 @@ input ActivitiesRequestQuery @oneOf {
   chainIds: [ChainId!]
   txHash: TxHashInput
   userPositionId: UserPositionId
+
+  """
+  Every activity touching one reserve, as either leg of a liquidation or swap
+  """
+  reserveId: ReserveId
 }
 
-union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity | LeverageActivity
+union ActivityItem = BorrowActivity | SupplyActivity | WithdrawActivity | RepayActivity | LiquidatedActivity | UsingAsCollateralActivity | UpdatedDynamicConfigActivity | UpdatedRiskPremiumActivity | UpdatedLiquidationConfigActivity | UpdatedPriceSourceActivity | UpdatedReserveConfigActivity | UpdatedSpokeConfigActivity | UpdatedPositionManagerActivity | TokenSwapActivity | SupplySwapActivity | BorrowSwapActivity | RepayWithSupplyActivity | WithdrawSwapActivity | LeverageActivity
 
 enum ActivityType {
   SUPPLY
@@ -27,6 +32,11 @@ enum ActivityType {
   SET_AS_COLLATERAL
   UPDATED_DYNAMIC_CONFIG
   UPDATED_RISK_PREMIUM
+  UPDATED_LIQUIDATION_CONFIG
+  UPDATED_PRICE_SOURCE
+  UPDATED_RESERVE_CONFIG
+  UPDATED_SPOKE_CONFIG
+  UPDATED_POSITION_MANAGER
   TOKEN_TO_TOKEN_SWAP
   SUPPLY_SWAP
   BORROW_SWAP
@@ -161,6 +171,11 @@ scalar BigDecimal
 scalar BigInt
 
 scalar BlockchainData
+
+type BooleanChangeSnapshot {
+  before: Boolean!
+  after: Boolean!
+}
 
 type BoostedRate {
   """The unique identifier for this boosted rate tier"""
@@ -660,11 +675,13 @@ type HubAssetInterestRateModelPoint {
   """The utilization rate at this point on the curve"""
   utilizationRate: PercentNumber!
 
-  """The variable borrow rate at this utilization level"""
+  """
+  The borrow rate at this utilization level, compounded so the curve meets `borrowApy`
+  """
   borrowRate: PercentNumber!
 
   """
-  The supply rate at this utilization level (borrow_rate × utilization × (1 − fee))
+  Nominal borrow rate × utilization × (1 − fee) at this utilization level, then compounded
   """
   supplyRate: PercentNumber!
 
@@ -734,10 +751,10 @@ type HubAssetSummary {
   """The available liquidity"""
   availableLiquidity: Erc20Amount!
 
-  """The supply apy"""
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
 
-  """The borrow apy"""
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
 
   """The net apy"""
@@ -1139,6 +1156,78 @@ type LiquidationFeeVariation {
   token: Erc20Token!
   current: PercentNumber!
   after: PercentNumber!
+}
+
+"""
+Liquidations in one time bucket, valued at each liquidation's own timestamp.
+"""
+type LiquidationsSample {
+  date: DateTime!
+  liquidations: Int!
+  debtLiquidated: ExchangeAmount!
+  collateralLiquidated: ExchangeAmount!
+
+  """
+  Debt-weighted gross bonus for the bucket: seized collateral over covered debt, minus one.
+  """
+  averageLiquidationBonus: PercentNumber!
+
+  """
+  Priced liquidations in this bucket, largest debt first, at most `limit` (capped at 50).
+  """
+  items(limit: Int! = 50): [LiquidationsSampleItem!]!
+}
+
+"""One liquidation inside a bucket, valued at its own timestamp."""
+type LiquidationsSampleItem {
+  """The same id the liquidation carries in `activities`."""
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  user: EvmAddress!
+  liquidator: EvmAddress!
+  debtReserveId: ReserveId!
+  collateralReserveId: ReserveId!
+  debtLiquidated: ExchangeAmount!
+  collateralLiquidated: ExchangeAmount!
+
+  """Seized collateral over covered debt, minus one."""
+  liquidationBonus: PercentNumber!
+}
+
+"""
+Liquidation totals over the requested window, with the same figures bucketed over time.
+"""
+type LiquidationsSummary {
+  totalLiquidations: Int!
+  debtLiquidated: ExchangeAmount!
+  collateralLiquidated: ExchangeAmount!
+
+  """
+  Debt-weighted gross bonus over the window: seized collateral over covered debt, minus one.
+  """
+  averageLiquidationBonus: PercentNumber!
+  history: [LiquidationsSample!]!
+}
+
+input LiquidationsSummaryRequest {
+  query: LiquidationsSummaryRequestQuery!
+  currency: Currency! = USD
+
+  """
+  Totals and history both cover this window; defaults to everything since the first liquidation
+  """
+  window: TimeWindow! = ALL
+}
+
+input LiquidationsSummaryRequestQuery @oneOf {
+  spoke: SpokeInput
+  spokeId: SpokeId
+
+  """
+  Liquidations where the reserve is either the debt or the collateral leg
+  """
+  reserveId: ReserveId
 }
 
 input MarketDebtSwapQuoteInput {
@@ -1924,6 +2013,11 @@ type PreviewUserPosition {
   otherConditions: [UserPositionConditionVariation!]!
 }
 
+type PriceSourceChangeSnapshot {
+  before: EvmAddress!
+  after: EvmAddress!
+}
+
 input ProtocolHistoryRequest {
   currency: Currency! = USD
   window: TimeWindow! = LAST_DAY
@@ -2007,6 +2101,9 @@ type Query {
   """
   hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
   activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
+
+  """Liquidation totals and a time series for one spoke or one reserve"""
+  liquidationsSummary(request: LiquidationsSummaryRequest!): LiquidationsSummary
   tokenSwapQuote(request: TokenSwapQuoteRequest!): TokenSwapQuoteResult!
   prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult! @deprecated(reason: "Use prepareOrder.")
   supplySwapQuote(request: SupplySwapQuoteRequest!): SupplySwapQuoteResult!
@@ -2221,6 +2318,14 @@ input ReserveAmountInputWithPermit @oneOf {
   erc20: ReserveErc20AmountInputWithPermit
 }
 
+type ReserveConfigSnapshot {
+  frozen: Boolean!
+  paused: Boolean!
+  borrowable: Boolean!
+  receiveSharesEnabled: Boolean!
+  collateralRisk: PercentNumber!
+}
+
 input ReserveErc20AmountInput {
   """
   Token value in its main unit (e.g., 1.5 DAI), not in the smallest fraction (e.g., wei).
@@ -2315,7 +2420,11 @@ type ReserveSummary {
   borrowed: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
+
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
 
   """
@@ -2331,6 +2440,8 @@ type ReserveUserState {
   balance: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+
+  """Compounded yearly cost including the user's risk premium."""
   borrowApy: PercentNumber!
 
   """
@@ -2479,6 +2590,16 @@ type Spoke {
   liquidationConfig: SpokeLiquidationConfig
   summary(currency: Currency! = USD): SpokeSummary!
   connectedHubs(currency: Currency! = USD): [SpokeConnectedHub!]!
+}
+
+type SpokeConfigSnapshot {
+  supplyCap: Erc20Amount!
+  borrowCap: Erc20Amount!
+  active: Boolean!
+  halted: Boolean!
+
+  """Null when the change predates the indexer recording the threshold"""
+  riskPremiumThreshold: PercentNumber
 }
 
 type SpokeConnectedHub {
@@ -3178,6 +3299,9 @@ union TokenAmount = NativeAmount | Erc20Amount
 enum TokenCategory {
   STABLECOIN
   ETH_CORRELATED
+  BTC_CORRELATED
+  PROTOCOL_TOKEN
+  INFRASTRUCTURE_TOKEN
 }
 
 type TokenInfo {
@@ -3369,6 +3493,59 @@ type UpdatedDynamicConfigActivity {
   chain: Chain!
 }
 
+"""
+A governance change to the spoke-wide liquidation parameters. Has no acting user.
+"""
+type UpdatedLiquidationConfigActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  before: SpokeLiquidationConfig!
+  after: SpokeLiquidationConfig!
+  chain: Chain!
+}
+
+"""
+A governance change activating or deactivating a position manager on a spoke. Has no acting user.
+"""
+type UpdatedPositionManagerActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  positionManager: EvmAddress!
+  active: BooleanChangeSnapshot!
+  chain: Chain!
+}
+
+"""
+A governance change to a reserve's oracle price source. Has no acting user.
+"""
+type UpdatedPriceSourceActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  reserve: ReserveInfo!
+  priceSource: PriceSourceChangeSnapshot!
+  chain: Chain!
+}
+
+"""
+A governance change to a reserve's status flags or collateral risk. Has no acting user.
+"""
+type UpdatedReserveConfigActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  reserve: ReserveInfo!
+  before: ReserveConfigSnapshot!
+  after: ReserveConfigSnapshot!
+  chain: Chain!
+}
+
 type UpdatedRiskPremiumActivity {
   id: ID!
   user: EvmAddress!
@@ -3376,6 +3553,20 @@ type UpdatedRiskPremiumActivity {
   txHash: TxHash!
   spoke: Spoke!
   premium: PercentNumberChangeSnapshot!
+  chain: Chain!
+}
+
+"""
+A governance change to a spoke's caps and status on one hub asset. Has no acting user.
+"""
+type UpdatedSpokeConfigActivity {
+  id: ID!
+  timestamp: DateTime!
+  txHash: TxHash!
+  spoke: Spoke!
+  hubAssetId: HubAssetId!
+  before: SpokeConfigSnapshot!
+  after: SpokeConfigSnapshot!
   chain: Chain!
 }
 

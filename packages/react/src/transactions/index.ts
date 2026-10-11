@@ -7,6 +7,10 @@ export { useBorrow } from './useBorrow';
 export { useClaimRewards } from './useClaimRewards';
 export { useLiquidatePosition } from './useLiquidatePosition';
 export {
+  type UseLiquidationsSummaryArgs,
+  useLiquidationsSummary,
+} from './useLiquidationsSummary';
+export {
   type UsePreviewArgs,
   usePreview,
   usePreviewAction,

@@ -6,6 +6,7 @@ import {
   type Erc20ApprovalRequired,
   Erc20ApprovalRequiredFragment,
   Erc20TokenFragment,
+  ExchangeAmountFragment,
   ExchangeAmountVariationFragment,
   ExecutionPlanFragment,
   HealthFactorResultFragment,
@@ -19,6 +20,7 @@ import {
   type Reward,
   RewardFragment,
   SpokeFragment,
+  SpokeLiquidationConfigFragment,
   TokenAmountFragment,
   type TransactionRequest,
   TransactionRequestFragment,
@@ -620,6 +622,203 @@ export type UpdatedRiskPremiumActivity = FragmentOf<
   typeof UpdatedRiskPremiumActivityFragment
 >;
 
+export const UpdatedLiquidationConfigActivityFragment = graphql(
+  `fragment UpdatedLiquidationConfigActivity on UpdatedLiquidationConfigActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    before {
+      ...SpokeLiquidationConfig
+    }
+    after {
+      ...SpokeLiquidationConfig
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [SpokeFragment, SpokeLiquidationConfigFragment, ChainFragment],
+);
+export type UpdatedLiquidationConfigActivity = FragmentOf<
+  typeof UpdatedLiquidationConfigActivityFragment
+>;
+
+export const PriceSourceChangeSnapshotFragment = graphql(
+  `fragment PriceSourceChangeSnapshot on PriceSourceChangeSnapshot {
+    __typename
+    before
+    after
+  }`,
+);
+export type PriceSourceChangeSnapshot = FragmentOf<
+  typeof PriceSourceChangeSnapshotFragment
+>;
+
+export const UpdatedPriceSourceActivityFragment = graphql(
+  `fragment UpdatedPriceSourceActivity on UpdatedPriceSourceActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    priceSource {
+      ...PriceSourceChangeSnapshot
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [
+    SpokeFragment,
+    ReserveInfoFragment,
+    PriceSourceChangeSnapshotFragment,
+    ChainFragment,
+  ],
+);
+export type UpdatedPriceSourceActivity = FragmentOf<
+  typeof UpdatedPriceSourceActivityFragment
+>;
+
+export const ReserveConfigSnapshotFragment = graphql(
+  `fragment ReserveConfigSnapshot on ReserveConfigSnapshot {
+    __typename
+    frozen
+    paused
+    borrowable
+    receiveSharesEnabled
+    collateralRisk {
+      ...PercentNumber
+    }
+  }`,
+  [PercentNumberFragment],
+);
+export type ReserveConfigSnapshot = FragmentOf<
+  typeof ReserveConfigSnapshotFragment
+>;
+
+export const UpdatedReserveConfigActivityFragment = graphql(
+  `fragment UpdatedReserveConfigActivity on UpdatedReserveConfigActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    reserve {
+      ...ReserveInfo
+    }
+    before {
+      ...ReserveConfigSnapshot
+    }
+    after {
+      ...ReserveConfigSnapshot
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [
+    SpokeFragment,
+    ReserveInfoFragment,
+    ReserveConfigSnapshotFragment,
+    ChainFragment,
+  ],
+);
+export type UpdatedReserveConfigActivity = FragmentOf<
+  typeof UpdatedReserveConfigActivityFragment
+>;
+
+export const SpokeConfigSnapshotFragment = graphql(
+  `fragment SpokeConfigSnapshot on SpokeConfigSnapshot {
+    __typename
+    supplyCap {
+      ...Erc20Amount
+    }
+    borrowCap {
+      ...Erc20Amount
+    }
+    active
+    halted
+    riskPremiumThreshold {
+      ...PercentNumber
+    }
+  }`,
+  [Erc20AmountFragment, PercentNumberFragment],
+);
+export type SpokeConfigSnapshot = FragmentOf<
+  typeof SpokeConfigSnapshotFragment
+>;
+
+export const UpdatedSpokeConfigActivityFragment = graphql(
+  `fragment UpdatedSpokeConfigActivity on UpdatedSpokeConfigActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    hubAssetId
+    before {
+      ...SpokeConfigSnapshot
+    }
+    after {
+      ...SpokeConfigSnapshot
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [SpokeFragment, SpokeConfigSnapshotFragment, ChainFragment],
+);
+export type UpdatedSpokeConfigActivity = FragmentOf<
+  typeof UpdatedSpokeConfigActivityFragment
+>;
+
+export const BooleanChangeSnapshotFragment = graphql(
+  `fragment BooleanChangeSnapshot on BooleanChangeSnapshot {
+    __typename
+    before
+    after
+  }`,
+);
+export type BooleanChangeSnapshot = FragmentOf<
+  typeof BooleanChangeSnapshotFragment
+>;
+
+export const UpdatedPositionManagerActivityFragment = graphql(
+  `fragment UpdatedPositionManagerActivity on UpdatedPositionManagerActivity {
+    __typename
+    id
+    timestamp
+    txHash
+    spoke {
+      ...Spoke
+    }
+    positionManager
+    active {
+      ...BooleanChangeSnapshot
+    }
+    chain {
+      ...Chain
+    }
+  }`,
+  [SpokeFragment, BooleanChangeSnapshotFragment, ChainFragment],
+);
+export type UpdatedPositionManagerActivity = FragmentOf<
+  typeof UpdatedPositionManagerActivityFragment
+>;
+
 export const TokenSwapActivityFragment = graphql(
   `fragment TokenSwapActivity on TokenSwapActivity {
     __typename
@@ -801,6 +1000,21 @@ export const ActivityItemFragment = graphql(
     ... on UpdatedRiskPremiumActivity {
       ...UpdatedRiskPremiumActivity
     }
+    ... on UpdatedLiquidationConfigActivity {
+      ...UpdatedLiquidationConfigActivity
+    }
+    ... on UpdatedPriceSourceActivity {
+      ...UpdatedPriceSourceActivity
+    }
+    ... on UpdatedReserveConfigActivity {
+      ...UpdatedReserveConfigActivity
+    }
+    ... on UpdatedSpokeConfigActivity {
+      ...UpdatedSpokeConfigActivity
+    }
+    ... on UpdatedPositionManagerActivity {
+      ...UpdatedPositionManagerActivity
+    }
     ... on TokenSwapActivity {
       ...TokenSwapActivity
     }
@@ -829,6 +1043,11 @@ export const ActivityItemFragment = graphql(
     UsingAsCollateralActivityFragment,
     UpdatedDynamicConfigActivityFragment,
     UpdatedRiskPremiumActivityFragment,
+    UpdatedLiquidationConfigActivityFragment,
+    UpdatedPriceSourceActivityFragment,
+    UpdatedReserveConfigActivityFragment,
+    UpdatedSpokeConfigActivityFragment,
+    UpdatedPositionManagerActivityFragment,
     TokenSwapActivityFragment,
     SupplySwapActivityFragment,
     BorrowSwapActivityFragment,
@@ -872,4 +1091,98 @@ export type ActivitiesRequest = RequestOf<typeof ActivitiesQuery>;
 
 export type ActivitiesRequestQuery = ReturnType<
   typeof graphql.scalar<'ActivitiesRequestQuery'>
+>;
+
+export const LiquidationsSampleItemFragment = graphql(
+  `fragment LiquidationsSampleItem on LiquidationsSampleItem {
+    __typename
+    id
+    timestamp
+    txHash
+    user
+    liquidator
+    debtReserveId
+    collateralReserveId
+    debtLiquidated {
+      ...ExchangeAmount
+    }
+    collateralLiquidated {
+      ...ExchangeAmount
+    }
+    liquidationBonus {
+      ...PercentNumber
+    }
+  }`,
+  [ExchangeAmountFragment, PercentNumberFragment],
+);
+export type LiquidationsSampleItem = FragmentOf<
+  typeof LiquidationsSampleItemFragment
+>;
+
+export const LiquidationsSampleFragment = graphql(
+  `fragment LiquidationsSample on LiquidationsSample {
+    __typename
+    date
+    liquidations
+    debtLiquidated {
+      ...ExchangeAmount
+    }
+    collateralLiquidated {
+      ...ExchangeAmount
+    }
+    averageLiquidationBonus {
+      ...PercentNumber
+    }
+    items {
+      ...LiquidationsSampleItem
+    }
+  }`,
+  [
+    ExchangeAmountFragment,
+    PercentNumberFragment,
+    LiquidationsSampleItemFragment,
+  ],
+);
+export type LiquidationsSample = FragmentOf<typeof LiquidationsSampleFragment>;
+
+export const LiquidationsSummaryFragment = graphql(
+  `fragment LiquidationsSummary on LiquidationsSummary {
+    __typename
+    totalLiquidations
+    debtLiquidated {
+      ...ExchangeAmount
+    }
+    collateralLiquidated {
+      ...ExchangeAmount
+    }
+    averageLiquidationBonus {
+      ...PercentNumber
+    }
+    history {
+      ...LiquidationsSample
+    }
+  }`,
+  [ExchangeAmountFragment, PercentNumberFragment, LiquidationsSampleFragment],
+);
+export type LiquidationsSummary = FragmentOf<
+  typeof LiquidationsSummaryFragment
+>;
+
+/**
+ * @internal
+ */
+export const LiquidationsSummaryQuery = graphql(
+  `query LiquidationsSummary($request: LiquidationsSummaryRequest!) {
+    value: liquidationsSummary(request: $request) {
+      ...LiquidationsSummary
+    }
+  }`,
+  [LiquidationsSummaryFragment],
+);
+export type LiquidationsSummaryRequest = RequestOf<
+  typeof LiquidationsSummaryQuery
+>;
+
+export type LiquidationsSummaryRequestQuery = ReturnType<
+  typeof graphql.scalar<'LiquidationsSummaryRequestQuery'>
 >;
