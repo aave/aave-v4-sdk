@@ -50,8 +50,9 @@
     "check": "gql.tada check",
     "doctor": "gql.tada doctor",
     "gql:generate:cache": "gql.tada generate turbo",
-    "gql:download:local": "./scripts/fetch-schema.ts http://localhost:3007/graphql ./src/schema.json && gql-tada generate schema 'http://localhost:3007/graphql' --output './schema.graphql'",
-    "gql:download:staging": "./scripts/fetch-schema.ts https://api.v4.staging.aave.com/graphql ./src/schema.json && gql-tada generate schema 'https://api.v4.staging.aave.com/graphql' --output './schema.graphql'",
+    "gql:generate:defaults": "./scripts/generate-defaults.ts && biome format --write ./src/defaults.ts",
+    "gql:download:local": "./scripts/fetch-schema.ts http://localhost:3007/graphql ./src/schema.json && gql-tada generate schema 'http://localhost:3007/graphql' --output './schema.graphql' && pnpm gql:generate:defaults",
+    "gql:download:staging": "./scripts/fetch-schema.ts https://api.v4.staging.aave.com/graphql ./src/schema.json && gql-tada generate schema 'https://api.v4.staging.aave.com/graphql' --output './schema.graphql' && pnpm gql:generate:defaults",
     "gql:generate:introspection": "gql-tada generate output",
     "gql:turbo": "gql-tada turbo",
     "prebuild": "pnpm run gql:turbo"
