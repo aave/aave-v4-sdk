@@ -105,7 +105,10 @@ export class GqlClient {
     { requestPolicy, batch = true }: QueryOptions = {},
   ): ResultAsync<TValue, UnexpectedError> {
     return this.resultFrom(
-      this.urql.query(document, variables, { batch, requestPolicy }),
+      this.urql.query(document, this.normalizeVariables(document, variables), {
+        batch,
+        requestPolicy,
+      }),
     );
   }
 
@@ -235,6 +238,18 @@ export class GqlClient {
 
   protected additionalExchanges(): Exchange[] {
     return [];
+  }
+
+  /**
+   * Rewrites query variables before they are keyed and sent.
+   *
+   * @internal
+   */
+  protected normalizeVariables<TVariables extends AnyVariables>(
+    _document: TypedDocumentNode<unknown, TVariables>,
+    variables: TVariables,
+  ): TVariables {
+    return variables;
   }
 
   protected reexecuteWithRefetching(

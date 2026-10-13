@@ -1,5 +1,6 @@
 import { type StandardData, UnexpectedError } from '@aave/client';
 import { extractDocumentName } from '@aave/core';
+import { normalizeVariables } from '@aave/graphql';
 import {
   type AnyVariables,
   invariant,
@@ -163,13 +164,17 @@ export function useSuspendableQuery<
   // as an error-free update). Kept here so the previous error can be presented
   // during the refetch, the way data is.
   const lastError = useRef<UnexpectedError | undefined>(undefined);
-  const operationId = useMemo(
-    () => createRequest(document, variables as Variables).key,
+  const normalizedVariables = useMemo(
+    () => normalizeVariables(document, variables as Variables),
     [document, variables],
+  );
+  const operationId = useMemo(
+    () => createRequest(document, normalizedVariables).key,
+    [document, normalizedVariables],
   );
   const [{ fetching, data, error, stale, operation }, executeQuery] = useQuery({
     query: document,
-    variables: variables as Variables,
+    variables: normalizedVariables,
     pause,
     context: useMemo(
       () => ({
