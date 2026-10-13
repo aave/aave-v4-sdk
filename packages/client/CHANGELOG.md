@@ -1,5 +1,21 @@
 # @aave/client
 
+## 6.8.0
+
+### Minor Changes
+
+- 746fb0a: **feat:** earn & borrow surface: collateral-scoped position fields, hub-asset scoped reads, reserve and hub-asset history, and `multiStepPreview` for plans of one or more actions folded through the protocol state
+- ef6e2d6: **feat:** fill in schema defaults for omitted request fields so equivalent queries share one operation key and network request
+- 746fb0a: **feat:** `SupplyRequest.useAsCollateral` lets a supply enable or disable the reserve's collateral flag; `enableCollateral` is deprecated
+
+### Patch Changes
+
+- Updated dependencies [746fb0a]
+- Updated dependencies [ef6e2d6]
+- Updated dependencies [746fb0a]
+  - @aave/graphql@3.7.0
+  - @aave/core@1.2.0
+
 ## 6.7.0
 
 ### Minor Changes
