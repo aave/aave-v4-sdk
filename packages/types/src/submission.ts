@@ -2,10 +2,11 @@ import type { Tagged } from 'type-fest';
 import { invariant } from './helpers';
 
 /**
- * The identifier a wallet returns when it accepts a transaction request.
+ * The id a wallet returns when the user signs a transaction.
  *
- * Not necessarily an on-chain hash: for a Smart Account it may be a Safe
- * `safeTxHash` or an EIP-5792 call id.
+ * For a regular wallet (EOA) it is the on-chain transaction hash. For a Smart
+ * Account it may be a wallet-specific id, such as a Safe `safeTxHash` or an
+ * EIP-5792 call id.
  */
 export type SubmissionId = Tagged<string, 'SubmissionId'>;
 

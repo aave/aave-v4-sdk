@@ -167,10 +167,10 @@ function executePlan(
 /**
  * Creates an execution plan handler that sends transactions using the provided ethers signer.
  *
- * Known limitation: with a Smart Account that returns its own transaction id
- * (e.g. a Safe `safeTxHash`), ethers blocks until that id is found on-chain,
- * which may be never (e.g. Safe mobile over WalletConnect). Use the viem
- * integration for Smart Accounts.
+ * Smart Accounts are not fully supported. If the wallet returns its own id
+ * instead of an on-chain hash (e.g. a Safe `safeTxHash`), ethers waits for that
+ * id to appear on-chain, which may never happen (e.g. Safe mobile over
+ * WalletConnect). Use the viem integration for Smart Accounts.
  */
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   signer: Signer,

@@ -5,4 +5,4 @@
 "@aave/react": minor
 ---
 
-**feat:** track Smart Account transactions (e.g. Safe over WalletConnect, Safe mobile, Safe iframe) via `wallet_getCallsStatus` until they execute on-chain, resolving with the real execution hash; unexecuted ones fail after 30 minutes with `SubmissionUnresolvedError` (`name: 'TimeoutError'`, check `SubmissionUnresolvedError.is(error)` before assuming execution and do not resend blindly); `SendWithError` now includes `TimeoutError`; a dropped EOA tx now fails after 30 minutes with `SubmissionUnresolvedError` instead of 180s `UnexpectedError`; React Privy `useSendTransaction` and the CLI inherit the new tracking; removes the optional `@safe-global/safe-apps-sdk` peer dependency
+**feat:** wait for Smart Account transactions (e.g. Safe) to execute on-chain and return the real tx hash; transactions not on-chain after 30 minutes, including dropped EOA transactions that previously failed after 180s with `UnexpectedError`, now fail with `SubmissionUnresolvedError` (a `TimeoutError`, now part of `SendWithError`), so check `SubmissionUnresolvedError.is(error)` before resending; removes the optional `@safe-global/safe-apps-sdk` peer dependency

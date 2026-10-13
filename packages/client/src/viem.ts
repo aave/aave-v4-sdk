@@ -288,13 +288,15 @@ export const SUBMISSION_TIMEOUT = 30 * 60_000;
 export const FIRST_PROBE_TIMEOUT = 5_000;
 
 /**
- * How many times the receipt poller is started before a receipt request
- * failure ends tracking, and how long it waits between starts.
+ * Max times the receipt poller is started. Once used up, a failed receipt
+ * request ends tracking.
  *
  * @internal
  */
 export const RECEIPT_ATTEMPTS = 4;
 /**
+ * Wait between receipt poller starts.
+ *
  * @internal
  */
 export const RECEIPT_RETRY_DELAY = 4_000;
@@ -309,10 +311,9 @@ type SubmissionOutcome =
   | { status: 'receipt-error'; error: unknown };
 
 /**
- * Returns a client over `walletClient` that rejects every request once `signal`
- * aborts. viem's `waitForTransactionReceipt` cannot be cancelled; on this
- * client it stops sending requests after settlement instead of polling the
- * wallet until its timeout.
+ * Wraps `walletClient` so every request fails once `signal` aborts. viem's
+ * `waitForTransactionReceipt` can't be cancelled, so this stops it from
+ * polling the wallet after tracking has settled.
  */
 function clientUntil(walletClient: WalletClient, signal: AbortSignal) {
   return createClient({
@@ -332,18 +333,21 @@ function clientUntil(walletClient: WalletClient, signal: AbortSignal) {
 }
 
 /**
- * Tracks a submitted transaction with two pollers through the wallet transport:
+ * Waits for a submitted transaction to settle, running two pollers over the
+ * wallet transport:
  *
- * - (a) `eth_getTransactionReceipt`, for EOAs and wallets returning an on-chain hash.
- * - (b) `wallet_getCallsStatus`, for wallets returning their own id (e.g. a Safe
- *   `safeTxHash`), which may need more signatures before executing.
+ * - (a) `eth_getTransactionReceipt`: for EOAs and wallets that return an
+ *   on-chain hash.
+ * - (b) `wallet_getCallsStatus`: for wallets that return their own id (e.g. a
+ *   Safe `safeTxHash`), which may still need signatures before it executes.
  *
- * Once the wallet recognises the id, (b) decides. Otherwise (a) decides, but a
- * receipt is held until (b)'s first probe completes, because the Safe iframe
- * provider echoes the `safeTxHash` as the receipt's `transactionHash`. Such a
- * receipt comes from the executor, not the account, so an indirect receipt is
- * held until `FIRST_PROBE_TIMEOUT` even when the first probe fails: a single
- * failed probe must not let it through.
+ * If the wallet recognises the id, (b)'s answer wins. Otherwise (a)'s does,
+ * with one catch: the Safe iframe provider returns a receipt whose
+ * `transactionHash` is the `safeTxHash` itself. So every receipt is held until
+ * (b)'s first probe completes. A receipt sent from an address other than the
+ * account (an execution by a Safe owner or a bundler) is held for the full
+ * `FIRST_PROBE_TIMEOUT`, even if the first probe fails, so one flaky probe
+ * can't let it through.
  */
 function trackSubmission(
   walletClient: WalletClient,
@@ -564,10 +568,11 @@ function executePlan(
 /**
  * Creates an execution plan handler that sends transactions using the provided wallet client.
  *
- * With a Smart Account (e.g. a Safe multisig), each transaction is tracked until
- * it executes on-chain. If it has not executed after 30 minutes, it fails with a
- * `TimeoutError` that is a `SubmissionUnresolvedError`: it may still execute, so
- * check `SubmissionUnresolvedError.is(error)` and do not resend it blindly.
+ * Each transaction is awaited until it is on-chain. With a Smart Account (e.g. a
+ * Safe multisig) this can take a while, since other owners may need to sign.
+ * If a transaction is not on-chain after 30 minutes, it fails with a
+ * {@link SubmissionUnresolvedError}. It may still go through, so check
+ * `SubmissionUnresolvedError.is(error)` and do not resend it automatically.
  */
 export function sendWith(walletClient: WalletClient): ExecutionPlanHandler;
 /**

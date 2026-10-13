@@ -103,18 +103,26 @@ export class TimeoutError extends ResultAwareError {
 }
 
 /**
- * Error indicating the wallet accepted a transaction, but it was not confirmed
- * on-chain within the waiting window — e.g. a Smart Account transaction still
- * awaiting co-signer signatures. It may still execute later, so do not resend
- * the same transaction blindly.
+ * Error indicating the wallet accepted a transaction, but it did not land
+ * on-chain within 30 minutes. For example, a Safe transaction still waiting
+ * for other owners to sign, or a transaction the network dropped.
  *
- * Its `name` is `'TimeoutError'`; use {@link SubmissionUnresolvedError.is} to
- * tell it apart from a {@link TimeoutError} that implies execution.
+ * The transaction may still go through later. Do not resend it automatically:
+ * ask the user to check their wallet (e.g. the Safe app) first.
+ *
+ * Its `name` is `'TimeoutError'`, so existing `TimeoutError` handling still
+ * catches it. Use {@link SubmissionUnresolvedError.is} to tell the two apart.
+ *
+ * ```ts
+ * if (SubmissionUnresolvedError.is(error)) {
+ *   // Not on-chain yet: ask the user to check their wallet before retrying
+ * }
+ * ```
  */
 export class SubmissionUnresolvedError extends TimeoutError {
   /**
-   * The identifier the wallet returned for the transaction. Not necessarily an
-   * on-chain hash (e.g. a Safe `safeTxHash`).
+   * The id the wallet returned for the transaction. For a Smart Account this
+   * may not be an on-chain hash (e.g. a Safe `safeTxHash`).
    */
   readonly submissionId: SubmissionId;
 
@@ -143,15 +151,15 @@ export class SubmissionUnresolvedError extends TimeoutError {
     chainId: ChainId;
   }): SubmissionUnresolvedError {
     return new SubmissionUnresolvedError(
-      `Transaction ${args.submissionId} was submitted but not confirmed on-chain yet.`,
+      `Transaction ${args.submissionId} was accepted by the wallet but is not on-chain yet. It may still execute: check the wallet before sending it again.`,
       args.submissionId,
       args.chainId,
     );
   }
 
   /**
-   * Checks by property rather than `instanceof`, so it also works across
-   * duplicate copies of this package.
+   * Checks whether `error` is a {@link SubmissionUnresolvedError}. Works even
+   * when more than one copy of the SDK is installed.
    */
   static override is(error: unknown): error is SubmissionUnresolvedError;
   static override is<T extends typeof ResultAwareError>(

@@ -33,11 +33,10 @@ import { useChainAction } from '../misc';
  * ```
  *
  * With a Smart Account (e.g. a Safe multisig), the transaction stays pending
- * while co-signers sign. If it has not executed after 30 minutes, the
- * pending transaction fails with a `TimeoutError` that is a
- * `SubmissionUnresolvedError`: it may still execute, so check
- * `SubmissionUnresolvedError.is(error)` and do not resend it blindly. Some
- * wallets keep their prompt open until the transaction executes.
+ * until it is executed on-chain.
+ * If it is not on-chain after 30 minutes, it fails with a
+ * `SubmissionUnresolvedError`. It may still go through, so check
+ * `SubmissionUnresolvedError.is(error)` and do not resend it automatically.
  *
  * @param walletClient - The wallet client to use for sending transactions.
  */
