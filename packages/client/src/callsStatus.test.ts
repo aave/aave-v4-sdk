@@ -155,18 +155,20 @@ describe(`Given the '${trackCallsStatus.name}' function`, () => {
     expect(outcome).toMatchObject({ status: 'error' });
   });
 
-  it('Then it stops probing an unsupported method but still times out', async () => {
-    const onProbe = vi.fn();
-    const { outcome, provider } = await run(
-      { error: rpcErrors.methodNotFound },
-      { onProbe },
-      61_000,
-    );
+  it.each([
+    ['methodNotFound', rpcErrors.methodNotFound],
+    ['methodNotSupported', rpcErrors.methodNotSupported],
+  ])(
+    'Then it stops probing an unsupported method (%s) but still times out',
+    async (_, error) => {
+      const onProbe = vi.fn();
+      const { outcome, provider } = await run({ error }, { onProbe }, 61_000);
 
-    expect(provider.calls('wallet_getCallsStatus')).toBe(1);
-    expect(onProbe.mock.calls).toEqual([[false]]);
-    expect(outcome).toEqual({ status: 'timeout' });
-  });
+      expect(provider.calls('wallet_getCallsStatus')).toBe(1);
+      expect(onProbe.mock.calls).toEqual([[false]]);
+      expect(outcome).toEqual({ status: 'timeout' });
+    },
+  );
 
   it('Then it stops polling when aborted', async () => {
     const controller = new AbortController();

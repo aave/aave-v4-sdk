@@ -2,6 +2,7 @@ import { type SubmissionId, type TxHash, txHash } from '@aave/types';
 import {
   BaseError,
   MethodNotFoundRpcError,
+  MethodNotSupportedRpcError,
   UnsupportedProviderMethodError,
   type WalletClient,
 } from 'viem';
@@ -76,6 +77,7 @@ function isUnsupportedMethod(error: unknown): boolean {
     error.walk(
       (cause) =>
         cause instanceof MethodNotFoundRpcError ||
+        cause instanceof MethodNotSupportedRpcError ||
         cause instanceof UnsupportedProviderMethodError,
     ) !== null
   );

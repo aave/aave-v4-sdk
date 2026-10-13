@@ -318,6 +318,7 @@ export function chainScript({
  */
 export const rpcErrors = {
   methodNotFound: { code: -32601, message: 'Method not found' },
+  methodNotSupported: { code: -32004, message: 'Method not supported' },
   unknownBundle: { code: 5730, message: 'Unknown bundle id' },
   safeMobileNotFound: { code: -32000, message: 'Transaction not found' },
   userRejected: { code: 4001, message: 'User rejected the request' },
