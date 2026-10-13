@@ -13,6 +13,9 @@ import {
   type AssetSupplyHistoryRequest,
   type AssetSupplySample,
   type MultichainAsset,
+  MultichainAssetHistoryQuery,
+  type MultichainAssetHistoryRequest,
+  type MultichainAssetHistorySample,
   MultichainAssetQuery,
   type MultichainAssetRequest,
   ProtocolHistoryQuery,
@@ -219,6 +222,37 @@ export function protocolHistory(
 ): ResultAsync<ProtocolHistorySample[], UnexpectedError> {
   return client.query(
     ProtocolHistoryQuery,
+    { request },
+    {
+      requestPolicy:
+        options.requestPolicy ?? DEFAULT_QUERY_OPTIONS.requestPolicy,
+    },
+  );
+}
+
+/**
+ * Fetches deposits, borrows, available liquidity and utilization for one asset
+ * across chains, bucketed over the given window.
+ *
+ * ```ts
+ * const result = await multichainAssetHistory(client, {
+ *   query: { symbol: 'USDC' },
+ *   window: TimeWindow.LastWeek,
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The multichain asset history request parameters.
+ * @param options - The query options.
+ * @returns Array of multichain asset history samples over time.
+ */
+export function multichainAssetHistory(
+  client: AaveClient,
+  request: MultichainAssetHistoryRequest,
+  options: Required<RequestPolicyOptions> = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<MultichainAssetHistorySample[], UnexpectedError> {
+  return client.query(
+    MultichainAssetHistoryQuery,
     { request },
     {
       requestPolicy:
