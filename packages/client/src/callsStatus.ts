@@ -48,8 +48,17 @@ export type TrackCallsStatusOptions = {
   signal?: AbortSignal;
 };
 
-function isRecognized(response: GetCallsStatusReturnType): boolean {
-  return Number.isInteger(response.statusCode);
+/**
+ * Whether the wallet answered with a status for `id`. A status for another
+ * id (a stale or buggy answer) counts as unrecognised, so polling continues.
+ */
+function isRecognized(response: GetCallsStatusReturnType, id: string): boolean {
+  // viem's own `sendCalls` fallback and legacy 1.0 responses carry no id
+  const responseId = (response as { id?: string }).id;
+  return (
+    Number.isInteger(response.statusCode) &&
+    (responseId === undefined || responseId.toLowerCase() === id.toLowerCase())
+  );
 }
 
 /**
@@ -133,7 +142,7 @@ export function trackCallsStatus(
       try {
         const response = await getCallsStatus(walletClient, { id });
         errors = 0;
-        recognized = isRecognized(response);
+        recognized = isRecognized(response, id);
         outcome = recognized ? outcomeFrom(response) : null;
       } catch (error) {
         errors++;

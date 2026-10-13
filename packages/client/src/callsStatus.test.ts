@@ -168,4 +168,62 @@ describe(`Given the '${trackCallsStatus.name}' function`, () => {
     await vi.advanceTimersByTimeAsync(60_000);
     expect(provider.calls('wallet_getCallsStatus')).toBe(calls);
   });
+
+  describe('When the wallet answers for another id', () => {
+    it('Then it ignores a cancelled status and settles on its own id', async () => {
+      const { outcome } = await run([
+        { result: makeCallsStatus({ status: 400, id: first }) },
+        {
+          result: makeCallsStatus({
+            status: 200,
+            receipts: [{ hash: last, status: 'success' }],
+          }),
+        },
+      ]);
+
+      expect(outcome).toEqual({ status: 'success', txHash: last });
+    });
+
+    it('Then it does not settle on a success for another id', async () => {
+      const onProbe = vi.fn();
+      const { outcome } = await run(
+        {
+          result: makeCallsStatus({
+            status: 200,
+            id: first,
+            receipts: [{ hash: last, status: 'success' }],
+          }),
+        },
+        { onProbe },
+      );
+
+      expect(outcome).toBeUndefined();
+      expect(onProbe).toHaveBeenCalledWith(false);
+      expect(onProbe).not.toHaveBeenCalledWith(true);
+    });
+  });
+
+  it('Then it accepts a response without an id', async () => {
+    const { outcome } = await run({
+      result: makeCallsStatus({
+        status: 200,
+        id: null,
+        receipts: [{ hash: last, status: 'success' }],
+      }),
+    });
+
+    expect(outcome).toEqual({ status: 'success', txHash: last });
+  });
+
+  it('Then it matches the id regardless of case', async () => {
+    const { outcome } = await run({
+      result: makeCallsStatus({
+        status: 200,
+        id: ambireId.toUpperCase(),
+        receipts: [{ hash: last, status: 'success' }],
+      }),
+    });
+
+    expect(outcome).toEqual({ status: 'success', txHash: last });
+  });
 });

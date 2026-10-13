@@ -86,7 +86,14 @@ export function createScriptedWallet(
     if ('error' in response) {
       throw rpcError(response.error);
     }
-    return response.result;
+    const { result } = response;
+    if (
+      method === 'wallet_getCallsStatus' &&
+      (result as { id?: unknown } | null)?.id === REQUESTED_ID
+    ) {
+      return { ...(result as object), id: (params as [string])[0] };
+    }
+    return result;
   };
 
   return {
@@ -244,20 +251,28 @@ export function advancingBlockNumber(): Scripted {
 }
 
 /**
- * Creates a `wallet_getCallsStatus` response.
+ * Placeholder id the scripted wallet replaces with the id it was asked about.
+ */
+export const REQUESTED_ID = 'requested-id';
+
+/**
+ * Creates a `wallet_getCallsStatus` response. By default it answers for the
+ * requested id; pass `id` to answer for another one, or `null` to omit it.
  */
 export function makeCallsStatus({
   status,
   receipts,
   version = '2.0.0',
+  id = REQUESTED_ID,
 }: {
   status: number | 'PENDING' | 'CONFIRMED';
   receipts?: { hash: HexString; status: 'success' | 'reverted' }[];
   version?: '2.0.0' | '1.0';
+  id?: string | null;
 }) {
   return {
     version,
-    id: '0x01',
+    ...(id === null ? {} : { id }),
     chainId: '0x1',
     atomic: true,
     status,
