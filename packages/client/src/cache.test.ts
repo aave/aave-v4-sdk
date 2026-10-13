@@ -23,6 +23,7 @@ import {
   client,
   createNewWallet,
   ETHEREUM_FORK_ID,
+  ETHEREUM_SPOKE_CORE_ADDRESS,
   ETHEREUM_USDC_ADDRESS,
   fundErc20Address,
 } from './testing';
@@ -247,8 +248,14 @@ describe('Given the Aave SDK normalized graph cache', () => {
       })
         .map(
           (list) =>
-            list.find((reserve) => reserve.canSupply) ??
-            never('No reserve found to supply to for the token'),
+            // Pin the Core spoke: other spokes can hit their Hub add cap on the
+            // shared fork while the API still reports `canSupply: true`
+            list.find(
+              (reserve) =>
+                reserve.canSupply &&
+                reserve.spoke.address === ETHEREUM_SPOKE_CORE_ADDRESS,
+            ) ??
+            never('No Core spoke reserve found to supply to for the token'),
         )
         .andThen((reserve) =>
           fundErc20Address(evmAddress(user.account.address), {
