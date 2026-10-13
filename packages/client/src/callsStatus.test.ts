@@ -148,11 +148,24 @@ describe(`Given the '${trackCallsStatus.name}' function`, () => {
 
   it('Then it gives up after maxConsecutiveErrors failed probes', async () => {
     const { outcome } = await run(
-      { error: rpcErrors.methodNotFound },
+      { error: rpcErrors.transport },
       { maxConsecutiveErrors: 3 },
     );
 
     expect(outcome).toMatchObject({ status: 'error' });
+  });
+
+  it('Then it stops probing an unsupported method but still times out', async () => {
+    const onProbe = vi.fn();
+    const { outcome, provider } = await run(
+      { error: rpcErrors.methodNotFound },
+      { onProbe },
+      61_000,
+    );
+
+    expect(provider.calls('wallet_getCallsStatus')).toBe(1);
+    expect(onProbe.mock.calls).toEqual([[false]]);
+    expect(outcome).toEqual({ status: 'timeout' });
   });
 
   it('Then it stops polling when aborted', async () => {

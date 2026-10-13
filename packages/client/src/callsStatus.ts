@@ -1,5 +1,10 @@
 import { type SubmissionId, type TxHash, txHash } from '@aave/types';
-import type { WalletClient } from 'viem';
+import {
+  BaseError,
+  MethodNotFoundRpcError,
+  UnsupportedProviderMethodError,
+  type WalletClient,
+} from 'viem';
 import { type GetCallsStatusReturnType, getCallsStatus } from 'viem/actions';
 
 /**
@@ -62,6 +67,21 @@ function isRecognized(response: GetCallsStatusReturnType, id: string): boolean {
 }
 
 /**
+ * Whether the wallet doesn't implement `wallet_getCallsStatus` at all. Method
+ * support doesn't change mid-session, so further probes are wasted requests.
+ */
+function isUnsupportedMethod(error: unknown): boolean {
+  return (
+    error instanceof BaseError &&
+    error.walk(
+      (cause) =>
+        cause instanceof MethodNotFoundRpcError ||
+        cause instanceof UnsupportedProviderMethodError,
+    ) !== null
+  );
+}
+
+/**
  * Maps a `wallet_getCallsStatus` response to an outcome, or `null` to keep
  * polling. Relies on viem's normalised `statusCode` and receipt `status`.
  */
@@ -111,6 +131,7 @@ export function trackCallsStatus(
   return new Promise((resolve) => {
     let done = false;
     let errors = 0;
+    let unsupported = false;
     let pollTimer: ReturnType<typeof setTimeout> | undefined;
 
     const finish = (outcome: CallsStatusOutcome) => {
@@ -146,6 +167,7 @@ export function trackCallsStatus(
         outcome = recognized ? outcomeFrom(response) : null;
       } catch (error) {
         errors++;
+        unsupported = isUnsupportedMethod(error);
         if (
           maxConsecutiveErrors !== undefined &&
           errors >= maxConsecutiveErrors
@@ -163,7 +185,8 @@ export function trackCallsStatus(
         return;
       }
 
-      if (!done) {
+      // keep `timeoutTimer` running: callers rely on it as the shared deadline
+      if (!done && !unsupported) {
         pollTimer = setTimeout(probe, CALLS_STATUS_POLLING_INTERVAL);
       }
     };
