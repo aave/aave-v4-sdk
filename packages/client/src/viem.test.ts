@@ -61,6 +61,10 @@ const receiptOf = (
   status: 'success' | 'reverted' = 'success',
 ) => ({ result: makeReceipt({ hash, from: account, status }) });
 const noReceipt = { result: null };
+// Enough failures in a row to outlast the wallet transport's own retries
+const receiptFailures = Array.from({ length: 4 }, () => ({
+  error: rpcErrors.transport,
+}));
 // the Safe iframe's receipt: the executor's real receipt, hash overwritten with the safeTxHash
 const echoedReceipt = {
   result: makeReceipt({ hash: submitted, from: executor, status: 'success' }),
@@ -595,7 +599,40 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
     });
 
-    it(`Then it fails with an ${UnexpectedError.name} when the wallet does not recognise the id`, async () => {
+    it('Then it keeps tracking when the wallet recognises the id only later', async () => {
+      const { walletClient } = setup({
+        eth_getTransactionReceipt: [...receiptFailures, noReceipt],
+        wallet_getCallsStatus: [
+          { error: rpcErrors.safeMobileNotFound },
+          { error: rpcErrors.safeMobileNotFound },
+          pending,
+          executedStatus(),
+        ],
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(30_000);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
+    });
+
+    it('Then an EOA resolves once a later receipt request succeeds', async () => {
+      const { walletClient } = setup({
+        eth_getTransactionReceipt: [...receiptFailures, receiptOf(submitted)],
+        wallet_getCallsStatus: { error: rpcErrors.unknownBundle },
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(20_000);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(submitted);
+    });
+
+    it(`Then it fails with an ${UnexpectedError.name} only after every receipt attempt fails and the wallet does not recognise the id`, async () => {
       const { walletClient } = setup({
         eth_getTransactionReceipt: { error: rpcErrors.transport },
         wallet_getCallsStatus: { error: rpcErrors.methodNotFound },
@@ -604,8 +641,10 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       const result = track(
         waitForTransactionResult(walletClient, request, submitted),
       );
-      await vi.advanceTimersByTimeAsync(10_000);
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(result.current).toBeUndefined();
 
+      await vi.advanceTimersByTimeAsync(30_000);
       expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(
         UnexpectedError,
       );

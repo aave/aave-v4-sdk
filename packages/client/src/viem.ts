@@ -287,6 +287,18 @@ export const SUBMISSION_TIMEOUT = 30 * 60_000;
  */
 export const FIRST_PROBE_TIMEOUT = 5_000;
 
+/**
+ * How many times the receipt poller is started before a receipt request
+ * failure ends tracking, and how long it waits between starts.
+ *
+ * @internal
+ */
+export const RECEIPT_ATTEMPTS = 4;
+/**
+ * @internal
+ */
+export const RECEIPT_RETRY_DELAY = 4_000;
+
 type SubmissionOutcome =
   | Exclude<CallsStatusOutcome, { status: 'aborted' }>
   | {
@@ -345,11 +357,14 @@ function trackSubmission(
     let capReached = false;
     let recognized = false;
     let held: SubmissionOutcome | undefined;
+    let receiptAttempts = 0;
+    let receiptRetry: ReturnType<typeof setTimeout> | undefined;
 
     const settle = (outcome: SubmissionOutcome) => {
       if (settled) return;
       settled = true;
       clearTimeout(firstProbeCap);
+      clearTimeout(receiptRetry);
       controller.abort();
       resolve(outcome);
     };
@@ -382,21 +397,32 @@ function trackSubmission(
     };
 
     // (a)
-    let replaced: ReplacementReason | undefined;
-    waitForTransactionReceipt(clientUntil(walletClient, controller.signal), {
-      hash,
-      timeout: SUBMISSION_TIMEOUT,
-      onReplaced: ({ reason }) => {
-        replaced = reason;
-      },
-    }).then(
-      (receipt) => onReceiptOutcome({ status: 'receipt', receipt, replaced }),
-      (error) => {
-        // the shared timeout is owned by (b)
-        if (error instanceof WaitForTransactionReceiptTimeoutError) return;
-        onReceiptOutcome({ status: 'receipt-error', error });
-      },
-    );
+    const waitForReceipt = () => {
+      receiptAttempts += 1;
+      let replaced: ReplacementReason | undefined;
+      waitForTransactionReceipt(clientUntil(walletClient, controller.signal), {
+        hash,
+        timeout: SUBMISSION_TIMEOUT,
+        onReplaced: ({ reason }) => {
+          replaced = reason;
+        },
+      }).then(
+        (receipt) => onReceiptOutcome({ status: 'receipt', receipt, replaced }),
+        (error) => {
+          // the shared timeout is owned by (b)
+          if (error instanceof WaitForTransactionReceiptTimeoutError) return;
+          if (controller.signal.aborted) return;
+          // A failed receipt request says nothing about the transaction, which
+          // may still land or be recognised by (b): settling here invites a resend
+          if (receiptAttempts < RECEIPT_ATTEMPTS) {
+            receiptRetry = setTimeout(waitForReceipt, RECEIPT_RETRY_DELAY);
+            return;
+          }
+          onReceiptOutcome({ status: 'receipt-error', error });
+        },
+      );
+    };
+    waitForReceipt();
 
     // (b)
     trackCallsStatus(walletClient, submissionId(hash), {
