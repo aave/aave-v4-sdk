@@ -22,7 +22,10 @@ export function SupplyForm({ walletClient }: SupplyFormProps) {
         setStatus('Sending transaction…');
         return sendTransaction(plan);
 
-      case 'Erc20ApprovalRequired':
+      case 'Erc20Approval':
+        setStatus('Approval required. Sending approval transaction…');
+        return sendTransaction(plan.byTransaction);
+
       case 'PreContractActionRequired':
         setStatus('Approval required. Sending approval transaction…');
         return sendTransaction(plan.transaction);
