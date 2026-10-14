@@ -1850,6 +1850,21 @@ type PositionSwapSetCollateralApproval {
   bySignature: SwapTypedData!
 }
 
+"""
+A position swap, for asking whether a reserve can be its source (`canSwapFrom`) or its
+destination (`canSwapTo`). Each side is the one its quote names.
+"""
+enum PositionSwapType {
+  """From the current supply to the new one."""
+  SUPPLY_SWAP
+  """From the current debt to the new one."""
+  BORROW_SWAP
+  """From the debt being repaid to the supply that repays it."""
+  REPAY_WITH_SUPPLY
+  """From the debt borrowed to the collateral it buys."""
+  LEVERAGE
+}
+
 type PreContractActionRequired {
   """The transaction requires a pre-contract action first"""
   transaction: TransactionRequest!
@@ -2323,7 +2338,17 @@ type Reserve {
   canBorrow: Boolean!
   canSupply: Boolean!
   canUseAsCollateral: Boolean!
-  canSwapFrom: Boolean!
+  """
+  Without a `type`, reserve-level: `active && !frozen && !paused`. With one, whether this
+  reserve can be that swap's source: the chain's deployment serves the swap and the asset's
+  curated sides allow it.
+  """
+  canSwapFrom(type: PositionSwapType): Boolean!
+  """
+  Whether this reserve can be a position swap's destination: of that swap with a `type`, of
+  any the chain's deployment serves without one. The asset's curated sides included.
+  """
+  canSwapTo(type: PositionSwapType): Boolean!
   userState: ReserveUserState
   asset: HubAsset!
   spoke: Spoke!
@@ -3551,6 +3576,10 @@ type UserBorrowItem {
   """The interest incurred on the loan"""
   interest: Erc20Amount!
   """
+  Whether a borrow swap or a repay with supply can start from this position.
+  """
+  canSwapFrom: Boolean!
+  """
   When the borrow was created.
   This is null if they have no supply item, for
   example, when using include_zero_balances this comes
@@ -3865,6 +3894,8 @@ type UserSupplyItem {
   interest: Erc20Amount!
   """If this supply is used as collateral"""
   isCollateral: Boolean!
+  """Whether a supply swap can start from this position."""
+  canSwapFrom: Boolean!
   """
   When the supply was created.
   This is null if they have no supply item, for

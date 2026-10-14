@@ -9715,7 +9715,34 @@
                 "name": "Any"
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "type",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              }
+            ]
+          },
+          {
+            "name": "canSwapTo",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": [
+              {
+                "name": "type",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              }
+            ]
           },
           {
             "name": "userState",
@@ -13594,6 +13621,17 @@
             "args": []
           },
           {
+            "name": "canSwapFrom",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "createdAt",
             "type": {
               "kind": "SCALAR",
@@ -14617,6 +14655,17 @@
           },
           {
             "name": "isCollateral",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "canSwapFrom",
             "type": {
               "kind": "NON_NULL",
               "ofType": {

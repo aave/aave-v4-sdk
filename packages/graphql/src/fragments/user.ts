@@ -35,6 +35,7 @@ export const UserSupplyItemFragment = graphql(
       ...Erc20Amount
     }
     isCollateral
+    canSwapFrom
     createdAt
   }`,
   [Erc20AmountFragment, ReserveFragment],
@@ -57,6 +58,7 @@ export const UserBorrowItemFragment = graphql(
     reserve {
       ...Reserve
     }
+    canSwapFrom
     createdAt
   }`,
   [Erc20AmountFragment, ReserveFragment],
