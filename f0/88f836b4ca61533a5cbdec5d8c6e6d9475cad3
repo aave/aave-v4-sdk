@@ -1,0 +1,23 @@
+.changeset/position-swap-flags.md
+  s_61172960321b7d::t_2e9532502af893 7
+packages/graphql/src/enums.ts
+  s_61172960321b7d::t_aced72e23a1a23 189-211
+packages/graphql/src/graphql.ts
+  s_61172960321b7d::t_2de69ffecae0ee 32,116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f088f836b4ca61533a5cbdec5d8c6e6d9475cad3",
+  "prompts": {},
+  "sessions": {
+    "s_61172960321b7d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "136941e8-ff8b-4071-9de5-2c4640deb849",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
