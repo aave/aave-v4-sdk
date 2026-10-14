@@ -187,6 +187,29 @@ export enum WithdrawSwapKind {
 }
 
 /**
+ * A position swap, for asking whether a reserve can be its source (`canSwapFrom`)
+ * or its destination (`canSwapTo`). Each side is the one its quote names.
+ */
+export enum PositionSwapType {
+  /**
+   * From the current supply to the new one.
+   */
+  SupplySwap = 'SUPPLY_SWAP',
+  /**
+   * From the current debt to the new one.
+   */
+  BorrowSwap = 'BORROW_SWAP',
+  /**
+   * From the debt being repaid to the supply that repays it.
+   */
+  RepayWithSupply = 'REPAY_WITH_SUPPLY',
+  /**
+   * From the debt borrowed to the collateral it buys.
+   */
+  Leverage = 'LEVERAGE',
+}
+
+/**
  * Order class indicating market or limit order type.
  */
 export enum OrderClass {
