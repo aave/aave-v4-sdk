@@ -138,14 +138,14 @@ export const ReserveFragment = graphql(
     canUseAsCollateral
     canSwapFrom
     canSwapTo
-    canSwapFromSupplySwap: canSwapFrom(type: SUPPLY_SWAP)
-    canSwapToSupplySwap: canSwapTo(type: SUPPLY_SWAP)
-    canSwapFromBorrowSwap: canSwapFrom(type: BORROW_SWAP)
-    canSwapToBorrowSwap: canSwapTo(type: BORROW_SWAP)
-    canSwapFromRepayWithSupply: canSwapFrom(type: REPAY_WITH_SUPPLY)
-    canSwapToRepayWithSupply: canSwapTo(type: REPAY_WITH_SUPPLY)
-    canSwapFromLeverage: canSwapFrom(type: LEVERAGE)
-    canSwapToLeverage: canSwapTo(type: LEVERAGE)
+    canSwapSupplyFrom: canSwapFrom(type: SUPPLY_SWAP)
+    canSwapSupplyTo: canSwapTo(type: SUPPLY_SWAP)
+    canSwapBorrowFrom: canSwapFrom(type: BORROW_SWAP)
+    canSwapBorrowTo: canSwapTo(type: BORROW_SWAP)
+    canRepayWithSupply: canSwapFrom(type: REPAY_WITH_SUPPLY)
+    canRepayWithThisSupply: canSwapTo(type: REPAY_WITH_SUPPLY)
+    canLeverage: canSwapFrom(type: LEVERAGE)
+    canLeverageWith: canSwapTo(type: LEVERAGE)
     userState {
       ...ReserveUserState
     }

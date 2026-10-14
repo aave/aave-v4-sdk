@@ -4,4 +4,4 @@
 "@aave/react": minor
 ---
 
-**feat:** position swap availability: `Reserve.canSwapTo`, a `canSwapFrom*` / `canSwapTo*` pair per swap (supply swap, borrow swap, repay with supply, leverage), and `canSwapFrom` on `UserSupplyItem` and `UserBorrowItem`
+**feat:** position swap availability on `Reserve`: `canSwapTo`, and per swap `canSwapSupplyFrom`/`canSwapSupplyTo`, `canSwapBorrowFrom`/`canSwapBorrowTo`, `canRepayWithSupply`/`canRepayWithThisSupply` and `canLeverage`/`canLeverageWith`; `canSwapFrom` on `UserSupplyItem` and `UserBorrowItem`
