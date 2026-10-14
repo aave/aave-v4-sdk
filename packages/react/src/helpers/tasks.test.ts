@@ -27,6 +27,26 @@ describe(`Given the '${useAsyncTask.name}' hook`, () => {
     });
   });
 
+  describe('When rendered in Strict Mode', () => {
+    it('Then it should remain executable after the Effect remount check', async () => {
+      const { result } = renderHook(
+        () => useAsyncTask((input: string) => okAsync(input), []),
+        { reactStrictMode: true },
+      );
+
+      await act(async () => {
+        await result.current[0]('test');
+      });
+
+      expect(result.current[1]).toMatchObject({
+        called: true,
+        loading: false,
+        data: 'test',
+        error: undefined,
+      });
+    });
+  });
+
   describe('And the hook is executed for the first time', () => {
     describe('When the task is in progress', () => {
       it('Then it should return the state in line with type of `AsyncTaskLoading`', async () => {
