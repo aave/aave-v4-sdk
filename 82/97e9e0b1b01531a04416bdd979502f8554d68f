@@ -1,0 +1,30 @@
+packages/client/src/testing.ts
+  s_187fdf14c48a92::t_93584568207aca 244-293,295,299-311,313-321
+  s_187fdf14c48a92::t_1295f2ace22006 203-206
+  s_187fdf14c48a92::t_d8f5f315e8756a 35
+  s_187fdf14c48a92::t_f0f07858b9c1f2 294,296-298
+  s_187fdf14c48a92::t_7afbd5ac1c1657 312
+packages/client/src/environments.ts
+  h_be8c3c572e9983 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8297e9e0b1b01531a04416bdd979502f8554d68f",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_187fdf14c48a92": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cd83995-1960-48f2-a84a-f6bb49f87f8d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
