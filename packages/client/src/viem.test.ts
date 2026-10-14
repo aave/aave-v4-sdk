@@ -28,7 +28,12 @@ import {
   type ScriptedWallet,
   walletClientFor,
 } from './testing-wallet';
-import { SUBMISSION_TIMEOUT, sendWith, waitForTransactionResult } from './viem';
+import {
+  INDIRECT_RECEIPT_TIMEOUT,
+  SUBMISSION_TIMEOUT,
+  sendWith,
+  waitForTransactionResult,
+} from './viem';
 
 const account = evmAddress('0x1111111111111111111111111111111111111111');
 const executor = evmAddress('0x2222222222222222222222222222222222222222');
@@ -232,6 +237,20 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
     });
 
+    it('Then it holds the echoed receipt past the first-probe cap while the first status answer is slow', async () => {
+      const { walletClient } = setup({
+        eth_getTransactionReceipt: echoedReceipt,
+        wallet_getCallsStatus: { delayMs: 8_000, respond: executedStatus() },
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
+    });
+
     it('Then a failed first status probe does not release the echoed receipt', async () => {
       const { walletClient } = setup({
         eth_getTransactionReceipt: echoedReceipt,
@@ -390,11 +409,17 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
     });
   });
 
-  describe('When the EOA transaction is replaced', () => {
-    it(`Then a reverted receipt with a different hash fails with a ${CancelError.name}`, async () => {
+  describe('When the wallet maps the Submission to a reverted Execution receipt without EIP-5792 support', () => {
+    it(`Then it fails with a ${TransactionError.name} for the Execution hash`, async () => {
       const { walletClient } = setup({
         wallet_getCallsStatus: { error: rpcErrors.methodNotFound },
-        eth_getTransactionReceipt: receiptOf(executed, 'reverted'),
+        eth_getTransactionReceipt: {
+          result: makeReceipt({
+            hash: executed,
+            from: executor,
+            status: 'reverted',
+          }),
+        },
       });
 
       const result = track(
@@ -402,9 +427,13 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       );
       await vi.advanceTimersByTimeAsync(10_000);
 
-      expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(CancelError);
+      const error = result.current?._unsafeUnwrapErr();
+      expect(error).toBeInstanceOf(TransactionError);
+      expect((error as TransactionError).txHash).toBe(executed);
     });
+  });
 
+  describe('When the EOA transaction is replaced', () => {
     it(`Then a reverted receipt with the same hash fails with a ${TransactionError.name}`, async () => {
       const { walletClient } = setup({
         wallet_getCallsStatus: { error: rpcErrors.methodNotFound },
@@ -648,6 +677,24 @@ describe(`Given the viem '${waitForTransactionResult.name}' function`, () => {
       expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(
         UnexpectedError,
       );
+    });
+  });
+
+  describe("When the wallet's first status probe hangs and an indirect receipt arrives", () => {
+    it('Then it holds the receipt until the indirect-receipt cap, then resolves', async () => {
+      const { walletClient } = setup({
+        wallet_getCallsStatus: { hang: true },
+        eth_getTransactionReceipt: echoedReceipt,
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, request, submitted),
+      );
+      await vi.advanceTimersByTimeAsync(INDIRECT_RECEIPT_TIMEOUT - 100);
+      expect(result.current).toBeUndefined();
+
+      await vi.advanceTimersByTimeAsync(200);
+      expect(result.current?._unsafeUnwrap().txHash).toBe(submitted);
     });
   });
 

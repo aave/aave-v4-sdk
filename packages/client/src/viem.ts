@@ -288,6 +288,14 @@ export const SUBMISSION_TIMEOUT = 30 * 60_000;
 export const FIRST_PROBE_TIMEOUT = 5_000;
 
 /**
+ * Max time a receipt sent from an address other than the account is held
+ * while the first `wallet_getCallsStatus` request is still unanswered.
+ *
+ * @internal
+ */
+export const INDIRECT_RECEIPT_TIMEOUT = 30_000;
+
+/**
  * Max times the receipt poller is started. Once used up, a failed receipt
  * request ends tracking.
  *
@@ -347,7 +355,8 @@ function clientUntil(walletClient: WalletClient, signal: AbortSignal) {
  * (b)'s first probe completes. A receipt sent from an address other than the
  * account (an execution by a Safe owner or a bundler) is held for the full
  * `FIRST_PROBE_TIMEOUT`, even if the first probe fails, so one flaky probe
- * can't let it through.
+ * can't let it through, and for as long as the first probe is unanswered, up
+ * to `INDIRECT_RECEIPT_TIMEOUT`, so a slow one can't either.
  */
 function trackSubmission(
   walletClient: WalletClient,
@@ -359,6 +368,7 @@ function trackSubmission(
     let settled = false;
     let firstProbeDone = false;
     let capReached = false;
+    let indirectCapReached = false;
     let recognized = false;
     let held: SubmissionOutcome | undefined;
     let receiptAttempts = 0;
@@ -368,6 +378,7 @@ function trackSubmission(
       if (settled) return;
       settled = true;
       clearTimeout(firstProbeCap);
+      clearTimeout(indirectReceiptCap);
       clearTimeout(receiptRetry);
       controller.abort();
       resolve(outcome);
@@ -379,8 +390,11 @@ function trackSubmission(
       account !== undefined &&
       !isAddressEqual(outcome.receipt.from, account);
 
-    const canRelease = (outcome: SubmissionOutcome) =>
-      !recognized && (capReached || (firstProbeDone && !isIndirect(outcome)));
+    const canRelease = (outcome: SubmissionOutcome) => {
+      if (recognized) return false;
+      if (!isIndirect(outcome)) return firstProbeDone || capReached;
+      return (firstProbeDone && capReached) || indirectCapReached;
+    };
 
     const releaseHeld = () => {
       if (held && canRelease(held)) settle(held);
@@ -390,6 +404,11 @@ function trackSubmission(
       capReached = true;
       releaseHeld();
     }, FIRST_PROBE_TIMEOUT);
+
+    const indirectReceiptCap = setTimeout(() => {
+      indirectCapReached = true;
+      releaseHeld();
+    }, INDIRECT_RECEIPT_TIMEOUT);
 
     const onReceiptOutcome = (outcome: SubmissionOutcome) => {
       if (recognized) return;
@@ -479,9 +498,8 @@ export function waitForTransactionResult(
         if (outcome.receipt.status === 'success') {
           return okAsync({ txHash: hash, operations: request.operations });
         }
-        if (initialTxHash !== hash) {
-          return errAsync(CancelError.from(`Transaction replaced by ${hash}`));
-        }
+        // A hash other than `initialTxHash` without `replaced` is the
+        // Execution the wallet mapped the Submission to, not a replacement
         return errAsync(transactionError(walletClient.chain, hash, request));
       }
 
