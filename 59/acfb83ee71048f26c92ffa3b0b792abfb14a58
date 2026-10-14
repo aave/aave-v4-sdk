@@ -1,0 +1,60 @@
+packages/client/src/eip5792.ts
+  s_431c39d0696833::t_245620f15a7b60 264-270,272-273,300-303
+packages/react/src/transactions/useBorrow.ts
+  s_431c39d0696833::t_a1a423c14accf6 113,117
+  s_431c39d0696833::t_a9b4333c9077d7 19
+packages/react/src/transactions/useRepay.ts
+  s_431c39d0696833::t_a1a423c14accf6 145,149
+  s_431c39d0696833::t_a9b4333c9077d7 26
+packages/react/src/transactions/batch.test-d.ts
+  s_431c39d0696833::t_a9b4333c9077d7 2-4,19,96-99
+  s_431c39d0696833::t_5379aef100bf24 1,100-101
+packages/react/src/transactions/useWithdraw.ts
+  s_431c39d0696833::t_a1a423c14accf6 113,117
+  s_431c39d0696833::t_a9b4333c9077d7 19
+packages/client/src/eip5792.test.ts
+  s_431c39d0696833::t_b6d7718a4f7cbb 231-246,248-254,259-260,263-288
+packages/client/src/viem.ts
+  s_431c39d0696833::t_245620f15a7b60 306,327-328,331-333,336-341,431
+packages/react/src/viem/adapters.ts
+  s_431c39d0696833::t_cf03b556755778 18
+  s_431c39d0696833::t_2bde48d34a8503 41-50,90,226
+  s_431c39d0696833::t_c1ec461ebf986f 93-94,100-102,105-114
+  s_431c39d0696833::t_8472497cf8c192 40
+packages/react/src/vaults.ts
+  s_431c39d0696833::t_a9b4333c9077d7 45
+  s_431c39d0696833::t_a1a423c14accf6 138,145
+packages/client/src/sendBatchWith.test.ts
+  s_431c39d0696833::t_36f23897c7a6a9 1,8,66-82,92-101,115-118,145-169
+  s_431c39d0696833::t_718e5af400e354 15,107
+packages/react/src/viem/adapters.test.ts
+  s_431c39d0696833::t_539820f61bd6c5 451-485
+packages/react/src/transactions/useSupply.ts
+  s_431c39d0696833::t_a9b4333c9077d7 21
+  s_431c39d0696833::t_a1a423c14accf6 164,168
+packages/react/src/helpers/writes.ts
+  s_431c39d0696833::t_a1a423c14accf6 134
+packages/react/src/transactions/useLiquidatePosition.ts
+  s_431c39d0696833::t_a9b4333c9077d7 21
+  s_431c39d0696833::t_a1a423c14accf6 153,160
+packages/react/src/index.ts
+  s_431c39d0696833::t_a9b4333c9077d7 13
+packages/client/src/types.ts
+  s_431c39d0696833::t_245620f15a7b60 73-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "59acfb83ee71048f26c92ffa3b0b792abfb14a58",
+  "prompts": {},
+  "sessions": {
+    "s_431c39d0696833": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88c1cd0b-ad60-4a0c-b5cc-298072b88fe2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

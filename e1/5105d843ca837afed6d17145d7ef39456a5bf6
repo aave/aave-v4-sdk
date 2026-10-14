@@ -1,0 +1,14 @@
+packages/graphql/src/defaults.ts
+  h_dd1a1ee57491bb 60-71,78-86,157-169
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e15105d843ca837afed6d17145d7ef39456a5bf6",
+  "prompts": {},
+  "humans": {
+    "h_dd1a1ee57491bb": {
+      "author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

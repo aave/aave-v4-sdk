@@ -1,0 +1,45 @@
+packages/client/src/ethers.ts
+  s_bb0d5dc555f998::t_86af1c15132b4b 170-173
+packages/react/src/viem/adapters.ts
+  s_bb0d5dc555f998::t_7fcdf8e9ae077a 37-39
+  h_be8c3c572e9983 36
+packages/types/src/submission.ts
+  s_bb0d5dc555f998::t_59ba4b8359ee53 5,7-8
+  h_be8c3c572e9983 9
+packages/core/src/errors.ts
+  s_bb0d5dc555f998::t_7cd23765328e4e 106-108,110-120,124
+  s_bb0d5dc555f998::t_0068e1ee56e9a5 154
+  h_be8c3c572e9983 125
+  s_bb0d5dc555f998::t_83a5684a14f404 161-162
+packages/client/src/viem.ts
+  s_bb0d5dc555f998::t_066825ff827442 291-292,298-299
+  s_bb0d5dc555f998::t_a49f4184d80cb8 314-316
+  s_bb0d5dc555f998::t_5e71854399e996 571-575
+  s_bb0d5dc555f998::t_0f38380111a524 336-337,339-342,344-350
+.changeset/patient-safes-wait.md
+  s_bb0d5dc555f998::t_1fd506950eaace 8
+packages/react/src/privy.ts
+  h_be8c3c572e9983 59
+  s_bb0d5dc555f998::t_7fcdf8e9ae077a 60-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "58d41a322517b000b14a252fd7f61822c9eda913",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_bb0d5dc555f998": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c675fa3-3706-4904-8dea-c196d3e28852",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

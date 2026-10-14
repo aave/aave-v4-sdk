@@ -1,0 +1,25 @@
+.changeset/plain-defaults-drop.md
+  s_cfaf92aeed8287::t_c4f543997b6a8f 8
+packages/client/src/normalizeVariables.test.ts
+  s_cfaf92aeed8287::t_7570ba7f825431 32-33,35-38,42,47-51,54-59,65,69-70,72-75,85-92,95-100,105-107,110-111,113,115,121-131,133-139,143,145-151,174-175,183,190
+packages/graphql/src/normalize.ts
+  s_cfaf92aeed8287::t_da9030e915a2de 48,50-53,56,58-66,73-75
+packages/react/src/helpers/normalizedReads.test.tsx
+  s_cfaf92aeed8287::t_dfd746785e62ea 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bbfd37f5240f11eebc6462f49d7be267c4a5b1dd",
+  "prompts": {},
+  "sessions": {
+    "s_cfaf92aeed8287": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "58355678-76a1-48a3-9a21-c5b0672935f4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+packages/client/src/testing-wallet.ts
+  s_9535672f742b99::t_c504af37c5b49f 321
+packages/client/src/callsStatus.test.ts
+  s_9535672f742b99::t_c504af37c5b49f 158-164
+  s_9535672f742b99::t_07a7ee5fa35b7d 165-171
+packages/client/src/callsStatus.ts
+  s_9535672f742b99::t_c504af37c5b49f 5,80
+AGENTS.md
+  s_9535672f742b99::t_81795fbefe8b21 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a61e8042ba4fca3c253aa60d94db8f32e7c660b8",
+  "prompts": {},
+  "sessions": {
+    "s_9535672f742b99": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "27836f57-46fe-4077-a340-f29e5c28d1e4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
