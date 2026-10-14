@@ -1,6 +1,11 @@
 import { supportsPermit, type TransactionReceipt } from '@aave/client';
 import {
+  stableVaultAssignRate,
+  stableVaultClaimSurplus,
   stableVaultDeposit,
+  stableVaultMovements,
+  stableVaultRateUsers,
+  stableVaultUnassignRate,
   stableVaultWithdraw,
   stableVaultWithdrawRedeem,
 } from '@aave/client/actions';
@@ -9,9 +14,16 @@ import type {
   ERC20PermitSignature,
   Erc20Approval,
   InsufficientBalanceError,
+  PaginatedStableVaultMovementsResult,
+  PaginatedStableVaultRateUsersResult,
   StableVault,
+  StableVaultAssignRateRequest,
   StableVaultClaimStatus,
+  StableVaultClaimSurplusRequest,
   StableVaultDepositRequest,
+  StableVaultMovementsRequest,
+  StableVaultRateUsersRequest,
+  StableVaultUnassignRateRequest,
   StableVaultUserPosition,
   StableVaultWithdrawClaim,
   StableVaultWithdrawRedeemRequest,
@@ -21,7 +33,9 @@ import type {
 import {
   StableVaultClaimStatusQuery,
   type StableVaultClaimStatusRequest,
+  StableVaultMovementsQuery,
   StableVaultQuery,
+  StableVaultRateUsersQuery,
   type StableVaultRequest,
   StableVaultsQuery,
   type StableVaultsRequest,
@@ -64,6 +78,105 @@ function injectDepositPermitSignature(
       permitSig,
     },
   };
+}
+
+/**
+ * A hook that provides a way to assign users to a stable vault boosted rate.
+ *
+ * ```ts
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [assignRate, { loading, error }] = useStableVaultAssignRate((transaction) =>
+ *   sendTransaction(transaction),
+ * );
+ * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
+ */
+export function useStableVaultAssignRate(
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
+): UseAsyncTask<
+  StableVaultAssignRateRequest,
+  TransactionReceipt,
+  SendTransactionError | PendingTransactionError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: StableVaultAssignRateRequest) =>
+      stableVaultAssignRate(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshStableVaultRateUsers(client, request)),
+    [client, handler],
+  );
+}
+
+/**
+ * A hook that provides a way to remove users from a stable vault boosted rate.
+ *
+ * ```ts
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [unassignRate, { loading, error }] = useStableVaultUnassignRate((transaction) =>
+ *   sendTransaction(transaction),
+ * );
+ * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
+ */
+export function useStableVaultUnassignRate(
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
+): UseAsyncTask<
+  StableVaultUnassignRateRequest,
+  TransactionReceipt,
+  SendTransactionError | PendingTransactionError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: StableVaultUnassignRateRequest) =>
+      stableVaultUnassignRate(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshStableVaultRateUsers(client, request)),
+    [client, handler],
+  );
+}
+
+/**
+ * A hook that provides a way to claim accumulated surplus from a stable vault.
+ *
+ * ```ts
+ * const [sendTransaction] = useSendTransaction(wallet);
+ * const [claimSurplus, { loading, error }] = useStableVaultClaimSurplus((transaction) =>
+ *   sendTransaction(transaction),
+ * );
+ * ```
+ *
+ * @param handler - The handler that will be used to handle the transaction.
+ */
+export function useStableVaultClaimSurplus(
+  handler: ExecutionPlanHandler<TransactionRequest, PendingTransaction>,
+): UseAsyncTask<
+  StableVaultClaimSurplusRequest,
+  TransactionReceipt,
+  SendTransactionError | PendingTransactionError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: StableVaultClaimSurplusRequest) =>
+      stableVaultClaimSurplus(client, request)
+        .andThen((transaction) => handler(transaction, { cancel }))
+        .andThen(PendingTransaction.tryFrom)
+        .andThen((pending) => pending.wait())
+        .andThen(client.waitForTransaction)
+        .andThrough(() => refreshStableVault(client, request.vaultId)),
+    [client, handler],
+  );
 }
 
 /**
@@ -229,6 +342,166 @@ export function useStableVaultWithdrawRedeem(
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction),
     [client, handler],
+  );
+}
+
+export type UseStableVaultRateUsersArgs = StableVaultRateUsersRequest;
+
+/**
+ * Fetch paginated users assigned to a stable vault boosted rate.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useStableVaultRateUsers({
+ *   vaultId,
+ *   rateId,
+ *   pageSize: PageSize.Ten,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useStableVaultRateUsers(
+  args: UseStableVaultRateUsersArgs & Suspendable,
+): SuspenseResult<PaginatedStableVaultRateUsersResult>;
+/**
+ * Pausable suspense mode.
+ */
+export function useStableVaultRateUsers(
+  args: Pausable<UseStableVaultRateUsersArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedStableVaultRateUsersResult>;
+/**
+ * Fetch paginated users assigned to a stable vault boosted rate.
+ *
+ * ```tsx
+ * const { data, loading, error } = useStableVaultRateUsers({
+ *   vaultId,
+ *   rateId,
+ *   pageSize: PageSize.Ten,
+ * });
+ * ```
+ */
+export function useStableVaultRateUsers(
+  args: UseStableVaultRateUsersArgs,
+): ReadResult<PaginatedStableVaultRateUsersResult>;
+/**
+ * Pausable loading state mode.
+ */
+export function useStableVaultRateUsers(
+  args: Pausable<UseStableVaultRateUsersArgs>,
+): PausableReadResult<PaginatedStableVaultRateUsersResult>;
+
+export function useStableVaultRateUsers({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseStableVaultRateUsersArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<PaginatedStableVaultRateUsersResult, UnexpectedError> {
+  return useSuspendableQuery({
+    document: StableVaultRateUsersQuery,
+    variables: { request },
+    suspense,
+    pause,
+  });
+}
+
+/**
+ * Low-level hook to execute a stable vault rate users action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ */
+export function useStableVaultRateUsersAction(): UseAsyncTask<
+  StableVaultRateUsersRequest,
+  PaginatedStableVaultRateUsersResult,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: StableVaultRateUsersRequest) =>
+      stableVaultRateUsers(client, request, { requestPolicy: 'cache-first' }),
+    [client],
+  );
+}
+
+export type UseStableVaultMovementsArgs = StableVaultMovementsRequest;
+
+/**
+ * Fetch paginated cross-chain fund movements for a stable vault.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useStableVaultMovements({
+ *   vaultId,
+ *   pageSize: PageSize.Ten,
+ *   suspense: true,
+ * });
+ * ```
+ */
+export function useStableVaultMovements(
+  args: UseStableVaultMovementsArgs & Suspendable,
+): SuspenseResult<PaginatedStableVaultMovementsResult>;
+/**
+ * Pausable suspense mode.
+ */
+export function useStableVaultMovements(
+  args: Pausable<UseStableVaultMovementsArgs> & Suspendable,
+): PausableSuspenseResult<PaginatedStableVaultMovementsResult>;
+/**
+ * Fetch paginated cross-chain fund movements for a stable vault.
+ *
+ * ```tsx
+ * const { data, loading, error } = useStableVaultMovements({
+ *   vaultId,
+ *   pageSize: PageSize.Ten,
+ * });
+ * ```
+ */
+export function useStableVaultMovements(
+  args: UseStableVaultMovementsArgs,
+): ReadResult<PaginatedStableVaultMovementsResult>;
+/**
+ * Pausable loading state mode.
+ */
+export function useStableVaultMovements(
+  args: Pausable<UseStableVaultMovementsArgs>,
+): PausableReadResult<PaginatedStableVaultMovementsResult>;
+
+export function useStableVaultMovements({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseStableVaultMovementsArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<PaginatedStableVaultMovementsResult, UnexpectedError> {
+  return useSuspendableQuery({
+    document: StableVaultMovementsQuery,
+    variables: { request },
+    suspense,
+    pause,
+  });
+}
+
+/**
+ * Low-level hook to execute a stable vault movements action directly.
+ *
+ * @experimental This hook is experimental and may be subject to breaking changes.
+ */
+export function useStableVaultMovementsAction(): UseAsyncTask<
+  StableVaultMovementsRequest,
+  PaginatedStableVaultMovementsResult,
+  UnexpectedError
+> {
+  const client = useAaveClient();
+
+  return useAsyncTask(
+    (request: StableVaultMovementsRequest) =>
+      stableVaultMovements(client, request, { requestPolicy: 'cache-first' }),
+    [client],
   );
 }
 
@@ -467,6 +740,34 @@ export function useStableVaults({
     suspense,
     pause,
   });
+}
+
+/**
+ * @internal
+ */
+function refreshStableVault(
+  client: ReturnType<typeof useAaveClient>,
+  vaultId: StableVaultClaimSurplusRequest['vaultId'],
+) {
+  return client.refreshQueryWhere(
+    StableVaultQuery,
+    (variables) => variables.request.id === vaultId,
+  );
+}
+
+/**
+ * @internal
+ */
+function refreshStableVaultRateUsers(
+  client: ReturnType<typeof useAaveClient>,
+  request: StableVaultAssignRateRequest | StableVaultUnassignRateRequest,
+) {
+  return client.refreshQueryWhere(
+    StableVaultRateUsersQuery,
+    (variables) =>
+      variables.request.vaultId === request.vaultId &&
+      variables.request.rateId === request.rateId,
+  );
 }
 
 /**
