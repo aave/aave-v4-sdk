@@ -6,6 +6,7 @@ import {
 import { chain as fetchChain } from '@aave/client/actions';
 import { toViemChain } from '@aave/client/viem';
 import {
+  type ActivityItem,
   type Chain,
   Currency,
   type DecimalNumber,
@@ -18,14 +19,16 @@ import {
 import {
   bigDecimal,
   type ChainId,
+  err,
   invariant,
   never,
   nonNullable,
+  ok,
   okAsync,
   ResultAsync,
   RoundingMode,
 } from '@aave/types';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPublicClient, fallback, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useAaveClient } from '../context';
@@ -61,7 +64,9 @@ const gasEstimates: Record<keyof PreviewAction, bigint> = {
 };
 
 function inferGasEstimate(action: PreviewAction): bigint {
-  const key = Object.keys(action)[0] as keyof PreviewAction;
+  const keys = Object.keys(action);
+  invariant(keys.length === 1, 'Expected exactly one preview action');
+  const key = keys[0] as keyof PreviewAction;
   return gasEstimates[key] ?? never(`Expected gas estimate for action ${key}`);
 }
 
@@ -103,52 +108,65 @@ function extractChainId(action: PreviewAction): ChainId {
   never('Expected reserve id');
 }
 
-function inferChainId(query: UseNetworkFeeRequestQuery): ChainId | undefined {
-  if ('activity' in query && query.activity) {
-    return query.activity.chain.chainId;
-  }
+type ExecutionRequest =
+  | { activity: ActivityItem }
+  | { chainId: ChainId; gasUnits: bigint };
 
-  if ('estimate' in query && query.estimate) {
-    return extractChainId(query.estimate);
+function prepareExecution(query?: UseNetworkFeeRequestQuery) {
+  try {
+    if (query && 'activity' in query && query.activity) {
+      return ok<ExecutionRequest>({ activity: query.activity });
+    }
+    if (query && 'estimate' in query && query.estimate) {
+      return ok<ExecutionRequest>({
+        chainId: extractChainId(query.estimate),
+        gasUnits: inferGasEstimate(query.estimate),
+      });
+    }
+    if (query && 'estimatePlan' in query && query.estimatePlan) {
+      const { actions } = query.estimatePlan;
+      const first = actions[0];
+      invariant(first, 'A fee estimate requires a non-empty plan');
+      const chainId = extractChainId(first);
+      let gasUnits = 0n;
+      for (const action of actions) {
+        invariant(
+          extractChainId(action) === chainId,
+          'All plan actions must be on the same chain',
+        );
+        gasUnits += inferGasEstimate(action);
+      }
+      // Budget separate transactions, retaining the approval allowances.
+      return ok<ExecutionRequest>({
+        chainId,
+        gasUnits,
+      });
+    }
+    return err(UnexpectedError.from('Expected a network fee query'));
+  } catch (error) {
+    return err(UnexpectedError.from(error));
   }
-
-  return undefined;
-}
-
-function inferTimestampForExchangeRateLookup(
-  query: UseNetworkFeeRequestQuery,
-): Date | undefined {
-  if ('activity' in query && query.activity) {
-    return query.activity.timestamp;
-  }
-  return undefined; // i.e., now
 }
 
 function resolveChain(
   client: AaveClient,
-  query: UseNetworkFeeRequestQuery,
+  request: ExecutionRequest,
 ): ResultAsync<Chain, UnexpectedError> {
-  if ('activity' in query && query.activity) {
-    return okAsync(query.activity.chain);
+  if ('activity' in request) {
+    return okAsync(request.activity.chain);
   }
-
-  if ('estimate' in query && query.estimate) {
-    return fetchChain(client, {
-      chainId: extractChainId(query.estimate),
-    }).map(nonNullable);
-  }
-
-  return never('Expected chain');
+  return fetchChain(client, { chainId: request.chainId }).map(nonNullable);
 }
 
 type ExecutionDetails = {
+  requestKey: string;
   chain: Chain;
   gasPrice: bigint;
   gasUnits: bigint;
 };
 
 function useExecutionDetails(): UseAsyncTask<
-  UseNetworkFeeRequestQuery,
+  ExecutionRequest & { requestKey: string },
   ExecutionDetails,
   UnexpectedError
 > {
@@ -173,6 +191,7 @@ function useExecutionDetails(): UseAsyncTask<
             (error) => UnexpectedError.from(error),
           ).map((receipt) => {
             return {
+              requestKey: query.requestKey,
               chain: query.activity.chain,
               gasPrice: receipt.effectiveGasPrice,
               gasUnits: receipt.gasUsed,
@@ -180,20 +199,22 @@ function useExecutionDetails(): UseAsyncTask<
           });
         }
 
-        if ('estimate' in query && query.estimate) {
+        if ('gasUnits' in query) {
           return ResultAsync.fromPromise(
             publicClient.estimateFeesPerGas(),
             (error) => UnexpectedError.from(error),
           ).map(({ maxFeePerGas }) => {
             return {
+              requestKey: query.requestKey,
               chain,
               gasPrice: maxFeePerGas,
-              gasUnits: inferGasEstimate(query.estimate),
+              gasUnits: query.gasUnits,
             };
           });
         }
 
         return okAsync({
+          requestKey: query.requestKey,
           chain: never('Expected chain'),
           gasPrice: 0n,
           gasUnits: 0n,
@@ -251,7 +272,11 @@ function createNetworkFeeAmount(
 }
 
 /**
- * Fetch the network fee for an ActivityItem or estimates networkf feed for a preview action.
+ * Fetch an activity's network fee or estimate a single action or same-chain plan.
+ * Plan estimates sum fixed action budgets (including supply/repay approvals).
+ * Any additional affordability margin is applied by the consumer.
+ * These are rough budgets for separate transactions, not simulations or wallet-batch quotes.
+ * Native token transfers and chain-specific data fees are not included.
  *
  * @experimental This hook is experimental and may be subject to breaking changes.
  */
@@ -267,28 +292,51 @@ export const useNetworkFee: UseNetworkFee = (({
   suspense?: boolean;
 }): SuspendableResult<NativeAmount, UnexpectedError> => {
   const [fetchDetails, details] = useExecutionDetails();
+  const preparation = prepareExecution(query);
+  const request = preparation.isOk() ? preparation.value : undefined;
+  const preparationError = preparation.isErr() ? preparation.error : undefined;
+  const chainId = request
+    ? 'activity' in request
+      ? request.activity.chain.chainId
+      : request.chainId
+    : undefined;
+  const timestamp =
+    request && 'activity' in request ? request.activity.timestamp : undefined;
+  const requestKey = request
+    ? 'activity' in request
+      ? `${chainId}:${request.activity.txHash}`
+      : `${chainId}:${request.gasUnits}`
+    : undefined;
+  const lastRequestedKey = useRef<string | undefined>(undefined);
+  const hasCurrentRequest = lastRequestedKey.current === requestKey;
+  const hasCurrentDetails = details.data?.requestKey === requestKey;
 
   const rate = useExchangeRate({
     from: {
-      native: inferChainId(query),
+      native: chainId,
     },
     to: currency,
-    at: inferTimestampForExchangeRateLookup(query),
-    pause,
+    at: timestamp,
+    pause: pause || !request,
     ...(suspense ? { suspense } : {}),
   });
   const metadata = rate.metadata;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: query omitted since it's usually a literal object that changes at every render
+  // biome-ignore lint/correctness/useExhaustiveDependencies: requestKey captures the inputs that affect this fixed estimate
   useEffect(() => {
-    if (pause || details.called || !query) return;
+    if (pause || !request || !requestKey || details.loading) return;
+    if (details.called && lastRequestedKey.current === requestKey) return;
+    lastRequestedKey.current = requestKey;
+    void fetchDetails({ ...request, requestKey });
+  }, [fetchDetails, pause, details.called, details.loading, requestKey]);
 
-    fetchDetails(query);
-  }, [fetchDetails, pause, details.called]);
+  if (preparationError && !pause) {
+    return ReadResult.Failure(preparationError, metadata);
+  }
 
   if (rate.paused) {
     return ReadResult.Paused(
-      details.data && rate.data
+      hasCurrentDetails && details.data && rate.data
         ? createNetworkFeeAmount(details.data, rate.data)
         : undefined,
       rate.error ? rate.error : undefined,
@@ -296,7 +344,12 @@ export const useNetworkFee: UseNetworkFee = (({
     );
   }
 
-  if (!details.called || details.loading || rate.loading) {
+  if (
+    !hasCurrentRequest ||
+    !details.called ||
+    details.loading ||
+    rate.loading
+  ) {
     return ReadResult.Loading(metadata);
   }
 
@@ -308,7 +361,7 @@ export const useNetworkFee: UseNetworkFee = (({
   }
 
   invariant(
-    details.data && rate.data,
+    hasCurrentDetails && details.data && rate.data,
     'Expected receipt, chain, and rate data',
   );
 
