@@ -322,5 +322,6 @@ export const rpcErrors = {
   unknownBundle: { code: 5730, message: 'Unknown bundle id' },
   safeMobileNotFound: { code: -32000, message: 'Transaction not found' },
   userRejected: { code: 4001, message: 'User rejected the request' },
+  atomicityNotSupported: { code: 5760, message: 'Atomicity not supported' },
   transport: { code: -32000, message: 'Transport error' },
 } as const;
