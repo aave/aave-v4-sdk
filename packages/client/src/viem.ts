@@ -29,6 +29,7 @@ import {
 } from '@aave/types';
 import {
   type Account,
+  BaseError,
   createClient,
   custom,
   defineChain,
@@ -38,7 +39,6 @@ import {
   type ReplacementReason,
   type RpcError,
   SwitchChainError,
-  TransactionExecutionError,
   type TransactionReceipt,
   type Transport,
   UserRejectedRequestError,
@@ -48,16 +48,18 @@ import {
 } from 'viem';
 import {
   estimateGas as estimateGasWithViem,
+  sendCalls as sendCallsWithViem,
   sendTransaction as sendTransactionWithViem,
   waitForTransactionReceipt,
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
 import { supportsPermit } from './adapters';
-import type { TransactionBatch } from './batch';
+import { type TransactionBatch, toBatch } from './batch';
 import { type CallsStatusOutcome, trackCallsStatus } from './callsStatus';
 import { nativeTokenInfo } from './nativeAsset';
 import type {
   ExecutionPlanHandler,
+  SendWithOptions,
   SignTypedDataError,
   TransactionResult,
   TypedData,
@@ -283,21 +285,21 @@ function sendEip1559Transaction(
           chain: walletClient.chain,
           gas,
         }),
-        (err) => {
-          if (err instanceof TransactionExecutionError) {
-            const rejected = err.walk(
-              (err) => err instanceof UserRejectedRequestError,
-            );
-
-            if (rejected) {
-              return CancelError.from(rejected);
-            }
-          }
-          return SigningError.from(err);
-        },
+        toSendError,
       ),
     )
     .map(txHash);
+}
+
+function toSendError(err: unknown): CancelError | SigningError {
+  if (err instanceof BaseError) {
+    const rejected = err.walk((err) => err instanceof UserRejectedRequestError);
+
+    if (rejected) {
+      return CancelError.from(rejected);
+    }
+  }
+  return SigningError.from(err);
 }
 
 function isWalletClientWithAccount(
@@ -319,6 +321,39 @@ export function sendTransaction(
   );
 
   return sendEip1559Transaction(walletClient, request);
+}
+
+/**
+ * Sends the batch as one atomic `wallet_sendCalls` request. The wallet
+ * estimates gas for the whole batch: estimating a call on its own would revert
+ * when it depends on an earlier one (e.g. an approval).
+ *
+ * A wallet that can't honour atomicity fails like any other wallet error.
+ *
+ * @internal
+ */
+export function sendBatch(
+  walletClient: WalletClient,
+  batch: TransactionBatch,
+): ResultAsync<SubmissionId, CancelError | SigningError> {
+  invariant(
+    isWalletClientWithAccount(walletClient),
+    'Wallet client with account is required',
+  );
+
+  return ResultAsync.fromPromise(
+    sendCallsWithViem(walletClient, {
+      account: walletClient.account,
+      chain: walletClient.chain,
+      calls: batch.transactions.map((request) => ({
+        to: request.to,
+        data: request.data,
+        value: BigInt(request.value),
+      })),
+      forceAtomic: true,
+    }),
+    toSendError,
+  ).map(({ id }) => submissionId(id));
 }
 
 /**
@@ -660,10 +695,27 @@ function sendTransactionAndWait(
   );
 }
 
+function sendBatchAndWait(walletClient: WalletClient, batch: TransactionBatch) {
+  return sendBatch(walletClient, batch).andThen((id) =>
+    waitForTransactionResult(walletClient, batch, id),
+  );
+}
+
 function executePlan(
   walletClient: WalletClient,
   result: ExecutionPlan,
+  options: SendWithOptions = {},
 ): ReturnType<ExecutionPlanHandler> {
+  const batch = options.batch ? toBatch(result) : null;
+
+  if (batch) {
+    return canBatch(walletClient, { chainId: batch.chainId }).andThen((ok) =>
+      ok
+        ? sendBatchAndWait(walletClient, batch)
+        : executePlan(walletClient, result),
+    );
+  }
+
   switch (result.__typename) {
     case 'TransactionRequest':
       return sendTransactionAndWait(walletClient, result);
@@ -703,18 +755,31 @@ function executePlan(
 export function sendWith(walletClient: WalletClient): ExecutionPlanHandler;
 /**
  * Sends execution plan transactions using the provided wallet client.
+ *
+ * With `{ batch: true }`, a plan with two or more transactions (e.g. an
+ * approval and the action) goes out as one atomic `wallet_sendCalls` prompt
+ * when the wallet already supports it (see {@link canBatch}). Otherwise the
+ * transactions are sent one by one.
+ *
+ * ```ts
+ * const result = await supply(client, request).andThen((plan) =>
+ *   sendWith(walletClient, plan, { batch: true }),
+ * );
+ * ```
  */
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
   result: T,
+  options?: SendWithOptions,
 ): ReturnType<ExecutionPlanHandler<T>>;
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
   result?: T,
+  options?: SendWithOptions,
 ): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
   return result
-    ? executePlan(walletClient, result)
-    : executePlan.bind(null, walletClient);
+    ? executePlan(walletClient, result, options)
+    : (plan: T) => executePlan(walletClient, plan);
 }
 
 /**

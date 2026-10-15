@@ -58,6 +58,15 @@ export type ExecutionPlanHandler<T extends ExecutionPlan = ExecutionPlan> = (
   result: T,
 ) => ResultAsync<TransactionResult, SendWithError>;
 
+export type SendWithOptions = {
+  /**
+   * Send a multi-transaction plan as one atomic batch when the wallet supports it.
+   *
+   * @defaultValue false
+   */
+  batch?: boolean;
+};
+
 export type SignTypedDataError = CancelError | SigningError;
 
 /**

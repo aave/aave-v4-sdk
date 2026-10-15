@@ -1,5 +1,6 @@
 import {
   CancelError,
+  SigningError,
   SubmissionUnresolvedError,
   TransactionError,
   UnexpectedError,
@@ -1008,6 +1009,150 @@ describe(`Given the viem '${waitForTransactionResult.name}' function with a batc
         submissionId: batchId,
         chainId: testChainId,
       });
+    });
+  });
+});
+
+describe(`Given the viem '${sendWith.name}' function with { batch: true }`, () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const approval: TransactionRequest = {
+    ...request,
+    to: contract,
+    data: '0x01' as BlockchainData,
+  };
+  const plan = {
+    __typename: 'Erc20ApprovalRequired',
+    approvals: [{ byTransaction: approval }],
+    originalTransaction: request,
+  } as unknown as Erc20ApprovalRequired;
+
+  const batchId = `0x${'c'.repeat(64)}`;
+  const supported = {
+    result: { '0x1': { atomic: { status: 'supported' } } },
+  };
+
+  describe('When the wallet supports atomic batches', () => {
+    it('Then it sends the approval and the action as one atomic wallet_sendCalls', async () => {
+      const sent: unknown[] = [];
+      const { provider, walletClient } = setup({
+        wallet_getCapabilities: supported,
+        wallet_sendCalls: (params) => {
+          sent.push(params);
+          return { result: { id: batchId } };
+        },
+        wallet_getCallsStatus: executedStatus(executed),
+      });
+
+      const result = track(sendWith(walletClient, plan, { batch: true }));
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrap()).toEqual({
+        txHash: executed,
+        operations: request.operations,
+      });
+      expect(sent).toMatchObject([
+        [
+          {
+            atomicRequired: true,
+            calls: [
+              { to: approval.to, data: approval.data },
+              { to: request.to, data: request.data },
+            ],
+          },
+        ],
+      ]);
+      expect(provider.calls('eth_sendTransaction')).toBe(0);
+      expect(provider.calls('eth_estimateGas')).toBe(0);
+    });
+  });
+
+  describe("When the wallet only reports atomic 'ready'", () => {
+    it('Then it sends the transactions one by one', async () => {
+      const { provider, walletClient } = setup({
+        wallet_getCapabilities: {
+          result: { '0x1': { atomic: { status: 'ready' } } },
+        },
+        eth_sendTransaction: [{ result: submitted }, { result: executed }],
+        eth_getTransactionReceipt: noReceipt,
+        wallet_getCallsStatus: (params) => {
+          const [id] = params as [string];
+          return executedStatus(id as HexString);
+        },
+      });
+
+      const result = track(sendWith(walletClient, plan, { batch: true }));
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
+      expect(provider.calls('wallet_sendCalls')).toBe(0);
+      expect(provider.calls('eth_sendTransaction')).toBe(2);
+    });
+  });
+
+  describe('When the plan has a single transaction', () => {
+    it('Then it sends it as today, without checking capabilities', async () => {
+      const { provider, walletClient } = setup({
+        eth_sendTransaction: { result: submitted },
+        eth_getTransactionReceipt: noReceipt,
+        wallet_getCallsStatus: executedStatus(executed),
+      });
+
+      const result = track(sendWith(walletClient, request, { batch: true }));
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrap().txHash).toBe(executed);
+      expect(provider.calls('wallet_getCapabilities')).toBe(0);
+    });
+  });
+
+  describe('When batching is not requested', () => {
+    it('Then it never checks capabilities', async () => {
+      const { provider, walletClient } = setup({
+        eth_sendTransaction: { error: rpcErrors.userRejected },
+      });
+
+      const result = track(sendWith(walletClient, plan));
+      await vi.advanceTimersByTimeAsync(1_000);
+
+      expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(CancelError);
+      expect(provider.calls('wallet_getCapabilities')).toBe(0);
+    });
+  });
+
+  describe('When the user rejects the batch', () => {
+    it(`Then it fails with a ${CancelError.name}`, async () => {
+      const { provider, walletClient } = setup({
+        wallet_getCapabilities: supported,
+        wallet_sendCalls: { error: rpcErrors.userRejected },
+      });
+
+      const result = track(sendWith(walletClient, plan, { batch: true }));
+      await vi.advanceTimersByTimeAsync(1_000);
+
+      expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(CancelError);
+      expect(provider.calls('wallet_getCallsStatus')).toBe(0);
+    });
+  });
+
+  describe('When the wallet refuses atomicity at send time', () => {
+    it(`Then it fails with a ${SigningError.name}, without falling back`, async () => {
+      const { provider, walletClient } = setup({
+        wallet_getCapabilities: supported,
+        wallet_sendCalls: { error: rpcErrors.atomicityNotSupported },
+      });
+
+      const result = track(sendWith(walletClient, plan, { batch: true }));
+      await vi.advanceTimersByTimeAsync(1_000);
+
+      expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(SigningError);
+      expect(provider.calls('eth_sendTransaction')).toBe(0);
     });
   });
 });
