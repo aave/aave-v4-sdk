@@ -1,0 +1,29 @@
+.changeset/position-swap-flags.md
+  s_61172960321b7d::t_f2f6ce4928bb49 1-7
+packages/graphql/schema.graphql
+  s_61172960321b7d::t_65459589d90754 1853-1867,2341-2351,3579-3582,3897-3898
+packages/graphql/src/fragments/reserve.ts
+  s_61172960321b7d::t_01f8f234a8d356 140-148
+packages/graphql/src/fragments/user.ts
+  s_61172960321b7d::t_72ab36d0b544ee 38,61
+packages/graphql/src/graphql-env.d.ts
+  s_61172960321b7d::t_7f635aedea6cde 234,277,439,472
+packages/graphql/src/schema.json
+  s_61172960321b7d::t_5bcbf5b6e11ae0 9718-9745,13623-13633,14667-14677,15138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cafb41f1629a42b0617d60f0f5d17f37ec6a56b9",
+  "prompts": {},
+  "sessions": {
+    "s_61172960321b7d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "136941e8-ff8b-4071-9de5-2c4640deb849",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
