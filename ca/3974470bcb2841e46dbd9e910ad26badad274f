@@ -1,0 +1,26 @@
+packages/client/src/testing-wallet.ts
+  s_45b3af06ef827c::t_7353f220e544a5 325
+packages/client/src/types.ts
+  s_45b3af06ef827c::t_8a7f1dc5f7a5ff 61-69
+packages/client/src/viem.test.ts
+  s_45b3af06ef827c::t_7353f220e544a5 3,1015-1157
+  s_45b3af06ef827c::t_d26d0a7d16dfda 1158
+packages/client/src/viem.ts
+  s_45b3af06ef827c::t_8a7f1dc5f7a5ff 32,51,57,62,288,294-304,326-358,698-703,707,709-718,758-768,773,778,781-782
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ca3974470bcb2841e46dbd9e910ad26badad274f",
+  "prompts": {},
+  "sessions": {
+    "s_45b3af06ef827c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0bf09e5-2fd8-4644-ba06-26989fce360a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
