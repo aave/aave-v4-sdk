@@ -13,6 +13,7 @@ import type {
   TransactionRequest,
 } from '@aave/graphql';
 import {
+  type ChainId,
   chainId,
   errAsync,
   invariant,
@@ -31,6 +32,7 @@ import {
   custom,
   defineChain,
   isAddressEqual,
+  numberToHex,
   type ProviderRpcError,
   type ReplacementReason,
   type RpcError,
@@ -186,6 +188,66 @@ export function ensureChain(
       return err.asResultAsync();
     });
   });
+}
+
+/**
+ * Chain key under which EIP-5792 wallets report capabilities that apply to every chain.
+ */
+const ALL_CHAINS = 0;
+
+function atomicStatusOf(capabilities: unknown): unknown {
+  return isObject(capabilities) &&
+    isObject(capabilities.atomic) &&
+    'status' in capabilities.atomic
+    ? capabilities.atomic.status
+    : undefined;
+}
+
+/**
+ * Checks whether the wallet can send an atomic batch on the given chain
+ * without further user action.
+ *
+ * Only `atomic.status === 'supported'` counts. `'ready'` means the wallet could
+ * upgrade the account (e.g. an EIP-7702 delegation) but would prompt the user
+ * for it, so it resolves to `false` like an unsupported or failing wallet.
+ *
+ * ```ts
+ * const result = await canBatch(walletClient, { chainId: chainId(1) });
+ * // result.value: boolean
+ * ```
+ *
+ * @param walletClient - The wallet client to check.
+ * @param options - The chain to check.
+ * @returns Never fails.
+ */
+export function canBatch(
+  walletClient: WalletClient,
+  { chainId: id }: { chainId: ChainId },
+): ResultAsync<boolean, never> {
+  if (!walletClient.account) {
+    return okAsync(false);
+  }
+
+  return ResultAsync.fromPromise(
+    walletClient.request({
+      method: 'wallet_getCapabilities',
+      params: [walletClient.account.address, [numberToHex(id)]],
+    }),
+    (err) => err,
+  )
+    .map((capabilities) => {
+      const byChain = new Map(
+        Object.entries(capabilities).map(
+          ([key, value]) => [Number(key), value] as const,
+        ),
+      );
+      const status =
+        atomicStatusOf(byChain.get(id)) ??
+        atomicStatusOf(byChain.get(ALL_CHAINS));
+
+      return status === 'supported';
+    })
+    .orElse(() => okAsync(false));
 }
 
 function estimateGas(

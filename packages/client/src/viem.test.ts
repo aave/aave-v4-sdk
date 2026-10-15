@@ -29,6 +29,7 @@ import {
   walletClientFor,
 } from './testing-wallet';
 import {
+  canBatch,
   INDIRECT_RECEIPT_TIMEOUT,
   SUBMISSION_TIMEOUT,
   sendWith,
@@ -799,5 +800,103 @@ describe(`Given the viem '${sendWith.name}' handler`, () => {
       expect(provider.calls('wallet_getCallsStatus')).toBe(0);
       expect(provider.calls('eth_getTransactionReceipt')).toBe(0);
     });
+  });
+});
+
+describe(`Given the viem '${canBatch.name}' function`, () => {
+  const capabilities = (byChain: Record<string, unknown>) => ({
+    result: byChain,
+  });
+  const atomic = (status: string) => ({ atomic: { status } });
+
+  async function check(entry: ScriptEntry) {
+    const { provider, walletClient } = setup({
+      wallet_getCapabilities: entry,
+    });
+    const result = await canBatch(walletClient, { chainId: testChainId });
+    return { provider, value: result._unsafeUnwrap() };
+  }
+
+  describe("When the wallet reports atomic 'supported' for the chain", () => {
+    it('Then it resolves to true', async () => {
+      const { value } = await check(
+        capabilities({ '0x1': atomic('supported') }),
+      );
+
+      expect(value).toBe(true);
+    });
+  });
+
+  describe("When the wallet reports atomic 'supported' for all chains (0x0)", () => {
+    it('Then it resolves to true', async () => {
+      const { value } = await check(
+        capabilities({ '0x0': atomic('supported') }),
+      );
+
+      expect(value).toBe(true);
+    });
+  });
+
+  describe('When the chain entry overrides the all-chains entry', () => {
+    it('Then the chain entry wins', async () => {
+      const { value } = await check(
+        capabilities({
+          '0x0': atomic('supported'),
+          '0x1': atomic('unsupported'),
+        }),
+      );
+
+      expect(value).toBe(false);
+    });
+  });
+
+  describe.each(['ready', 'unsupported'])(
+    "When the wallet reports atomic '%s'",
+    (status) => {
+      it('Then it resolves to false', async () => {
+        const { value } = await check(capabilities({ '0x1': atomic(status) }));
+
+        expect(value).toBe(false);
+      });
+    },
+  );
+
+  describe('When the wallet reports capabilities for another chain only', () => {
+    it('Then it resolves to false', async () => {
+      const { value } = await check(
+        capabilities({ '0x2105': atomic('supported') }),
+      );
+
+      expect(value).toBe(false);
+    });
+  });
+
+  describe('When the wallet reports no atomic capability', () => {
+    it('Then it resolves to false', async () => {
+      const { value } = await check(capabilities({ '0x1': {} }));
+
+      expect(value).toBe(false);
+    });
+  });
+
+  describe.each([
+    ['does not support EIP-5792', rpcErrors.methodNotFound],
+    ['fails', rpcErrors.transport],
+  ])('When the wallet %s', (_, error) => {
+    it('Then it resolves to false', async () => {
+      const { value } = await check({ error });
+
+      expect(value).toBe(false);
+    });
+  });
+
+  it('Then it asks for the given chain only', async () => {
+    const params: unknown[] = [];
+    await check((p) => {
+      params.push(p);
+      return capabilities({ '0x1': atomic('supported') });
+    });
+
+    expect(params).toEqual([[account, ['0x1']]]);
   });
 });
