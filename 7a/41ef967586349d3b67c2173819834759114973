@@ -1,0 +1,36 @@
+packages/react/src/privy.test.ts
+  s_45b3af06ef827c::t_70b57a371e2eea 4,77,79,183-214
+  s_45b3af06ef827c::t_01098368cab146 215-216
+packages/react/src/viem/adapters.test.ts
+  s_45b3af06ef827c::t_70b57a371e2eea 1,6-10,21,45,107-132
+  s_45b3af06ef827c::t_acad38f7732f8c 133
+packages/react/src/viem/send.ts
+  s_45b3af06ef827c::t_7c9b837a3495af 1-37
+packages/react/src/viem/adapters.ts
+  s_45b3af06ef827c::t_e703240a05e98f 3,13,36-37,42,46,68
+  s_45b3af06ef827c::t_7c9b837a3495af 7,17
+packages/react/src/privy.ts
+  s_45b3af06ef827c::t_7c9b837a3495af 5,9,25,29,60-61,63,68,94
+packages/react/src/index.ts
+  s_45b3af06ef827c::t_e703240a05e98f 15
+packages/react/src/helpers/writes.ts
+  s_45b3af06ef827c::t_e703240a05e98f 1
+  s_45b3af06ef827c::t_066a3e9e8dd1af 83-91
+  s_45b3af06ef827c::t_d291863bcfbc88 82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7a41ef967586349d3b67c2173819834759114973",
+  "prompts": {},
+  "sessions": {
+    "s_45b3af06ef827c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0bf09e5-2fd8-4644-ba06-26989fce360a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
