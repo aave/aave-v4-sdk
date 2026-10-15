@@ -1,25 +1,20 @@
 import type {
   SignTypedDataError,
+  TransactionBatch,
   TypedData,
   UnexpectedError,
 } from '@aave/client';
-import {
-  ensureChain,
-  sendTransaction,
-  signTypedDataWith,
-  toViemChain,
-  waitForTransactionResult,
-} from '@aave/client/viem';
+import { ensureChain, signTypedDataWith, toViemChain } from '@aave/client/viem';
 import type { TransactionRequest } from '@aave/graphql';
 import { invariant, type Signature } from '@aave/types';
 import { createWalletClient, custom, type WalletClient } from 'viem';
 import {
-  PendingTransaction,
   type UseAsyncTask,
-  type UseSendTransactionResult,
+  type UseSendTransactionOrBatchResult,
   useAsyncTask,
 } from '../helpers';
 import { useChainAction } from '../misc';
+import { send } from './send';
 
 /**
  * A hook that provides a way to send Aave transactions using a viem WalletClient instance.
@@ -38,15 +33,17 @@ import { useChainAction } from '../misc';
  * `SubmissionUnresolvedError`. It may still go through, so check
  * `SubmissionUnresolvedError.is(error)` and do not resend it automatically.
  *
+ * It also sends a `TransactionBatch` as one atomic `wallet_sendCalls` prompt.
+ *
  * @param walletClient - The wallet client to use for sending transactions.
  */
 export function useSendTransaction(
   walletClient: WalletClient | null | undefined,
-): UseSendTransactionResult {
+): UseSendTransactionOrBatchResult {
   const [fetchChain] = useChainAction();
 
   return useAsyncTask(
-    (request: TransactionRequest) => {
+    (request: TransactionRequest | TransactionBatch) => {
       invariant(
         walletClient,
         'Expected a WalletClient to handle the operation result.',
@@ -68,14 +65,7 @@ export function useSendTransaction(
                 }),
               }),
             )
-            .andThen((walletClient) =>
-              sendTransaction(walletClient, request).map(
-                (hash) =>
-                  new PendingTransaction(() =>
-                    waitForTransactionResult(walletClient, request, hash),
-                  ),
-              ),
-            ),
+            .andThen((walletClient) => send(walletClient, request)),
         );
     },
     [walletClient, fetchChain],

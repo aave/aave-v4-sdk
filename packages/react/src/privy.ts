@@ -2,14 +2,11 @@ import {
   CancelError,
   SigningError,
   type SignTypedDataError,
+  type TransactionBatch,
   type TypedData,
   UnexpectedError,
 } from '@aave/client';
-import {
-  sendTransaction,
-  toViemChain,
-  waitForTransactionResult,
-} from '@aave/client/viem';
+import { toViemChain } from '@aave/client/viem';
 import type { TransactionRequest } from '@aave/graphql';
 import {
   invariant,
@@ -24,12 +21,12 @@ import {
 } from '@privy-io/react-auth';
 import { createWalletClient, custom } from 'viem';
 import {
-  PendingTransaction,
   type UseAsyncTask,
-  type UseSendTransactionResult,
+  type UseSendTransactionOrBatchResult,
   useAsyncTask,
 } from './helpers';
 import { useChainAction } from './misc';
+import { send } from './viem/send';
 
 function isUserRejection(err: unknown): boolean {
   if (err && typeof err === 'object') {
@@ -60,13 +57,15 @@ function isUserRejection(err: unknown): boolean {
  * If it is not on-chain after 30 minutes, it fails with a
  * `SubmissionUnresolvedError`. It may still go through, so check
  * `SubmissionUnresolvedError.is(error)` and do not resend it automatically.
+ *
+ * It also sends a `TransactionBatch` as one atomic `wallet_sendCalls` prompt.
  */
-export function useSendTransaction(): UseSendTransactionResult {
+export function useSendTransaction(): UseSendTransactionOrBatchResult {
   const { wallets } = useWallets();
   const [fetchChain] = useChainAction();
 
   return useAsyncTask(
-    (request: TransactionRequest) => {
+    (request: TransactionRequest | TransactionBatch) => {
       const wallet = wallets.find((wallet) => wallet.address === request.from);
 
       invariant(
@@ -92,14 +91,7 @@ export function useSendTransaction(): UseSendTransactionResult {
                 transport: custom(provider),
               }),
             )
-            .andThen((walletClient) =>
-              sendTransaction(walletClient, request).map(
-                (hash) =>
-                  new PendingTransaction(() =>
-                    waitForTransactionResult(walletClient, request, hash),
-                  ),
-              ),
-            ),
+            .andThen((walletClient) => send(walletClient, request)),
         );
     },
     [wallets, fetchChain],

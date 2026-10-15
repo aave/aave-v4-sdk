@@ -12,6 +12,7 @@ export type {
   SendTransactionError,
   TransactionHandlerOptions,
   UseAsyncTask,
+  UseSendTransactionOrBatchResult,
   UseSendTransactionResult,
 } from './helpers';
 export * from './hubs';
