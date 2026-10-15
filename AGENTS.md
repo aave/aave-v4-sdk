@@ -29,6 +29,7 @@ pnpm vitest --run --project <project> <file> -t "<test-name>"  # Specific test
 - **Actions** (`packages/client/src/actions/`): Imperative functions for GraphQL queries
 - **Hooks** (`packages/react/src/`): React hooks wrapping actions with state management
 - **Imperative read hooks** (`use[X]Action`): Use `cache-first` policy, except `usePreviewAction`, `useExchangeRateAction`, and swap quote hooks which use `network-only`
+- **Domain terms** (Smart Account, Submission, Execution, …): see `CONTEXT.md`
 
 When updating GraphQL queries, update corresponding actions. Only update hooks if explicitly requested.
 

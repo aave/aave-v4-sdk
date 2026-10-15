@@ -28,7 +28,6 @@ import {
   type TypedDataField,
 } from 'ethers';
 import { supportsPermit } from './adapters';
-import { resolveTxHash } from './safe';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -102,31 +101,24 @@ export function waitForTransactionResult(
   request: TransactionRequest,
   response: TransactionResponse,
 ): ResultAsync<TransactionResult, TransactionError | UnexpectedError> {
-  return ResultAsync.fromPromise(resolveTxHash(txHash(response.hash)), (err) =>
+  return ResultAsync.fromPromise(response.wait(), (err) =>
     UnexpectedError.from(err),
-  ).andThen((resolvedHash) =>
-    ResultAsync.fromPromise(
-      resolvedHash !== txHash(response.hash)
-        ? nonNullable(response.provider).waitForTransaction(resolvedHash)
-        : response.wait(),
-      (err) => UnexpectedError.from(err),
-    ).andThen((receipt) => {
-      const hash = txHash(nonNullable(receipt?.hash));
+  ).andThen((receipt) => {
+    const hash = txHash(nonNullable(receipt?.hash));
 
-      if (receipt?.status === 0) {
-        return errAsync(
-          TransactionError.new({
-            txHash: hash,
-            request,
-          }),
-        );
-      }
-      return okAsync({
-        txHash: hash,
-        operations: request.operations,
-      });
-    }),
-  );
+    if (receipt?.status === 0) {
+      return errAsync(
+        TransactionError.new({
+          txHash: hash,
+          request,
+        }),
+      );
+    }
+    return okAsync({
+      txHash: hash,
+      operations: request.operations,
+    });
+  });
 }
 
 function sendTransactionAndWait(
@@ -174,6 +166,11 @@ function executePlan(
 
 /**
  * Creates an execution plan handler that sends transactions using the provided ethers signer.
+ *
+ * Smart Accounts are not fully supported. If the wallet returns its own id
+ * instead of an on-chain hash (e.g. a Safe `safeTxHash`), ethers waits for that
+ * id to appear on-chain, which may never happen (e.g. Safe mobile over
+ * WalletConnect). Use the viem integration for Smart Accounts.
  */
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   signer: Signer,
