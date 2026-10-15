@@ -4,7 +4,11 @@ import {
   TransactionError,
   UnexpectedError,
 } from '@aave/core';
-import type { Erc20ApprovalRequired, TransactionRequest } from '@aave/graphql';
+import {
+  type Erc20ApprovalRequired,
+  OperationType,
+  type TransactionRequest,
+} from '@aave/graphql';
 import {
   type BlockchainData,
   chainId,
@@ -12,9 +16,11 @@ import {
   type HexString,
   type Result,
   type ResultAsync,
+  submissionId,
   txHash,
 } from '@aave/types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { TransactionBatch } from './batch';
 import {
   after,
   chainScript,
@@ -898,5 +904,110 @@ describe(`Given the viem '${canBatch.name}' function`, () => {
     });
 
     expect(params).toEqual([[account, ['0x1']]]);
+  });
+});
+
+describe(`Given the viem '${waitForTransactionResult.name}' function with a batch`, () => {
+  const batchId = submissionId(`0x${'c'.repeat(64)}`);
+  const approvalHash = txHash(`0x${'3'.repeat(64)}`);
+  const batch: TransactionBatch = {
+    __typename: 'TransactionBatch',
+    chainId: testChainId,
+    from: account,
+    transactions: [{ ...request, to: contract }, request],
+    operations: [OperationType.SpokeSupply],
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('When the batch executes', () => {
+    it("Then it resolves with the last receipt's hash and the batch operations, without polling receipts", async () => {
+      const { provider, walletClient } = setup({
+        wallet_getCallsStatus: [
+          pending,
+          {
+            result: makeCallsStatus({
+              status: 200,
+              receipts: [
+                { hash: approvalHash, status: 'success' },
+                { hash: executed, status: 'success' },
+              ],
+            }),
+          },
+        ],
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, batch, batchId),
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(result.current?._unsafeUnwrap()).toEqual({
+        txHash: executed,
+        operations: batch.operations,
+      });
+      expect(provider.calls('eth_getTransactionReceipt')).toBe(0);
+    });
+  });
+
+  describe('When the batch reverts', () => {
+    it(`Then it fails with a ${TransactionError.name} for the reverted receipt`, async () => {
+      const { walletClient } = setup({
+        wallet_getCallsStatus: {
+          result: makeCallsStatus({
+            status: 500,
+            receipts: [{ hash: executed, status: 'reverted' }],
+          }),
+        },
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, batch, batchId),
+      );
+      await vi.advanceTimersByTimeAsync(1_000);
+
+      const error = result.current?._unsafeUnwrapErr();
+      expect(error).toBeInstanceOf(TransactionError);
+      expect((error as TransactionError).txHash).toBe(executed);
+    });
+  });
+
+  describe('When the wallet drops the batch', () => {
+    it(`Then it fails with a ${CancelError.name}`, async () => {
+      const { walletClient } = setup({
+        wallet_getCallsStatus: { result: makeCallsStatus({ status: 400 }) },
+      });
+
+      const result = track(
+        waitForTransactionResult(walletClient, batch, batchId),
+      );
+      await vi.advanceTimersByTimeAsync(1_000);
+
+      expect(result.current?._unsafeUnwrapErr()).toBeInstanceOf(CancelError);
+    });
+  });
+
+  describe('When the batch never executes', () => {
+    it(`Then it fails with a ${SubmissionUnresolvedError.name} for the batch id`, async () => {
+      const { walletClient } = setup({ wallet_getCallsStatus: pending });
+
+      const result = track(
+        waitForTransactionResult(walletClient, batch, batchId),
+      );
+      await vi.advanceTimersByTimeAsync(SUBMISSION_TIMEOUT + 1_000);
+
+      const error = result.current?._unsafeUnwrapErr();
+      expect(SubmissionUnresolvedError.is(error)).toBe(true);
+      expect(error).toMatchObject({
+        submissionId: batchId,
+        chainId: testChainId,
+      });
+    });
   });
 });

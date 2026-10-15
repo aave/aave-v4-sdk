@@ -21,6 +21,7 @@ import {
   okAsync,
   ResultAsync,
   type Signature,
+  type SubmissionId,
   signatureFrom,
   submissionId,
   type TxHash,
@@ -52,6 +53,7 @@ import {
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
 import { supportsPermit } from './adapters';
+import type { TransactionBatch } from './batch';
 import { type CallsStatusOutcome, trackCallsStatus } from './callsStatus';
 import { nativeTokenInfo } from './nativeAsset';
 import type {
@@ -525,18 +527,62 @@ function trackSubmission(
 }
 
 /**
+ * Waits for a `wallet_sendCalls` batch to settle. The id is the wallet's own,
+ * never an on-chain hash, so there is no receipt to poll.
+ */
+function trackCalls(
+  walletClient: WalletClient,
+  id: SubmissionId,
+): Promise<SubmissionOutcome> {
+  return trackCallsStatus(walletClient, id, {
+    timeout: SUBMISSION_TIMEOUT,
+  }).then((outcome) => {
+    invariant(outcome.status !== 'aborted', 'Batch tracking is never aborted');
+    return outcome;
+  });
+}
+
+type WaitForTransactionResultError =
+  | CancelError
+  | SubmissionUnresolvedError
+  | TransactionError
+  | UnexpectedError;
+
+/**
+ * Settles once the transactions of an execution plan have executed.
+ *
+ * A single transaction is tracked by hash, through its receipt and
+ * `wallet_getCallsStatus` (see `trackSubmission`). A batch is tracked by its
+ * `wallet_sendCalls` id, through `wallet_getCallsStatus` only. Both share
+ * `SUBMISSION_TIMEOUT` and the errors below.
+ *
  * @internal
  */
 export function waitForTransactionResult(
   walletClient: WalletClient,
   request: TransactionRequest,
   initialTxHash: TxHash,
-): ResultAsync<
-  TransactionResult,
-  CancelError | SubmissionUnresolvedError | TransactionError | UnexpectedError
-> {
+): ResultAsync<TransactionResult, WaitForTransactionResultError>;
+export function waitForTransactionResult(
+  walletClient: WalletClient,
+  batch: TransactionBatch,
+  id: SubmissionId,
+): ResultAsync<TransactionResult, WaitForTransactionResultError>;
+export function waitForTransactionResult(
+  walletClient: WalletClient,
+  submitted: TransactionRequest | TransactionBatch,
+  id: TxHash | SubmissionId,
+): ResultAsync<TransactionResult, WaitForTransactionResultError> {
+  const isBatch = submitted.__typename === 'TransactionBatch';
+  // the action, for a batch: what a failure is reported against
+  const request = isBatch
+    ? (submitted.transactions.at(-1) as TransactionRequest)
+    : submitted;
+
   return ResultAsync.fromSafePromise(
-    trackSubmission(walletClient, initialTxHash),
+    isBatch
+      ? trackCalls(walletClient, submissionId(id))
+      : trackSubmission(walletClient, txHash(id)),
   ).andThen((outcome) => {
     switch (outcome.status) {
       case 'receipt': {
@@ -558,9 +604,9 @@ export function waitForTransactionResult(
           return errAsync(transactionError(walletClient.chain, hash, request));
         }
         if (outcome.receipt.status === 'success') {
-          return okAsync({ txHash: hash, operations: request.operations });
+          return okAsync({ txHash: hash, operations: submitted.operations });
         }
-        // A hash other than `initialTxHash` without `replaced` is the
+        // A hash other than the submitted one without `replaced` is the
         // Execution the wallet mapped the Submission to, not a replacement
         return errAsync(transactionError(walletClient.chain, hash, request));
       }
@@ -568,7 +614,7 @@ export function waitForTransactionResult(
       case 'success':
         return okAsync({
           txHash: outcome.txHash,
-          operations: request.operations,
+          operations: submitted.operations,
         });
 
       case 'reverted':
@@ -586,8 +632,8 @@ export function waitForTransactionResult(
       case 'timeout':
         return errAsync(
           SubmissionUnresolvedError.new({
-            submissionId: submissionId(initialTxHash),
-            chainId: request.chainId,
+            submissionId: submissionId(id),
+            chainId: submitted.chainId,
           }),
         );
 
