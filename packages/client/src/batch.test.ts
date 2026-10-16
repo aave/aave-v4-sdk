@@ -82,6 +82,41 @@ describe(`Given the ${toBatch.name} function`, () => {
     });
   });
 
+  describe('When an approval is on another chain than the action', () => {
+    it('Then there is nothing to batch', () => {
+      const elsewhere = makeRequest(token, { chainId: chainId(8453) });
+
+      expect(toBatch(approvalPlan([elsewhere]))).toBeNull();
+    });
+  });
+
+  describe('When an approval is from another account than the action', () => {
+    it('Then there is nothing to batch', () => {
+      const other = makeRequest(token, {
+        from: evmAddress('0x4444444444444444444444444444444444444444'),
+      });
+
+      expect(toBatch(approvalPlan([other]))).toBeNull();
+    });
+  });
+
+  describe('When an approval names the same account in another letter case', () => {
+    it('Then it still batches', () => {
+      const checksummed = evmAddress(
+        '0xAbCdEf0123456789aBcDeF0123456789AbCdEf01',
+      );
+      const approval = makeRequest(token, { from: checksummed });
+      const plan = {
+        ...approvalPlan([approval]),
+        originalTransaction: makeRequest(spoke, {
+          from: evmAddress(checksummed.toLowerCase()),
+        }),
+      } as Erc20ApprovalRequired;
+
+      expect(toBatch(plan)).not.toBeNull();
+    });
+  });
+
   describe('When the plan is an insufficient balance error', () => {
     it('Then there is nothing to batch', () => {
       const plan = {

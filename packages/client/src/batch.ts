@@ -60,7 +60,15 @@ function batchOf(
   prerequisites: TransactionRequest[],
   action: TransactionRequest,
 ): TransactionBatch | null {
-  if (prerequisites.length === 0) {
+  // one batch is sent on one chain from one account
+  if (
+    prerequisites.length === 0 ||
+    prerequisites.some(
+      (tx) =>
+        tx.chainId !== action.chainId ||
+        tx.from.toLowerCase() !== action.from.toLowerCase(),
+    )
+  ) {
     return null;
   }
 
