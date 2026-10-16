@@ -24,6 +24,7 @@ import type {
   ChainsFilter,
   CollateralMetric,
   Currency,
+  ExternalCuratorDetailKind,
   OperationType,
   OrderClass,
   OrderDirection,
@@ -96,6 +97,7 @@ export const graphql = initGraphQLTada<{
     Cursor: Cursor;
     DateTime: Date;
     EvmAddress: EvmAddress;
+    ExternalCuratorDetailKind: ExternalCuratorDetailKind;
     Float: number;
     HealthFactor: BigDecimal;
     HubAssetId: HubAssetId;

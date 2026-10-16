@@ -305,3 +305,17 @@ export enum TokenSwapKind {
    */
   Sell = 'SELL',
 }
+
+/**
+ * The kind of link or fact shown on an external curator's profile.
+ */
+export enum ExternalCuratorDetailKind {
+  /**
+   * The curator's X (Twitter) profile.
+   */
+  X = 'X',
+  /**
+   * The curator's website.
+   */
+  Website = 'WEBSITE',
+}

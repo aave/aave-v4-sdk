@@ -1,3 +1,4 @@
+export * from './curators';
 export * from './hubs';
 export * from './misc';
 export * from './order';

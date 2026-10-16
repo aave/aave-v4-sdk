@@ -8,6 +8,8 @@ import {
   type Chain,
   decodeSpokeId,
   type Erc20Token,
+  type ExternalCurator,
+  type ExternalCuratorQuery,
   encodeHubId,
   encodeReserveId,
   encodeUserPositionId,
@@ -104,6 +106,10 @@ export const exchange = cacheExchange({
     },
     ExchangeAmount: {
       value: transformToBigDecimal,
+    },
+    ExternalCurator: {
+      createdAt: transformToDate,
+      updatedAt: transformToDate,
     },
     AssetPriceSample: {
       price: transformToBigDecimal,
@@ -306,6 +312,14 @@ export const exchange = cacheExchange({
       executableAfter: transformToDate,
     },
     V4Query: {
+      externalCurator: (
+        _,
+        { request }: VariablesOf<typeof ExternalCuratorQuery>,
+      ) => ({
+        __typename: 'ExternalCurator',
+        id: request.id,
+      }),
+
       hub: (_, { request }: VariablesOf<typeof HubQuery>) => {
         if (isHubInputVariant(request.query)) {
           return {
@@ -370,7 +384,9 @@ export const exchange = cacheExchange({
           .inspectFields('V4Query')
           .filter((f) => f.fieldName === 'activities')
           .reduce((set, f) => {
-            const pageRef = cache.resolve('V4Query', f.fieldKey) as string | null;
+            const pageRef = cache.resolve('V4Query', f.fieldKey) as
+              | string
+              | null;
             if (!pageRef) return set;
 
             const itemRefs = cache.resolve(pageRef, 'items') as string[] | null;
@@ -426,6 +442,7 @@ export const exchange = cacheExchange({
     // URQL SystemFields & DataFields doesn't play ball with the bigint scalar (BoostedRate.userCounts field),
     // hence the type assertion to BoostedRateId which is a string alias of the id
     BoostedRate: (data) => data.id as BoostedRateId,
+    ExternalCurator: (data: ExternalCurator) => data.id,
     Hub: (data: Hub) => data.id,
     HubAsset: (data: HubAsset) => data.id,
     LeverageActivity: (data: LeverageActivity) => data.id,
@@ -476,6 +493,7 @@ export const exchange = cacheExchange({
     BorrowSwap: () => null,
     BorrowSwapQuoteResult: () => null,
     CollateralFactorVariation: () => null,
+    CuratorSummary: () => null,
     DecimalNumber: () => null,
     DecimalNumberWithChange: () => null,
     DomainData: () => null,
@@ -485,6 +503,7 @@ export const exchange = cacheExchange({
     ExchangeAmount: () => null,
     ExchangeAmountVariation: () => null,
     ExchangeAmountWithChange: () => null,
+    ExternalCuratorDetail: () => null,
     ForkTopUpResponse: () => null,
     HealthFactorError: () => null,
     HealthFactorVariation: () => null,
