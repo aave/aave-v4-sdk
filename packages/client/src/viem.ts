@@ -309,16 +309,31 @@ function isWalletClientWithAccount(
 }
 
 /**
+ * Asserts the wallet client can send on `chainId`: it needs an account and
+ * must be on that chain, since the request is sent on `walletClient.chain`.
+ */
+function assertCanSendOn(
+  walletClient: WalletClient,
+  chainId: ChainId,
+): asserts walletClient is WalletClient<Transport, ViemChain, Account> {
+  invariant(
+    isWalletClientWithAccount(walletClient),
+    'Wallet client with account is required',
+  );
+  invariant(
+    walletClient.chain?.id === chainId,
+    `Wallet client must be on chain ${chainId}, but is on ${walletClient.chain?.id ?? 'no chain'}`,
+  );
+}
+
+/**
  * @internal
  */
 export function sendTransaction(
   walletClient: WalletClient,
   request: TransactionRequest,
 ): ResultAsync<TxHash, CancelError | SigningError> {
-  invariant(
-    isWalletClientWithAccount(walletClient),
-    'Wallet client with account is required',
-  );
+  assertCanSendOn(walletClient, request.chainId);
 
   return sendEip1559Transaction(walletClient, request);
 }
@@ -336,10 +351,7 @@ export function sendBatch(
   walletClient: WalletClient,
   batch: TransactionBatch,
 ): ResultAsync<SubmissionId, CancelError | SigningError> {
-  invariant(
-    isWalletClientWithAccount(walletClient),
-    'Wallet client with account is required',
-  );
+  assertCanSendOn(walletClient, batch.chainId);
 
   return ResultAsync.fromPromise(
     sendCallsWithViem(walletClient, {

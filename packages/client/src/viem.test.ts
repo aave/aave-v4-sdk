@@ -1156,3 +1156,39 @@ describe(`Given the viem '${sendWith.name}' function with { batch: true }`, () =
     });
   });
 });
+
+describe(`Given the viem '${sendWith.name}' function with a plan on another chain`, () => {
+  const base = chainId(8453);
+  const elsewhere: TransactionRequest = { ...request, chainId: base };
+  const plan = {
+    __typename: 'Erc20ApprovalRequired',
+    approvals: [{ byTransaction: { ...elsewhere, to: contract } }],
+    originalTransaction: elsewhere,
+  } as unknown as Erc20ApprovalRequired;
+
+  describe('When it sends a single transaction', () => {
+    it('Then it fails before sending anything', () => {
+      const { provider, walletClient } = setup({});
+
+      expect(() => sendWith(walletClient, elsewhere)).toThrow(
+        'Wallet client must be on chain 8453, but is on 1',
+      );
+      expect(provider.calls('eth_sendTransaction')).toBe(0);
+    });
+  });
+
+  describe('When it sends a batch', () => {
+    it('Then it fails before sending anything', async () => {
+      const { provider, walletClient } = setup({
+        wallet_getCapabilities: {
+          result: { '0x2105': { atomic: { status: 'supported' } } },
+        },
+      });
+
+      await expect(
+        sendWith(walletClient, plan, { batch: true }),
+      ).rejects.toThrow('Wallet client must be on chain 8453, but is on 1');
+      expect(provider.calls('wallet_sendCalls')).toBe(0);
+    });
+  });
+});
