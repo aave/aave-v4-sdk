@@ -305,7 +305,7 @@ export const exchange = cacheExchange({
     StableVaultPendingAvailability: {
       executableAfter: transformToDate,
     },
-    Query: {
+    V4Query: {
       hub: (_, { request }: VariablesOf<typeof HubQuery>) => {
         if (isHubInputVariant(request.query)) {
           return {
@@ -360,17 +360,17 @@ export const exchange = cacheExchange({
       ) => {
         // Bail out if not a txHash filter lookup
         if (!isTxHashInputVariant(args.request.query)) {
-          return cache.resolve('Query', 'activities', args);
+          return cache.resolve('V4Query', 'activities', args);
         }
 
         const { txHash, chainId } = args.request.query.txHash;
 
         // Collect all cached activities matching txHash
         const matches = cache
-          .inspectFields('Query')
+          .inspectFields('V4Query')
           .filter((f) => f.fieldName === 'activities')
           .reduce((set, f) => {
-            const pageRef = cache.resolve('Query', f.fieldKey) as string | null;
+            const pageRef = cache.resolve('V4Query', f.fieldKey) as string | null;
             if (!pageRef) return set;
 
             const itemRefs = cache.resolve(pageRef, 'items') as string[] | null;
