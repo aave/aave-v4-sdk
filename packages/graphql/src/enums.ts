@@ -31,7 +31,6 @@ export enum PageSize {
  * The time window for the historical data.
  */
 export enum TimeWindow {
-  LastHour = 'LAST_HOUR',
   LastDay = 'LAST_DAY',
   LastWeek = 'LAST_WEEK',
   LastMonth = 'LAST_MONTH',
@@ -228,6 +227,7 @@ export enum SwapStatusFilter {
 export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
+  TokenizedStock = 'TOKENIZED_STOCK',
 }
 
 /**
@@ -304,4 +304,18 @@ export enum TokenSwapKind {
    * Sell a specific amount of the source token
    */
   Sell = 'SELL',
+}
+
+/**
+ * The kind of link or fact shown on an external curator's profile.
+ */
+export enum ExternalCuratorDetailKind {
+  /**
+   * The curator's X (Twitter) profile.
+   */
+  X = 'X',
+  /**
+   * The curator's website.
+   */
+  Website = 'WEBSITE',
 }
