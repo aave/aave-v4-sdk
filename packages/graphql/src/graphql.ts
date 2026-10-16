@@ -33,6 +33,7 @@ import type {
   RepayWithSupplyKind,
   ReserveHoldersFilter,
   ReservesRequestFilter,
+  RewardAccrualBasis,
   StableVaultClaimStatus,
   SupplySwapKind,
   SwapActivityStatus,
@@ -116,6 +117,7 @@ export const graphql = initGraphQLTada<{
     ReserveHoldersFilter: ReserveHoldersFilter;
     ReserveId: ReserveId;
     ReservesRequestFilter: ReservesRequestFilter;
+    RewardAccrualBasis: RewardAccrualBasis;
     RewardId: RewardId;
     Signature: Signature;
     SpokeId: SpokeId;

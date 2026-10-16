@@ -1321,6 +1321,18 @@ type MerklBorrowReward {
   startDate: DateTime!
   endDate: DateTime!
   discountApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+
+  """
+  The tokens whose supplies reduce the borrow this campaign pays on. Empty when `GROSS`.
+  """
+  nettedBy: [Erc20Token!]!
+
+  """
+  `discountApy` per unit of the account's borrow here, after netting. Null for an anonymous
+  request, zero when the account is not eligible.
+  """
+  userEffectiveDiscountApy: PercentNumber
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   userEligible: Boolean!
@@ -1339,6 +1351,18 @@ type MerklSupplyReward {
   startDate: DateTime!
   endDate: DateTime!
   extraApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+
+  """
+  The tokens whose borrows reduce the supply this campaign pays on. Empty when `GROSS`.
+  """
+  nettedBy: [Erc20Token!]!
+
+  """
+  `extraApy` per unit of the account's supply here, after netting. Null for an anonymous
+  request, zero when the account is not eligible.
+  """
+  userEffectiveExtraApy: PercentNumber
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   userEligible: Boolean!
@@ -1954,9 +1978,12 @@ type PreviewMerklBorrowReward {
   startDate: DateTime!
   endDate: DateTime!
   discountApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+  nettedBy: [Erc20Token!]!
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   reserve: ReserveInfo!
+  userEligible: Boolean!
 }
 
 type PreviewMerklSupplyReward {
@@ -1964,9 +1991,12 @@ type PreviewMerklSupplyReward {
   startDate: DateTime!
   endDate: DateTime!
   extraApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+  nettedBy: [Erc20Token!]!
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   reserve: ReserveInfo!
+  userEligible: Boolean!
 }
 
 input PreviewRequest {
@@ -2531,6 +2561,16 @@ input ReservesRequestQuery @oneOf {
 }
 
 union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
+
+enum RewardAccrualBasis {
+  """The account's whole balance on the rewarded leg."""
+  GROSS
+
+  """
+  That balance less the account's holdings of the tokens in `nettedBy`, floored at zero.
+  """
+  NET
+}
 
 scalar RewardId
 
