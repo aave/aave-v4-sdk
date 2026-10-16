@@ -4,4 +4,4 @@
 "@aave/react": minor
 ---
 
-**feat:** `externalCurator` and `externalCurators` actions, and `Hub.externalCurator`
+**feat:** `externalCurator` and `externalCurators` actions, `useExternalCurator` and `useExternalCurators` hooks, and `Hub.externalCurator`
