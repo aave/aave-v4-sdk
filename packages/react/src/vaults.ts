@@ -1,4 +1,8 @@
-import { supportsPermit, type TransactionReceipt } from '@aave/client';
+import {
+  supportsPermit,
+  type TransactionBatch,
+  type TransactionReceipt,
+} from '@aave/client';
 import {
   stableVaultDeposit,
   stableVaultWithdraw,
@@ -28,8 +32,12 @@ import {
   StableVaultUserPositionsQuery,
   type StableVaultUserPositionsRequest,
 } from '@aave/graphql';
-import { errAsync, type NullishDeep, type Signature } from '@aave/types';
-
+import {
+  errAsync,
+  type NullishDeep,
+  okAsync,
+  type Signature,
+} from '@aave/types';
 import { useAaveClient } from './context';
 import {
   cancel,
@@ -52,6 +60,11 @@ import {
   handleSingleApproval,
   sendApprovalTransactions,
 } from './transactions/approvals';
+import {
+  type BatchableHandler,
+  type TransactionBatchOptions,
+  tryBatch,
+} from './transactions/batch';
 
 function injectDepositPermitSignature(
   request: StableVaultDepositRequest,
@@ -96,41 +109,78 @@ export function useStableVaultDeposit(
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
+>;
+/**
+ * With `{ batch }`, a plan with two or more transactions (e.g. an approval
+ * and the action) reaches the handler as one `TransactionBatch` when the
+ * wallet can send it atomically. Send it like a `TransactionRequest`.
+ */
+export function useStableVaultDeposit(
+  handler: ExecutionPlanHandler<
+    TransactionRequest | Erc20Approval | TransactionBatch,
+    Signature | PendingTransaction
+  >,
+  options: TransactionBatchOptions,
+): UseAsyncTask<
+  StableVaultDepositRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+>;
+export function useStableVaultDeposit(
+  handler: BatchableHandler<
+    TransactionRequest | Erc20Approval,
+    Signature | PendingTransaction
+  >,
+  options?: TransactionBatchOptions,
+): UseAsyncTask<
+  StableVaultDepositRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: StableVaultDepositRequest) =>
       stableVaultDeposit(client, request)
-        .andThen((plan) => {
-          switch (plan.__typename) {
-            case 'TransactionRequest':
-              return handler(plan, { cancel });
+        .andThen((plan) =>
+          tryBatch(plan, options?.batch, handler).andThen((sent) => {
+            if (sent) {
+              return okAsync(sent);
+            }
 
-            case 'Erc20ApprovalRequired':
-              if (supportsPermit(plan)) {
-                return handleSingleApproval(plan, handler, (permitSig) =>
-                  stableVaultDeposit(
-                    client,
-                    injectDepositPermitSignature(request, permitSig),
-                  ),
-                ).andThen((transaction) => handler(transaction, { cancel }));
-              }
-              return sendApprovalTransactions(plan, handler).andThen(
-                (transaction) => handler(transaction, { cancel }),
-              );
+            switch (plan.__typename) {
+              case 'TransactionRequest':
+                return handler(plan, { cancel });
 
-            case 'InsufficientBalanceError':
-              return errAsync(ValidationError.fromGqlNode(plan));
-          }
-        })
+              case 'Erc20ApprovalRequired':
+                if (supportsPermit(plan)) {
+                  return handleSingleApproval(plan, handler, (permitSig) =>
+                    stableVaultDeposit(
+                      client,
+                      injectDepositPermitSignature(request, permitSig),
+                    ),
+                  ).andThen((transaction) => handler(transaction, { cancel }));
+                }
+                return sendApprovalTransactions(plan, handler).andThen(
+                  (transaction) => handler(transaction, { cancel }),
+                );
+
+              case 'InsufficientBalanceError':
+                return errAsync(ValidationError.fromGqlNode(plan));
+            }
+          }),
+        )
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andThrough(() =>
           refreshStableVaultUserPositions(client, request.user),
         ),
-    [client, handler],
+    [client, handler, options?.batch],
   );
 }
 

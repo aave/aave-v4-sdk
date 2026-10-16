@@ -1,3 +1,4 @@
+export type { TransactionBatchOptions } from './batch';
 export {
   type UseActivitiesArgs,
   useActivities,
