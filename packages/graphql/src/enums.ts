@@ -137,6 +137,16 @@ export enum ReservesRequestFilter {
 }
 
 /**
+ * The balance on which a reward accrues.
+ */
+export enum RewardAccrualBasis {
+  /** The account's whole balance on the rewarded leg. */
+  Gross = 'GROSS',
+  /** The balance less the holdings specified by `nettedBy`, floored at zero. */
+  Net = 'NET',
+}
+
+/**
  * The borrow swap kind for debt swaps.
  */
 export enum BorrowSwapKind {

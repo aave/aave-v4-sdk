@@ -81,6 +81,13 @@ export const MerklSupplyRewardFragment = graphql(
     extraApy {
       ...PercentNumber
     }
+    accrualBasis
+    nettedBy {
+      ...Erc20Token
+    }
+    userEffectiveExtraApy {
+      ...PercentNumber
+    }
     payoutToken {
       ...Erc20Token
     }
@@ -100,6 +107,13 @@ export const MerklBorrowRewardFragment = graphql(
     startDate
     endDate
     discountApy {
+      ...PercentNumber
+    }
+    accrualBasis
+    nettedBy {
+      ...Erc20Token
+    }
+    userEffectiveDiscountApy {
       ...PercentNumber
     }
     payoutToken {

@@ -3882,6 +3882,44 @@
             "args": []
           },
           {
+            "name": "accrualBasis",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "nettedBy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Token",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userEffectiveDiscountApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "payoutToken",
             "type": {
               "kind": "NON_NULL",
@@ -4021,6 +4059,44 @@
                 "name": "PercentNumber",
                 "ofType": null
               }
+            },
+            "args": []
+          },
+          {
+            "name": "accrualBasis",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "nettedBy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Token",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userEffectiveExtraApy",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
             },
             "args": []
           },
@@ -6731,6 +6807,35 @@
             "args": []
           },
           {
+            "name": "accrualBasis",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "nettedBy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Token",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
             "name": "payoutToken",
             "type": {
               "kind": "NON_NULL",
@@ -6768,6 +6873,17 @@
                 "kind": "OBJECT",
                 "name": "ReserveInfo",
                 "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userEligible",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
@@ -6825,6 +6941,35 @@
             "args": []
           },
           {
+            "name": "accrualBasis",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "nettedBy",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Erc20Token",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
             "name": "payoutToken",
             "type": {
               "kind": "NON_NULL",
@@ -6862,6 +7007,17 @@
                 "kind": "OBJECT",
                 "name": "ReserveInfo",
                 "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "userEligible",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
               }
             },
             "args": []
