@@ -277,6 +277,12 @@ export const inputDefaults: InputDefaults = {
       limit: 'LimitOrderTokenSwapQuoteInput',
     },
   },
+  TokenizedStocksRequest: {
+    defaults: {
+      pageSize: 'FIFTY',
+    },
+    fields: {},
+  },
   UserBalancesByChains: {
     defaults: {
       byReservesType: 'ALL',

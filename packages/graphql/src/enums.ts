@@ -31,7 +31,6 @@ export enum PageSize {
  * The time window for the historical data.
  */
 export enum TimeWindow {
-  LastHour = 'LAST_HOUR',
   LastDay = 'LAST_DAY',
   LastWeek = 'LAST_WEEK',
   LastMonth = 'LAST_MONTH',
@@ -228,6 +227,7 @@ export enum SwapStatusFilter {
 export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
+  TokenizedStock = 'TOKENIZED_STOCK',
 }
 
 /**
