@@ -1,4 +1,8 @@
-import { type TransactionReceipt, UnexpectedError } from '@aave/client';
+import {
+  type TransactionBatch,
+  type TransactionReceipt,
+  UnexpectedError,
+} from '@aave/client';
 import { withdraw } from '@aave/client/actions';
 import { ValidationError } from '@aave/core';
 import type {
@@ -7,8 +11,7 @@ import type {
   TransactionRequest,
   WithdrawRequest,
 } from '@aave/graphql';
-import { errAsync } from '@aave/types';
-
+import { errAsync, okAsync } from '@aave/types';
 import { useAaveClient } from '../context';
 import {
   cancel,
@@ -20,6 +23,11 @@ import {
   type UseAsyncTask,
   useAsyncTask,
 } from '../helpers';
+import {
+  type BatchableHandler,
+  type TransactionBatchOptions,
+  tryBatch,
+} from './batch';
 
 /**
  * A hook that provides a way to withdraw supplied assets from an Aave reserve.
@@ -85,32 +93,69 @@ export function useWithdraw(
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
+>;
+/**
+ * With `{ batch }`, a plan with two or more transactions (e.g. an approval
+ * and the action) reaches the handler as one `TransactionBatch` when the
+ * wallet can send it atomically. Send it like a `TransactionRequest`.
+ */
+export function useWithdraw(
+  handler: ExecutionPlanHandler<
+    TransactionRequest | PreContractActionRequired | TransactionBatch,
+    PendingTransaction
+  >,
+  options: TransactionBatchOptions,
+): UseAsyncTask<
+  WithdrawRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+>;
+export function useWithdraw(
+  handler: BatchableHandler<
+    TransactionRequest | PreContractActionRequired,
+    PendingTransaction
+  >,
+  options?: TransactionBatchOptions,
+): UseAsyncTask<
+  WithdrawRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: WithdrawRequest) =>
       withdraw(client, request)
-        .andThen((plan) => {
-          switch (plan.__typename) {
-            case 'TransactionRequest':
-              return handler(plan, { cancel });
+        .andThen((plan) =>
+          tryBatch(plan, options?.batch, handler).andThen((sent) => {
+            if (sent) {
+              return okAsync(sent);
+            }
 
-            case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen((pending) => pending.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }));
+            switch (plan.__typename) {
+              case 'TransactionRequest':
+                return handler(plan, { cancel });
 
-            case 'InsufficientBalanceError':
-              return errAsync(ValidationError.fromGqlNode(plan));
+              case 'PreContractActionRequired':
+                return handler(plan, { cancel })
+                  .andThen((pending) => pending.wait())
+                  .andThen(() => handler(plan.originalTransaction, { cancel }));
 
-            case 'Erc20ApprovalRequired':
-              return UnexpectedError.from(plan).asResultAsync();
-          }
-        })
+              case 'InsufficientBalanceError':
+                return errAsync(ValidationError.fromGqlNode(plan));
+
+              case 'Erc20ApprovalRequired':
+                return UnexpectedError.from(plan).asResultAsync();
+            }
+          }),
+        )
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andThrough(() => refreshQueriesForReserveChange(client, request)),
-    [client, handler],
+    [client, handler, options?.batch],
   );
 }
