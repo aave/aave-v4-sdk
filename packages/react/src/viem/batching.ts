@@ -38,11 +38,16 @@ type CachedAnswer = { value: Promise<boolean>; at: number };
 
 const answers = new Map<string, CachedAnswer>();
 
+// the same account can live in two wallets that answer differently
+function keyOf(walletClient: WalletClient, chainId: ChainId): string {
+  return `${walletClient.uid}:${walletClient.account?.address}:${chainId}`;
+}
+
 function cachedCanBatch(
   walletClient: WalletClient,
   chainId: ChainId,
 ): Promise<boolean> {
-  const key = `${walletClient.account?.address}:${chainId}`;
+  const key = keyOf(walletClient, chainId);
   const cached = answers.get(key);
 
   if (cached && Date.now() - cached.at < CAN_BATCH_STALE_TIME) {
@@ -66,8 +71,8 @@ export function clearCanBatchCache(): void {
  * the given chain, e.g. to show "Approve & supply" as a single step in a
  * preview.
  *
- * It is `false` until the wallet has answered. Answers are cached per account
- * and chain for a short time. Sending does not rely on this value: a write
+ * It is `false` until the wallet has answered. Answers are cached per wallet,
+ * account and chain for a short time. Sending does not rely on this value: a write
  * hook's `batch` option checks the wallet again.
  *
  * ```ts
@@ -84,9 +89,7 @@ export function useCanBatch(
   { chainId }: { chainId: ChainId },
 ): boolean {
   const [answer, setAnswer] = useState<{ key: string; value: boolean }>();
-  const key = walletClient
-    ? `${walletClient.account?.address}:${chainId}`
-    : undefined;
+  const key = walletClient ? keyOf(walletClient, chainId) : undefined;
 
   useEffect(() => {
     if (!walletClient || !key) return;

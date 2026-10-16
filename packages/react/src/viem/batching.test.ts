@@ -123,4 +123,26 @@ describe(`Given the '${useCanBatch.name}' hook`, () => {
       expect(provider.calls('wallet_getCapabilities')).toBe(2);
     });
   });
+
+  describe('When the user switches to another wallet with the same account', () => {
+    it('Then it asks the new wallet instead of reusing the previous answer', async () => {
+      const upgraded = setup(supported);
+      const plain = setup(ready);
+
+      const { result, rerender } = renderHook(
+        ({ walletClient }) =>
+          useCanBatch(walletClient, { chainId: testChainId }),
+        { initialProps: { walletClient: upgraded.walletClient } },
+      );
+      await waitFor(() => expect(result.current).toBe(true));
+
+      rerender({ walletClient: plain.walletClient });
+
+      expect(result.current).toBe(false);
+      await waitFor(() =>
+        expect(plain.provider.calls('wallet_getCapabilities')).toBe(1),
+      );
+      expect(result.current).toBe(false);
+    });
+  });
 });
