@@ -25,3 +25,11 @@ _Avoid_: resolved hash
 **Awaiting Signatures**:
 The state of a Submission that cannot execute until more co-signers of a Smart Account sign it.
 _Avoid_: pending (too broad)
+
+**Batch-capable Account**:
+An account whose wallet reports EIP-5792 `atomic` status `supported` for a chain, so it can execute several calls atomically without further user action. It can be a Smart Account or an EOA already upgraded with EIP-7702; an EOA that reports `ready` would need the upgrade first and is not batch-capable.
+_Avoid_: 7702 wallet, smart wallet
+
+**Transaction Batch**:
+The transactions of one execution plan (e.g. approvals, then the action) sent as a single atomic `wallet_sendCalls` request. It produces one Submission, tracked by its EIP-5792 call id.
+_Avoid_: bundle (ERC-4337 term), multicall
