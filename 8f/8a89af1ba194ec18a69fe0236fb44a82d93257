@@ -1,0 +1,21 @@
+packages/react/src/viem/batching.test.ts
+  s_45b3af06ef827c::t_b73021ecac8296 126-147
+packages/react/src/viem/batching.ts
+  s_45b3af06ef827c::t_b5612bdf79bf77 41-45,50,74-75,92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8f8a89af1ba194ec18a69fe0236fb44a82d93257",
+  "prompts": {},
+  "sessions": {
+    "s_45b3af06ef827c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0bf09e5-2fd8-4644-ba06-26989fce360a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
