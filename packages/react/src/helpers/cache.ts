@@ -8,6 +8,7 @@ import {
   HubsQuery,
   isChainIdsVariant,
   isSpokeInputVariant,
+  PendingOrdersQuery,
   type RepayRequest,
   type Reserve,
   ReserveHoldersQuery,
@@ -136,6 +137,13 @@ export function refreshUserPositions(
       (_, data) => data !== null && isMatch(data),
     ),
   ]);
+}
+
+/**
+ * @internal
+ */
+export function refreshPendingOrders(client: AaveClient) {
+  return client.refreshQueryWhere(PendingOrdersQuery, () => true);
 }
 
 /**

@@ -24,8 +24,11 @@ import type {
   ExchangeAmountWithChange,
   HealthFactorWithChange,
   NativeAsset,
+  OrderCancelled,
+  OrderOpen,
   OrderReceipt,
   OrderTypedData,
+  PaginatedOrdersResult,
   PaginatedUserSwapsResult,
   PercentNumber,
   PercentNumberWithChange,
@@ -650,6 +653,51 @@ export function makePaginatedUserSwapsResult(
 ): PaginatedUserSwapsResult {
   return {
     __typename: 'PaginatedUserSwapsResult',
+    items,
+    pageInfo: {
+      __typename: 'PaginatedResultInfo',
+      prev: null,
+      next: null,
+    },
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeOrderOpen(): OrderOpen {
+  return {
+    __typename: 'OrderOpen',
+    orderId: randomBase64String() as OrderId,
+    createdAt: new Date(),
+    deadline: new Date(Date.now() + 3600_000), // 1 hour from now
+    explorerUrl: 'https://example.com/explorer.json',
+    operation: makeTokenSwap(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makeOrderCancelled(): OrderCancelled {
+  return {
+    __typename: 'OrderCancelled',
+    orderId: randomBase64String() as OrderId,
+    createdAt: new Date(),
+    cancelledAt: new Date(),
+    explorerUrl: 'https://example.com/explorer.json',
+    operation: makeTokenSwap(),
+  };
+}
+
+/**
+ * @internal
+ */
+export function makePaginatedOrdersResult(
+  items: Array<OrderOpen | OrderCancelled>,
+): PaginatedOrdersResult {
+  return {
+    __typename: 'PaginatedOrdersResult',
     items,
     pageInfo: {
       __typename: 'PaginatedResultInfo',
