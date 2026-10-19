@@ -1,0 +1,21 @@
+packages/client/src/environments.ts
+  s_4dd317084f0242::t_9b20721d31b088 8,21
+packages/graphql/package.json
+  s_4dd317084f0242::t_9b20721d31b088 55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "aec0d6dc452a089cb3a17ae99a1616085148b4ed",
+  "prompts": {},
+  "sessions": {
+    "s_4dd317084f0242": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1854625a-19f7-4366-88b4-9972cc32b194",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
