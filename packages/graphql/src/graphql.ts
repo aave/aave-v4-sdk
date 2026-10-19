@@ -30,6 +30,7 @@ import type {
   OrderDirection,
   OrderStatusFilter,
   PageSize,
+  PositionSwapType,
   QuoteAccuracy,
   RepayWithSupplyKind,
   ReserveHoldersFilter,
@@ -106,6 +107,7 @@ export const graphql = initGraphQLTada<{
     OrderQuoteId: OrderQuoteId;
     OrderStatusFilter: OrderStatusFilter;
     PageSize: PageSize;
+    PositionSwapType: PositionSwapType;
     QuoteAccuracy: QuoteAccuracy;
     ReserveHoldersFilter: ReserveHoldersFilter;
     ReserveId: ReserveId;
