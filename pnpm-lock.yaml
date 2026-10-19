@@ -116,9 +116,6 @@ importers:
         specifier: ^6.3.5
         version: 6.3.5
     devDependencies:
-      '@bgd-labs/aave-address-book':
-        specifier: ^4.25.3
-        version: 4.25.3
       '@node-kit/pnpm-workspace-root':
         specifier: ^3.3.1
         version: 3.3.1
@@ -561,9 +558,6 @@ packages:
 
   '@base-org/account@1.1.0':
     resolution: {integrity: sha512-MHer5qFwh43b713tmlL3He9K5HhWnrV5hvDud9p37CSmNz6PyzTF8hRQixAJxBHaRsUHaxBm3n6dNKJIvLPnUw==}
-
-  '@bgd-labs/aave-address-book@4.25.3':
-    resolution: {integrity: sha512-B9bxg1QujWBOFoeMy5py9TNuyuC5r6qcSp60Tz4vA/5350a9UI3Mf7LRyAzmPbVes6kB/gGM+Ryf5LMhr2/0Og==}
 
   '@biomejs/biome@2.2.5':
     resolution: {integrity: sha512-zcIi+163Rc3HtyHbEO7CjeHq8DjQRs40HsGbW6vx2WI0tg8mYQOPouhvHSyEnCBAorfYNnKdR64/IxO7xQ5faw==}
@@ -7012,8 +7006,6 @@ snapshots:
       - use-sync-external-store
       - utf-8-validate
       - zod
-
-  '@bgd-labs/aave-address-book@4.25.3': {}
 
   '@biomejs/biome@2.2.5':
     optionalDependencies:
