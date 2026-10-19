@@ -6,6 +6,7 @@ import {
   ExchangeAmountWithChangeFragment,
   PercentNumberFragment,
 } from './common';
+import { ExternalCuratorFragment } from './curators';
 
 export const HubSummaryFragment = graphql(
   `fragment HubSummary on HubSummary {
@@ -34,6 +35,21 @@ export const HubSummaryFragment = graphql(
 );
 export type HubSummary = FragmentOf<typeof HubSummaryFragment>;
 
+export const HubExposureItemFragment = graphql(
+  `fragment HubExposureItem on HubExposureItem {
+    __typename
+    share {
+      ...PercentNumber
+    }
+    totalCollateral(currency: $currency) {
+      ...ExchangeAmount
+    }
+    asOf
+  }`,
+  [PercentNumberFragment, ExchangeAmountFragment],
+);
+export type HubExposureItem = FragmentOf<typeof HubExposureItemFragment>;
+
 export const HubFragment = graphql(
   `fragment Hub on Hub {
       __typename
@@ -46,7 +62,10 @@ export const HubFragment = graphql(
       summary(currency: $currency) {
         ...HubSummary
       }
+      externalCurator {
+        ...ExternalCurator
+      }
     }`,
-  [ChainFragment, HubSummaryFragment],
+  [ChainFragment, HubSummaryFragment, ExternalCuratorFragment],
 );
 export type Hub = FragmentOf<typeof HubFragment>;

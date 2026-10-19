@@ -34,6 +34,7 @@ export enum TimeWindow {
   LastDay = 'LAST_DAY',
   LastWeek = 'LAST_WEEK',
   LastMonth = 'LAST_MONTH',
+  LastThreeMonths = 'LAST_THREE_MONTHS',
   LastSixMonths = 'LAST_SIX_MONTHS',
   LastYear = 'LAST_YEAR',
   All = 'ALL',
@@ -151,24 +152,6 @@ export enum RepayWithSupplyKind {
 }
 
 /**
- * The status of a stable vault withdrawal claim.
- */
-export enum StableVaultClaimStatus {
-  /**
-   * The claim is ready to be redeemed.
-   */
-  Ready = 'READY',
-  /**
-   * The claim is still in the waiting period.
-   */
-  Pending = 'PENDING',
-  /**
-   * The claim status could not be determined.
-   */
-  Unknown = 'UNKNOWN',
-}
-
-/**
  * The supply swap kind for supply swaps.
  */
 export enum SupplySwapKind {
@@ -226,14 +209,7 @@ export enum SwapStatusFilter {
 export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
-}
-
-/**
- * The status of a token movement record.
- */
-export enum TokenMovementStatus {
-  Pending = 'PENDING',
-  Done = 'DONE',
+  TokenizedStock = 'TOKENIZED_STOCK',
 }
 
 /**
@@ -302,4 +278,18 @@ export enum TokenSwapKind {
    * Sell a specific amount of the source token
    */
   Sell = 'SELL',
+}
+
+/**
+ * The kind of link or fact shown on an external curator's profile.
+ */
+export enum ExternalCuratorDetailKind {
+  /**
+   * The curator's X (Twitter) profile.
+   */
+  X = 'X',
+  /**
+   * The curator's website.
+   */
+  Website = 'WEBSITE',
 }

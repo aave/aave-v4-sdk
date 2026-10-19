@@ -1,3 +1,9 @@
+schema {
+  query: V4Query
+  mutation: V4Mutation
+  subscription: V4Subscription
+}
+
 input ActivitiesRequest {
   query: ActivitiesRequestQuery!
   user: EvmAddress
@@ -45,6 +51,14 @@ input AmountInput @oneOf {
   max: AlwaysTrue
 }
 
+"""A credit purchase made by the customer behind the API key."""
+type ApiPayment {
+  id: ID!
+  customerId: String!
+  amountUsd: Float!
+  creditsPurchased: Int!
+}
+
 enum ApyMetric {
   HIGHEST
   LOWEST
@@ -85,6 +99,21 @@ type AssetBorrowSample {
   lowestApy: PercentNumber!
   averageApy: PercentNumber!
   breakdown: [AssetSampleBreakdown!]!
+}
+
+"""Whether one token is unavailable in the caller's region."""
+type AssetGeoblock {
+  """The token asked about"""
+  assetId: AssetId!
+
+  """The chain the token is deployed to"""
+  chainId: ChainId!
+
+  """The token address"""
+  address: EvmAddress!
+
+  """Whether the token is refused where the caller is"""
+  isGeoblocked: Boolean!
 }
 
 scalar AssetId
@@ -156,27 +185,16 @@ type AssetSupplySample {
   breakdown: [AssetSampleBreakdown!]!
 }
 
+"""The tokens to check."""
+input AssetsRequest {
+  queries: [AssetRequestQuery!]!
+}
+
 scalar BigDecimal
 
 scalar BigInt
 
 scalar BlockchainData
-
-type BoostedRate {
-  """The unique identifier for this boosted rate tier"""
-  id: BoostedRateId!
-
-  """The display name for this boosted rate tier"""
-  name: String!
-
-  """The number of users currently assigned to this boosted rate"""
-  userCount: BigInt!
-
-  """The annual percentage yield for this boosted rate tier"""
-  apy: PercentNumber!
-}
-
-scalar BoostedRateId
 
 type BorrowActivity {
   id: ID!
@@ -190,7 +208,13 @@ type BorrowActivity {
 }
 
 input BorrowApyHistoryRequest {
-  reserve: ReserveId!
+  """Exactly one of `reserve` or `hubAsset` must be set"""
+  reserve: ReserveId
+
+  """
+  The hub asset's shared rate curve; rewards are folded from its smallest reserve.
+  """
+  hubAsset: HubAssetId
   window: TimeWindow! = LAST_DAY
 
   """
@@ -215,7 +239,7 @@ input BorrowRequest {
   """The reserve id"""
   reserve: ReserveId!
 
-  """The amount supplying"""
+  """The amount borrowing"""
   amount: ReserveAmountInput!
 
   """The user sending the transaction (normally the user's wallet address)"""
@@ -297,7 +321,7 @@ type Chain {
   nativeInfo: TokenInfo! @deprecated(reason: "Use nativeAsset { ... on WrappedNativeAsset { nativeToken } ... on SharedBalanceNativeAsset { nativeToken } }.")
 
   """
-  Zero when no gateway is deployed; the honest optional value is `WrappedNativeAsset.gateway`.
+  Errors when no gateway is deployed; `WrappedNativeAsset.gateway` is the optional value.
   """
   nativeGateway: EvmAddress! @deprecated(reason: "Use nativeAsset { ... on WrappedNativeAsset { gateway } }.")
   signatureGateway: EvmAddress!
@@ -364,6 +388,15 @@ enum CollateralMetric {
   LOWEST
 }
 
+"""An external curator's hubs, summed."""
+type CuratorSummary {
+  totalSupplied: ExchangeAmount!
+  totalBorrowed: ExchangeAmount!
+  hubsCount: Int!
+  spokesCount: Int!
+  chainIds: [ChainId!]!
+}
+
 enum Currency {
   USD
   GBP
@@ -403,11 +436,49 @@ type DomainData {
 scalar DynamicConfigKey
 
 input ERC20PermitSignature {
-  """The signature for the erc721"""
+  """The permit signature"""
   value: Signature!
 
-  """The deadline for the erc721"""
+  """The permit deadline"""
   deadline: Int!
+}
+
+"""
+One hub asset's Earn row across every spoke listing it, which no single position covers.
+"""
+type EarnScopePreview {
+  hubAsset: HubAssetId!
+
+  """
+  Supplied balance with interest; null only when the row is empty on both sides.
+  """
+  supplied: Erc20AmountVariation
+
+  """
+  Supply interest earned across the row. Null on the same terms as `supplied`.
+  """
+  earnings: Erc20AmountVariation
+
+  """Supply rewards the plan gains or gives up on the row's own reserves."""
+  rewards: PreviewRewardOutcome!
+
+  """
+  The hub asset's base rates, one pair since all its reserves share one curve.
+  """
+  reserveRates: ScopedReserveRates
+
+  """The row's supplies in USD, before and after the plan."""
+  totalSupplied(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """
+  Yearly earnings at the row's APY, not the accrued interest `earnings` reports.
+  """
+  projectedEarnings(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """
+  Base rate, underlying yield and the Merkl APY each side is eligible for, weighted by value.
+  """
+  supplyApy: PercentNumberVariation!
 }
 
 type Erc20Amount {
@@ -421,6 +492,14 @@ type Erc20Amount {
   exchangeRate(currency: Currency! = USD): DecimalNumber!
   isWrappedNative: Boolean!
   token: Erc20Token!
+}
+
+"""
+An `Erc20Amount` before and after, for the token-denominated sides of a scoped preview.
+"""
+type Erc20AmountVariation {
+  current: Erc20Amount!
+  after: Erc20Amount!
 }
 
 type Erc20Approval {
@@ -469,8 +548,9 @@ input Erc20Input {
 type Erc20Token {
   """The token address"""
   address: EvmAddress!
+  tokenizedStock: TokenizedStock
 
-  """The chain its deployed to"""
+  """The chain it's deployed to"""
   chain: Chain!
 
   """The ERC20 token info"""
@@ -530,6 +610,61 @@ input ExchangeRateRequestFrom @oneOf {
 
 union ExecutionPlan = TransactionRequest | Erc20ApprovalRequired | PreContractActionRequired | InsufficientBalanceError
 
+"""A party that curates hubs but is not itself a protocol."""
+type ExternalCurator {
+  id: ID!
+  name: String!
+
+  """The curator's description, one entry per paragraph."""
+  description: [String!]!
+  icon: String!
+  details: [ExternalCuratorDetail!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  summary(currency: Currency! = USD): CuratorSummary!
+}
+
+"""A link on a curator's profile, such as a website or an X account."""
+type ExternalCuratorDetail {
+  kind: ExternalCuratorDetailKind!
+  value: String!
+  tooltip: String
+  href: String
+}
+
+enum ExternalCuratorDetailKind {
+  X
+  WEBSITE
+}
+
+input ExternalCuratorRequest {
+  id: ID!
+}
+
+input ExternalCuratorsRequest {
+  query: ExternalCuratorsRequestQuery!
+}
+
+input ExternalCuratorsRequestQuery @oneOf {
+  chainIds: [ChainId!]
+}
+
+"""A third-party v4 deployment that this API does not serve."""
+type ExternalInstance {
+  """
+  The value to send as the `x-aave-instance` header to reach this deployment's API.
+  """
+  instance: String!
+  name: String!
+
+  """What this deployment is. Null when not written yet."""
+  description: String
+  iconUrl: String
+
+  """The chains this deployment runs on."""
+  chainIds: [ChainId!]!
+}
+
 input ForkTopUpErc20 {
   """The token address"""
   currency: EvmAddress!
@@ -586,13 +721,21 @@ input FromQuoteWithdrawSwapQuoteInput {
 }
 
 input HasProcessedKnownTransactionRequest {
-  """
-  The operation types this is given to you on the TransactionRequest::operations
-  """
+  """The `operations` from the `TransactionRequest` that sent it."""
   operations: [OperationType!]!
 
   """The tx hash"""
   txHash: TxHash!
+  chainId: ChainId
+}
+
+"""The company's registered address."""
+type Headquarters {
+  address: String
+  city: String
+  state: String
+  zip: String
+  country: String
 }
 
 scalar HealthFactor
@@ -628,6 +771,19 @@ type Hub {
   """The chain the hub is deployed on"""
   chain: Chain!
 
+  """The hub name, formatted for display."""
+  displayName: String!
+
+  """The hub title for a card or tooltip, including the noun."""
+  displayTitle: String!
+  description: HubDescription!
+
+  """The external curator of this hub, if any."""
+  externalCurator: ExternalCurator
+
+  """Share of this hub's collateral by asset, largest first."""
+  exposure: [HubExposureItem!]!
+
   """The hub summary"""
   summary(currency: Currency! = USD): HubSummary!
 }
@@ -653,6 +809,22 @@ type HubAsset {
   userState: HubAssetUserState
 }
 
+input HubAssetHoldersRequest {
+  query: HubAssetHoldersRequestQuery!
+  filter: ReserveHoldersFilter! = SUPPLIED
+  orderBy: ReserveHoldersOrderBy! = {amount: DESC}
+  pageSize: PageSize! = TEN
+  cursor: Cursor
+}
+
+input HubAssetHoldersRequestQuery @oneOf {
+  """Holders aggregated across all of the hub asset's reserves"""
+  hubAssetId: HubAssetId
+
+  """Holders of a single reserve"""
+  reserveId: ReserveId
+}
+
 scalar HubAssetId
 
 """A single point on the interest rate model curve."""
@@ -660,11 +832,13 @@ type HubAssetInterestRateModelPoint {
   """The utilization rate at this point on the curve"""
   utilizationRate: PercentNumber!
 
-  """The variable borrow rate at this utilization level"""
+  """
+  The borrow rate at this utilization level, compounded so the curve meets `borrowApy`
+  """
   borrowRate: PercentNumber!
 
   """
-  The supply rate at this utilization level (borrow_rate × utilization × (1 − fee))
+  Nominal borrow rate × utilization × (1 − fee) at this utilization level, then compounded
   """
   supplyRate: PercentNumber!
 
@@ -677,9 +851,8 @@ type HubAssetInterestRateModelPoint {
 }
 
 """
-Request to compute the full interest rate model for a hub asset.
-Returns 201 data points covering 0% to 100% utilization in 0.5% steps,
-showing how supply/borrow rates and required liquidity changes vary across
+Request to compute the full interest rate model for a hub asset: every 0.5% step from 0% to 100% utilization,
+plus the current utilization and the curve's kink, showing how supply/borrow rates and required liquidity changes vary across
 the entire utilization range.
 """
 input HubAssetInterestRateModelRequest {
@@ -688,7 +861,7 @@ input HubAssetInterestRateModelRequest {
 
 """Identifies the hub asset to compute the interest rate model for."""
 input HubAssetInterestRateModelRequestQuery @oneOf {
-  """The hub asset id (chain_id + hub_address + onchain_hub_asset_id)"""
+  """The hub asset id"""
   hubAssetId: HubAssetId
 }
 
@@ -734,10 +907,10 @@ type HubAssetSummary {
   """The available liquidity"""
   availableLiquidity: Erc20Amount!
 
-  """The supply apy"""
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
 
-  """The borrow apy"""
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
 
   """The net apy"""
@@ -751,11 +924,35 @@ type HubAssetSummary {
 
   """The number of active spoke reserves for this hub asset"""
   activeReservesCount: Int!
+
+  """
+  Time-weighted average supply APY over the window. Includes Merkl supply rewards unless `includeRewards` is false.
+  """
+  trailingSupplyApy(window: TimeWindow! = LAST_DAY, includeRewards: Boolean! = true): PercentNumber!
 }
 
 type HubAssetUserState {
-  """The hub asset balance"""
+  """The user's wallet balance of the underlying token"""
   balance: Erc20Amount!
+
+  """
+  The user's supplied balance across this hub asset's reserves, interest included
+  """
+  supplied: Erc20Amount!
+
+  """The collateral-enabled portion of `supplied`"""
+  collateralSupplied: Erc20Amount!
+
+  """Supply interest earned across this hub asset's reserves"""
+  earnings: Erc20Amount!
+
+  """The collateral-enabled portion of `earnings`"""
+  collateralEarnings: Erc20Amount!
+
+  """
+  Base rate, underlying yield and the Merkl rewards the user is eligible for, by balance.
+  """
+  supplyApy: PercentNumber!
 }
 
 input HubAssetsRequest {
@@ -774,6 +971,38 @@ input HubAssetsRequestOrderBy @oneOf {
 input HubAssetsRequestQuery @oneOf {
   hubInput: HubInput
   hubId: HubId
+
+  """All hub assets on the given chains"""
+  chainIds: [ChainId!]
+
+  """All hub assets on the given hubs"""
+  hubIds: [HubId!]
+
+  """Hub assets for a token across chains, matched by its symbol"""
+  symbolChainIds: SymbolInput
+}
+
+"""Display copy for a hub. Null when none has been written."""
+type HubDescription {
+  """Copy shown above a deposit table."""
+  deposit: String
+
+  """Copy shown under a card title that already names the hub."""
+  identity: String
+}
+
+type HubExposureItem {
+  """The hub asset the collateral is held in"""
+  asset: HubAsset!
+
+  """This asset's share of the hub's collateral"""
+  share: PercentNumber!
+
+  """When the figures were read."""
+  asOf: DateTime!
+
+  """The USD value of collateral-enabled supplies in this asset"""
+  totalCollateral(currency: Currency! = USD): ExchangeAmount!
 }
 
 scalar HubId
@@ -860,6 +1089,11 @@ input HubSummaryHistoryRequest {
 input HubSummaryHistoryRequestQuery @oneOf {
   hubInput: HubInput
   hubId: HubId
+
+  """
+  One asset on one hub: its deposits, borrows and available liquidity over time
+  """
+  hubAssetId: HubAssetId
 }
 
 type HubSummarySample {
@@ -868,6 +1102,21 @@ type HubSummarySample {
   borrows: ExchangeAmount!
   availableLiquidity: ExchangeAmount!
   utilizationRate: PercentNumber!
+
+  """
+  Deposits in the underlying token, null when the criteria spans more than one token.
+  """
+  depositsAmount: Erc20Amount
+
+  """
+  Borrows in the underlying token, on the same terms as `depositsAmount`.
+  """
+  borrowsAmount: Erc20Amount
+
+  """
+  Available liquidity in the underlying token, on the same terms as `depositsAmount`.
+  """
+  availableLiquidityAmount: Erc20Amount
 }
 
 input HubTokenInput {
@@ -896,6 +1145,7 @@ input HubsRequestQuery @oneOf {
 
   """Get back all the hubs based on the chain ids passed in"""
   chainIds: [ChainId!]
+  externalCuratorId: ID
 }
 
 type InsufficientBalanceError {
@@ -910,6 +1160,7 @@ type InsufficientLiquidityError {
   reason: String!
 }
 
+"""A scalar that can represent any JSON value."""
 scalar JSON
 
 """
@@ -990,7 +1241,7 @@ input LimitLeverageQuoteInput {
 
   """
   Collateral bought by this order's swap leg, in the collateral asset's human units. Excludes
-  the user's existing collateral and `additional_collateral`, which form the equity base.
+  the user's existing collateral and `additionalCollateral`, which form the equity base.
   """
   collateralAmount: BigDecimal!
 
@@ -1118,19 +1369,7 @@ type LiquidatedActivity {
   liquidator: EvmAddress!
   chain: Chain!
 
-  """
-  User's health factor at the moment immediately before the liquidation tx.
-  
-  Reuses the same building blocks as `user_summary_history`'s historical HF:
-  1. `spoke.user_position_history` snapshot per reserve at
-  `sequence_id < self.sequence_id` for shares + premium + dynamic config.
-  2. `get_reserve_asset_rates_history_bulk` to derive `HubAssetRates` at the
-  liquidation timestamp (gives balance-with-interest from shares).
-  3. `get_reserve_price_history_bulk` for the historical USD price.
-  4. `UserReserveSupplyState::get_user_supply_breakdown` /
-  `UserReserveDebtState::get_user_debt_breakdown` for the breakdown.
-  5. `UserDynamicConfigState::get_user_health_factor_formatted` for the HF.
-  """
+  """The user's health factor immediately before the liquidation."""
   liquidationHealthFactor: HealthFactor!
 }
 
@@ -1156,11 +1395,11 @@ input MarketDebtSwapQuoteInput {
 """
 Open or increase a leveraged position: flash-loan the debt asset, swap it to the collateral asset,
 supply the collateral, then borrow the debt to repay the flash loan. The equity base is the user's
-collateral-enabled balance in `collateral_reserve` plus the optional wallet top-up, and
+collateral-enabled balance in `collateralReserve` plus the optional wallet top-up, and
 `multiplier` is the target exposure (> 1) applied to that equity.
 
 Not previewable directly: `previewUserPosition` needs the executed swap amounts, so quote first
-and preview the resulting `quoteId` via `FromQuote`.
+and preview the resulting `quoteId` via `fromQuote`.
 """
 input MarketLeverageQuoteInput {
   """
@@ -1231,6 +1470,58 @@ input MarketRepayWithSupplyQuoteInput {
   kind: RepayWithSupplyKind
 }
 
+"""
+A side with no position reads as zero, except its health factor, which is null.
+"""
+type MarketScopePreview {
+  spoke: SpokeId!
+
+  """Collateral-enabled supplies, before the plan and after all of it."""
+  totalCollateral(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """The Market's full debt, which Earn supplies never offset."""
+  totalDebt(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """Collateral minus debt."""
+  netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """Supply APY weighted over collateral-enabled supplies only."""
+  collateralSupplyApy: PercentNumberVariation!
+
+  """
+  Net APY over collateral-enabled supplies, retaining the Market's full debt.
+  """
+  netCollateralApy: PercentNumberVariation!
+
+  """Premium over the base borrow rate, zero on a side with no debt."""
+  riskPremium: PercentNumberVariation!
+
+  """What the position could borrow in total against its collateral."""
+  maxBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """
+  What is left of that capacity once the position's debt is taken off it.
+  """
+  remainingBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """Yearly earnings at each side's net APY, not interest already accrued."""
+  projectedEarnings(currency: Currency! = USD): ExchangeAmountVariation!
+
+  """
+  Rewards the plan gains or gives up on the Market's collateral and debt, judged on its end states.
+  """
+  rewards: PreviewRewardOutcome!
+
+  """
+  Reserves whose pinned risk config the plan moves, indirect re-pins included.
+  """
+  otherConditions: [UserPositionConditionVariation!]!
+
+  """Base rates of every reserve held on either side, in reserve id order."""
+  reserveRates: [ScopedReserveRates!]!
+  healthFactor: HealthFactorVariation!
+}
+
 input MarketSupplySwapQuoteInput {
   """
   Quote accuracy level - FAST for faster response, ACCURATE for verified pricing (default)
@@ -1268,6 +1559,18 @@ type MerklBorrowReward {
   startDate: DateTime!
   endDate: DateTime!
   discountApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+
+  """
+  The tokens whose supplies reduce the borrow this campaign pays on. Empty when `GROSS`.
+  """
+  nettedBy: [Erc20Token!]!
+
+  """
+  `discountApy` per unit of the account's borrow here, after netting. Null for an anonymous
+  request, zero when the account is not eligible.
+  """
+  userEffectiveDiscountApy: PercentNumber
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   userEligible: Boolean!
@@ -1286,14 +1589,105 @@ type MerklSupplyReward {
   startDate: DateTime!
   endDate: DateTime!
   extraApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+
+  """
+  The tokens whose borrows reduce the supply this campaign pays on. Empty when `GROSS`.
+  """
+  nettedBy: [Erc20Token!]!
+
+  """
+  `extraApy` per unit of the account's supply here, after netting. Null for an anonymous
+  request, zero when the account is not eligible.
+  """
+  userEffectiveExtraApy: PercentNumber
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   userEligible: Boolean!
 }
 
+type MultiStepPreview {
+  """Whether the plan as submitted passes protocol validation."""
+  status: MultiStepPreviewStatus!
+  steps: [MultiStepPreviewStep!]!
+
+  """
+  Observations about the plan as a whole, never blocking, unlike a step's blockers.
+  """
+  warnings: [PreviewWarning!]!
+
+  """
+  Null unless a scope was asked for and the plan is `VALID`, since a partial plan never runs.
+  """
+  scope: PreviewScopeResult
+}
+
+input MultiStepPreviewRequest {
+  """The plan's actions, in execution order."""
+  actions: [PreviewAction!]!
+
+  """
+  Selects what `scope` reports; validation covers every action either way.
+  """
+  scope: PreviewScope
+}
+
+"""
+Protocol validation only: it assumes the amounts can be funded and ignores gas.
+"""
+enum MultiStepPreviewStatus {
+  VALID
+  BLOCKED
+
+  """
+  A step could not be evaluated, so the plan is neither proven nor refused.
+  """
+  INCOMPLETE
+}
+
+type MultiStepPreviewStep {
+  index: Int!
+  status: MultiStepPreviewStepStatus!
+
+  """
+  Null on a `NOT_EVALUATED` step, and on a `BLOCKED` one with no amount to preview.
+  """
+  preview: PreviewUserPosition
+
+  """
+  Why the step is blocked; every code here refuses the action at protocol level.
+  """
+  blockers: [PreviewWarning!]!
+}
+
+enum MultiStepPreviewStepStatus {
+  APPLIED
+  BLOCKED
+
+  """
+  After a blocked step: every step is required, so the rest are not evaluated.
+  """
+  NOT_EVALUATED
+}
+
 type MultichainAsset {
   assets: [Asset!]!
   summary: MultichainAssetSummary!
+}
+
+input MultichainAssetHistoryRequest {
+  query: MultichainAssetRequestQuery!
+  chainIds: [ChainId!]
+  currency: Currency! = USD
+  window: TimeWindow! = LAST_DAY
+}
+
+type MultichainAssetHistorySample {
+  date: DateTime!
+  deposits: ExchangeAmount!
+  borrows: ExchangeAmount!
+  availableLiquidity: ExchangeAmount!
+  utilizationRate: PercentNumber!
 }
 
 input MultichainAssetRequest {
@@ -1329,21 +1723,6 @@ type MultichainAssetSummary {
   chainCount: Int!
   reservesCount: Int!
   activeReservesCount: Int!
-}
-
-type Mutation {
-  """Top up a balance for a user or yourself on the fork"""
-  forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
-  swap(request: SwapRequest!): SwapExecutionPlan! @deprecated(reason: "Use submitOrder.")
-  cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan! @deprecated(reason: "Use cancelOrder.")
-  submitOrder(request: SubmitOrderRequest!): OrderExecutionPlan!
-  cancelOrder(request: CancelOrderRequest!): CancelOrderExecutionPlan!
-
-  """
-  Redeem a pending withdrawal claim.
-  Returns a transaction if the claim is ready, or the pending availability timestamp if not.
-  """
-  stableVaultWithdrawRedeem(request: StableVaultWithdrawRedeemRequest!): StableVaultWithdrawRedeemExecutionPlan!
 }
 
 type NativeAmount {
@@ -1394,14 +1773,14 @@ scalar OnChainHubAssetId
 scalar OnChainReserveId
 
 enum OperationType {
+  SPOKE_SUPPLY
   SPOKE_BORROW
   SPOKE_REPAY
-  SPOKE_SUPPLY
   SPOKE_WITHDRAW
-  SPOKE_UPDATE_USER_RISK_PREMIUM
-  SPOKE_UPDATE_USER_DYNAMIC_CONFIG
   SPOKE_SET_USER_USING_AS_COLLATERAL
   SPOKE_SET_USER_POSITION_MANAGER
+  SPOKE_UPDATE_USER_RISK_PREMIUM
+  SPOKE_UPDATE_USER_DYNAMIC_CONFIG
   RENOUNCE_SPOKE_USER_POSITION_MANAGER
   LIQUIDATION
 }
@@ -1447,8 +1826,8 @@ enum OrderDirection {
 ERC-20 approval for the wallet-side token pull, currently the leverage top-up. The spender is
 the order's adapter instance, whose address only the server can derive.
 
-`by_signature` is `null` when the token has no usable EIP-2612 permit, in which case the user
-must send `by_transaction`.
+`bySignature` is `null` when the token has no usable EIP-2612 permit, in which case the user
+must send `byTransaction`.
 """
 type OrderErc20Approval {
   byTransaction: TransactionRequest!
@@ -1524,9 +1903,7 @@ type OrderQuote {
   """Final sell amount after all fees and slippage"""
   finalSell: TokenAmount!
 
-  """
-  DEX direction of the underlying swap (Buy/Sell); kept Swap-flavored on purpose.
-  """
+  """DEX direction of the underlying swap (Buy/Sell)."""
   kind: TokenSwapKind!
 
   """Market or limit classification of the order."""
@@ -1635,20 +2012,15 @@ type PaginatedSpokeUserPositionManagerResult {
   pageInfo: PaginatedResultInfo!
 }
 
-type PaginatedStableVaultMovementsResult {
-  """The list of token movement records"""
-  items: [TokenMovementRecord!]!
-
-  """Pagination metadata for navigating results"""
-  pageInfo: PaginatedResultInfo!
+"""The cursors to the previous and next page; null when there is none."""
+type PaginatedTokenizedStocksInfo {
+  prev: TokenizedStockCursor
+  next: TokenizedStockCursor
 }
 
-type PaginatedStableVaultRateUsersResult {
-  """The list of user addresses assigned to the rate tier"""
-  items: [EvmAddress!]!
-
-  """Pagination metadata for navigating results"""
-  pageInfo: PaginatedResultInfo!
+type PaginatedTokenizedStocksResult {
+  items: [TokenizedStock!]!
+  pageInfo: PaginatedTokenizedStocksInfo!
 }
 
 type PaginatedUserSwapsResult {
@@ -1666,11 +2038,11 @@ input PendingOrdersRequest {
 
 type PercentNumber {
   """
-  The on-chain representation of the percentage, stored in basis points (bps).
+  The on-chain representation of the percentage, as an integer scaled by `decimals`.
   """
   onChainValue: BigInt!
 
-  """The number of decimals defining the precision of `bps`."""
+  """The number of decimals `onChainValue` is scaled by."""
   decimals: Int!
 
   """The percentage value where 1.0 represents 100%."""
@@ -1745,6 +2117,21 @@ type PositionSwapPositionManagerApproval {
 
 type PositionSwapSetCollateralApproval {
   bySignature: SwapTypedData!
+}
+
+"""The kind of position swap."""
+enum PositionSwapType {
+  """From the current supply to the new one."""
+  SUPPLY_SWAP
+
+  """From the current debt to the new one."""
+  BORROW_SWAP
+
+  """From the debt being repaid to the supply that repays it."""
+  REPAY_WITH_SUPPLY
+
+  """From the debt borrowed to the collateral it buys."""
+  LEVERAGE
 }
 
 type PreContractActionRequired {
@@ -1851,6 +2238,7 @@ type PreviewBorrowPointsReward {
   multiplier: Float!
   criteria: [PointsCriteria!]
   reserve: ReserveInfo!
+  userEligible: Boolean!
 }
 
 type PreviewMerklBorrowReward {
@@ -1858,9 +2246,12 @@ type PreviewMerklBorrowReward {
   startDate: DateTime!
   endDate: DateTime!
   discountApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+  nettedBy: [Erc20Token!]!
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   reserve: ReserveInfo!
+  userEligible: Boolean!
 }
 
 type PreviewMerklSupplyReward {
@@ -1868,9 +2259,12 @@ type PreviewMerklSupplyReward {
   startDate: DateTime!
   endDate: DateTime!
   extraApy: PercentNumber!
+  accrualBasis: RewardAccrualBasis!
+  nettedBy: [Erc20Token!]!
   payoutToken: Erc20Token!
   criteria: [MerklCriteria!]!
   reserve: ReserveInfo!
+  userEligible: Boolean!
 }
 
 input PreviewRequest {
@@ -1891,6 +2285,21 @@ type PreviewRewardOutcome {
   gained: [PreviewReward!]! @deprecated(reason: "Use acquired with ReserveReward instead.")
 }
 
+"""
+Which side a plan preview reads, since one hub asset can sit in Earn and a Market at once.
+"""
+input PreviewScope @oneOf {
+  """One spoke's collateral-enabled supplies and its full debt."""
+  market: SpokeId
+
+  """
+  One hub asset's collateral-disabled supplies, across every spoke listing it.
+  """
+  earn: HubAssetId
+}
+
+union PreviewScopeResult = MarketScopePreview | EarnScopePreview
+
 type PreviewSupplyPointsReward {
   id: RewardId!
   program: PointsProgram!
@@ -1900,6 +2309,7 @@ type PreviewSupplyPointsReward {
   multiplier: Float!
   criteria: [PointsCriteria!]
   reserve: ReserveInfo!
+  userEligible: Boolean!
 }
 
 type PreviewUserPosition {
@@ -1917,11 +2327,49 @@ type PreviewUserPosition {
   reserveRates: PreviewReserveRates!
   netCollateral(currency: Currency! = USD): ExchangeAmountVariation!
   netBalance(currency: Currency! = USD): ExchangeAmountVariation!
-  projectedEarnings: ExchangeAmountVariation!
-  maxBorrowingPower: ExchangeAmountVariation!
-  remainingBorrowingPower: ExchangeAmountVariation!
+  projectedEarnings(currency: Currency! = USD): ExchangeAmountVariation!
+  maxBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
+  remainingBorrowingPower(currency: Currency! = USD): ExchangeAmountVariation!
   rewards: PreviewRewardOutcome!
   otherConditions: [UserPositionConditionVariation!]!
+}
+
+type PreviewWarning {
+  code: PreviewWarningCode!
+
+  """
+  The reserve the warning is about; for a split position, the leftover Earn side.
+  """
+  reserveId: ReserveId
+
+  """What the action asked for, in the reserve's underlying."""
+  requested: Erc20Amount
+
+  """What was available, in the reserve's underlying."""
+  available: Erc20Amount
+}
+
+"""
+Why an action cannot execute; whether that blocks or warns is the client's call per flow.
+"""
+enum PreviewWarningCode {
+  RESERVE_NOT_FOUND
+  RESERVE_INACTIVE
+  RESERVE_FROZEN
+  RESERVE_PAUSED
+  NOT_BORROWABLE
+  COLLATERAL_NOT_ELIGIBLE
+  INSUFFICIENT_SUPPLY_BALANCE
+  INSUFFICIENT_LIQUIDITY
+  SUPPLY_CAP_EXCEEDED
+  BORROW_CAP_EXCEEDED
+  AMOUNT_EXCEEDS_DEBT
+  AMOUNT_MUST_BE_POSITIVE
+  AMOUNT_TOO_SMALL_FOR_SHARES
+  COLLATERAL_STATUS_ALREADY_SET
+  HEALTH_FACTOR_BELOW_THRESHOLD
+  QUOTE_REQUIRED
+  SPLIT_POSITION_WOULD_RESULT
 }
 
 input ProtocolHistoryRequest {
@@ -1934,153 +2382,8 @@ type ProtocolHistorySample {
   date: DateTime!
   deposits: ExchangeAmount!
   borrows: ExchangeAmount!
-}
-
-type Query {
-  health: Boolean!
-  chain(request: ChainRequest!): Chain
-  chains(request: ChainsRequest!): [Chain!]!
-
-  """Get the exchange rate of tokens > currency or currency > currency"""
-  exchangeRate(request: ExchangeRateRequest!): ExchangeAmount!
-  protocolHistory(request: ProtocolHistoryRequest!): [ProtocolHistorySample!]!
-  asset(request: AssetRequest!): Asset
-  multichainAsset(request: MultichainAssetRequest!): MultichainAsset!
-  assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
-  assetBorrowHistory(request: AssetBorrowHistoryRequest!): [AssetBorrowSample!]!
-  assetPriceHistory(request: AssetPriceHistoryRequest!): [AssetPriceSample!]!
-
-  """Fetch a list of hubs depending on your search criteria"""
-  hubs(request: HubsRequest!): [Hub!]!
-  hub(request: HubRequest!): Hub
-  hubAssets(request: HubAssetsRequest!): [HubAsset!]!
-  hubSummaryHistory(request: HubSummaryHistoryRequest!): [HubSummarySample!]!
-  hubAssetInterestRateModel(request: HubAssetInterestRateModelRequest!): HubAssetInterestRateModelResult!
-
-  """
-  Per-asset configuration for a (hub, spoke) pair, including caps,
-  halted flag, and risk premium threshold.
-  """
-  hubSpokeConfigs(request: HubSpokeConfigsRequest!): [HubSpokeConfig!]!
-  reserve(request: ReserveRequest!): Reserve
-  reserveHolders(request: PaginatedReserveHoldersRequest!): PaginatedReserveHoldersResult!
-  reserves(request: ReservesRequest!): [Reserve!]!
-  supply(request: SupplyRequest!): ExecutionPlan!
-  borrow(request: BorrowRequest!): ExecutionPlan!
-  withdraw(request: WithdrawRequest!): ExecutionPlan!
-  repay(request: RepayRequest!): ExecutionPlan!
-  spokePositionManagers(request: SpokePositionManagersRequest!): PaginatedSpokePositionManagerResult!
-  spokeUserPositionManagers(request: SpokeUserPositionManagersRequest!): PaginatedSpokeUserPositionManagerResult!
-  setSpokeUserPositionManager(request: SetSpokeUserPositionManagerRequest!): TransactionRequest!
-  renounceSpokeUserPositionManager(request: RenounceSpokeUserPositionManagerRequest!): TransactionRequest!
-  setUserSuppliesAsCollateral(request: SetUserSuppliesAsCollateralRequest!): TransactionRequest!
-  liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
-  updateUserPositionConditions(request: UpdateUserPositionConditionsRequest!): TransactionRequest!
-  preview(request: PreviewRequest!): PreviewUserPosition!
-  borrowApyHistory(request: BorrowApyHistoryRequest!): [ApySample!]!
-  supplyApyHistory(request: SupplyApyHistoryRequest!): [ApySample!]!
-  spoke(request: SpokeRequest!): Spoke
-
-  """Lists all spokes"""
-  spokes(request: SpokesRequest!): [Spoke!]!
-  spokeSummaryHistory(request: SpokeSummaryHistoryRequest!): [SpokeSummarySample!]!
-
-  """
-  Get the user balances.
-  This will only return assets that can be used on the protocol.
-  """
-  userBalances(request: UserBalancesRequest!): [UserBalance!]!
-  userBorrows(request: UserBorrowsRequest!): [UserBorrowItem!]!
-  userSummary(request: UserSummaryRequest!): UserSummary!
-  userSummaryHistory(request: UserSummaryHistoryRequest!): [UserSummaryHistoryItem!]!
-  userPositions(request: UserPositionsRequest!): [UserPosition!]!
-  userPosition(request: UserPositionRequest!): UserPosition
-  userSupplies(request: UserSuppliesRequest!): [UserSupplyItem!]!
-  userRiskPremiumBreakdown(request: UserRiskPremiumBreakdownRequest!): [UserRiskPremiumBreakdownItem!]!
-
-  """
-  This lets you know the API has processed the known transaction hash, as the API uses caching to make things as fast
-  as possible, it has an invalidation task, so sometimes if the receipt is complete, we may still (rarely) serve
-  old data for 100-200ms longer, it's best to query after you got the receipt to be told that it is ready to go.
-  Note the invalidation is very quick, and most of the time it's present even before your receipt is returned this is to
-  cater for the race condition.
-  """
-  hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
-  activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
-  tokenSwapQuote(request: TokenSwapQuoteRequest!): TokenSwapQuoteResult!
-  prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult! @deprecated(reason: "Use prepareOrder.")
-  supplySwapQuote(request: SupplySwapQuoteRequest!): SupplySwapQuoteResult!
-  borrowSwapQuote(request: BorrowSwapQuoteRequest!): BorrowSwapQuoteResult!
-  repayWithSupplyQuote(request: RepayWithSupplyQuoteRequest!): RepayWithSupplyQuoteResult!
-  withdrawSwapQuote(request: WithdrawSwapQuoteRequest!): WithdrawSwapQuoteResult!
-  leverageQuote(request: LeverageQuoteRequest!): LeverageQuoteResult!
-  preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult! @deprecated(reason: "Use prepareOrder.")
-  swapStatus(request: SwapStatusRequest!): SwapStatus @deprecated(reason: "Use orderStatus.")
-  userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult! @deprecated(reason: "Use pendingOrders.")
-  prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult! @deprecated(reason: "Use prepareCancelOrder.")
-  swappableTokens(request: SwappableTokensRequest!): [Token!]!
-
-  """
-  Prepare typed data to sign for any order. Dispatches on the quote's product; leverage lands
-  with its adapter wiring.
-  """
-  prepareOrder(request: PrepareOrderRequest!): PrepareOrderResult!
-  orderStatus(request: OrderStatusRequest!): OrderStatus
-  pendingOrders(request: PendingOrdersRequest!): PaginatedOrdersResult!
-  prepareCancelOrder(request: PrepareCancelOrderRequest!): PrepareCancelOrderResult!
-
-  """Claim rewards for a user"""
-  claimRewards(request: ClaimRewardsRequest!): TransactionRequest!
-
-  """The rewards a user can claim"""
-  userClaimableRewards(request: UserClaimableRewardsRequest!): [UserClaimableReward!]!
-
-  """Get a single stable vault by its id."""
-  stableVault(request: StableVaultRequest!): StableVault
-
-  """Get all stable vaults managed by the given admin address."""
-  stableVaults(request: StableVaultsRequest!): [StableVault!]!
-
-  """
-  Get the paginated list of users assigned to a specific rate tier in a stable vault.
-  """
-  stableVaultRateUsers(request: StableVaultRateUsersRequest!): PaginatedStableVaultRateUsersResult!
-
-  """
-  Build a transaction to assign users to a boosted rate tier in a stable vault.
-  """
-  stableVaultAssignRate(request: StableVaultAssignRateRequest!): TransactionRequest!
-
-  """
-  Build a transaction to remove users from a boosted rate tier in a stable vault.
-  """
-  stableVaultUnassignRate(request: StableVaultUnassignRateRequest!): TransactionRequest!
-
-  """Build a transaction to claim surplus assets from a stable vault."""
-  stableVaultClaimSurplus(request: StableVaultClaimSurplusRequest!): TransactionRequest!
-
-  """Get the paginated list of token movements for a stable vault."""
-  stableVaultMovements(request: StableVaultMovementsRequest!): PaginatedStableVaultMovementsResult!
-
-  """
-  Build a transaction to deposit tokens into a stable vault.
-  Returns a transaction request, an ERC20 approval if needed, or an insufficient balance error.
-  """
-  stableVaultDeposit(request: StableVaultDepositRequest!): StableVaultDepositExecutionPlan!
-
-  """
-  Build a transaction to withdraw tokens from a stable vault.
-  Returns either an instant transaction or a delayed withdrawal claim depending on vault liquidity.
-  """
-  stableVaultWithdraw(request: StableVaultWithdrawRequest!): StableVaultWithdrawExecutionPlan!
-
-  """Get the current status of a pending withdrawal claim."""
-  stableVaultClaimStatus(request: StableVaultClaimStatusRequest!): StableVaultClaimStatus!
-
-  """
-  Get a user's positions across stable vaults, optionally filtered to a specific vault.
-  """
-  stableVaultUserPositions(request: StableVaultUserPositionsRequest!): [StableVaultUserPosition!]!
+  availableLiquidity: ExchangeAmount!
+  utilizationRate: PercentNumber!
 }
 
 """Quote accuracy level for swap quotes"""
@@ -2199,9 +2502,12 @@ type Reserve {
   canBorrow: Boolean!
   canSupply: Boolean!
   canUseAsCollateral: Boolean!
-  canSwapFrom: Boolean!
+  canSwapFrom(type: PositionSwapType): Boolean!
   userState: ReserveUserState
   asset: HubAsset!
+
+  """Whether this reserve can be the destination of a position swap."""
+  canSwapTo(type: PositionSwapType): Boolean!
   spoke: Spoke!
 }
 
@@ -2315,7 +2621,11 @@ type ReserveSummary {
   borrowed: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+
+  """Yearly yield assuming per-second compounding."""
   supplyApy: PercentNumber!
+
+  """Yearly cost with interest assuming per-second compounding."""
   borrowApy: PercentNumber!
 
   """
@@ -2325,12 +2635,19 @@ type ReserveSummary {
   """
   underlyingApy: PercentNumber
   rewards: [Reward!]!
+
+  """
+  Time-weighted average supply APY over the window. Includes Merkl supply rewards unless `includeRewards` is false.
+  """
+  trailingSupplyApy(window: TimeWindow! = LAST_DAY, includeRewards: Boolean! = true): PercentNumber!
 }
 
 type ReserveUserState {
   balance: Erc20Amount!
   suppliable: Erc20Amount!
   borrowable: Erc20Amount!
+
+  """Compounded yearly cost including the user's risk premium."""
   borrowApy: PercentNumber!
 
   """
@@ -2403,6 +2720,9 @@ input ReservesRequestQuery @oneOf {
   """Get all reserves with a hub id"""
   hubId: HubId
 
+  """Get all the reserves on the hubs an external curator holds"""
+  externalCuratorId: ID
+
   """Get all the reserves on based on user position id"""
   userPositionId: UserPositionId
 
@@ -2423,7 +2743,27 @@ input ReservesRequestQuery @oneOf {
 
 union Reward = MerklSupplyReward | MerklBorrowReward | SupplyPointsReward | BorrowPointsReward
 
+"""What a campaign's rate is paid on."""
+enum RewardAccrualBasis {
+  """The account's whole balance on the rewarded leg."""
+  GROSS
+
+  """
+  That balance less the account's holdings of the tokens in `nettedBy`, floored at zero.
+  """
+  NET
+}
+
 scalar RewardId
+
+"""
+What the reserve pays, as opposed to the scope's APY, which is what the user earns.
+"""
+type ScopedReserveRates {
+  reserveId: ReserveId!
+  supplyApy: PercentNumberVariation!
+  borrowApy: PercentNumberVariation!
+}
 
 input SetSpokeUserPositionManagerRequest {
   """The spoke id"""
@@ -2476,6 +2816,13 @@ type Spoke {
 
   """The spoke chain"""
   chain: Chain!
+
+  """The spoke name, formatted for display."""
+  displayName: String!
+
+  """The market title for a card or tooltip, including the noun."""
+  displayTitle: String!
+  description: SpokeDescription!
   liquidationConfig: SpokeLiquidationConfig
   summary(currency: Currency! = USD): SpokeSummary!
   connectedHubs(currency: Currency! = USD): [SpokeConnectedHub!]!
@@ -2491,6 +2838,18 @@ type SpokeConnectedHubSummary {
   creditLine: ExchangeAmount!
   creditUsed: PercentNumber!
   totalSupplied: ExchangeAmount!
+}
+
+"""Display copy for a market. Null when none has been written."""
+type SpokeDescription {
+  """Copy shown above a deposit table."""
+  deposit: String
+
+  """Copy shown above a borrow table."""
+  borrow: String
+
+  """Copy shown under a card title that already names the market."""
+  identity: String
 }
 
 scalar SpokeId
@@ -2550,6 +2909,9 @@ input SpokeSummaryHistoryRequest {
 input SpokeSummaryHistoryRequestQuery @oneOf {
   spokeInput: SpokeInput
   spokeId: SpokeId
+
+  """One reserve: its own deposits and borrows over time"""
+  reserveId: ReserveId
 }
 
 type SpokeSummarySample {
@@ -2585,16 +2947,10 @@ input SpokesRequest {
 }
 
 input SpokesRequestQuery @oneOf {
-  """
-  The hub id
-  Get all the spokes which hubs are linked to a spoke reserve
-  """
+  """Every spoke with a reserve on this hub"""
   hubId: HubId
 
-  """
-  The hub address and chain id
-  Get all the spokes which hubs are linked to a spoke reserve
-  """
+  """Every spoke with a reserve on this hub"""
   hub: HubInput
 
   """
@@ -2602,247 +2958,7 @@ input SpokesRequestQuery @oneOf {
   Get all the spokes which are on the list of chain ids
   """
   chainIds: [ChainId!]
-}
-
-type StableVault {
-  """The unique identifier for the stable vault"""
-  id: StableVaultId!
-
-  """The display name of the stable vault"""
-  name: String!
-
-  """The on-chain contract address of the stable vault"""
-  address: EvmAddress!
-
-  """The admin address that manages the vault"""
-  admin: EvmAddress!
-
-  """The chain the vault is deployed on"""
-  chain: Chain!
-
-  """Aggregated summary statistics for the vault"""
-  summary: StableVaultSummary!
-
-  """The rate configuration for the vault, including base and boosted rates"""
-  rates: StableVaultRates!
-}
-
-input StableVaultAmountInput {
-  """The token address used in the stable vault operation"""
-  address: EvmAddress!
-
-  """The token amount"""
-  value: AmountInput!
-
-  """
-  The signed ERC20 permit message to operate on the token without a prior approval transaction
-  """
-  permitSig: ERC20PermitSignature
-}
-
-input StableVaultAssignRateRequest {
-  """The stable vault id"""
-  vaultId: StableVaultId!
-
-  """The boosted rate tier id to assign users to"""
-  rateId: BoostedRateId!
-
-  """The list of user addresses to assign to the rate tier"""
-  users: [EvmAddress!]!
-}
-
-enum StableVaultClaimStatus {
-  """The claim is ready to be redeemed"""
-  READY
-
-  """The claim is still in the waiting period"""
-  PENDING
-
-  """The claim status could not be determined"""
-  UNKNOWN
-}
-
-input StableVaultClaimStatusRequest {
-  """The withdrawal claim id to check"""
-  claimId: StableVaultWithdrawClaimId!
-}
-
-input StableVaultClaimSurplusRequest {
-  """The stable vault id"""
-  vaultId: StableVaultId!
-
-  """The list of surplus claims to execute"""
-  claims: [SurplusClaim!]!
-}
-
-union StableVaultDepositExecutionPlan = TransactionRequest | Erc20ApprovalRequired | InsufficientBalanceError
-
-input StableVaultDepositRequest {
-  """The target stable vault"""
-  vault: StableVaultInput!
-
-  """The depositor's address"""
-  user: EvmAddress!
-
-  """The token and amount to deposit"""
-  amount: StableVaultAmountInput!
-}
-
-scalar StableVaultId
-
-input StableVaultInput {
-  """The stable vault id"""
-  id: StableVaultId!
-}
-
-input StableVaultMovementsRequest {
-  """The stable vault id"""
-  vaultId: StableVaultId!
-
-  """The number of results per page"""
-  pageSize: PageSize!
-
-  """The pagination cursor for fetching the next page"""
-  cursor: Cursor
-}
-
-type StableVaultPendingAvailability {
-  """The earliest time at which the withdrawal claim becomes redeemable"""
-  executableAfter: DateTime!
-}
-
-input StableVaultRateUsersRequest {
-  """The stable vault id"""
-  vaultId: StableVaultId!
-
-  """The rate tier id to query users for"""
-  rateId: BoostedRateId!
-
-  """The number of results per page"""
-  pageSize: PageSize!
-
-  """The pagination cursor for fetching the next page"""
-  cursor: Cursor
-}
-
-type StableVaultRates {
-  """The base APY applied to all depositors in the vault"""
-  baseRate: PercentNumber!
-
-  """The display name for the rate tier"""
-  name: String!
-
-  """The list of boosted rate tiers available for eligible users"""
-  boostedRates: [BoostedRate!]!
-}
-
-input StableVaultRequest {
-  """The stable vault id to look up"""
-  id: StableVaultId!
-}
-
-type StableVaultSummary {
-  """The total number of shares issued by the vault"""
-  shares: BigInt!
-
-  """The total number of users deposited in the vault"""
-  userCount: BigInt!
-
-  """The total value of deposits in the vault"""
-  totalDeposits: BigDecimal!
-}
-
-input StableVaultUnassignRateRequest {
-  """The stable vault id"""
-  vaultId: StableVaultId!
-
-  """The boosted rate tier id to remove users from"""
-  rateId: BoostedRateId!
-
-  """The list of user addresses to remove from the rate tier"""
-  users: [EvmAddress!]!
-}
-
-type StableVaultUserPosition {
-  """Unique identifier derived from vault id and user address"""
-  id: StableVaultUserPositionId!
-
-  """The stable vault this position belongs to"""
-  vault: StableVault!
-
-  """The user's address"""
-  user: EvmAddress!
-
-  """The original deposited amount"""
-  principal: DecimalNumber!
-
-  """The accrued interest on the position"""
-  interests: DecimalNumber!
-
-  """The number of vault shares held"""
-  shares: DecimalNumber!
-
-  """The total balance (principal + interest)"""
-  totalBalance: DecimalNumber!
-
-  """The effective annual percentage yield for this position"""
-  apy: PercentNumber!
-
-  """The boosted rate tier the user is assigned to"""
-  boostedRateId: BoostedRateId!
-}
-
-scalar StableVaultUserPositionId
-
-input StableVaultUserPositionsRequest {
-  """The user address to get positions for"""
-  user: EvmAddress!
-
-  """Optional filter to narrow results to a specific vault"""
-  filter: StableVaultUserPositionsRequestFilter
-}
-
-input StableVaultUserPositionsRequestFilter {
-  """Filter positions to a specific stable vault"""
-  vault: StableVaultInput!
-}
-
-type StableVaultWithdrawClaim {
-  """The unique identifier for the pending withdrawal claim"""
-  claimId: StableVaultWithdrawClaimId!
-
-  """The transaction to submit to initiate the withdrawal claim"""
-  transaction: TransactionRequest!
-
-  """The earliest time at which the claim can be redeemed"""
-  executableAfter: DateTime!
-}
-
-scalar StableVaultWithdrawClaimId
-
-union StableVaultWithdrawExecutionPlan = TransactionRequest | StableVaultWithdrawClaim
-
-union StableVaultWithdrawRedeemExecutionPlan = TransactionRequest | StableVaultPendingAvailability
-
-input StableVaultWithdrawRedeemRequest {
-  """The withdrawal claim id to redeem"""
-  claimId: StableVaultWithdrawClaimId!
-}
-
-input StableVaultWithdrawRequest {
-  """The stable vault to withdraw from"""
-  vault: StableVaultInput!
-
-  """The withdrawer's address"""
-  user: EvmAddress!
-
-  """The token and amount to withdraw"""
-  amount: StableVaultAmountInput!
-}
-
-input StableVaultsRequest {
-  """The admin address to filter vaults by"""
-  admin: EvmAddress!
+  externalCuratorId: ID
 }
 
 input SubmitOrderBySignatureInput {
@@ -2872,7 +2988,13 @@ type SupplyActivity {
 }
 
 input SupplyApyHistoryRequest {
-  reserve: ReserveId!
+  """Exactly one of `reserve` or `hubAsset` must be set"""
+  reserve: ReserveId
+
+  """
+  The hub asset's shared rate curve; rewards are folded from its smallest reserve.
+  """
+  hubAsset: HubAssetId
   window: TimeWindow! = LAST_DAY
 
   """
@@ -2901,10 +3023,15 @@ input SupplyRequest {
   amount: ReserveAmountInputWithPermit!
 
   """If you wish to enable collateral with it meaning you can borrow"""
-  enableCollateral: AlwaysTrue
+  enableCollateral: AlwaysTrue @deprecated(reason: "Use useAsCollateral instead.")
 
   """The user sending the transaction (normally the user's wallet address)"""
   sender: EvmAddress!
+
+  """
+  The reserve's collateral status after the supply. Omit to leave it unchanged.
+  """
+  useAsCollateral: Boolean
 }
 
 type SupplySwap {
@@ -2940,14 +3067,6 @@ input SupplySwapQuoteRequest @oneOf {
 }
 
 union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
-
-input SurplusClaim {
-  """The token address of the surplus asset to claim"""
-  asset: EvmAddress!
-
-  """The amount to claim, in the token's main unit (e.g., 1.5 USDC)"""
-  amount: BigDecimal!
-}
 
 enum SwapActivityStatus {
   FULFILLED
@@ -3166,6 +3285,7 @@ enum TimeWindow {
   LAST_DAY
   LAST_WEEK
   LAST_MONTH
+  LAST_THREE_MONTHS
   LAST_SIX_MONTHS
   LAST_YEAR
   ALL
@@ -3178,6 +3298,7 @@ union TokenAmount = NativeAmount | Erc20Amount
 enum TokenCategory {
   STABLECOIN
   ETH_CORRELATED
+  TOKENIZED_STOCK
 }
 
 type TokenInfo {
@@ -3193,10 +3314,14 @@ type TokenInfo {
   """The token icon"""
   icon: String!
 
+  """The token name, formatted for display."""
+  displayName: String!
+  displaySymbol: String!
+
   """The token decimals"""
   decimals: Int!
 
-  """The token category,"""
+  """The token categories"""
   categories: [TokenCategory!]!
 
   """
@@ -3213,92 +3338,6 @@ input TokenInput @oneOf {
 
   """The erc20 address"""
   erc20: EvmAddress
-}
-
-union TokenMovement = TokenMovementBridgeOut | TokenMovementBridgeIn | TokenMovementAllocate | TokenMovementDeallocate | TokenMovementSwap | TokenMovementRebalance
-
-type TokenMovementAllocate {
-  """The token allocated to a yield strategy"""
-  token: Erc20Token!
-
-  """The amount allocated"""
-  amount: BigDecimal!
-}
-
-type TokenMovementBridgeIn {
-  """The source token from the origin chain"""
-  fromToken: Erc20Token!
-
-  """The destination token received"""
-  toToken: Erc20Token!
-
-  """The amount bridged in"""
-  amount: BigDecimal!
-}
-
-type TokenMovementBridgeOut {
-  """The source token being bridged out"""
-  fromToken: Erc20Token!
-
-  """The destination token on the target chain"""
-  toToken: Erc20Token!
-
-  """The amount bridged"""
-  amount: BigDecimal!
-}
-
-type TokenMovementDeallocate {
-  """The token deallocated from a yield strategy"""
-  token: Erc20Token!
-
-  """The amount deallocated"""
-  amount: BigDecimal!
-}
-
-scalar TokenMovementId
-
-type TokenMovementRebalance {
-  """The token being rebalanced"""
-  token: Erc20Token!
-
-  """The amount rebalanced"""
-  amount: BigDecimal!
-}
-
-type TokenMovementRecord {
-  """The unique identifier for this movement record"""
-  id: TokenMovementId!
-
-  """The movement type and its associated details"""
-  type: TokenMovement!
-
-  """The status of the movement record"""
-  status: TokenMovementStatus!
-
-  """The timestamp when the movement occurred"""
-  timestamp: DateTime!
-
-  """The on-chain transaction hash"""
-  txHash: TxHash!
-}
-
-enum TokenMovementStatus {
-  PENDING
-  DONE
-}
-
-type TokenMovementSwap {
-  """The token being swapped from"""
-  fromToken: Erc20Token!
-
-  """The amount of the source token"""
-  fromAmount: BigDecimal!
-
-  """The token being swapped to"""
-  toToken: Erc20Token!
-
-  """The amount of the destination token received"""
-  toAmount: BigDecimal!
 }
 
 type TokenSwap {
@@ -3334,6 +3373,346 @@ input TokenSwapQuoteRequest @oneOf {
 }
 
 union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | SwapByTransactionWithApprovalRequired | InsufficientLiquidityError
+
+type TokenizedStock {
+  """The tokenized stock id"""
+  id: TokenizedStockId!
+  chainId: ChainId!
+  address: EvmAddress!
+
+  """The underlying company's exchange ticker, such as `AAPL`."""
+  tickerSymbol: String!
+
+  """The ISIN of the security the token redeems into."""
+  isin: String!
+
+  """The underlying company and its equity market."""
+  offchain: TokenizedStockOffchain!
+
+  """The token itself."""
+  onchain: TokenizedStockOnchain!
+}
+
+type TokenizedStockAbout {
+  """The year the company was founded."""
+  foundedYear: Int!
+  companyName: String
+  description: String
+  ceo: String
+  sector: String
+  industry: String
+
+  """Full-time employees, as of the company's most recent annual filing."""
+  employeeCount: Int
+  website: String
+
+  """The day the company first listed, at the exchange's midnight."""
+  ipoDate: DateTime
+  headquarters: Headquarters
+}
+
+type TokenizedStockChart {
+  """The chart points, oldest first."""
+  points: [TokenizedStockChartPoint!]!
+}
+
+"""The spacing between chart points."""
+enum TokenizedStockChartGrain {
+  FIVE_MINUTE
+  HOURLY
+  DAILY
+}
+
+"""One point of the token's chart."""
+type TokenizedStockChartPoint {
+  at: DateTime!
+  price: BigDecimal!
+
+  """The market cap; null when unknown for this point."""
+  marketCap: BigDecimal
+  volume: BigDecimal
+}
+
+scalar TokenizedStockCursor
+
+"""One dividend the underlying company paid."""
+type TokenizedStockDividend {
+  """The day the share began trading without the dividend."""
+  exDate: DateTime!
+  declarationDate: DateTime
+  recordDate: DateTime
+  paymentDate: DateTime
+  amount: BigDecimal!
+
+  """The dividend amount adjusted for later splits."""
+  adjustedAmount: BigDecimal
+
+  """
+  The dividend as a percentage of the close on its ex-date; null when there was no close that day.
+  """
+  yieldPercentage: BigDecimal
+
+  """How often the dividend is paid, such as `Quarterly`."""
+  frequency: String
+}
+
+"""One quarter's earnings."""
+type TokenizedStockEarnings {
+  """The day the company reported."""
+  reportDate: DateTime!
+
+  """The fiscal year the quarter belongs to."""
+  fiscalYear: Int
+
+  """The fiscal quarter, `Q1` to `Q4`. Null for a quarter not yet reported."""
+  fiscalPeriod: String
+
+  """The reported EPS; null for a quarter not yet reported."""
+  epsActual: BigDecimal
+  epsEstimated: BigDecimal
+
+  """The reported revenue."""
+  revenueActual: BigDecimal
+  revenueEstimated: BigDecimal
+}
+
+"""The exchange the underlying trades on."""
+type TokenizedStockExchange {
+  """The exchange's code, such as `NASDAQ`."""
+  code: String!
+  name: String
+
+  """The opening time in the exchange's local time, such as `09:30`."""
+  openingHour: String
+  closingHour: String
+  timezone: String
+
+  """Whether the exchange is open now; null when not known yet."""
+  isOpen: Boolean
+
+  """When this was last refreshed."""
+  updatedAt: DateTime!
+}
+
+"""Which filed periods to return."""
+enum TokenizedStockFinancialPeriod {
+  QUARTERLY
+  ANNUAL
+}
+
+"""One filed period of the underlying company's income statement."""
+type TokenizedStockFinancials {
+  fiscalYear: Int!
+
+  """`Q1`..`Q4`, or `FY` for an annual filing."""
+  fiscalPeriod: String!
+  periodEnd: DateTime
+  filingDate: DateTime
+
+  """The currency the statement was filed in."""
+  reportedCurrency: String
+  revenue: BigDecimal
+  grossProfit: BigDecimal
+  operatingIncome: BigDecimal
+  netIncome: BigDecimal
+
+  """The reported EPS for the period."""
+  eps: BigDecimal
+
+  """The diluted EPS for the period."""
+  epsDiluted: BigDecimal
+  revenuePerShare: BigDecimal
+  netIncomePerShare: BigDecimal
+
+  """Shares outstanding at the period end."""
+  sharesOutstanding: BigDecimal
+}
+
+scalar TokenizedStockId
+
+type TokenizedStockOffchain {
+  """The company profile."""
+  about: TokenizedStockAbout!
+
+  """The equity's market data; null before the first quote."""
+  market: TokenizedStockOffchainMarket
+
+  """
+  The company's valuation and performance over the trailing twelve months; null before the first refresh.
+  """
+  performance: TokenizedStockPerformance
+
+  """The equity's price, market cap and volume, oldest first."""
+  chart(grain: TokenizedStockChartGrain!, since: DateTime, until: DateTime): TokenizedStockOffchainChart!
+
+  """The exchange the underlying trades on; null when not known."""
+  exchange: TokenizedStockExchange
+
+  """The dividends the company paid, oldest first."""
+  dividends(since: DateTime, until: DateTime): [TokenizedStockDividend!]!
+
+  """
+  Quarterly earnings, oldest first, including scheduled quarters with only an estimate.
+  """
+  earnings(since: DateTime, until: DateTime): [TokenizedStockEarnings!]!
+
+  """When the company next reports; null if nothing is scheduled."""
+  nextEarningsReport: DateTime
+
+  """Filed income statements, oldest first. Quarterly by default."""
+  financials(period: TokenizedStockFinancialPeriod! = QUARTERLY): [TokenizedStockFinancials!]!
+}
+
+type TokenizedStockOffchainChart {
+  """The chart points, oldest first."""
+  points: [TokenizedStockOffchainChartPoint!]!
+}
+
+"""One point of the equity's chart."""
+type TokenizedStockOffchainChartPoint {
+  """The point's time, in the exchange's timezone."""
+  at: DateTime!
+  price: BigDecimal!
+
+  """The market cap; daily points only, null where not published."""
+  marketCap: BigDecimal
+
+  """The traded volume, in shares."""
+  volumeShares: Int
+}
+
+"""The underlying equity's market data."""
+type TokenizedStockOffchainMarket {
+  price: BigDecimal
+  change: BigDecimal
+  changePercentage: BigDecimal
+  open: BigDecimal
+  previousClose: BigDecimal
+  dayLow: BigDecimal
+  dayHigh: BigDecimal
+  yearLow: BigDecimal
+  yearHigh: BigDecimal
+  marketCap: BigDecimal
+
+  """The traded volume, in shares."""
+  volume: Int
+  change1D: BigDecimal
+  change5D: BigDecimal
+  change1M: BigDecimal
+  change3M: BigDecimal
+  change6M: BigDecimal
+  changeYtd: BigDecimal
+  change1Y: BigDecimal
+  change3Y: BigDecimal
+  change5Y: BigDecimal
+  change10Y: BigDecimal
+  changeMax: BigDecimal
+
+  """When the exchange last priced the equity."""
+  quoteTimestamp: DateTime
+}
+
+type TokenizedStockOnchain {
+  """The token's on-chain details; null until first read."""
+  about: TokenizedStockOnchainAbout
+
+  """The token's market data; null when no provider lists it."""
+  market: TokenizedStockOnchainMarket
+
+  """
+  The token's price, market cap and volume, oldest first. Empty when no provider lists it.
+  """
+  chart(grain: TokenizedStockChartGrain!, since: DateTime, until: DateTime): TokenizedStockChart!
+}
+
+type TokenizedStockOnchainAbout {
+  """The token name"""
+  name: String!
+
+  """The token symbol, such as `AAPLc`."""
+  symbol: String!
+  decimals: Int!
+
+  """The total supply as a holder sees it, with the multiplier applied."""
+  totalSupply: BigInt!
+
+  """
+  The total supply as the contract reports it, without the multiplier. Use `totalSupply` for display.
+  """
+  totalSupplyRaw: BigInt!
+
+  """The supply cap as a holder sees it, with the multiplier applied."""
+  supplyCap: BigInt!
+
+  """The supply cap as the contract reports it, without the multiplier."""
+  supplyCapRaw: BigInt!
+
+  """
+  The redemption ratio in WAD, where `1e18` is one share. It rises with dividends and splits.
+  """
+  multiplier: BigInt!
+
+  """When the contract was last read."""
+  updatedAt: DateTime!
+}
+
+"""The token's market data."""
+type TokenizedStockOnchainMarket {
+  price: BigDecimal!
+  marketCap: BigDecimal!
+  fullyDilutedValuation: BigDecimal!
+
+  """Traded volume over the last 24 hours, in USD."""
+  volume24H: BigDecimal!
+  circulatingSupply: BigDecimal!
+  totalSupply: BigDecimal!
+  change1H: BigDecimal
+  change24H: BigDecimal
+  change7D: BigDecimal
+
+  """`null` until the token is a month old."""
+  change30D: BigDecimal
+
+  """`null` until the token is a year old."""
+  change1Y: BigDecimal
+
+  """When the provider computed these figures."""
+  lastUpdated: DateTime!
+}
+
+"""How many items a page holds."""
+enum TokenizedStockPageSize {
+  TEN
+  FIFTY
+}
+
+"""
+The company's valuation and performance over the trailing twelve months.
+"""
+type TokenizedStockPerformance {
+  dividendYield: BigDecimal
+
+  """Net income per share."""
+  eps: BigDecimal
+  revenuePerShare: BigDecimal
+  priceToEarnings: BigDecimal
+  priceToSales: BigDecimal
+  operatingMargin: BigDecimal
+
+  """When these figures were last refreshed."""
+  updatedAt: DateTime!
+}
+
+"""The tokenized stock, by chain and address."""
+input TokenizedStockRequest {
+  chainId: ChainId!
+  address: EvmAddress!
+}
+
+input TokenizedStocksRequest {
+  pageSize: TokenizedStockPageSize! = FIFTY
+  cursor: TokenizedStockCursor
+}
 
 type TransactionRequest {
   to: EvmAddress!
@@ -3537,9 +3916,14 @@ type UserBorrowItem {
   interest: Erc20Amount!
 
   """
+  Whether a borrow swap or a repay with supply can start from this position.
+  """
+  canSwapFrom: Boolean!
+
+  """
   When the borrow was created.
-  This is null if they have no supply item, for
-  example, when using include_zero_balances this comes
+  This is null if they have no borrow item, for
+  example, when using `includeZeroBalances` this comes
   back as principal and debt as 0
   """
   createdAt: DateTime
@@ -3616,9 +4000,7 @@ type UserPosition {
   createdAt: DateTime!
   totalSupplied(currency: Currency! = USD): ExchangeAmountWithChange!
 
-  """
-  Total collateral which is the full some of the assets supplied which are enabled as collateral
-  """
+  """Total collateral: the sum of the supplies enabled as collateral"""
   totalCollateral(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """Total debt which is the total amount borrowed plus the accrued premium"""
@@ -3631,18 +4013,24 @@ type UserPosition {
   netCollateral(currency: Currency! = USD): ExchangeAmountWithChange!
 
   """
-  Net APY across the user's supplies and borrows. Composes
-  [`net_supply_apy`] and [`net_borrow_apy`], both of which include the
-  user's eligible Merkl reward APY on top of base supply / borrow rates.
+  Net APY with the premium on the borrow side and eligible Merkl rewards on both.
   """
   netApy: PercentNumber!
 
   """
   Net supply APY weighted by USD balance. Includes the user's eligible
-  Merkl supply reward APY (`extra_apy`) and the asset's underlying yield
+  Merkl supply reward APY and the asset's underlying yield
   on top of each reserve's base supply rate.
   """
   netSupplyApy: PercentNumberWithChange!
+
+  """Supply APY weighted over collateral-enabled supplies only."""
+  collateralSupplyApy: PercentNumberWithChange!
+
+  """
+  Net APY over collateral-enabled supplies, retaining the position's full debt.
+  """
+  netCollateralApy: PercentNumber!
 
   """
   Net APY split into the parts it is made of. Leverage amplifies each part, so on a looped
@@ -3651,9 +4039,7 @@ type UserPosition {
   netApyBreakdown: NetApyBreakdown!
 
   """
-  Net borrow APY weighted by USD debt. Subtracts the user's eligible
-  Merkl borrow reward APY (`discount_apy`) from each reserve's base
-  borrow rate.
+  Weighted by USD debt, each reserve at the premium the spoke charges less borrow rewards.
   """
   netBorrowApy: PercentNumberWithChange!
 
@@ -3661,12 +4047,16 @@ type UserPosition {
   Net accrued interest earned (all supply interests - all borrow interests)
   """
   netAccruedInterest(currency: Currency! = USD): ExchangeAmount!
+
+  """
+  Interest earned by collateral-enabled supplies minus all borrow interest.
+  """
+  netCollateralAccruedInterest(currency: Currency! = USD): ExchangeAmount!
   healthFactor: HealthFactorWithChange!
   riskPremium: UserPositionRiskPremium
 
   """
-  ExchangeAmount liquidation price if you only have one collateral more then
-  1 collateral you should render health factor
+  The liquidation price when the position has one collateral; with more than one, render the health factor instead.
   """
   liquidationPrice(currency: Currency! = USD): ExchangeAmount
   maxBorrowingPower(currency: Currency! = USD): ExchangeAmount!
@@ -3757,19 +4147,11 @@ type UserSummary {
   """Total debt across all positions"""
   totalDebt(currency: Currency! = USD): ExchangeAmount!
 
-  """
-  Net APY = (Σ (supplied_amount_i * supply_apy_i) - Σ (borrowed_amount_j * borrow_apy_j)) / (Σ supplied_amount_i)
-  
-  Per-position `supply_apy_i` and `borrow_apy_j` include the user's
-  eligible Merkl reward APY (via [`UserPosition::net_supply_apy`] /
-  [`UserPosition::net_borrow_apy`]). Historical NET APY in
-  [`get_user_summary_history`] stays base-only because Merkl APR has no
-  historical campaign data.
-  """
+  """Net APY across all positions, each weighted by its net worth."""
   netApy: PercentNumber!
 
   """
-  The same split as a position's, weighted across positions the way `net_apy` is, so the
+  The same split as a position's, weighted across positions the way `netApy` is, so the
   dashboard headline and the position it drills into agree on where the number came from.
   """
   netApyBreakdown: NetApyBreakdown!
@@ -3791,6 +4173,13 @@ input UserSummaryFilter @oneOf {
 }
 
 type UserSummaryHistoryItem {
+  """
+  The aggregated supply APY for the time period, weighted by USD supplied
+  """
+  supplyApy: PercentNumber!
+
+  """The supply APY weighted over collateral-enabled supplies only"""
+  collateralSupplyApy: PercentNumber!
   healthFactor: BigDecimal
   date: DateTime!
 
@@ -3802,6 +4191,12 @@ type UserSummaryHistoryItem {
 
   """The aggregated supplies for the time period"""
   supplies(currency: Currency! = USD): ExchangeAmount!
+
+  """The aggregated collateral-enabled supplies for the time period"""
+  collateral(currency: Currency! = USD): ExchangeAmount!
+
+  """The aggregated collateral minus debt for the time period"""
+  netCollateral(currency: Currency! = USD): ExchangeAmount!
 }
 
 input UserSummaryHistoryRequest {
@@ -3870,10 +4265,13 @@ type UserSupplyItem {
   """If this supply is used as collateral"""
   isCollateral: Boolean!
 
+  """Whether a supply swap can start from this position."""
+  canSwapFrom: Boolean!
+
   """
   When the supply was created.
   This is null if they have no supply item, for
-  example, when using include_zero_balances this comes
+  example, when using `includeZeroBalances` this comes
   back as principal, balance, and withdrawable as 0
   """
   createdAt: DateTime
@@ -3918,6 +4316,162 @@ type UsingAsCollateralActivity {
   reserve: ReserveInfo!
   enabledAsCollateral: Boolean!
   chain: Chain!
+}
+
+type V4Mutation {
+  """Top up a balance for a user on the fork"""
+  forkTopUp(request: ForkTopUpRequest!): ForkTopUpResponse!
+  swap(request: SwapRequest!): SwapExecutionPlan! @deprecated(reason: "Use submitOrder.")
+  cancelSwap(request: CancelSwapRequest!): CancelSwapExecutionPlan! @deprecated(reason: "Use cancelOrder.")
+  submitOrder(request: SubmitOrderRequest!): OrderExecutionPlan!
+  cancelOrder(request: CancelOrderRequest!): CancelOrderExecutionPlan!
+}
+
+type V4Query {
+  """
+  The credit purchases of the customer behind the API key. Requires an API key.
+  """
+  apiPayments: [ApiPayment!]!
+  activities(request: ActivitiesRequest!): PaginatedActivitiesResult!
+
+  """Whether a token is unavailable in the caller's region."""
+  isAssetGeoblocked(request: AssetRequest!): Boolean!
+
+  """Whether each of several tokens is unavailable in the caller's region."""
+  areAssetsGeoblocked(request: AssetsRequest!): [AssetGeoblock!]!
+  asset(request: AssetRequest!): Asset
+  assetBorrowHistory(request: AssetBorrowHistoryRequest!): [AssetBorrowSample!]!
+  assetSupplyHistory(request: AssetSupplyHistoryRequest!): [AssetSupplySample!]!
+  assetPriceHistory(request: AssetPriceHistoryRequest!): [AssetPriceSample!]!
+  multichainAsset(request: MultichainAssetRequest!): MultichainAsset!
+
+  """
+  One asset's totals across chains per bucket, grouped the way `multichainAsset` groups.
+  """
+  multichainAssetHistory(request: MultichainAssetHistoryRequest!): [MultichainAssetHistorySample!]!
+  reserve(request: ReserveRequest!): Reserve
+  reserves(request: ReservesRequest!): [Reserve!]!
+  reserveHolders(request: PaginatedReserveHoldersRequest!): PaginatedReserveHoldersResult!
+  hubAssetHolders(request: HubAssetHoldersRequest!): PaginatedReserveHoldersResult!
+  supplyApyHistory(request: SupplyApyHistoryRequest!): [ApySample!]!
+  borrowApyHistory(request: BorrowApyHistoryRequest!): [ApySample!]!
+  chain(request: ChainRequest!): Chain
+  chains(request: ChainsRequest!): [Chain!]!
+  hub(request: HubRequest!): Hub
+
+  """Fetch a list of hubs depending on your search criteria"""
+  hubs(request: HubsRequest!): [Hub!]!
+  hubAssets(request: HubAssetsRequest!): [HubAsset!]!
+  hubAssetInterestRateModel(request: HubAssetInterestRateModelRequest!): HubAssetInterestRateModelResult!
+
+  """
+  Per-asset configuration for a (hub, spoke) pair, including caps,
+  halted flag, and risk premium threshold.
+  """
+  hubSpokeConfigs(request: HubSpokeConfigsRequest!): [HubSpokeConfig!]!
+  hubSummaryHistory(request: HubSummaryHistoryRequest!): [HubSummarySample!]!
+  protocolHistory(request: ProtocolHistoryRequest!): [ProtocolHistorySample!]!
+
+  """The known third-party v4 deployments."""
+  externalInstances: [ExternalInstance!]!
+
+  """An external curator by id, or null if there is none."""
+  externalCurator(request: ExternalCuratorRequest!): ExternalCurator
+
+  """The external curators holding a hub on the given chains."""
+  externalCurators(request: ExternalCuratorsRequest!): [ExternalCurator!]!
+  spoke(request: SpokeRequest!): Spoke
+
+  """Lists all spokes"""
+  spokes(request: SpokesRequest!): [Spoke!]!
+  spokeSummaryHistory(request: SpokeSummaryHistoryRequest!): [SpokeSummarySample!]!
+  spokePositionManagers(request: SpokePositionManagersRequest!): PaginatedSpokePositionManagerResult!
+  spokeUserPositionManagers(request: SpokeUserPositionManagersRequest!): PaginatedSpokeUserPositionManagerResult!
+
+  """Get the exchange rate of tokens > currency or currency > currency"""
+  exchangeRate(request: ExchangeRateRequest!): ExchangeAmount!
+  health: Boolean!
+  userPosition(request: UserPositionRequest!): UserPosition
+  userSummary(request: UserSummaryRequest!): UserSummary!
+  userSummaryHistory(request: UserSummaryHistoryRequest!): [UserSummaryHistoryItem!]!
+  userRiskPremiumBreakdown(request: UserRiskPremiumBreakdownRequest!): [UserRiskPremiumBreakdownItem!]!
+  userPositions(request: UserPositionsRequest!): [UserPosition!]!
+
+  """The rewards a user can claim"""
+  userClaimableRewards(request: UserClaimableRewardsRequest!): [UserClaimableReward!]!
+
+  """Claim rewards for a user"""
+  claimRewards(request: ClaimRewardsRequest!): TransactionRequest!
+  borrow(request: BorrowRequest!): ExecutionPlan!
+  supply(request: SupplyRequest!): ExecutionPlan!
+  withdraw(request: WithdrawRequest!): ExecutionPlan!
+  repay(request: RepayRequest!): ExecutionPlan!
+  setUserSuppliesAsCollateral(request: SetUserSuppliesAsCollateralRequest!): TransactionRequest!
+  setSpokeUserPositionManager(request: SetSpokeUserPositionManagerRequest!): TransactionRequest!
+  renounceSpokeUserPositionManager(request: RenounceSpokeUserPositionManagerRequest!): TransactionRequest!
+  updateUserPositionConditions(request: UpdateUserPositionConditionsRequest!): TransactionRequest!
+  liquidatePosition(request: LiquidatePositionRequest!): LiquidatePositionExecutionPlan!
+
+  """
+  Whether the API has caught up with the block this transaction was mined in, so reads
+  reflect it. Poll it after the receipt and before reading positions or balances.
+  """
+  hasProcessedKnownTransaction(request: HasProcessedKnownTransactionRequest!): Boolean!
+
+  """A tokenized stock, or null if the address is not listed."""
+  tokenizedStock(request: TokenizedStockRequest!): TokenizedStock
+
+  """The listed tokenized stocks, paginated."""
+  tokenizedStocks(request: TokenizedStocksRequest! = {pageSize: FIFTY, cursor: null}): PaginatedTokenizedStocksResult!
+  tokenSwapQuote(request: TokenSwapQuoteRequest!): TokenSwapQuoteResult!
+  swappableTokens(request: SwappableTokensRequest!): [Token!]!
+
+  """
+  Prepare typed data to sign for any order. Dispatches on the quote's product; leverage lands
+  with its adapter wiring.
+  """
+  prepareOrder(request: PrepareOrderRequest!): PrepareOrderResult!
+  orderStatus(request: OrderStatusRequest!): OrderStatus
+  pendingOrders(request: PendingOrdersRequest!): PaginatedOrdersResult!
+  prepareCancelOrder(request: PrepareCancelOrderRequest!): PrepareCancelOrderResult!
+  leverageQuote(request: LeverageQuoteRequest!): LeverageQuoteResult!
+  supplySwapQuote(request: SupplySwapQuoteRequest!): SupplySwapQuoteResult!
+  borrowSwapQuote(request: BorrowSwapQuoteRequest!): BorrowSwapQuoteResult!
+  repayWithSupplyQuote(request: RepayWithSupplyQuoteRequest!): RepayWithSupplyQuoteResult!
+  withdrawSwapQuote(request: WithdrawSwapQuoteRequest!): WithdrawSwapQuoteResult!
+  prepareTokenSwap(request: PrepareTokenSwapRequest!): PrepareTokenSwapResult! @deprecated(reason: "Use prepareOrder.")
+  preparePositionSwap(request: PreparePositionSwapRequest!): PreparePositionSwapResult! @deprecated(reason: "Use prepareOrder.")
+  swapStatus(request: SwapStatusRequest!): SwapStatus @deprecated(reason: "Use orderStatus.")
+  userSwaps(request: UserSwapsRequest!): PaginatedUserSwapsResult! @deprecated(reason: "Use pendingOrders.")
+  prepareSwapCancel(request: PrepareSwapCancelRequest!): PrepareSwapCancelResult! @deprecated(reason: "Use prepareCancelOrder.")
+  preview(request: PreviewRequest!): PreviewUserPosition!
+
+  """Previews a plan, each step against the state the steps before it left."""
+  multiStepPreview(request: MultiStepPreviewRequest!): MultiStepPreview!
+
+  """
+  Get the user balances.
+  This will only return assets that can be used on the protocol.
+  """
+  userBalances(request: UserBalancesRequest!): [UserBalance!]!
+  userBorrows(request: UserBorrowsRequest!): [UserBorrowItem!]!
+  userSupplies(request: UserSuppliesRequest!): [UserSupplyItem!]!
+}
+
+type V4Subscription {
+  """The user summary, re-sent as it changes."""
+  userSummary(request: UserSummaryRequest!): UserSummary!
+
+  """A user position, re-sent as it changes."""
+  userPosition(request: UserPositionRequest!): UserPosition!
+
+  """The user positions, re-sent as they change."""
+  userPositions(request: UserPositionsRequest!): [UserPosition!]!
+
+  """
+  A tokenized stock, re-sent as its prices change. Errors if the address is not listed.
+  """
+  tokenizedStock(request: TokenizedStockRequest!): TokenizedStock!
 }
 
 type WithdrawActivity {

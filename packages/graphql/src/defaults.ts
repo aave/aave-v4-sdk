@@ -57,13 +57,33 @@ export const inputDefaults: InputDefaults = {
       market: 'MarketDebtSwapQuoteInput',
     },
   },
+  HubAssetHoldersRequest: {
+    defaults: {
+      filter: 'SUPPLIED',
+      orderBy: {
+        amount: 'DESC',
+      },
+      pageSize: 'TEN',
+    },
+    fields: {
+      orderBy: 'ReserveHoldersOrderBy',
+    },
+  },
   HubAssetsRequest: {
     defaults: {
       orderBy: {
         assetName: 'ASC',
       },
     },
-    fields: {},
+    fields: {
+      query: 'HubAssetsRequestQuery',
+    },
+  },
+  HubAssetsRequestQuery: {
+    defaults: {},
+    fields: {
+      symbolChainIds: 'SymbolInput',
+    },
   },
   HubSummaryHistoryRequest: {
     defaults: {
@@ -131,6 +151,19 @@ export const inputDefaults: InputDefaults = {
   MarketWithdrawSwapQuoteInput: {
     defaults: {
       accuracy: 'ACCURATE',
+    },
+    fields: {},
+  },
+  MultiStepPreviewRequest: {
+    defaults: {},
+    fields: {
+      actions: 'PreviewAction',
+    },
+  },
+  MultichainAssetHistoryRequest: {
+    defaults: {
+      currency: 'USD',
+      window: 'LAST_DAY',
     },
     fields: {},
   },
@@ -243,6 +276,12 @@ export const inputDefaults: InputDefaults = {
       market: 'MarketOrderTokenSwapQuoteInput',
       limit: 'LimitOrderTokenSwapQuoteInput',
     },
+  },
+  TokenizedStocksRequest: {
+    defaults: {
+      pageSize: 'FIFTY',
+    },
+    fields: {},
   },
   UserBalancesByChains: {
     defaults: {
