@@ -1,7 +1,7 @@
 ---
-"@aave/graphql": minor
-"@aave/client": minor
-"@aave/react": minor
+"@aave/graphql": major
+"@aave/client": major
+"@aave/react": major
 ---
 
-**feat:** remove stable vaults (`stableVault*` actions and hooks, `StableVaultClaimStatus`, `TokenMovementStatus` and vault ids), which the API no longer serves
+**feat:** remove stable vaults (`stableVault*` actions and hooks, `StableVaultClaimStatus`, `TokenMovementStatus` and vault ids) and `TimeWindow.LastHour`, which the API no longer serves

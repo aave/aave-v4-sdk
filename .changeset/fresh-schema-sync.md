@@ -4,4 +4,4 @@
 "@aave/react": minor
 ---
 
-**feat:** sync schema with the pro staging API: adds `TokenCategory.TokenizedStock`, removes `TimeWindow.LastHour`, and adds `TokenizedStocksRequest` defaults
+**feat:** sync schema with the staging API: adds `TokenCategory.TokenizedStock` and `TokenizedStocksRequest` defaults
