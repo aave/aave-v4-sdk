@@ -1,5 +1,25 @@
 # @aave/cli
 
+## 4.4.0
+
+### Minor Changes
+
+- 746fb0a: **feat:** `SupplyRequest.useAsCollateral` lets a supply enable or disable the reserve's collateral flag; `enableCollateral` is deprecated
+
+### Patch Changes
+
+- Updated dependencies [9051fdf]
+- Updated dependencies [746fb0a]
+- Updated dependencies [9051fdf]
+- Updated dependencies [9051fdf]
+- Updated dependencies [da86de0]
+- Updated dependencies [5f74824]
+- Updated dependencies [ef6e2d6]
+- Updated dependencies [bc5c980]
+- Updated dependencies [746fb0a]
+- Updated dependencies [9051fdf]
+  - @aave/client@7.0.0
+
 ## 4.3.8
 
 ### Patch Changes

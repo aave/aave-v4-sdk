@@ -1,5 +1,26 @@
 # @aave/graphql
 
+## 4.0.0
+
+### Major Changes
+
+- 9051fdf: **feat:** remove stable vaults (`stableVault*` actions and hooks, `StableVaultClaimStatus`, `TokenMovementStatus` and vault ids) and `TimeWindow.LastHour`, which the API no longer serves
+
+### Minor Changes
+
+- 746fb0a: **feat:** earn & borrow surface: collateral-scoped position fields, hub-asset scoped reads, reserve and hub-asset history, and `multiStepPreview` for plans of one or more actions folded through the protocol state
+- 9051fdf: **feat:** sync schema with the staging API: adds `TokenCategory.TokenizedStock` and `TokenizedStocksRequest` defaults
+- 9051fdf: **feat:** `externalCurator` and `externalCurators` actions, `useExternalCurator` and `useExternalCurators` hooks, and `Hub.externalCurator`
+- ef6e2d6: **feat:** fill in schema defaults for omitted request fields so equivalent queries share one operation key and network request
+- bc5c980: **feat:** position swap availability on `Reserve`: `canSwapTo`, and per swap `canSwapSupplyFrom`/`canSwapSupplyTo`, `canSwapBorrowFrom`/`canSwapBorrowTo`, `canRepayWithSupply`/`canRepayWithThisSupply` and `canLeverage`/`canLeverageWith`; `canSwapFrom` on `UserSupplyItem` and `UserBorrowItem`; and the `PositionSwapType` enum for passing the swap as a variable
+- 746fb0a: **feat:** `SupplyRequest.useAsCollateral` lets a supply enable or disable the reserve's collateral flag; `enableCollateral` is deprecated
+
+### Patch Changes
+
+- da86de0: **fix:** explicit types for order and swap status documents to avoid `TS7056` in declaration emit
+- Updated dependencies [5f74824]
+  - @aave/types@1.1.0
+
 ## 3.6.0
 
 ### Minor Changes
