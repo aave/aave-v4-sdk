@@ -15,4 +15,3 @@ export * from './spoke';
 export * from './swaps';
 export * from './transactions';
 export * from './user';
-export * from './vaults';
