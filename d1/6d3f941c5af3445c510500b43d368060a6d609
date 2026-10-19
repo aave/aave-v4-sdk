@@ -1,0 +1,27 @@
+.changeset/brave-otters-adjust.md
+  s_f6f991117fba1f::t_9c6c6ee911ee12 1-7
+packages/graphql/schema.graphql
+  s_f6f991117fba1f::t_38b532cd11ba82 2284-2286
+packages/graphql/src/graphql-env.d.ts
+  s_f6f991117fba1f::t_9e595749fd9c90 265
+packages/graphql/src/schema.json
+  s_f6f991117fba1f::t_fc48be26c70245 7437-7454
+packages/graphql/src/transactions.ts
+  s_f6f991117fba1f::t_2828c7da5a9c53 294-296
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d16d3f941c5af3445c510500b43d368060a6d609",
+  "prompts": {},
+  "sessions": {
+    "s_f6f991117fba1f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c76caa6c-e2ea-4ef9-9054-fd02b6798e4e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
