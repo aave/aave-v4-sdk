@@ -5,6 +5,7 @@ import {
   DomainDataFragment,
   InsufficientBalanceErrorFragment,
   InsufficientLiquidityErrorFragment,
+  type PaginatedResultInfo,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   TokenAmountFragment,
@@ -337,7 +338,19 @@ export const OrderExpiredFragment = graphql(
 );
 export type OrderExpired = FragmentOf<typeof OrderExpiredFragment>;
 
-export const OrderStatusFragment = graphql(
+// Explicit document types from here on: inferring them exceeds what the
+// compiler will serialize in declaration emit (TS7056).
+type OrderStatusNode =
+  | OrderOpen
+  | OrderPendingSignature
+  | OrderCancelled
+  | OrderExpired
+  | OrderFulfilled;
+
+export const OrderStatusFragment: FragmentDocumentFor<
+  OrderStatusNode,
+  'OrderStatus'
+> = graphql(
   `fragment OrderStatus on OrderStatus {
     __typename
     ... on OrderOpen {
@@ -368,7 +381,16 @@ export type OrderStatus = ExtendWithOpaqueType<
   FragmentOf<typeof OrderStatusFragment>
 >;
 
-export const PaginatedOrdersResultFragment = graphql(
+export type PaginatedOrdersResult = {
+  __typename: 'PaginatedOrdersResult';
+  items: OrderStatusNode[];
+  pageInfo: PaginatedResultInfo;
+};
+
+export const PaginatedOrdersResultFragment: FragmentDocumentFor<
+  PaginatedOrdersResult,
+  'PaginatedOrdersResult'
+> = graphql(
   `fragment PaginatedOrdersResult on PaginatedOrdersResult {
     __typename
     items {
@@ -380,9 +402,6 @@ export const PaginatedOrdersResultFragment = graphql(
   }`,
   [OrderStatusFragment, PaginatedResultInfoFragment],
 );
-export type PaginatedOrdersResult = FragmentOf<
-  typeof PaginatedOrdersResultFragment
->;
 
 export const OrderReceiptFragment = graphql(
   `fragment OrderReceipt on OrderReceipt {

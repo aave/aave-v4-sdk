@@ -167,3 +167,11 @@ export type FragmentDocumentFor<
     masked: false;
   }
 >;
+
+/**
+ * @internal
+ */
+export type QueryDocumentFor<
+  TValue,
+  TVariables extends AnyVariables,
+> = TadaDocumentNode<{ value: TValue }, TVariables>;
