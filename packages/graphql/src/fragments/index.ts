@@ -1,5 +1,6 @@
 export * from './assets';
 export * from './common';
+export * from './curators';
 export * from './hubs';
 export * from './orders';
 export * from './permits';
@@ -9,4 +10,3 @@ export * from './spoke';
 export * from './swaps';
 export * from './transactions';
 export * from './user';
-export * from './vaults';

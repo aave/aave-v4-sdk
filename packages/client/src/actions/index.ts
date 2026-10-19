@@ -1,3 +1,4 @@
+export * from './curators';
 export * from './hubs';
 export * from './misc';
 export * from './order';
@@ -8,4 +9,3 @@ export * from './spokes';
 export * from './swap';
 export * from './transactions';
 export * from './user';
-export * from './vaults';

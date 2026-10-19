@@ -1,3 +1,4 @@
+export * from './curators';
 export * from './enums';
 export * from './fragments';
 export * from './graphql';
@@ -14,4 +15,3 @@ export * from './spoke';
 export * from './swaps';
 export * from './transactions';
 export * from './user';
-export * from './vaults';
