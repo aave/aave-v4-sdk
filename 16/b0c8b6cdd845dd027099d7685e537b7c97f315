@@ -1,0 +1,37 @@
+packages/graphql/src/fragments/rewards.ts
+  s_a79fb2aaf34102::t_afb43200fde09a 84-90,112-118
+packages/graphql/src/enums.ts
+  s_a79fb2aaf34102::t_afb43200fde09a 140-148
+  s_a79fb2aaf34102::t_9d9a2a7013b27a 139
+packages/graphql/src/graphql.ts
+  s_a79fb2aaf34102::t_afb43200fde09a 36,120
+.changeset/funky-spiders-know.md
+  h_dd1a1ee57491bb 1-7
+packages/graphql/schema.graphql
+  s_a79fb2aaf34102::t_57c127f3027583 1324-1335,1354-1365,1981-1982,1986,1994-1995,1999,2565-2574
+packages/graphql/src/graphql-env.d.ts
+  s_a79fb2aaf34102::t_e7f1f704effbeb 160,163,249-250,299
+packages/graphql/src/schema.json
+  s_a79fb2aaf34102::t_1fafc619da1958 3884-3921,4065-4102,6809-6837,6879-6889,6943-6971,7013-7023
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "16b0c8b6cdd845dd027099d7685e537b7c97f315",
+  "prompts": {},
+  "humans": {
+    "h_dd1a1ee57491bb": {
+      "author": "AGMASO <agmguindo@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a79fb2aaf34102": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1440c-dd8c-7eb0-8dc8-03117f269dac",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+packages/react/src/curators.ts
+  s_4dd317084f0242::t_d20efb18f64339 1-191
+packages/react/src/index.ts
+  s_4dd317084f0242::t_d20efb18f64339 5
+.changeset/keen-curators-join.md
+  s_4dd317084f0242::t_5edce014a859b7 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "43876e6339ae39f5aea0464dcb102a3ec14f374f",
+  "prompts": {},
+  "sessions": {
+    "s_4dd317084f0242": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1854625a-19f7-4366-88b4-9972cc32b194",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

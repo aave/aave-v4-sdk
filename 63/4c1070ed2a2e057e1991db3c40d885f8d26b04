@@ -1,0 +1,28 @@
+packages/client/src/viem.test.ts
+  s_6d4a37bbe7cf71::t_515ff4d217e068 31-36,240-253,412-413,416-422,430-432,434,436,683-699
+  s_6d4a37bbe7cf71::t_fec8de00a7c10a 700
+packages/client/src/viem.ts
+  s_6d4a37bbe7cf71::t_91b53c82a2cf1a 381
+  s_6d4a37bbe7cf71::t_cf7e73f27e5e69 393-397,408-411
+  s_6d4a37bbe7cf71::t_9c7d04f52606e3 501-502
+  s_6d4a37bbe7cf71::t_a797021c11b3ed 371
+  s_6d4a37bbe7cf71::t_818d4e4342e29a 358-359
+  s_6d4a37bbe7cf71::t_39de7c0763bd28 291-297
+  s_6d4a37bbe7cf71::t_30bc6aa1de92dd 290,412
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "634c1070ed2a2e057e1991db3c40d885f8d26b04",
+  "prompts": {},
+  "sessions": {
+    "s_6d4a37bbe7cf71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "223a8964-4994-494f-aa9d-ef19a7b8d2c6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

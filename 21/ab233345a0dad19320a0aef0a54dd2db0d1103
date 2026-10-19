@@ -1,0 +1,21 @@
+.changeset/fresh-schema-sync.md
+  s_4dd317084f0242::t_2e41bb265558ea 7
+.changeset/quiet-vaults-leave.md
+  s_4dd317084f0242::t_41f06a5759d5ce 2-4,7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "21ab233345a0dad19320a0aef0a54dd2db0d1103",
+  "prompts": {},
+  "sessions": {
+    "s_4dd317084f0242": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1854625a-19f7-4366-88b4-9972cc32b194",
+        "model": "unknown"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
