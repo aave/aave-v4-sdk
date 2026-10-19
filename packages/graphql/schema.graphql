@@ -2281,6 +2281,9 @@ union PreviewReward = PreviewMerklSupplyReward | PreviewMerklBorrowReward | Prev
 type PreviewRewardOutcome {
   abandoned: [ReserveReward!]!
   acquired: [ReserveReward!]!
+
+  """Rewards the account stays eligible for whose effective APY the action moves."""
+  adjusted: [ReserveReward!]!
   lost: [PreviewReward!]! @deprecated(reason: "Use abandoned with ReserveReward instead.")
   gained: [PreviewReward!]! @deprecated(reason: "Use acquired with ReserveReward instead.")
 }
