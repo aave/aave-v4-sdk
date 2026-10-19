@@ -1,3 +1,5 @@
+import type { FragmentOf } from 'gql.tada';
+import type { Currency, TimeWindow } from './enums';
 import {
   BorrowSwapQuoteResultFragment,
   CancelSwapExecutionPlanFragment,
@@ -13,7 +15,7 @@ import {
   TokenSwapQuoteResultFragment,
   WithdrawSwapQuoteResultFragment,
 } from './fragments';
-import { graphql, type RequestOf } from './graphql';
+import { graphql, type QueryDocumentFor, type RequestOf } from './graphql';
 
 /**
  * @internal
@@ -64,10 +66,17 @@ export const PrepareTokenSwapQuery = graphql(
 );
 export type PrepareTokenSwapRequest = RequestOf<typeof PrepareTokenSwapQuery>;
 
+export type SwapStatusRequest = ReturnType<
+  typeof graphql.scalar<'SwapStatusRequest'>
+>;
+
 /**
  * @internal
  */
-export const SwapStatusQuery = graphql(
+export const SwapStatusQuery: QueryDocumentFor<
+  FragmentOf<typeof SwapStatusFragment> | null,
+  { request: SwapStatusRequest; currency: Currency; timeWindow: TimeWindow }
+> = graphql(
   `query SwapStatus($request: SwapStatusRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: swapStatus(request: $request) {
       ...SwapStatus
@@ -75,7 +84,6 @@ export const SwapStatusQuery = graphql(
   }`,
   [SwapStatusFragment],
 );
-export type SwapStatusRequest = RequestOf<typeof SwapStatusQuery>;
 
 /**
  * @internal
@@ -116,10 +124,17 @@ export const CancelSwapMutation = graphql(
 );
 export type CancelSwapRequest = RequestOf<typeof CancelSwapMutation>;
 
+export type UserSwapsRequest = ReturnType<
+  typeof graphql.scalar<'UserSwapsRequest'>
+>;
+
 /**
  * @internal
  */
-export const UserSwapsQuery = graphql(
+export const UserSwapsQuery: QueryDocumentFor<
+  FragmentOf<typeof PaginatedUserSwapsResultFragment>,
+  { request: UserSwapsRequest; currency: Currency; timeWindow: TimeWindow }
+> = graphql(
   `query UserSwaps($request: UserSwapsRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: userSwaps(request: $request) {
       ...PaginatedUserSwapsResult
@@ -127,7 +142,6 @@ export const UserSwapsQuery = graphql(
   }`,
   [PaginatedUserSwapsResultFragment],
 );
-export type UserSwapsRequest = RequestOf<typeof UserSwapsQuery>;
 
 /**
  * @internal
