@@ -1,0 +1,35 @@
+packages/graphql/src/fragments/orders.ts
+  s_d7eaa1067e813f::t_84f5b44e11fb5d 341-342,390-393
+  s_d7eaa1067e813f::t_ae1786fc977bf4 8,384-389
+  s_d7eaa1067e813f::t_34d121436d4cca 343-353
+.changeset/lean-status-types.md
+  s_d7eaa1067e813f::t_8e93a4b86f74c3 1-7
+packages/graphql/src/fragments/swaps.ts
+  s_d7eaa1067e813f::t_ae1786fc977bf4 9,569-574
+  s_d7eaa1067e813f::t_84f5b44e11fb5d 481-482,575-578
+  s_d7eaa1067e813f::t_34d121436d4cca 483-493
+packages/graphql/src/graphql.ts
+  s_d7eaa1067e813f::t_f269e2389405d9 170-177
+packages/graphql/src/orders.ts
+  s_d7eaa1067e813f::t_b096086de03f99 1-2,58
+  s_d7eaa1067e813f::t_f269e2389405d9 12,50-53,57,59-60,68-71,76-79
+packages/graphql/src/swaps.ts
+  s_d7eaa1067e813f::t_b096086de03f99 1-2,77
+  s_d7eaa1067e813f::t_f269e2389405d9 18,69-72,76,78-79,127-130,134-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "705a90e6afe7d70f83d206e216ff16cf70f23269",
+  "prompts": {},
+  "sessions": {
+    "s_d7eaa1067e813f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1b20bc43-7319-4b71-844f-6f8c25a1dcb6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

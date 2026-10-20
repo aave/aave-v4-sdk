@@ -1,0 +1,23 @@
+packages/client/src/viem.test.ts
+  s_45b3af06ef827c::t_0166a508c1e68f 1159-1194
+.changeset/atomic-plans-batch.md
+  s_45b3af06ef827c::t_ca9a4c480e5a3e 6
+packages/client/src/viem.ts
+  s_45b3af06ef827c::t_6970601bb2ef28 312-313,315,317-318,323-336,354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c27c8ea35280e7dffbd3542eb7502b54b764a292",
+  "prompts": {},
+  "sessions": {
+    "s_45b3af06ef827c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0bf09e5-2fd8-4644-ba06-26989fce360a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

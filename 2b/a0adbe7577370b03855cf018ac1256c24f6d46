@@ -1,0 +1,23 @@
+packages/graphql/package.json
+  s_4dd317084f0242::t_251bc1319ff83e 55
+packages/client/src/environments.ts
+  s_4dd317084f0242::t_c227096e803726 8,21
+.changeset/bright-hosts-move.md
+  s_4dd317084f0242::t_f3d2836af59867 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2ba0adbe7577370b03855cf018ac1256c24f6d46",
+  "prompts": {},
+  "sessions": {
+    "s_4dd317084f0242": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1854625a-19f7-4366-88b4-9972cc32b194",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+packages/graphql/src/fragments/hubs.ts
+  s_4dd317084f0242::t_a4e0b3bf6b4384 65-67,69
+  s_4dd317084f0242::t_2b5a156abea8b5 9
+packages/graphql/src/curators.ts
+  s_4dd317084f0242::t_a4e0b3bf6b4384 1-32
+packages/graphql/src/fragments/index.ts
+  s_4dd317084f0242::t_a4e0b3bf6b4384 3
+packages/graphql/src/graphql.ts
+  s_4dd317084f0242::t_a4e0b3bf6b4384 27,100
+packages/client/src/cache.ts
+  s_4dd317084f0242::t_419490b9e56cd7 319,387-389
+  s_4dd317084f0242::t_10fec52f8469cf 11-12,110-113,315-318,320-322,445,496,506
+packages/client/src/actions/index.ts
+  s_4dd317084f0242::t_419490b9e56cd7 1
+packages/graphql/src/index.ts
+  s_4dd317084f0242::t_a4e0b3bf6b4384 1
+packages/graphql/src/enums.ts
+  s_4dd317084f0242::t_a4e0b3bf6b4384 308-321
+packages/graphql/src/fragments/curators.ts
+  s_4dd317084f0242::t_a4e0b3bf6b4384 1-53
+packages/client/src/actions/curators.ts
+  s_4dd317084f0242::t_419490b9e56cd7 1-73
+.changeset/keen-curators-join.md
+  s_4dd317084f0242::t_543ae3a539ddfc 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7ca012f263689daeec660f8ce716d7cb48015d06",
+  "prompts": {},
+  "sessions": {
+    "s_4dd317084f0242": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1854625a-19f7-4366-88b4-9972cc32b194",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}
