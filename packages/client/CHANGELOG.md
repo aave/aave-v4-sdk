@@ -1,5 +1,19 @@
 # @aave/client
 
+## 7.1.0
+
+### Minor Changes
+
+- 331c30f: **feat:** send multi-step execution plans (approval + action) as one atomic EIP-5792 `wallet_sendCalls` prompt when the wallet is batch-capable, opt-in via `sendWith(walletClient, plan, { batch: true })` and the `{ batch: batchCapability(walletClient) }` option on `useSupply`, `useRepay`, `useBorrow`, `useWithdraw` and `useLiquidatePosition`; adds `canBatch`, `useCanBatch` and `TransactionBatch` support in the viem and Privy `useSendTransaction`; `sendWith` (viem) now fails before sending when the wallet client is not on the plan's chain
+- cd2940a: **feat:** add `adjusted` to `PreviewRewardOutcome` for rewards that stay eligible but change effective APY.
+- cd2940a: **feat:** expose net campaign metadata and user-effective supply and borrow reward APYs.
+
+### Patch Changes
+
+- Updated dependencies [cd2940a]
+- Updated dependencies [cd2940a]
+  - @aave/graphql@4.1.0
+
 ## 7.0.0
 
 ### Major Changes

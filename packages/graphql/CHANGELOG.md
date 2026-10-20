@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 4.1.0
+
+### Minor Changes
+
+- cd2940a: **feat:** add `adjusted` to `PreviewRewardOutcome` for rewards that stay eligible but change effective APY.
+- cd2940a: **feat:** expose net campaign metadata and user-effective supply and borrow reward APYs.
+
 ## 4.0.0
 
 ### Major Changes
