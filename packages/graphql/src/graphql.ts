@@ -30,6 +30,7 @@ import type {
   OrderDirection,
   OrderStatusFilter,
   PageSize,
+  PositionSwapType,
   QuoteAccuracy,
   RepayWithSupplyKind,
   ReserveHoldersFilter,
@@ -106,6 +107,7 @@ export const graphql = initGraphQLTada<{
     OrderQuoteId: OrderQuoteId;
     OrderStatusFilter: OrderStatusFilter;
     PageSize: PageSize;
+    PositionSwapType: PositionSwapType;
     QuoteAccuracy: QuoteAccuracy;
     ReserveHoldersFilter: ReserveHoldersFilter;
     ReserveId: ReserveId;
@@ -165,3 +167,11 @@ export type FragmentDocumentFor<
     masked: false;
   }
 >;
+
+/**
+ * @internal
+ */
+export type QueryDocumentFor<
+  TValue,
+  TVariables extends AnyVariables,
+> = TadaDocumentNode<{ value: TValue }, TVariables>;
