@@ -1,0 +1,27 @@
+packages/client/src/testing.ts
+  h_be8c3c572e9983 249-250
+  s_704249359224e3::t_2c2f1c7893bab9 10
+  s_704249359224e3::t_54a347206c656c 17,37,242-245,251-290
+  s_704249359224e3::t_3b239a15674f72 291-292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "81a92c4ac50f8e16894305c2a9ea1534b941c390",
+  "prompts": {},
+  "humans": {
+    "h_be8c3c572e9983": {
+      "author": "Mark Grothe <grothem@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_704249359224e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e220e270-23ec-4a60-b15c-d55c6946a9d7",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
