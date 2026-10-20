@@ -37,19 +37,26 @@ import {
 
 import { isTerminalOrderStatus } from './helpers';
 
-function findNewlyFulfilledOrders(
+function findSettledOrders(
   items: readonly OrderStatus[],
   prevItems: readonly OrderStatus[],
-): OrderFulfilled[] {
+): OrderStatus[] {
   const prevTypenames = new Map(
     prevItems.map((item) => [item.orderId, item.__typename]),
   );
+  const currentIds = new Set(items.map((item) => item.orderId));
 
-  return items.filter(
+  const newlyFulfilled = items.filter(
     (item): item is OrderFulfilled =>
       item.__typename === 'OrderFulfilled' &&
       prevTypenames.get(item.orderId) !== 'OrderFulfilled',
   );
+  // A status filter without Fulfilled drops the order from the list instead of returning it as fulfilled
+  const leftTheList = prevItems.filter(
+    (item) => !isTerminalOrderStatus(item) && !currentIds.has(item.orderId),
+  );
+
+  return [...newlyFulfilled, ...leftTheList];
 }
 
 export type UsePendingOrdersArgs = Prettify<
@@ -134,29 +141,35 @@ export function usePendingOrders({
   pause?: boolean;
 }): SuspendableResult<PaginatedOrdersResult, UnexpectedError> {
   const client = useAaveClient();
-  const [allTerminal, setAllTerminal] = useState(false);
+  const [hasActiveOrders, setHasActiveOrders] = useState(false);
 
   const result: SuspendableResult<PaginatedOrdersResult, UnexpectedError> =
     useSuspendableQuery({
       document: PendingOrdersQuery,
       variables: { request, currency, timeWindow },
       suspense,
-      pause: pause || allTerminal,
-      pollInterval: client.context.environment.swapStatusInterval,
+      pause,
+      pollInterval: hasActiveOrders
+        ? client.context.environment.swapStatusInterval
+        : 0,
     });
 
   const items = result.data?.items ?? [];
   const prevItems = useDeferredValue(items);
 
+  const nextHasActiveOrders = items.some(
+    (item) => !isTerminalOrderStatus(item),
+  );
+  if (nextHasActiveOrders !== hasActiveOrders) {
+    setHasActiveOrders(nextHasActiveOrders);
+  }
+
+  const hasData = result.data !== undefined;
+
   useEffect(() => {
-    if (items.length === 0) return;
+    if (!hasData) return;
 
-    const allItemsTerminal = items.every(isTerminalOrderStatus);
-    if (allItemsTerminal) {
-      setAllTerminal(true);
-    }
-
-    for (const item of findNewlyFulfilledOrders(items, prevItems)) {
+    for (const item of findSettledOrders(items, prevItems)) {
       switch (item.operation.__typename) {
         case 'TokenSwap':
           if (request.user) {
@@ -195,7 +208,7 @@ export function usePendingOrders({
           break;
       }
     }
-  }, [items, prevItems, client, request.user]);
+  }, [hasData, items, prevItems, client, request.user]);
 
   return result;
 }
