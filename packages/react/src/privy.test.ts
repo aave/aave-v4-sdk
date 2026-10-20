@@ -1,6 +1,7 @@
 import {
   CancelError,
   SubmissionUnresolvedError,
+  type TransactionBatch,
   UnexpectedError,
 } from '@aave/client';
 import {
@@ -73,9 +74,9 @@ function setupPrivyWallet(
   return { provider, switchChain };
 }
 
-async function send() {
+async function send(input: TransactionRequest | TransactionBatch = request) {
   const { result } = renderHookWithinContext(() => useSendTransaction());
-  return result.current[0](request);
+  return result.current[0](input);
 }
 
 describe(`Given the Privy '${useSendTransaction.name}' hook`, () => {
@@ -177,6 +178,40 @@ describe(`Given the Privy '${useSendTransaction.name}' hook`, () => {
 
       assertErr(result);
       expect(result.error).toBeInstanceOf(CancelError);
+    });
+  });
+
+  describe('When given a TransactionBatch', () => {
+    it('Then it sends one atomic wallet_sendCalls and resolves with the executed hash', async () => {
+      const sent: unknown[] = [];
+      const { provider } = setupPrivyWallet({
+        wallet_sendCalls: (params) => {
+          sent.push(params);
+          return { result: { id: `0x${'c'.repeat(64)}` } };
+        },
+        wallet_getCallsStatus: {
+          result: makeCallsStatus({
+            status: 200,
+            receipts: [{ hash: executed, status: 'success' }],
+          }),
+        },
+      });
+      const batch: TransactionBatch = {
+        __typename: 'TransactionBatch',
+        chainId: ETHEREUM_FORK_ID,
+        from: account,
+        transactions: [request, request],
+        operations: request.operations,
+      };
+
+      const pending = await send(batch);
+      assertOk(pending);
+
+      const result = await pending.value.wait();
+      assertOk(result);
+      expect(result.value.txHash).toBe(executed);
+      expect(sent).toMatchObject([[{ atomicRequired: true }]]);
+      expect(provider.calls('eth_sendTransaction')).toBe(0);
     });
   });
 });

@@ -1,4 +1,8 @@
-import { supportsPermit, type TransactionReceipt } from '@aave/client';
+import {
+  supportsPermit,
+  type TransactionBatch,
+  type TransactionReceipt,
+} from '@aave/client';
 import { supply } from '@aave/client/actions';
 import { ValidationError } from '@aave/core';
 import type {
@@ -9,8 +13,7 @@ import type {
   SupplyRequest,
   TransactionRequest,
 } from '@aave/graphql';
-import { errAsync, type Signature } from '@aave/types';
-
+import { errAsync, okAsync, type Signature } from '@aave/types';
 import { useAaveClient } from '../context';
 import {
   cancel,
@@ -23,6 +26,11 @@ import {
   useAsyncTask,
 } from '../helpers';
 import { handleSingleApproval, sendApprovalTransactions } from './approvals';
+import {
+  type BatchableHandler,
+  type TransactionBatchOptions,
+  tryBatch,
+} from './batch';
 
 function injectSupplyPermitSignature(
   request: SupplyRequest,
@@ -109,44 +117,84 @@ export function useSupply(
   | SendTransactionError
   | PendingTransactionError
   | ValidationError<InsufficientBalanceError>
+>;
+/**
+ * With `{ batch }`, a plan with two or more transactions (e.g. an approval
+ * and the action) reaches the handler as one `TransactionBatch` when the
+ * wallet can send it atomically. Send it like a `TransactionRequest`.
+ */
+export function useSupply(
+  handler: ExecutionPlanHandler<
+    | TransactionRequest
+    | Erc20Approval
+    | PreContractActionRequired
+    | TransactionBatch,
+    Signature | PendingTransaction
+  >,
+  options: TransactionBatchOptions,
+): UseAsyncTask<
+  SupplyRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
+>;
+export function useSupply(
+  handler: BatchableHandler<
+    TransactionRequest | Erc20Approval | PreContractActionRequired,
+    Signature | PendingTransaction
+  >,
+  options?: TransactionBatchOptions,
+): UseAsyncTask<
+  SupplyRequest,
+  TransactionReceipt,
+  | SendTransactionError
+  | PendingTransactionError
+  | ValidationError<InsufficientBalanceError>
 > {
   const client = useAaveClient();
 
   return useAsyncTask(
     (request: SupplyRequest) =>
       supply(client, request)
-        .andThen((plan) => {
-          switch (plan.__typename) {
-            case 'TransactionRequest':
-              return handler(plan, { cancel });
+        .andThen((plan) =>
+          tryBatch(plan, options?.batch, handler).andThen((sent) => {
+            if (sent) {
+              return okAsync(sent);
+            }
 
-            case 'Erc20ApprovalRequired':
-              if (supportsPermit(plan)) {
-                return handleSingleApproval(plan, handler, (permitSig) =>
-                  supply(
-                    client,
-                    injectSupplyPermitSignature(request, permitSig),
-                  ),
-                ).andThen((transaction) => handler(transaction, { cancel }));
-              }
-              return sendApprovalTransactions(plan, handler).andThen(
-                (transaction) => handler(transaction, { cancel }),
-              );
+            switch (plan.__typename) {
+              case 'TransactionRequest':
+                return handler(plan, { cancel });
 
-            case 'PreContractActionRequired':
-              return handler(plan, { cancel })
-                .andThen(PendingTransaction.tryFrom)
-                .andThen((pending) => pending.wait())
-                .andThen(() => handler(plan.originalTransaction, { cancel }));
+              case 'Erc20ApprovalRequired':
+                if (supportsPermit(plan)) {
+                  return handleSingleApproval(plan, handler, (permitSig) =>
+                    supply(
+                      client,
+                      injectSupplyPermitSignature(request, permitSig),
+                    ),
+                  ).andThen((transaction) => handler(transaction, { cancel }));
+                }
+                return sendApprovalTransactions(plan, handler).andThen(
+                  (transaction) => handler(transaction, { cancel }),
+                );
 
-            case 'InsufficientBalanceError':
-              return errAsync(ValidationError.fromGqlNode(plan));
-          }
-        })
+              case 'PreContractActionRequired':
+                return handler(plan, { cancel })
+                  .andThen(PendingTransaction.tryFrom)
+                  .andThen((pending) => pending.wait())
+                  .andThen(() => handler(plan.originalTransaction, { cancel }));
+
+              case 'InsufficientBalanceError':
+                return errAsync(ValidationError.fromGqlNode(plan));
+            }
+          }),
+        )
         .andThen(PendingTransaction.tryFrom)
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andThrough(() => refreshQueriesForReserveChange(client, request)),
-    [client, handler],
+    [client, handler, options?.batch],
   );
 }

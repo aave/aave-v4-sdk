@@ -13,6 +13,7 @@ import type {
   TransactionRequest,
 } from '@aave/graphql';
 import {
+  type ChainId,
   chainId,
   errAsync,
   invariant,
@@ -20,6 +21,7 @@ import {
   okAsync,
   ResultAsync,
   type Signature,
+  type SubmissionId,
   signatureFrom,
   submissionId,
   type TxHash,
@@ -27,15 +29,16 @@ import {
 } from '@aave/types';
 import {
   type Account,
+  BaseError,
   createClient,
   custom,
   defineChain,
   isAddressEqual,
+  numberToHex,
   type ProviderRpcError,
   type ReplacementReason,
   type RpcError,
   SwitchChainError,
-  TransactionExecutionError,
   type TransactionReceipt,
   type Transport,
   UserRejectedRequestError,
@@ -45,15 +48,18 @@ import {
 } from 'viem';
 import {
   estimateGas as estimateGasWithViem,
+  sendCalls as sendCallsWithViem,
   sendTransaction as sendTransactionWithViem,
   waitForTransactionReceipt,
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
 import { supportsPermit } from './adapters';
+import { type TransactionBatch, toBatch } from './batch';
 import { type CallsStatusOutcome, trackCallsStatus } from './callsStatus';
 import { nativeTokenInfo } from './nativeAsset';
 import type {
   ExecutionPlanHandler,
+  SendWithOptions,
   SignTypedDataError,
   TransactionResult,
   TypedData,
@@ -188,6 +194,70 @@ export function ensureChain(
   });
 }
 
+/**
+ * Chain key under which EIP-5792 wallets report capabilities that apply to every chain.
+ */
+const ALL_CHAINS = 0;
+
+function atomicStatusOf(capabilities: unknown): unknown {
+  return isObject(capabilities) &&
+    isObject(capabilities.atomic) &&
+    'status' in capabilities.atomic
+    ? capabilities.atomic.status
+    : undefined;
+}
+
+/**
+ * Checks whether the wallet can send an atomic batch on the given chain
+ * without further user action.
+ *
+ * Only `atomic.status === 'supported'` counts. `'ready'` means the wallet could
+ * upgrade the account (e.g. an EIP-7702 delegation) but would prompt the user
+ * for it, so it resolves to `false` like an unsupported or failing wallet.
+ *
+ * ```ts
+ * const result = await canBatch(walletClient, { chainId: chainId(1) });
+ * // result.value: boolean
+ * ```
+ *
+ * @param walletClient - The wallet client to check.
+ * @param options - The chain to check.
+ * @returns Never fails.
+ */
+export function canBatch(
+  walletClient: WalletClient,
+  { chainId: id }: { chainId: ChainId },
+): ResultAsync<boolean, never> {
+  if (!walletClient.account) {
+    return okAsync(false);
+  }
+
+  return ResultAsync.fromPromise(
+    walletClient.request({
+      method: 'wallet_getCapabilities',
+      params: [walletClient.account.address, [numberToHex(id)]],
+    }),
+    (err) => err,
+  )
+    .map((capabilities: unknown) => {
+      if (!isObject(capabilities)) {
+        return false;
+      }
+
+      const byChain = new Map(
+        Object.entries(capabilities).map(
+          ([key, value]) => [Number(key), value] as const,
+        ),
+      );
+      const status =
+        atomicStatusOf(byChain.get(id)) ??
+        atomicStatusOf(byChain.get(ALL_CHAINS));
+
+      return status === 'supported';
+    })
+    .orElse(() => okAsync(false));
+}
+
 function estimateGas(
   walletClient: WalletClient,
   request: TransactionRequest,
@@ -219,21 +289,21 @@ function sendEip1559Transaction(
           chain: walletClient.chain,
           gas,
         }),
-        (err) => {
-          if (err instanceof TransactionExecutionError) {
-            const rejected = err.walk(
-              (err) => err instanceof UserRejectedRequestError,
-            );
-
-            if (rejected) {
-              return CancelError.from(rejected);
-            }
-          }
-          return SigningError.from(err);
-        },
+        toSendError,
       ),
     )
     .map(txHash);
+}
+
+function toSendError(err: unknown): CancelError | SigningError {
+  if (err instanceof BaseError) {
+    const rejected = err.walk((err) => err instanceof UserRejectedRequestError);
+
+    if (rejected) {
+      return CancelError.from(rejected);
+    }
+  }
+  return SigningError.from(err);
 }
 
 function isWalletClientWithAccount(
@@ -243,18 +313,63 @@ function isWalletClientWithAccount(
 }
 
 /**
+ * Asserts the wallet client can send on `chainId`: it needs an account and
+ * must be on that chain, since the request is sent on `walletClient.chain`.
+ */
+function assertCanSendOn(
+  walletClient: WalletClient,
+  chainId: ChainId,
+): asserts walletClient is WalletClient<Transport, ViemChain, Account> {
+  invariant(
+    isWalletClientWithAccount(walletClient),
+    'Wallet client with account is required',
+  );
+  invariant(
+    walletClient.chain?.id === chainId,
+    `Wallet client must be on chain ${chainId}, but is on ${walletClient.chain?.id ?? 'no chain'}`,
+  );
+}
+
+/**
  * @internal
  */
 export function sendTransaction(
   walletClient: WalletClient,
   request: TransactionRequest,
 ): ResultAsync<TxHash, CancelError | SigningError> {
-  invariant(
-    isWalletClientWithAccount(walletClient),
-    'Wallet client with account is required',
-  );
+  assertCanSendOn(walletClient, request.chainId);
 
   return sendEip1559Transaction(walletClient, request);
+}
+
+/**
+ * Sends the batch as one atomic `wallet_sendCalls` request. The wallet
+ * estimates gas for the whole batch: estimating a call on its own would revert
+ * when it depends on an earlier one (e.g. an approval).
+ *
+ * A wallet that can't honour atomicity fails like any other wallet error.
+ *
+ * @internal
+ */
+export function sendBatch(
+  walletClient: WalletClient,
+  batch: TransactionBatch,
+): ResultAsync<SubmissionId, CancelError | SigningError> {
+  assertCanSendOn(walletClient, batch.chainId);
+
+  return ResultAsync.fromPromise(
+    sendCallsWithViem(walletClient, {
+      account: walletClient.account,
+      chain: walletClient.chain,
+      calls: batch.transactions.map((request) => ({
+        to: request.to,
+        data: request.data,
+        value: BigInt(request.value),
+      })),
+      forceAtomic: true,
+    }),
+    toSendError,
+  ).map(({ id }) => submissionId(id));
 }
 
 /**
@@ -463,18 +578,62 @@ function trackSubmission(
 }
 
 /**
+ * Waits for a `wallet_sendCalls` batch to settle. The id is the wallet's own,
+ * never an on-chain hash, so there is no receipt to poll.
+ */
+function trackCalls(
+  walletClient: WalletClient,
+  id: SubmissionId,
+): Promise<SubmissionOutcome> {
+  return trackCallsStatus(walletClient, id, {
+    timeout: SUBMISSION_TIMEOUT,
+  }).then((outcome) => {
+    invariant(outcome.status !== 'aborted', 'Batch tracking is never aborted');
+    return outcome;
+  });
+}
+
+type WaitForTransactionResultError =
+  | CancelError
+  | SubmissionUnresolvedError
+  | TransactionError
+  | UnexpectedError;
+
+/**
+ * Settles once the transactions of an execution plan have executed.
+ *
+ * A single transaction is tracked by hash, through its receipt and
+ * `wallet_getCallsStatus` (see `trackSubmission`). A batch is tracked by its
+ * `wallet_sendCalls` id, through `wallet_getCallsStatus` only. Both share
+ * `SUBMISSION_TIMEOUT` and the errors below.
+ *
  * @internal
  */
 export function waitForTransactionResult(
   walletClient: WalletClient,
   request: TransactionRequest,
   initialTxHash: TxHash,
-): ResultAsync<
-  TransactionResult,
-  CancelError | SubmissionUnresolvedError | TransactionError | UnexpectedError
-> {
+): ResultAsync<TransactionResult, WaitForTransactionResultError>;
+export function waitForTransactionResult(
+  walletClient: WalletClient,
+  batch: TransactionBatch,
+  id: SubmissionId,
+): ResultAsync<TransactionResult, WaitForTransactionResultError>;
+export function waitForTransactionResult(
+  walletClient: WalletClient,
+  submitted: TransactionRequest | TransactionBatch,
+  id: TxHash | SubmissionId,
+): ResultAsync<TransactionResult, WaitForTransactionResultError> {
+  const isBatch = submitted.__typename === 'TransactionBatch';
+  // the action, for a batch: what a failure is reported against
+  const request = isBatch
+    ? (submitted.transactions.at(-1) as TransactionRequest)
+    : submitted;
+
   return ResultAsync.fromSafePromise(
-    trackSubmission(walletClient, initialTxHash),
+    isBatch
+      ? trackCalls(walletClient, submissionId(id))
+      : trackSubmission(walletClient, txHash(id)),
   ).andThen((outcome) => {
     switch (outcome.status) {
       case 'receipt': {
@@ -496,9 +655,9 @@ export function waitForTransactionResult(
           return errAsync(transactionError(walletClient.chain, hash, request));
         }
         if (outcome.receipt.status === 'success') {
-          return okAsync({ txHash: hash, operations: request.operations });
+          return okAsync({ txHash: hash, operations: submitted.operations });
         }
-        // A hash other than `initialTxHash` without `replaced` is the
+        // A hash other than the submitted one without `replaced` is the
         // Execution the wallet mapped the Submission to, not a replacement
         return errAsync(transactionError(walletClient.chain, hash, request));
       }
@@ -506,7 +665,7 @@ export function waitForTransactionResult(
       case 'success':
         return okAsync({
           txHash: outcome.txHash,
-          operations: request.operations,
+          operations: submitted.operations,
         });
 
       case 'reverted':
@@ -524,8 +683,8 @@ export function waitForTransactionResult(
       case 'timeout':
         return errAsync(
           SubmissionUnresolvedError.new({
-            submissionId: submissionId(initialTxHash),
-            chainId: request.chainId,
+            submissionId: submissionId(id),
+            chainId: submitted.chainId,
           }),
         );
 
@@ -552,10 +711,27 @@ function sendTransactionAndWait(
   );
 }
 
+function sendBatchAndWait(walletClient: WalletClient, batch: TransactionBatch) {
+  return sendBatch(walletClient, batch).andThen((id) =>
+    waitForTransactionResult(walletClient, batch, id),
+  );
+}
+
 function executePlan(
   walletClient: WalletClient,
   result: ExecutionPlan,
+  options: SendWithOptions = {},
 ): ReturnType<ExecutionPlanHandler> {
+  const batch = options.batch ? toBatch(result) : null;
+
+  if (batch) {
+    return canBatch(walletClient, { chainId: batch.chainId }).andThen((ok) =>
+      ok
+        ? sendBatchAndWait(walletClient, batch)
+        : executePlan(walletClient, result),
+    );
+  }
+
   switch (result.__typename) {
     case 'TransactionRequest':
       return sendTransactionAndWait(walletClient, result);
@@ -595,18 +771,31 @@ function executePlan(
 export function sendWith(walletClient: WalletClient): ExecutionPlanHandler;
 /**
  * Sends execution plan transactions using the provided wallet client.
+ *
+ * With `{ batch: true }`, a plan with two or more transactions (e.g. an
+ * approval and the action) goes out as one atomic `wallet_sendCalls` prompt
+ * when the wallet already supports it (see {@link canBatch}). Otherwise the
+ * transactions are sent one by one.
+ *
+ * ```ts
+ * const result = await supply(client, request).andThen((plan) =>
+ *   sendWith(walletClient, plan, { batch: true }),
+ * );
+ * ```
  */
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
   result: T,
+  options?: SendWithOptions,
 ): ReturnType<ExecutionPlanHandler<T>>;
 export function sendWith<T extends ExecutionPlan = ExecutionPlan>(
   walletClient: WalletClient,
   result?: T,
+  options?: SendWithOptions,
 ): ExecutionPlanHandler<T> | ReturnType<ExecutionPlanHandler<T>> {
   return result
-    ? executePlan(walletClient, result)
-    : executePlan.bind(null, walletClient);
+    ? executePlan(walletClient, result, options)
+    : (plan: T) => executePlan(walletClient, plan);
 }
 
 /**

@@ -1,8 +1,13 @@
+import type { TransactionBatch } from '@aave/client';
 import {
   ETHEREUM_FORK_ID,
   setupEip1193Interceptor,
 } from '@aave/client/testing';
-import { sendTransaction, signTypedDataWith } from '@aave/client/viem';
+import {
+  sendBatch,
+  sendTransaction,
+  signTypedDataWith,
+} from '@aave/client/viem';
 import { CancelError, SigningError } from '@aave/core';
 import type { TransactionRequest } from '@aave/graphql';
 import { makeSwapTypedData } from '@aave/graphql/testing';
@@ -13,6 +18,7 @@ import {
   evmAddress,
   okAsync,
   signatureFrom,
+  submissionId,
   txHash,
 } from '@aave/types';
 import {
@@ -36,6 +42,7 @@ vi.mock('@aave/client/viem', async () => {
   return {
     ...actual,
     sendTransaction: vi.fn(() => okAsync(txHash(`0x${'0'.repeat(63)}1`))),
+    sendBatch: vi.fn(() => okAsync(submissionId(`0x${'c'.repeat(64)}`))),
     signTypedDataWith: vi.fn(() =>
       okAsync(signatureFrom(`0x${'1'.repeat(130)}`)),
     ),
@@ -96,6 +103,33 @@ describe(`Given the viem's '${useSendTransaction.name}' adapter hook`, () => {
 
       assertOk(tx);
       expect(sendTransaction).toHaveBeenCalledOnce();
+    });
+
+    it('Then it should switch the chain and send a TransactionBatch as one batch', async () => {
+      vi.mocked(sendBatch).mockClear();
+      walletChainId = `0x${(42).toString(16)}`;
+      const batch: TransactionBatch = {
+        __typename: 'TransactionBatch',
+        chainId: request.chainId,
+        from: request.from,
+        transactions: [request, request],
+        operations: request.operations,
+      };
+      const { result } = renderHookWithinContext(() =>
+        useSendTransaction(wallet),
+      );
+
+      const tx = await result.current[0](batch);
+
+      assertOk(tx);
+      expect(sendBatch).toHaveBeenCalledOnce();
+      expect(sendBatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chain: expect.objectContaining({ id: request.chainId }),
+        }),
+        batch,
+      );
+      expect(sendTransaction).not.toHaveBeenCalled();
     });
   });
 

@@ -4,6 +4,7 @@ export * from '@aave/types';
 export type { SSRData } from '@urql/core';
 export * from './AaveClient';
 export * from './adapters';
+export * from './batch';
 export type {
   AssetOverride,
   ClientConfig,

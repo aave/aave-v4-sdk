@@ -1,4 +1,4 @@
-import type { TransactionResult } from '@aave/client';
+import type { TransactionBatch, TransactionResult } from '@aave/client';
 import {
   CancelError,
   type SigningError,
@@ -75,6 +75,16 @@ export class PendingTransaction {
 
 export type UseSendTransactionResult = UseAsyncTask<
   TransactionRequest,
+  PendingTransaction,
+  SendTransactionError
+>;
+
+/**
+ * A {@link UseSendTransactionResult} that also sends a {@link TransactionBatch}
+ * as one atomic wallet prompt.
+ */
+export type UseSendTransactionOrBatchResult = UseAsyncTask<
+  TransactionRequest | TransactionBatch,
   PendingTransaction,
   SendTransactionError
 >;
