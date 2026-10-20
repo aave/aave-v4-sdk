@@ -21,6 +21,7 @@ import { useCallback } from 'react';
 
 import { useAaveClient } from '../context';
 import type { PendingTransactionError, SendTransactionError } from '../helpers';
+import { refreshPendingOrders } from '../helpers/cache';
 
 import {
   type CurrencyQueryOptions,
@@ -99,18 +100,20 @@ export function useTokenSwapOrder(
       | PendingTransactionError
       | ValidationError<InsufficientBalanceError>
     > => {
-      return submitOrder(client, request).andThen((plan) => {
-        switch (plan.__typename) {
-          case 'OrderTransactionRequest':
-            return handler(plan, { cancel })
-              .andThen(PendingTransaction.tryFrom)
-              .andThen((pendingTransaction) => pendingTransaction.wait())
-              .andThen(() => okAsync(plan.orderReceipt));
+      return submitOrder(client, request)
+        .andThen((plan) => {
+          switch (plan.__typename) {
+            case 'OrderTransactionRequest':
+              return handler(plan, { cancel })
+                .andThen(PendingTransaction.tryFrom)
+                .andThen((pendingTransaction) => pendingTransaction.wait())
+                .andThen(() => okAsync(plan.orderReceipt));
 
-          case 'OrderReceipt':
-            return okAsync(plan);
-        }
-      });
+            case 'OrderReceipt':
+              return okAsync(plan);
+          }
+        })
+        .andThrough(() => refreshPendingOrders(client));
     },
     [client, handler],
   );
