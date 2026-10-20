@@ -1,0 +1,19 @@
+packages/react/src/transactions/batch.test.ts
+  s_25c6743205fa4d::t_189c2d764580d4 106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d93b16794428bf541cf67573adbeb5f7655fb894",
+  "prompts": {},
+  "sessions": {
+    "s_25c6743205fa4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7251a0a4-b36a-4c86-a2f3-be3abfec3efe",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
