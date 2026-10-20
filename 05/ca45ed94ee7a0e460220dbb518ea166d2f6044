@@ -1,0 +1,19 @@
+.changeset/atomic-plans-batch.md
+  s_c4b75cfe6b084d::t_577a4f3255abb6 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "05ca45ed94ee7a0e460220dbb518ea166d2f6044",
+  "prompts": {},
+  "sessions": {
+    "s_c4b75cfe6b084d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f96b2684-5f4c-440e-ab73-29865b010dae",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}
