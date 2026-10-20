@@ -1,0 +1,24 @@
+packages/client/src/cache.ts
+  s_a79fb2aaf34102::t_770784ccbf9d04 498-500
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "72bd5123a35ca72357e8718d40b94d621e0fca06",
+  "prompts": {},
+  "humans": {
+    "h_dd1a1ee57491bb": {
+      "author": "AGMASO <agmguindo@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a79fb2aaf34102": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1440c-dd8c-7eb0-8dc8-03117f269dac",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
