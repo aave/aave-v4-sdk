@@ -1,3 +1,5 @@
+import type { FragmentOf } from 'gql.tada';
+import type { Currency, TimeWindow } from './enums';
 import {
   CancelOrderExecutionPlanFragment,
   LeverageQuoteResultFragment,
@@ -7,7 +9,7 @@ import {
   PrepareCancelOrderResultFragment,
   PrepareOrderResultFragment,
 } from './fragments';
-import { graphql, type RequestOf } from './graphql';
+import { graphql, type QueryDocumentFor, type RequestOf } from './graphql';
 
 /**
  * @internal
@@ -45,10 +47,17 @@ export const PrepareOrderQuery = graphql(
 );
 export type PrepareOrderRequest = RequestOf<typeof PrepareOrderQuery>;
 
+export type OrderStatusRequest = ReturnType<
+  typeof graphql.scalar<'OrderStatusRequest'>
+>;
+
 /**
  * @internal
  */
-export const OrderStatusQuery = graphql(
+export const OrderStatusQuery: QueryDocumentFor<
+  FragmentOf<typeof OrderStatusFragment> | null,
+  { request: OrderStatusRequest; currency: Currency; timeWindow: TimeWindow }
+> = graphql(
   `query OrderStatus($request: OrderStatusRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: orderStatus(request: $request) {
       ...OrderStatus
@@ -56,12 +65,18 @@ export const OrderStatusQuery = graphql(
   }`,
   [OrderStatusFragment],
 );
-export type OrderStatusRequest = RequestOf<typeof OrderStatusQuery>;
+
+export type PendingOrdersRequest = ReturnType<
+  typeof graphql.scalar<'PendingOrdersRequest'>
+>;
 
 /**
  * @internal
  */
-export const PendingOrdersQuery = graphql(
+export const PendingOrdersQuery: QueryDocumentFor<
+  FragmentOf<typeof PaginatedOrdersResultFragment>,
+  { request: PendingOrdersRequest; currency: Currency; timeWindow: TimeWindow }
+> = graphql(
   `query PendingOrders($request: PendingOrdersRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {
     value: pendingOrders(request: $request) {
       ...PaginatedOrdersResult
@@ -69,7 +84,6 @@ export const PendingOrdersQuery = graphql(
   }`,
   [PaginatedOrdersResultFragment],
 );
-export type PendingOrdersRequest = RequestOf<typeof PendingOrdersQuery>;
 
 /**
  * @internal

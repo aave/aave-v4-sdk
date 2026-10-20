@@ -24,24 +24,24 @@ import type {
   ChainsFilter,
   CollateralMetric,
   Currency,
+  ExternalCuratorDetailKind,
   OperationType,
   OrderClass,
   OrderDirection,
   OrderStatusFilter,
   PageSize,
+  PositionSwapType,
   QuoteAccuracy,
   RepayWithSupplyKind,
   ReserveHoldersFilter,
   ReservesRequestFilter,
   RewardAccrualBasis,
-  StableVaultClaimStatus,
   SupplySwapKind,
   SwapActivityStatus,
   SwapOrderClass,
   SwapStatusFilter,
   TimeWindow,
   TokenCategory,
-  TokenMovementStatus,
   TokenSwapKind,
   UserPositionConditionsUpdate,
   WithdrawSwapKind,
@@ -49,7 +49,6 @@ import type {
 import type { introspection } from './graphql-env';
 import type {
   AssetId,
-  BoostedRateId,
   HubAssetId,
   HubId,
   ID,
@@ -60,13 +59,9 @@ import type {
   ReserveId,
   RewardId,
   SpokeId,
-  StableVaultId,
-  StableVaultUserPositionId,
-  StableVaultWithdrawClaimId,
   SwapId,
   SwapQuoteId,
   TokenInfoId,
-  TokenMovementId,
   UserBalanceId,
   UserBorrowItemId,
   UserPositionId,
@@ -87,7 +82,6 @@ export const graphql = initGraphQLTada<{
     BigInt: bigint;
     BlockchainData: BlockchainData;
     Boolean: boolean;
-    BoostedRateId: BoostedRateId;
     BorrowSwapKind: BorrowSwapKind;
     ChainId: ChainId;
     ChainsFilter: ChainsFilter;
@@ -97,6 +91,7 @@ export const graphql = initGraphQLTada<{
     Cursor: Cursor;
     DateTime: Date;
     EvmAddress: EvmAddress;
+    ExternalCuratorDetailKind: ExternalCuratorDetailKind;
     Float: number;
     HealthFactor: BigDecimal;
     HubAssetId: HubAssetId;
@@ -113,6 +108,7 @@ export const graphql = initGraphQLTada<{
     OrderQuoteId: OrderQuoteId;
     OrderStatusFilter: OrderStatusFilter;
     PageSize: PageSize;
+    PositionSwapType: PositionSwapType;
     QuoteAccuracy: QuoteAccuracy;
     ReserveHoldersFilter: ReserveHoldersFilter;
     ReserveId: ReserveId;
@@ -123,10 +119,6 @@ export const graphql = initGraphQLTada<{
     SpokeId: SpokeId;
     String: string;
     SupplySwapKind: SupplySwapKind;
-    StableVaultClaimStatus: StableVaultClaimStatus;
-    StableVaultId: StableVaultId;
-    StableVaultUserPositionId: StableVaultUserPositionId;
-    StableVaultWithdrawClaimId: StableVaultWithdrawClaimId;
     SwapActivityStatus: SwapActivityStatus;
     SwapId: SwapId;
     SwapOrderClass: SwapOrderClass;
@@ -135,8 +127,6 @@ export const graphql = initGraphQLTada<{
     TimeWindow: TimeWindow;
     TokenCategory: TokenCategory;
     TokenInfoId: TokenInfoId;
-    TokenMovementId: TokenMovementId;
-    TokenMovementStatus: TokenMovementStatus;
     TokenSwapKind: TokenSwapKind;
     TxHash: TxHash;
     UserBalanceId: UserBalanceId;
@@ -179,3 +169,11 @@ export type FragmentDocumentFor<
     masked: false;
   }
 >;
+
+/**
+ * @internal
+ */
+export type QueryDocumentFor<
+  TValue,
+  TVariables extends AnyVariables,
+> = TadaDocumentNode<{ value: TValue }, TVariables>;

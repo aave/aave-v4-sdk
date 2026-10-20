@@ -2,6 +2,7 @@ export * from '@aave/client';
 
 export * from './AaveProvider';
 export { useAaveClient } from './context';
+export * from './curators';
 export type {
   AsyncTaskError,
   AsyncTaskIdle,
@@ -24,4 +25,3 @@ export * from './spokes';
 export * from './swap';
 export * from './transactions';
 export * from './user';
-export * from './vaults';

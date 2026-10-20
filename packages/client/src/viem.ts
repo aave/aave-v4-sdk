@@ -1,6 +1,7 @@
 import {
   CancelError,
   SigningError,
+  SubmissionUnresolvedError,
   TransactionError,
   UnexpectedError,
   ValidationError,
@@ -20,19 +21,26 @@ import {
   ResultAsync,
   type Signature,
   signatureFrom,
+  submissionId,
   type TxHash,
   txHash,
 } from '@aave/types';
 import {
   type Account,
+  createClient,
+  custom,
   defineChain,
+  isAddressEqual,
   type ProviderRpcError,
+  type ReplacementReason,
   type RpcError,
   SwitchChainError,
   TransactionExecutionError,
+  type TransactionReceipt,
   type Transport,
   UserRejectedRequestError,
   type Chain as ViemChain,
+  WaitForTransactionReceiptTimeoutError,
   type WalletClient,
 } from 'viem';
 import {
@@ -42,8 +50,8 @@ import {
 } from 'viem/actions';
 import { mainnet, sepolia } from 'viem/chains';
 import { supportsPermit } from './adapters';
+import { type CallsStatusOutcome, trackCallsStatus } from './callsStatus';
 import { nativeTokenInfo } from './nativeAsset';
-import { resolveTxHash } from './safe';
 import type {
   ExecutionPlanHandler,
   SignTypedDataError,
@@ -264,6 +272,197 @@ export function transactionError(
 }
 
 /**
+ * Max wait for a submitted transaction to execute on-chain, e.g. while a
+ * Smart Account collects co-signer signatures.
+ *
+ * @internal
+ */
+export const SUBMISSION_TIMEOUT = 30 * 60_000;
+
+/**
+ * Max time a receipt is held while waiting for the first
+ * `wallet_getCallsStatus` answer.
+ *
+ * @internal
+ */
+export const FIRST_PROBE_TIMEOUT = 5_000;
+
+/**
+ * Max time a receipt sent from an address other than the account is held
+ * while the first `wallet_getCallsStatus` request is still unanswered.
+ *
+ * @internal
+ */
+export const INDIRECT_RECEIPT_TIMEOUT = 30_000;
+
+/**
+ * Max times the receipt poller is started. Once used up, a failed receipt
+ * request ends tracking.
+ *
+ * @internal
+ */
+export const RECEIPT_ATTEMPTS = 4;
+/**
+ * Wait between receipt poller starts.
+ *
+ * @internal
+ */
+export const RECEIPT_RETRY_DELAY = 4_000;
+
+type SubmissionOutcome =
+  | Exclude<CallsStatusOutcome, { status: 'aborted' }>
+  | {
+      status: 'receipt';
+      receipt: TransactionReceipt;
+      replaced?: ReplacementReason;
+    }
+  | { status: 'receipt-error'; error: unknown };
+
+/**
+ * Wraps `walletClient` so every request fails once `signal` aborts. viem's
+ * `waitForTransactionReceipt` can't be cancelled, so this stops it from
+ * polling the wallet after tracking has settled.
+ */
+function clientUntil(walletClient: WalletClient, signal: AbortSignal) {
+  return createClient({
+    account: walletClient.account,
+    chain: walletClient.chain,
+    pollingInterval: walletClient.pollingInterval,
+    transport: custom(
+      {
+        request: (args) =>
+          signal.aborted
+            ? Promise.reject(new Error('Submission settled'))
+            : walletClient.request(args),
+      },
+      { retryCount: 0 }, // walletClient's transport already retries
+    ),
+  });
+}
+
+/**
+ * Waits for a submitted transaction to settle, running two pollers over the
+ * wallet transport:
+ *
+ * - (a) `eth_getTransactionReceipt`: for EOAs and wallets that return an
+ *   on-chain hash.
+ * - (b) `wallet_getCallsStatus`: for wallets that return their own id (e.g. a
+ *   Safe `safeTxHash`), which may still need signatures before it executes.
+ *
+ * If the wallet recognises the id, (b)'s answer wins. Otherwise (a)'s does,
+ * with one catch: the Safe iframe provider returns a receipt whose
+ * `transactionHash` is the `safeTxHash` itself. So every receipt is held until
+ * (b)'s first probe completes. A receipt sent from an address other than the
+ * account (an execution by a Safe owner or a bundler) is held for the full
+ * `FIRST_PROBE_TIMEOUT`, even if the first probe fails, so one flaky probe
+ * can't let it through, and for as long as the first probe is unanswered, up
+ * to `INDIRECT_RECEIPT_TIMEOUT`, so a slow one can't either.
+ */
+function trackSubmission(
+  walletClient: WalletClient,
+  hash: TxHash,
+): Promise<SubmissionOutcome> {
+  return new Promise((resolve) => {
+    const controller = new AbortController();
+    const account = walletClient.account?.address;
+    let settled = false;
+    let firstProbeDone = false;
+    let capReached = false;
+    let indirectCapReached = false;
+    let recognized = false;
+    let held: SubmissionOutcome | undefined;
+    let receiptAttempts = 0;
+    let receiptRetry: ReturnType<typeof setTimeout> | undefined;
+
+    const settle = (outcome: SubmissionOutcome) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(firstProbeCap);
+      clearTimeout(indirectReceiptCap);
+      clearTimeout(receiptRetry);
+      controller.abort();
+      resolve(outcome);
+    };
+
+    // a receipt not sent by the account: Smart Account execution or bundle
+    const isIndirect = (outcome: SubmissionOutcome) =>
+      outcome.status === 'receipt' &&
+      account !== undefined &&
+      !isAddressEqual(outcome.receipt.from, account);
+
+    const canRelease = (outcome: SubmissionOutcome) => {
+      if (recognized) return false;
+      if (!isIndirect(outcome)) return firstProbeDone || capReached;
+      return (firstProbeDone && capReached) || indirectCapReached;
+    };
+
+    const releaseHeld = () => {
+      if (held && canRelease(held)) settle(held);
+    };
+
+    const firstProbeCap = setTimeout(() => {
+      capReached = true;
+      releaseHeld();
+    }, FIRST_PROBE_TIMEOUT);
+
+    const indirectReceiptCap = setTimeout(() => {
+      indirectCapReached = true;
+      releaseHeld();
+    }, INDIRECT_RECEIPT_TIMEOUT);
+
+    const onReceiptOutcome = (outcome: SubmissionOutcome) => {
+      if (recognized) return;
+      if (canRelease(outcome)) {
+        settle(outcome);
+      } else {
+        held = outcome;
+      }
+    };
+
+    // (a)
+    const waitForReceipt = () => {
+      receiptAttempts += 1;
+      let replaced: ReplacementReason | undefined;
+      waitForTransactionReceipt(clientUntil(walletClient, controller.signal), {
+        hash,
+        timeout: SUBMISSION_TIMEOUT,
+        onReplaced: ({ reason }) => {
+          replaced = reason;
+        },
+      }).then(
+        (receipt) => onReceiptOutcome({ status: 'receipt', receipt, replaced }),
+        (error) => {
+          // the shared timeout is owned by (b)
+          if (error instanceof WaitForTransactionReceiptTimeoutError) return;
+          if (controller.signal.aborted) return;
+          // A failed receipt request says nothing about the transaction, which
+          // may still land or be recognised by (b): settling here invites a resend
+          if (receiptAttempts < RECEIPT_ATTEMPTS) {
+            receiptRetry = setTimeout(waitForReceipt, RECEIPT_RETRY_DELAY);
+            return;
+          }
+          onReceiptOutcome({ status: 'receipt-error', error });
+        },
+      );
+    };
+    waitForReceipt();
+
+    // (b)
+    trackCallsStatus(walletClient, submissionId(hash), {
+      timeout: SUBMISSION_TIMEOUT,
+      signal: controller.signal,
+      onProbe: (isRecognized) => {
+        recognized ||= isRecognized;
+        firstProbeDone = true;
+        releaseHeld();
+      },
+    }).then((outcome) => {
+      if (outcome.status !== 'aborted') settle(outcome);
+    });
+  });
+}
+
+/**
  * @internal
  */
 export function waitForTransactionResult(
@@ -272,35 +471,69 @@ export function waitForTransactionResult(
   initialTxHash: TxHash,
 ): ResultAsync<
   TransactionResult,
-  CancelError | TransactionError | UnexpectedError
+  CancelError | SubmissionUnresolvedError | TransactionError | UnexpectedError
 > {
-  return ResultAsync.fromPromise(resolveTxHash(initialTxHash), (err) =>
-    UnexpectedError.from(err),
-  ).andThen((resolvedHash) =>
-    ResultAsync.fromPromise(
-      waitForTransactionReceipt(walletClient, {
-        hash: resolvedHash,
-      }),
-      (err) => UnexpectedError.from(err),
-    ).andThen((receipt) => {
-      const hash = txHash(receipt.transactionHash);
+  return ResultAsync.fromSafePromise(
+    trackSubmission(walletClient, initialTxHash),
+  ).andThen((outcome) => {
+    switch (outcome.status) {
+      case 'receipt': {
+        const hash = txHash(outcome.receipt.transactionHash);
 
-      switch (receipt.status) {
-        case 'reverted':
-          if (resolvedHash !== hash) {
-            return errAsync(
-              CancelError.from(`Transaction replaced by ${hash}`),
-            );
-          }
+        // A cancel mines as a successful 0-value self-transfer, so its receipt status can't tell
+        if (
+          outcome.replaced === 'cancelled' ||
+          outcome.replaced === 'replaced'
+        ) {
+          return errAsync(
+            CancelError.from(`Transaction ${outcome.replaced} by ${hash}`),
+          );
+        }
+        if (
+          outcome.replaced === 'repriced' &&
+          outcome.receipt.status === 'reverted'
+        ) {
           return errAsync(transactionError(walletClient.chain, hash, request));
-        case 'success':
-          return okAsync({
-            txHash: hash,
-            operations: request.operations,
-          });
+        }
+        if (outcome.receipt.status === 'success') {
+          return okAsync({ txHash: hash, operations: request.operations });
+        }
+        // A hash other than `initialTxHash` without `replaced` is the
+        // Execution the wallet mapped the Submission to, not a replacement
+        return errAsync(transactionError(walletClient.chain, hash, request));
       }
-    }),
-  );
+
+      case 'success':
+        return okAsync({
+          txHash: outcome.txHash,
+          operations: request.operations,
+        });
+
+      case 'reverted':
+        return errAsync(
+          transactionError(walletClient.chain, outcome.txHash, request),
+        );
+
+      case 'cancelled':
+        return errAsync(
+          CancelError.from(
+            'Transaction was not executed: rejected or dropped by the wallet',
+          ),
+        );
+
+      case 'timeout':
+        return errAsync(
+          SubmissionUnresolvedError.new({
+            submissionId: submissionId(initialTxHash),
+            chainId: request.chainId,
+          }),
+        );
+
+      case 'receipt-error':
+      case 'error':
+        return errAsync(UnexpectedError.from(outcome.error));
+    }
+  });
 }
 
 function sendTransactionAndWait(
@@ -308,7 +541,11 @@ function sendTransactionAndWait(
   request: TransactionRequest,
 ): ResultAsync<
   TransactionResult,
-  CancelError | SigningError | TransactionError | UnexpectedError
+  | CancelError
+  | SigningError
+  | SubmissionUnresolvedError
+  | TransactionError
+  | UnexpectedError
 > {
   return sendTransaction(walletClient, request).andThen((hash) =>
     waitForTransactionResult(walletClient, request, hash),
@@ -348,6 +585,12 @@ function executePlan(
 
 /**
  * Creates an execution plan handler that sends transactions using the provided wallet client.
+ *
+ * Each transaction is awaited until it is on-chain. With a Smart Account (e.g. a
+ * Safe multisig) this can take a while, since other owners may need to sign.
+ * If a transaction is not on-chain after 30 minutes, it fails with a
+ * {@link SubmissionUnresolvedError}. It may still go through, so check
+ * `SubmissionUnresolvedError.is(error)` and do not resend it automatically.
  */
 export function sendWith(walletClient: WalletClient): ExecutionPlanHandler;
 /**

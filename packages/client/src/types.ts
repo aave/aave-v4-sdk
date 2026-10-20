@@ -1,6 +1,7 @@
 import type {
   CancelError,
   SigningError,
+  TimeoutError,
   TransactionError,
   UnexpectedError,
   ValidationError,
@@ -48,6 +49,7 @@ export function transactionReceipt(txHash: TxHash): TransactionReceipt {
 export type SendWithError =
   | CancelError
   | SigningError
+  | TimeoutError
   | TransactionError
   | ValidationError<InsufficientBalanceError>
   | UnexpectedError;

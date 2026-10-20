@@ -1,13 +1,14 @@
 import {
   type ActivitiesQuery,
   type Asset,
-  type BoostedRateId,
   type BorrowActivity,
   type BorrowPoints,
   type BorrowSwapActivity,
   type Chain,
   decodeSpokeId,
   type Erc20Token,
+  type ExternalCurator,
+  type ExternalCuratorQuery,
   encodeHubId,
   encodeReserveId,
   encodeUserPositionId,
@@ -31,13 +32,10 @@ import {
   type ReserveInfo,
   type ReserveQuery,
   type Spoke,
-  type StableVault,
-  type StableVaultUserPosition,
   type SupplyActivity,
   type SupplyPoints,
   type SupplySwapActivity,
   type TokenInfo,
-  type TokenMovementRecord,
   type TokenSwapActivity,
   type UpdatedDynamicConfigActivity,
   type UpdatedRiskPremiumActivity,
@@ -104,6 +102,10 @@ export const exchange = cacheExchange({
     },
     ExchangeAmount: {
       value: transformToBigDecimal,
+    },
+    ExternalCurator: {
+      createdAt: transformToDate,
+      updatedAt: transformToDate,
     },
     AssetPriceSample: {
       price: transformToBigDecimal,
@@ -291,21 +293,15 @@ export const exchange = cacheExchange({
       createdAt: transformToDate,
       deadline: transformToDate,
     },
-    StableVaultSummary: {
-      shares: transformToBigInt,
-      totalDeposits: transformToBigDecimal,
-      userCount: transformToBigInt,
-    },
-    StableVaultWithdrawClaim: {
-      executableAfter: transformToDate,
-    },
-    TokenMovementRecord: {
-      timestamp: transformToDate,
-    },
-    StableVaultPendingAvailability: {
-      executableAfter: transformToDate,
-    },
-    Query: {
+    V4Query: {
+      externalCurator: (
+        _,
+        { request }: VariablesOf<typeof ExternalCuratorQuery>,
+      ) => ({
+        __typename: 'ExternalCurator',
+        id: request.id,
+      }),
+
       hub: (_, { request }: VariablesOf<typeof HubQuery>) => {
         if (isHubInputVariant(request.query)) {
           return {
@@ -360,17 +356,19 @@ export const exchange = cacheExchange({
       ) => {
         // Bail out if not a txHash filter lookup
         if (!isTxHashInputVariant(args.request.query)) {
-          return cache.resolve('Query', 'activities', args);
+          return cache.resolve('V4Query', 'activities', args);
         }
 
         const { txHash, chainId } = args.request.query.txHash;
 
         // Collect all cached activities matching txHash
         const matches = cache
-          .inspectFields('Query')
+          .inspectFields('V4Query')
           .filter((f) => f.fieldName === 'activities')
           .reduce((set, f) => {
-            const pageRef = cache.resolve('Query', f.fieldKey) as string | null;
+            const pageRef = cache.resolve('V4Query', f.fieldKey) as
+              | string
+              | null;
             if (!pageRef) return set;
 
             const itemRefs = cache.resolve(pageRef, 'items') as string[] | null;
@@ -423,9 +421,7 @@ export const exchange = cacheExchange({
     BorrowActivity: (data: BorrowActivity) => data.id,
     BorrowPointsReward: (data: BorrowPoints) => data.id,
     BorrowSwapActivity: (data: BorrowSwapActivity) => data.id,
-    // URQL SystemFields & DataFields doesn't play ball with the bigint scalar (BoostedRate.userCounts field),
-    // hence the type assertion to BoostedRateId which is a string alias of the id
-    BoostedRate: (data) => data.id as BoostedRateId,
+    ExternalCurator: (data: ExternalCurator) => data.id,
     Hub: (data: Hub) => data.id,
     HubAsset: (data: HubAsset) => data.id,
     LeverageActivity: (data: LeverageActivity) => data.id,
@@ -440,13 +436,10 @@ export const exchange = cacheExchange({
     Reserve: (data: Reserve) => data.id,
     ReserveInfo: (data: ReserveInfo) => data.id,
     Spoke: (data: Spoke) => data.id,
-    StableVault: (data: StableVault) => data.id,
-    StableVaultUserPosition: (data: StableVaultUserPosition) => data.id,
     SupplyActivity: (data: SupplyActivity) => data.id,
     SupplyPointsReward: (data: SupplyPoints) => data.id,
     SupplySwapActivity: (data: SupplySwapActivity) => data.id,
     TokenInfo: (data: TokenInfo) => data.id,
-    TokenMovementRecord: (data: TokenMovementRecord) => data.id,
     TokenSwapActivity: (data: TokenSwapActivity) => data.id,
     UpdatedDynamicConfigActivity: (data: UpdatedDynamicConfigActivity) =>
       data.id,
@@ -476,6 +469,7 @@ export const exchange = cacheExchange({
     BorrowSwap: () => null,
     BorrowSwapQuoteResult: () => null,
     CollateralFactorVariation: () => null,
+    CuratorSummary: () => null,
     DecimalNumber: () => null,
     DecimalNumberWithChange: () => null,
     DomainData: () => null,
@@ -485,6 +479,7 @@ export const exchange = cacheExchange({
     ExchangeAmount: () => null,
     ExchangeAmountVariation: () => null,
     ExchangeAmountWithChange: () => null,
+    ExternalCuratorDetail: () => null,
     ForkTopUpResponse: () => null,
     HealthFactorError: () => null,
     HealthFactorVariation: () => null,
@@ -538,8 +533,6 @@ export const exchange = cacheExchange({
     PaginatedResultInfo: () => null,
     PaginatedSpokePositionManagerResult: () => null,
     PaginatedSpokeUserPositionManagerResult: () => null,
-    PaginatedStableVaultMovementsResult: () => null,
-    PaginatedStableVaultRateUsersResult: () => null,
     PaginatedUserSwapsResult: () => null,
     PercentNumber: () => null,
     PercentNumberChangeSnapshot: () => null,
@@ -572,10 +565,6 @@ export const exchange = cacheExchange({
     SharedBalanceNativeAsset: () => null,
     SpokePositionManager: () => null,
     SpokeUserPositionManager: () => null,
-    StableVaultPendingAvailability: () => null,
-    StableVaultRates: () => null,
-    StableVaultSummary: () => null,
-    StableVaultWithdrawClaim: () => null,
     SupplySwap: () => null,
     SupplySwapQuoteResult: () => null,
     SwapByIntent: () => null,
@@ -592,12 +581,6 @@ export const exchange = cacheExchange({
     SwapReceipt: () => null,
     SwapTransactionRequest: () => null,
     SwapTypedData: () => null,
-    TokenMovementAllocate: () => null,
-    TokenMovementBridgeIn: () => null,
-    TokenMovementBridgeOut: () => null,
-    TokenMovementDeallocate: () => null,
-    TokenMovementRebalance: () => null,
-    TokenMovementSwap: () => null,
     TokenSwap: () => null,
     TokenSwapQuoteResult: () => null,
     TransactionRequest: () => null,

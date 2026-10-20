@@ -1,6 +1,6 @@
 {
   "name": "@aave/graphql",
-  "version": "3.6.0",
+  "version": "4.0.0",
   "description": "GraphQL bindings for the Aave API",
   "repository": {
     "directory": "packages/graphql",
@@ -52,7 +52,7 @@
     "gql:generate:cache": "gql.tada generate turbo",
     "gql:generate:defaults": "./scripts/generate-defaults.ts && biome format --write ./src/defaults.ts",
     "gql:download:local": "./scripts/fetch-schema.ts http://localhost:3007/graphql ./src/schema.json && gql-tada generate schema 'http://localhost:3007/graphql' --output './schema.graphql' && pnpm gql:generate:defaults",
-    "gql:download:staging": "./scripts/fetch-schema.ts https://api.v4.staging.aave.com/graphql ./src/schema.json && gql-tada generate schema 'https://api.v4.staging.aave.com/graphql' --output './schema.graphql' && pnpm gql:generate:defaults",
+    "gql:download:staging": "./scripts/fetch-schema.ts https://api.staging.aave.com/graphql ./src/schema.json && gql-tada generate schema 'https://api.staging.aave.com/graphql' --output './schema.graphql' && pnpm gql:generate:defaults",
     "gql:generate:introspection": "gql-tada generate output",
     "gql:turbo": "gql-tada turbo",
     "prebuild": "pnpm run gql:turbo"

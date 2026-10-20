@@ -6,6 +6,7 @@ import {
   Erc20AmountFragment,
   InsufficientBalanceErrorFragment,
   InsufficientLiquidityErrorFragment,
+  type PaginatedResultInfo,
   PaginatedResultInfoFragment,
   PercentNumberFragment,
   TokenAmountFragment,
@@ -477,7 +478,19 @@ export const SwapFulfilledFragment = graphql(
 );
 export type SwapFulfilled = FragmentOf<typeof SwapFulfilledFragment>;
 
-export const SwapStatusFragment = graphql(
+// Explicit document types from here on: inferring them exceeds what the
+// compiler will serialize in declaration emit (TS7056).
+type SwapStatusNode =
+  | SwapOpen
+  | SwapPendingSignature
+  | SwapCancelled
+  | SwapExpired
+  | SwapFulfilled;
+
+export const SwapStatusFragment: FragmentDocumentFor<
+  SwapStatusNode,
+  'SwapStatus'
+> = graphql(
   `fragment SwapStatus on SwapStatus {
     __typename
     ... on SwapOpen {
@@ -553,7 +566,16 @@ export const CancelSwapExecutionPlanFragment: FragmentDocumentFor<
   [TransactionRequestFragment, SwapCancelledResultFragment],
 );
 
-export const PaginatedUserSwapsResultFragment = graphql(
+export type PaginatedUserSwapsResult = {
+  __typename: 'PaginatedUserSwapsResult';
+  items: SwapStatusNode[];
+  pageInfo: PaginatedResultInfo;
+};
+
+export const PaginatedUserSwapsResultFragment: FragmentDocumentFor<
+  PaginatedUserSwapsResult,
+  'PaginatedUserSwapsResult'
+> = graphql(
   `fragment PaginatedUserSwapsResult on PaginatedUserSwapsResult {
     __typename
     items {
@@ -565,9 +587,6 @@ export const PaginatedUserSwapsResultFragment = graphql(
   }`,
   [SwapStatusFragment, PaginatedResultInfoFragment],
 );
-export type PaginatedUserSwapsResult = FragmentOf<
-  typeof PaginatedUserSwapsResultFragment
->;
 
 export const PositionSwapAdapterContractApprovalFragment = graphql(
   `fragment PositionSwapAdapterContractApproval on PositionSwapAdapterContractApproval {

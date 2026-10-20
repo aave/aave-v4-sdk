@@ -31,7 +31,6 @@ export enum PageSize {
  * The time window for the historical data.
  */
 export enum TimeWindow {
-  LastHour = 'LAST_HOUR',
   LastDay = 'LAST_DAY',
   LastWeek = 'LAST_WEEK',
   LastMonth = 'LAST_MONTH',
@@ -163,24 +162,6 @@ export enum RepayWithSupplyKind {
 }
 
 /**
- * The status of a stable vault withdrawal claim.
- */
-export enum StableVaultClaimStatus {
-  /**
-   * The claim is ready to be redeemed.
-   */
-  Ready = 'READY',
-  /**
-   * The claim is still in the waiting period.
-   */
-  Pending = 'PENDING',
-  /**
-   * The claim status could not be determined.
-   */
-  Unknown = 'UNKNOWN',
-}
-
-/**
  * The supply swap kind for supply swaps.
  */
 export enum SupplySwapKind {
@@ -194,6 +175,29 @@ export enum SupplySwapKind {
 export enum WithdrawSwapKind {
   Withdraw = 'WITHDRAW',
   Buy = 'BUY',
+}
+
+/**
+ * A position swap, for asking whether a reserve can be its source (`canSwapFrom`)
+ * or its destination (`canSwapTo`). Each side is the one its quote names.
+ */
+export enum PositionSwapType {
+  /**
+   * From the current supply to the new one.
+   */
+  SupplySwap = 'SUPPLY_SWAP',
+  /**
+   * From the current debt to the new one.
+   */
+  BorrowSwap = 'BORROW_SWAP',
+  /**
+   * From the debt being repaid to the supply that repays it.
+   */
+  RepayWithSupply = 'REPAY_WITH_SUPPLY',
+  /**
+   * From the debt borrowed to the collateral it buys.
+   */
+  Leverage = 'LEVERAGE',
 }
 
 /**
@@ -238,14 +242,7 @@ export enum SwapStatusFilter {
 export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
-}
-
-/**
- * The status of a token movement record.
- */
-export enum TokenMovementStatus {
-  Pending = 'PENDING',
-  Done = 'DONE',
+  TokenizedStock = 'TOKENIZED_STOCK',
 }
 
 /**
@@ -314,4 +311,18 @@ export enum TokenSwapKind {
    * Sell a specific amount of the source token
    */
   Sell = 'SELL',
+}
+
+/**
+ * The kind of link or fact shown on an external curator's profile.
+ */
+export enum ExternalCuratorDetailKind {
+  /**
+   * The curator's X (Twitter) profile.
+   */
+  X = 'X',
+  /**
+   * The curator's website.
+   */
+  Website = 'WEBSITE',
 }
