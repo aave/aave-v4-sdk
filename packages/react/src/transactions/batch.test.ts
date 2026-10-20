@@ -103,7 +103,7 @@ describe(`Given the '${useSupply.name}' hook with the batch option`, () => {
   });
 
   async function supplyWith(batch: BatchCapability | undefined) {
-    const handler = vi.fn(sent);
+    const handler = vi.fn((_plan: { __typename: string }) => sent());
     const {
       result: {
         current: [supply],
