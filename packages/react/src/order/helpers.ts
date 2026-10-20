@@ -37,6 +37,7 @@ import {
   type SendTransactionError,
   trySignatureFrom,
 } from '../helpers';
+import { refreshPendingOrders } from '../helpers/cache';
 import { type UseAsyncTask, useAsyncTask } from '../helpers/tasks';
 
 export function extractLeverageQuote(
@@ -251,20 +252,22 @@ export function submitOrderIntent(
   | PendingTransactionError
   | UnexpectedError
 > {
-  return submitOrder(client, { bySignature }).andThen((plan) => {
-    switch (plan.__typename) {
-      case 'OrderReceipt':
-        return okAsync(plan);
-      // The server may answer an intent submission with a transaction to
-      // send; the order is already registered, so the transaction must be
-      // dispatched rather than dead-ending a fully signed flow.
-      case 'OrderTransactionRequest':
-        return handler(plan, { cancel })
-          .andThen(PendingTransaction.tryFrom)
-          .andThen((pendingTransaction) => pendingTransaction.wait())
-          .map(() => plan.orderReceipt);
-    }
-  });
+  return submitOrder(client, { bySignature })
+    .andThen((plan) => {
+      switch (plan.__typename) {
+        case 'OrderReceipt':
+          return okAsync(plan);
+        // The server may answer an intent submission with a transaction to
+        // send; the order is already registered, so the transaction must be
+        // dispatched rather than dead-ending a fully signed flow.
+        case 'OrderTransactionRequest':
+          return handler(plan, { cancel })
+            .andThen(PendingTransaction.tryFrom)
+            .andThen((pendingTransaction) => pendingTransaction.wait())
+            .map(() => plan.orderReceipt);
+      }
+    })
+    .andThrough(() => refreshPendingOrders(client));
 }
 
 export {

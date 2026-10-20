@@ -7,12 +7,14 @@ import {
   bigDecimal,
   chainId,
   type EvmAddress,
+  errAsync,
   evmAddress,
   type HexString,
   invariant,
   isObject,
   never,
   nonNullable,
+  okAsync,
   ResultAsync,
 } from '@aave/types';
 import type { Eip1193Provider } from 'ethers';
@@ -32,7 +34,7 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { afterAll, beforeAll } from 'vitest';
 import { AaveClient } from './AaveClient';
-import { chain } from './actions';
+import { chain, userBalances } from './actions';
 import { local, production, staging } from './environments';
 import { toViemChain } from './viem';
 
@@ -237,7 +239,55 @@ export function fundErc20Address(
       params: [token.address, address, amountHex],
     }),
     (err) => UnexpectedError.from(err),
+  ).andThen((hash) =>
+    waitForApiErc20Balance(address, token.address, token.amount).map(
+      () => hash,
+    ),
   );
+}
+
+// fundErc20Address calls tenderly directly to set the users balance.
+// Wait until the API picks it up before continuing on with the test.
+function waitForApiErc20Balance(
+  address: EvmAddress,
+  tokenAddress: EvmAddress,
+  amount: BigDecimal,
+  { interval = 500, timeout = 15_000 } = {},
+): ResultAsync<void, UnexpectedError> {
+  const deadline = Date.now() + timeout;
+
+  const poll = (): ResultAsync<void, UnexpectedError> =>
+    userBalances(
+      client,
+      {
+        user: address,
+        filter: { chains: { chainIds: [ETHEREUM_FORK_ID] } },
+      },
+      { requestPolicy: 'network-only' },
+    ).andThen((balances) => {
+      const funded = balances
+        .flatMap((balance) => balance.balances)
+        .some(
+          (item) =>
+            item.__typename === 'Erc20Amount' &&
+            item.token.address.toLowerCase() === tokenAddress.toLowerCase() &&
+            item.amount.value.gte(amount),
+        );
+
+      if (funded) {
+        return okAsync(undefined);
+      }
+      if (Date.now() > deadline) {
+        return errAsync(
+          new UnexpectedError(
+            `API did not report a ${amount} balance of ${tokenAddress} for ${address} within ${timeout}ms`,
+          ),
+        );
+      }
+      return ResultAsync.fromSafePromise(wait(interval)).andThen(poll);
+    });
+
+  return poll();
 }
 
 export function wait(ms: number) {
