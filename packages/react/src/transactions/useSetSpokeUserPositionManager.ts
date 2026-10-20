@@ -93,7 +93,9 @@ export function useSetSpokeUserPositionManager(
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
-        .andThrough(() => refreshSpokePositionManagers(client, request.spoke)),
+        .andThrough(() =>
+          refreshSpokePositionManagers(client, request.spoke, request.user),
+        ),
     [client, handler],
   );
 }
