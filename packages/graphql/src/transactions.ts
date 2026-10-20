@@ -291,6 +291,9 @@ export const PreviewRewardOutcomeFragment = graphql(
     acquired {
       ...ReserveReward
     }
+    adjusted {
+      ...ReserveReward
+    }
   }`,
   [ReserveRewardFragment],
 );
