@@ -239,7 +239,11 @@ export function canBatch(
     }),
     (err) => err,
   )
-    .map((capabilities) => {
+    .map((capabilities: unknown) => {
+      if (!isObject(capabilities)) {
+        return false;
+      }
+
       const byChain = new Map(
         Object.entries(capabilities).map(
           ([key, value]) => [Number(key), value] as const,

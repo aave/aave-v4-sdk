@@ -886,6 +886,14 @@ describe(`Given the viem '${canBatch.name}' function`, () => {
     });
   });
 
+  describe('When the wallet answers with null', () => {
+    it('Then it resolves to false', async () => {
+      const { value } = await check({ result: null });
+
+      expect(value).toBe(false);
+    });
+  });
+
   describe.each([
     ['does not support EIP-5792', rpcErrors.methodNotFound],
     ['fails', rpcErrors.transport],
