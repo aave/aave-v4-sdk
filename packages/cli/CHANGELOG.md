@@ -1,5 +1,14 @@
 # @aave/cli
 
+## 4.4.1
+
+### Patch Changes
+
+- Updated dependencies [331c30f]
+- Updated dependencies [cd2940a]
+- Updated dependencies [cd2940a]
+  - @aave/client@7.1.0
+
 ## 4.4.0
 
 ### Minor Changes
