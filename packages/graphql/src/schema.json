@@ -7448,6 +7448,24 @@
             "args": []
           },
           {
+            "name": "adjusted",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ReserveReward",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
             "name": "lost",
             "type": {
               "kind": "NON_NULL",
