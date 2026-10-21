@@ -220,6 +220,7 @@ export const exchange = cacheExchange({
       multiplier: transformToBigDecimal,
     },
     LeverageApprovalsRequired: {
+      minMultiplier: transformToBigDecimal,
       maxSafeMultiplier: transformToBigDecimal,
     },
     UserMerklClaimableReward: {

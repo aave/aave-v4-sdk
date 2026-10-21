@@ -60,7 +60,7 @@ import {
  * @param client - Aave client.
  * @param request - The leverage quote request parameters.
  * @param options - The query options.
- * @returns The leverage quote with approvals and the maximum safe multiplier.
+ * @returns The leverage quote with approvals and the multiplier range it allows.
  */
 export function leverageQuote(
   client: AaveClient,

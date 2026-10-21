@@ -44,8 +44,9 @@ export type UseLeverageQuoteArgs = Prettify<
 /**
  * Fetch a quote for a leverage operation with the specified parameters.
  *
- * Resolves to the full quote node, so `maxSafeMultiplier` is available
- * alongside `quote` to bound a leverage input.
+ * Resolves to the full quote node, so `minMultiplier` and `maxSafeMultiplier`
+ * are available alongside `quote` to bound a leverage input. The multiplier
+ * measures the whole position: total collateral over net equity after the order.
  *
  * This signature supports React Suspense:
  *

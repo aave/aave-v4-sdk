@@ -3740,6 +3740,17 @@
             "args": []
           },
           {
+            "name": "minMultiplier",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
             "name": "maxSafeMultiplier",
             "type": {
               "kind": "NON_NULL",
