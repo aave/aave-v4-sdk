@@ -1,5 +1,11 @@
 # @aave/graphql
 
+## 4.2.0
+
+### Minor Changes
+
+- 9e8cb88: **feat:** add `TokenCategory.BtcDerived` and `TokenCategory.YieldBearingStable` from the API schema
+
 ## 4.1.0
 
 ### Minor Changes
