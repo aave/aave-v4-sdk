@@ -1,5 +1,17 @@
 # @aave/react
 
+## 7.2.0
+
+### Minor Changes
+
+- 9e8cb88: **feat:** add `TokenCategory.BtcDerived` and `TokenCategory.YieldBearingStable` from the API schema
+
+### Patch Changes
+
+- Updated dependencies [9e8cb88]
+  - @aave/graphql@4.2.0
+  - @aave/client@7.2.0
+
 ## 7.1.0
 
 ### Minor Changes
