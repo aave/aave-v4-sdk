@@ -243,6 +243,8 @@ export enum TokenCategory {
   Stablecoin = 'STABLECOIN',
   EthCorrelated = 'ETH_CORRELATED',
   TokenizedStock = 'TOKENIZED_STOCK',
+  BtcDerived = 'BTC_DERIVED',
+  YieldBearingStable = 'YIELD_BEARING_STABLE',
 }
 
 /**
