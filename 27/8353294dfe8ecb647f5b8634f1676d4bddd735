@@ -1,0 +1,111 @@
+packages/client/src/actions/swap.ts
+  s_8c4f39e1c85fee::t_c2a65124e81cf5 90-91,214-215,269-270,324-325,379-380
+  s_8c4f39e1c85fee::t_fa5d0f14a84416 109,230,285,340,395
+  s_8c4f39e1c85fee::t_f6e18b508378e8 8
+packages/graphql/src/fragments/common.ts
+  s_8c4f39e1c85fee::t_5b5500f9eadae4 439-448
+packages/client/src/actions/order.ts
+  s_8c4f39e1c85fee::t_77ee47df937405 75-76
+  s_8c4f39e1c85fee::t_deca5b790589b0 91
+  s_8c4f39e1c85fee::t_a23debc6de20a8 8
+packages/graphql/schema.graphql
+  s_8c4f39e1c85fee::t_a59db52444b045 4548
+  s_8c4f39e1c85fee::t_8402e1dc8f066d 54-58
+  s_8c4f39e1c85fee::t_769ca1eabbd3cb 1220
+  s_8c4f39e1c85fee::t_300b3835738050 2501
+  s_8c4f39e1c85fee::t_310c37bfe7cb48 286
+  s_8c4f39e1c85fee::t_2a802828b9d797 3076
+  s_8c4f39e1c85fee::t_064bd1382aaefb 3384
+packages/react/src/swap/useTokenSwapQuote.ts
+  s_8c4f39e1c85fee::t_74cae28d188d2e 169-170,248-249
+  s_8c4f39e1c85fee::t_1fb02493794fca 4
+  s_8c4f39e1c85fee::t_979f2a4cfed48e 36-37,46
+packages/react/src/order/useLeverageQuote.ts
+  s_8c4f39e1c85fee::t_5f2ee3c1c7f3e5 4
+  s_8c4f39e1c85fee::t_b98753a6eff30b 138-139,215-216
+packages/react/src/swap/useBorrowSwap.ts
+  s_8c4f39e1c85fee::t_8fbb8651536340 4
+  s_8c4f39e1c85fee::t_953fcb39c27ece 75-79
+packages/react/src/swap/helpers.ts
+  s_8c4f39e1c85fee::t_2aa455d913df5b 40-43,46-47,53
+  s_8c4f39e1c85fee::t_75727062e596e8 14
+packages/react/src/order/useWithdrawSwapOrder.ts
+  s_8c4f39e1c85fee::t_9d8225366dc1d3 4
+  s_8c4f39e1c85fee::t_e806b64e963947 67-71
+packages/react/src/order/useTokenSwapOrder.ts
+  s_8c4f39e1c85fee::t_723d3acdb90299 9
+  s_8c4f39e1c85fee::t_f537cc809df28e 91-95
+packages/react/src/swap/useBorrowSwapQuote.ts
+  s_8c4f39e1c85fee::t_86fc9e16cf9321 3-7
+  s_8c4f39e1c85fee::t_d674c91cc09fa4 137-138,212-213
+packages/react/src/swap/useWithdrawSwapQuote.ts
+  s_8c4f39e1c85fee::t_65cefdbefdc469 137-138,212-213
+  s_8c4f39e1c85fee::t_1c93b259c08383 3-7
+packages/react/src/swap/useWithdrawSwap.ts
+  s_8c4f39e1c85fee::t_1cf78c2a62d2ed 75-79
+  s_8c4f39e1c85fee::t_a694d596b3cdf2 4
+packages/react/src/order/helpers.ts
+  s_8c4f39e1c85fee::t_13681c8bb41d1d 60
+  s_8c4f39e1c85fee::t_d46f2bb89d2e91 45-48,51-52
+  s_8c4f39e1c85fee::t_b6eda52b23189d 14
+packages/react/src/order/useRepayWithSupplyOrder.ts
+  s_8c4f39e1c85fee::t_f2d620c0f60ad9 4
+  s_8c4f39e1c85fee::t_49d93a515bf18d 68-72
+packages/graphql/src/fragments/orders.ts
+  s_8c4f39e1c85fee::t_51c3330f8feff1 5
+  s_8c4f39e1c85fee::t_dfdc7d8dc83ad4 214-216,218-222
+packages/graphql/src/schema.json
+  s_8c4f39e1c85fee::t_14cc9784a2f2f3 80-95
+  s_8c4f39e1c85fee::t_8212d3a215ba94 1110-1113,3789-3792,8268-8271,9971-9974,11184-11187,16588-16591
+  s_8c4f39e1c85fee::t_6336524055fcc9 78-79
+.changeset/small-swaps-fail.md
+  s_8c4f39e1c85fee::t_84e72178d4f6b4 1-7
+packages/graphql/src/fragments/swaps.ts
+  s_8c4f39e1c85fee::t_aa4b4a3cbe0749 182-184,192
+  s_8c4f39e1c85fee::t_68decd7bcf03c5 5
+  s_8c4f39e1c85fee::t_5b6a3dbb0d449f 686-688,693,709-711,716,732-734,739,755-757,762
+packages/react/src/swap/useSupplySwapQuote.ts
+  s_8c4f39e1c85fee::t_1781ce7b4b459d 134-135,209-210
+  s_8c4f39e1c85fee::t_f9762c598a136c 4
+packages/react/src/swap/useRepayWithSupplyQuote.ts
+  s_8c4f39e1c85fee::t_90b5b067a4acb6 3-7
+  s_8c4f39e1c85fee::t_3ea422a28ca4c3 137-138,215-216
+packages/react/src/swap/useRepayWithSupply.ts
+  s_8c4f39e1c85fee::t_451ec104f6421b 78-82
+  s_8c4f39e1c85fee::t_ae8a7f5197a3d0 7
+packages/client/src/cache.ts
+  s_8c4f39e1c85fee::t_ffd1d4aaa205c5 493
+packages/react/src/swap/useSupplySwap.ts
+  s_8c4f39e1c85fee::t_7719939620e800 4
+  s_8c4f39e1c85fee::t_b552f7c29204f5 76-80
+packages/react/src/order/useBorrowSwapOrder.ts
+  s_8c4f39e1c85fee::t_4469b14ae3bf5b 4
+  s_8c4f39e1c85fee::t_5780319c5e60b5 67-71
+packages/react/src/order/useSupplySwapOrder.ts
+  s_8c4f39e1c85fee::t_f5ec64aadee81e 4
+  s_8c4f39e1c85fee::t_3c8db4c2af4867 84-88
+packages/react/src/order/useLeverage.ts
+  s_8c4f39e1c85fee::t_8755a070068eee 4
+  s_8c4f39e1c85fee::t_0d93ca57ba2572 100-104
+packages/react/src/swap/useTokenSwap.ts
+  s_8c4f39e1c85fee::t_2e0e047f897bf5 95-99
+  s_8c4f39e1c85fee::t_0c01a1f64b8775 5
+packages/graphql/src/graphql-env.d.ts
+  s_8c4f39e1c85fee::t_3872189c99127d 11,45,150,286,349,394,485
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "278353294dfe8ecb647f5b8634f1676d4bddd735",
+  "prompts": {},
+  "sessions": {
+    "s_8c4f39e1c85fee": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "617fa6dc-a503-4f62-92f6-e8e7ea4956bb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
