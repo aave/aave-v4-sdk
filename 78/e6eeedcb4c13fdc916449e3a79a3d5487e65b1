@@ -1,0 +1,52 @@
+packages/react/src/transactions/useSupply.ts
+  s_45b3af06ef827c::t_534903ac6a30b0 1-5,16,127-133,145-146,167-168,170-181,183-187,189-191
+  s_45b3af06ef827c::t_3a0d6a5e1c92b1 29-33,134,147
+  s_45b3af06ef827c::t_1b589b496ca001 143-144,161
+  s_45b3af06ef827c::t_7d3ec2f89ebcb0 120-126,135-142,148-153,160,162-166,192-193,198
+packages/react/src/transactions/useBorrow.ts
+  s_45b3af06ef827c::t_7d3ec2f89ebcb0 96-102,108-115,121-126,133,135-139,154-155,159
+  s_45b3af06ef827c::t_534903ac6a30b0 1-5,14,103-106,118-119,140-141,143-146,148-149,151-153
+  s_45b3af06ef827c::t_1b589b496ca001 116-117,134
+  s_45b3af06ef827c::t_3a0d6a5e1c92b1 26-30,107,120
+packages/react/src/transactions/useRepay.ts
+  s_45b3af06ef827c::t_534903ac6a30b0 1-5,16-21,133-139,151-152,173-174,176-185,187-191,193-197,199-201
+  s_45b3af06ef827c::t_7d3ec2f89ebcb0 126-132,141-148,154-159,166,168-172,202-203,208
+  s_45b3af06ef827c::t_3a0d6a5e1c92b1 34-38,140,153
+  s_45b3af06ef827c::t_1b589b496ca001 149-150,167
+packages/react/src/transactions/useWithdraw.ts
+  s_45b3af06ef827c::t_534903ac6a30b0 1-5,14,103-106,118-119,140-141,143-146,148-149,151-153
+  s_45b3af06ef827c::t_7d3ec2f89ebcb0 96-102,108-115,121-126,133,135-139,154-155,159
+  s_45b3af06ef827c::t_1b589b496ca001 116-117,134
+  s_45b3af06ef827c::t_3a0d6a5e1c92b1 26-30,107,120
+packages/react/src/transactions/batch.test.ts
+  s_45b3af06ef827c::t_71f83d0afe21a4 16
+  s_45b3af06ef827c::t_66c9f48f0c13b6 1-15,17-126,131-133,135-150,152-189
+  s_45b3af06ef827c::t_e1084b16fa7aab 127-130,134,151
+packages/react/src/transactions/batch.ts
+  s_45b3af06ef827c::t_1b589b496ca001 7,9-14,29-40,45,48,55-57,60
+  s_45b3af06ef827c::t_ad6f10c2607131 1-6,8,15,17-28,41-44,46-47,49-54,58-59,61-62
+  s_45b3af06ef827c::t_3a0d6a5e1c92b1 16
+packages/react/src/transactions/index.ts
+  s_45b3af06ef827c::t_3a0d6a5e1c92b1 1
+packages/react/src/transactions/useLiquidatePosition.ts
+  s_45b3af06ef827c::t_3a0d6a5e1c92b1 29-33,141,154
+  s_45b3af06ef827c::t_534903ac6a30b0 1-5,16,134-140,152-153,174-175,177-188,190-194,196-198
+  s_45b3af06ef827c::t_1b589b496ca001 150-151,168
+  s_45b3af06ef827c::t_7d3ec2f89ebcb0 127-133,142-149,155-160,167,169-173,199-200,205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "78e6eeedcb4c13fdc916449e3a79a3d5487e65b1",
+  "prompts": {},
+  "sessions": {
+    "s_45b3af06ef827c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0bf09e5-2fd8-4644-ba06-26989fce360a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Mark Grothe <grothem@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+packages/react/src/order/usePendingOrders.test.ts
+  s_1536b5870f2417::t_d2f1f6fe823c39 5-10,12-13,16,18-19,21-27
+  s_1536b5870f2417::t_16df3595d32ebf 2,28-42,44-45,47-215,323
+  s_1536b5870f2417::t_2d20d9f179c27e 46
+  s_1536b5870f2417::t_0fe5498bdf4655 3,14-15,17,20
+  s_1536b5870f2417::t_74aa7fb93bedad 1,218,221,225,230,240-243,245-258,263-267
+  s_1536b5870f2417::t_84b0884e9c23ef 4,11
+  s_1536b5870f2417::t_66a5d94b911325 216,272-322
+  s_1536b5870f2417::t_e3cf594fa025df 217,219-220,222-224,226-229,231-239,244,259-262,268-271
+  s_1536b5870f2417::t_64dbf958e1acaf 43
+packages/react/src/order/useCancelOrder.ts
+  s_1536b5870f2417::t_8e26bf7723c3fc 25,104-108,110-124,126-151,153-154,156-160,162-168
+.changeset/idle-orders-rest.md
+  s_1536b5870f2417::t_6958398fd6fb86 1-5
+packages/react/src/order/useTokenSwapOrder.ts
+  s_1536b5870f2417::t_3889afe9ad3dcf 103-110,112-116
+  s_1536b5870f2417::t_a94cd7882e82be 24
+packages/graphql/src/testing.ts
+  s_1536b5870f2417::t_b83271875a2d45 668-689,707-709
+  s_1536b5870f2417::t_0fe5498bdf4655 31,665-667,690-706
+  s_1536b5870f2417::t_3a9e830d57571d 27-28
+packages/react/src/helpers/cache.ts
+  s_1536b5870f2417::t_ac42f493d7b7f9 11,142-146
+  s_1536b5870f2417::t_d91bc25b61458f 147-148
+packages/react/src/order/usePendingOrders.ts
+  s_1536b5870f2417::t_15540bef55f004 40,43,47,49,54-59
+  s_1536b5870f2417::t_b5b55f5055004e 160-165,169
+  s_1536b5870f2417::t_17c97847eb05b6 144,151-154
+  s_1536b5870f2417::t_ffaa8c60fc1879 211
+  s_1536b5870f2417::t_1f22080169bbde 167-168,170,172
+packages/react/src/order/helpers.ts
+  s_1536b5870f2417::t_42d9f29ce7bc80 40
+  s_1536b5870f2417::t_b87e17d753c1dc 255-270
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ae8bbe98317ad81dfd9608d69c87c16782947922",
+  "prompts": {},
+  "sessions": {
+    "s_1536b5870f2417": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8cdcdcd-8306-46c7-9e6e-52080f5b9fba",
+        "model": "unknown"
+      },
+      "human_author": "Joaquin Battilana <battilanajn@gmail.com>"
+    }
+  }
+}

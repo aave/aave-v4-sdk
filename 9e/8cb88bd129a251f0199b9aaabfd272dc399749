@@ -1,0 +1,25 @@
+.changeset/fresh-token-categories.md
+  s_7f495dab6fd4a6::t_3550e5fad335ee 1-7
+packages/graphql/src/enums.ts
+  s_7f495dab6fd4a6::t_3550e5fad335ee 246-247
+packages/graphql/schema.graphql
+  s_7f495dab6fd4a6::t_e1ed2f1b328a19 3304-3305
+packages/graphql/src/graphql-env.d.ts
+  s_7f495dab6fd4a6::t_8194f992c7b119 385
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9e8cb88bd129a251f0199b9aaabfd272dc399749",
+  "prompts": {},
+  "sessions": {
+    "s_7f495dab6fd4a6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18705-f8f5-7f00-ae43-383f3f5e5294",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
