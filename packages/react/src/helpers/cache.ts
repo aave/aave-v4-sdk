@@ -21,6 +21,7 @@ import {
   SpokePositionManagersQuery,
   SpokeQuery,
   SpokesQuery,
+  SpokeUserPositionManagersQuery,
   type SupplyRequest,
   UserBalancesQuery,
   UserBorrowsQuery,
@@ -241,11 +242,19 @@ export function refreshHubs(client: AaveClient, chainId: ChainId) {
 export function refreshSpokePositionManagers(
   client: AaveClient,
   spoke: SpokeId,
+  user: EvmAddress,
 ) {
-  return client.refreshQueryWhere(
-    SpokePositionManagersQuery,
-    (variables) => variables.request.spoke === spoke,
-  );
+  return ResultAsync.combine([
+    client.refreshQueryWhere(
+      SpokePositionManagersQuery,
+      (variables) => variables.request.spoke === spoke,
+    ),
+    client.refreshQueryWhere(
+      SpokeUserPositionManagersQuery,
+      (variables) =>
+        variables.request.spoke === spoke && variables.request.user === user,
+    ),
+  ]);
 }
 
 /**
