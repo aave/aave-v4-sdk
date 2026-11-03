@@ -77,6 +77,24 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AmountTooSmallError",
+        "fields": [
+          {
+            "name": "reason",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "ApiPayment",
         "fields": [
           {
@@ -1089,6 +1107,10 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientLiquidityError"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AmountTooSmallError"
           }
         ]
       },
@@ -3764,6 +3786,10 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientLiquidityError"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AmountTooSmallError"
           }
         ]
       },
@@ -8239,6 +8265,10 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientLiquidityError"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AmountTooSmallError"
           }
         ]
       },
@@ -9938,6 +9968,10 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientLiquidityError"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AmountTooSmallError"
           }
         ]
       },
@@ -11147,6 +11181,10 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientLiquidityError"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AmountTooSmallError"
           }
         ]
       },
@@ -16547,6 +16585,10 @@
           {
             "kind": "OBJECT",
             "name": "InsufficientLiquidityError"
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AmountTooSmallError"
           }
         ]
       },

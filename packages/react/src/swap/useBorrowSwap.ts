@@ -1,6 +1,7 @@
 import { borrowSwapQuote, preparePositionSwap } from '@aave/client/actions';
 import type { ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   BorrowSwapQuoteRequest,
   InsufficientBalanceError,
   InsufficientLiquidityError,
@@ -71,7 +72,11 @@ export function useBorrowSwap(
   | SwapSignerError
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+  | ValidationError<
+      | InsufficientBalanceError
+      | InsufficientLiquidityError
+      | AmountTooSmallError
+    >
 > {
   const client = useAaveClient();
 

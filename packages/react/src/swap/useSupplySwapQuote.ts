@@ -1,6 +1,7 @@
 import { supplySwapQuote } from '@aave/client/actions';
 import type { UnexpectedError, ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   InsufficientLiquidityError,
   SupplySwapQuoteRequest,
   SwapQuote,
@@ -130,7 +131,8 @@ export function useSupplySwapQuote({
   pause?: boolean;
 }): SuspendableResult<
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 
@@ -204,7 +206,8 @@ export function useSupplySwapQuoteAction(
 ): UseAsyncTask<
   SupplySwapQuoteRequest,
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 

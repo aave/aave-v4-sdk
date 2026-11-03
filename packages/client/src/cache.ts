@@ -490,6 +490,7 @@ export const exchange = cacheExchange({
     MultichainAssetHistorySample: () => null,
     InsufficientBalanceError: () => null,
     InsufficientLiquidityError: () => null,
+    AmountTooSmallError: () => null,
     Leverage: () => null,
     LeverageApprovalsRequired: () => null,
     LeverageQuoteResult: () => null,

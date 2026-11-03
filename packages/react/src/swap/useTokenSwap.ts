@@ -2,6 +2,7 @@ import { supportsPermit } from '@aave/client';
 import { prepareTokenSwap, swap, tokenSwapQuote } from '@aave/client/actions';
 import { UnexpectedError, type ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   Erc20Approval,
   InsufficientBalanceError,
   InsufficientLiquidityError,
@@ -91,7 +92,11 @@ export function useTokenSwap(
   SwapReceipt,
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+  | ValidationError<
+      | InsufficientBalanceError
+      | InsufficientLiquidityError
+      | AmountTooSmallError
+    >
 > {
   const client = useAaveClient();
 
