@@ -1,0 +1,30 @@
+packages/react/src/swap/useUserSwaps.ts
+  s_da480adf7d5d15::t_f125a812c67702 29,157
+packages/react/src/user.ts
+  s_da480adf7d5d15::t_f125a812c67702 4,180-183,208-209,212,219,221,343-346,371-372,375,382,384
+packages/react/src/helpers/cache.ts
+  s_da480adf7d5d15::t_f125a812c67702 25,355-379
+  s_da480adf7d5d15::t_221a2d1b2cd80d 380
+packages/react/src/order/useOrderStatus.ts
+  s_da480adf7d5d15::t_f125a812c67702 9-10,23,28-36,107,128-134,136-145,147-148
+packages/react/src/order/usePendingOrders.ts
+  s_da480adf7d5d15::t_f125a812c67702 29,166
+.changeset/refresh-when-orders-settle.md
+  s_da480adf7d5d15::t_e9cf2094aa9c1b 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "18eece0be2379e1fb8ece48a64d658d07f16655e",
+  "prompts": {},
+  "sessions": {
+    "s_da480adf7d5d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "045f74a8-1828-4900-be8c-3ed360b45828",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
