@@ -26,14 +26,7 @@ import {
   useSuspendableQuery,
 } from '../helpers';
 
-import {
-  refreshAfterBorrowSwap,
-  refreshAfterLeverage,
-  refreshAfterRepayWithSupply,
-  refreshAfterSupplySwap,
-  refreshAfterTokenSwap,
-  refreshAfterWithdrawSwap,
-} from '../helpers/cache';
+import { refreshAfterOrderSettled } from '../helpers/cache';
 
 import { isTerminalOrderStatus } from './helpers';
 
@@ -170,43 +163,7 @@ export function usePendingOrders({
     if (!hasData) return;
 
     for (const item of findSettledOrders(items, prevItems)) {
-      switch (item.operation.__typename) {
-        case 'TokenSwap':
-          if (request.user) {
-            refreshAfterTokenSwap(client, request.user);
-          }
-          break;
-
-        case 'BorrowSwap':
-          if (request.user) {
-            refreshAfterBorrowSwap(client, request.user);
-          }
-          break;
-
-        case 'RepayWithSupply':
-          if (request.user) {
-            refreshAfterRepayWithSupply(client, request.user);
-          }
-          break;
-
-        case 'SupplySwap':
-          if (request.user) {
-            refreshAfterSupplySwap(client, request.user);
-          }
-          break;
-
-        case 'WithdrawSwap':
-          if (request.user) {
-            refreshAfterWithdrawSwap(client, request.user);
-          }
-          break;
-
-        case 'Leverage':
-          if (request.user) {
-            refreshAfterLeverage(client, request.user);
-          }
-          break;
-      }
+      if (request.user) refreshAfterOrderSettled(client, request.user, item);
     }
   }, [hasData, items, prevItems, client, request.user]);
 

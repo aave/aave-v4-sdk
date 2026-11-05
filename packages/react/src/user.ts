@@ -1,6 +1,7 @@
 import {
   type CurrencyQueryOptions,
   DEFAULT_QUERY_OPTIONS,
+  type RequestPolicyOptions,
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
@@ -176,6 +177,10 @@ export function useUserSupplies({
  * Use this hook to retrieve data on demand as part of a larger workflow
  * (e.g., in an event handler in order to move to the next step).
  *
+ * Reads `cache-first` by default. An order settles off-chain after the flow
+ * last read the cache: pass `requestPolicy: 'network-only'` where the
+ * supplies must be current.
+ *
  * ```ts
  * const [execute, { called, data, error, loading }] = useUserSuppliesAction();
  *
@@ -200,18 +205,20 @@ export function useUserSupplies({
  */
 export function useUserSuppliesAction(
   options: CurrencyQueryOptions &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = {},
 ): UseAsyncTask<UserSuppliesRequest, UserSupplyItem[], UnexpectedError> {
   const client = useAaveClient();
+  const requestPolicy = options.requestPolicy ?? 'cache-first';
 
   return useAsyncTask(
     (request: UserSuppliesRequest) =>
       userSupplies(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-        requestPolicy: 'cache-first',
+        requestPolicy,
       }),
-    [client, options.currency, options.timeWindow],
+    [client, options.currency, options.timeWindow, requestPolicy],
   );
 }
 
@@ -333,6 +340,10 @@ export function useUserBorrows({
  * Use this hook to retrieve data on demand as part of a larger workflow
  * (e.g., in an event handler in order to move to the next step).
  *
+ * Reads `cache-first` by default. An order settles off-chain after the flow
+ * last read the cache: pass `requestPolicy: 'network-only'` where the
+ * borrows must be current.
+ *
  * ```ts
  * const [execute, { called, data, error, loading }] = useUserBorrowsAction();
  *
@@ -357,18 +368,20 @@ export function useUserBorrows({
  */
 export function useUserBorrowsAction(
   options: CurrencyQueryOptions &
-    TimeWindowQueryOptions = DEFAULT_QUERY_OPTIONS,
+    TimeWindowQueryOptions &
+    RequestPolicyOptions = {},
 ): UseAsyncTask<UserBorrowsRequest, UserBorrowItem[], UnexpectedError> {
   const client = useAaveClient();
+  const requestPolicy = options.requestPolicy ?? 'cache-first';
 
   return useAsyncTask(
     (request: UserBorrowsRequest) =>
       userBorrows(client, request, {
         currency: options.currency ?? DEFAULT_QUERY_OPTIONS.currency,
         timeWindow: options.timeWindow ?? DEFAULT_QUERY_OPTIONS.timeWindow,
-        requestPolicy: 'cache-first',
+        requestPolicy,
       }),
-    [client, options.currency, options.timeWindow],
+    [client, options.currency, options.timeWindow, requestPolicy],
   );
 }
 
