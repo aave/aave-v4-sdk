@@ -7,6 +7,7 @@ node_modules
 
 # build output
 **/dist
+examples/*/build
 /docs
 */graphql-cache.d.ts
 
