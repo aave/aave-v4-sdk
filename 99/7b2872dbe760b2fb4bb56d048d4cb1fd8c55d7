@@ -1,0 +1,29 @@
+packages/graphql/schema.graphql
+  s_da480adf7d5d15::t_9599fb0aea61a8 2032-2033
+packages/react/src/order/usePendingOrders.test.ts
+  s_da480adf7d5d15::t_9599fb0aea61a8 65
+packages/graphql/src/graphql-env.d.ts
+  s_da480adf7d5d15::t_9599fb0aea61a8 229
+packages/client/src/actions/order.ts
+  s_da480adf7d5d15::t_9599fb0aea61a8 368,372
+packages/react/src/order/usePendingOrders.ts
+  s_da480adf7d5d15::t_9599fb0aea61a8 60,66,77,83,95,99,109,115
+.changeset/pending-orders-chain-ids.md
+  s_da480adf7d5d15::t_3411652f07f9ac 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "997b2872dbe760b2fb4bb56d048d4cb1fd8c55d7",
+  "prompts": {},
+  "sessions": {
+    "s_da480adf7d5d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "045f74a8-1828-4900-be8c-3ed360b45828",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
