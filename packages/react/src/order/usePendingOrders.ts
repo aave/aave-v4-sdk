@@ -57,13 +57,13 @@ export type UsePendingOrdersArgs = Prettify<
 >;
 
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
  * const { data } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   suspense: true,
@@ -74,13 +74,13 @@ export function usePendingOrders(
   args: UsePendingOrdersArgs & Suspendable,
 ): SuspenseResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * Pausable suspense mode.
  *
  * ```tsx
  * const { data } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   suspense: true,
@@ -92,11 +92,11 @@ export function usePendingOrders(
   args: Pausable<UsePendingOrdersArgs> & Suspendable,
 ): PausableSuspenseResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * ```tsx
  * const { data, error, loading } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  * });
@@ -106,13 +106,13 @@ export function usePendingOrders(
   args: UsePendingOrdersArgs,
 ): ReadResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * Pausable loading state mode.
  *
  * ```tsx
  * const { data, error, loading, paused } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   pause: true,

@@ -62,7 +62,7 @@ describe(`Given the '${usePendingOrders.name}' hook`, () => {
   });
 
   const request: PendingOrdersRequest = {
-    chainId: chainId(1),
+    chainIds: [chainId(1)],
     user: evmAddress('0x742d35cc6634c0532925a3b844bc454e4438f44e'),
   };
 
