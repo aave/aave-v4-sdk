@@ -365,11 +365,11 @@ export function cancelOrder(
 }
 
 /**
- * Fetches the user's pending orders for a specific chain.
+ * Fetches the user's pending orders across the given chains.
  *
  * ```ts
  * const result = await pendingOrders(client, {
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc...'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  * });

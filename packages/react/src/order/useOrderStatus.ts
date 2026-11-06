@@ -6,8 +6,8 @@ import {
 import type { UnexpectedError } from '@aave/core';
 import type { OrderId, OrderStatus, OrderStatusRequest } from '@aave/graphql';
 import { OrderStatusQuery } from '@aave/graphql';
-import type { NullishDeep, Prettify } from '@aave/types';
-import { useEffect, useState } from 'react';
+import type { EvmAddress, NullishDeep, Prettify } from '@aave/types';
+import { useDeferredValue, useEffect, useState } from 'react';
 
 import { useAaveClient } from '../context';
 import {
@@ -20,11 +20,20 @@ import {
   type SuspenseResult,
   useSuspendableQuery,
 } from '../helpers';
+import { refreshAfterOrderSettled } from '../helpers/cache';
 
 import { isTerminalOrderStatus } from './helpers';
 
 export type UseOrderStatusArgs = Prettify<
-  OrderStatusRequest & CurrencyQueryOptions & TimeWindowQueryOptions
+  OrderStatusRequest &
+    CurrencyQueryOptions &
+    TimeWindowQueryOptions & {
+      /**
+       * The order's user. When set, the user's positions and balances are
+       * refreshed once the order is fulfilled, whichever chain it settles on.
+       */
+      user?: EvmAddress;
+    }
 >;
 
 /**
@@ -95,6 +104,7 @@ export function useOrderStatus({
   pause = false,
   currency = DEFAULT_QUERY_OPTIONS.currency,
   timeWindow = DEFAULT_QUERY_OPTIONS.timeWindow,
+  user,
   ...request
 }: NullishDeep<UseOrderStatusArgs> & {
   suspense?: boolean;
@@ -115,11 +125,27 @@ export function useOrderStatus({
       pollInterval: client.context.environment.swapStatusInterval,
     });
 
+  // A long-settled order mounts fulfilled; only a settlement watched here refreshes
+  const previous = useDeferredValue(result.data);
+  const wasPending =
+    previous?.orderId === result.data?.orderId &&
+    (previous?.__typename === 'OrderOpen' ||
+      previous?.__typename === 'OrderPendingSignature');
+
   useEffect(() => {
-    if (result.data && isTerminalOrderStatus(result.data)) {
-      setTerminalOrderId(result.data.orderId);
+    const order = result.data;
+    if (!order || !isTerminalOrderStatus(order)) return;
+    // The order may settle on a chain no pending-orders list is watching
+    if (
+      user &&
+      wasPending &&
+      order.__typename === 'OrderFulfilled' &&
+      terminalOrderId !== order.orderId
+    ) {
+      refreshAfterOrderSettled(client, user, order);
     }
-  }, [result.data]);
+    setTerminalOrderId(order.orderId);
+  }, [client, user, result.data, wasPending, terminalOrderId]);
 
   return result;
 }

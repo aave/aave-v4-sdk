@@ -2029,7 +2029,8 @@ type PaginatedUserSwapsResult {
 }
 
 input PendingOrdersRequest {
-  chainId: ChainId!
+  chainId: ChainId @deprecated(reason: "Use chainIds instead.")
+  chainIds: [ChainId!]
   user: EvmAddress!
   filterBy: [OrderStatusFilter!]
   pageSize: PageSize! = FIFTY
