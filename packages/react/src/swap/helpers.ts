@@ -11,6 +11,7 @@ import {
   ValidationError,
 } from '@aave/core';
 import type {
+  AmountTooSmallError,
   InsufficientBalanceError,
   InsufficientLiquidityError,
   PositionSwapApproval,
@@ -36,15 +37,20 @@ import {
 import { type UseAsyncTask, useAsyncTask } from '../helpers/tasks';
 
 export function extractPositionSwapQuote(
-  data: PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError,
+  data:
+    | PositionSwapByIntentApprovalsRequired
+    | InsufficientLiquidityError
+    | AmountTooSmallError,
 ): Result<
   SwapQuote,
-  ValidationError<InsufficientLiquidityError> | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
+  | UnexpectedError
 > {
   switch (data.__typename) {
     case 'PositionSwapByIntentApprovalsRequired':
       return ok(data.quote);
     case 'InsufficientLiquidityError':
+    case 'AmountTooSmallError':
       return err(ValidationError.fromGqlNode(data));
     default:
       return err(
