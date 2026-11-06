@@ -1,5 +1,12 @@
 # @aave/graphql
 
+## 4.2.0
+
+### Minor Changes
+
+- 9e8cb88: **feat:** add `TokenCategory.BtcDerived` and `TokenCategory.YieldBearingStable` from the API schema
+- 997b287: **feat:** `pendingOrders` and `usePendingOrders` take `chainIds` and return orders across those chains, each with its own explorer URL; `chainId` is deprecated
+
 ## 4.1.0
 
 ### Minor Changes
