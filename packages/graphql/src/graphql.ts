@@ -34,6 +34,7 @@ import type {
   QuoteAccuracy,
   RepayWithSupplyKind,
   ReserveHoldersFilter,
+  ReserveOracleKind,
   ReservesRequestFilter,
   RewardAccrualBasis,
   SupplySwapKind,
@@ -112,6 +113,7 @@ export const graphql = initGraphQLTada<{
     QuoteAccuracy: QuoteAccuracy;
     ReserveHoldersFilter: ReserveHoldersFilter;
     ReserveId: ReserveId;
+    ReserveOracleKind: ReserveOracleKind;
     ReservesRequestFilter: ReservesRequestFilter;
     RewardAccrualBasis: RewardAccrualBasis;
     RewardId: RewardId;

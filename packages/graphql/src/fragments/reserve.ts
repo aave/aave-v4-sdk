@@ -3,6 +3,7 @@ import { graphql } from '../graphql';
 import { HubAssetFragment } from './assets';
 import {
   ChainFragment,
+  DecimalNumberFragment,
   Erc20AmountFragment,
   Erc20TokenFragment,
   PercentNumberFragment,
@@ -50,6 +51,36 @@ export const ReserveStatusFragment = graphql(
   }`,
 );
 export type ReserveStatus = FragmentOf<typeof ReserveStatusFragment>;
+
+export const ReserveOracleFeedFragment = graphql(
+  `fragment ReserveOracleFeed on ReserveOracleFeed {
+    __typename
+    address
+    description
+    lastUpdatedAt
+  }`,
+);
+export type ReserveOracleFeed = FragmentOf<typeof ReserveOracleFeedFragment>;
+
+export const ReserveOracleFragment = graphql(
+  `fragment ReserveOracle on ReserveOracle {
+    __typename
+    address
+    kind
+    description
+    price {
+      ...DecimalNumber
+    }
+    lastUpdatedAt
+    createdAt
+    creationTx
+    feeds {
+      ...ReserveOracleFeed
+    }
+  }`,
+  [DecimalNumberFragment, ReserveOracleFeedFragment],
+);
+export type ReserveOracle = FragmentOf<typeof ReserveOracleFragment>;
 
 export const ReserveSummaryFragment = graphql(
   `fragment ReserveSummary on ReserveSummary {
@@ -133,6 +164,9 @@ export const ReserveFragment = graphql(
     status {
       ...ReserveStatus
     }
+    oracle {
+      ...ReserveOracle
+    }
     canBorrow
     canSupply
     canUseAsCollateral
@@ -159,6 +193,7 @@ export const ReserveFragment = graphql(
     ReserveSummaryFragment,
     ReserveSettingsFragment,
     ReserveStatusFragment,
+    ReserveOracleFragment,
     ReserveUserStateFragment,
     HubAssetFragment,
   ],

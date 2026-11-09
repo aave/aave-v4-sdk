@@ -126,6 +126,20 @@ export enum ReserveHoldersFilter {
 }
 
 /**
+ * How a reserve's price source prices the asset.
+ */
+export enum ReserveOracleKind {
+  /**
+   * The price follows one or more market feeds.
+   */
+  Market = 'MARKET',
+  /**
+   * The price is a constant set in the source contract.
+   */
+  Fixed = 'FIXED',
+}
+
+/**
  * The filter for reserves request.
  */
 export enum ReservesRequestFilter {

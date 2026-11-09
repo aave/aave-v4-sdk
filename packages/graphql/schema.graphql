@@ -2513,6 +2513,9 @@ type Reserve {
   """Whether this reserve can be the destination of a position swap."""
   canSwapTo(type: PositionSwapType): Boolean!
   spoke: Spoke!
+
+  """Null when the reserve has no price source yet."""
+  oracle: ReserveOracle
 }
 
 input ReserveAmountInput @oneOf {
@@ -2576,6 +2579,41 @@ input ReserveInput {
   chainId: ChainId!
   spoke: EvmAddress!
   onChainId: OnChainReserveId!
+}
+
+type ReserveOracle {
+  """The reserve's price source contract (adapter)."""
+  address: EvmAddress!
+  kind: ReserveOracleKind!
+  description: String
+
+  """The oracle's own answer in USD. Null when inputs are missing."""
+  price: DecimalNumber
+
+  """Oldest feed update. Null for FIXED or when a feed never answered."""
+  lastUpdatedAt: DateTime
+
+  """First time this address became a reserve's price source on this chain."""
+  createdAt: DateTime!
+
+  """Null until a backfill fills old rows."""
+  creationTx: TxHash
+
+  """
+  Chainlink proxies, aggregators or sinks behind the source. Empty for FIXED.
+  """
+  feeds: [ReserveOracleFeed!]!
+}
+
+type ReserveOracleFeed {
+  address: EvmAddress!
+  description: String
+  lastUpdatedAt: DateTime
+}
+
+enum ReserveOracleKind {
+  MARKET
+  FIXED
 }
 
 input ReserveRequest {
