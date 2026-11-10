@@ -144,6 +144,24 @@ export enum ReserveOracleKind {
 }
 
 /**
+ * What kind of account owns an oracle or feed contract.
+ */
+export enum ReserveOracleOwnerKind {
+  /**
+   * A Safe multisig.
+   */
+  Safe = 'SAFE',
+  /**
+   * An externally owned account, with no code.
+   */
+  Eoa = 'EOA',
+  /**
+   * A contract that is not a Safe.
+   */
+  Contract = 'CONTRACT',
+}
+
+/**
  * The filter for reserves request.
  */
 export enum ReservesRequestFilter {

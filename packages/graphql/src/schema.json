@@ -8564,6 +8564,15 @@
             "args": []
           },
           {
+            "name": "provider",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleProvider",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "createdAt",
             "type": {
               "kind": "NON_NULL",
@@ -8599,6 +8608,77 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "administration",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleAdministration",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "marketPrice",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleMarketPrice",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleAdministration",
+        "fields": [
+          {
+            "name": "label",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "owner",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "ownerKind",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "threshold",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "signers",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              }
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -8628,6 +8708,87 @@
           },
           {
             "name": "lastUpdatedAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "heartbeatSeconds",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "deviationThreshold",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "administration",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleAdministration",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleMarketPrice",
+        "fields": [
+          {
+            "name": "price",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lastUpdatedAt",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleProvider",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "url",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
