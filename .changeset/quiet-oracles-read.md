@@ -4,4 +4,4 @@
 "@aave/react": minor
 ---
 
-**feat:** expose `Reserve.oracle`, the reserve's price source with its kind, price, feeds and creation
+**feat:** expose `Reserve.oracle`, the reserve's price source with its kind (market, fixed or manual), price, feeds, Pendle maturity and creation

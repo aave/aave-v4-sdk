@@ -72,6 +72,7 @@ export const ReserveOracleFragment = graphql(
       ...DecimalNumber
     }
     lastUpdatedAt
+    maturity
     createdAt
     creationTx
     feeds {

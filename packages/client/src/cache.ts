@@ -238,6 +238,7 @@ export const exchange = cacheExchange({
     },
     ReserveOracle: {
       lastUpdatedAt: transformToNullableDate,
+      maturity: transformToNullableDate,
       createdAt: transformToDate,
     },
     ReserveOracleFeed: {

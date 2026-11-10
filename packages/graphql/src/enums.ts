@@ -137,6 +137,10 @@ export enum ReserveOracleKind {
    * The price is a constant set in the source contract.
    */
   Fixed = 'FIXED',
+  /**
+   * The price is set by hand by an admin.
+   */
+  Manual = 'MANUAL',
 }
 
 /**

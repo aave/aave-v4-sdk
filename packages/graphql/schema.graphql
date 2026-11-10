@@ -2590,8 +2590,13 @@ type ReserveOracle {
   """The oracle's own answer in USD. Null when inputs are missing."""
   price: DecimalNumber
 
-  """Oldest feed update. Null for FIXED or when a feed never answered."""
+  """
+  Oldest feed update, or for MANUAL the last time an admin set the price. Null for FIXED or when a feed never answered.
+  """
   lastUpdatedAt: DateTime
+
+  """When the Pendle principal token this oracle prices matures. Null otherwise."""
+  maturity: DateTime
 
   """First time this address became a reserve's price source on this chain."""
   createdAt: DateTime!
@@ -2614,6 +2619,7 @@ type ReserveOracleFeed {
 enum ReserveOracleKind {
   MARKET
   FIXED
+  MANUAL
 }
 
 input ReserveRequest {
