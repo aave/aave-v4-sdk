@@ -11,6 +11,8 @@ import {
   type ReserveHoldersRequest,
   type ReserveIdentity,
   ReserveIdsQuery,
+  ReserveOracleQuery,
+  type ReserveOracleRequest,
   ReserveQuery,
   type ReserveRequest,
   ReservesQuery,
@@ -18,6 +20,7 @@ import {
   type ReserveTrailingSupplyApys,
   ReserveTrailingSupplyApysQuery,
   type ReserveTrailingSupplyApysRequest,
+  type ReserveWithOracle,
   SupplyApyHistoryQuery,
   type SupplyApyHistoryRequest,
 } from '@aave/graphql';
@@ -206,6 +209,30 @@ export function reserveTrailingSupplyApys(
     { request },
     { requestPolicy },
   );
+}
+
+/**
+ * Fetches a reserve's oracle: its price source, price, feeds and administration.
+ *
+ * ```ts
+ * const result = await reserveOracle(client, {
+ *   query: { reserveId: reserveId('SGVsbG8h') },
+ * });
+ * ```
+ *
+ * @param client - Aave client.
+ * @param request - The reserve request parameters.
+ * @param options - The query options.
+ * @returns The reserve with its oracle, or null when the reserve does not exist.
+ */
+export function reserveOracle(
+  client: AaveClient,
+  request: ReserveOracleRequest,
+  {
+    requestPolicy = DEFAULT_QUERY_OPTIONS.requestPolicy,
+  }: RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
+): ResultAsync<ReserveWithOracle | null, UnexpectedError> {
+  return client.query(ReserveOracleQuery, { request }, { requestPolicy });
 }
 
 /**

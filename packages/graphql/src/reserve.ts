@@ -6,6 +6,7 @@ import {
   ReserveFragment,
   ReserveHolderFragment,
   ReserveIdentityFragment,
+  ReserveOracleFragment,
 } from './fragments';
 import { graphql, type RequestOf, type ResultOf } from './graphql';
 
@@ -72,6 +73,31 @@ export const ReserveTrailingSupplyApysQuery = graphql(
 export type ReserveTrailingSupplyApysRequest = RequestOf<
   typeof ReserveTrailingSupplyApysQuery
 >;
+
+export const ReserveWithOracleFragment = graphql(
+  `fragment ReserveWithOracle on Reserve {
+    __typename
+    id
+    oracle {
+      ...ReserveOracle
+    }
+  }`,
+  [ReserveOracleFragment],
+);
+export type ReserveWithOracle = FragmentOf<typeof ReserveWithOracleFragment>;
+
+/**
+ * @internal
+ */
+export const ReserveOracleQuery = graphql(
+  `query ReserveOracle($request: ReserveRequest!) {
+    value: reserve(request: $request) {
+      ...ReserveWithOracle
+    }
+  }`,
+  [ReserveWithOracleFragment],
+);
+export type ReserveOracleRequest = RequestOf<typeof ReserveOracleQuery>;
 
 export const ReserveQuery = graphql(
   `query Reserve($request: ReserveRequest!, $currency: Currency!, $timeWindow: TimeWindow!) {

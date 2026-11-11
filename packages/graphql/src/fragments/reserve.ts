@@ -224,9 +224,6 @@ export const ReserveFragment = graphql(
     status {
       ...ReserveStatus
     }
-    oracle {
-      ...ReserveOracle
-    }
     canBorrow
     canSupply
     canUseAsCollateral
@@ -253,7 +250,6 @@ export const ReserveFragment = graphql(
     ReserveSummaryFragment,
     ReserveSettingsFragment,
     ReserveStatusFragment,
-    ReserveOracleFragment,
     ReserveUserStateFragment,
     HubAssetFragment,
   ],
