@@ -194,6 +194,7 @@ export const LeverageApprovalsRequiredFragment = graphql(
     approvals {
       ...OrderApproval
     }
+    minMultiplier
     maxSafeMultiplier
   }`,
   [OrderQuoteFragment, OrderApprovalFragment],
