@@ -26,14 +26,7 @@ import {
   useSuspendableQuery,
 } from '../helpers';
 
-import {
-  refreshAfterBorrowSwap,
-  refreshAfterLeverage,
-  refreshAfterRepayWithSupply,
-  refreshAfterSupplySwap,
-  refreshAfterTokenSwap,
-  refreshAfterWithdrawSwap,
-} from '../helpers/cache';
+import { refreshAfterOrderSettled } from '../helpers/cache';
 
 import { isTerminalOrderStatus } from './helpers';
 
@@ -64,13 +57,13 @@ export type UsePendingOrdersArgs = Prettify<
 >;
 
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * This signature supports React Suspense:
  *
  * ```tsx
  * const { data } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   suspense: true,
@@ -81,13 +74,13 @@ export function usePendingOrders(
   args: UsePendingOrdersArgs & Suspendable,
 ): SuspenseResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * Pausable suspense mode.
  *
  * ```tsx
  * const { data } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   suspense: true,
@@ -99,11 +92,11 @@ export function usePendingOrders(
   args: Pausable<UsePendingOrdersArgs> & Suspendable,
 ): PausableSuspenseResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * ```tsx
  * const { data, error, loading } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  * });
@@ -113,13 +106,13 @@ export function usePendingOrders(
   args: UsePendingOrdersArgs,
 ): ReadResult<PaginatedOrdersResult>;
 /**
- * Fetch the user's orders for a specific chain.
+ * Fetch the user's orders across the given chains.
  *
  * Pausable loading state mode.
  *
  * ```tsx
  * const { data, error, loading, paused } = usePendingOrders({
- *   chainId: chainId(1),
+ *   chainIds: [chainId(1), chainId(43114)],
  *   user: evmAddress('0x742d35cc…'),
  *   filterBy: [OrderStatusFilter.Fulfilled, OrderStatusFilter.Open],
  *   pause: true,
@@ -170,43 +163,7 @@ export function usePendingOrders({
     if (!hasData) return;
 
     for (const item of findSettledOrders(items, prevItems)) {
-      switch (item.operation.__typename) {
-        case 'TokenSwap':
-          if (request.user) {
-            refreshAfterTokenSwap(client, request.user);
-          }
-          break;
-
-        case 'BorrowSwap':
-          if (request.user) {
-            refreshAfterBorrowSwap(client, request.user);
-          }
-          break;
-
-        case 'RepayWithSupply':
-          if (request.user) {
-            refreshAfterRepayWithSupply(client, request.user);
-          }
-          break;
-
-        case 'SupplySwap':
-          if (request.user) {
-            refreshAfterSupplySwap(client, request.user);
-          }
-          break;
-
-        case 'WithdrawSwap':
-          if (request.user) {
-            refreshAfterWithdrawSwap(client, request.user);
-          }
-          break;
-
-        case 'Leverage':
-          if (request.user) {
-            refreshAfterLeverage(client, request.user);
-          }
-          break;
-      }
+      if (request.user) refreshAfterOrderSettled(client, request.user, item);
     }
   }, [hasData, items, prevItems, client, request.user]);
 
