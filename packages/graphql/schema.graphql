@@ -2039,7 +2039,8 @@ type PaginatedUserSwapsResult {
 }
 
 input PendingOrdersRequest {
-  chainId: ChainId!
+  chainId: ChainId @deprecated(reason: "Use chainIds instead.")
+  chainIds: [ChainId!]
   user: EvmAddress!
   filterBy: [OrderStatusFilter!]
   pageSize: PageSize! = FIFTY
@@ -3311,6 +3312,8 @@ enum TokenCategory {
   STABLECOIN
   ETH_CORRELATED
   TOKENIZED_STOCK
+  BTC_DERIVED
+  YIELD_BEARING_STABLE
 }
 
 type TokenInfo {

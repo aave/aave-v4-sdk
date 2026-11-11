@@ -22,6 +22,7 @@ import {
   SpokeQuery,
   SpokesQuery,
   type SupplyRequest,
+  type SwapOperation,
   UserBalancesQuery,
   UserBorrowsQuery,
   type UserBorrowsRequestQuery,
@@ -350,4 +351,30 @@ export function refreshAfterLeverage(client: AaveClient, user: EvmAddress) {
     refreshUserBorrows(client, user),
     refreshUserBalances(client, user),
   ]);
+}
+
+/**
+ * Refreshes the caches an order's settlement moves.
+ *
+ * @internal
+ */
+export function refreshAfterOrderSettled(
+  client: AaveClient,
+  user: EvmAddress,
+  order: { operation: Pick<SwapOperation, '__typename'> },
+) {
+  switch (order.operation.__typename) {
+    case 'TokenSwap':
+      return refreshAfterTokenSwap(client, user);
+    case 'BorrowSwap':
+      return refreshAfterBorrowSwap(client, user);
+    case 'RepayWithSupply':
+      return refreshAfterRepayWithSupply(client, user);
+    case 'SupplySwap':
+      return refreshAfterSupplySwap(client, user);
+    case 'WithdrawSwap':
+      return refreshAfterWithdrawSwap(client, user);
+    case 'Leverage':
+      return refreshAfterLeverage(client, user);
+  }
 }
