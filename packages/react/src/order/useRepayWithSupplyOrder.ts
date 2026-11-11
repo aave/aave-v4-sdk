@@ -1,6 +1,7 @@
 import { prepareOrder, repayWithSupplyQuote } from '@aave/client/actions';
 import type { ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   InsufficientBalanceError,
   InsufficientLiquidityError,
   OrderReceipt,
@@ -64,7 +65,11 @@ export function useRepayWithSupplyOrder(
   | OrderSignerError
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+  | ValidationError<
+      | InsufficientBalanceError
+      | InsufficientLiquidityError
+      | AmountTooSmallError
+    >
 > {
   const client = useAaveClient();
 

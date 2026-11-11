@@ -2,6 +2,7 @@ import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 import {
+  AmountTooSmallErrorFragment,
   DomainDataFragment,
   InsufficientBalanceErrorFragment,
   InsufficientLiquidityErrorFragment,
@@ -211,8 +212,15 @@ export const LeverageQuoteResultFragment = graphql(
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
+    ... on AmountTooSmallError {
+      ...AmountTooSmallError
+    }
   }`,
-  [LeverageApprovalsRequiredFragment, InsufficientLiquidityErrorFragment],
+  [
+    LeverageApprovalsRequiredFragment,
+    InsufficientLiquidityErrorFragment,
+    AmountTooSmallErrorFragment,
+  ],
 );
 export type LeverageQuoteResult = ExtendWithOpaqueType<
   FragmentOf<typeof LeverageQuoteResultFragment>

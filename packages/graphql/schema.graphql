@@ -51,6 +51,11 @@ input AmountInput @oneOf {
   max: AlwaysTrue
 }
 
+"""The amount is too small to trade once the swap's fees are taken."""
+type AmountTooSmallError {
+  reason: String!
+}
+
 """A credit purchase made by the customer behind the API key."""
 type ApiPayment {
   id: ID!
@@ -278,7 +283,7 @@ input BorrowSwapQuoteRequest @oneOf {
   fromQuote: FromQuoteDebtSwapQuoteInput
 }
 
-union BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
+union BorrowSwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError | AmountTooSmallError
 
 input CancelIntentSwapInput {
   id: SwapId!
@@ -1222,7 +1227,7 @@ input LeverageQuoteRequest @oneOf {
   fromQuote: FromQuoteLeverageQuoteInput
 }
 
-union LeverageQuoteResult = LeverageApprovalsRequired | InsufficientLiquidityError
+union LeverageQuoteResult = LeverageApprovalsRequired | InsufficientLiquidityError | AmountTooSmallError
 
 input LimitDebtSwapQuoteInput {
   quoteId: SwapQuoteId
@@ -2504,7 +2509,7 @@ input RepayWithSupplyQuoteRequest @oneOf {
   fromQuote: FromQuoteRepayWithSupplyQuoteInput
 }
 
-union RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
+union RepayWithSupplyQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError | AmountTooSmallError
 
 type Reserve {
   id: ReserveId!
@@ -3079,7 +3084,7 @@ input SupplySwapQuoteRequest @oneOf {
   fromQuote: FromQuoteSupplySwapQuoteInput
 }
 
-union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
+union SupplySwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError | AmountTooSmallError
 
 enum SwapActivityStatus {
   FULFILLED
@@ -3387,7 +3392,7 @@ input TokenSwapQuoteRequest @oneOf {
   fromQuote: MarketOrderTokenSwapFromQuoteInput
 }
 
-union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | SwapByTransactionWithApprovalRequired | InsufficientLiquidityError
+union TokenSwapQuoteResult = SwapByIntent | SwapByIntentWithApprovalRequired | SwapByTransaction | SwapByTransactionWithApprovalRequired | InsufficientLiquidityError | AmountTooSmallError
 
 type TokenizedStock {
   """The tokenized stock id"""
@@ -4551,7 +4556,7 @@ input WithdrawSwapQuoteRequest @oneOf {
   fromQuote: FromQuoteWithdrawSwapQuoteInput
 }
 
-union WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError
+union WithdrawSwapQuoteResult = PositionSwapByIntentApprovalsRequired | InsufficientLiquidityError | AmountTooSmallError
 
 """A native token with an ERC20 wrapper."""
 type WrappedNativeAsset {

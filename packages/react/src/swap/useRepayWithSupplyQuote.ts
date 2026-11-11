@@ -1,6 +1,10 @@
 import { repayWithSupplyQuote } from '@aave/client/actions';
 import type { UnexpectedError, ValidationError } from '@aave/core';
-import type { InsufficientLiquidityError, SwapQuote } from '@aave/graphql';
+import type {
+  AmountTooSmallError,
+  InsufficientLiquidityError,
+  SwapQuote,
+} from '@aave/graphql';
 import {
   QuoteAccuracy,
   RepayWithSupplyQuoteQuery,
@@ -130,7 +134,8 @@ export function useRepayWithSupplyQuote({
   pause?: boolean;
 }): SuspendableResult<
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 
@@ -207,7 +212,8 @@ export function useRepayWithSupplyQuoteAction(
 ): UseAsyncTask<
   RepayWithSupplyQuoteRequest,
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 

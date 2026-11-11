@@ -1,6 +1,7 @@
 import { leverageQuote } from '@aave/client/actions';
 import type { UnexpectedError, ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   InsufficientLiquidityError,
   LeverageApprovalsRequired,
   LeverageQuoteRequest,
@@ -135,7 +136,8 @@ export function useLeverageQuote({
   pause?: boolean;
 }): SuspendableResult<
   LeverageApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 
@@ -211,7 +213,8 @@ export function useLeverageQuoteAction(
 ): UseAsyncTask<
   LeverageQuoteRequest,
   LeverageApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 
