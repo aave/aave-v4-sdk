@@ -1,5 +1,22 @@
 # @aave/client
 
+## 7.2.0
+
+### Minor Changes
+
+- 9e8cb88: **feat:** add `TokenCategory.BtcDerived` and `TokenCategory.YieldBearingStable` from the API schema
+- cd6ef2b: **feat:** `minMultiplier` on `LeverageApprovalsRequired`, where the position stands before the order; a requested `multiplier` must be above it. The leverage `multiplier` now measures the whole position, total collateral over net equity after the order, so bound a leverage input between `minMultiplier` and `maxSafeMultiplier`.
+- 997b287: **feat:** `pendingOrders` and `usePendingOrders` take `chainIds` and return orders across those chains, each with its own explorer URL; `chainId` is deprecated
+- 7673b6c: **feat:** support `AmountTooSmallError` on token swap, position swap and leverage quotes, returned as a `ValidationError` when the amount does not cover the swap fees
+
+### Patch Changes
+
+- Updated dependencies [9e8cb88]
+- Updated dependencies [cd6ef2b]
+- Updated dependencies [997b287]
+- Updated dependencies [7673b6c]
+  - @aave/graphql@4.2.0
+
 ## 7.1.0
 
 ### Minor Changes
