@@ -1171,8 +1171,9 @@ type Leverage {
   debt: PositionAmount!
 
   """
-  Exposure multiplier: target collateral over entry equity. Read `debt` for what the order
-  borrowed; a limit order can hold this exposure on less debt than the collateral is worth.
+  The whole position's collateral over its net equity, in USD, after the order. Orders quoted
+  before this measure carry an earlier one: collateral over the deposit plus the balance
+  already in the collateral reserve. Read `debt` for what the order borrowed.
   """
   multiplier: BigDecimal!
 }
@@ -1187,7 +1188,8 @@ type LeverageActivity {
   debt: PositionAmount!
 
   """
-  Exposure multiplier: target collateral over entry equity, not debt over equity.
+  The whole position's collateral over its net equity, in USD, after the order. Orders quoted
+  before this measure carry an earlier, deposit-based one.
   """
   multiplier: BigDecimal!
   explorerUrl: String!
@@ -1200,8 +1202,16 @@ type LeverageApprovalsRequired {
   approvals: [OrderApproval!]!
 
   """
-  Multiplier at which this position becomes liquidatable, given the debt this quote draws.
-  A hard wall, not a recommendation: sitting at it is one price tick from liquidation.
+  The position's whole-position multiplier before this order, counting `additionalCollateral`
+  and any balance in the collateral reserve the order turns on as collateral. A requested
+  `multiplier` must be above it; a position with no debt starts at 1.
+  """
+  minMultiplier: BigDecimal!
+
+  """
+  The whole-position multiplier at which this position becomes liquidatable, given the debt
+  this quote draws per unit of collateral. A hard wall, not a recommendation: sitting at it is
+  one price tick from liquidation.
   """
   maxSafeMultiplier: BigDecimal!
 }
@@ -1228,11 +1238,11 @@ input LimitDebtSwapQuoteInput {
 }
 
 """
-Limit leverage: specify the exact collateral to hold and debt to take (the limit price is implied
-by their ratio), rather than a market multiplier. The effective exposure multiplier is derived
-from the collateral leg and still checked against the safe ceiling. That check assumes the debt
-leg is worth at least as much as the collateral leg, so a limit price that takes less debt is
-held to the same ceiling as a market order rather than a looser one.
+Limit leverage: specify the exact collateral to buy and debt to take (the limit price is implied
+by their ratio), rather than a market multiplier. The whole-position multiplier the order
+reaches is read off those amounts and still checked against the safe ceiling. A limit price that
+takes less debt than the collateral is worth is held to the same ceiling as a market order
+rather than a looser one.
 """
 input LimitLeverageQuoteInput {
   quoteId: OrderQuoteId
@@ -1241,7 +1251,7 @@ input LimitLeverageQuoteInput {
 
   """
   Collateral bought by this order's swap leg, in the collateral asset's human units. Excludes
-  the user's existing collateral and `additionalCollateral`, which form the equity base.
+  the user's existing collateral and `additionalCollateral`.
   """
   collateralAmount: BigDecimal!
 
@@ -1394,9 +1404,9 @@ input MarketDebtSwapQuoteInput {
 
 """
 Open or increase a leveraged position: flash-loan the debt asset, swap it to the collateral asset,
-supply the collateral, then borrow the debt to repay the flash loan. The equity base is the user's
-collateral-enabled balance in `collateralReserve` plus the optional wallet top-up, and
-`multiplier` is the target exposure (> 1) applied to that equity.
+supply the collateral, then borrow the debt to repay the flash loan. `multiplier` measures the
+whole position: its total collateral over its net equity (collateral minus debt), in USD, after
+the order. A position with no debt starts at 1.
 
 Not previewable directly: `previewUserPosition` needs the executed swap amounts, so quote first
 and preview the resulting `quoteId` via `fromQuote`.
@@ -1416,11 +1426,11 @@ input MarketLeverageQuoteInput {
   collateralReserve: ReserveId!
 
   """
-  Target exposure multiplier (target collateral / entry equity), must be greater than 1.
-  Must stay under `maxSafeMultiplier`, the multiplier at which this position becomes
-  liquidatable. Omit it to be quoted at a health factor chosen from how closely the two legs
-  track each other, which still takes a single quote. The resolved value is implied by the
-  quote's own amounts: `multiplier = 1 + buyAmount / equity`.
+  Target multiplier for the whole position after the order: total collateral over net equity,
+  in USD. Must be above the quote's `minMultiplier` and at most its `maxSafeMultiplier`. The
+  swap is sized against estimated costs, so the order lands near the target rather than
+  exactly on it. Omit it to be quoted at a health factor chosen from how closely the two legs
+  track each other.
   """
   multiplier: BigDecimal
 

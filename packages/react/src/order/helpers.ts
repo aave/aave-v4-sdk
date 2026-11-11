@@ -48,7 +48,7 @@ export function extractLeverageQuote(
 > {
   switch (data.__typename) {
     // Returned whole rather than narrowed to `.quote` so callers keep
-    // `maxSafeMultiplier`, which a leverage UI needs to bound its input.
+    // `minMultiplier` and `maxSafeMultiplier`, which bound a leverage input.
     case 'LeverageApprovalsRequired':
       return ok(data);
     case 'InsufficientLiquidityError':
