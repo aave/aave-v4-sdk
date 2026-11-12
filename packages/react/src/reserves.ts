@@ -801,6 +801,8 @@ export function useReserveOracle({
   suspense?: boolean;
   pause?: boolean;
 }): SuspendableResult<ReserveWithOracle | null, UnexpectedError> {
+  const client = useAaveClient();
+
   return useSuspendableQuery({
     document: ReserveOracleQuery,
     variables: {
@@ -808,5 +810,6 @@ export function useReserveOracle({
     },
     suspense,
     pause,
+    pollInterval: client.context.environment.exchangeRateInterval,
   });
 }
