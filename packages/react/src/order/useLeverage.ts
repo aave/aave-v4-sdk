@@ -1,6 +1,7 @@
 import { leverageQuote, prepareOrder } from '@aave/client/actions';
 import type { ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   ERC20PermitSignature,
   InsufficientBalanceError,
   InsufficientLiquidityError,
@@ -96,7 +97,11 @@ export function useLeverage(
   | OrderSignerError
   | SendTransactionError
   | PendingTransactionError
-  | ValidationError<InsufficientBalanceError | InsufficientLiquidityError>
+  | ValidationError<
+      | InsufficientBalanceError
+      | InsufficientLiquidityError
+      | AmountTooSmallError
+    >
 > {
   const client = useAaveClient();
 

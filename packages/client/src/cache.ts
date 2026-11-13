@@ -220,6 +220,7 @@ export const exchange = cacheExchange({
       multiplier: transformToBigDecimal,
     },
     LeverageApprovalsRequired: {
+      minMultiplier: transformToBigDecimal,
       maxSafeMultiplier: transformToBigDecimal,
     },
     UserMerklClaimableReward: {
@@ -502,6 +503,7 @@ export const exchange = cacheExchange({
     MultichainAssetHistorySample: () => null,
     InsufficientBalanceError: () => null,
     InsufficientLiquidityError: () => null,
+    AmountTooSmallError: () => null,
     Leverage: () => null,
     LeverageApprovalsRequired: () => null,
     LeverageQuoteResult: () => null,

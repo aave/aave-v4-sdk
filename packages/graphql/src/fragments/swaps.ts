@@ -2,6 +2,7 @@ import type { ExtendWithOpaqueType } from '@aave/types';
 import type { FragmentOf } from 'gql.tada';
 import { type FragmentDocumentFor, graphql } from '../graphql';
 import {
+  AmountTooSmallErrorFragment,
   DomainDataFragment,
   Erc20AmountFragment,
   InsufficientBalanceErrorFragment,
@@ -178,6 +179,9 @@ export const TokenSwapQuoteResultFragment = graphql(
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
+    ... on AmountTooSmallError {
+      ...AmountTooSmallError
+    }
   }`,
   [
     SwapByIntentFragment,
@@ -185,6 +189,7 @@ export const TokenSwapQuoteResultFragment = graphql(
     SwapByTransactionFragment,
     SwapByTransactionWithApprovalRequiredFragment,
     InsufficientLiquidityErrorFragment,
+    AmountTooSmallErrorFragment,
   ],
 );
 export type TokenSwapQuoteResult = ExtendWithOpaqueType<
@@ -678,10 +683,14 @@ export const SupplySwapQuoteResultFragment = graphql(
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
+    ... on AmountTooSmallError {
+      ...AmountTooSmallError
+    }
   }`,
   [
     PositionSwapByIntentApprovalsRequiredFragment,
     InsufficientLiquidityErrorFragment,
+    AmountTooSmallErrorFragment,
   ],
 );
 export type SupplySwapQuoteResult = ExtendWithOpaqueType<
@@ -697,10 +706,14 @@ export const BorrowSwapQuoteResultFragment = graphql(
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
+    ... on AmountTooSmallError {
+      ...AmountTooSmallError
+    }
   }`,
   [
     PositionSwapByIntentApprovalsRequiredFragment,
     InsufficientLiquidityErrorFragment,
+    AmountTooSmallErrorFragment,
   ],
 );
 export type BorrowSwapQuoteResult = ExtendWithOpaqueType<
@@ -716,10 +729,14 @@ export const RepayWithSupplyQuoteResultFragment = graphql(
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
+    ... on AmountTooSmallError {
+      ...AmountTooSmallError
+    }
   }`,
   [
     PositionSwapByIntentApprovalsRequiredFragment,
     InsufficientLiquidityErrorFragment,
+    AmountTooSmallErrorFragment,
   ],
 );
 export type RepayWithSupplyQuoteResult = ExtendWithOpaqueType<
@@ -735,10 +752,14 @@ export const WithdrawSwapQuoteResultFragment = graphql(
     ... on InsufficientLiquidityError {
       ...InsufficientLiquidityError
     }
+    ... on AmountTooSmallError {
+      ...AmountTooSmallError
+    }
   }`,
   [
     PositionSwapByIntentApprovalsRequiredFragment,
     InsufficientLiquidityErrorFragment,
+    AmountTooSmallErrorFragment,
   ],
 );
 export type WithdrawSwapQuoteResult = ExtendWithOpaqueType<

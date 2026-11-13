@@ -11,6 +11,7 @@ import {
   ValidationError,
 } from '@aave/core';
 import type {
+  AmountTooSmallError,
   ERC20PermitSignature,
   InsufficientBalanceError,
   InsufficientLiquidityError,
@@ -41,17 +42,22 @@ import { refreshPendingOrders } from '../helpers/cache';
 import { type UseAsyncTask, useAsyncTask } from '../helpers/tasks';
 
 export function extractLeverageQuote(
-  data: LeverageApprovalsRequired | InsufficientLiquidityError,
+  data:
+    | LeverageApprovalsRequired
+    | InsufficientLiquidityError
+    | AmountTooSmallError,
 ): Result<
   LeverageApprovalsRequired,
-  ValidationError<InsufficientLiquidityError> | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
+  | UnexpectedError
 > {
   switch (data.__typename) {
     // Returned whole rather than narrowed to `.quote` so callers keep
-    // `maxSafeMultiplier`, which a leverage UI needs to bound its input.
+    // `minMultiplier` and `maxSafeMultiplier`, which bound a leverage input.
     case 'LeverageApprovalsRequired':
       return ok(data);
     case 'InsufficientLiquidityError':
+    case 'AmountTooSmallError':
       return err(ValidationError.fromGqlNode(data));
     default:
       return err(

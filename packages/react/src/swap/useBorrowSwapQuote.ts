@@ -1,6 +1,10 @@
 import { borrowSwapQuote } from '@aave/client/actions';
 import type { UnexpectedError, ValidationError } from '@aave/core';
-import type { InsufficientLiquidityError, SwapQuote } from '@aave/graphql';
+import type {
+  AmountTooSmallError,
+  InsufficientLiquidityError,
+  SwapQuote,
+} from '@aave/graphql';
 import {
   BorrowSwapQuoteQuery,
   type BorrowSwapQuoteRequest,
@@ -130,7 +134,8 @@ export function useBorrowSwapQuote({
   pause?: boolean;
 }): SuspendableResult<
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 
@@ -204,7 +209,8 @@ export function useBorrowSwapQuoteAction(
 ): UseAsyncTask<
   BorrowSwapQuoteRequest,
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 

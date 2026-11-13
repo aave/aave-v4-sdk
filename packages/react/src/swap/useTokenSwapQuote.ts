@@ -1,6 +1,7 @@
 import { tokenSwapQuote } from '@aave/client/actions';
 import { UnexpectedError, ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   InsufficientLiquidityError,
   SwapQuote,
   TokenSwapQuoteRequest,
@@ -32,7 +33,8 @@ function extractTokenSwapQuote(
   data: TokenSwapQuoteResult,
 ): Result<
   SwapQuote,
-  ValidationError<InsufficientLiquidityError> | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
+  | UnexpectedError
 > {
   switch (data.__typename) {
     case 'SwapByIntent':
@@ -41,6 +43,7 @@ function extractTokenSwapQuote(
     case 'SwapByTransactionWithApprovalRequired':
       return ok(data.quote);
     case 'InsufficientLiquidityError':
+    case 'AmountTooSmallError':
       return err(ValidationError.fromGqlNode(data));
     default:
       return err(
@@ -163,7 +166,8 @@ export function useTokenSwapQuote({
   pause?: boolean;
 }): SuspendableResult<
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 
@@ -241,7 +245,8 @@ export function useTokenSwapQuoteAction(
 ): UseAsyncTask<
   TokenSwapQuoteRequest,
   SwapQuote,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 

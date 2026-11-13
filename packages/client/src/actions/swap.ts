@@ -5,6 +5,7 @@ import {
   ValidationError,
 } from '@aave/core';
 import {
+  type AmountTooSmallError,
   BorrowSwapQuoteQuery,
   type BorrowSwapQuoteRequest,
   type CancelSwapExecutionPlan,
@@ -86,7 +87,8 @@ export function tokenSwapQuote(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<
   TokenSwapQuoteResult,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   return client
     .query(
@@ -104,6 +106,7 @@ export function tokenSwapQuote(
           return okAsync(result);
 
         case 'InsufficientLiquidityError':
+        case 'AmountTooSmallError':
           return ValidationError.fromGqlNode(result).asResultAsync();
 
         default:
@@ -208,7 +211,8 @@ export function supplySwapQuote(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<
   PositionSwapByIntentApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   return client
     .query(
@@ -223,6 +227,7 @@ export function supplySwapQuote(
           return okAsync(result);
 
         case 'InsufficientLiquidityError':
+        case 'AmountTooSmallError':
           return ValidationError.fromGqlNode(result).asResultAsync();
 
         default:
@@ -261,7 +266,8 @@ export function borrowSwapQuote(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<
   PositionSwapByIntentApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   return client
     .query(
@@ -276,6 +282,7 @@ export function borrowSwapQuote(
           return okAsync(result);
 
         case 'InsufficientLiquidityError':
+        case 'AmountTooSmallError':
           return ValidationError.fromGqlNode(result).asResultAsync();
 
         default:
@@ -314,7 +321,8 @@ export function repayWithSupplyQuote(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<
   PositionSwapByIntentApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   return client
     .query(
@@ -329,6 +337,7 @@ export function repayWithSupplyQuote(
           return okAsync(result);
 
         case 'InsufficientLiquidityError':
+        case 'AmountTooSmallError':
           return ValidationError.fromGqlNode(result).asResultAsync();
 
         default:
@@ -367,7 +376,8 @@ export function withdrawSwapQuote(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<
   PositionSwapByIntentApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   return client
     .query(
@@ -382,6 +392,7 @@ export function withdrawSwapQuote(
           return okAsync(result);
 
         case 'InsufficientLiquidityError':
+        case 'AmountTooSmallError':
           return ValidationError.fromGqlNode(result).asResultAsync();
 
         default:

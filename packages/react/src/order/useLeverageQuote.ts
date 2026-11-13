@@ -1,6 +1,7 @@
 import { leverageQuote } from '@aave/client/actions';
 import type { UnexpectedError, ValidationError } from '@aave/core';
 import type {
+  AmountTooSmallError,
   InsufficientLiquidityError,
   LeverageApprovalsRequired,
   LeverageQuoteRequest,
@@ -44,8 +45,9 @@ export type UseLeverageQuoteArgs = Prettify<
 /**
  * Fetch a quote for a leverage operation with the specified parameters.
  *
- * Resolves to the full quote node, so `maxSafeMultiplier` is available
- * alongside `quote` to bound a leverage input.
+ * Resolves to the full quote node, so `minMultiplier` and `maxSafeMultiplier`
+ * are available alongside `quote` to bound a leverage input. The multiplier
+ * measures the whole position: total collateral over net equity after the order.
  *
  * This signature supports React Suspense:
  *
@@ -134,7 +136,8 @@ export function useLeverageQuote({
   pause?: boolean;
 }): SuspendableResult<
   LeverageApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 
@@ -210,7 +213,8 @@ export function useLeverageQuoteAction(
 ): UseAsyncTask<
   LeverageQuoteRequest,
   LeverageApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   const client = useAaveClient();
 

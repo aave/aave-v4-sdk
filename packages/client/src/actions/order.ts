@@ -5,6 +5,7 @@ import {
   ValidationError,
 } from '@aave/core';
 import {
+  type AmountTooSmallError,
   type CancelOrderExecutionPlan,
   CancelOrderMutation,
   type CancelOrderRequest,
@@ -60,7 +61,7 @@ import {
  * @param client - Aave client.
  * @param request - The leverage quote request parameters.
  * @param options - The query options.
- * @returns The leverage quote with approvals and the maximum safe multiplier.
+ * @returns The leverage quote with approvals and the multiplier range it allows.
  */
 export function leverageQuote(
   client: AaveClient,
@@ -71,7 +72,8 @@ export function leverageQuote(
   }: CurrencyQueryOptions & RequestPolicyOptions = DEFAULT_QUERY_OPTIONS,
 ): ResultAsync<
   LeverageApprovalsRequired,
-  UnexpectedError | ValidationError<InsufficientLiquidityError>
+  | UnexpectedError
+  | ValidationError<InsufficientLiquidityError | AmountTooSmallError>
 > {
   return client
     .query(
@@ -86,6 +88,7 @@ export function leverageQuote(
           return okAsync(result);
 
         case 'InsufficientLiquidityError':
+        case 'AmountTooSmallError':
           return ValidationError.fromGqlNode(result).asResultAsync();
 
         default:
