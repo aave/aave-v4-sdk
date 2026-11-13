@@ -2528,6 +2528,9 @@ type Reserve {
   """Whether this reserve can be the destination of a position swap."""
   canSwapTo(type: PositionSwapType): Boolean!
   spoke: Spoke!
+
+  """Null when the reserve has no price source yet."""
+  oracle: ReserveOracle
 }
 
 input ReserveAmountInput @oneOf {
@@ -2591,6 +2594,142 @@ input ReserveInput {
   chainId: ChainId!
   spoke: EvmAddress!
   onChainId: OnChainReserveId!
+}
+
+type ReserveOracle {
+  """The reserve's price source contract (adapter)."""
+  address: EvmAddress!
+  kind: ReserveOracleKind!
+  description: String
+
+  """The oracle's own answer in USD. Null when inputs are missing."""
+  price: DecimalNumber
+
+  """
+  Oldest feed update, or for MANUAL the last time an admin set the price. Null for FIXED or when a feed never answered.
+  """
+  lastUpdatedAt: DateTime
+
+  """When the Pendle principal token this oracle prices matures. Null otherwise."""
+  maturity: DateTime
+
+  """First time this address became a reserve's price source on this chain."""
+  createdAt: DateTime!
+
+  """Null until a backfill fills old rows."""
+  creationTx: TxHash
+
+  """
+  Chainlink proxies, aggregators or sinks behind the source. Empty for FIXED.
+  """
+  feeds: [ReserveOracleFeed!]!
+
+  """
+  Who operates the oracle. Chainlink when every feed is a Chainlink feed, a reviewed name
+  otherwise, and null when neither is known.
+  """
+  provider: ReserveOracleProvider
+
+  """
+  Who can change the oracle contract: its owner, or a name such as `Aave governance`. Null when
+  nobody can, or when its owner has not been read yet.
+  """
+  administration: ReserveOracleAdministration
+
+  """
+  What CoinGecko reports the reserve's underlying token trades at, to set beside `price`.
+  Null on testnets, for a token CoinGecko does not list, and before its first read.
+  """
+  marketPrice: ReserveOracleMarketPrice
+}
+
+type ReserveOracleAdministration {
+  """
+  A name for the administrator, such as `Aave governance`. Null when `owner` is set.
+  """
+  label: String
+
+  """The account that owns the contract. Null when `label` is set."""
+  owner: EvmAddress
+
+  """
+  What kind of account `owner` is. Null when `label` is set, and for an owner not read yet.
+  """
+  ownerKind: ReserveOracleOwnerKind
+
+  """
+  How many of `signers` must approve a transaction. Null unless `owner` is a Safe.
+  """
+  threshold: Int
+
+  """The Safe's signers, newest first. Null unless `owner` is a Safe."""
+  signers: [EvmAddress!]
+}
+
+type ReserveOracleFeed {
+  address: EvmAddress!
+  description: String
+  lastUpdatedAt: DateTime
+
+  """
+  The feed's latest answer in its own units, such as BTC per WBTC for `WBTC / BTC` or USD for
+  `ETH / USD`. A relay sink answers in the units of the price it relays. Null before its first.
+  """
+  answer: DecimalNumber
+
+  """
+  The longest the feed goes without an update, in seconds, as its Chainlink configuration sets
+  it. Null for a feed with no Chainlink configuration.
+  """
+  heartbeatSeconds: Int
+
+  """
+  How far the price moves before the feed updates ahead of its heartbeat, as its Chainlink
+  configuration sets it. Null for a feed with no Chainlink configuration, and for one that
+  updates on its heartbeat alone.
+  """
+  deviationThreshold: PercentNumber
+
+  """
+  Who can change the feed contract: its owner, or a reviewed name. Null when nobody can, or
+  when its owner has not been read yet.
+  """
+  administration: ReserveOracleAdministration
+}
+
+enum ReserveOracleKind {
+  MARKET
+  FIXED
+  MANUAL
+}
+
+type ReserveOracleMarketPrice {
+  """The price in USD."""
+  price: BigDecimal!
+
+  """
+  When CoinGecko computed the price, which can trail the request by minutes.
+  """
+  lastUpdatedAt: DateTime!
+}
+
+enum ReserveOracleOwnerKind {
+  """A Safe multisig."""
+  SAFE
+
+  """An externally owned account, with no code."""
+  EOA
+
+  """A contract that is not a Safe."""
+  CONTRACT
+}
+
+type ReserveOracleProvider {
+  """The provider's name, such as `Chainlink`."""
+  name: String!
+
+  """The provider's website. Null when none is set."""
+  url: String
 }
 
 input ReserveRequest {

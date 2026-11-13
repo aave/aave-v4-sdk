@@ -8460,6 +8460,15 @@
               }
             },
             "args": []
+          },
+          {
+            "name": "oracle",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracle",
+              "ofType": null
+            },
+            "args": []
           }
         ],
         "interfaces": []
@@ -8530,6 +8539,309 @@
                 "name": "HubAsset",
                 "ofType": null
               }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracle",
+        "fields": [
+          {
+            "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "kind",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "description",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "price",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DecimalNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "lastUpdatedAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "maturity",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "provider",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleProvider",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "createdAt",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "creationTx",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "feeds",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ReserveOracleFeed",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "administration",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleAdministration",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "marketPrice",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleMarketPrice",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleAdministration",
+        "fields": [
+          {
+            "name": "label",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "owner",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "ownerKind",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "threshold",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "signers",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleFeed",
+        "fields": [
+          {
+            "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "description",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "lastUpdatedAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "answer",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DecimalNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "heartbeatSeconds",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "deviationThreshold",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "administration",
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReserveOracleAdministration",
+              "ofType": null
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleMarketPrice",
+        "fields": [
+          {
+            "name": "price",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lastUpdatedAt",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleProvider",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "url",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           }

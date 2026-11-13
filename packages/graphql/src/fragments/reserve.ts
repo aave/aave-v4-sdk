@@ -3,6 +3,7 @@ import { graphql } from '../graphql';
 import { HubAssetFragment } from './assets';
 import {
   ChainFragment,
+  DecimalNumberFragment,
   Erc20AmountFragment,
   Erc20TokenFragment,
   PercentNumberFragment,
@@ -50,6 +51,103 @@ export const ReserveStatusFragment = graphql(
   }`,
 );
 export type ReserveStatus = FragmentOf<typeof ReserveStatusFragment>;
+
+export const ReserveOracleAdministrationFragment = graphql(
+  `fragment ReserveOracleAdministration on ReserveOracleAdministration {
+    __typename
+    label
+    owner
+    ownerKind
+    threshold
+    signers
+  }`,
+);
+export type ReserveOracleAdministration = FragmentOf<
+  typeof ReserveOracleAdministrationFragment
+>;
+
+export const ReserveOracleFeedFragment = graphql(
+  `fragment ReserveOracleFeed on ReserveOracleFeed {
+    __typename
+    address
+    description
+    lastUpdatedAt
+    answer {
+      ...DecimalNumber
+    }
+    heartbeatSeconds
+    deviationThreshold {
+      ...PercentNumber
+    }
+    administration {
+      ...ReserveOracleAdministration
+    }
+  }`,
+  [
+    DecimalNumberFragment,
+    PercentNumberFragment,
+    ReserveOracleAdministrationFragment,
+  ],
+);
+export type ReserveOracleFeed = FragmentOf<typeof ReserveOracleFeedFragment>;
+
+export const ReserveOracleProviderFragment = graphql(
+  `fragment ReserveOracleProvider on ReserveOracleProvider {
+    __typename
+    name
+    url
+  }`,
+);
+export type ReserveOracleProvider = FragmentOf<
+  typeof ReserveOracleProviderFragment
+>;
+
+export const ReserveOracleMarketPriceFragment = graphql(
+  `fragment ReserveOracleMarketPrice on ReserveOracleMarketPrice {
+    __typename
+    price
+    lastUpdatedAt
+  }`,
+);
+export type ReserveOracleMarketPrice = FragmentOf<
+  typeof ReserveOracleMarketPriceFragment
+>;
+
+export const ReserveOracleFragment = graphql(
+  `fragment ReserveOracle on ReserveOracle {
+    __typename
+    address
+    kind
+    description
+    price {
+      ...DecimalNumber
+    }
+    lastUpdatedAt
+    maturity
+    marketPrice {
+      ...ReserveOracleMarketPrice
+    }
+    provider {
+      ...ReserveOracleProvider
+    }
+    administration {
+      ...ReserveOracleAdministration
+    }
+    createdAt
+    creationTx
+    feeds {
+      ...ReserveOracleFeed
+    }
+  }`,
+  [
+    DecimalNumberFragment,
+    ReserveOracleAdministrationFragment,
+    ReserveOracleFeedFragment,
+    ReserveOracleMarketPriceFragment,
+    ReserveOracleProviderFragment,
+  ],
+);
+export type ReserveOracle = FragmentOf<typeof ReserveOracleFragment>;
 
 export const ReserveSummaryFragment = graphql(
   `fragment ReserveSummary on ReserveSummary {
