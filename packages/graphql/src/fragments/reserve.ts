@@ -72,6 +72,9 @@ export const ReserveOracleFeedFragment = graphql(
     address
     description
     lastUpdatedAt
+    answer {
+      ...DecimalNumber
+    }
     heartbeatSeconds
     deviationThreshold {
       ...PercentNumber
@@ -80,7 +83,11 @@ export const ReserveOracleFeedFragment = graphql(
       ...ReserveOracleAdministration
     }
   }`,
-  [PercentNumberFragment, ReserveOracleAdministrationFragment],
+  [
+    DecimalNumberFragment,
+    PercentNumberFragment,
+    ReserveOracleAdministrationFragment,
+  ],
 );
 export type ReserveOracleFeed = FragmentOf<typeof ReserveOracleFeedFragment>;
 

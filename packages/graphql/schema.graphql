@@ -2657,6 +2657,12 @@ type ReserveOracleFeed {
   lastUpdatedAt: DateTime
 
   """
+  The feed's latest answer in its own units, such as BTC per WBTC for `WBTC / BTC` or USD for
+  `ETH / USD`. A relay sink answers in the units of the price it relays. Null before its first.
+  """
+  answer: DecimalNumber
+
+  """
   The longest the feed goes without an update, in seconds, as its Chainlink configuration sets
   it. Null for a feed with no Chainlink configuration.
   """

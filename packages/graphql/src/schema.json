@@ -8715,6 +8715,15 @@
             "args": []
           },
           {
+            "name": "answer",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DecimalNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
             "name": "heartbeatSeconds",
             "type": {
               "kind": "SCALAR",
