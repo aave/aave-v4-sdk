@@ -1,0 +1,42 @@
+packages/graphql/src/graphql-env.d.ts
+  s_e991f3987ef037::t_36fc5e7ad496fc 298,305
+.changeset/quiet-oracles-read.md
+  s_e991f3987ef037::t_fecf883d2b6be9 7
+packages/graphql/schema.graphql
+  s_e991f3987ef037::t_1dddd9790e58e6 2628-2633
+  s_e991f3987ef037::t_0d1f1d57ce248b 2627,2756-2793
+packages/client/src/cache.ts
+  s_e991f3987ef037::t_02dcc6c7150b1f 579
+  s_e991f3987ef037::t_a7828bc2ace15c 252-254
+packages/graphql/src/fragments/reserve.ts
+  s_e991f3987ef037::t_0cbed5f466f59e 94-113
+  s_e991f3987ef037::t_d223a2f2e0fb74 161-163,171
+packages/graphql/src/schema.json
+  s_e991f3987ef037::t_da0deaebf0a60a 8654-8670
+  s_e991f3987ef037::t_a8b628dd7ba7ce 8653,8871-8929
+  s_e5c1d4e111e78e::t_e62238e4808800 8869-8870
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "021cf8a71d83638c043d482fccc374badacc32de",
+  "prompts": {},
+  "sessions": {
+    "s_e5c1d4e111e78e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5c23f04-08c0-45b5-997e-1daed9150c7d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    },
+    "s_e991f3987ef037": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aff382f1-9334-4017-b64d-ad2e0fe38aa8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
