@@ -2626,10 +2626,10 @@ type ReserveOracle {
 
   """
   The exchange rates the price multiplies its feeds by, such as `wstETH / stETH` for a capped
-  liquid staking token, each read from its token contract and held under a cap. Empty for an
+  liquid staking token, each read from its token contract and held under a cap. Null for an
   oracle with none.
   """
-  ratios: [ReserveOracleRatio!]!
+  cappedRates: [ReserveOracleCappedRate!]
 
   """
   Who operates the oracle. Chainlink when every feed is a Chainlink feed, a reviewed name
@@ -2671,6 +2671,43 @@ type ReserveOracleAdministration {
 
   """The Safe's signers, newest first. Null unless `owner` is a Safe."""
   signers: [EvmAddress!]
+}
+
+"""
+An exchange rate a reserve's oracle reads from a token contract, such as stETH per wstETH, and
+the cap the oracle holds it under.
+"""
+type ReserveOracleCappedRate {
+  """
+  The contract the rate is read from, such as the wstETH token.
+  """
+  address: EvmAddress!
+
+  """
+  The pair the rate converts, such as `wstETH / stETH`. Null when the oracle does not name it.
+  """
+  description: String
+
+  """
+  The latest rate read, sampled every few minutes.
+  """
+  rate: DecimalNumber!
+
+  """
+  The highest rate the oracle accepts right now. Above it, the price uses this instead.
+  """
+  maxRate: DecimalNumber!
+
+  """
+  How fast the cap grows, per year.
+  """
+  maxYearlyGrowth: PercentNumber!
+
+  """
+  When the rate last changed, to within a few minutes. Null when it has not changed in the
+  last 30 days.
+  """
+  lastChangedAt: DateTime
 }
 
 type ReserveOracleFeed {
@@ -2751,44 +2788,6 @@ input ReserveRequest {
 input ReserveRequestQuery @oneOf {
   reserveId: ReserveId
   reserveInput: ReserveInput
-}
-
-"""
-An exchange rate a reserve's oracle reads from a token contract, such as stETH per wstETH, and
-the cap the oracle holds it under.
-"""
-type ReserveOracleRatio {
-  """
-  The contract the rate is read from, such as the wstETH token.
-  """
-  address: EvmAddress!
-
-  """
-  The pair the rate converts, such as `wstETH / stETH`. Null when the oracle does not name it.
-  """
-  description: String
-
-  """
-  The latest rate read, sampled every few minutes. Null before the first read.
-  """
-  ratio: DecimalNumber
-
-  """
-  The highest rate the oracle accepts right now. Above it, the price uses this instead. Null
-  before the cap is first read.
-  """
-  maxRatio: DecimalNumber
-
-  """
-  How fast the cap grows, per year. Null before the cap is first read.
-  """
-  maxYearlyGrowth: PercentNumber
-
-  """
-  When the rate last changed, to within a few minutes. Null when it has not changed in the
-  last 30 days.
-  """
-  lastUpdatedAt: DateTime
 }
 
 type ReserveReward {

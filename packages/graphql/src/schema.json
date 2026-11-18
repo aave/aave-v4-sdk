@@ -8651,18 +8651,15 @@
             "args": []
           },
           {
-            "name": "ratios",
+            "name": "cappedRates",
             "type": {
-              "kind": "NON_NULL",
+              "kind": "LIST",
               "ofType": {
-                "kind": "LIST",
+                "kind": "NON_NULL",
                 "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "ReserveOracleRatio",
-                    "ofType": null
-                  }
+                  "kind": "OBJECT",
+                  "name": "ReserveOracleCappedRate",
+                  "ofType": null
                 }
               }
             },
@@ -8736,6 +8733,76 @@
                   "name": "Any"
                 }
               }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleCappedRate",
+        "fields": [
+          {
+            "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "description",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "rate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "maxRate",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DecimalNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "maxYearlyGrowth",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PercentNumber",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lastChangedAt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
             },
             "args": []
           }
@@ -8857,67 +8924,6 @@
           },
           {
             "name": "url",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          }
-        ],
-        "interfaces": []
-      },
-      {
-        "kind": "OBJECT",
-        "name": "ReserveOracleRatio",
-        "fields": [
-          {
-            "name": "address",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "description",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
-            "name": "ratio",
-            "type": {
-              "kind": "OBJECT",
-              "name": "DecimalNumber",
-              "ofType": null
-            },
-            "args": []
-          },
-          {
-            "name": "maxRatio",
-            "type": {
-              "kind": "OBJECT",
-              "name": "DecimalNumber",
-              "ofType": null
-            },
-            "args": []
-          },
-          {
-            "name": "maxYearlyGrowth",
-            "type": {
-              "kind": "OBJECT",
-              "name": "PercentNumber",
-              "ofType": null
-            },
-            "args": []
-          },
-          {
-            "name": "lastUpdatedAt",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
