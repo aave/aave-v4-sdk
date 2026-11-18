@@ -8651,6 +8651,24 @@
             "args": []
           },
           {
+            "name": "ratios",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ReserveOracleRatio",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "args": []
+          },
+          {
             "name": "administration",
             "type": {
               "kind": "OBJECT",
@@ -8839,6 +8857,67 @@
           },
           {
             "name": "url",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ReserveOracleRatio",
+        "fields": [
+          {
+            "name": "address",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "description",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "ratio",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DecimalNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "maxRatio",
+            "type": {
+              "kind": "OBJECT",
+              "name": "DecimalNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "maxYearlyGrowth",
+            "type": {
+              "kind": "OBJECT",
+              "name": "PercentNumber",
+              "ofType": null
+            },
+            "args": []
+          },
+          {
+            "name": "lastUpdatedAt",
             "type": {
               "kind": "SCALAR",
               "name": "Any"

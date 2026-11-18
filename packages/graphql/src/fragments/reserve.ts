@@ -91,6 +91,26 @@ export const ReserveOracleFeedFragment = graphql(
 );
 export type ReserveOracleFeed = FragmentOf<typeof ReserveOracleFeedFragment>;
 
+export const ReserveOracleRatioFragment = graphql(
+  `fragment ReserveOracleRatio on ReserveOracleRatio {
+    __typename
+    address
+    description
+    ratio {
+      ...DecimalNumber
+    }
+    maxRatio {
+      ...DecimalNumber
+    }
+    maxYearlyGrowth {
+      ...PercentNumber
+    }
+    lastUpdatedAt
+  }`,
+  [DecimalNumberFragment, PercentNumberFragment],
+);
+export type ReserveOracleRatio = FragmentOf<typeof ReserveOracleRatioFragment>;
+
 export const ReserveOracleProviderFragment = graphql(
   `fragment ReserveOracleProvider on ReserveOracleProvider {
     __typename
@@ -138,6 +158,9 @@ export const ReserveOracleFragment = graphql(
     feeds {
       ...ReserveOracleFeed
     }
+    ratios {
+      ...ReserveOracleRatio
+    }
   }`,
   [
     DecimalNumberFragment,
@@ -145,6 +168,7 @@ export const ReserveOracleFragment = graphql(
     ReserveOracleFeedFragment,
     ReserveOracleMarketPriceFragment,
     ReserveOracleProviderFragment,
+    ReserveOracleRatioFragment,
   ],
 );
 export type ReserveOracle = FragmentOf<typeof ReserveOracleFragment>;

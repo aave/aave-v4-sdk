@@ -249,6 +249,9 @@ export const exchange = cacheExchange({
       price: transformToBigDecimal,
       lastUpdatedAt: transformToDate,
     },
+    ReserveOracleRatio: {
+      lastUpdatedAt: transformToNullableDate,
+    },
     SpokeLiquidationConfig: {
       targetHealthFactor: transformToBigDecimal,
       healthFactorForMaxBonus: transformToBigDecimal,
@@ -573,6 +576,7 @@ export const exchange = cacheExchange({
     ReserveOracleFeed: () => null,
     ReserveOracleMarketPrice: () => null,
     ReserveOracleProvider: () => null,
+    ReserveOracleRatio: () => null,
     ReserveReward: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,
