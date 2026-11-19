@@ -237,6 +237,21 @@ export const exchange = cacheExchange({
     UserSupplyItem: {
       createdAt: transformToNullableDate,
     },
+    ReserveOracle: {
+      lastUpdatedAt: transformToNullableDate,
+      maturity: transformToNullableDate,
+      createdAt: transformToDate,
+    },
+    ReserveOracleFeed: {
+      lastUpdatedAt: transformToNullableDate,
+    },
+    ReserveOracleMarketPrice: {
+      price: transformToBigDecimal,
+      lastUpdatedAt: transformToDate,
+    },
+    ReserveOracleCappedRate: {
+      lastChangedAt: transformToNullableDate,
+    },
     SpokeLiquidationConfig: {
       targetHealthFactor: transformToBigDecimal,
       healthFactorForMaxBonus: transformToBigDecimal,
@@ -556,6 +571,12 @@ export const exchange = cacheExchange({
     RepayWithSupply: () => null,
     RepayWithSupplyQuoteResult: () => null,
     ReserveHolder: () => null,
+    ReserveOracle: () => null,
+    ReserveOracleAdministration: () => null,
+    ReserveOracleFeed: () => null,
+    ReserveOracleMarketPrice: () => null,
+    ReserveOracleProvider: () => null,
+    ReserveOracleCappedRate: () => null,
     ReserveReward: () => null,
     ReserveSettings: () => null,
     ReserveStatus: () => null,

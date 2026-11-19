@@ -126,6 +126,42 @@ export enum ReserveHoldersFilter {
 }
 
 /**
+ * How a reserve's price source prices the asset.
+ */
+export enum ReserveOracleKind {
+  /**
+   * The price follows one or more market feeds.
+   */
+  Market = 'MARKET',
+  /**
+   * The price is a constant set in the source contract.
+   */
+  Fixed = 'FIXED',
+  /**
+   * The price is set by hand by an admin.
+   */
+  Manual = 'MANUAL',
+}
+
+/**
+ * What kind of account owns an oracle or feed contract.
+ */
+export enum ReserveOracleOwnerKind {
+  /**
+   * A Safe multisig.
+   */
+  Safe = 'SAFE',
+  /**
+   * An externally owned account, with no code.
+   */
+  Eoa = 'EOA',
+  /**
+   * A contract that is not a Safe.
+   */
+  Contract = 'CONTRACT',
+}
+
+/**
  * The filter for reserves request.
  */
 export enum ReservesRequestFilter {

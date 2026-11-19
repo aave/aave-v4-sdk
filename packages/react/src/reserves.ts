@@ -3,9 +3,12 @@ import {
   DEFAULT_QUERY_OPTIONS,
   HubAssetHoldersQuery,
   type HubAssetHoldersRequest,
+  ReserveOracleQuery,
+  type ReserveOracleRequest,
   type ReserveTrailingSupplyApys,
   ReserveTrailingSupplyApysQuery,
   type ReserveTrailingSupplyApysRequest,
+  type ReserveWithOracle,
   type TimeWindowQueryOptions,
   type UnexpectedError,
 } from '@aave/client';
@@ -746,5 +749,67 @@ export function useReserveTrailingSupplyApys({
     },
     suspense,
     pause,
+  });
+}
+
+export type UseReserveOracleArgs = ReserveOracleRequest;
+
+/**
+ * Fetch a reserve's oracle: its price source, price, feeds and administration.
+ *
+ * This signature supports React Suspense:
+ *
+ * ```tsx
+ * const { data } = useReserveOracle({ …, suspense: true });
+ * ```
+ */
+export function useReserveOracle(
+  args: UseReserveOracleArgs & Suspendable,
+): SuspenseResult<ReserveWithOracle | null>;
+/**
+ * Fetch a reserve's oracle: its price source, price, feeds and administration.
+ *
+ * Pausable suspense mode.
+ */
+export function useReserveOracle(
+  args: Pausable<UseReserveOracleArgs> & Suspendable,
+): PausableSuspenseResult<ReserveWithOracle | null>;
+/**
+ * Fetch a reserve's oracle: its price source, price, feeds and administration.
+ *
+ * ```tsx
+ * const { data, error, loading } = useReserveOracle({ … });
+ * ```
+ */
+export function useReserveOracle(
+  args: UseReserveOracleArgs,
+): ReadResult<ReserveWithOracle | null>;
+/**
+ * Fetch a reserve's oracle: its price source, price, feeds and administration.
+ *
+ * Pausable loading state mode.
+ */
+export function useReserveOracle(
+  args: Pausable<UseReserveOracleArgs>,
+): PausableReadResult<ReserveWithOracle | null>;
+
+export function useReserveOracle({
+  suspense = false,
+  pause = false,
+  ...request
+}: NullishDeep<UseReserveOracleArgs> & {
+  suspense?: boolean;
+  pause?: boolean;
+}): SuspendableResult<ReserveWithOracle | null, UnexpectedError> {
+  const client = useAaveClient();
+
+  return useSuspendableQuery({
+    document: ReserveOracleQuery,
+    variables: {
+      request,
+    },
+    suspense,
+    pause,
+    pollInterval: client.context.environment.exchangeRateInterval,
   });
 }
