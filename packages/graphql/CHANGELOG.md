@@ -1,5 +1,15 @@
 # @aave/graphql
 
+## 4.2.0
+
+### Minor Changes
+
+- 9e8cb88: **feat:** add `TokenCategory.BtcDerived` and `TokenCategory.YieldBearingStable` from the API schema
+- cd6ef2b: **feat:** `minMultiplier` on `LeverageApprovalsRequired`, where the position stands before the order; a requested `multiplier` must be above it. The leverage `multiplier` now measures the whole position, total collateral over net equity after the order, so bound a leverage input between `minMultiplier` and `maxSafeMultiplier`.
+- 997b287: **feat:** `pendingOrders` and `usePendingOrders` take `chainIds` and return orders across those chains, each with its own explorer URL; `chainId` is deprecated
+- e9f1b22: **feat:** `reserveOracle` action and `useReserveOracle` hook (polled) for `Reserve.oracle`, the reserve's price source with its kind (market, fixed or manual), price, CoinGecko market price, provider, administration, feeds with heartbeat, deviation and latest answer, `cappedRates` such as `wstETH / stETH` with their cap, Pendle maturity and creation
+- 7673b6c: **feat:** support `AmountTooSmallError` on token swap, position swap and leverage quotes, returned as a `ValidationError` when the amount does not cover the swap fees
+
 ## 4.1.0
 
 ### Minor Changes
