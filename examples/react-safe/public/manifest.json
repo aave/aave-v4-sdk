@@ -1,0 +1,5 @@
+{
+  "name": "Aave React SDK Safe Example",
+  "description": "A minimal Safe App example showing Aave React SDK transaction flow.",
+  "iconPath": "aave.svg"
+}
