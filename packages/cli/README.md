@@ -18,7 +18,7 @@ $ npm install -g @aave/cli
 $ aave COMMAND
 running command...
 $ aave (--version)
-@aave/cli/4.2.0 linux-x64 node-v22.22.2
+@aave/cli/4.2.4 linux-x64 node-v22.22.2
 $ aave --help [COMMAND]
 USAGE
   $ aave COMMAND
@@ -38,8 +38,10 @@ USAGE
 * [`aave reserves holders`](#aave-reserves-holders)
 * [`aave reserves list`](#aave-reserves-list)
 * [`aave spokes list`](#aave-spokes-list)
+* [`aave spokes position-managers`](#aave-spokes-position-managers)
 * [`aave user balance`](#aave-user-balance)
 * [`aave user borrows`](#aave-user-borrows)
+* [`aave user position-managers`](#aave-user-position-managers)
 * [`aave user positions`](#aave-user-positions)
 * [`aave user rewards`](#aave-user-rewards)
 * [`aave user summary`](#aave-user-summary)
@@ -65,7 +67,7 @@ DESCRIPTION
   Borrow ERC20 tokens from a reserve
 ```
 
-_See code: [src/commands/action/borrow.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/action/borrow.ts)_
+_See code: [src/commands/action/borrow.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/action/borrow.ts)_
 
 ## `aave action claim-rewards`
 
@@ -88,7 +90,7 @@ DESCRIPTION
   Claim rewards for the current wallet
 ```
 
-_See code: [src/commands/action/claim-rewards.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/action/claim-rewards.ts)_
+_See code: [src/commands/action/claim-rewards.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/action/claim-rewards.ts)_
 
 ## `aave action repay`
 
@@ -110,7 +112,7 @@ DESCRIPTION
   Repay ERC20 debt to a reserve
 ```
 
-_See code: [src/commands/action/repay.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/action/repay.ts)_
+_See code: [src/commands/action/repay.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/action/repay.ts)_
 
 ## `aave action supply`
 
@@ -133,7 +135,7 @@ DESCRIPTION
   Supply ERC20 tokens to a reserve
 ```
 
-_See code: [src/commands/action/supply.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/action/supply.ts)_
+_See code: [src/commands/action/supply.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/action/supply.ts)_
 
 ## `aave action swap token`
 
@@ -162,7 +164,7 @@ DESCRIPTION
   Swap one token for another token using market mode
 ```
 
-_See code: [src/commands/action/swap/token.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/action/swap/token.ts)_
+_See code: [src/commands/action/swap/token.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/action/swap/token.ts)_
 
 ## `aave action withdraw`
 
@@ -184,7 +186,7 @@ DESCRIPTION
   Withdraw ERC20 tokens from a reserve
 ```
 
-_See code: [src/commands/action/withdraw.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/action/withdraw.ts)_
+_See code: [src/commands/action/withdraw.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/action/withdraw.ts)_
 
 ## `aave hubs list`
 
@@ -204,7 +206,7 @@ DESCRIPTION
   List Aave v4 liquidity hubs
 ```
 
-_See code: [src/commands/hubs/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/hubs/list.ts)_
+_See code: [src/commands/hubs/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/hubs/list.ts)_
 
 ## `aave reserve`
 
@@ -224,7 +226,7 @@ DESCRIPTION
   Show Aave v4 reserve details by reserve ID
 ```
 
-_See code: [src/commands/reserve.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/reserve.ts)_
+_See code: [src/commands/reserve.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/reserve.ts)_
 
 ## `aave reserves holders`
 
@@ -246,7 +248,7 @@ DESCRIPTION
   List top holders for a reserve
 ```
 
-_See code: [src/commands/reserves/holders.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/reserves/holders.ts)_
+_See code: [src/commands/reserves/holders.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/reserves/holders.ts)_
 
 ## `aave reserves list`
 
@@ -269,7 +271,7 @@ DESCRIPTION
   List Aave v4 reserves
 ```
 
-_See code: [src/commands/reserves/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/reserves/list.ts)_
+_See code: [src/commands/reserves/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/reserves/list.ts)_
 
 ## `aave spokes list`
 
@@ -291,7 +293,31 @@ DESCRIPTION
   List Aave v4 spokes
 ```
 
-_See code: [src/commands/spokes/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/spokes/list.ts)_
+_See code: [src/commands/spokes/list.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/spokes/list.ts)_
+
+## `aave spokes position-managers`
+
+List position managers available for a specific spoke
+
+```
+USAGE
+  $ aave spokes position-managers -s <spoke-id> [--json] [--include-inactive] [--page-size TEN|FIFTY] [--cursor <value>]
+
+FLAGS
+  -s, --spoke=<spoke-id>    (required) Spoke ID to query position managers from
+      --cursor=<value>      Pagination cursor returned by a previous request
+      --include-inactive    Include inactive position managers
+      --page-size=<option>  [default: TEN] Number of results per page
+                            <options: TEN|FIFTY>
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+DESCRIPTION
+  List position managers available for a specific spoke
+```
+
+_See code: [src/commands/spokes/position-managers.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/spokes/position-managers.ts)_
 
 ## `aave user balance`
 
@@ -312,7 +338,7 @@ DESCRIPTION
   List user token balances that can be used in Aave v4
 ```
 
-_See code: [src/commands/user/balance.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/user/balance.ts)_
+_See code: [src/commands/user/balance.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/user/balance.ts)_
 
 ## `aave user borrows`
 
@@ -333,7 +359,32 @@ DESCRIPTION
   List user borrows for a specific chain
 ```
 
-_See code: [src/commands/user/borrows.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/user/borrows.ts)_
+_See code: [src/commands/user/borrows.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/user/borrows.ts)_
+
+## `aave user position-managers`
+
+List position managers approved by a user for a specific spoke
+
+```
+USAGE
+  $ aave user position-managers -s <spoke-id> [--json] [--address <evm-address>] [--page-size TEN|FIFTY] [--cursor
+  <value>]
+
+FLAGS
+  -s, --spoke=<spoke-id>       (required) Spoke ID to query user position managers from
+      --address=<evm-address>  User address (defaults to PRIVATE_KEY wallet address)
+      --cursor=<value>         Pagination cursor returned by a previous request
+      --page-size=<option>     [default: TEN] Number of results per page
+                               <options: TEN|FIFTY>
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+DESCRIPTION
+  List position managers approved by a user for a specific spoke
+```
+
+_See code: [src/commands/user/position-managers.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/user/position-managers.ts)_
 
 ## `aave user positions`
 
@@ -354,7 +405,7 @@ DESCRIPTION
   List user positions across chains
 ```
 
-_See code: [src/commands/user/positions.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/user/positions.ts)_
+_See code: [src/commands/user/positions.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/user/positions.ts)_
 
 ## `aave user rewards`
 
@@ -375,7 +426,7 @@ DESCRIPTION
   List claimable rewards for a user on a specific chain
 ```
 
-_See code: [src/commands/user/rewards.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/user/rewards.ts)_
+_See code: [src/commands/user/rewards.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/user/rewards.ts)_
 
 ## `aave user summary`
 
@@ -396,7 +447,7 @@ DESCRIPTION
   Show a user summary for a specific chain
 ```
 
-_See code: [src/commands/user/summary.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/user/summary.ts)_
+_See code: [src/commands/user/summary.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/user/summary.ts)_
 
 ## `aave user supplies`
 
@@ -417,5 +468,5 @@ DESCRIPTION
   List user supplies for a specific chain
 ```
 
-_See code: [src/commands/user/supplies.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.0/src/commands/user/supplies.ts)_
+_See code: [src/commands/user/supplies.ts](https://github.com/aave/aave-v4-sdk/blob/v4.2.4/src/commands/user/supplies.ts)_
 <!-- commandsstop -->
