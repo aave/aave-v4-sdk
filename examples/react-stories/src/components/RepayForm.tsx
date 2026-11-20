@@ -41,7 +41,18 @@ export function RepayForm({ borrow, walletClient }: RepayFormProps) {
           }),
         );
 
-      case 'Erc20ApprovalRequired':
+      case 'Erc20Approval':
+        setStatus({
+          kind: KIND.info,
+          message: 'Sign the Approval Transaction in your wallet',
+        });
+        return sendTransaction(plan.byTransaction).andTee(() =>
+          setStatus({
+            kind: KIND.info,
+            message: 'Sending Approval Transaction…',
+          }),
+        );
+
       case 'PreContractActionRequired':
         setStatus({
           kind: KIND.info,
