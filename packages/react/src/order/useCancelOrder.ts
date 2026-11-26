@@ -11,12 +11,13 @@ import {
   type TransactionError,
   UnexpectedError,
 } from '@aave/core';
-import type {
-  OrderCancelled,
-  OrderCancelledResult,
-  OrderTypedData,
-  PrepareCancelOrderRequest,
-  TransactionRequest,
+import {
+  type OrderCancelled,
+  type OrderCancelledResult,
+  type OrderTypedData,
+  type PrepareCancelOrderRequest,
+  type TransactionRequest,
+  UserBalancesQuery,
 } from '@aave/graphql';
 import type { ResultAsync, Signature } from '@aave/types';
 import { ResultAwareError } from '@aave/types';
@@ -165,7 +166,11 @@ export function useCancelOrder(
               ).asResultAsync();
           }
         })
-        .andThrough(() => refreshPendingOrders(client)),
+        .andThrough(() => refreshPendingOrders(client))
+        // The request names no user; an on-chain cancel refunds the order's funds
+        .andThrough(() =>
+          client.refreshQueryWhere(UserBalancesQuery, () => true),
+        ),
     [client, handler],
   );
 }

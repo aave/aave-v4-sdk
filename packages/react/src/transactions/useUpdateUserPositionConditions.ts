@@ -1,9 +1,11 @@
 import type { TransactionReceipt } from '@aave/client';
 import { updateUserPositionConditions } from '@aave/client/actions';
-import type {
-  TransactionRequest,
-  UpdateUserPositionConditionsRequest,
+import {
+  decodeUserPositionId,
+  type TransactionRequest,
+  type UpdateUserPositionConditionsRequest,
 } from '@aave/graphql';
+import { ResultAsync } from '@aave/types';
 
 import { useAaveClient } from '../context';
 import {
@@ -11,7 +13,11 @@ import {
   type ExecutionPlanHandler,
   type PendingTransaction,
   type PendingTransactionError,
+  refreshUserActivities,
   refreshUserPositionById,
+  refreshUserRiskPremium,
+  refreshUserSummary,
+  refreshUserSummaryHistory,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
@@ -74,14 +80,25 @@ export function useUpdateUserPositionConditions(
   const client = useAaveClient();
 
   return useAsyncTask(
-    (request: UpdateUserPositionConditionsRequest) =>
-      updateUserPositionConditions(client, request)
+    (request: UpdateUserPositionConditionsRequest) => {
+      const { chainId, spoke, user } = decodeUserPositionId(
+        request.userPositionId,
+      );
+      const spokeInput = { chainId, address: spoke };
+      return updateUserPositionConditions(client, request)
         .andThen((transaction) => handler(transaction, { cancel }))
         .andThen((pending) => pending.wait())
         .andThen(client.waitForTransaction)
         .andThrough(() =>
-          refreshUserPositionById(client, request.userPositionId),
-        ),
+          ResultAsync.combine([
+            refreshUserPositionById(client, request.userPositionId),
+            refreshUserSummary(client, user, spokeInput),
+            refreshUserSummaryHistory(client, user, spokeInput),
+            refreshUserRiskPremium(client, user, spokeInput),
+            refreshUserActivities(client, user),
+          ]),
+        );
+    },
     [client, handler],
   );
 }

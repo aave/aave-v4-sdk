@@ -16,9 +16,12 @@ import {
   refreshHubs,
   refreshReserves,
   refreshSpokes,
+  refreshUserActivities,
   refreshUserBorrows,
   refreshUserPositions,
+  refreshUserRiskPremium,
   refreshUserSummary,
+  refreshUserSummaryHistory,
   refreshUserSupplies,
   type SendTransactionError,
   type UseAsyncTask,
@@ -101,6 +104,9 @@ export function useSetUserSuppliesAsCollateral(
             // update user borrows
             refreshUserBorrows(client, request.sender),
 
+            // update user activity
+            refreshUserActivities(client, request.sender),
+
             ...reserveDetails.flatMap(({ chainId, spoke }) => [
               // update user positions
               refreshUserPositions(client, request.sender, {
@@ -110,6 +116,16 @@ export function useSetUserSuppliesAsCollateral(
 
               // update user summary
               refreshUserSummary(client, request.sender, {
+                chainId,
+                address: spoke,
+              }),
+
+              // update the summary chart and the risk premium breakdown
+              refreshUserSummaryHistory(client, request.sender, {
+                chainId,
+                address: spoke,
+              }),
+              refreshUserRiskPremium(client, request.sender, {
                 chainId,
                 address: spoke,
               }),
