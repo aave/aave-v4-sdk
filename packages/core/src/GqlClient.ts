@@ -13,13 +13,12 @@ import {
   type Operation,
   type OperationContext,
   type OperationResult,
-  type OperationResultSource,
   type RequestPolicy,
   type SSRData,
   type TypedDocumentNode,
   type Client as UrqlClient,
 } from '@urql/core';
-import { map, pipe, tap } from 'wonka';
+import { filter, map, pipe, take, tap, toPromise } from 'wonka';
 import { batchFetchExchange } from './batching';
 import type { Context } from './context';
 import { inFlightDedupExchange, refetching } from './dedup';
@@ -40,6 +39,11 @@ export type QueryOptions = {
    * @default true
    */
   batch?: boolean;
+};
+
+const fromCache = (result: OperationResult): boolean => {
+  const outcome = result.operation.context.meta?.cacheOutcome;
+  return outcome === 'hit' || outcome === 'partial';
 };
 
 export class GqlClient {
@@ -104,11 +108,24 @@ export class GqlClient {
     variables: TVariables,
     { requestPolicy, batch = true }: QueryOptions = {},
   ): ResultAsync<TValue, UnexpectedError> {
+    const source = this.urql.query(
+      document,
+      this.normalizeVariables(document, variables),
+      { batch, requestPolicy },
+    );
     return this.resultFrom(
-      this.urql.query(document, this.normalizeVariables(document, variables), {
-        batch,
-        requestPolicy,
-      }),
+      requestPolicy === 'network-only'
+        ? pipe(
+            source,
+            // graphcache re-reads the key from the cache when a dependency is written; taking that read aborts the request
+            filter(
+              (result) =>
+                !result.stale && !result.hasNext && !fromCache(result),
+            ),
+            take(1),
+            toPromise,
+          )
+        : source.toPromise(),
     );
   }
 
@@ -123,7 +140,7 @@ export class GqlClient {
     document: TypedDocumentNode<StandardData<TValue>, TVariables>,
     variables: TVariables,
   ): ResultAsync<TValue, UnexpectedError> {
-    return this.resultFrom(this.urql.mutation(document, variables));
+    return this.resultFrom(this.urql.mutation(document, variables).toPromise());
   }
 
   /**
@@ -382,11 +399,9 @@ export class GqlClient {
   }
 
   private resultFrom<TValue, TVariables extends AnyVariables>(
-    source: OperationResultSource<
-      OperationResult<StandardData<TValue>, TVariables>
-    >,
+    promise: Promise<OperationResult<StandardData<TValue>, TVariables>>,
   ): ResultAsync<TValue, UnexpectedError> {
-    return ResultAsync.fromPromise(source.toPromise(), (err: unknown) => {
+    return ResultAsync.fromPromise(promise, (err: unknown) => {
       this.logger.error(err);
       return UnexpectedError.from(err);
     }).andThen((result) => {
