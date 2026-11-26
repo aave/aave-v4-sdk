@@ -191,6 +191,86 @@ describe(`Given an instance of the ${GqlClient.name}`, () => {
     });
   });
 
+  describe('And a cached list whose items are written by other queries', () => {
+    const ItemsQuery = gql`
+      query ItemsQuery {
+        value: items {
+          id
+          name
+        }
+      }
+    `;
+    const ItemQuery = gql`
+      query ItemQuery {
+        value: item {
+          id
+          name
+        }
+      }
+    `;
+    const item = (id: string, name: string) => ({
+      __typename: 'Item',
+      id,
+      name,
+    });
+
+    describe('When a network-only query for the list is in flight while those writes land', () => {
+      it('Then it should resolve with the network response, not the cache re-read', async () => {
+        let listRequests = 0;
+        let writes = 0;
+        server.use(
+          api.query(ItemsQuery, async () => {
+            listRequests++;
+            if (listRequests === 1) {
+              return msw.HttpResponse.json({
+                data: { value: [item('1', 'old')] },
+              });
+            }
+            await delay(100);
+            return msw.HttpResponse.json({
+              data: { value: [item('2', 'new')] },
+            });
+          }),
+          api.query(ItemQuery, () => {
+            writes++;
+            return msw.HttpResponse.json({
+              data: { value: item('1', `old, write ${writes}`) },
+            });
+          }),
+        );
+        const client = new GqlClient({ ...context, batch: false });
+        assertOk(
+          await client.query(
+            ItemsQuery,
+            {},
+            { requestPolicy: 'cache-first', batch: false },
+          ),
+        );
+
+        const fresh = client.query(
+          ItemsQuery,
+          {},
+          { requestPolicy: 'network-only', batch: false },
+        );
+        // urql drops the first cache re-read while the list is in flight, not the second
+        await client.query(
+          ItemQuery,
+          {},
+          { requestPolicy: 'network-only', batch: false },
+        );
+        await client.query(
+          ItemQuery,
+          {},
+          { requestPolicy: 'network-only', batch: false },
+        );
+
+        const result = await fresh;
+        assertOk(result);
+        expect(result.value).toEqual([{ id: '2', name: 'new' }]);
+      });
+    });
+  });
+
   describe('And observing the requests made by the client', () => {
     describe('When executing a single isolated query', () => {
       it('Then it should execute it in its own HTTP request', async () => {
