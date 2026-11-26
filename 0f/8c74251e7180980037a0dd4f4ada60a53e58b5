@@ -1,0 +1,35 @@
+packages/react/src/helpers/cache.ts
+  s_f15779cbad0461::t_b48d301d8f57fc 13-14,38-40,97-109,153-163,216-249,262-302,371,373-374,376-381,384-392,394,396-397,404,406,408,414,417,421-434,443,445-446,448-452
+  s_f15779cbad0461::t_58da9ae5dfdaa2 3,6
+packages/react/src/transactions/useClaimRewards.ts
+  s_f15779cbad0461::t_28b3759d7336ee 12,87
+packages/react/src/helpers/cache.test.ts
+  s_f15779cbad0461::t_aa02cdb5fe3fa8 40-49,52-57,74-76,94-185,188-200,207-210,216-222,234-236,243-245,268-291,294-298,301-315,322-329
+  s_f15779cbad0461::t_5236c38821d137 1-39,50-51,58-73,77-93,186-187,201-206,211-215,223-233,237-242,246-267,292-293,299-300,316-321,330-335
+packages/react/src/order/useCancelOrder.ts
+  s_f15779cbad0461::t_28b3759d7336ee 14-20,169-173
+packages/react/src/transactions/useSetUserSuppliesAsCollateral.ts
+  s_f15779cbad0461::t_28b3759d7336ee 19,22,24,107-109,123-131
+  s_f15779cbad0461::t_58e4ab4e182d05 132
+packages/react/src/transactions/useUpdateUserPositionConditions.ts
+  s_f15779cbad0461::t_7ccf6d75828c20 3-6,8
+  s_f15779cbad0461::t_28b3759d7336ee 16,18-20,83-88,93-101
+.changeset/refresh-after-actions.md
+  s_f15779cbad0461::t_e60b135a683a0b 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0f8c74251e7180980037a0dd4f4ada60a53e58b5",
+  "prompts": {},
+  "sessions": {
+    "s_f15779cbad0461": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b8388f0-fed8-4ba6-a2aa-7de347d92708",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
