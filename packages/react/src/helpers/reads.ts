@@ -213,7 +213,9 @@ export function useSuspendableQuery<
   }, [pause, fetching, data, stale]);
 
   useEffect(() => {
-    if (pollInterval <= 0 || fetching || pause) return undefined;
+    // A stale result is the previous one replayed while a refetch is in flight; with another
+    // subscriber on the key it arrives synchronously and `fetching` never flips, so wait for the fresh one
+    if (pollInterval <= 0 || fetching || stale || pause) return undefined;
 
     const timerId = setTimeout(() => {
       executeQuery({
@@ -223,7 +225,7 @@ export function useSuspendableQuery<
     }, pollInterval);
 
     return () => clearTimeout(timerId);
-  }, [fetching, executeQuery, pollInterval, pause]);
+  }, [fetching, stale, executeQuery, pollInterval, pause]);
 
   if (pause) {
     const unexpectedError = error ? UnexpectedError.from(error) : undefined;
