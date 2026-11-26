@@ -9,6 +9,7 @@ import {
   type ExecutionPlanHandler,
   PendingTransaction,
   type PendingTransactionError,
+  refreshUserBalances,
   type SendTransactionError,
   type UseAsyncTask,
   useAsyncTask,
@@ -83,7 +84,7 @@ export function useClaimRewards(
         )
         .andThrough(() => {
           client.markRewardsClaimed(request.user, request.chainId, request.ids);
-          return okAsync(undefined);
+          return refreshUserBalances(client, request.user);
         }),
     [client, handler],
   );

@@ -1,13 +1,17 @@
 import type { AaveClient } from '@aave/client';
 import {
+  ActivitiesQuery,
   type BorrowRequest,
   decodeReserveId,
+  decodeSpokeId,
   decodeUserPositionId,
   type Hub,
   HubQuery,
   HubsQuery,
   isChainIdsVariant,
   isSpokeInputVariant,
+  isTokensVariant,
+  isTxHashInputVariant,
   PendingOrdersQuery,
   type RepayRequest,
   type Reserve,
@@ -31,6 +35,9 @@ import {
   type UserPositionId,
   UserPositionQuery,
   UserPositionsQuery,
+  UserRiskPremiumBreakdownQuery,
+  type UserSummaryFilter,
+  UserSummaryHistoryQuery,
   UserSummaryQuery,
   UserSuppliesQuery,
   type UserSuppliesRequestQuery,
@@ -90,6 +97,19 @@ export function refreshUserSupplies(client: AaveClient, user: EvmAddress) {
 /**
  * @internal
  */
+export function refreshUserActivities(client: AaveClient, user: EvmAddress) {
+  // A tx hash names one immutable row
+  return client.refreshQueryWhere(
+    ActivitiesQuery,
+    (variables) =>
+      variables.request.user === user &&
+      !isTxHashInputVariant(variables.request.query),
+  );
+}
+
+/**
+ * @internal
+ */
 export function refreshUserBorrows(client: AaveClient, user: EvmAddress) {
   return client.refreshQueryWhere(
     UserBorrowsQuery,
@@ -130,8 +150,17 @@ export function refreshUserPositions(
     position.user === user;
 
   return ResultAsync.combine([
-    client.refreshQueryWhere(UserPositionsQuery, (_, data) =>
-      data.some(isMatch),
+    // Matched on the request: a first action on a spoke opens a position the cached list does not hold yet
+    client.refreshQueryWhere(
+      UserPositionsQuery,
+      (variables) =>
+        variables.request.user === user &&
+        (isChainIdsVariant(variables.request.filter)
+          ? variables.request.filter.chainIds.includes(spoke.chainId)
+          : isTokensVariant(variables.request.filter) &&
+            variables.request.filter.tokens.some(
+              (token) => token.chainId === spoke.chainId,
+            )),
     ),
     client.refreshQueryWhere(
       UserPositionQuery,
@@ -184,6 +213,40 @@ export function refreshReserveHolders(client: AaveClient, ids: ReserveId[]) {
   });
 }
 
+function isSameSpoke(a: SpokeInput, b: SpokeInput): boolean {
+  return a.chainId === b.chainId && a.address === b.address;
+}
+
+function positionCovers(
+  id: UserPositionId,
+  user: EvmAddress,
+  spoke: SpokeInput,
+): boolean {
+  const position = decodeUserPositionId(id);
+  return (
+    position.user === user &&
+    isSameSpoke({ chainId: position.chainId, address: position.spoke }, spoke)
+  );
+}
+
+// No filter is the whole account, which any spoke moves
+function summaryFilterCovers(
+  filter: UserSummaryFilter | null | undefined,
+  user: EvmAddress,
+  spoke: SpokeInput,
+): boolean {
+  if (!filter) return true;
+  if (isSpokeInputVariant(filter)) return isSameSpoke(filter.spoke, spoke);
+  if (isChainIdsVariant(filter)) return filter.chainIds.includes(spoke.chainId);
+  if ('spokeId' in filter && filter.spokeId) {
+    return isSameSpoke(decodeSpokeId(filter.spokeId), spoke);
+  }
+  if ('userPositionId' in filter && filter.userPositionId) {
+    return positionCovers(filter.userPositionId, user, spoke);
+  }
+  return false;
+}
+
 /**
  * @internal
  */
@@ -196,12 +259,47 @@ export function refreshUserSummary(
     UserSummaryQuery,
     (variables) =>
       variables.request.user === user &&
-      (isSpokeInputVariant(variables.request.filter)
-        ? variables.request.filter.spoke.chainId === spoke.chainId &&
-          variables.request.filter.spoke.address === spoke.address
-        : isChainIdsVariant(variables.request.filter)
-          ? variables.request.filter.chainIds.some((id) => id === spoke.chainId)
-          : false),
+      summaryFilterCovers(variables.request.filter, user, spoke),
+  );
+}
+
+/**
+ * @internal
+ */
+export function refreshUserSummaryHistory(
+  client: AaveClient,
+  user: EvmAddress,
+  spoke: SpokeInput,
+) {
+  return client.refreshQueryWhere(
+    UserSummaryHistoryQuery,
+    (variables) =>
+      variables.request.user === user &&
+      summaryFilterCovers(variables.request.filter, user, spoke),
+  );
+}
+
+/**
+ * @internal
+ */
+export function refreshUserRiskPremium(
+  client: AaveClient,
+  user: EvmAddress,
+  spoke: SpokeInput,
+) {
+  return client.refreshQueryWhere(
+    UserRiskPremiumBreakdownQuery,
+    (variables) => {
+      const { query } = variables.request;
+      if (variables.request.user !== user) return false;
+      if ('userSpoke' in query && query.userSpoke) {
+        return isSameSpoke(decodeSpokeId(query.userSpoke.spoke), spoke);
+      }
+      if ('userPositionId' in query && query.userPositionId) {
+        return positionCovers(query.userPositionId, user, spoke);
+      }
+      return false;
+    },
   );
 }
 
@@ -270,111 +368,86 @@ export function refreshUserPositionById(
 /**
  * @internal
  */
+export function refreshAfterPositionChange(
+  client: AaveClient,
+  user: EvmAddress,
+  reserves: ReserveId[],
+) {
+  const spokes = new Map<string, SpokeInput>();
+  for (const reserve of reserves) {
+    const { chainId, spoke: address } = decodeReserveId(reserve);
+    spokes.set(`${chainId}:${address}`, { chainId, address });
+  }
+  const chainIds = new Set([...spokes.values()].map((spoke) => spoke.chainId));
+
+  return ResultAsync.combine([
+    ...[...spokes.values()].flatMap((spoke) => [
+      refreshUserPositions(client, user, spoke),
+      refreshUserSummary(client, user, spoke),
+      refreshUserSummaryHistory(client, user, spoke),
+      refreshUserRiskPremium(client, user, spoke),
+      refreshSpokes(client, spoke),
+    ]),
+    refreshReserves(client, reserves),
+    refreshReserveHolders(client, reserves),
+    refreshUserBalances(client, user),
+    refreshUserSupplies(client, user),
+    refreshUserBorrows(client, user),
+    refreshUserActivities(client, user),
+    ...[...chainIds].map((chainId) => refreshHubs(client, chainId)),
+  ]);
+}
+
+/**
+ * @internal
+ */
 export function refreshQueriesForReserveChange(
   client: AaveClient,
   request: SupplyRequest | BorrowRequest | RepayRequest | WithdrawRequest,
 ) {
-  const { chainId, spoke: address } = decodeReserveId(request.reserve);
-  const spoke: SpokeInput = { chainId, address };
-  return ResultAsync.combine([
-    refreshUserPositions(client, request.sender, spoke),
-    refreshUserSummary(client, request.sender, spoke),
-    refreshReserves(client, [request.reserve]),
-    refreshReserveHolders(client, [request.reserve]),
-    refreshSpokes(client, spoke),
-    refreshUserBalances(client, request.sender),
-    refreshUserSupplies(client, request.sender),
-    refreshUserBorrows(client, request.sender),
-    refreshHubs(client, chainId),
-  ]);
+  return refreshAfterPositionChange(client, request.sender, [request.reserve]);
 }
 
 /**
  * @internal
  */
 export function refreshAfterTokenSwap(client: AaveClient, user: EvmAddress) {
-  return refreshUserBalances(client, user);
-}
-
-/**
- * @internal
- */
-export function refreshAfterSupplySwap(client: AaveClient, user: EvmAddress) {
   return ResultAsync.combine([
-    refreshUserSupplies(client, user),
     refreshUserBalances(client, user),
+    refreshUserActivities(client, user),
   ]);
 }
 
-/**
- * @internal
- */
-export function refreshAfterBorrowSwap(client: AaveClient, user: EvmAddress) {
-  return ResultAsync.combine([
-    refreshUserBorrows(client, user),
-    refreshUserBalances(client, user),
-  ]);
+function reservesMovedBy(operation: SwapOperation): ReserveId[] {
+  switch (operation.__typename) {
+    case 'SupplySwap':
+    case 'BorrowSwap':
+      return [operation.sell.reserve.id, operation.buy.reserve.id];
+    case 'RepayWithSupply':
+      return [operation.repay.reserve.id, operation.supply.reserve.id];
+    case 'WithdrawSwap':
+      return [operation.withdraw.reserve.id];
+    case 'Leverage':
+      return [operation.collateral.reserve.id, operation.debt.reserve.id];
+    case 'TokenSwap':
+      return [];
+  }
 }
 
 /**
- * @internal
- */
-export function refreshAfterRepayWithSupply(
-  client: AaveClient,
-  user: EvmAddress,
-) {
-  return ResultAsync.combine([
-    refreshUserSupplies(client, user),
-    refreshUserBorrows(client, user),
-    refreshUserBalances(client, user),
-  ]);
-}
-
-/**
- * @internal
- */
-export function refreshAfterWithdrawSwap(client: AaveClient, user: EvmAddress) {
-  return ResultAsync.combine([
-    refreshUserSupplies(client, user),
-    refreshUserBalances(client, user),
-  ]);
-}
-
-/**
- * @internal
- */
-export function refreshAfterLeverage(client: AaveClient, user: EvmAddress) {
-  // Leverage supplies collateral and takes debt in one go, so both sides of the
-  // position move alongside the wallet balance (optional top-up).
-  return ResultAsync.combine([
-    refreshUserSupplies(client, user),
-    refreshUserBorrows(client, user),
-    refreshUserBalances(client, user),
-  ]);
-}
-
-/**
- * Refreshes the caches an order's settlement moves.
- *
  * @internal
  */
 export function refreshAfterOrderSettled(
   client: AaveClient,
   user: EvmAddress,
-  order: { operation: Pick<SwapOperation, '__typename'> },
+  order: { operation: SwapOperation },
 ) {
-  switch (order.operation.__typename) {
-    case 'TokenSwap':
-      return refreshAfterTokenSwap(client, user);
-    case 'BorrowSwap':
-      return refreshAfterBorrowSwap(client, user);
-    case 'RepayWithSupply':
-      return refreshAfterRepayWithSupply(client, user);
-    case 'SupplySwap':
-      return refreshAfterSupplySwap(client, user);
-    case 'WithdrawSwap':
-      return refreshAfterWithdrawSwap(client, user);
-    case 'Leverage':
-      return refreshAfterLeverage(client, user);
+  if (order.operation.__typename === 'TokenSwap') {
+    return refreshAfterTokenSwap(client, user);
   }
+  return refreshAfterPositionChange(
+    client,
+    user,
+    reservesMovedBy(order.operation),
+  );
 }
