@@ -1,0 +1,21 @@
+packages/react/src/reserves.ts
+  s_e991f3987ef037::t_d4069e4cf9f5be 804-805,813
+.changeset/quiet-oracles-read.md
+  s_e991f3987ef037::t_04c36d0a232893 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "20b301c9dd150b3b3c7b1274773f79153cf61e66",
+  "prompts": {},
+  "sessions": {
+    "s_e991f3987ef037": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aff382f1-9334-4017-b64d-ad2e0fe38aa8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}

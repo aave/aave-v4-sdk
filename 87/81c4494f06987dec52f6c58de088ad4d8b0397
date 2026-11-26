@@ -1,0 +1,77 @@
+.changeset/leverage-min-multiplier.md
+  s_e991f3987ef037::t_1178c910671c94 1-7
+.changeset/small-swaps-fail.md
+  s_e991f3987ef037::t_36cc4cfb924b6c 1-7
+packages/client/src/actions/order.ts
+  s_e991f3987ef037::t_3618d13f33376c 8,64,75-76,91
+packages/client/src/actions/swap.ts
+  s_e991f3987ef037::t_eb205e79f27ab7 8,90-91,109,214-215,230,269-270,285,324-325,340,379-380,395
+packages/client/src/cache.ts
+  s_e991f3987ef037::t_9f96711e8651a4 223,506
+packages/graphql/schema.graphql
+  s_e991f3987ef037::t_4f396266cfde1a 54-58,286,1179-1181,1196-1197,1210-1219,1230,1246-1250,1259,1412-1414,1434-1438,2512,3226,3534,4698
+packages/graphql/src/fragments/common.ts
+  s_e991f3987ef037::t_06feb5c0cab9c6 439-448
+packages/graphql/src/fragments/orders.ts
+  s_e991f3987ef037::t_bde843e212c435 5,197,215-217,219-223
+packages/graphql/src/fragments/swaps.ts
+  s_e991f3987ef037::t_3d9e603fe5849c 5,182-184,192,686-688,693,709-711,716,732-734,739,755-757,762
+packages/graphql/src/graphql-env.d.ts
+  s_e991f3987ef037::t_de07e6b965d3be 11,45,148,150,286,356,401,492
+packages/graphql/src/schema.json
+  s_e991f3987ef037::t_e0be777bc3bd18 78-95,1110-1113,3764-3774,3800-3803,8279-8282,10294-10297,11507-11510,16911-16914
+packages/react/src/order/helpers.ts
+  s_e991f3987ef037::t_a7339593c7aecf 14,45-48,51-52,56,60
+packages/react/src/order/useBorrowSwapOrder.ts
+  s_e991f3987ef037::t_7d0f95cdb80073 4,67-71
+packages/react/src/order/useLeverage.ts
+  s_e991f3987ef037::t_4eaba3691319d5 4,100-104
+packages/react/src/order/useLeverageQuote.ts
+  s_e991f3987ef037::t_1c47134ef82c75 4,48-50,139-140,216-217
+packages/react/src/order/useRepayWithSupplyOrder.ts
+  s_e991f3987ef037::t_f526fa11569600 4,68-72
+packages/react/src/order/useSupplySwapOrder.ts
+  s_e991f3987ef037::t_00e5a9c9f7d9b7 4,84-88
+packages/react/src/order/useTokenSwapOrder.ts
+  s_e991f3987ef037::t_6d112f8162cb25 9,91-95
+packages/react/src/order/useWithdrawSwapOrder.ts
+  s_e991f3987ef037::t_e4d486edb981b7 4,67-71
+packages/react/src/swap/helpers.ts
+  s_e991f3987ef037::t_854728e333c763 14,40-43,46-47,53
+packages/react/src/swap/useBorrowSwap.ts
+  s_e991f3987ef037::t_9efd0aa8af5835 4,75-79
+packages/react/src/swap/useBorrowSwapQuote.ts
+  s_e991f3987ef037::t_14a20fecfff837 3-7,137-138,212-213
+packages/react/src/swap/useRepayWithSupply.ts
+  s_e991f3987ef037::t_3adc66584fea88 7,78-82
+packages/react/src/swap/useRepayWithSupplyQuote.ts
+  s_e991f3987ef037::t_f108a8b10acd56 3-7,137-138,215-216
+packages/react/src/swap/useSupplySwap.ts
+  s_e991f3987ef037::t_14ab7a119e63bc 4,76-80
+packages/react/src/swap/useSupplySwapQuote.ts
+  s_e991f3987ef037::t_bc500fbd6f1732 4,134-135,209-210
+packages/react/src/swap/useTokenSwap.ts
+  s_e991f3987ef037::t_3e4fea34b20e56 5,95-99
+packages/react/src/swap/useTokenSwapQuote.ts
+  s_e991f3987ef037::t_38e9da2a1dcffb 4,36-37,46,169-170,248-249
+packages/react/src/swap/useWithdrawSwap.ts
+  s_e991f3987ef037::t_6e3e3d8fcc101a 4,75-79
+packages/react/src/swap/useWithdrawSwapQuote.ts
+  s_e991f3987ef037::t_71c8f6fd363de7 3-7,137-138,212-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8781c4494f06987dec52f6c58de088ad4d8b0397",
+  "prompts": {},
+  "sessions": {
+    "s_e991f3987ef037": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aff382f1-9334-4017-b64d-ad2e0fe38aa8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Martin Grabina <mgrabina@itba.edu.ar>"
+    }
+  }
+}
