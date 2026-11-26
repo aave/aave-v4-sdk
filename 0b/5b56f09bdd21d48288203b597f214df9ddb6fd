@@ -1,0 +1,23 @@
+packages/react/src/helpers/reads.ts
+  s_f15779cbad0461::t_745133fc837048 216-218,228
+packages/react/src/helpers/reads.test.ts
+  s_f15779cbad0461::t_c6ad2110d3c6bc 504-528
+.changeset/polling-shared-key.md
+  s_f15779cbad0461::t_6b19302a558bf7 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0b5b56f09bdd21d48288203b597f214df9ddb6fd",
+  "prompts": {},
+  "sessions": {
+    "s_f15779cbad0461": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b8388f0-fed8-4ba6-a2aa-7de347d92708",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
