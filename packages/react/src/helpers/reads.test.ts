@@ -501,6 +501,31 @@ describe(`Given a declarative read hook based on '${useSuspendableQuery.name}' h
       });
     });
 
+    it('Then two components polling the same query should both keep polling', async () => {
+      const client = AaveClient.create({ environment });
+      const first = renderHookWithinContext(
+        () => useTestHook({ id: 1, pollInterval: 1 }),
+        { client },
+      );
+      const second = renderHookWithinContext(
+        () => useTestHook({ id: 1, pollInterval: 1 }),
+        { client },
+      );
+      await vi.waitUntil(
+        () => !first.result.current.loading && !second.result.current.loading,
+      );
+      const start = pollCounter;
+
+      // urql replays the previous result as stale to the second subscriber on every poll;
+      // the timer must still be re-armed on the fresh one
+      for (let i = 0; i < 4; i++) {
+        await act(() => vi.advanceTimersToNextTimerAsync());
+      }
+
+      expect(pollCounter).toBeGreaterThanOrEqual(start + 3);
+      expect(first.result.current.data).toBe(second.result.current.data);
+    });
+
     it('Then it should set reloading to true while refetching', async () => {
       // Track reloading states observed during the test
       const reloadingStates: boolean[] = [];

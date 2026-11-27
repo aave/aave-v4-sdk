@@ -213,7 +213,8 @@ export function useSuspendableQuery<
   }, [pause, fetching, data, stale]);
 
   useEffect(() => {
-    if (pollInterval <= 0 || fetching || pause) return undefined;
+    // With another subscriber on the key, urql replays the old result as stale instead of setting fetching
+    if (pollInterval <= 0 || fetching || stale || pause) return undefined;
 
     const timerId = setTimeout(() => {
       executeQuery({
@@ -223,7 +224,7 @@ export function useSuspendableQuery<
     }, pollInterval);
 
     return () => clearTimeout(timerId);
-  }, [fetching, executeQuery, pollInterval, pause]);
+  }, [fetching, stale, executeQuery, pollInterval, pause]);
 
   if (pause) {
     const unexpectedError = error ? UnexpectedError.from(error) : undefined;
