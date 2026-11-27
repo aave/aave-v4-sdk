@@ -1,0 +1,19 @@
+packages/react/src/helpers/reads.ts
+  s_f15779cbad0461::t_14e1ea3b0b8987 216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4343f99fdafaa2f1e3f005b2e56f28c72bddbcb9",
+  "prompts": {},
+  "sessions": {
+    "s_f15779cbad0461": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b8388f0-fed8-4ba6-a2aa-7de347d92708",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "AGMASO <agmguindo@gmail.com>"
+    }
+  }
+}
