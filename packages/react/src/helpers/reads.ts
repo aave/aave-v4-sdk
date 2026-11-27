@@ -213,8 +213,7 @@ export function useSuspendableQuery<
   }, [pause, fetching, data, stale]);
 
   useEffect(() => {
-    // A stale result is the previous one replayed while a refetch is in flight; with another
-    // subscriber on the key it arrives synchronously and `fetching` never flips, so wait for the fresh one
+    // With another subscriber on the key, urql replays the old result as stale instead of setting fetching
     if (pollInterval <= 0 || fetching || stale || pause) return undefined;
 
     const timerId = setTimeout(() => {
